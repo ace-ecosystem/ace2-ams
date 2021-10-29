@@ -81,7 +81,6 @@ jobs:
       - name: E2E tests
         uses: cypress-io/github-action@v2
         with:
-          build: npm run build
           start: npm run production
           wait-on: "http://localhost:8080"
           working-directory: frontend
