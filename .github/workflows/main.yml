@@ -11,7 +11,7 @@ on:
 # All of the jobs run in parallel, but each step within a job is sequential
 jobs:
   backend:
-    name: Backend 
+    name: Backend
     runs-on: ubuntu-latest
     
     env:
@@ -62,7 +62,30 @@ jobs:
       - name: Unit tests
         run: cd gui && npm run test:unit
 
+  e2e:
+    name: End-to-End
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Build Backend
+        run: cd api && docker-compose build api
+          
+      - name: Run Backend
+        run: cd api && docker-compose up -d
+        
+      - name: Build Frontend
+        run: cd gui && npm install
+
       - name: E2E tests
         uses: cypress-io/github-action@v2
         with:
           start: cd gui && npm run production
+          working-directory: gui
