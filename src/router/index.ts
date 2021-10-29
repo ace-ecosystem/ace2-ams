@@ -1,18 +1,30 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
+import AnalyzeAlert from "@/pages/Alerts/AnalyzeAlert.vue";
+import ViewAlert from "@/pages/Alerts/ViewAlert.vue";
 import ManageAlerts from "@/pages/Alerts/ManageAlerts.vue";
 import TheLogin from "@/pages/User/TheLogin.vue";
 import store from "@/store";
 
 const routes: Array<RouteRecordRaw> = [
   {
+    path: "/login",
+    name: "Login",
+    component: TheLogin,
+  },
+  {
     path: "/manage_alerts",
     name: "Manage Alerts",
     component: ManageAlerts,
   },
   {
-    path: "/login",
-    name: "Login",
-    component: TheLogin,
+    path: "/analyze",
+    name: "Analyze",
+    component: AnalyzeAlert,
+  },
+  {
+    path: "/alert/:alertID",
+    name: "View Alert",
+    component: ViewAlert,
   },
   {
     path: "/",

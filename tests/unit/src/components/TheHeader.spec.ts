@@ -18,6 +18,6 @@ describe("TheHeader.vue", () => {
   });
 
   it("renders all buttons", () => {
-    expect(wrapper.findAllComponents(Button).length).toBe(6);
+    expect(wrapper.findAllComponents(Button).length).toBe(7);
   });
 });

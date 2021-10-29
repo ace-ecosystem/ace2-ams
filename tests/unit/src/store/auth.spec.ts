@@ -1,7 +1,6 @@
 import Vuex from "vuex";
 
 import auth from "@/store/auth";
-
 const getters = auth.getters;
 
 class State {

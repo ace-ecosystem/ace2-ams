@@ -5,7 +5,7 @@ import PrimeVue from "primevue/config";
 
 describe("AssignModal.vue", () => {
   afterEach(() => {
-    store.commit("users/SET_USERS", []);
+    store.commit("users/addItems", []);
     store.commit("selectedAlerts/UNSELECTALL");
     store.commit("modals/CLOSE", "AssignModal");
     wrapper.setData({

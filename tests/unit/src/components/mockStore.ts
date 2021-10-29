@@ -1,16 +1,15 @@
+// todo: delete this make AssignModal.spec.ts use the real store and nock instead.
+// Use AnalyzeAlertForm.spec.ts as an example
+
 import { createStore } from "vuex";
 import { CommitFunction } from "@/store";
 import alerts from "@/store/alerts";
-import users from "@/store/users";
+import makeGenericModule from "@/store/generic";
 import modals from "@/store/modals";
 import selectedAlerts from "@/store/selectedAlerts";
 
 const alertsState = alerts.state;
 const alertsMutations = alerts.mutations;
-
-const usersState = users.state;
-const usersGetters = users.getters;
-const usersMutations = users.mutations;
 
 export class testVars {
   public static errorCondition = false;
@@ -44,6 +43,11 @@ const alertsStore = {
   },
 };
 
+const users = makeGenericModule();
+const usersState = users.state;
+const usersGetters = users.getters;
+const usersMutations = users.mutations;
+
 const usersStore = {
   namespaced: true,
 
@@ -52,7 +56,7 @@ const usersStore = {
   mutations: usersMutations,
 
   actions: {
-    getAllUsers({ commit }: CommitFunction) {
+    getAll({ commit }: CommitFunction) {
       let promise = Promise.resolve<Array<string> | Error>(["Alice", "Bob"]);
 
       if (testVars.errorCondition) {
@@ -62,8 +66,7 @@ const usersStore = {
       }
       return promise
         .then((users) => {
-          commit("SET_USERS", users);
-          commit("SET_GET_ALL_TIMESTAMP");
+          commit("addItems", users);
         })
         .catch((error) => {
           throw error;

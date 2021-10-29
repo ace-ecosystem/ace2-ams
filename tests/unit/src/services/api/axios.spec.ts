@@ -5,7 +5,7 @@ import myNock from "@unit/services/api/nock";
 describe("Axios interceptor functionality", () => {
   it("will reject the request if it the response was not a 401", async () => {
     myNock.get("/user/").reply(405);
-    await expect(users.getAllUsers()).rejects.toEqual(
+    await expect(users.getAll()).rejects.toEqual(
       new Error("Request failed with status code 405"),
     );
   });
@@ -23,7 +23,7 @@ describe("Axios interceptor functionality", () => {
     myNock.get("/auth/refresh").reply(200);
     myNock.get("/user/").reply(200, mockUsers);
 
-    await expect(users.getAllUsers()).resolves.toEqual(mockUsers);
+    await expect(users.getAll()).resolves.toEqual(mockUsers);
   });
 
   it("will reject a bad request after successfully refreshing tokens", async () => {
@@ -31,7 +31,7 @@ describe("Axios interceptor functionality", () => {
     myNock.get("/auth/refresh").reply(200);
     myNock.get("/user/").reply(405);
 
-    await expect(users.getAllUsers()).rejects.toEqual(
+    await expect(users.getAll()).rejects.toEqual(
       new Error("Request failed with status code 405"),
     );
   });
@@ -40,7 +40,7 @@ describe("Axios interceptor functionality", () => {
     myNock.get("/user/").reply(401);
     myNock.get("/auth/refresh").reply(401);
 
-    await expect(users.getAllUsers()).rejects.toEqual(
+    await expect(users.getAll()).rejects.toEqual(
       new Error("Request failed with status code 401"),
     );
   });
