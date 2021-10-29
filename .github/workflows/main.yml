@@ -84,5 +84,5 @@ jobs:
       - name: E2E tests
         uses: cypress-io/github-action@v2
         with:
-          start: cd gui && npm run production
+          start: npm run production
           working-directory: gui
