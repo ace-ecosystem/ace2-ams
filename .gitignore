@@ -9,8 +9,8 @@ coverage/
 site/
 .mypy_cache/
 
-tests/e2e/videos/
-tests/e2e/screenshots/
+frontend/tests/e2e/videos/
+frontend/tests/e2e/screenshots/
 
 # local env files
 .env
