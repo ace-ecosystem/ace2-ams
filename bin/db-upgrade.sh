@@ -9,7 +9,7 @@ set +a
 # Start the entire application and then pause until the database is accessible.
 # NOTE: If you changed the mapped port for the "db" service in the docker-compose.yml
 # file, you will need to update it below in the "while" loop as well.
-docker-compose up -d
+docker-compose -f backend/docker-compose.yml up -d
 while !</dev/tcp/localhost/6666; do sleep 1; done;
 
 # Create the database revision
