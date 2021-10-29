@@ -74,12 +74,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "16"
-
-      - name: Build Backend
-        run: cd api && docker-compose build api
           
-      - name: Run Backend
-        run: cd api && docker-compose up -d
+      - name: Build and Run Backend
+        run: cd api && docker-compose up -d --build
         
       - name: Build Frontend
         run: cd gui && npm install
