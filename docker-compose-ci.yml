@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+    db:
+        container_name: ace2-ams-db
+        image: aceecosystem/ace2-ams-db:latest
+        environment:
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+    api:
+        depends_on:
+            - db
+        container_name: ace2-ams-api
+        image: aceecosystem/ace2-ams-api:latest
+        environment:
+            # The DATABASE_URL environment variable needs to be in the form of:
+            # postgresql://<user>:<password>@db:5432/<database>
+            - DATABASE_URL=${DATABASE_URL}
+            - JWT_ACCESS_EXPIRE_SECONDS=${JWT_ACCESS_EXPIRE_SECONDS}
+            - JWT_ALGORITHM=${JWT_ALGORITHM}
+            - JWT_REFRESH_EXPIRE_SECONDS=${JWT_REFRESH_EXPIRE_SECONDS}
+            - JWT_SECRET=${JWT_SECRET}
+        command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; /start.sh'

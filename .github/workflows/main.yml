@@ -1,0 +1,39 @@
+name: Build and Test
+
+# Runs only when there is a pull request against the main branch
+on:
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# All of the jobs run in parallel, but each step within a job is sequential
+jobs:
+  api:
+    name: API Tests  
+    runs-on: ubuntu-latest
+    
+    env:
+      DOCKER_BUILDKIT: 1
+      COMPOSE_DOCKER_CLI_BUILD: 1
+      COOKIES_SAMESITE: lax
+      COOKIES_SECURE: False
+      JWT_ACCESS_EXPIRE_SECONDS: 900
+      JWT_ALGORITHM: HS256
+      JWT_REFRESH_EXPIRE_SECONDS: 43200
+      JWT_SECRET: supersecret
+      POSTGRES_DB: ace
+      POSTGRES_USER: ace
+      POSTGRES_PASSWORD: supersecret
+      DATABASE_URL: postgresql://ace:supersecret@db:5432/ace
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Build
+        run: docker-compose build api
+          
+      - name: Test
+        run: docker-compose run -e TESTING=1 api pytest -vv

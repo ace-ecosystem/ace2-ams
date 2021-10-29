@@ -1,0 +1,10 @@
+[flake8]
+exclude = 
+    */.git,
+    */__pycache__/*,
+    */.pytest_cache/*,
+    */db/migrations/*,
+    */db/schemas/__init__.py
+
+max-complexity = 10
+max-line-length = 120

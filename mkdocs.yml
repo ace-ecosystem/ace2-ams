@@ -1,0 +1,29 @@
+# Project information
+site_name: ACE2 AMS - API
+site_description: Documentation for ACE 2.0 Alert Management System - API
+site_author: ACE Ecosystem
+site_url: 
+
+# Repository
+repo_name: ace2-ams-api
+repo_url: 
+edit_uri: ""
+docs_dir: docs
+
+theme:
+  name: material
+
+# Extensions
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - toc:
+      permalink: true
+  - fenced_code
+  - tables
+
+# Plugins
+plugins:
+  - search
+  - awesome-pages
