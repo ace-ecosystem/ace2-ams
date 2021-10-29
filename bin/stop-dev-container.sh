@@ -6,4 +6,4 @@ set -a
 source "$ACE2_ENV_PATH"
 set +a
 
-docker-compose down
+docker-compose -f backend/docker-compose.yml down
