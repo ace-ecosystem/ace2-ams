@@ -1,0 +1,83 @@
+{
+  "name": "ace2-ams-gui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "cypress": "npx cypress run --headless",
+    "production": "vue-cli-service serve --mode production",
+    "test:unit": "vue-cli-service test:unit",
+    "test:e2e": "start-server-and-test production http://localhost:8080 cypress",
+    "lint": "vue-cli-service lint",
+    "lint:style": "stylelint src/**/*.{css,scss,vue}"
+  },
+  "dependencies": {
+    "axios": "^0.21.4",
+    "camelcase-keys": "^7.0.0",
+    "core-js": "^3.18.1",
+    "moment-timezone": "^0.5.33",
+    "primeflex": "^3.1.0",
+    "primeicons": "4.1.0",
+    "primevue": "^3.7.2",
+    "snakecase-keys": "^5.0.0",
+    "vue": "^3.2.19",
+    "vue-router": "^4.0.11",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@cypress/vue": "^3.0.3",
+    "@cypress/webpack-dev-server": "^1.6.0",
+    "@types/jest": "^27.0.2",
+    "@types/js-cookie": "^3.0.0",
+    "@types/node": "^16.10.2",
+    "@types/webpack-env": "^1.16.2",
+    "@typescript-eslint/eslint-plugin": "^4.32.0",
+    "@typescript-eslint/parser": "^4.32.0",
+    "@vue/cli-plugin-babel": "^4.5.13",
+    "@vue/cli-plugin-router": "^4.5.13",
+    "@vue/cli-plugin-typescript": "^4.5.13",
+    "@vue/cli-plugin-unit-jest": "^4.5.13",
+    "@vue/cli-plugin-vuex": "^4.5.13",
+    "@vue/cli-service": "^4.5.13",
+    "@vue/compiler-sfc": "^3.2.19",
+    "@vue/eslint-config-prettier": "^6.0.0",
+    "@vue/eslint-config-typescript": "^7.0.0",
+    "@vue/test-utils": "^2.0.0-rc.14",
+    "circular-dependency-plugin": "^5.2.2",
+    "cypress": "^8.7.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-cypress": "^2.12.1",
+    "eslint-plugin-prettier": "^3.4.1",
+    "eslint-plugin-vue": "^7.18.0",
+    "html-webpack-plugin": "^4.5.2",
+    "husky": "^7.0.2",
+    "jest": "^26.3.3",
+    "lint-staged": "^11.1.2",
+    "mock-local-storage": "^1.1.17",
+    "nock": "^13.1.3",
+    "prettier": "^2.4.1",
+    "sass": "^1.42.1",
+    "sass-loader": "^10.2.0",
+    "speed-measure-webpack-plugin": "^1.5.0",
+    "start-server-and-test": "^1.14.0",
+    "stylelint": "^13.13.1",
+    "stylelint-config-recommended": "^5.0.0",
+    "stylelint-config-standard": "^22.0.0",
+    "ts-jest": "^26.5.6",
+    "typescript": "^4.4.3",
+    "vue-jest": "^5.0.0-alpha.10",
+    "webpack": "^4.46.0",
+    "yorkie": "^2.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts,vue}": "eslint --fix",
+    "*.{css,scss,vue}": "stylelint --fix",
+    "*": "prettier -w -u"
+  }
+}

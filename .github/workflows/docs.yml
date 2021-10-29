@@ -1,0 +1,36 @@
+name: Publish Documentation
+
+# Runs only when code is merged into the main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Publish Documentation
+    runs-on: ubuntu-latest
+    
+    # This makes sure that only a single job of this workflow runs at a time
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install dependencies
+        run: python3 -m pip install mkdocs mkdocs-awesome-pages-plugin mkdocs-material
+
+      - name: Build
+        run: mkdocs build
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site

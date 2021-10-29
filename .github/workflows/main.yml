@@ -1,0 +1,41 @@
+name: Build and Test
+
+# Runs only when there is a pull request against the main branch
+on:
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# All of the jobs run in parallel, but each step within a job is sequential
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+        
+      - name: Build
+        run: npm install
+
+      - name: Prettier
+        run: npx prettier --check .
+
+      - name: ESLint
+        run: npx eslint .
+        
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: E2E tests
+        uses: cypress-io/github-action@v2
+        with:
+          start: npm run production
