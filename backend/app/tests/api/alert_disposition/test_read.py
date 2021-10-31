@@ -2,6 +2,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 #
 # INVALID TESTS
@@ -23,10 +25,10 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_get_all(client_valid_access_token):
+def test_get_all(client_valid_access_token, db):
     # Create some objects
-    client_valid_access_token.post("/api/alert/disposition/", json={"rank": 1, "value": "test"})
-    client_valid_access_token.post("/api/alert/disposition/", json={"rank": 2, "value": "test2"})
+    helpers.create_alert_disposition(value="test", rank=1, db=db)
+    helpers.create_alert_disposition(value="test2", rank=2, db=db)
 
     # Read them back
     get = client_valid_access_token.get("/api/alert/disposition/")
