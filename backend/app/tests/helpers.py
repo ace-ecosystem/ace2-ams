@@ -101,7 +101,8 @@ def create_alert(
         tool=create_alert_tool(value=tool, db=db),
         tool_instance=create_alert_tool_instance(value=tool_instance, db=db),
         type=create_alert_type(value=alert_type, db=db),
-        version=uuid.uuid4()
+        uuid=uuid.uuid4(),
+        version=uuid.uuid4(),
     )
 
     if disposition:
@@ -139,7 +140,7 @@ def create_event(name: str, db: Session) -> Event:
     Helper function to create an event. Returns the event.
     """
 
-    obj = Event(name=name, version=uuid.uuid4())
+    obj = Event(name=name, uuid=uuid.uuid4(), version=uuid.uuid4())
     db.add(obj)
     return obj
 
@@ -168,10 +169,7 @@ def create_node_threat(value: str, db: Session, types: List[str] = None) -> Node
     if types is None:
         types = ["test_type"]
 
-    obj = NodeThreat(
-        value=value,
-        types=[create_node_threat_type(value=t, db=db) for t in types]
-    )
+    obj = NodeThreat(value=value, types=[create_node_threat_type(value=t, db=db) for t in types])
     db.add(obj)
     return obj
 
