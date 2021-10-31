@@ -103,20 +103,21 @@ def read_observable(type: str, value: str, db: Session) -> Union[Observable, Non
     )
 
 
-def read_user_by_username(username: str, db: Session) -> User:
+def read_user_by_username(username: str, db: Session, err_on_not_found: bool = True) -> User:
     """Returns the User with the given username if it exists. Designed to be called only
     by the API since it raises an HTTPException."""
 
     try:
         return db.execute(select(User).where(User.username == username)).scalars().one()
     except NoResultFound:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"The user {username} does not exist",
-        )
+        if err_on_not_found:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"The user {username} does not exist",
+            )
 
 
-def read_by_value(value: str, db_table: DeclarativeMeta, db: Session):
+def read_by_value(value: str, db_table: DeclarativeMeta, db: Session, err_on_not_found: bool = True):
     """Returns an object from the given database table with the given value.
     Designed to be called only by the API since it raises an HTTPException."""
 
@@ -129,10 +130,11 @@ def read_by_value(value: str, db_table: DeclarativeMeta, db: Session):
     # MultipleResultsFound exception is not caught since each database table that has a
     # value column should be configured to have that column be unique.
     except NoResultFound:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"The {value} {db_table} does not exist",
-        )
+        if err_on_not_found:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"The {value} {db_table} does not exist",
+            )
 
 
 def read_by_values(values: List[str], db_table: DeclarativeMeta, db: Session):
