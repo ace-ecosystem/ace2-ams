@@ -75,10 +75,10 @@ def test_create_invalid_node_fields(client_valid_access_token, key, value):
         ("uuid"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, key):
+def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
     # Create an object
     create1_json = {"uuid": str(uuid.uuid4()), "queue": "test_queue", "type": "test_type"}
@@ -91,10 +91,10 @@ def test_create_duplicate_unique_fields(client_valid_access_token, key):
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
-def test_create_nonexistent_owner(client_valid_access_token):
+def test_create_nonexistent_owner(client_valid_access_token, db):
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
     # Create an object
     create = client_valid_access_token.post(
@@ -104,9 +104,9 @@ def test_create_nonexistent_owner(client_valid_access_token):
     assert "user" in create.text
 
 
-def test_create_nonexistent_queue(client_valid_access_token):
+def test_create_nonexistent_queue(client_valid_access_token, db):
     # Create an alert type
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_type(value="test_type", db=db)
 
     # Create an object
     create = client_valid_access_token.post("/api/alert/", json={"queue": "test_queue", "type": "test_type"})
@@ -114,10 +114,10 @@ def test_create_nonexistent_queue(client_valid_access_token):
     assert "alert_queue" in create.text
 
 
-def test_create_nonexistent_tool(client_valid_access_token):
+def test_create_nonexistent_tool(client_valid_access_token, db):
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
     # Create an object
     create = client_valid_access_token.post(
@@ -127,10 +127,10 @@ def test_create_nonexistent_tool(client_valid_access_token):
     assert "alert_tool" in create.text
 
 
-def test_create_nonexistent_tool_instance(client_valid_access_token):
+def test_create_nonexistent_tool_instance(client_valid_access_token, db):
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
     # Create an object
     create = client_valid_access_token.post(
@@ -140,9 +140,9 @@ def test_create_nonexistent_tool_instance(client_valid_access_token):
     assert "alert_tool_instance" in create.text
 
 
-def test_create_nonexistent_type(client_valid_access_token):
+def test_create_nonexistent_type(client_valid_access_token, db):
     # Create an alert type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
+    helpers.create_alert_queue(value="test_queue", db=db)
 
     # Create an object
     create = client_valid_access_token.post("/api/alert/", json={"queue": "test_queue", "type": "test_type"})
@@ -154,10 +154,10 @@ def test_create_nonexistent_type(client_valid_access_token):
     "key,value",
     NONEXISTENT_FIELDS,
 )
-def test_create_nonexistent_node_fields(client_valid_access_token, key, value):
+def test_create_nonexistent_node_fields(client_valid_access_token, db, key, value):
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
     create = client_valid_access_token.post(
         "/api/alert/", json={key: value, "queue": "test_queue", "type": "test_type"}
@@ -187,12 +187,12 @@ def test_create_nonexistent_node_fields(client_valid_access_token, key, value):
         ("uuid", str(uuid.uuid4())),
     ],
 )
-def test_create_valid_optional_fields(client_valid_access_token, key, value):
+def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
-    # Create the object
+    # Create the alert
     create = client_valid_access_token.post(
         "/api/alert/", json={key: value, "queue": "test_queue", "type": "test_type"}
     )
@@ -208,24 +208,13 @@ def test_create_valid_optional_fields(client_valid_access_token, key, value):
         assert get.json()[key] == value
 
 
-def test_create_valid_owner(client_valid_access_token):
+def test_create_valid_owner(client_valid_access_token, db):
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
-
-    # Create a user role
-    client_valid_access_token.post("/api/user/role/", json={"value": "test_role"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
     # Create a user
-    create_json = {
-        "default_alert_queue": "test_queue",
-        "display_name": "John Doe",
-        "email": "john@test.com",
-        "password": "abcd1234",
-        "roles": ["test_role"],
-        "username": "johndoe",
-    }
-    client_valid_access_token.post("/api/user/", json=create_json)
+    helpers.create_user(username="johndoe", db=db)
 
     # Use the user to create a new alert
     create = client_valid_access_token.post(
@@ -238,13 +227,13 @@ def test_create_valid_owner(client_valid_access_token):
     assert get.json()["owner"]["username"] == "johndoe"
 
 
-def test_create_valid_tool(client_valid_access_token):
+def test_create_valid_tool(client_valid_access_token, db):
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
     # Create an alert tool
-    client_valid_access_token.post("/api/alert/tool/", json={"value": "test_tool"})
+    helpers.create_alert_tool(value="test_tool", db=db)
 
     # Use the tool to create a new alert
     create = client_valid_access_token.post(
@@ -257,13 +246,13 @@ def test_create_valid_tool(client_valid_access_token):
     assert get.json()["tool"]["value"] == "test_tool"
 
 
-def test_create_valid_tool_instance(client_valid_access_token):
+def test_create_valid_tool_instance(client_valid_access_token, db):
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
     # Create an alert tool instance
-    client_valid_access_token.post("/api/alert/tool/instance/", json={"value": "test_tool_instance"})
+    helpers.create_alert_tool_instance(value="test_tool_instance", db=db)
 
     # Use the tool instance to create a new alert
     create = client_valid_access_token.post(
@@ -276,12 +265,12 @@ def test_create_valid_tool_instance(client_valid_access_token):
     assert get.json()["tool_instance"]["value"] == "test_tool_instance"
 
 
-def test_create_valid_required_fields(client_valid_access_token):
+def test_create_valid_required_fields(client_valid_access_token, db):
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
-    # Create the object
+    # Create the alert
     create = client_valid_access_token.post("/api/alert/", json={"queue": "test_queue", "type": "test_type"})
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -296,17 +285,16 @@ def test_create_valid_required_fields(client_valid_access_token):
     "values",
     VALID_DIRECTIVES,
 )
-def test_create_valid_node_directives(client_valid_access_token, values):
-    # Create the directives. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
-    for value in list(set(values)):
-        client_valid_access_token.post("/api/node/directive/", json={"value": value})
+def test_create_valid_node_directives(client_valid_access_token, db, values):
+    # Create the directives
+    for value in values:
+        helpers.create_node_directive(value=value, db=db)
 
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
-    # Create the node
+    # Create the alert
     create = client_valid_access_token.post(
         "/api/alert/", json={"directives": values, "queue": "test_queue", "type": "test_type"}
     )
@@ -355,19 +343,18 @@ def test_create_valid_node_tags(client_valid_access_token, db, values):
     "value",
     VALID_THREAT_ACTOR,
 )
-def test_create_valid_node_threat_actor(client_valid_access_token, value):
-    # Create the threat actor. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
+def test_create_valid_node_threat_actor(client_valid_access_token, db, value):
+    # Create the threat actor
     if value:
-        client_valid_access_token.post("/api/node/threat_actor/", json={"value": value})
+        helpers.create_node_threat_actor(value=value, db=db)
 
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
-    # Create the node
+    # Create the alert
     create = client_valid_access_token.post(
-        "/api/analysis/", json={"threat_actor": value, "queue": "test_queue", "type": "test_type"}
+        "/api/alert/", json={"threat_actor": value, "queue": "test_queue", "type": "test_type"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -383,22 +370,18 @@ def test_create_valid_node_threat_actor(client_valid_access_token, value):
     "values",
     VALID_THREATS,
 )
-def test_create_valid_node_threats(client_valid_access_token, values):
-    # Create a threat type
-    client_valid_access_token.post("/api/node/threat/type/", json={"value": "test_type"})
-
-    # Create the threats. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
-    for value in list(set(values)):
-        client_valid_access_token.post("/api/node/threat/", json={"types": ["test_type"], "value": value})
+def test_create_valid_node_threats(client_valid_access_token, db, values):
+    # Create the threats
+    for value in values:
+        helpers.create_node_threat(value=value, db=db, types=["test_type"])
 
     # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
 
-    # Create the node
+    # Create the alert
     create = client_valid_access_token.post(
-        "/api/analysis/", json={"threats": values, "queue": "test_queue", "type": "test_type"}
+        "/api/alert/", json={"threats": values, "queue": "test_queue", "type": "test_type"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
