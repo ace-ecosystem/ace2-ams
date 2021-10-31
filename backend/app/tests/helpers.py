@@ -1,129 +1,221 @@
-from fastapi.testclient import TestClient
+import uuid
+
+from datetime import datetime
 from sqlalchemy.orm import Session
-from typing import Optional, Tuple
+from sqlalchemy.orm.decl_api import DeclarativeMeta
+from typing import List, Optional
 
 from core.auth import hash_password
+from db import crud
+from db.schemas.alert import Alert
+from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.alert_queue import AlertQueue
+from db.schemas.alert_tool import AlertTool
+from db.schemas.alert_tool_instance import AlertToolInstance
+from db.schemas.alert_type import AlertType
+from db.schemas.analysis import Analysis
+from db.schemas.event import Event
+from db.schemas.event_status import EventStatus
+from db.schemas.node_directive import NodeDirective
+from db.schemas.node_tag import NodeTag
+from db.schemas.node_threat import NodeThreat
+from db.schemas.node_threat_actor import NodeThreatActor
+from db.schemas.node_threat_type import NodeThreatType
+from db.schemas.observable_type import ObservableType
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
 
 
+def _create_basic_object(value: str, db_table: DeclarativeMeta, db: Session):
+    existing = crud.read_by_value(value=value, db_table=db_table, db=db, err_on_not_found=False)
+    if existing:
+        return existing
+
+    obj = db_table(value=value)
+    db.add(obj)
+    crud.commit(db)
+    return obj
+
+
+def create_alert_disposition(value: str, db: Session, rank: Optional[int] = None) -> AlertDisposition:
+    existing = crud.read_by_value(value=value, db_table=AlertDisposition, db=db, err_on_not_found=False)
+    if existing:
+        return existing
+
+    if rank is None:
+        existing_dispositions = crud.read_all(db_table=AlertDisposition, db=db)
+        rank = len(existing_dispositions)
+
+    disposition = AlertDisposition(value=value, rank=rank)
+    db.add(disposition)
+    crud.commit(db)
+    return disposition
+
+
+def create_alert_queue(value: str, db: Session) -> AlertQueue:
+    return _create_basic_object(db_table=AlertQueue, value=value, db=db)
+
+
+def create_alert_tool(value: str, db: Session) -> AlertTool:
+    return _create_basic_object(db_table=AlertTool, value=value, db=db)
+
+
+def create_alert_tool_instance(value: str, db: Session) -> AlertToolInstance:
+    return _create_basic_object(db_table=AlertToolInstance, value=value, db=db)
+
+
+def create_alert_type(value: str, db: Session) -> AlertType:
+    return _create_basic_object(db_table=AlertType, value=value, db=db)
+
+
 def create_alert(
-    client_valid_access_token: TestClient,
+    db: Session,
     alert_queue: str = "test_queue",
     alert_type: str = "test_type",
     disposition: Optional[str] = None,
-    name: Optional[str] = None,
+    disposition_time: Optional[datetime] = None,
+    disposition_user: Optional[str] = None,
+    event_time: datetime = None,
+    insert_time: datetime = None,
+    name: str = "Test Alert",
     owner: Optional[str] = None,
-    tool: Optional[str] = None,
-    tool_instance: Optional[str] = None,
-) -> Tuple[str, str]:
+    tool: str = "test_tool",
+    tool_instance: str = "test_tool_instance",
+) -> Alert:
     """
     Helper function to create an alert. Returns a tuple of (alert_uuid, analysis_uuid)
     """
 
-    # Create the alert queue if needed. Creating a duplicate will rollback the session.
-    alert_queues = client_valid_access_token.get("/api/alert/queue/")
-    if not any(q["value"] == alert_queue for q in alert_queues.json()):
-        client_valid_access_token.post("/api/alert/queue/", json={"value": alert_queue})
+    if event_time is None:
+        event_time = datetime.utcnow()
 
-    # Create the alert type if needed. Creating a duplicate will rollback the session.
-    alert_types = client_valid_access_token.get("/api/alert/type/")
-    if not any(t["value"] == alert_type for t in alert_types.json()):
-        client_valid_access_token.post("/api/alert/type/", json={"value": alert_type})
+    if insert_time is None:
+        insert_time = datetime.utcnow()
 
-    # Create the alert
-    create_json = {"queue": alert_queue, "type": alert_type, "name": name}
-    create = client_valid_access_token.post("/api/alert/", json=create_json)
+    alert = Alert(
+        analysis=Analysis(version=uuid.uuid4()),
+        event_time=event_time,
+        insert_time=insert_time,
+        name=name,
+        queue=create_alert_queue(value=alert_queue, db=db),
+        tool=create_alert_tool(value=tool, db=db),
+        tool_instance=create_alert_tool_instance(value=tool_instance, db=db),
+        type=create_alert_type(value=alert_type, db=db),
+        version=uuid.uuid4()
+    )
 
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-
-    # Set the disposition if one was given
     if disposition:
-        dispositions = client_valid_access_token.get("/api/alert/disposition/")
-        if not any(d["value"] == disposition for d in dispositions.json()):
-            client_valid_access_token.post(
-                "/api/alert/disposition/", json={"value": disposition, "rank": len(dispositions.json()) + 1}
-            )
+        alert.disposition = create_alert_disposition(value=disposition, db=db)
 
-        client_valid_access_token.patch(
-            create.headers["Content-Location"], json={"disposition": disposition, "version": get.json()["version"]}
-        )
+    if disposition_time:
+        alert.disposition_time = disposition_time
 
-        # Read it back to get the new version
-        get = client_valid_access_token.get(create.headers["Content-Location"])
+    if disposition_user:
+        alert.disposition_user = create_user(username=disposition_user, db=db, alert_queue=alert_queue)
 
-    # Set the owner if one was given
+    if event_time:
+        alert.event_time = event_time
+
+    if insert_time:
+        alert.insert_time = insert_time
+
     if owner:
-        client_valid_access_token.patch(
-            create.headers["Content-Location"], json={"owner": owner, "version": get.json()["version"]}
-        )
+        alert.owner = create_user(username=owner, db=db, alert_queue=alert_queue)
 
-        # Read it back to get the new version
-        get = client_valid_access_token.get(create.headers["Content-Location"])
+    db.add(alert)
+    crud.commit(db)
 
-    # Set the tool if one was given
-    if tool:
-        tools = client_valid_access_token.get("/api/alert/tool/")
-        if not any(t["value"] == tool for t in tools.json()):
-            client_valid_access_token.post("/api/alert/tool/", json={"value": tool})
-
-        client_valid_access_token.patch(
-            create.headers["Content-Location"], json={"tool": tool, "version": get.json()["version"]}
-        )
-
-        # Read it back to get the new version
-        get = client_valid_access_token.get(create.headers["Content-Location"])
-
-    # Set the tool instance if one was given
-    if tool_instance:
-        tool_instances = client_valid_access_token.get("/api/alert/tool/instance/")
-        if not any(t["value"] == tool_instance for t in tool_instances.json()):
-            client_valid_access_token.post("/api/alert/tool/instance/", json={"value": tool_instance})
-
-        client_valid_access_token.patch(
-            create.headers["Content-Location"], json={"tool_instance": tool_instance, "version": get.json()["version"]}
-        )
-
-        # Read it back to get the new version
-        get = client_valid_access_token.get(create.headers["Content-Location"])
-
-    return get.json()["uuid"], get.json()["analysis"]["uuid"]
+    return alert
 
 
-def create_event(client_valid_access_token: TestClient, name: str, status: str = "OPEN") -> str:
+def create_analysis(db: Session) -> Analysis:
+    obj = Analysis(version=uuid.uuid4())
+    db.add(obj)
+    return obj
+
+
+def create_event(name: str, db: Session) -> Event:
     """
-    Helper function to create an event. Returns the event UUID.
+    Helper function to create an event. Returns the event.
     """
 
-    # Create an event status and remediation
-    client_valid_access_token.post("/api/event/status/", json={"value": status})
-
-    # Create the event
-    create = client_valid_access_token.post("/api/event/", json={"name": name, "status": status})
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    return get.json()["uuid"]
+    obj = Event(name=name, version=uuid.uuid4())
+    db.add(obj)
+    return obj
 
 
-def create_test_user(db: Session, username: str, password: str):
-    # Create an alert queue
-    alert_queue = AlertQueue(value="test_queue")
-    db.add(alert_queue)
+def create_event_status(value: str, db: Session) -> EventStatus:
+    return _create_basic_object(db_table=EventStatus, value=value, db=db)
 
-    # Create a user role
-    user_role = UserRole(value="test_role")
-    db.add(user_role)
 
-    # Create a user
-    user = User(
-        default_alert_queue=alert_queue,
-        display_name="John Doe",
-        email="john@test.com",
+def create_node_directive(value: str, db: Session) -> NodeDirective:
+    return _create_basic_object(db_table=NodeDirective, value=value, db=db)
+
+
+def create_node_tag(value: str, db: Session) -> NodeTag:
+    return _create_basic_object(db_table=NodeTag, value=value, db=db)
+
+
+def create_node_threat_actor(value: str, db: Session) -> NodeThreatActor:
+    return _create_basic_object(db_table=NodeThreatActor, value=value, db=db)
+
+
+def create_node_threat(value: str, db: Session, types: List[str] = None) -> NodeThreat:
+    existing = crud.read_by_value(value=value, db_table=NodeThreat, db=db, err_on_not_found=False)
+    if existing:
+        return existing
+
+    if types is None:
+        types = ["test_type"]
+
+    obj = NodeThreat(
+        value=value,
+        types=[create_node_threat_type(value=t, db=db) for t in types]
+    )
+    db.add(obj)
+    return obj
+
+
+def create_node_threat_type(value: str, db: Session) -> NodeThreatType:
+    return _create_basic_object(db_table=NodeThreatType, value=value, db=db)
+
+
+def create_observable_type(value: str, db: Session) -> ObservableType:
+    return _create_basic_object(db_table=ObservableType, value=value, db=db)
+
+
+def create_user(
+    username: str,
+    db: Session,
+    alert_queue: str = "test_queue",
+    display_name: str = "Analyst",
+    email: Optional[str] = None,
+    password: str = "asdfasdf",
+    roles: List[str] = None,
+) -> User:
+    existing = crud.read_user_by_username(username=username, db=db, err_on_not_found=False)
+    if existing:
+        return existing
+
+    if email is None:
+        email = f"{username}@test.com"
+
+    if roles is None:
+        roles = [create_user_role(value="test_role", db=db)]
+    else:
+        roles = [create_user_role(value=r, db=db) for r in roles]
+
+    obj = User(
+        default_alert_queue=create_alert_queue(value=alert_queue, db=db),
+        display_name=display_name,
+        email=email,
         password=hash_password(password),
-        roles=[user_role],
+        roles=roles,
         username=username,
     )
-    db.add(user)
+    db.add(obj)
+    return obj
+
+
+def create_user_role(value: str, db: Session) -> UserRole:
+    return _create_basic_object(db_table=UserRole, value=value, db=db)
