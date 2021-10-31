@@ -12,7 +12,7 @@ from tests.api.node import (
     VALID_THREAT_ACTOR,
     VALID_THREATS,
 )
-from tests.helpers import create_alert
+from tests import helpers
 
 
 #
@@ -144,9 +144,9 @@ def test_create_valid_analysis_module_type(client_valid_access_token):
     assert get.json()["analysis_module_type"]["uuid"] == analysis_module_type_uuid
 
 
-def test_create_valid_parent_observable_uuid(client_valid_access_token):
+def test_create_valid_parent_observable_uuid(client_valid_access_token, db):
     # Create an alert
-    alert_uuid, analysis_uuid = create_alert(client_valid_access_token=client_valid_access_token)
+    alert = helpers.create_alert(db=db)
 
     # Create an observable type
     client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
@@ -154,8 +154,8 @@ def test_create_valid_parent_observable_uuid(client_valid_access_token):
     # Create an observable instance
     observable_uuid = str(uuid.uuid4())
     create_json = {
-        "alert_uuid": alert_uuid,
-        "parent_analysis_uuid": analysis_uuid,
+        "alert_uuid": str(alert.uuid),
+        "parent_analysis_uuid": str(alert.analysis_uuid),
         "type": "test_type",
         "uuid": observable_uuid,
         "value": "test",

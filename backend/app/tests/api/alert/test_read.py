@@ -1,10 +1,10 @@
-import time
 import uuid
 
+from datetime import datetime, timedelta
 from fastapi import status
 from urllib.parse import urlencode
 
-from tests.helpers import create_alert, create_event, create_test_user
+from tests import helpers
 
 
 #
@@ -27,10 +27,10 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_get_all_pagination(client_valid_access_token):
+def test_get_all_pagination(client_valid_access_token, db):
     # Create 11 alerts
     for _ in range(11):
-        create_alert(client_valid_access_token)
+        helpers.create_alert(db)
 
     # Keep track of all of the alert UUIDs to make sure we read them all
     unique_alert_uuids = set()
@@ -62,10 +62,10 @@ def test_get_all_empty(client_valid_access_token):
     assert get.json() == {"items": [], "limit": 50, "offset": 0, "total": 0}
 
 
-def test_get_filter_disposition(client_valid_access_token):
+def test_get_filter_disposition(client_valid_access_token, db):
     # Create some alerts
-    create_alert(client_valid_access_token)
-    create_alert(client_valid_access_token, disposition="FALSE_POSITIVE")
+    helpers.create_alert(db)
+    helpers.create_alert(db, disposition="FALSE_POSITIVE")
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -78,12 +78,9 @@ def test_get_filter_disposition(client_valid_access_token):
 
 
 def test_get_filter_disposition_user(client_valid_access_token, db):
-    # Create an analyst user
-    create_test_user(db=db, username="analyst", password="asdfasdf")
-
     # Create some alerts
-    create_alert(client_valid_access_token)
-    create_alert(client_valid_access_token, disposition="FALSE_POSITIVE")
+    helpers.create_alert(db)
+    helpers.create_alert(db, disposition_user="analyst")
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -95,171 +92,135 @@ def test_get_filter_disposition_user(client_valid_access_token, db):
     assert get.json()["items"][0]["disposition_user"]["username"] == "analyst"
 
 
-def test_get_filter_dispositioned_after(client_valid_access_token):
+def test_get_filter_dispositioned_after(client_valid_access_token, db):
     # Create some alerts
-    create_alert(client_valid_access_token)
-    alert_uuid, _ = create_alert(client_valid_access_token, disposition="FALSE_POSITIVE")
-    time.sleep(0.25)
-    create_alert(client_valid_access_token, disposition="FALSE_POSITIVE")
+    helpers.create_alert(db)
+    alert = helpers.create_alert(db, disposition_time=datetime.utcnow())
+    helpers.create_alert(db, disposition_time=datetime.utcnow()+timedelta(seconds=5))
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
     assert get.json()["total"] == 3
-
-    # Get the disposition_time of the first dispositioned alert
-    get = client_valid_access_token.get(f"/api/alert/{alert_uuid}")
-    disposition_time = get.json()["disposition_time"]
 
     # There should only be 1 alert when we filter by dispositioned_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"dispositioned_after": disposition_time}
+    params = {"dispositioned_after": alert.disposition_time}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
-def test_get_filter_dispositioned_before(client_valid_access_token):
+def test_get_filter_dispositioned_before(client_valid_access_token, db):
     # Create some alerts
-    create_alert(client_valid_access_token)
-    create_alert(client_valid_access_token, disposition="FALSE_POSITIVE")
-    time.sleep(0.25)
-    alert_uuid, _ = create_alert(client_valid_access_token, disposition="FALSE_POSITIVE")
+    helpers.create_alert(db)
+    helpers.create_alert(db, disposition_time=datetime.utcnow()-timedelta(seconds=5))
+    alert = helpers.create_alert(db, disposition_time=datetime.utcnow())
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
     assert get.json()["total"] == 3
 
-    # Get the disposition_time of the second dispositioned alert
-    get = client_valid_access_token.get(f"/api/alert/{alert_uuid}")
-    disposition_time = get.json()["disposition_time"]
-
     # There should only be 1 alert when we filter by dispositioned_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"dispositioned_before": disposition_time}
+    params = {"dispositioned_before": alert.disposition_time}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
-def test_get_filter_event_time_after(client_valid_access_token):
+def test_get_filter_event_time_after(client_valid_access_token, db):
     # Create some alerts
-    alert_uuid, _ = create_alert(client_valid_access_token)
-    time.sleep(0.25)
-    create_alert(client_valid_access_token)
+    alert = helpers.create_alert(db, event_time=datetime.utcnow())
+    helpers.create_alert(db, event_time=datetime.utcnow()+timedelta(seconds=5))
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
     assert get.json()["total"] == 2
-
-    # Get the event_time of the first alert
-    get = client_valid_access_token.get(f"/api/alert/{alert_uuid}")
-    event_time = get.json()["event_time"]
 
     # There should only be 1 alert when we filter by event_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"event_time_after": event_time}
+    params = {"event_time_after": alert.event_time}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
-def test_get_filter_event_time_before(client_valid_access_token):
+def test_get_filter_event_time_before(client_valid_access_token, db):
     # Create some alerts
-    create_alert(client_valid_access_token)
-    time.sleep(0.25)
-    alert_uuid, _ = create_alert(client_valid_access_token)
+    helpers.create_alert(db, event_time=datetime.utcnow())
+    alert = helpers.create_alert(db, event_time=datetime.utcnow()+timedelta(seconds=5))
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
     assert get.json()["total"] == 2
-
-    # Get the event_time of the second alert
-    get = client_valid_access_token.get(f"/api/alert/{alert_uuid}")
-    event_time = get.json()["event_time"]
 
     # There should only be 1 alert when we filter by event_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"event_time_before": event_time}
+    params = {"event_time_before": alert.event_time}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
-def test_get_filter_event_uuid(client_valid_access_token):
+def test_get_filter_event_uuid(client_valid_access_token, db):
     # Create an event
-    event_uuid = create_event(client_valid_access_token, name="Test Event")
+    event = helpers.create_event(name="Test Event", db=db)
 
     # Create some alerts
-    create_alert(client_valid_access_token)
-    alert_uuid, _ = create_alert(client_valid_access_token)
+    helpers.create_alert(db)
+    alert = helpers.create_alert(db)
+
+    # Add one alert to the event
+    alert.event_uuid = event.uuid
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
     assert get.json()["total"] == 2
-
-    # Read one of the alerts back
-    get = client_valid_access_token.get(f"/api/alert/{alert_uuid}")
-
-    # Add one of the alerts to the event
-    client_valid_access_token.patch(
-        f"/api/alert/{alert_uuid}", json={"event_uuid": event_uuid, "version": get.json()["version"]}
-    )
 
     # There should only be 1 alert when we filter by the event_uuid
-    get = client_valid_access_token.get(f"/api/alert/?event_uuid={event_uuid}")
-    print(get.json())
+    get = client_valid_access_token.get(f"/api/alert/?event_uuid={event.uuid}")
     assert get.json()["total"] == 1
-    assert get.json()["items"][0]["event_uuid"] == event_uuid
+    assert get.json()["items"][0]["event_uuid"] == str(event.uuid)
 
 
-def test_get_filter_insert_time_after(client_valid_access_token):
+def test_get_filter_insert_time_after(client_valid_access_token, db):
     # Create some alerts
-    alert_uuid, _ = create_alert(client_valid_access_token)
-    time.sleep(0.25)
-    create_alert(client_valid_access_token)
+    alert = helpers.create_alert(db, insert_time=datetime.utcnow())
+    helpers.create_alert(db, insert_time=datetime.utcnow()+timedelta(seconds=5))
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
     assert get.json()["total"] == 2
-
-    # Get the insert_time of the first alert
-    get = client_valid_access_token.get(f"/api/alert/{alert_uuid}")
-    insert_time = get.json()["insert_time"]
 
     # There should only be 1 alert when we filter by insert_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"insert_time_after": insert_time}
+    params = {"insert_time_after": alert.insert_time}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
-def test_get_filter_insert_time_before(client_valid_access_token):
+def test_get_filter_insert_time_before(client_valid_access_token, db):
     # Create some alerts
-    create_alert(client_valid_access_token)
-    time.sleep(0.25)
-    alert_uuid, _ = create_alert(client_valid_access_token)
+    helpers.create_alert(db, insert_time=datetime.utcnow()-timedelta(seconds=5))
+    alert = helpers.create_alert(db, insert_time=datetime.utcnow())
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
     assert get.json()["total"] == 2
 
-    # Get the insert_time of the second alert
-    get = client_valid_access_token.get(f"/api/alert/{alert_uuid}")
-    insert_time = get.json()["insert_time"]
-
     # There should only be 1 alert when we filter by insert_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"insert_time_before": insert_time}
+    params = {"insert_time_before": alert.insert_time}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
-def test_get_filter_name(client_valid_access_token):
+def test_get_filter_name(client_valid_access_token, db):
     # Create some alerts
-    create_alert(client_valid_access_token, name="Test Alert")
-    create_alert(client_valid_access_token, name="Some Other Alert")
+    helpers.create_alert(db, name="Test Alert")
+    helpers.create_alert(db, name="Some Other Alert")
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -273,11 +234,11 @@ def test_get_filter_name(client_valid_access_token):
 
 def test_get_filter_owner(client_valid_access_token, db):
     # Create an analyst user
-    create_test_user(db=db, username="analyst", password="asdfasdf")
+    helpers.create_user(username="analyst", db=db)
 
     # Create some alerts
-    create_alert(client_valid_access_token)
-    create_alert(client_valid_access_token, owner="analyst")
+    helpers.create_alert(db)
+    helpers.create_alert(db, owner="analyst")
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -289,10 +250,10 @@ def test_get_filter_owner(client_valid_access_token, db):
     assert get.json()["items"][0]["owner"]["username"] == "analyst"
 
 
-def test_get_filter_queue(client_valid_access_token):
+def test_get_filter_queue(client_valid_access_token, db):
     # Create some alerts
-    create_alert(client_valid_access_token, alert_queue="test_queue1")
-    create_alert(client_valid_access_token, alert_queue="test_queue2")
+    helpers.create_alert(db, alert_queue="test_queue1")
+    helpers.create_alert(db, alert_queue="test_queue2")
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -304,10 +265,10 @@ def test_get_filter_queue(client_valid_access_token):
     assert get.json()["items"][0]["queue"]["value"] == "test_queue1"
 
 
-def test_get_filter_tool(client_valid_access_token):
+def test_get_filter_tool(client_valid_access_token, db):
     # Create some alerts
-    create_alert(client_valid_access_token, tool="test_tool1")
-    create_alert(client_valid_access_token, tool="test_tool2")
+    helpers.create_alert(db, tool="test_tool1")
+    helpers.create_alert(db, tool="test_tool2")
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -319,10 +280,10 @@ def test_get_filter_tool(client_valid_access_token):
     assert get.json()["items"][0]["tool"]["value"] == "test_tool1"
 
 
-def test_get_filter_tool_instance(client_valid_access_token):
+def test_get_filter_tool_instance(client_valid_access_token, db):
     # Create some alerts
-    create_alert(client_valid_access_token, tool_instance="test_tool_instance1")
-    create_alert(client_valid_access_token, tool_instance="test_tool_instance2")
+    helpers.create_alert(db, tool_instance="test_tool_instance1")
+    helpers.create_alert(db, tool_instance="test_tool_instance2")
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -334,10 +295,10 @@ def test_get_filter_tool_instance(client_valid_access_token):
     assert get.json()["items"][0]["tool_instance"]["value"] == "test_tool_instance1"
 
 
-def test_get_filter_type(client_valid_access_token):
+def test_get_filter_type(client_valid_access_token, db):
     # Create some alerts
-    create_alert(client_valid_access_token, alert_type="test_type")
-    create_alert(client_valid_access_token, alert_type="test_type2")
+    helpers.create_alert(db, alert_type="test_type")
+    helpers.create_alert(db, alert_type="test_type2")
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -349,11 +310,11 @@ def test_get_filter_type(client_valid_access_token):
     assert get.json()["items"][0]["type"]["value"] == "test_type"
 
 
-def test_get_multiple_filters(client_valid_access_token):
+def test_get_multiple_filters(client_valid_access_token, db):
     # Create some alerts
-    create_alert(client_valid_access_token, alert_type="test_type1")
-    create_alert(client_valid_access_token, alert_type="test_type1", disposition="FALSE_POSITIVE")
-    create_alert(client_valid_access_token, alert_type="test_type2", disposition="FALSE_POSITIVE")
+    helpers.create_alert(db, alert_type="test_type1")
+    helpers.create_alert(db, alert_type="test_type1", disposition="FALSE_POSITIVE")
+    helpers.create_alert(db, alert_type="test_type2", disposition="FALSE_POSITIVE")
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")

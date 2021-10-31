@@ -11,7 +11,7 @@ from tests.api.node import (
     VALID_THREAT_ACTOR,
     VALID_THREATS,
 )
-from tests.helpers import create_test_user
+from tests import helpers
 
 
 #
@@ -148,8 +148,7 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 
 
 def test_update_disposition(client_valid_access_token, db):
-    # Create an analyst user
-    create_test_user(db=db, username="analyst", password="asdfasdf")
+    helpers.create_user(username="analyst", db=db)
 
     # Create an alert type
     client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})

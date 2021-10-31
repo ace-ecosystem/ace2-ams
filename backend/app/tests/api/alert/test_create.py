@@ -11,6 +11,7 @@ from tests.api.node import (
     VALID_THREAT_ACTOR,
     VALID_THREATS,
 )
+from tests import helpers
 
 
 #
@@ -320,19 +321,28 @@ def test_create_valid_node_directives(client_valid_access_token, values):
     "values",
     VALID_TAGS,
 )
-def test_create_valid_node_tags(client_valid_access_token, values):
-    # Create the tags. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
-    for value in list(set(values)):
-        client_valid_access_token.post("/api/node/tag/", json={"value": value})
+def test_create_valid_node_tags(client_valid_access_token, db, values):
+    # Create the tags
+    for value in values:
+        helpers.create_node_tag(value=value, db=db)
 
-    # Create an alert queue and type
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-    client_valid_access_token.post("/api/alert/type/", json={"value": "test_type"})
+    # Create the required items for an alert
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
+    helpers.create_alert_tool(value="test_tool", db=db)
+    helpers.create_alert_tool_instance(value="test_instance", db=db)
 
-    # Create the node
+    # Create the alert
     create = client_valid_access_token.post(
-        "/api/alert/", json={"tags": values, "queue": "test_queue", "type": "test_type"}
+        "/api/alert/",
+        json={
+            "tags": values,
+            "name": "test",
+            "queue": "test_queue",
+            "tool": "test_tool",
+            "tool_instance": "test_instance",
+            "type": "test_type",
+        },
     )
     assert create.status_code == status.HTTP_201_CREATED
 
