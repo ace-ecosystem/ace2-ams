@@ -16,7 +16,13 @@ from db.schemas.alert_type import AlertType
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.event import Event
+from db.schemas.event_prevention_tool import EventPreventionTool
+from db.schemas.event_remediation import EventRemediation
+from db.schemas.event_risk_level import EventRiskLevel
+from db.schemas.event_source import EventSource
 from db.schemas.event_status import EventStatus
+from db.schemas.event_type import EventType
+from db.schemas.event_vector import EventVector
 from db.schemas.node_directive import NodeDirective
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
@@ -171,10 +177,6 @@ def create_analysis_module_type(
     required_tags: List[str] = None,
     version: str = "1.0.0",
 ) -> AnalysisModuleType:
-    existing = crud.read_by_value(value=value, db_table=AnalysisModuleType, db=db, err_on_not_found=False)
-    if existing:
-        return existing
-
     if observable_types:
         observable_types = [create_observable_type(value=o, db=db) for o in observable_types]
     else:
@@ -205,14 +207,38 @@ def create_analysis_module_type(
     return obj
 
 
-def create_event(name: str, db: Session) -> Event:
-    obj = Event(name=name, uuid=uuid.uuid4(), version=uuid.uuid4())
+def create_event(name: str, db: Session, status: str = "OPEN") -> Event:
+    obj = Event(name=name, status=create_event_status(value=status, db=db), uuid=uuid.uuid4(), version=uuid.uuid4())
     db.add(obj)
     return obj
 
 
+def create_event_prevention_tool(value: str, db: Session) -> EventPreventionTool:
+    return _create_basic_object(db_table=EventPreventionTool, value=value, db=db)
+
+
+def create_event_remediation(value: str, db: Session) -> EventRemediation:
+    return _create_basic_object(db_table=EventRemediation, value=value, db=db)
+
+
+def create_event_risk_level(value: str, db: Session) -> EventRiskLevel:
+    return _create_basic_object(db_table=EventRiskLevel, value=value, db=db)
+
+
+def create_event_source(value: str, db: Session) -> EventSource:
+    return _create_basic_object(db_table=EventSource, value=value, db=db)
+
+
 def create_event_status(value: str, db: Session) -> EventStatus:
     return _create_basic_object(db_table=EventStatus, value=value, db=db)
+
+
+def create_event_type(value: str, db: Session) -> EventType:
+    return _create_basic_object(db_table=EventType, value=value, db=db)
+
+
+def create_event_vector(value: str, db: Session) -> EventVector:
+    return _create_basic_object(db_table=EventVector, value=value, db=db)
 
 
 def create_node_directive(value: str, db: Session) -> NodeDirective:
