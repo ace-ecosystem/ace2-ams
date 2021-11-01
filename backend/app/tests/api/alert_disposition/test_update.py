@@ -82,7 +82,4 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     # Update it
     update = client_valid_access_token.patch(f"/api/alert/disposition/{obj.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/disposition/{obj.uuid}")
-    assert get.json()[key] == updated_value
+    assert getattr(obj, key) == updated_value

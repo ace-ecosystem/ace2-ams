@@ -4,6 +4,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 #
 # INVALID TESTS
@@ -153,27 +155,33 @@ def test_create_valid_optional_fields(client_valid_access_token, key, value):
 
 
 @pytest.mark.parametrize(
-    "api_endpoint,key,values",
+    "key,values",
     [
-        ("/api/observable/type/", "observable_types", []),
-        ("/api/observable/type/", "observable_types", ["test"]),
-        ("/api/observable/type/", "observable_types", ["test1", "test2"]),
-        ("/api/observable/type/", "observable_types", ["test", "test"]),
-        ("/api/node/directive/", "required_directives", []),
-        ("/api/node/directive/", "required_directives", ["test"]),
-        ("/api/node/directive/", "required_directives", ["test1", "test2"]),
-        ("/api/node/directive/", "required_directives", ["test", "test"]),
-        ("/api/node/tag/", "required_tags", []),
-        ("/api/node/tag/", "required_tags", ["test"]),
-        ("/api/node/tag/", "required_tags", ["test1", "test2"]),
-        ("/api/node/tag/", "required_tags", ["test", "test"]),
+        ("observable_types", []),
+        ("observable_types", ["test"]),
+        ("observable_types", ["test1", "test2"]),
+        ("observable_types", ["test", "test"]),
+        ("required_directives", []),
+        ("required_directives", ["test"]),
+        ("required_directives", ["test1", "test2"]),
+        ("required_directives", ["test", "test"]),
+        ("required_tags", []),
+        ("required_tags", ["test"]),
+        ("required_tags", ["test1", "test2"]),
+        ("required_tags", ["test", "test"]),
     ],
 )
-def test_create_valid_list_fields(client_valid_access_token, api_endpoint, key, values):
-    # Create the objects. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
-    for value in list(set(values)):
-        client_valid_access_token.post(api_endpoint, json={"value": value})
+def test_create_valid_list_fields(client_valid_access_token, db, key, values):
+    # Create the objects
+    if key == "observable_types":
+        create_func = helpers.create_observable_type
+    elif key == "required_directives":
+        create_func = helpers.create_node_directive
+    else:
+        create_func = helpers.create_node_tag
+
+    for value in values:
+        create_func(value=value, db=db)
 
     # Create the analysis module type
     create = client_valid_access_token.post(

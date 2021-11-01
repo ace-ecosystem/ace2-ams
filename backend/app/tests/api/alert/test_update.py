@@ -1,6 +1,7 @@
 import pytest
 import uuid
 
+from dateutil.parser import parse
 from fastapi import status
 
 from tests.api.node import (
@@ -149,11 +150,8 @@ def test_update_disposition(client_valid_access_token, db):
         f"/api/alert/{alert.uuid}", json={"disposition": "test", "version": str(alert.version)}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert get.json()["disposition"]["value"] == "test"
-    assert get.json()["version"] != str(initial_version)
+    assert alert.disposition.value == "test"
+    assert alert.version != initial_version
 
 
 def test_update_event_uuid(client_valid_access_token, db):
@@ -170,11 +168,8 @@ def test_update_event_uuid(client_valid_access_token, db):
         f"/api/alert/{alert.uuid}", json={"event_uuid": str(event.uuid), "version": str(alert.version)}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert get.json()["event_uuid"] == str(event.uuid)
-    assert get.json()["version"] != str(initial_alert_version)
+    assert alert.event_uuid == event.uuid
+    assert alert.version != initial_alert_version
 
     # By adding the alert to the event, you should be able to see the alert UUID in the event's
     # alert_uuids list even though it was not explicitly added.
@@ -197,11 +192,8 @@ def test_update_owner(client_valid_access_token, db):
         f"/api/alert/{alert.uuid}", json={"owner": "johndoe", "version": str(alert.version)}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert get.json()["owner"]["username"] == "johndoe"
-    assert get.json()["version"] != str(initial_alert_version)
+    assert alert.owner.username == "johndoe"
+    assert alert.version != initial_alert_version
 
 
 def test_update_queue(client_valid_access_token, db):
@@ -217,11 +209,8 @@ def test_update_queue(client_valid_access_token, db):
         f"/api/alert/{alert.uuid}", json={"queue": "test_queue2", "version": str(alert.version)}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert get.json()["queue"]["value"] == "test_queue2"
-    assert get.json()["version"] != str(initial_alert_version)
+    assert alert.queue.value == "test_queue2"
+    assert alert.version != initial_alert_version
 
 
 def test_update_tool(client_valid_access_token, db):
@@ -237,11 +226,8 @@ def test_update_tool(client_valid_access_token, db):
         f"/api/alert/{alert.uuid}", json={"tool": "test", "version": str(alert.version)}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert get.json()["tool"]["value"] == "test"
-    assert get.json()["version"] != str(initial_alert_version)
+    assert alert.tool.value == "test"
+    assert alert.version != initial_alert_version
 
 
 def test_update_tool_instance(client_valid_access_token, db):
@@ -257,11 +243,8 @@ def test_update_tool_instance(client_valid_access_token, db):
         f"/api/alert/{alert.uuid}", json={"tool_instance": "test", "version": str(alert.version)}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert get.json()["tool_instance"]["value"] == "test"
-    assert get.json()["version"] != str(initial_alert_version)
+    assert alert.tool_instance.value == "test"
+    assert alert.version != initial_alert_version
 
 
 def test_update_type(client_valid_access_token, db):
@@ -277,11 +260,8 @@ def test_update_type(client_valid_access_token, db):
         f"/api/alert/{alert.uuid}", json={"type": "test_type2", "version": str(alert.version)}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert get.json()["type"]["value"] == "test_type2"
-    assert get.json()["version"] != str(initial_alert_version)
+    assert alert.type.value == "test_type2"
+    assert alert.version != initial_alert_version
 
 
 @pytest.mark.parametrize(
@@ -302,11 +282,8 @@ def test_update_valid_node_directives(client_valid_access_token, db, values):
         f"/api/alert/{alert.uuid}", json={"directives": values, "version": str(alert.version)}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert len(get.json()["directives"]) == len(list(set(values)))
-    assert get.json()["version"] != str(initial_alert_version)
+    assert len(alert.directives) == len(set(values))
+    assert alert.version != initial_alert_version
 
 
 @pytest.mark.parametrize(
@@ -327,11 +304,8 @@ def test_update_valid_node_tags(client_valid_access_token, db, values):
         f"/api/alert/{alert.uuid}", json={"tags": values, "version": str(alert.version)}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert len(get.json()["tags"]) == len(list(set(values)))
-    assert get.json()["version"] != str(initial_alert_version)
+    assert len(alert.tags) == len(set(values))
+    assert alert.version != initial_alert_version
 
 
 @pytest.mark.parametrize(
@@ -353,14 +327,12 @@ def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
     if value:
-        assert get.json()["threat_actor"]["value"] == value
+        assert alert.threat_actor.value == value
     else:
-        assert get.json()["threat_actor"] is None
+        assert alert.threat_actor is None
 
-    assert get.json()["version"] != str(initial_alert_version)
+    assert alert.version != initial_alert_version
 
 
 @pytest.mark.parametrize(
@@ -381,11 +353,8 @@ def test_update_valid_node_threats(client_valid_access_token, db, values):
         f"/api/alert/{alert.uuid}", json={"threats": values, "version": str(alert.version)}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert len(get.json()["threats"]) == len(list(set(values)))
-    assert get.json()["version"] != str(initial_alert_version)
+    assert len(alert.threats) == len(set(values))
+    assert alert.version != initial_alert_version
 
 
 @pytest.mark.parametrize(
@@ -414,10 +383,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
 
     # Set the initial value on the alert
     setattr(alert, key, initial_value)
-
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert get.json()[key] == initial_value
+    assert getattr(alert, key) == initial_value
 
     # Update it
     update = client_valid_access_token.patch(
@@ -425,13 +391,9 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
-    # Read it back
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-
-    # If the test is for event_time, make sure that the retrieved value matches the proper UTC timestamp
     if key == "event_time":
-        assert get.json()[key] == "2022-01-01T00:00:00+00:00"
+        assert alert.event_time == parse("2022-01-01T00:00:00+00:00")
     else:
-        assert get.json()[key] == updated_value
+        assert getattr(alert, key) == updated_value
 
-    assert get.json()["version"] != str(initial_alert_version)
+    assert alert.version != initial_alert_version
