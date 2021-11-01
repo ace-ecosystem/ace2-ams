@@ -23,6 +23,8 @@ from db.schemas.event_source import EventSource
 from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
+from db.schemas.node import Node
+from db.schemas.node_comment import NodeComment
 from db.schemas.node_directive import NodeDirective
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
@@ -239,6 +241,19 @@ def create_event_type(value: str, db: Session) -> EventType:
 
 def create_event_vector(value: str, db: Session) -> EventVector:
     return _create_basic_object(db_table=EventVector, value=value, db=db)
+
+
+def create_node_comment(
+    node: Node, username: str, value: str, db: Session, insert_time: Optional[datetime] = None
+) -> NodeComment:
+    if insert_time is None:
+        insert_time = datetime.utcnow()
+
+    user = create_user(username=username, db=db)
+
+    obj = NodeComment(insert_time=insert_time, node_uuid=node.uuid, user=user, uuid=uuid.uuid4(), value=value)
+    db.add(obj)
+    return obj
 
 
 def create_node_directive(value: str, db: Session) -> NodeDirective:
