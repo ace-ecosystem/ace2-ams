@@ -25,6 +25,7 @@ from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
 from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment
+from db.schemas.node_history_action import NodeHistoryAction
 from db.schemas.node_directive import NodeDirective
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
@@ -260,6 +261,10 @@ def create_node_directive(value: str, db: Session) -> NodeDirective:
     return _create_basic_object(db_table=NodeDirective, value=value, db=db)
 
 
+def create_node_history_action(value: str, db: Session) -> NodeHistoryAction:
+    return _create_basic_object(db_table=NodeHistoryAction, value=value, db=db)
+
+
 def create_node_tag(value: str, db: Session) -> NodeTag:
     return _create_basic_object(db_table=NodeTag, value=value, db=db)
 
@@ -276,7 +281,7 @@ def create_node_threat(value: str, db: Session, types: List[str] = None) -> Node
     if types is None:
         types = ["test_type"]
 
-    obj = NodeThreat(value=value, types=[create_node_threat_type(value=t, db=db) for t in types])
+    obj = NodeThreat(value=value, types=[create_node_threat_type(value=t, db=db) for t in types], uuid=uuid.uuid4())
     db.add(obj)
     return obj
 
@@ -289,7 +294,11 @@ def create_observable(
     type: str, value: str, db: Session, expires_on: Optional[datetime] = None, for_detection: bool = False
 ) -> Observable:
     obj = Observable(
-        expires_on=expires_on, for_detection=for_detection, type=create_observable_type(value=type, db=db), value=value
+        expires_on=expires_on,
+        for_detection=for_detection,
+        type=create_observable_type(value=type, db=db),
+        uuid=uuid.uuid4(),
+        value=value,
     )
     db.add(obj)
     return obj
@@ -361,6 +370,7 @@ def create_user(
         password=hash_password(password),
         roles=roles,
         username=username,
+        uuid=uuid.uuid4(),
     )
     db.add(obj)
     return obj
