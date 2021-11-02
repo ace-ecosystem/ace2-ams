@@ -93,7 +93,7 @@ def test_create_duplicate_uuid(client_valid_access_token, db):
     alert = helpers.create_alert(db=db)
 
     # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    helpers.create_observable_type(value="test_type", db=db)
 
     # Create an object
     create_json = {
@@ -115,7 +115,7 @@ def test_create_nonexistent_alert(client_valid_access_token, db):
     analysis = helpers.create_analysis(db=db)
 
     # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    helpers.create_observable_type(value="test_type", db=db)
 
     # Ensure you cannot create an observable instance with a nonexistent alert
     nonexistent_alert_uuid = str(uuid.uuid4())
@@ -135,7 +135,7 @@ def test_create_nonexistent_analysis(client_valid_access_token, db):
     alert = helpers.create_alert(db=db)
 
     # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    helpers.create_observable_type(value="test_type", db=db)
 
     # Ensure you cannot create an observable instance with a nonexistent analysis
     nonexistent_analysis_uuid = str(uuid.uuid4())
@@ -155,7 +155,7 @@ def test_create_nonexistent_performed_analysis(client_valid_access_token, db):
     alert = helpers.create_alert(db=db)
 
     # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    helpers.create_observable_type(value="test_type", db=db)
 
     # Ensure you cannot create an observable instance with a nonexistent performed analysis
     nonexistent_analysis_uuid = str(uuid.uuid4())
@@ -176,7 +176,7 @@ def test_create_nonexistent_redirection(client_valid_access_token, db):
     alert = helpers.create_alert(db=db)
 
     # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    helpers.create_observable_type(value="test_type", db=db)
 
     # Ensure you cannot create an observable instance with a nonexistent redirection target
     nonexistent_redirection_uuid = str(uuid.uuid4())
@@ -197,7 +197,7 @@ def test_create_nonexistent_type(client_valid_access_token, db):
     alert = helpers.create_alert(db=db)
 
     # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    helpers.create_observable_type(value="test_type", db=db)
 
     # Ensure you cannot create an observable instance with a nonexistent type
     create_json = {
@@ -220,7 +220,7 @@ def test_create_nonexistent_node_fields(client_valid_access_token, db, key, valu
     alert = helpers.create_alert(db=db)
 
     # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    helpers.create_observable_type(value="test_type", db=db)
 
     # Ensure you cannot create an observable instance with a nonexistent type
     create_json = {

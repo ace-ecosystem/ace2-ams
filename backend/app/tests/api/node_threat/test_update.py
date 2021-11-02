@@ -3,6 +3,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 #
 # INVALID TESTS
@@ -43,19 +45,13 @@ def test_update_invalid_uuid(client_valid_access_token):
         ("value"),
     ],
 )
-def test_update_duplicate_unique_fields(client_valid_access_token, key):
+def test_update_duplicate_unique_fields(client_valid_access_token, db, key):
     # Create a node threat type
-    client_valid_access_token.post("/api/node/threat/type/", json={"value": "test_type"})
-
-    # Create some objects
-    create1_json = {"types": ["test_type"], "value": "test"}
-    client_valid_access_token.post("/api/node/threat/", json=create1_json)
-
-    create2_json = {"types": ["test_type"], "value": "test2"}
-    create2 = client_valid_access_token.post("/api/node/threat/", json=create2_json)
+    obj1 = helpers.create_node_threat(value="test", types=["test_type"], db=db)
+    obj2 = helpers.create_node_threat(value="test2", types=["test_type"], db=db)
 
     # Ensure you cannot update a unique field to a value that already exists
-    update = client_valid_access_token.patch(create2.headers["Content-Location"], json={key: create1_json[key]})
+    update = client_valid_access_token.patch(f"/api/node/threat/{obj2.uuid}", json={key: getattr(obj1, key)})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
@@ -72,37 +68,26 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 
 
 @pytest.mark.parametrize(
-    "value",
+    "values",
     [
         (["new_type"]),
         (["new_type1", "new_type2"]),
     ],
 )
-def test_update_valid_types(client_valid_access_token, value):
-    # Create some node threat types
-    initial_types = ["test_type1", "test_type2", "test_type3"]
-    for threat_type in initial_types:
-        client_valid_access_token.post("/api/node/threat/type/", json={"value": threat_type})
-
+def test_update_valid_types(client_valid_access_token, db, values):
     # Create the object
-    create = client_valid_access_token.post("/api/node/threat/", json={"types": initial_types, "value": "test"})
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["types"]) == len(initial_types)
+    initial_types = ["test_type1", "test_type2", "test_type3"]
+    obj = helpers.create_node_threat(value="test", types=initial_types, db=db)
+    assert len(obj.types) == len(initial_types)
 
     # Create the new node threat types
-    for threat_type in value:
-        client_valid_access_token.post("/api/node/threat/type/", json={"value": threat_type})
+    for value in values:
+        helpers.create_node_threat_type(value=value, db=db)
 
     # Update it
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={"types": value})
+    update = client_valid_access_token.patch(f"/api/node/threat/{obj.uuid}", json={"types": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["types"]) == len(value)
+    assert len(obj.types) == len(values)
 
 
 @pytest.mark.parametrize(
@@ -114,24 +99,14 @@ def test_update_valid_types(client_valid_access_token, value):
         ("value", "test", "test"),
     ],
 )
-def test_update(client_valid_access_token, key, initial_value, updated_value):
-    # Create a node threat type
-    client_valid_access_token.post("/api/node/threat/type/", json={"value": "test_type"})
-
+def test_update(client_valid_access_token, db, key, initial_value, updated_value):
     # Create the object
-    create_json = {"types": ["test_type"], "value": "test"}
-    create_json[key] = initial_value
-    create = client_valid_access_token.post("/api/node/threat/", json=create_json)
-    assert create.status_code == status.HTTP_201_CREATED
+    obj = helpers.create_node_threat(value="test", types=["test_type"], db=db)
 
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()[key] == initial_value
+    # Set the initial value
+    setattr(obj, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={key: updated_value})
+    update = client_valid_access_token.patch(f"/api/node/threat/{obj.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()[key] == updated_value
+    assert getattr(obj, key) == updated_value

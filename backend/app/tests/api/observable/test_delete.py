@@ -2,6 +2,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 """
 NOTE: There are no tests for the foreign key constraints. The DELETE endpoint will need to be updated once the endpoints
@@ -29,27 +31,26 @@ def test_delete_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_delete(client_valid_access_token):
+def test_delete(client_valid_access_token, db):
     # Create an observable type
-    type_create = client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    observable_type = helpers.create_observable_type(value="test_type", db=db)
 
-    # Create the object
-    create = client_valid_access_token.post("/api/observable/", json={"type": "test_type", "value": "test"})
-    assert create.status_code == status.HTTP_201_CREATED
+    # Create the observable
+    observable = helpers.create_observable(type="test_type", value="test", db=db)
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client_valid_access_token.get(f"/api/observable/{observable.uuid}")
     assert get.status_code == status.HTTP_200_OK
 
     # Delete it
-    delete = client_valid_access_token.delete(create.headers["Content-Location"])
+    delete = client_valid_access_token.delete(f"/api/observable/{observable.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client_valid_access_token.get(f"/api/observable/{observable.uuid}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
     # Make sure the observable type is still there
-    get = client_valid_access_token.get(type_create.headers["Content-Location"])
+    get = client_valid_access_token.get(f"/api/observable/type/{observable_type.uuid}")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["value"] == "test_type"

@@ -3,6 +3,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 #
 # INVALID TESTS
@@ -46,9 +48,9 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
         ("value"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, key):
+def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     # Create a node threat type
-    client_valid_access_token.post("/api/node/threat/type/", json={"value": "test_type"})
+    helpers.create_node_threat_type(value="test_type", db=db)
 
     # Create an object
     create1_json = {"types": ["test_type"], "uuid": str(uuid.uuid4()), "value": "test"}
@@ -93,9 +95,9 @@ def test_create_nonexistent_type(client_valid_access_token):
         ("uuid", str(uuid.uuid4())),
     ],
 )
-def test_create_valid_optional_fields(client_valid_access_token, key, value):
+def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
     # Create a node threat type
-    client_valid_access_token.post("/api/node/threat/type/", json={"value": "test_type"})
+    helpers.create_node_threat_type(value="test_type", db=db)
 
     # Create the object
     create = client_valid_access_token.post(
@@ -109,21 +111,20 @@ def test_create_valid_optional_fields(client_valid_access_token, key, value):
 
 
 @pytest.mark.parametrize(
-    "value,list_length",
+    "values,list_length",
     [
         (["test_type"], 1),
         (["test_type1", "test_type2"], 2),
         (["test_type", "test_type"], 1),
     ],
 )
-def test_create_valid_types(client_valid_access_token, value, list_length):
-    # Create the node threat types. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
-    for threat_type in list(set(value)):
-        client_valid_access_token.post("/api/node/threat/type/", json={"value": threat_type})
+def test_create_valid_types(client_valid_access_token, db, values, list_length):
+    # Create the node threat types
+    for value in values:
+        helpers.create_node_threat_type(value=value, db=db)
 
     # Create the object
-    create = client_valid_access_token.post("/api/node/threat/", json={"types": value, "value": "test"})
+    create = client_valid_access_token.post("/api/node/threat/", json={"types": values, "value": "test"})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
@@ -131,9 +132,9 @@ def test_create_valid_types(client_valid_access_token, value, list_length):
     assert len(get.json()["types"]) == list_length
 
 
-def test_create_valid_required_fields(client_valid_access_token):
+def test_create_valid_required_fields(client_valid_access_token, db):
     # Create a node threat type
-    client_valid_access_token.post("/api/node/threat/type/", json={"value": "test_type"})
+    helpers.create_node_threat_type(value="test_type", db=db)
 
     # Create the object
     create = client_valid_access_token.post("/api/node/threat/", json={"types": ["test_type"], "value": "test"})

@@ -2,6 +2,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 #
 # INVALID TESTS
@@ -23,13 +25,10 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_get_all(client_valid_access_token):
-    # Create a node threat type
-    client_valid_access_token.post("/api/node/threat/type/", json={"value": "test_type"})
-
+def test_get_all(client_valid_access_token, db):
     # Create some objects
-    client_valid_access_token.post("/api/node/threat/", json={"types": ["test_type"], "value": "test"})
-    client_valid_access_token.post("/api/node/threat/", json={"types": ["test_type"], "value": "test2"})
+    helpers.create_node_threat(value="test", types=["test_type"], db=db)
+    helpers.create_node_threat(value="test2", types=["test_type"], db=db)
 
     # Read them back
     get = client_valid_access_token.get("/api/node/threat/")
