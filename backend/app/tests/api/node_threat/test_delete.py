@@ -2,6 +2,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 """
 NOTE: There are no tests for the foreign key constraints. The DELETE endpoint will need to be updated once the endpoints
@@ -29,27 +31,22 @@ def test_delete_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_delete(client_valid_access_token):
+def test_delete(client_valid_access_token, db):
     # Create a node threat type
-    type_create = client_valid_access_token.post("/api/node/threat/type/", json={"value": "test_type"})
+    threat_type = helpers.create_node_threat_type(value="test_type", db=db)
 
-    # Create the object
-    create = client_valid_access_token.post("/api/node/threat/", json={"types": ["test_type"], "value": "test"})
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.status_code == status.HTTP_200_OK
+    # Create a node threat
+    threat = helpers.create_node_threat(value="test", types=["test_type"], db=db)
 
     # Delete it
-    delete = client_valid_access_token.delete(create.headers["Content-Location"])
+    delete = client_valid_access_token.delete(f"/api/node/threat/{threat.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client_valid_access_token.get(f"/api/node/threat/{threat.uuid}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
     # Make sure the node threat type is still there
-    get = client_valid_access_token.get(type_create.headers["Content-Location"])
+    get = client_valid_access_token.get(f"/api/node/threat/type/{threat_type.uuid}")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["value"] == "test_type"

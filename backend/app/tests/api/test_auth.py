@@ -1,12 +1,10 @@
 import pytest
 import time
 
-from datetime import datetime, timedelta
-from fastapi import status, testclient
-from jose import jwt
+from fastapi import status
 
-from core.config import get_settings, Settings
-from tests.helpers import create_test_user
+from core.config import Settings
+from tests import helpers
 from main import app
 
 
@@ -23,7 +21,7 @@ from main import app
     ],
 )
 def test_auth_invalid(client, db, username, password):
-    create_test_user(db, "johndoe", "abcd1234")
+    helpers.create_user(username="johndoe", password="abcd1234", db=db)
 
     # Attempt to authenticate
     auth = client.post("/api/auth", data={"username": username, "password": password})
@@ -37,7 +35,7 @@ def test_auth_invalid(client, db, username, password):
 
 
 def test_disabled_user(client, db):
-    create_test_user(db, "johndoe", "abcd1234")
+    helpers.create_user(username="johndoe", password="abcd1234", db=db)
 
     # Attempt to authenticate
     auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
@@ -77,7 +75,7 @@ def test_expired_token(client, db, monkeypatch):
     # Patching __code__ works no matter how the function is imported
     monkeypatch.setattr("core.config.get_settings.__code__", mock_get_settings.__code__)
 
-    create_test_user(db, "johndoe", "abcd1234")
+    helpers.create_user(username="johndoe", password="abcd1234", db=db)
 
     # Attempt to authenticate
     auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
@@ -122,7 +120,7 @@ def test_missing_token(client):
 
 
 def test_wrong_token_type(client, db):
-    create_test_user(db, "johndoe", "abcd1234")
+    helpers.create_user(username="johndoe", password="abcd1234", db=db)
 
     # Attempt to authenticate
     auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
@@ -171,8 +169,8 @@ def test_missing_route_authentication(client, route):
 #
 
 
-def test_auth_success(client: testclient.TestClient, db):
-    create_test_user(db, "johndoe", "abcd1234")
+def test_auth_success(client, db):
+    helpers.create_user(username="johndoe", password="abcd1234", db=db)
 
     # Attempt to authenticate
     auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})

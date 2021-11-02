@@ -6,6 +6,7 @@ from fastapi import status
 from core.auth import verify_password
 from db import crud
 from db.schemas.user import User
+from tests import helpers
 
 
 #
@@ -67,42 +68,18 @@ def test_update_invalid_uuid(client_valid_access_token):
         ("username"),
     ],
 )
-def test_update_duplicate_unique_fields(client_valid_access_token, key):
-    # Create an alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-
-    # Create a user role
-    client_valid_access_token.post("/api/user/role/", json={"value": "test_role"})
-
-    # Create some objects
-    create1_json = {
-        "default_alert_queue": "test_queue",
-        "display_name": "John Doe",
-        "email": "john@test.com",
-        "password": "abcd1234",
-        "roles": ["test_role"],
-        "username": "johndoe",
-    }
-    client_valid_access_token.post("/api/user/", json=create1_json)
-
-    # Ensure you cannot create another object with the same unique field value
-    create2_json = {
-        "default_alert_queue": "test_queue",
-        "display_name": "Jane Doe",
-        "email": "jane@test.com",
-        "password": "wxyz6789",
-        "roles": ["test_role"],
-        "username": "janedoe",
-    }
-    create2 = client_valid_access_token.post("/api/user/", json=create2_json)
+def test_update_duplicate_unique_fields(client_valid_access_token, db, key):
+    # Create some users
+    obj1 = helpers.create_user(username="johndoe", email="johndoe@test.com", db=db)
+    obj2 = helpers.create_user(username="janedoe", email="janedoe@test.com", db=db)
 
     # Ensure you cannot update a unique field to a value that already exists
-    update = client_valid_access_token.patch(create2.headers["Content-Location"], json={key: create1_json[key]})
+    update = client_valid_access_token.patch(f"/api/user/{obj2.uuid}", json={key: getattr(obj1, key)})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
 def test_update_nonexistent_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch(f"/api/user/{uuid.uuid4()}", json={"value": "test"})
+    update = client_valid_access_token.patch(f"/api/user/{uuid.uuid4()}", json={"display_name": "test"})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -111,90 +88,41 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 #
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        ("new_queue"),
-    ],
-)
-def test_update_valid_alert_queue(client_valid_access_token, value):
-    # Create an initial alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "initial_queue"})
-
-    # Create a user role
-    client_valid_access_token.post("/api/user/role/", json={"value": "test_role"})
-
-    # Create the object
-    create_json = {
-        "default_alert_queue": "initial_queue",
-        "display_name": "John Doe",
-        "email": "john@test.com",
-        "password": "abcd1234",
-        "roles": ["test_role"],
-        "username": "johndoe",
-    }
-    create = client_valid_access_token.post("/api/user/", json=create_json)
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["default_alert_queue"]["value"] == "initial_queue"
+def test_update_valid_alert_queue(client_valid_access_token, db):
+    # Create a user
+    obj = helpers.create_user(username="johndoe", alert_queue="test_queue", db=db)
+    assert obj.default_alert_queue.value == "test_queue"
 
     # Create the new alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": value})
+    helpers.create_alert_queue(value="test_queue2", db=db)
 
     # Update it
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={"default_alert_queue": value})
+    update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={"default_alert_queue": "test_queue2"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["default_alert_queue"]["value"] == value
+    assert obj.default_alert_queue.value == "test_queue2"
 
 
 @pytest.mark.parametrize(
-    "value",
+    "values",
     [
         (["new_role"]),
         (["new_role1", "new_role2"]),
     ],
 )
-def test_update_valid_roles(client_valid_access_token, value):
-    # Create an alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-
-    # Create some user roles
+def test_update_valid_roles(client_valid_access_token, db, values):
+    # Create a user
     initial_roles = ["test_role1", "test_role2", "test_role3"]
-    for role in initial_roles:
-        client_valid_access_token.post("/api/user/role/", json={"value": role})
-
-    # Create the object
-    create1_json = {
-        "default_alert_queue": "test_queue",
-        "display_name": "John Doe",
-        "email": "john@test.com",
-        "password": "abcd1234",
-        "roles": initial_roles,
-        "username": "johndoe",
-    }
-    create = client_valid_access_token.post("/api/user/", json=create1_json)
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["roles"]) == len(initial_roles)
+    obj = helpers.create_user(username="johndoe", roles=initial_roles, db=db)
+    assert len(obj.roles) == len(initial_roles)
 
     # Create the new user roles
-    for role in value:
-        client_valid_access_token.post("/api/user/role/", json={"value": role})
+    for value in values:
+        helpers.create_user_role(value=value, db=db)
 
     # Update it
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={"roles": value})
+    update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={"roles": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["roles"]) == len(value)
+    assert len(obj.roles) == len(values)
 
 
 @pytest.mark.parametrize(
@@ -212,38 +140,17 @@ def test_update_valid_roles(client_valid_access_token, value):
         ("username", "johndoe", "johndoe"),
     ],
 )
-def test_update(client_valid_access_token, key, initial_value, updated_value):
-    # Create an alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
+def test_update(client_valid_access_token, db, key, initial_value, updated_value):
+    # Create a user
+    obj = helpers.create_user(username="johndoe", db=db)
 
-    # Create a user role
-    client_valid_access_token.post("/api/user/role/", json={"value": "test_role"})
-
-    # Create the object
-    create_json = {
-        "default_alert_queue": "test_queue",
-        "display_name": "John Doe",
-        "email": "john@test.com",
-        "password": "abcd1234",
-        "roles": ["test_role"],
-        "timezone": "America/New_York",
-        "username": "johndoe",
-    }
-    create_json[key] = initial_value
-    create = client_valid_access_token.post("/api/user/", json=create_json)
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()[key] == initial_value
+    # Set the initial value
+    setattr(obj, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={key: updated_value})
+    update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()[key] == updated_value
+    assert getattr(obj, key) == updated_value
 
 
 @pytest.mark.parametrize(
@@ -254,44 +161,15 @@ def test_update(client_valid_access_token, key, initial_value, updated_value):
     ],
 )
 def test_update_password(client_valid_access_token, db, initial_value, updated_value):
-    # Create an alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-
-    # Create a user role
-    client_valid_access_token.post("/api/user/role/", json={"value": "test_role"})
-
-    # Create the object
-    create_json = {
-        "default_alert_queue": "test_queue",
-        "display_name": "John Doe",
-        "email": "john@test.com",
-        "password": initial_value,
-        "roles": ["test_role"],
-        "username": "johndoe",
-    }
-    create = client_valid_access_token.post("/api/user/", json=create_json)
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read it back to get the UUID
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-
-    # Manually retrieve the user from the database so we have the initial password hash
-    initial_user = crud.read(uuid=get.json()["uuid"], db_table=User, db=db)
-    initial_hash = initial_user.password
+    # Create a user
+    obj = helpers.create_user(username="johndoe", password=initial_value, db=db)
+    initial_password_hash = obj.password
 
     # Make sure the initial password validates against its hash
-    assert verify_password(initial_value, initial_hash) is True
+    assert verify_password(initial_value, initial_password_hash) is True
 
     # Update it
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={"password": updated_value})
+    update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={"password": updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Manually retrieve the user from the database so we have the updated password hash
-    updated_user = crud.read(uuid=get.json()["uuid"], db_table=User, db=db)
-    updated_hash = updated_user.password
-
-    # Make sure the two hashes are not the same
-    assert initial_hash != updated_hash
-
-    # Make sure the updated password validates against its hash
-    assert verify_password(updated_value, updated_hash) is True
+    assert obj.password != initial_password_hash
+    assert verify_password(updated_value, obj.password) is True

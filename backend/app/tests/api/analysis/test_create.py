@@ -12,7 +12,7 @@ from tests.api.node import (
     VALID_THREAT_ACTOR,
     VALID_THREATS,
 )
-from tests.helpers import create_alert
+from tests import helpers
 
 
 #
@@ -128,69 +128,54 @@ def test_create_valid_optional_fields(client_valid_access_token, key, value):
         assert get.json()[key] == value
 
 
-def test_create_valid_analysis_module_type(client_valid_access_token):
+def test_create_valid_analysis_module_type(client_valid_access_token, db):
     # Create an analysis module type
-    analysis_module_type_uuid = str(uuid.uuid4())
-    client_valid_access_token.post(
-        "/api/analysis/module_type/", json={"uuid": analysis_module_type_uuid, "value": "test", "version": "1.0.0"}
-    )
+    analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Use the analysis module type to create a new analysis
-    create = client_valid_access_token.post("/api/analysis/", json={"analysis_module_type": analysis_module_type_uuid})
+    create = client_valid_access_token.post(
+        "/api/analysis/", json={"analysis_module_type": str(analysis_module_type.uuid)}
+    )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["analysis_module_type"]["uuid"] == analysis_module_type_uuid
+    assert get.json()["analysis_module_type"]["uuid"] == str(analysis_module_type.uuid)
 
 
-def test_create_valid_parent_observable_uuid(client_valid_access_token):
+def test_create_valid_parent_observable_uuid(client_valid_access_token, db):
     # Create an alert
-    alert_uuid, analysis_uuid = create_alert(client_valid_access_token=client_valid_access_token)
-
-    # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    alert = helpers.create_alert(db=db)
 
     # Create an observable instance
-    observable_uuid = str(uuid.uuid4())
-    create_json = {
-        "alert_uuid": alert_uuid,
-        "parent_analysis_uuid": analysis_uuid,
-        "type": "test_type",
-        "uuid": observable_uuid,
-        "value": "test",
-    }
-    observable_create = client_valid_access_token.post("/api/observable/instance/", json=[create_json])
-    assert observable_create.status_code == status.HTTP_201_CREATED
-
-    # Read the observable instance back to get its current version
-    get_observable = client_valid_access_token.get(observable_create.headers["Content-Location"])
-    initial_version = get_observable.json()["version"]
+    observable_instance = helpers.create_observable_instance(
+        type="test_type", value="test", alert=alert, parent_analysis=alert.analysis, db=db
+    )
+    initial_observable_instance_version = observable_instance.version
 
     # Use the observable instance as the parent for a new analysis
-    child_analysis_uuid = str(uuid.uuid4())
+    child_analysis_uuid = uuid.uuid4()
     create = client_valid_access_token.post(
         "/api/analysis/",
         json={
-            "parent_observable_uuid": observable_uuid,
-            "uuid": child_analysis_uuid,
+            "parent_observable_uuid": str(observable_instance.uuid),
+            "uuid": str(child_analysis_uuid),
         },
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["parent_observable_uuid"] == observable_uuid
+    assert get.json()["parent_observable_uuid"] == str(observable_instance.uuid)
 
-    # Read the observable instance back. By creating the analysis and setting its parent_observable_uuid,
-    # you should be able to read that observable instance back and see the analysis listed in its
+    # By creating the analysis and setting its parent_observable_uuid, you should be
+    # able to read that observable instance back and see the analysis listed in its
     # performed_analysis_uuids list even though it was not explictly added.
-    get_observable = client_valid_access_token.get(observable_create.headers["Content-Location"])
-    assert get_observable.json()["performed_analysis_uuids"] == [child_analysis_uuid]
+    assert observable_instance.performed_analysis_uuids == [child_analysis_uuid]
 
-    # Additionally, adding the child analysis to the observable instance should trigger the observable instance
-    # to get a new version.
-    assert get_observable.json()["version"] != initial_version
+    # Additionally, adding the child analysis to the observable instance should trigger
+    # the observable instance to get a new version.
+    assert observable_instance.version != initial_observable_instance_version
 
 
 def test_create_valid_required_fields(client_valid_access_token):
@@ -207,11 +192,10 @@ def test_create_valid_required_fields(client_valid_access_token):
     "values",
     VALID_DIRECTIVES,
 )
-def test_create_valid_node_directives(client_valid_access_token, values):
-    # Create the directives. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
-    for value in list(set(values)):
-        client_valid_access_token.post("/api/node/directive/", json={"value": value})
+def test_create_valid_node_directives(client_valid_access_token, db, values):
+    # Create the directives
+    for value in values:
+        helpers.create_node_directive(value=value, db=db)
 
     # Create the node
     create = client_valid_access_token.post("/api/analysis/", json={"directives": values})
@@ -226,11 +210,10 @@ def test_create_valid_node_directives(client_valid_access_token, values):
     "values",
     VALID_TAGS,
 )
-def test_create_valid_node_tags(client_valid_access_token, values):
-    # Create the tags. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
-    for value in list(set(values)):
-        client_valid_access_token.post("/api/node/tag/", json={"value": value})
+def test_create_valid_node_tags(client_valid_access_token, db, values):
+    # Create the tags
+    for value in values:
+        helpers.create_node_tag(value=value, db=db)
 
     # Create the node
     create = client_valid_access_token.post("/api/analysis/", json={"tags": values})
@@ -245,11 +228,10 @@ def test_create_valid_node_tags(client_valid_access_token, values):
     "value",
     VALID_THREAT_ACTOR,
 )
-def test_create_valid_node_threat_actor(client_valid_access_token, value):
-    # Create the threat actor. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
+def test_create_valid_node_threat_actor(client_valid_access_token, db, value):
+    # Create the threat actor
     if value:
-        client_valid_access_token.post("/api/node/threat_actor/", json={"value": value})
+        helpers.create_node_threat_actor(value=value, db=db)
 
     # Create the node
     create = client_valid_access_token.post("/api/analysis/", json={"threat_actor": value})
@@ -267,14 +249,10 @@ def test_create_valid_node_threat_actor(client_valid_access_token, value):
     "values",
     VALID_THREATS,
 )
-def test_create_valid_node_threats(client_valid_access_token, values):
-    # Create a threat type
-    client_valid_access_token.post("/api/node/threat/type/", json={"value": "test_type"})
-
-    # Create the threats. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
-    for value in list(set(values)):
-        client_valid_access_token.post("/api/node/threat/", json={"types": ["test_type"], "value": value})
+def test_create_valid_node_threats(client_valid_access_token, db, values):
+    # Create the threats
+    for value in values:
+        helpers.create_node_threat(value=value, types=["test_type"], db=db)
 
     # Create the node
     create = client_valid_access_token.post("/api/analysis/", json={"threats": values})
@@ -282,4 +260,4 @@ def test_create_valid_node_threats(client_valid_access_token, values):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["threats"]) == len(list(set(values)))
+    assert len(get.json()["threats"]) == len(set(values))

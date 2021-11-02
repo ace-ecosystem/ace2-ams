@@ -11,6 +11,7 @@ from tests.api.node import (
     VALID_THREAT_ACTOR,
     VALID_THREATS,
 )
+from tests import helpers
 
 
 #
@@ -100,9 +101,9 @@ def test_create_invalid_node_fields(client_valid_access_token, key, value):
         ("uuid"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, key):
+def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
     create1_json = {"uuid": str(uuid.uuid4()), "name": "test", "status": "OPEN"}
@@ -115,9 +116,9 @@ def test_create_duplicate_unique_fields(client_valid_access_token, key):
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
-def test_create_nonexistent_owner(client_valid_access_token):
+def test_create_nonexistent_owner(client_valid_access_token, db):
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
     create = client_valid_access_token.post("/api/event/", json={"owner": "johndoe", "name": "test", "status": "OPEN"})
@@ -125,9 +126,9 @@ def test_create_nonexistent_owner(client_valid_access_token):
     assert "user" in create.text
 
 
-def test_create_nonexistent_prevention_tools(client_valid_access_token):
+def test_create_nonexistent_prevention_tools(client_valid_access_token, db):
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
     create = client_valid_access_token.post(
@@ -137,9 +138,9 @@ def test_create_nonexistent_prevention_tools(client_valid_access_token):
     assert "event_prevention_tool" in create.text
 
 
-def test_create_nonexistent_remediations(client_valid_access_token):
+def test_create_nonexistent_remediations(client_valid_access_token, db):
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
     create = client_valid_access_token.post(
@@ -149,9 +150,9 @@ def test_create_nonexistent_remediations(client_valid_access_token):
     assert "event_remediation" in create.text
 
 
-def test_create_nonexistent_risk_level(client_valid_access_token):
+def test_create_nonexistent_risk_level(client_valid_access_token, db):
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
     create = client_valid_access_token.post(
@@ -161,9 +162,9 @@ def test_create_nonexistent_risk_level(client_valid_access_token):
     assert "event_risk_level" in create.text
 
 
-def test_create_nonexistent_source(client_valid_access_token):
+def test_create_nonexistent_source(client_valid_access_token, db):
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
     create = client_valid_access_token.post("/api/event/", json={"source": "test", "name": "test", "status": "OPEN"})
@@ -178,9 +179,9 @@ def test_create_nonexistent_status(client_valid_access_token):
     assert "event_status" in create.text
 
 
-def test_create_nonexistent_type(client_valid_access_token):
+def test_create_nonexistent_type(client_valid_access_token, db):
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
     create = client_valid_access_token.post("/api/event/", json={"type": "test", "name": "test", "status": "OPEN"})
@@ -188,9 +189,9 @@ def test_create_nonexistent_type(client_valid_access_token):
     assert "event_type" in create.text
 
 
-def test_create_nonexistent_vectors(client_valid_access_token):
+def test_create_nonexistent_vectors(client_valid_access_token, db):
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
     create = client_valid_access_token.post("/api/event/", json={"vectors": ["test"], "name": "test", "status": "OPEN"})
@@ -202,9 +203,9 @@ def test_create_nonexistent_vectors(client_valid_access_token):
     "key,value",
     NONEXISTENT_FIELDS,
 )
-def test_create_nonexistent_node_fields(client_valid_access_token, key, value):
+def test_create_nonexistent_node_fields(client_valid_access_token, db, key, value):
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     create = client_valid_access_token.post("/api/event/", json={key: value, "name": "test", "status": "OPEN"})
     assert create.status_code == status.HTTP_404_NOT_FOUND
@@ -257,9 +258,9 @@ def test_create_nonexistent_node_fields(client_valid_access_token, key, value):
         ("uuid", str(uuid.uuid4())),
     ],
 )
-def test_create_valid_optional_fields(client_valid_access_token, key, value):
+def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create the object
     create = client_valid_access_token.post("/api/event/", json={key: value, "name": "test", "status": "OPEN"})
@@ -275,26 +276,12 @@ def test_create_valid_optional_fields(client_valid_access_token, key, value):
         assert get.json()[key] == value
 
 
-def test_create_valid_owner(client_valid_access_token):
-    # Create an alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-
-    # Create a user role
-    client_valid_access_token.post("/api/user/role/", json={"value": "test_role"})
-
+def test_create_valid_owner(client_valid_access_token, db):
     # Create a user
-    create_json = {
-        "default_alert_queue": "test_queue",
-        "display_name": "John Doe",
-        "email": "john@test.com",
-        "password": "abcd1234",
-        "roles": ["test_role"],
-        "username": "johndoe",
-    }
-    client_valid_access_token.post("/api/user/", json=create_json)
+    helpers.create_user(username="johndoe", db=db)
 
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Use the user to create a new event
     create = client_valid_access_token.post("/api/event/", json={"owner": "johndoe", "name": "test", "status": "OPEN"})
@@ -305,10 +292,10 @@ def test_create_valid_owner(client_valid_access_token):
     assert get.json()["owner"]["username"] == "johndoe"
 
 
-def test_create_valid_prevention_tools(client_valid_access_token):
+def test_create_valid_prevention_tools(client_valid_access_token, db):
     # Create an event status and prevention tool
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
-    client_valid_access_token.post("/api/event/prevention_tool/", json={"value": "test"})
+    helpers.create_event_status(value="OPEN", db=db)
+    helpers.create_event_prevention_tool(value="test", db=db)
 
     # Use the prevention tool to create a new event
     create = client_valid_access_token.post(
@@ -321,10 +308,10 @@ def test_create_valid_prevention_tools(client_valid_access_token):
     assert get.json()["prevention_tools"][0]["value"] == "test"
 
 
-def test_create_valid_remediations(client_valid_access_token):
+def test_create_valid_remediations(client_valid_access_token, db):
     # Create an event status and remediation
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
-    client_valid_access_token.post("/api/event/remediation/", json={"value": "test"})
+    helpers.create_event_status(value="OPEN", db=db)
+    helpers.create_event_remediation(value="test", db=db)
 
     # Use the remediation to create a new event
     create = client_valid_access_token.post(
@@ -337,10 +324,10 @@ def test_create_valid_remediations(client_valid_access_token):
     assert get.json()["remediations"][0]["value"] == "test"
 
 
-def test_create_valid_risk_level(client_valid_access_token):
+def test_create_valid_risk_level(client_valid_access_token, db):
     # Create an event status and risk level
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
-    client_valid_access_token.post("/api/event/risk_level/", json={"value": "test"})
+    helpers.create_event_status(value="OPEN", db=db)
+    helpers.create_event_risk_level(value="test", db=db)
 
     # Use the risk level to create a new event
     create = client_valid_access_token.post(
@@ -353,10 +340,10 @@ def test_create_valid_risk_level(client_valid_access_token):
     assert get.json()["risk_level"]["value"] == "test"
 
 
-def test_create_valid_source(client_valid_access_token):
+def test_create_valid_source(client_valid_access_token, db):
     # Create an event status and source
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
-    client_valid_access_token.post("/api/event/source/", json={"value": "test"})
+    helpers.create_event_status(value="OPEN", db=db)
+    helpers.create_event_source(value="test", db=db)
 
     # Use the source to create a new event
     create = client_valid_access_token.post("/api/event/", json={"source": "test", "name": "test", "status": "OPEN"})
@@ -367,10 +354,10 @@ def test_create_valid_source(client_valid_access_token):
     assert get.json()["source"]["value"] == "test"
 
 
-def test_create_valid_type(client_valid_access_token):
+def test_create_valid_type(client_valid_access_token, db):
     # Create an event status and type
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
-    client_valid_access_token.post("/api/event/type/", json={"value": "test"})
+    helpers.create_event_status(value="OPEN", db=db)
+    helpers.create_event_type(value="test", db=db)
 
     # Use the type to create a new event
     create = client_valid_access_token.post("/api/event/", json={"type": "test", "name": "test", "status": "OPEN"})
@@ -381,10 +368,10 @@ def test_create_valid_type(client_valid_access_token):
     assert get.json()["type"]["value"] == "test"
 
 
-def test_create_valid_vectors(client_valid_access_token):
+def test_create_valid_vectors(client_valid_access_token, db):
     # Create an event status and vector
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
-    client_valid_access_token.post("/api/event/vector/", json={"value": "test"})
+    helpers.create_event_status(value="OPEN", db=db)
+    helpers.create_event_vector(value="test", db=db)
 
     # Use the vector to create a new event
     create = client_valid_access_token.post("/api/event/", json={"vectors": ["test"], "name": "test", "status": "OPEN"})
@@ -395,9 +382,9 @@ def test_create_valid_vectors(client_valid_access_token):
     assert get.json()["vectors"][0]["value"] == "test"
 
 
-def test_create_valid_required_fields(client_valid_access_token):
-    # Create an event status and remediation
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+def test_create_valid_required_fields(client_valid_access_token, db):
+    # Create an event status
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create the object
     create = client_valid_access_token.post("/api/event/", json={"name": "test", "status": "OPEN"})
@@ -414,14 +401,13 @@ def test_create_valid_required_fields(client_valid_access_token):
     "values",
     VALID_DIRECTIVES,
 )
-def test_create_valid_node_directives(client_valid_access_token, values):
-    # Create the directives. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
-    for value in list(set(values)):
-        client_valid_access_token.post("/api/node/directive/", json={"value": value})
+def test_create_valid_node_directives(client_valid_access_token, db, values):
+    # Create the directives
+    for value in values:
+        helpers.create_node_directive(value=value, db=db)
 
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create the node
     create = client_valid_access_token.post(
@@ -431,21 +417,20 @@ def test_create_valid_node_directives(client_valid_access_token, values):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["directives"]) == len(list(set(values)))
+    assert len(get.json()["directives"]) == len(set(values))
 
 
 @pytest.mark.parametrize(
     "values",
     VALID_TAGS,
 )
-def test_create_valid_node_tags(client_valid_access_token, values):
-    # Create the tags. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
-    for value in list(set(values)):
-        client_valid_access_token.post("/api/node/tag/", json={"value": value})
+def test_create_valid_node_tags(client_valid_access_token, db, values):
+    # Create the tags
+    for value in values:
+        helpers.create_node_tag(value=value, db=db)
 
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create the node
     create = client_valid_access_token.post("/api/event/", json={"tags": values, "name": "test", "status": "OPEN"})
@@ -453,21 +438,20 @@ def test_create_valid_node_tags(client_valid_access_token, values):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["tags"]) == len(list(set(values)))
+    assert len(get.json()["tags"]) == len(set(values))
 
 
 @pytest.mark.parametrize(
     "value",
     VALID_THREAT_ACTOR,
 )
-def test_create_valid_node_threat_actor(client_valid_access_token, value):
-    # Create the threat actor. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
+def test_create_valid_node_threat_actor(client_valid_access_token, db, value):
+    # Create the threat actor
     if value:
-        client_valid_access_token.post("/api/node/threat_actor/", json={"value": value})
+        helpers.create_node_threat_actor(value=value, db=db)
 
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create the node
     create = client_valid_access_token.post(
@@ -487,17 +471,13 @@ def test_create_valid_node_threat_actor(client_valid_access_token, value):
     "values",
     VALID_THREATS,
 )
-def test_create_valid_node_threats(client_valid_access_token, values):
-    # Create a threat type
-    client_valid_access_token.post("/api/node/threat/type/", json={"value": "test_type"})
-
-    # Create the threats. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
-    for value in list(set(values)):
-        client_valid_access_token.post("/api/node/threat/", json={"types": ["test_type"], "value": value})
+def test_create_valid_node_threats(client_valid_access_token, db, values):
+    # Create the threats
+    for value in values:
+        helpers.create_node_threat(value=value, types=["test_type"], db=db)
 
     # Create an event status
-    client_valid_access_token.post("/api/event/status/", json={"value": "OPEN"})
+    helpers.create_event_status(value="OPEN", db=db)
 
     # Create the node
     create = client_valid_access_token.post("/api/event/", json={"threats": values, "name": "test", "status": "OPEN"})
@@ -505,4 +485,4 @@ def test_create_valid_node_threats(client_valid_access_token, values):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["threats"]) == len(list(set(values)))
+    assert len(get.json()["threats"]) == len(set(values))

@@ -2,6 +2,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 """
 NOTE: There are no tests for the foreign key constraints. The DELETE endpoint will need to be updated once the endpoints
@@ -29,56 +31,21 @@ def test_delete_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_delete(client_valid_access_token):
+def test_delete(client_valid_access_token, db):
     # Create a node
-    node_uuid = str(uuid.uuid4())
-    node_create = client_valid_access_token.post("/api/analysis/", json={"uuid": node_uuid})
-
-    # Read the node back
-    get_node = client_valid_access_token.get(node_create.headers["Content-Location"])
-    initial_node_version = get_node.json()["version"]
-    assert get_node.json()["comments"] == []
-
-    # Create an alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-
-    # Create a user role
-    client_valid_access_token.post("/api/user/role/", json={"value": "test_role"})
-
-    # Create a user
-    create_json = {
-        "default_alert_queue": "test_queue",
-        "display_name": "John Doe",
-        "email": "john@test.com",
-        "password": "abcd1234",
-        "roles": ["test_role"],
-        "username": "johndoe",
-    }
-    client_valid_access_token.post("/api/user/", json=create_json)
+    node = helpers.create_analysis(db=db)
 
     # Create a comment
-    create_json = {
-        "node_uuid": node_uuid,
-        "user": "johndoe",
-        "uuid": str(uuid.uuid4()),
-        "value": "test",
-    }
-    create = client_valid_access_token.post("/api/node/comment/", json=create_json)
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read the node back
-    get_node = client_valid_access_token.get(node_create.headers["Content-Location"])
-    assert get_node.json()["version"] != initial_node_version
-    assert get_node.json()["comments"][0]["value"] == "test"
+    comment = helpers.create_node_comment(node=node, username="johndoe", value="test", db=db)
+    assert len(node.comments) == 1
 
     # Delete it
-    delete = client_valid_access_token.delete(create.headers["Content-Location"])
+    delete = client_valid_access_token.delete(f"/api/node/comment/{comment.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client_valid_access_token.get(f"/api/node/comment/{comment.uuid}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
     # And make sure the node no longer shows the comment
-    get_node = client_valid_access_token.get(node_create.headers["Content-Location"])
-    assert get_node.json()["comments"] == []
+    assert len(node.comments) == 0

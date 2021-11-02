@@ -3,6 +3,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 #
 # INVALID TESTS
@@ -33,53 +35,16 @@ def test_update_nonexistent_uuid(client_valid_access_token):
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_update_duplicate_node_uuid_value(client_valid_access_token):
+def test_update_duplicate_node_uuid_value(client_valid_access_token, db):
     # Create a node
-    node_uuid = str(uuid.uuid4())
-    node_create = client_valid_access_token.post("/api/analysis/", json={"uuid": node_uuid})
-
-    # Read the node back
-    get_node = client_valid_access_token.get(node_create.headers["Content-Location"])
-    assert get_node.json()["comments"] == []
-
-    # Create an alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-
-    # Create a user role
-    client_valid_access_token.post("/api/user/role/", json={"value": "test_role"})
-
-    # Create a user
-    create_json = {
-        "default_alert_queue": "test_queue",
-        "display_name": "John Doe",
-        "email": "john@test.com",
-        "password": "abcd1234",
-        "roles": ["test_role"],
-        "username": "johndoe",
-    }
-    client_valid_access_token.post("/api/user/", json=create_json)
+    node = helpers.create_analysis(db=db)
 
     # Create some comments
-    create_json = {
-        "node_uuid": node_uuid,
-        "user": "johndoe",
-        "uuid": str(uuid.uuid4()),
-        "value": "test",
-    }
-    create = client_valid_access_token.post("/api/node/comment/", json=create_json)
-    assert create.status_code == status.HTTP_201_CREATED
-
-    create2_json = {
-        "node_uuid": node_uuid,
-        "user": "johndoe",
-        "uuid": str(uuid.uuid4()),
-        "value": "test2",
-    }
-    create2 = client_valid_access_token.post("/api/node/comment/", json=create2_json)
-    assert create2.status_code == status.HTTP_201_CREATED
+    comment1 = helpers.create_node_comment(node=node, username="johndoe", value="test", db=db)
+    comment2 = helpers.create_node_comment(node=node, username="johndoe", value="test2", db=db)
 
     # Make sure you cannot update a comment on a node to one that already exists
-    update = client_valid_access_token.patch(create2.headers["Content-Location"], json={"value": create_json["value"]})
+    update = client_valid_access_token.patch(f"/api/node/comment/{comment2.uuid}", json={"value": comment1.value})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
@@ -88,52 +53,15 @@ def test_update_duplicate_node_uuid_value(client_valid_access_token):
 #
 
 
-def test_update(client_valid_access_token):
+def test_update(client_valid_access_token, db):
     # Create a node
-    node_uuid = str(uuid.uuid4())
-    node_create = client_valid_access_token.post("/api/analysis/", json={"uuid": node_uuid})
-
-    # Read the node back
-    get_node = client_valid_access_token.get(node_create.headers["Content-Location"])
-    initial_node_version = get_node.json()["version"]
-    assert get_node.json()["comments"] == []
-
-    # Create an alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
-
-    # Create a user role
-    client_valid_access_token.post("/api/user/role/", json={"value": "test_role"})
-
-    # Create a user
-    create_json = {
-        "default_alert_queue": "test_queue",
-        "display_name": "John Doe",
-        "email": "john@test.com",
-        "password": "abcd1234",
-        "roles": ["test_role"],
-        "username": "johndoe",
-    }
-    client_valid_access_token.post("/api/user/", json=create_json)
+    node = helpers.create_analysis(db=db)
 
     # Create a comment
-    create_json = {
-        "node_uuid": node_uuid,
-        "user": "johndoe",
-        "uuid": str(uuid.uuid4()),
-        "value": "test",
-    }
-    create = client_valid_access_token.post("/api/node/comment/", json=create_json)
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read the node back
-    get_node = client_valid_access_token.get(node_create.headers["Content-Location"])
-    assert get_node.json()["version"] != initial_node_version
-    assert get_node.json()["comments"][0]["value"] == "test"
+    comment = helpers.create_node_comment(node=node, username="johndoe", value="test", db=db)
+    assert node.comments[0].value == "test"
 
     # Update it
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={"value": "updated"})
+    update = client_valid_access_token.patch(f"/api/node/comment/{comment.uuid}", json={"value": "updated"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read the node back to make sure it shows the updated comment
-    get_node = client_valid_access_token.get(node_create.headers["Content-Location"])
-    assert get_node.json()["comments"][0]["value"] == "updated"
+    assert node.comments[0].value == "updated"

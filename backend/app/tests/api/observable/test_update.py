@@ -1,7 +1,11 @@
 import pytest
 import uuid
 
+from datetime import datetime
+from dateutil.parser import parse
 from fastapi import status
+
+from tests import helpers
 
 
 #
@@ -36,16 +40,13 @@ def test_update_invalid_uuid(client_valid_access_token):
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_update_duplicate_type_value(client_valid_access_token):
-    # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
-
+def test_update_duplicate_type_value(client_valid_access_token, db):
     # Create some observables
-    client_valid_access_token.post("/api/observable/", json={"type": "test_type", "value": "test"})
-    create = client_valid_access_token.post("/api/observable/", json={"type": "test_type", "value": "test2"})
+    obj1 = helpers.create_observable(type="test_type", value="test", db=db)
+    obj2 = helpers.create_observable(type="test_type", value="test2", db=db)
 
     # Ensure you cannot update an observable to have a duplicate type+value combination
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={"value": "test"})
+    update = client_valid_access_token.patch(f"/api/observable/{obj2.uuid}", json={"value": obj1.value})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
@@ -61,26 +62,18 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_update_valid_type(client_valid_access_token):
-    # Create some observable types
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type2"})
-
+def test_update_valid_type(client_valid_access_token, db):
     # Create the object
-    create = client_valid_access_token.post("/api/observable/", json={"type": "test_type", "value": "test"})
-    assert create.status_code == status.HTTP_201_CREATED
+    obj = helpers.create_observable(type="test_type", value="test", db=db)
+    assert obj.type.value == "test_type"
 
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["type"]["value"] == "test_type"
+    # Create a new observable type
+    helpers.create_observable_type(value="test_type2", db=db)
 
     # Update it
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={"type": "test_type2"})
+    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"type": "test_type2"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["type"]["value"] == "test_type2"
+    assert obj.type.value == "test_type2"
 
 
 @pytest.mark.parametrize(
@@ -99,35 +92,22 @@ def test_update_valid_type(client_valid_access_token):
         ("value", "test", "test"),
     ],
 )
-def test_update(client_valid_access_token, key, initial_value, updated_value):
-    # Create some observable types
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type2"})
-
+def test_update(client_valid_access_token, db, key, initial_value, updated_value):
     # Create the object
-    create_json = {"type": "test_type", "value": "test"}
-    create_json[key] = initial_value
-    create = client_valid_access_token.post("/api/observable/", json=create_json)
-    assert create.status_code == status.HTTP_201_CREATED
+    obj = helpers.create_observable(type="test_type", value="test", db=db)
 
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-
-    # If the test is for expires_on, make sure that the retrieved value matches the proper UTC timestamp
+    # Set the initial value
     if key == "expires_on" and initial_value:
-        assert get.json()[key] == "2022-01-01T00:00:00+00:00"
+        setattr(obj, key, datetime.utcfromtimestamp(initial_value))
     else:
-        assert get.json()[key] == initial_value
+        setattr(obj, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={key: updated_value})
+    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
 
     # If the test is for expires_on, make sure that the retrieved value matches the proper UTC timestamp
     if key == "expires_on" and updated_value:
-        assert get.json()[key] == "2022-01-01T00:00:00+00:00"
+        assert obj.expires_on == parse("2022-01-01T00:00:00+00:00")
     else:
-        assert get.json()[key] == updated_value
+        assert getattr(obj, key) == updated_value

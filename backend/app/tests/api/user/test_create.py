@@ -3,6 +3,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 #
 # INVALID TESTS
@@ -72,12 +74,12 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
         ("uuid"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, key):
+def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     # Create an alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
+    helpers.create_alert_queue(value="test_queue", db=db)
 
     # Create a user role
-    client_valid_access_token.post("/api/user/role/", json={"value": "test_role"})
+    helpers.create_user_role(value="test_role", db=db)
 
     # Create an object
     create1_json = {
@@ -140,12 +142,12 @@ def test_create_missing_required_fields(client_valid_access_token, key):
     "key,value",
     [("enabled", False), ("timezone", "America/New_York"), ("uuid", str(uuid.uuid4()))],
 )
-def test_create_valid_optional_fields(client_valid_access_token, key, value):
+def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
     # Create an alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
+    helpers.create_alert_queue(value="test_queue", db=db)
 
     # Create a user role
-    client_valid_access_token.post("/api/user/role/", json={"value": "test_role"})
+    helpers.create_user_role(value="test_role", db=db)
 
     # Create the object
     create_json = {
@@ -165,12 +167,12 @@ def test_create_valid_optional_fields(client_valid_access_token, key, value):
     assert get.json()[key] == value
 
 
-def test_create_valid_required_fields(client_valid_access_token):
+def test_create_valid_required_fields(client_valid_access_token, db):
     # Create an alert queue
-    client_valid_access_token.post("/api/alert/queue/", json={"value": "test_queue"})
+    helpers.create_alert_queue(value="test_queue", db=db)
 
     # Create a user role
-    client_valid_access_token.post("/api/user/role/", json={"value": "test_role"})
+    helpers.create_user_role(value="test_role", db=db)
 
     # Create the object
     create_json = {

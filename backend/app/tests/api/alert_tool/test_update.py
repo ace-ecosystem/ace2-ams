@@ -3,6 +3,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 #
 # INVALID TESTS
@@ -35,16 +37,13 @@ def test_update_invalid_uuid(client_valid_access_token):
         ("value"),
     ],
 )
-def test_update_duplicate_unique_fields(client_valid_access_token, key):
+def test_update_duplicate_unique_fields(client_valid_access_token, db, key):
     # Create some objects
-    create1_json = {"value": "test"}
-    client_valid_access_token.post("/api/alert/tool/", json=create1_json)
-
-    create2_json = {"value": "test2"}
-    create2 = client_valid_access_token.post("/api/alert/tool/", json=create2_json)
+    obj1 = helpers.create_alert_tool(value="test", db=db)
+    obj2 = helpers.create_alert_tool(value="test2", db=db)
 
     # Ensure you cannot update a unique field to a value that already exists
-    update = client_valid_access_token.patch(create2.headers["Content-Location"], json={key: create1_json[key]})
+    update = client_valid_access_token.patch(f"/api/alert/tool/{obj2.uuid}", json={key: getattr(obj1, key)})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
@@ -67,21 +66,14 @@ def test_update_nonexistent_uuid(client_valid_access_token):
         ("value", "test", "test"),
     ],
 )
-def test_update(client_valid_access_token, key, initial_value, updated_value):
+def test_update(client_valid_access_token, db, key, initial_value, updated_value):
     # Create the object
-    create_json = {"value": "test"}
-    create_json[key] = initial_value
-    create = client_valid_access_token.post("/api/alert/tool/", json=create_json)
-    assert create.status_code == status.HTTP_201_CREATED
+    obj = helpers.create_alert_tool(value="test", db=db)
 
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()[key] == initial_value
+    # Set the initial value
+    setattr(obj, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={key: updated_value})
+    update = client_valid_access_token.patch(f"/api/alert/tool/{obj.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()[key] == updated_value
+    assert getattr(obj, key) == updated_value

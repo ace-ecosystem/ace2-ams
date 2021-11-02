@@ -2,6 +2,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 """
 NOTE: There are no tests for the foreign key constraints. The DELETE endpoint will need to be updated once the endpoints
@@ -29,19 +31,18 @@ def test_delete_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_delete(client_valid_access_token):
+def test_delete(client_valid_access_token, db):
     # Create the object
-    create = client_valid_access_token.post("/api/node/threat_actor/", json={"value": "test"})
-    assert create.status_code == status.HTTP_201_CREATED
+    obj = helpers.create_node_threat_actor(value="test", db=db)
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client_valid_access_token.get(f"/api/node/threat_actor/{obj.uuid}")
     assert get.status_code == status.HTTP_200_OK
 
     # Delete it
-    delete = client_valid_access_token.delete(create.headers["Content-Location"])
+    delete = client_valid_access_token.delete(f"/api/node/threat_actor/{obj.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client_valid_access_token.get(f"/api/node/threat_actor/{obj.uuid}")
     assert get.status_code == status.HTTP_404_NOT_FOUND

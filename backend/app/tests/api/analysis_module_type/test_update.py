@@ -3,6 +3,9 @@ import pytest
 import uuid
 
 from fastapi import status
+from db.schemas.analysis_module_type import AnalysisModuleType
+
+from tests import helpers
 
 
 #
@@ -61,13 +64,13 @@ def test_update_invalid_uuid(client_valid_access_token):
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_update_duplicate_value_version(client_valid_access_token):
+def test_update_duplicate_value_version(client_valid_access_token, db):
     # Create some objects
-    client_valid_access_token.post("/api/analysis/module_type/", json={"value": "test", "version": "1.0.0"})
-    create = client_valid_access_token.post("/api/analysis/module_type/", json={"value": "test", "version": "1.0.1"})
+    helpers.create_analysis_module_type(value="test", version="1.0.0", db=db)
+    amt2 = helpers.create_analysis_module_type(value="test", version="1.0.1", db=db)
 
     # Ensure you cannot update an analysis module type to have a duplicate version+value combination
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={"version": "1.0.0"})
+    update = client_valid_access_token.patch(f"/api/analysis/module_type/{amt2.uuid}", json={"version": "1.0.0"})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
@@ -82,43 +85,43 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 
 
 @pytest.mark.parametrize(
-    "api_endpoint,key,values",
+    "key,values",
     [
-        ("/api/observable/type/", "observable_types", []),
-        ("/api/observable/type/", "observable_types", ["test"]),
-        ("/api/observable/type/", "observable_types", ["test1", "test2"]),
-        ("/api/observable/type/", "observable_types", ["test", "test"]),
-        ("/api/node/directive/", "required_directives", []),
-        ("/api/node/directive/", "required_directives", ["test"]),
-        ("/api/node/directive/", "required_directives", ["test1", "test2"]),
-        ("/api/node/directive/", "required_directives", ["test", "test"]),
-        ("/api/node/tag/", "required_tags", []),
-        ("/api/node/tag/", "required_tags", ["test"]),
-        ("/api/node/tag/", "required_tags", ["test1", "test2"]),
-        ("/api/node/tag/", "required_tags", ["test", "test"]),
+        ("observable_types", []),
+        ("observable_types", ["test"]),
+        ("observable_types", ["test1", "test2"]),
+        ("observable_types", ["test", "test"]),
+        ("required_directives", []),
+        ("required_directives", ["test"]),
+        ("required_directives", ["test1", "test2"]),
+        ("required_directives", ["test", "test"]),
+        ("required_tags", []),
+        ("required_tags", ["test"]),
+        ("required_tags", ["test1", "test2"]),
+        ("required_tags", ["test", "test"]),
     ],
 )
-def test_update_valid_list_fields(client_valid_access_token, api_endpoint, key, values):
-    # Create the analysis module type
-    create = client_valid_access_token.post("/api/analysis/module_type/", json={"value": "test", "version": "1.0.0"})
-    assert create.status_code == status.HTTP_201_CREATED
+def test_update_valid_list_fields(client_valid_access_token, db, key, values):
+    # Create an analysis module type
+    analysis_module_type = helpers.create_analysis_module_type(value="test_type", db=db)
 
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()[key]) == 0
+    # Create the objects
+    if key == "observable_types":
+        create_func = helpers.create_observable_type
+    elif key == "required_directives":
+        create_func = helpers.create_node_directive
+    else:
+        create_func = helpers.create_node_tag
 
-    # Create the objects. Need to only create unique values, otherwise the database will return a 409
-    # conflict exception and will roll back the test's database session (causing the test to fail).
-    for value in list(set(values)):
-        client_valid_access_token.post(api_endpoint, json={"value": value})
+    for value in values:
+        create_func(value=value, db=db)
 
     # Update it
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={key: values})
+    update = client_valid_access_token.patch(
+        f"/api/analysis/module_type/{analysis_module_type.uuid}", json={key: values}
+    )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()[key]) == len(list(set(values)))
+    assert len(getattr(analysis_module_type, key)) == len(set(values))
 
 
 @pytest.mark.parametrize(
@@ -136,31 +139,20 @@ def test_update_valid_list_fields(client_valid_access_token, api_endpoint, key, 
         ("version", "1.0.0", "1.0.0"),
     ],
 )
-def test_update(client_valid_access_token, key, initial_value, updated_value):
-    # Create the object
-    create_json = {"value": "test", "version": "1.0.0"}
-    create_json[key] = initial_value
-    create = client_valid_access_token.post("/api/analysis/module_type/", json=create_json)
-    assert create.status_code == status.HTTP_201_CREATED
+def test_update(client_valid_access_token, db, key, initial_value, updated_value):
+    # Create an analysis module type
+    analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-
-    # If the test is for extended_version, make sure the JSON form of the supplied string matches
-    if key == "extended_version" and initial_value:
-        assert get.json()[key] == json.loads(initial_value)
-    else:
-        assert get.json()[key] == initial_value
+    # Set the initial value
+    setattr(analysis_module_type, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(create.headers["Content-Location"], json={key: updated_value})
+    update = client_valid_access_token.patch(
+        f"/api/analysis/module_type/{analysis_module_type.uuid}", json={key: updated_value}
+    )
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-
-    # If the test is for extended_version, make sure the JSON form of the supplied string matches
     if key == "extended_version":
-        assert get.json()[key] == json.loads(updated_value)
+        assert analysis_module_type.extended_version == json.loads(updated_value)
     else:
-        assert get.json()[key] == updated_value
+        assert getattr(analysis_module_type, key) == updated_value

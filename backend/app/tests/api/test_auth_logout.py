@@ -1,6 +1,6 @@
 from fastapi import status
 
-from tests.helpers import create_test_user
+from tests import helpers
 
 
 #
@@ -9,7 +9,7 @@ from tests.helpers import create_test_user
 
 
 def test_auth_logout_success(client, db):
-    create_test_user(db, "johndoe", "abcd1234")
+    helpers.create_user(username="johndoe", password="abcd1234", db=db)
 
     # Attempt to authenticate
     auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})

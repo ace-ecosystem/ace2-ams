@@ -3,6 +3,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 #
 # INVALID TESTS
@@ -44,9 +46,9 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
         ("uuid"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, key):
+def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    helpers.create_observable_type(value="test_type", db=db)
 
     # Create an object
     create1_json = {"type": "test_type", "uuid": str(uuid.uuid4()), "value": "test"}
@@ -59,9 +61,9 @@ def test_create_duplicate_unique_fields(client_valid_access_token, key):
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
-def test_create_duplicate_type_value(client_valid_access_token):
+def test_create_duplicate_type_value(client_valid_access_token, db):
     # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    helpers.create_observable_type(value="test_type", db=db)
 
     # Create an object
     client_valid_access_token.post("/api/observable/", json={"type": "test_type", "value": "test"})
@@ -109,9 +111,9 @@ def test_create_nonexistent_type(client_valid_access_token):
         ("uuid", str(uuid.uuid4())),
     ],
 )
-def test_create_valid_optional_fields(client_valid_access_token, key, value):
+def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
     # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    helpers.create_observable_type(value="test_type", db=db)
 
     # Create the object
     create = client_valid_access_token.post("/api/observable/", json={key: value, "type": "test_type", "value": "test"})
@@ -127,9 +129,9 @@ def test_create_valid_optional_fields(client_valid_access_token, key, value):
         assert get.json()[key] == value
 
 
-def test_create_valid_required_fields(client_valid_access_token):
+def test_create_valid_required_fields(client_valid_access_token, db):
     # Create an observable type
-    client_valid_access_token.post("/api/observable/type/", json={"value": "test_type"})
+    helpers.create_observable_type(value="test_type", db=db)
 
     # Create the object
     create = client_valid_access_token.post("/api/observable/", json={"type": "test_type", "value": "test"})
