@@ -6,4 +6,5 @@ set -a
 source "$ACE2_ENV_PATH"
 set +a
 
-docker-compose -f docker-compose.yml down
+docker-compose up -d
+docker exec ace2-ams-gui npm run test:e2e
