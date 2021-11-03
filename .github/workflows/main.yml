@@ -82,5 +82,5 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           start: npm run production
-          wait-on: "http://localhost:8080, http://localhost:8888"
+          wait-on: "http://localhost:8080"
           working-directory: frontend
