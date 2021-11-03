@@ -7,4 +7,4 @@ source "$ACE2_ENV_PATH"
 set +a
 
 bin/stop-dev-container.sh
-docker-compose -f backend/docker-compose.yml up -d
+docker-compose -f docker-compose.yml up -d
