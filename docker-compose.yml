@@ -15,20 +15,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
 
-  gui:
-    depends_on:
-      - api
-    container_name: ace2-ams-gui
-    build:
-      context: ./frontend
-      dockerfile: ./Dockerfile.dev
-    ports:
-      - 7777:8080
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: bash -c 'while !</dev/tcp/api/80; do sleep 1; done; npm run serve'
-
   api:
     depends_on:
       - db
@@ -49,10 +35,26 @@ services:
       - JWT_REFRESH_EXPIRE_SECONDS=${JWT_REFRESH_EXPIRE_SECONDS}
       - JWT_SECRET=${JWT_SECRET}
     ports:
-      - 8888:80
+      - 7777:80
     volumes:
       - ./backend/app:/app
     command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; /start-reload.sh'
+
+  gui:
+    depends_on:
+      - api
+    container_name: ace2-ams-gui
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile.dev
+    environment:
+      - VUE_APP_BACKEND_URL=http://localhost:7777/api
+    ports:
+      - 8888:8080
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: bash -c 'while !</dev/tcp/api/80; do sleep 1; done; npm run serve'
 
 volumes:
   postgres_data:
