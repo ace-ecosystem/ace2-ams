@@ -9,4 +9,5 @@ set +a
 # Remove the leading app/ from the command line argument so the path works inside of the container.
 new_path=${1#backend/app/}
 
-docker-compose -f backend/docker-compose.yml run -e TESTING=1 api pytest "$new_path" -vv
+docker-compose up -d
+docker exec -e TESTING=1 ace2-ams-api pytest "$new_path" -vv

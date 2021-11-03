@@ -31,10 +31,10 @@ source "$ACE2_ENV_PATH"
 set +a
 
 # Destroy the existing development environment
-docker-compose -f docker-compose.yml down -v
+docker-compose down -v
 
 # Build the new development environment
-docker-compose -f docker-compose.yml build
+docker-compose build
 
 # Start the development environment
-docker-compose -f docker-compose.yml up -d
+docker-compose up -d
