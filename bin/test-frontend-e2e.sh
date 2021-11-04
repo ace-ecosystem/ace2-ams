@@ -7,4 +7,4 @@ source "$ACE2_ENV_PATH"
 set +a
 
 docker-compose up -d
-docker exec ace2-ams-gui npm run test:e2e
+docker exec ace2-ams-gui npx cypress run --headless
