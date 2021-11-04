@@ -31,6 +31,7 @@
           />
 
           <Button
+            id="submit"
             label="Log In"
             icon="pi pi-user"
             class="w-full"
