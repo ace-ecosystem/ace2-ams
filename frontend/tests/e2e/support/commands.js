@@ -26,10 +26,14 @@
 
 Cypress.Commands.add("login", () => {
   cy.visit("/login");
-  const formData = new FormData();
-  formData.append("username", "analyst");
-  formData.append("password", "analyst");
-  cy.request("POST", "/api/auth", formData);
+  cy.get("div[name='loginForm']").should("be.visible");
+  cy.get("#username").should("be.visible").type("analyst");
+  cy.get("#password").should("be.visible").type("analyst");
+  cy.get("#submit").should("be.visible").click();
+  cy.url().should("contain", "/manage");
+  cy.getCookie("access_token").should("exist");
+  cy.getCookie("refresh_token").should("exist");
+  cy.getCookies().should("have.length", 2);
 });
 
 Cypress.Commands.add("addFormObservable", () => {
