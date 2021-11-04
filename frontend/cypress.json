@@ -7,5 +7,5 @@
   "supportFile": "tests/e2e/support/index.js",
   "testFiles": "**/*.spec.js",
   "componentFolder": "src",
-  "baseUrl": "http://localhost:8080"
+  "baseUrl": "http://ace2-ams:8080"
 }

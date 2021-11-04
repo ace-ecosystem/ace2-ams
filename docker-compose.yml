@@ -34,8 +34,6 @@ services:
       - JWT_ALGORITHM=${JWT_ALGORITHM}
       - JWT_REFRESH_EXPIRE_SECONDS=${JWT_REFRESH_EXPIRE_SECONDS}
       - JWT_SECRET=${JWT_SECRET}
-    ports:
-      - 7777:80
     volumes:
       - ./backend/app:/app
     command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; /start-reload.sh'
@@ -48,13 +46,23 @@ services:
       context: ./frontend
       dockerfile: ./Dockerfile.dev
     environment:
-      - VUE_APP_BACKEND_URL=http://localhost:7777/api
-    ports:
-      - 8080:8080
+      - VUE_APP_BACKEND_URL=http://ace2-ams:7777/api
+
     volumes:
       - ./frontend:/app
       - /app/node_modules
     command: bash -c 'while !</dev/tcp/api/80; do sleep 1; done; npm run serve'
+
+  ace2-ams:
+    depends_on:
+      - gui
+    container_name: ace2-ams
+    build:
+      context: ./nginx
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8080
+      - 7777:7777
 
 volumes:
   postgres_data:
