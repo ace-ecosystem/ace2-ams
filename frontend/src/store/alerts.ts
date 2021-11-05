@@ -71,6 +71,7 @@ const store = {
               eventTime: alert.eventTime,
               insertTime: alert.insertTime,
               name: alert.name ? alert.name : "Unnamed",
+              observables: alert.analysis.discoveredObservableUuids,
               owner: alert.owner ? alert.owner.value : "None",
               queue: alert.queue.value,
               tags: alert.tags,

@@ -14,14 +14,14 @@
     :resizable-columns="true"
     :rows="10"
     :rows-per-page-options="[5, 10, 50]"
-    :sort-order="1"
+    :sort-order="-1"
     column-resize-mode="expand"
     current-page-report-template="Showing {first} to {last} of {totalRecords}"
     data-key="uuid"
     paginator-template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
     removable-sort
     responsive-layout="scroll"
-    sort-field="name"
+    sort-field="eventTime"
     name="AlertsTable"
     @rowSelect="alertSelect($event.data)"
     @rowUnselect="alertUnselect($event.data)"
@@ -104,7 +104,7 @@
       <h5>Observables:</h5>
       <ul>
         <li v-for="obs of slotProps.data.observables" :key="obs.value">
-          {{ obs.type }} - {{ obs.value }}
+          {{ obs }}
         </li>
       </ul>
     </template>
