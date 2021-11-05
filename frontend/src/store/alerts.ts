@@ -1,6 +1,6 @@
-import alert from "@/services/api/alerts";
-import { AlertRead } from "@/models/alert";
+import alertApi from "@/services/api/alerts";
 import { CommitFunction } from "@/store/index";
+import { alert } from "@/models/alert";
 import { UUID } from "@/models/base";
 
 const store = {
@@ -15,16 +15,14 @@ const store = {
     queriedAlerts: [],
   },
   getters: {
-    openAlert: (state: { openAlert: AlertRead }) => state.openAlert,
+    openAlert: (state: { openAlert: alert }) => state.openAlert,
+    queriedAlerts: (state: { queriedAlerts: alert[] }) => state.queriedAlerts,
   },
   mutations: {
-    SET_OPEN_ALERT(state: { openAlert: AlertRead | null }, alert: AlertRead) {
+    SET_OPEN_ALERT(state: { openAlert: alert | null }, alert: alert) {
       state.openAlert = alert;
     },
-    SET_QUERIED_ALERTS(
-      state: { queriedAlerts: AlertRead[] },
-      alerts: AlertRead[],
-    ) {
+    SET_QUERIED_ALERTS(state: { queriedAlerts: alert[] }, alerts: alert[]) {
       state.queriedAlerts = alerts;
     },
     SET_QUERY_TIMESTAMP(state: { lastQueriedAlertsTime: number | null }) {
@@ -33,8 +31,8 @@ const store = {
   },
 
   actions: {
-    createAlert({ commit }: CommitFunction, newAlert: Record<string, unknown>) {
-      return alert
+    createAlert({ commit }: CommitFunction, newAlert: any) {
+      alertApi
         .create(newAlert)
         .then((alert) => {
           commit("SET_OPEN_ALERT", alert);
@@ -43,8 +41,8 @@ const store = {
           throw error;
         });
     },
-    openAlert({ commit }: CommitFunction, alertUUID: UUID) {
-      return alert
+    getSingle({ commit }: CommitFunction, alertUUID: UUID) {
+      alertApi
         .getSingle(alertUUID)
         .then((alert) => {
           commit("SET_OPEN_ALERT", alert);
@@ -53,11 +51,49 @@ const store = {
           throw error;
         });
     },
+    getAll({ commit }: CommitFunction, options: any) {
+      alertApi
+        .getAll(options)
+        .then((alerts) => {
+          const parsedAlerts = [];
+          for (const index in alerts.items) {
+            const alert = alerts.items[index];
+            const parsedAlert = {
+              comments: alert.comments,
+              disposition: alert.disposition ? alert.disposition.value : "OPEN",
+              dispositionTime: alert.dispositionTime
+                ? alert.dispositionTime
+                : null,
+              dispositionUser: alert.dispositionUser
+                ? alert.dispositionUser.value
+                : "None",
+              eventTime: alert.eventTime,
+              insertTime: alert.insertTime,
+              name: alert.name ? alert.name : "Unnamed",
+              owner: alert.owner ? alert.owner.value : "None",
+              queue: alert.queue.value,
+              tags: alert.tags,
+              tool: alert.tool ? alert.tool.value : "None",
+              type: alert.type ? alert.type.value : "None",
+              uuid: alert.uuid,
+            };
+            parsedAlerts.push(parsedAlert);
+          }
+          commit("SET_QUERIED_ALERTS", parsedAlerts);
+        })
+        .catch((error) => {
+          throw error;
+        });
+    },
     updateAlert(
       { commit }: CommitFunction,
-      payload: { oldAlertUUID: UUID; updateData: Record<string, unknown> },
+      payload: { oldAlertUUID: UUID; updateData: any },
     ) {
-      return alert
+      // once we get around to updating alerts, we will need to update the base api service to have a
+      // 'getAfterUpdate' option like there is for 'create'
+      // then we can reset the open/queried alert(s)
+      //  might need to hadd some options to the vuex portion for that.. idk its down the road
+      alertApi
         .updateSingle(payload.updateData, payload.oldAlertUUID)
         .catch((error) => {
           throw error;
@@ -65,19 +101,19 @@ const store = {
     },
     updateAlerts(
       { commit }: CommitFunction,
-      payload: { oldAlertUUIDs: UUID[]; updateData: Record<string, unknown> },
+      payload: { oldAlertUUIDs: UUID[]; updateData: any },
     ) {
       // I have no idea if this is the right way to do this
       // but basically pushing all the requests to update into an array
       const promises = [];
       for (let i = 0; i < payload.oldAlertUUIDs.length; i++) {
         promises.push(
-          alert.updateSingle(payload.updateData, payload.oldAlertUUIDs[i]),
+          alertApi.updateSingle(payload.updateData, payload.oldAlertUUIDs[i]),
         );
       }
 
       // and then all of those requests are resolved here
-      return Promise.all(promises).catch((error) => {
+      Promise.all(promises).catch((error) => {
         throw error;
       });
 
