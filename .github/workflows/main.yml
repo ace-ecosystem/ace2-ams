@@ -91,4 +91,4 @@ jobs:
         run: docker-compose up -d
 
       - name: E2E tests
-        run: docker-compose run gui npx cypress run --headless
+        run: docker-compose run gui npx cypress run --headless --config video=false,screenshotOnRunFailure=false
