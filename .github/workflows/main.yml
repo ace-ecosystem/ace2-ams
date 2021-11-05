@@ -70,13 +70,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-
       - name: Build and Run
-        run: docker-compose build && docker-compose up -d
+        run: docker-compose up -d
 
       - name: E2E tests
-        run: docker run ace2-ams-gui npx cypress run --headless
+        run: docker run --network container:ace2-ams-gui npx cypress run --headless
