@@ -84,13 +84,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Add hosts to /etc/hosts
-        run: sudo echo "127.0.0.1 ace2-ams" | sudo tee -a /etc/hosts
+      - name: Run environment
+        run: docker-compose up -d
 
-      - name: E2E tests
-        uses: cypress-io/github-action@v2
-        with:
-          build: docker-compose build
-          start: docker-compose up -d
-          wait-on: "http://ace2-ams:8080"
-          working-directory: frontend
+      - name: List containers
+        run: docker container list
+
+      # - name: Add hosts to /etc/hosts
+      #   run: sudo echo "127.0.0.1 ace2-ams" | sudo tee -a /etc/hosts
+      #
+      # - name: E2E tests
+      #   uses: cypress-io/github-action@v2
+      #   with:
+      #     build: docker-compose build
+      #     start: docker-compose up -d
+      #     wait-on: "http://ace2-ams:8080"
+      #     working-directory: frontend
