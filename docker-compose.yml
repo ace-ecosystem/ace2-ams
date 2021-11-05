@@ -50,7 +50,6 @@ services:
       dockerfile: ./Dockerfile.dev
     environment:
       - VUE_APP_BACKEND_URL=http://ace2-ams:8080/api/
-
     volumes:
       - ./frontend:/app
       - /app/node_modules
