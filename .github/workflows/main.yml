@@ -75,12 +75,8 @@ jobs:
         with:
           node-version: "16"
 
-      - name: Build and Run Backend
-        run: docker-compose up -d --build api
+      - name: Build and Run Environment
+        run: docker-compose up -d --build
 
       - name: E2E tests
-        uses: cypress-io/github-action@v2
-        with:
-          start: npm run production
-          wait-on: "http://localhost:8080"
-          working-directory: frontend
+        run: docker exec ace2-ams-gui npx cypress run --headless
