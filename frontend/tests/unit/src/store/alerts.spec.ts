@@ -176,7 +176,7 @@ describe("alerts Actions", () => {
     await expect(store.dispatch("createAlert")).rejects.toEqual(
       new Error("Request failed with status code 403"),
     );
-    await expect(store.dispatch("openAlert")).rejects.toEqual(
+    await expect(store.dispatch("getSingle")).rejects.toEqual(
       new Error("Request failed with status code 403"),
     );
     await expect(
