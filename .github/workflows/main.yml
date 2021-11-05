@@ -90,6 +90,9 @@ jobs:
       - name: List containers
         run: docker container list
 
+      - name: API ping
+        run: docker exec ace2-ams-gui curl http://ace2-ams:8080/api/ping
+
       - name: E2E tests
         run: docker exec -e DEBUG=cypress:* ace2-ams-gui npx cypress run --headless --config video=false,screenshotOnRunFailure=false
 
