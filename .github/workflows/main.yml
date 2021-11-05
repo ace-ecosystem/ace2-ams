@@ -91,7 +91,7 @@ jobs:
         run: docker container list
 
       - name: E2E tests
-        run: docker exec ace2-ams-gui npx cypress run --headless --config video=false,screenshotOnRunFailure=false
+        run: docker exec -e DEBUG=cypress:* ace2-ams-gui npx cypress run --headless --config video=false,screenshotOnRunFailure=false
 
       # - name: Add hosts to /etc/hosts
       #   run: sudo echo "127.0.0.1 ace2-ams" | sudo tee -a /etc/hosts
