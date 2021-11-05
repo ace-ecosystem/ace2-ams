@@ -75,8 +75,8 @@ jobs:
         with:
           node-version: "16"
 
-      - name: Build
-        run: docker-compose build
+      - name: Build and Run
+        run: docker-compose build && docker-compose up -d
 
       - name: E2E tests
         run: docker run ace2-ams-gui npx cypress run --headless
