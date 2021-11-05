@@ -25,8 +25,7 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
 Cypress.Commands.add("login", () => {
-  let headers = null;
-  let body = null;
+  cy.intercept("POST", "/api/auth").as("auth");
 
   cy.visit("/login");
   cy.get("div[name='loginForm']").should("be.visible");
@@ -34,6 +33,14 @@ Cypress.Commands.add("login", () => {
   cy.get("#password").should("be.visible").type("analyst");
   cy.get("#submit").should("be.visible").click();
   cy.url().should("contain", "/manage");
+
+  cy.wait("@auth").then((xhr) => {
+    cy.log(xhr.request.headers);
+    cy.log(xhr.request.body);
+    cy.task("log", xhr.request.headers);
+    cy.task("log", xhr.request.body);
+  });
+
   cy.getCookie("access_token").should("exist");
   cy.getCookie("refresh_token").should("exist");
   cy.getCookies().should("have.length", 2);
