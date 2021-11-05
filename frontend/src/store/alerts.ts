@@ -31,18 +31,19 @@ const store = {
   },
 
   actions: {
-    createAlert({ commit }: CommitFunction, newAlert: any) {
-      alertApi
+    async createAlert({ commit }: CommitFunction, newAlert: any) {
+      await alertApi
         .create(newAlert)
         .then((alert) => {
+          console.log(alert);
           commit("SET_OPEN_ALERT", alert);
         })
         .catch((error) => {
           throw error;
         });
     },
-    getSingle({ commit }: CommitFunction, alertUUID: UUID) {
-      alertApi
+    async getSingle({ commit }: CommitFunction, alertUUID: UUID) {
+      await alertApi
         .getSingle(alertUUID)
         .then((alert) => {
           commit("SET_OPEN_ALERT", alert);
@@ -51,8 +52,8 @@ const store = {
           throw error;
         });
     },
-    getAll({ commit }: CommitFunction, options: any) {
-      alertApi
+    async getAll({ commit }: CommitFunction, options: any) {
+      await alertApi
         .getAll(options)
         .then((alerts) => {
           const parsedAlerts = [];
@@ -85,7 +86,7 @@ const store = {
           throw error;
         });
     },
-    updateAlert(
+    async updateAlert(
       { commit }: CommitFunction,
       payload: { oldAlertUUID: UUID; updateData: any },
     ) {
@@ -93,13 +94,13 @@ const store = {
       // 'getAfterUpdate' option like there is for 'create'
       // then we can reset the open/queried alert(s)
       //  might need to hadd some options to the vuex portion for that.. idk its down the road
-      alertApi
+      await alertApi
         .updateSingle(payload.updateData, payload.oldAlertUUID)
         .catch((error) => {
           throw error;
         });
     },
-    updateAlerts(
+    async updateAlerts(
       { commit }: CommitFunction,
       payload: { oldAlertUUIDs: UUID[]; updateData: any },
     ) {
@@ -113,7 +114,7 @@ const store = {
       }
 
       // and then all of those requests are resolved here
-      Promise.all(promises).catch((error) => {
+      await Promise.all(promises).catch((error) => {
         throw error;
       });
 
