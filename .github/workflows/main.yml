@@ -71,7 +71,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build
-        run: docker-compose build gui
+        run: docker-compose build
+
+      - name: Run
+        run: docker-compose up -d
 
       - name: E2E tests
-        run: docker-compose run gui npx cypress run --headless
+        run: docker-compose exec gui npx cypress run --headless
