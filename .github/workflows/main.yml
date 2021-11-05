@@ -66,6 +66,20 @@ jobs:
     name: End-to-End
     runs-on: ubuntu-latest
 
+    env:
+      DOCKER_BUILDKIT: 1
+      COMPOSE_DOCKER_CLI_BUILD: 1
+      COOKIES_SAMESITE: lax
+      COOKIES_SECURE: False
+      JWT_ACCESS_EXPIRE_SECONDS: 900
+      JWT_ALGORITHM: HS256
+      JWT_REFRESH_EXPIRE_SECONDS: 43200
+      JWT_SECRET: supersecret
+      POSTGRES_DB: ace
+      POSTGRES_USER: ace
+      POSTGRES_PASSWORD: supersecret
+      DATABASE_URL: postgresql://ace:supersecret@db:5432/ace
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -77,4 +91,4 @@ jobs:
         run: docker-compose up -d
 
       - name: E2E tests
-        run: docker-compose exec gui npx cypress run --headless
+        run: docker-compose run gui npx cypress run --headless
