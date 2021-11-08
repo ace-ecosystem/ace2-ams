@@ -97,3 +97,6 @@ jobs:
 
       - name: FastAPI logs
         run: docker logs ace2-ams-api
+
+      - name: Database logs
+        run: docker logs ace2-ams-db
