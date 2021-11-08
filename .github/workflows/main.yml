@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      ACE_DEV: true
       DOCKER_BUILDKIT: 1
       COMPOSE_DOCKER_CLI_BUILD: 1
       COOKIES_SAMESITE: lax
@@ -66,21 +67,36 @@ jobs:
     name: End-to-End
     runs-on: ubuntu-latest
 
+    env:
+      ACE_DEV: true
+      DOCKER_BUILDKIT: 1
+      COMPOSE_DOCKER_CLI_BUILD: 1
+      COOKIES_SAMESITE: lax
+      COOKIES_SECURE: False
+      JWT_ACCESS_EXPIRE_SECONDS: 900
+      JWT_ALGORITHM: HS256
+      JWT_REFRESH_EXPIRE_SECONDS: 43200
+      JWT_SECRET: supersecret
+      POSTGRES_DB: ace
+      POSTGRES_USER: ace
+      POSTGRES_PASSWORD: supersecret
+      DATABASE_URL: postgresql://ace:supersecret@db:5432/ace
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-
-      - name: Build and Run Backend
-        run: docker-compose up -d --build api
+      - name: Run environment
+        run: docker-compose up -d
 
       - name: E2E tests
-        uses: cypress-io/github-action@v2
-        with:
-          start: npm run production
-          wait-on: "http://localhost:8080"
-          working-directory: frontend
+        run: docker exec ace2-ams-gui npx cypress run --headless --config video=false,screenshotOnRunFailure=false
+
+      - name: Nginx logs
+        run: docker logs ace2-ams
+
+      - name: FastAPI logs
+        run: docker logs ace2-ams-api
+
+      - name: Database logs
+        run: docker logs ace2-ams-db
