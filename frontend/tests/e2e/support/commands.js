@@ -33,34 +33,9 @@ Cypress.Commands.add("login", () => {
   cy.get("#password").should("be.visible").type("analyst");
   cy.get("#submit").should("be.visible").click();
   cy.url().should("contain", "/manage");
-
-  cy.wait("@auth").then((xhr) => {
-    cy.log(xhr.request.headers);
-    cy.log(xhr.request.body);
-    cy.task("log", xhr.request.headers);
-    cy.task("log", xhr.request.body);
-
-    cy.log(xhr.response.headers);
-    cy.log(xhr.response.statusMessage);
-    cy.log(xhr.response.body);
-    cy.task("log", xhr.response.headers);
-    cy.task("log", xhr.response.statusMessage);
-    cy.task("log", xhr.response.body);
-  });
-
   cy.getCookie("access_token").should("exist");
   cy.getCookie("refresh_token").should("exist");
   cy.getCookies().should("have.length", 2);
-
-  // cy.intercept("/api/auth", (req) => {
-  //   req.continue((res) => {
-  //     headers = res.headers;
-  //     body = res.body;
-  //   });
-  // });
-
-  // cy.log(headers);
-  // cy.log(body);
 });
 
 Cypress.Commands.add("addFormObservable", () => {
