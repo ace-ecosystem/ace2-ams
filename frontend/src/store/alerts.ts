@@ -69,7 +69,7 @@ const store = {
           for (const index in alerts.items) {
             const alert = alerts.items[index];
             const parsedAlert = {
-              comments: alert.comments,
+              comments: alert.comments ? alert.comments : [],
               disposition: alert.disposition ? alert.disposition.value : "OPEN",
               dispositionTime: alert.dispositionTime
                 ? alert.dispositionTime
@@ -77,15 +77,17 @@ const store = {
               dispositionUser: alert.dispositionUser
                 ? alert.dispositionUser.value
                 : "None",
-              eventTime: alert.eventTime,
-              insertTime: alert.insertTime,
+              eventTime: alert.eventTime ? alert.name : null,
+              insertTime: alert.insertTime ? alert.name : null,
               name: alert.name ? alert.name : "Unnamed",
-              observables: alert.analysis.discoveredObservableUuids,
+              observables: alert.analysis
+                ? alert.analysis.discoveredObservableUuids
+                : [],
               owner: alert.owner ? alert.owner.value : "None",
-              queue: alert.queue.value,
-              tags: alert.tags,
+              queue: alert.queue ? alert.queue.value : "None",
+              tags: alert.tags ? alert.tags : [],
               tool: alert.tool ? alert.tool.value : "None",
-              type: alert.type ? alert.type.value : "None",
+              type: alert.type ? alert.type : "",
               uuid: alert.uuid,
             };
             parsedAlerts.push(parsedAlert);

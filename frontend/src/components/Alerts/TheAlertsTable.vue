@@ -52,7 +52,7 @@
           <Button
             icon="pi pi-refresh"
             class="p-button-rounded p-m-1"
-            @click="resetAlertTable()"
+            @click="reset()"
           />
           <!--            EXPORT TABLE -->
           <Button
@@ -154,6 +154,7 @@
         defaultColumns: ["eventTime", "name", "owner", "disposition"],
 
         expandedRows: [],
+        error: null,
         isLoading: false,
         selectedColumns: null,
         selectedRows: null,
@@ -163,43 +164,40 @@
     computed: {
       ...mapGetters({
         alerts: "alerts/queriedAlerts",
+        selectedAlerts: "selectedAlerts/selected",
       }),
     },
 
     async created() {
-      this.resetAlertTable();
-      // this is where we can query for alerts to show
-      this.loadAlerts();
+      this.reset();
+      await this.loadAlerts();
     },
 
     methods: {
-      alertSelect(alert) {
-        this.$store.dispatch("selectedAlerts/select", alert.uuid);
-      },
-
-      alertUnselect(alert) {
-        this.$store.dispatch("selectedAlerts/unselect", alert.uuid);
-      },
+      ...mapActions({
+        alertSelect: "selectedAlerts/select",
+        alertUnselect: "selectedAlerts/selectAll",
+        alertUnselectAll: "selectedAlerts/unselectAll",
+        selectAll: "selectedAlerts/selectAll",
+        getAllAlerts: "alerts/getAll",
+      }),
 
       alertSelectAll() {
         let allAlertUuids = [];
         for (let i = 0; i < this.alerts.length; i++) {
           allAlertUuids.push(this.alerts[i].uuid);
         }
-        this.$store.dispatch("selectedAlerts/selectAll", allAlertUuids);
+        this.selectAll(allAlertUuids);
       },
 
-      alertUnselectAll() {
-        this.$store.dispatch("selectedAlerts/unselectAll");
-      },
-
-      resetAlertTable() {
+      reset() {
         // Sets the alert table selected columns and keyword search back to default
         this.initAlertTable();
         this.selectedColumns = [];
         this.selectedColumns = this.columns.filter((column) => {
           return this.defaultColumns.includes(column.field);
         });
+        this.error = null;
       },
 
       initAlertTable() {
@@ -211,6 +209,7 @@
 
       onColumnToggle(value) {
         // Toggles selected columns to display
+        // This method required/provided by Primevue 'ColToggle' docs
         this.selectedColumns = this.columns.filter((col) =>
           value.includes(col),
         );
@@ -224,7 +223,7 @@
       async loadAlerts() {
         this.isLoading = true;
         try {
-          await this.$store.dispatch("alerts/getAll");
+          await this.getAllAlerts();
         } catch (error) {
           this.error = error.message || "Something went wrong!";
         }
