@@ -1,3 +1,6 @@
+// WARNING!! These tests are running under the assumption that it is a freshly reset container and AnalyzeAlert.spec.js has successfully completed ONE time.
+// Need to add some setup/teardown utilities in order to decouple these tests.
+
 describe("TheAlertsTable.vue", () => {
   before(() => {
     cy.log("logging in");
@@ -145,7 +148,7 @@ describe("TheAlertsTable.vue", () => {
     // Now the observable dropdown should be visible
     cy.get(".p-datatable-row-expansion > td")
       .should("be.visible")
-      .should("have.text", "Observables:");
+      .contains("Observables:");
     // Click the chevron again
     cy.get(":nth-child(1) > :nth-child(1) > .p-row-toggler")
       .should("be.visible")
