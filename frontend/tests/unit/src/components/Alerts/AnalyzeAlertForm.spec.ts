@@ -11,7 +11,7 @@ import MultiSelect from "primevue/multiselect";
 import TabPanel from "primevue/tabpanel";
 import TabView from "primevue/tabview";
 import { mount } from "@vue/test-utils";
-import store from "../../../../src/store/index";
+import store from "../../../../../src/store/index";
 import PrimeVue from "primevue/config";
 import moment from "moment-timezone";
 import myNock from "@unit/services/api/nock";
