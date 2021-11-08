@@ -26,6 +26,20 @@ Once you choose the `Reopen in Container` option, VSCode will work on building t
 
 Any work done on the application should be done through the devcontainer. If you make a change to the devcontainer configuration (found in the `.devcontainer` directory), you can rebuild the devcontainer by clicking on `Dev Container: ACE2 AMS` in the lower-left corner of VSCode and then selecting the `Rebuild Container` option in the menu that opens.
 
+## Updating your hosts file
+
+Your local system will need an entry in the hosts file to properly work with the AMS development environment.
+
+For Mac/Linux, this file is located at `/etc/hosts`.
+
+In Windows, this file is located at `C:\Windows\System32\drivers\etc\hosts`. You will need to open Notepad or another text editor as an Administrator in order to edit the hosts file.
+
+Add the following entry to the file:
+
+```
+127.0.0.1 ace2-ams
+```
+
 ## Starting the application
 
 You can start the application using Docker containers so that it uses hot-reloading anytime you change a file:
@@ -38,7 +52,7 @@ This script will generate random passwords for the database user and the secret 
 
 Once the both the frontend and backend development environments are built and started, you can access the components:
 
-- Frontend: [http://localhost:8080](http://localhost:8080)
+- Frontend: [http://ace2-ams:8080](http://ace2-ams:8080)
 - Backend API Swagger documentation: [http://localhost:7777/docs](http://localhost:7777/docs)
 - Backend API ReDoc documentation: [http://localhost:7777/redoc](http://localhost:7777/redoc)
 

@@ -5,9 +5,10 @@ const smp = new SpeedMeasurePlugin();
 
 module.exports = {
   devServer: {
+    disableHostCheck: true,
     proxy: {
       "^/api/": {
-        target: "http://localhost:7777",
+        target: process.env.VUE_APP_BACKEND_URL,
         ws: true,
         changeOrigin: true,
       },

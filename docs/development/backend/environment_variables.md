@@ -11,7 +11,6 @@ These variables are used by the FastAPI backend application.
 - **ACE_DEV**: If set (to anything), the application will run in development-mode, which means that the Alembic database migrations will be applied and the database seeded with basic information automatically when the application starts.
 - **COOKIES_SAMESITE**: The `SameSite` value to use when sending cookies. The development environment uses `lax`. Defaults to `lax`.
 - **COOKIES_SECURE**: True/False whether or not you want to require HTTPS when sending cookies. The development environment uses `False`. Defaults to `True`.
-- **CORS_ORIGINS**: A comma-separated string of origins to allow with CORS. For example, your development environment should be set to something like `http://localhost:8080` depending on which port the GUI is served from.
 - **DATABASE_URL**: The connection string used to connect to the PostgreSQL server. It should be in the form of `postgresql://user:password@hostname[:port]/dbname`.
 - **JWT_ACCESS_EXPIRE_SECONDS**: The number of seconds after which an access token will expire. The development environment uses `900` (15 minutes) by default.
 - **JWT_ALGORITHM**: Sets the algorithm to use for signing the tokens. The development environment uses `HS256` by default.

@@ -4,7 +4,19 @@ ACE2 is comprised of the [Core](https://ace-ecosystem.github.io/ace2-core/) and 
 
 ## Quick Start
 
-The AMS comes with a Docker-Compose file to quickly deploy the application in development mode, which includes hot-reloading for both the frontend and backend API:
+Your local system will need an entry in the hosts file to properly work with the AMS development environment.
+
+For Mac/Linux, this file is located at `/etc/hosts`.
+
+In Windows, this file is located at `C:\Windows\System32\drivers\etc\hosts`. You will need to open Notepad or another text editor as an Administrator in order to edit the hosts file.
+
+Add the following entry to the file:
+
+```
+127.0.0.1 ace2-ams
+```
+
+With your host file updated, you can use the helper script to reset and build the local AMS development environment that includes hot-reloading for both the frontend and backend:
 
 ```
 bin/reset-dev-container.sh
@@ -12,7 +24,7 @@ bin/reset-dev-container.sh
 
 After the containers are built and running, you can access the components using the following URLs:
 
-- Frontend: [http://localhost:8080](http://localhost:8080)
+- Frontend: [http://ace2-ams:8080](http://ace2-ams:8080)
 - Backend API Swagger documentation: [http://localhost:7777/docs](http://localhost:7777/docs)
 - Backend API ReDoc documentation: [http://localhost:7777/redoc](http://localhost:7777/redoc)
 
