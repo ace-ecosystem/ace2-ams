@@ -1,7 +1,7 @@
 <!-- AnalyzeAlert.vue -->
 
 <template>
-  <div>
+  <div id="alert-form">
     <AnalyzeAlertForm></AnalyzeAlertForm>
   </div>
 </template>
