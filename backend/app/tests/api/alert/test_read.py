@@ -265,7 +265,7 @@ def test_get_filter_queue(client_valid_access_token, db):
     assert get.json()["items"][0]["queue"]["value"] == "test_queue1"
 
 
-def test_get_filter_tag(client_valid_access_token, db):
+def test_get_filter_tags(client_valid_access_token, db):
     # Create some alerts
     helpers.create_alert(db)
     helpers.create_alert(db, tags=["tag1"])
@@ -290,6 +290,34 @@ def test_get_filter_tag(client_valid_access_token, db):
 
     # All the alerts should be returned if you don't specify any tags for the filter
     get = client_valid_access_token.get("/api/alert/?tags=")
+    assert get.json()["total"] == 3
+
+
+def test_get_filter_threats(client_valid_access_token, db):
+    # Create some alerts
+    helpers.create_alert(db)
+    helpers.create_alert(db, threats=["threat1"])
+    helpers.create_alert(db, threats=["threat2", "threat3", "threat4"])
+
+    # There should be 3 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 3
+
+    # There should only be 1 alert when we filter by a single threat
+    get = client_valid_access_token.get("/api/alert/?threats=threat1")
+    assert get.json()["total"] == 1
+    assert len(get.json()["items"][0]["threats"]) == 1
+    assert get.json()["items"][0]["threats"][0]["value"] == "threat1"
+
+    # There should only be 1 alert when we filter by multiple threats
+    get = client_valid_access_token.get("/api/alert/?threats=threat2,threat3")
+    assert get.json()["total"] == 1
+    assert len(get.json()["items"][0]["threats"]) == 3
+    assert any(t["value"] == "threat2" for t in get.json()["items"][0]["threats"])
+    assert any(t["value"] == "threat3" for t in get.json()["items"][0]["threats"])
+
+    # All the alerts should be returned if you don't specify any threats for the filter
+    get = client_valid_access_token.get("/api/alert/?threats=")
     assert get.json()["total"] == 3
 
 

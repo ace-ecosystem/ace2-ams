@@ -92,6 +92,7 @@ def create_alert(
     name: str = "Test Alert",
     owner: Optional[str] = None,
     tags: Optional[List[str]] = None,
+    threats: Optional[List[str]] = None,
     tool: str = "test_tool",
     tool_instance: str = "test_tool_instance",
 ) -> Alert:
@@ -134,7 +135,9 @@ def create_alert(
 
     if tags:
         alert.tags = [create_node_tag(value=tag, db=db) for tag in tags]
-        print(alert.tags)
+
+    if threats:
+        alert.threats = [create_node_threat(value=threat, db=db) for threat in threats]
 
     db.add(alert)
     crud.commit(db)

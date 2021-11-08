@@ -23,6 +23,7 @@ from db.schemas.alert_type import AlertType
 from db.schemas.analysis import Analysis
 from db.schemas.event import Event
 from db.schemas.node_tag import NodeTag
+from db.schemas.node_threat import NodeThreat
 from db.schemas.user import User
 
 
@@ -93,6 +94,7 @@ def get_all_alerts(
     owner: Optional[str] = None,
     queue: Optional[str] = None,
     tags: Optional[str] = None,
+    threats: Optional[str] = None,
     tool: Optional[str] = None,
     tool_instance: Optional[str] = None,
     type: Optional[str] = None,
@@ -145,6 +147,12 @@ def get_all_alerts(
         for tag in tags.split(","):
             tag_filters.append(Alert.tags.any(NodeTag.value == tag))
         query = query.where(and_(*tag_filters))
+
+    if threats:
+        threat_filters = []
+        for threat in threats.split(","):
+            threat_filters.append(Alert.threats.any(NodeThreat.value == threat))
+        query = query.where(and_(*threat_filters))
 
     if tool:
         query = query.join(AlertTool).where(AlertTool.value == tool)
