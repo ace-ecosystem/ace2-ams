@@ -94,6 +94,7 @@
               <div class="field col-1">
                 <Button
                   v-if="observablesListEmpty"
+                  id="add-observable-empty"
                   icon="pi pi-plus"
                   class="p-button-rounded inputfield"
                   @click="addFormObservable"
@@ -103,13 +104,14 @@
             <div
               v-for="(observable, index) in observables"
               :key="observable.index"
+              name="observable-input"
               class="p-col-12"
             >
               <div class="formgrid grid">
                 <div class="field col-2 px-1">
                   <Calendar
-                    id="observable-time"
                     v-model="observables[index].time"
+                    name="observable-time"
                     placeholder="No time selected"
                     class="inputfield w-full"
                     :show-time="true"
@@ -118,15 +120,15 @@
                 </div>
                 <div class="field col-2 px-1">
                   <Dropdown
-                    id="observable-type"
                     v-model="observables[index].type"
+                    name="observable-type"
                     class="inputfield w-full"
                     option-label="value"
                     option-value="value"
                     :options="observableTypes"
                   />
                 </div>
-                <div class="field col-3 px-1">
+                <div class="field col-3 px-1" name="observable-value">
                   <FileUpload
                     v-if="observables[index].type == 'file'"
                     mode="basic"
@@ -135,7 +137,6 @@
                   <div v-else class="p-inputgroup">
                     <InputText
                       v-if="!observables[index].multiAdd"
-                      id="observable-value"
                       v-model="observables[index].value"
                       placeholder="Enter a value"
                       class="inputfield w-full"
@@ -143,7 +144,6 @@
                     ></InputText>
                     <Textarea
                       v-else
-                      id="observable-value"
                       v-model="observables[index].value"
                       placeholder="Enter a comma or newline-delimited list of values"
                       class="inputfield w-full"
@@ -156,8 +156,8 @@
                 </div>
                 <div class="field col-3 px-1">
                   <MultiSelect
-                    id="observable-directives"
                     v-model="observables[index].directives"
+                    name="observable-directives"
                     placeholder="No directives selected"
                     class="inputfield w-full"
                     :options="directives"
@@ -165,6 +165,7 @@
                 </div>
                 <div class="field col-1">
                   <Button
+                    name="delete-observable"
                     icon="pi pi-times"
                     class="inputfield"
                     @click="deleteFormObservable(index)"
@@ -173,6 +174,7 @@
                 <div class="field col-1">
                   <Button
                     v-if="isLastObservable(index)"
+                    id="add-observable"
                     label="Add"
                     icon="pi pi-plus"
                     class="p-button-rounded inputfield"
