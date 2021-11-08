@@ -96,6 +96,12 @@ jobs:
       - name: API auth
         run: docker exec ace2-ams-gui curl -X POST -F 'username=analyst' -F 'password=analyst' -vvv http://ace2-ams:8080/api/auth
 
+      - name: Nginx logs
+        run: docker logs ace2-ams
+
+      - name: FastAPI logs
+        run: docker logs ace2-ams-api
+
       # - name: E2E tests
       #   run: docker exec -e DEBUG=cypress:* ace2-ams-gui npx cypress run --headless --config video=false,screenshotOnRunFailure=false
 
