@@ -34,23 +34,33 @@ const addMultipleObservables = () => {
 };
 
 describe("AnalyzeAlert.vue", () => {
-  beforeEach(() => {
+  before(() => {
+    cy.log("logging in");
     cy.login();
-    cy.visit("/analyze");
   });
+
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
+    cy.visit("/analyze");
+    cy.url().should("contain", "/analyze");
+  });
+
   it("Analyze page renders", () => {
     cy.get("#alert-form").should("be.visible");
   });
+
   it("Add observable button adds another row", () => {
     cy.get("div[name='observable-input']").should("have.length", 1);
     cy.get("#add-observable").click();
     cy.get("div[name='observable-input']").should("have.length", 2);
   });
+
   it("Delete observable button works", () => {
     cy.get("button[name='delete-observable']").should("have.length", 1);
     cy.get("button[name='delete-observable']").click();
     cy.get("div[name='observable-input']").should("have.length", 0);
   });
+
   it("Changes the observable input box based on observable type", () => {
     // Check that initial observable is a file observable & doesn't have a multi-input button
     cy.get("div[name='observable-value']")
@@ -92,6 +102,7 @@ describe("AnalyzeAlert.vue", () => {
       .should("exist");
     cy.get("div[name='observable-value']").find("button").should("not.exist");
   });
+
   it("submits alert/observable data to API and routes user to new alert page after submission", () => {
     cy.intercept("POST", "/api/alert").as("createAlert");
     cy.intercept("POST", "/api/observable/instance").as("createObservable");
@@ -104,6 +115,7 @@ describe("AnalyzeAlert.vue", () => {
     cy.wait("@getAlert").its("state").should("eq", "Complete");
     cy.url().should("include", "/alert/");
   });
+
   it("submits alert/observable data to API and shows error if alert creation fails", () => {
     addMultipleObservables();
     cy.intercept("POST", "/api/alert/", {
@@ -115,6 +127,7 @@ describe("AnalyzeAlert.vue", () => {
     cy.get(".p-message-wrapper").should("exist");
     cy.url().should("include", "/analyze");
   });
+
   it("submits alert/observable data to API and shows information and error messages, continue button, and routes to new alert when continue button is clicked", () => {
     cy.intercept("POST", "/api/alert").as("createAlert");
     cy.intercept("GET", "/api/alert/*").as("getAlert");
@@ -138,6 +151,7 @@ describe("AnalyzeAlert.vue", () => {
     cy.wait("@getAlert").its("state").should("eq", "Complete");
     cy.url().should("include", "/alert/");
   });
+
   it("submits alert/observable data to API for ea. observable when multi-alert option is clicked, and then routes to last created alert", () => {
     cy.intercept("POST", "/api/alert").as("createAlert");
     cy.intercept("POST", "/api/observable/instance").as("createObservable");
@@ -171,6 +185,7 @@ describe("AnalyzeAlert.vue", () => {
     cy.wait("@getAlert").its("state").should("eq", "Complete");
     cy.url().should("include", "/alert/");
   });
+
   it("submits alert data to API and shows error message if alert creation fails when multi-alert create option is clicked", () => {
     addMultipleObservables();
     cy.intercept("POST", "/api/alert/", {
@@ -183,6 +198,7 @@ describe("AnalyzeAlert.vue", () => {
     cy.get(".p-message-wrapper").should("exist");
     cy.url().should("include", "/analyze");
   });
+
   it("submits alert/observable data to API for ea. observable when multi-alert create option is clicked, and routes to last created alert even if observable creation fails", () => {
     cy.intercept("POST", "/api/alert").as("createAlert");
     cy.intercept("GET", "/api/alert/*").as("getAlert");
