@@ -305,6 +305,10 @@ def create_node_threat_type(value: str, db: Session) -> NodeThreatType:
 def create_observable(
     type: str, value: str, db: Session, expires_on: Optional[datetime] = None, for_detection: bool = False
 ) -> Observable:
+    existing = crud.read_observable(type=type, value=value, db=db)
+    if existing:
+        return existing
+
     obj = Observable(
         expires_on=expires_on,
         for_detection=for_detection,

@@ -1,5 +1,5 @@
 from datetime import datetime
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi_pagination import LimitOffsetPage
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy import and_, select
@@ -25,6 +25,8 @@ from db.schemas.event import Event
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
+from db.schemas.observable import Observable
+from db.schemas.observable_instance import ObservableInstance
 from db.schemas.user import User
 
 
@@ -92,6 +94,7 @@ def get_all_alerts(
     insert_time_after: Optional[datetime] = None,
     insert_time_before: Optional[datetime] = None,
     name: Optional[str] = None,
+    observable: Optional[str] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
     owner: Optional[str] = None,
     queue: Optional[str] = None,
     tags: Optional[str] = None,
@@ -137,6 +140,17 @@ def get_all_alerts(
 
     if name:
         query = query.where(Alert.name.ilike(f"%{name}%"))
+
+    if observable:
+        split = observable.split("|", maxsplit=1)
+        observable_type = split[0]
+        observable_value = split[1]
+
+        query = (
+            query.join(ObservableInstance, ObservableInstance.alert_uuid == Alert.uuid)
+            .join(Observable)
+            .where(Observable.type.has(value=observable_type), Observable.value == observable_value)
+        )
 
     if owner:
         query = query.join(User, onclause=Alert.owner_uuid == User.uuid).where(User.username == owner)
