@@ -91,13 +91,13 @@ jobs:
         run: docker container list
 
       - name: API ping
-        run: docker exec ace2-ams-gui curl http://ace2-ams:8080/api/ping
+        run: docker exec ace2-ams-gui curl -vvv http://ace2-ams:8080/api/ping
 
       - name: API auth
-        run: docker exec ace2-ams-gui curl -X POST -F 'username=analyst' -F 'password=analyst' http://ace2-ams:8080/api/auth
+        run: docker exec ace2-ams-gui curl -X POST -F 'username=analyst' -F 'password=analyst' -vvv http://ace2-ams:8080/api/auth
 
-      - name: E2E tests
-        run: docker exec -e DEBUG=cypress:* ace2-ams-gui npx cypress run --headless --config video=false,screenshotOnRunFailure=false
+      # - name: E2E tests
+      #   run: docker exec -e DEBUG=cypress:* ace2-ams-gui npx cypress run --headless --config video=false,screenshotOnRunFailure=false
 
       # - name: Add hosts to /etc/hosts
       #   run: sudo echo "127.0.0.1 ace2-ams" | sudo tee -a /etc/hosts
