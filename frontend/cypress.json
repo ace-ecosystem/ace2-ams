@@ -5,7 +5,7 @@
   "screenshotsFolder": "tests/e2e/screenshots",
   "videosFolder": "tests/e2e/videos",
   "supportFile": "tests/e2e/support/index.js",
-  "testFiles": ["**/Login.spec.js", "**/AnalyzeAlert.spec.js", "**/*.spec.js"],
+  "testFiles": "**/*.spec.js",
   "componentFolder": "src",
   "baseUrl": "http://ace2-ams:8080"
 }
