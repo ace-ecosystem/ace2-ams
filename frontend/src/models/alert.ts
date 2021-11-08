@@ -2,28 +2,47 @@ import { UUID } from "./base";
 import { genericObject } from "./base";
 
 export type alert = {
-  analysis: Record<string, any>;
+  analysis?: Record<string, any>;
+  comments?: genericObject[];
+  description?: string;
+  directives?: genericObject[];
+  disposition?: genericObject;
+  dispositionTime?: Date;
+  dispositionUser?: genericObject;
+  eventTime?: Date;
+  eventUuid?: UUID;
+  insertTime?: Date;
+  instructions?: string;
+  name?: string;
+  owner?: genericObject;
+  queue?: genericObject;
+  tags?: genericObject[];
+  threatActor?: genericObject;
+  threats?: genericObject[];
+  tool?: genericObject;
+  toolInstance?: genericObject;
+  type?: genericObject;
+  uuid: UUID;
+  version?: UUID;
+};
+
+// High-level alert data that will be displayed in Manage Alerts or in an event
+export type alertSummary = {
   comments: genericObject[];
   description: string;
-  directives: genericObject[];
-  disposition: genericObject;
-  dispositionTime: Date;
-  dispositionUser: genericObject;
-  eventTime: Date;
-  eventUuid: UUID;
-  insertTime: Date;
-  instructions: string;
+  disposition: genericObject | string;
+  dispositionTime: Date | null;
+  dispositionUser: genericObject | string;
+  eventTime: Date | null;
+  insertTime: Date | null;
   name: string;
-  owner: genericObject;
-  queue: genericObject;
+  observables: genericObject[];
+  owner: genericObject | string;
+  queue: genericObject | string;
   tags: genericObject[];
-  threatActor: genericObject;
-  threats: genericObject[];
-  tool: genericObject;
-  toolInstance: genericObject;
-  type: genericObject;
+  tool: genericObject | string;
+  type: genericObject | string;
   uuid: UUID;
-  version: UUID;
 };
 
 export type alertGetAll = {

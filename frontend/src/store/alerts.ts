@@ -1,7 +1,29 @@
 import alertApi from "@/services/api/alerts";
 import { CommitFunction } from "@/store/index";
-import { alert } from "@/models/alert";
+import { alert, alertSummary } from "@/models/alert";
 import { UUID } from "@/models/base";
+
+export function parseAlertSummary(alert: alert): alertSummary {
+  return {
+    comments: alert.comments ? alert.comments : [],
+    description: alert.description ? alert.description : "",
+    disposition: alert.disposition ? alert.disposition.value : "OPEN",
+    dispositionTime: alert.dispositionTime ? alert.dispositionTime : null,
+    dispositionUser: alert.dispositionUser
+      ? alert.dispositionUser.value
+      : "None",
+    eventTime: alert.eventTime ? alert.eventTime : null,
+    insertTime: alert.insertTime ? alert.insertTime : null,
+    name: alert.name ? alert.name : "Unnamed",
+    observables: alert.analysis ? alert.analysis.discoveredObservableUuids : [],
+    owner: alert.owner ? alert.owner.value : "None",
+    queue: alert.queue ? alert.queue.value : "None",
+    tags: alert.tags ? alert.tags : [],
+    tool: alert.tool ? alert.tool.value : "None",
+    type: alert.type ? alert.type : "",
+    uuid: alert.uuid,
+  };
+}
 
 const store = {
   namespaced: true,
@@ -9,28 +31,31 @@ const store = {
   state: {
     // currently opened alert
     openAlert: null,
-    // last time alerts were fetched with current filter settings
-    lastQueriedAlertsTime: null,
     // all alerts returned from current filter settings
     queriedAlerts: [],
   },
   getters: {
-    openAlert: (state: { openAlert: alert }): alert => state.openAlert,
-    queriedAlerts: (state: { queriedAlerts: alert[] }): alert[] =>
-      state.queriedAlerts,
+    openAlert: (state: {
+      openAlert: alertSummary | null;
+      queriedAlerts: alertSummary[];
+    }): alertSummary | null => state.openAlert,
+    queriedAlerts: (state: {
+      openAlert: alertSummary | null;
+      queriedAlerts: alertSummary[];
+    }): alertSummary[] => state.queriedAlerts,
   },
   mutations: {
-    SET_OPEN_ALERT(state: { openAlert: alert | null }, alert: alert): void {
+    SET_OPEN_ALERT(
+      state: { openAlert: alertSummary | null },
+      alert: alertSummary,
+    ): void {
       state.openAlert = alert;
     },
     SET_QUERIED_ALERTS(
-      state: { queriedAlerts: alert[] },
-      alerts: alert[],
+      state: { queriedAlerts: alertSummary[] },
+      alerts: alertSummary[],
     ): void {
       state.queriedAlerts = alerts;
-    },
-    SET_QUERY_TIMESTAMP(state: { lastQueriedAlertsTime: number | null }): void {
-      state.lastQueriedAlertsTime = new Date().getTime();
     },
   },
 
@@ -67,32 +92,11 @@ const store = {
         .then((alerts) => {
           const parsedAlerts = [];
           for (const index in alerts.items) {
-            const alert = alerts.items[index];
-            const parsedAlert = {
-              comments: alert.comments ? alert.comments : [],
-              disposition: alert.disposition ? alert.disposition.value : "OPEN",
-              dispositionTime: alert.dispositionTime
-                ? alert.dispositionTime
-                : null,
-              dispositionUser: alert.dispositionUser
-                ? alert.dispositionUser.value
-                : "None",
-              eventTime: alert.eventTime ? alert.name : null,
-              insertTime: alert.insertTime ? alert.name : null,
-              name: alert.name ? alert.name : "Unnamed",
-              observables: alert.analysis
-                ? alert.analysis.discoveredObservableUuids
-                : [],
-              owner: alert.owner ? alert.owner.value : "None",
-              queue: alert.queue ? alert.queue.value : "None",
-              tags: alert.tags ? alert.tags : [],
-              tool: alert.tool ? alert.tool.value : "None",
-              type: alert.type ? alert.type : "",
-              uuid: alert.uuid,
-            };
+            const parsedAlert = parseAlertSummary(alerts.items[index]);
             parsedAlerts.push(parsedAlert);
           }
           commit("SET_QUERIED_ALERTS", parsedAlerts);
+          commit("SET_OPEN_ALERT", null);
         })
         .catch((error) => {
           throw error;
