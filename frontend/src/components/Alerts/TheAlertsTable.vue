@@ -170,7 +170,6 @@
       this.resetAlertTable();
       // this is where we can query for alerts to show
       this.loadAlerts();
-      console.log(this.alerts);
     },
 
     methods: {
@@ -201,7 +200,6 @@
         this.selectedColumns = this.columns.filter((column) => {
           return this.defaultColumns.includes(column.field);
         });
-        console.log(this.selectedColumns);
       },
 
       initAlertTable() {

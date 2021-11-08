@@ -42,7 +42,6 @@ const store = {
       await alertApi
         .create(newAlert)
         .then((alert) => {
-          console.log(alert);
           commit("SET_OPEN_ALERT", alert);
         })
         .catch((error) => {
