@@ -93,6 +93,9 @@ jobs:
       - name: API ping
         run: docker exec ace2-ams-gui curl http://ace2-ams:8080/api/ping
 
+      - name: API auth
+        run: docker exec ace2-ams-gui curl -X POST -F 'username=analyst' -F 'password=analyst' http://ace2-ams:8080/api/auth
+
       - name: E2E tests
         run: docker exec -e DEBUG=cypress:* ace2-ams-gui npx cypress run --headless --config video=false,screenshotOnRunFailure=false
 
