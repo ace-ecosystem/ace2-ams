@@ -24,6 +24,7 @@ from db.schemas.analysis import Analysis
 from db.schemas.event import Event
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
+from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.user import User
 
 
@@ -94,6 +95,7 @@ def get_all_alerts(
     owner: Optional[str] = None,
     queue: Optional[str] = None,
     tags: Optional[str] = None,
+    threat_actor: Optional[str] = None,
     threats: Optional[str] = None,
     tool: Optional[str] = None,
     tool_instance: Optional[str] = None,
@@ -147,6 +149,9 @@ def get_all_alerts(
         for tag in tags.split(","):
             tag_filters.append(Alert.tags.any(NodeTag.value == tag))
         query = query.where(and_(*tag_filters))
+
+    if threat_actor:
+        query = query.join(NodeThreatActor).where(NodeThreatActor.value == threat_actor)
 
     if threats:
         threat_filters = []

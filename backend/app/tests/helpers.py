@@ -92,6 +92,7 @@ def create_alert(
     name: str = "Test Alert",
     owner: Optional[str] = None,
     tags: Optional[List[str]] = None,
+    threat_actor: Optional[str] = None,
     threats: Optional[List[str]] = None,
     tool: str = "test_tool",
     tool_instance: str = "test_tool_instance",
@@ -135,6 +136,9 @@ def create_alert(
 
     if tags:
         alert.tags = [create_node_tag(value=tag, db=db) for tag in tags]
+
+    if threat_actor:
+        alert.threat_actor = create_node_threat_actor(value=threat_actor, db=db)
 
     if threats:
         alert.threats = [create_node_threat(value=threat, db=db) for threat in threats]
