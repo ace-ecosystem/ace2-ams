@@ -5,7 +5,7 @@
 import Vuex from "vuex";
 import alerts from "@/store/alerts";
 import myNock from "@unit/services/api/nock";
-import { AlertRead } from "@/models/alert";
+import { alert } from "@/models/alert";
 import snakecaseKeys from "snakecase-keys";
 const actions = alerts.actions;
 const mutations = alerts.mutations;
@@ -19,7 +19,7 @@ const mockAlertCreate = {
   name: "MockAlert",
 };
 
-const mockAlertRead = {
+const mockalert = {
   analysis: {},
   insertTime: new Date(0).toDateString(),
   queue: "default",
@@ -37,7 +37,7 @@ const mockAlertRead = {
 
 describe("alerts Mutations", () => {
   it("will set the openAlert state value to a given alert object", () => {
-    const queriedAlerts: AlertRead[] = [];
+    const queriedAlerts: alert[] = [];
     const state = {
       openAlert: null,
       lastQueriedAlertsTime: null,
@@ -45,11 +45,11 @@ describe("alerts Mutations", () => {
     };
     const store = new Vuex.Store({ state, mutations });
 
-    store.commit("SET_OPEN_ALERT", mockAlertRead);
-    expect(state.openAlert).toEqual(mockAlertRead);
+    store.commit("SET_OPEN_ALERT", mockalert);
+    expect(state.openAlert).toEqual(mockalert);
   });
   it("will add a list of queried alerts to the queriedAlerts list", () => {
-    const queriedAlerts: AlertRead[] = [];
+    const queriedAlerts: alert[] = [];
     const state = {
       openAlert: null,
       lastQueriedAlertsTime: null,
@@ -57,11 +57,11 @@ describe("alerts Mutations", () => {
     };
     const store = new Vuex.Store({ state, mutations });
 
-    store.commit("SET_QUERIED_ALERTS", [mockAlertRead, mockAlertRead]);
+    store.commit("SET_QUERIED_ALERTS", [mockalert, mockalert]);
     expect(state.queriedAlerts.length).toBe(2);
   });
   it("will set the lastGetAll timestamp to the current time", () => {
-    const queriedAlerts: AlertRead[] = [];
+    const queriedAlerts: alert[] = [];
     const state = {
       openAlert: null,
       lastQueriedAlertsTime: null,
@@ -79,7 +79,7 @@ describe("alerts Mutations", () => {
 
 describe("alerts Actions", () => {
   it("will request to create an alert with a given AlertCreate object, and set the openAlert to result on success", async () => {
-    const queriedAlerts: AlertRead[] = [];
+    const queriedAlerts: alert[] = [];
     const state = {
       openAlert: null,
       lastQueriedAlertsTime: null,
@@ -88,31 +88,31 @@ describe("alerts Actions", () => {
     const store = new Vuex.Store({ state, mutations, actions });
     const mockRequest = myNock
       .post("/alert/", JSON.stringify(snakecaseKeys(mockAlertCreate)))
-      .reply(200, mockAlertRead);
+      .reply(200, mockalert);
 
     await store.dispatch("createAlert", mockAlertCreate);
 
     expect(mockRequest.isDone()).toEqual(true);
-    expect(state.openAlert).toEqual(mockAlertRead);
+    expect(state.openAlert).toEqual(mockalert);
   });
 
   it("will make fetch alert data given an alert ID", async () => {
-    const queriedAlerts: AlertRead[] = [];
+    const queriedAlerts: alert[] = [];
     const state = {
       openAlert: null,
       lastQueriedAlertsTime: null,
       queriedAlerts: queriedAlerts,
     };
     const store = new Vuex.Store({ state, mutations, actions });
-    const mockRequest = myNock.get("/alert/uuid1").reply(200, mockAlertRead);
+    const mockRequest = myNock.get("/alert/uuid1").reply(200, mockalert);
     await store.dispatch("openAlert", "uuid1");
 
     expect(mockRequest.isDone()).toEqual(true);
 
-    expect(state.openAlert).toEqual(mockAlertRead);
+    expect(state.openAlert).toEqual(mockalert);
   });
   it("will make a request to update an alert given the UUID and update data upon the updateAlert action", async () => {
-    const queriedAlerts: AlertRead[] = [];
+    const queriedAlerts: alert[] = [];
     const state = {
       openAlert: null,
       lastQueriedAlertsTime: null,
@@ -133,7 +133,7 @@ describe("alerts Actions", () => {
   });
 
   it("will make multiple reqs to update multiple alerts given a list of UUIDS and update data upon the updateAlerts action", async () => {
-    const queriedAlerts: AlertRead[] = [];
+    const queriedAlerts: alert[] = [];
     const state = {
       openAlert: null,
       lastQueriedAlertsTime: null,
@@ -157,7 +157,7 @@ describe("alerts Actions", () => {
   });
 
   it("will throw an error when a request fails in any action", async () => {
-    const queriedAlerts: AlertRead[] = [];
+    const queriedAlerts: alert[] = [];
     const state = {
       openAlert: null,
       lastQueriedAlertsTime: null,

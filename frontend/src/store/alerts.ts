@@ -15,23 +15,30 @@ const store = {
     queriedAlerts: [],
   },
   getters: {
-    openAlert: (state: { openAlert: alert }) => state.openAlert,
-    queriedAlerts: (state: { queriedAlerts: alert[] }) => state.queriedAlerts,
+    openAlert: (state: { openAlert: alert }): alert => state.openAlert,
+    queriedAlerts: (state: { queriedAlerts: alert[] }): alert[] =>
+      state.queriedAlerts,
   },
   mutations: {
-    SET_OPEN_ALERT(state: { openAlert: alert | null }, alert: alert) {
+    SET_OPEN_ALERT(state: { openAlert: alert | null }, alert: alert): void {
       state.openAlert = alert;
     },
-    SET_QUERIED_ALERTS(state: { queriedAlerts: alert[] }, alerts: alert[]) {
+    SET_QUERIED_ALERTS(
+      state: { queriedAlerts: alert[] },
+      alerts: alert[],
+    ): void {
       state.queriedAlerts = alerts;
     },
-    SET_QUERY_TIMESTAMP(state: { lastQueriedAlertsTime: number | null }) {
+    SET_QUERY_TIMESTAMP(state: { lastQueriedAlertsTime: number | null }): void {
       state.lastQueriedAlertsTime = new Date().getTime();
     },
   },
 
   actions: {
-    async createAlert({ commit }: CommitFunction, newAlert: any) {
+    async createAlert(
+      { commit }: CommitFunction,
+      newAlert: any,
+    ): Promise<void> {
       await alertApi
         .create(newAlert)
         .then((alert) => {
@@ -42,7 +49,10 @@ const store = {
           throw error;
         });
     },
-    async getSingle({ commit }: CommitFunction, alertUUID: UUID) {
+    async getSingle(
+      { commit }: CommitFunction,
+      alertUUID: UUID,
+    ): Promise<void> {
       await alertApi
         .getSingle(alertUUID)
         .then((alert) => {
@@ -52,7 +62,7 @@ const store = {
           throw error;
         });
     },
-    async getAll({ commit }: CommitFunction, options: any) {
+    async getAll({ commit }: CommitFunction, options: any): Promise<void> {
       await alertApi
         .getAll(options)
         .then((alerts) => {
@@ -90,7 +100,7 @@ const store = {
     async updateAlert(
       { commit }: CommitFunction,
       payload: { oldAlertUUID: UUID; updateData: any },
-    ) {
+    ): Promise<void> {
       // once we get around to updating alerts, we will need to update the base api service to have a
       // 'getAfterUpdate' option like there is for 'create'
       // then we can reset the open/queried alert(s)
@@ -104,7 +114,7 @@ const store = {
     async updateAlerts(
       { commit }: CommitFunction,
       payload: { oldAlertUUIDs: UUID[]; updateData: any },
-    ) {
+    ): Promise<void> {
       // I have no idea if this is the right way to do this
       // but basically pushing all the requests to update into an array
       const promises = [];
