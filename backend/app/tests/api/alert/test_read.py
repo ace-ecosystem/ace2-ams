@@ -96,7 +96,7 @@ def test_get_filter_dispositioned_after(client_valid_access_token, db):
     # Create some alerts
     helpers.create_alert(db)
     alert = helpers.create_alert(db, disposition_time=datetime.utcnow())
-    helpers.create_alert(db, disposition_time=datetime.utcnow()+timedelta(seconds=5))
+    helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(seconds=5))
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -113,7 +113,7 @@ def test_get_filter_dispositioned_after(client_valid_access_token, db):
 def test_get_filter_dispositioned_before(client_valid_access_token, db):
     # Create some alerts
     helpers.create_alert(db)
-    helpers.create_alert(db, disposition_time=datetime.utcnow()-timedelta(seconds=5))
+    helpers.create_alert(db, disposition_time=datetime.utcnow() - timedelta(seconds=5))
     alert = helpers.create_alert(db, disposition_time=datetime.utcnow())
 
     # There should be 3 total alerts
@@ -131,7 +131,7 @@ def test_get_filter_dispositioned_before(client_valid_access_token, db):
 def test_get_filter_event_time_after(client_valid_access_token, db):
     # Create some alerts
     alert = helpers.create_alert(db, event_time=datetime.utcnow())
-    helpers.create_alert(db, event_time=datetime.utcnow()+timedelta(seconds=5))
+    helpers.create_alert(db, event_time=datetime.utcnow() + timedelta(seconds=5))
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -148,7 +148,7 @@ def test_get_filter_event_time_after(client_valid_access_token, db):
 def test_get_filter_event_time_before(client_valid_access_token, db):
     # Create some alerts
     helpers.create_alert(db, event_time=datetime.utcnow())
-    alert = helpers.create_alert(db, event_time=datetime.utcnow()+timedelta(seconds=5))
+    alert = helpers.create_alert(db, event_time=datetime.utcnow() + timedelta(seconds=5))
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -186,7 +186,7 @@ def test_get_filter_event_uuid(client_valid_access_token, db):
 def test_get_filter_insert_time_after(client_valid_access_token, db):
     # Create some alerts
     alert = helpers.create_alert(db, insert_time=datetime.utcnow())
-    helpers.create_alert(db, insert_time=datetime.utcnow()+timedelta(seconds=5))
+    helpers.create_alert(db, insert_time=datetime.utcnow() + timedelta(seconds=5))
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -202,7 +202,7 @@ def test_get_filter_insert_time_after(client_valid_access_token, db):
 
 def test_get_filter_insert_time_before(client_valid_access_token, db):
     # Create some alerts
-    helpers.create_alert(db, insert_time=datetime.utcnow()-timedelta(seconds=5))
+    helpers.create_alert(db, insert_time=datetime.utcnow() - timedelta(seconds=5))
     alert = helpers.create_alert(db, insert_time=datetime.utcnow())
 
     # There should be 2 total alerts
@@ -263,6 +263,34 @@ def test_get_filter_queue(client_valid_access_token, db):
     get = client_valid_access_token.get("/api/alert/?queue=test_queue1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["queue"]["value"] == "test_queue1"
+
+
+def test_get_filter_tag(client_valid_access_token, db):
+    # Create some alerts
+    helpers.create_alert(db)
+    helpers.create_alert(db, tags=["tag1"])
+    helpers.create_alert(db, tags=["tag2", "tag3", "tag4"])
+
+    # There should be 3 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 3
+
+    # There should only be 1 alert when we filter by a single tag
+    get = client_valid_access_token.get("/api/alert/?tags=tag1")
+    assert get.json()["total"] == 1
+    assert len(get.json()["items"][0]["tags"]) == 1
+    assert get.json()["items"][0]["tags"][0]["value"] == "tag1"
+
+    # There should only be 1 alert when we filter by multiple tags
+    get = client_valid_access_token.get("/api/alert/?tags=tag2,tag3")
+    assert get.json()["total"] == 1
+    assert len(get.json()["items"][0]["tags"]) == 3
+    assert any(t["value"] == "tag2" for t in get.json()["items"][0]["tags"])
+    assert any(t["value"] == "tag3" for t in get.json()["items"][0]["tags"])
+
+    # All the alerts should be returned if you don't specify any tags for the filter
+    get = client_valid_access_token.get("/api/alert/?tags=")
+    assert get.json()["total"] == 3
 
 
 def test_get_filter_tool(client_valid_access_token, db):

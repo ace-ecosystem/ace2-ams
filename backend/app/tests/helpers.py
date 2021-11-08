@@ -91,6 +91,7 @@ def create_alert(
     insert_time: datetime = None,
     name: str = "Test Alert",
     owner: Optional[str] = None,
+    tags: Optional[List[str]] = None,
     tool: str = "test_tool",
     tool_instance: str = "test_tool_instance",
 ) -> Alert:
@@ -130,6 +131,10 @@ def create_alert(
 
     if owner:
         alert.owner = create_user(username=owner, db=db, alert_queue=alert_queue)
+
+    if tags:
+        alert.tags = [create_node_tag(value=tag, db=db) for tag in tags]
+        print(alert.tags)
 
     db.add(alert)
     crud.commit(db)

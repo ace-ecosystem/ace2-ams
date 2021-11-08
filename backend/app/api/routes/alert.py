@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Request, Response
 from fastapi_pagination import LimitOffsetPage
 from fastapi_pagination.ext.sqlalchemy_future import paginate
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 from typing import Optional
 from uuid import UUID, uuid4
@@ -22,6 +22,7 @@ from db.schemas.alert_tool_instance import AlertToolInstance
 from db.schemas.alert_type import AlertType
 from db.schemas.analysis import Analysis
 from db.schemas.event import Event
+from db.schemas.node_tag import NodeTag
 from db.schemas.user import User
 
 
@@ -91,6 +92,7 @@ def get_all_alerts(
     name: Optional[str] = None,
     owner: Optional[str] = None,
     queue: Optional[str] = None,
+    tags: Optional[str] = None,
     tool: Optional[str] = None,
     tool_instance: Optional[str] = None,
     type: Optional[str] = None,
@@ -137,6 +139,12 @@ def get_all_alerts(
 
     if queue:
         query = query.join(AlertQueue).where(AlertQueue.value == queue)
+
+    if tags:
+        tag_filters = []
+        for tag in tags.split(","):
+            tag_filters.append(Alert.tags.any(NodeTag.value == tag))
+        query = query.where(and_(*tag_filters))
 
     if tool:
         query = query.join(AlertTool).where(AlertTool.value == tool)
