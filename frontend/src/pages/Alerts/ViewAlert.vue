@@ -23,7 +23,7 @@
       );
       this.$store.dispatch("selectedAlerts/select", this.$route.params.alertID);
       await this.$store.dispatch(
-        "alerts/openAlert",
+        "alerts/getSingle",
         this.$route.params.alertID,
       );
     },

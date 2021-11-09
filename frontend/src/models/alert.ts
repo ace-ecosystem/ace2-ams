@@ -1,50 +1,53 @@
-import { UUID } from "@/models/base";
-import { NodeBase, NodeCreate, NodeRead, NodeUpdate } from "@/models/node";
+import { UUID } from "./base";
+import { genericObject } from "./base";
 
-interface AlertBase extends NodeBase {
+export type alert = {
+  analysis?: Record<string, any>;
+  comments?: genericObject[];
   description?: string;
-  eventTime: Date;
-  instructions: string;
-  name: string;
-  owner?: string;
-  queue: string;
-  tool?: string;
-  toolInstance?: string;
-  type: string;
-}
-export interface AlertCreate extends NodeCreate, AlertBase {
-  uuid: UUID;
-}
-
-// todo
-// this may not actually be necessary
-// format response object into this? idk
-export interface AlertRead extends NodeRead, AlertBase {
-  // todo: change to AnalysisRead
-  analysis: Record<string, unknown>;
-  // todo: change to AlertDispositionRead
-  disposition?: string;
+  directives?: genericObject[];
+  disposition?: genericObject;
   dispositionTime?: Date;
-  // todo: change to UserRead
-  dispositionUser?: string;
+  dispositionUser?: genericObject;
+  eventTime?: Date;
   eventUuid?: UUID;
-  insertTime: Date;
-  // todo: change to UserRead
-  owner?: string;
-  // todo: change to AlertQueueRead
-  queue: string;
-  // todo: change to AlertToolRead
-  tool?: string;
-  // todo: change to AlertToolInstanceRead
-  tool_instance?: string;
-  // todo: change to AlertTypeRead
-  type: string;
+  insertTime?: Date;
+  instructions?: string;
+  name?: string;
+  owner?: genericObject;
+  queue?: genericObject;
+  tags?: genericObject[];
+  threatActor?: genericObject;
+  threats?: genericObject[];
+  tool?: genericObject;
+  toolInstance?: genericObject;
+  type?: genericObject;
   uuid: UUID;
-}
+  version?: UUID;
+};
 
-export interface AlertUpdate extends NodeUpdate, AlertBase {
-  disposition?: string;
-  eventUuid?: UUID;
-  queue: string;
-  type: string;
-}
+// High-level alert data that will be displayed in Manage Alerts or in an event
+export type alertSummary = {
+  comments: genericObject[];
+  description: string;
+  disposition: genericObject | string;
+  dispositionTime: Date | null;
+  dispositionUser: genericObject | string;
+  eventTime: Date | null;
+  insertTime: Date | null;
+  name: string;
+  observables: genericObject[];
+  owner: genericObject | string;
+  queue: genericObject | string;
+  tags: genericObject[];
+  tool: genericObject | string;
+  type: genericObject | string;
+  uuid: UUID;
+};
+
+export type alertGetAll = {
+  items: alert[];
+  limit: number;
+  offset: number;
+  total: number;
+};

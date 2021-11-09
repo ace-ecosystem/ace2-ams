@@ -2,12 +2,12 @@
 
 <template>
   <br />
-  <TheAlertActionToolbar />
+  <TheAlertActionToolbar id="AlertActionToolbar" />
   <br />
-  <TheFilterToolbar />
+  <TheFilterToolbar id="FilterToolbar" />
   <br />
   <div class="card">
-    <TheAlertsTable />
+    <TheAlertsTable id="AlertsTable" />
   </div>
 </template>
 
