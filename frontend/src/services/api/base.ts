@@ -2,6 +2,7 @@ import { AxiosRequestConfig } from "axios";
 import instance from "./axios";
 import camelcaseKeys from "camelcase-keys";
 import snakecaseKeys from "snakecase-keys";
+import { anyGetAll, anyGetSingle } from "@/models/api";
 import { UUID } from "@/models/base";
 
 type Method = "GET" | "DELETE" | "POST" | "PATCH";
@@ -27,7 +28,7 @@ export class BaseApi {
     method: Method,
     data?: Record<string, any>,
     getAfterCreate = true,
-  ): Promise<unknown> {
+  ): Promise<any> {
     const config: AxiosRequestConfig = {
       url: url,
       method: method,
@@ -63,8 +64,11 @@ export class BaseApi {
     return await this.baseRequest(url, "POST", data, getAfterCreate);
   }
 
-  async readRequest(url: string): Promise<unknown> {
-    return await this.baseRequest(url, "GET");
+  async readRequest(
+    url: string,
+    options?: Record<string, any>,
+  ): Promise<anyGetSingle & anyGetAll> {
+    return await this.baseRequest(url, "GET", options);
   }
 
   async updateRequest(
@@ -96,13 +100,15 @@ export class GenericEndpoint {
   }
 
   // READ
-  async getAll(): Promise<unknown> {
-    return await this.api.readRequest(`${this.endpoint}`).catch((err) => {
-      throw err;
-    });
+  async getAll(options?: Record<string, unknown>): Promise<anyGetAll> {
+    return await this.api
+      .readRequest(`${this.endpoint}`, options)
+      .catch((err) => {
+        throw err;
+      });
   }
 
-  async getSingle(uuid: UUID): Promise<unknown> {
+  async getSingle(uuid: UUID): Promise<anyGetSingle> {
     return await this.api
       .readRequest(`${this.endpoint}${uuid}`)
       .catch((err) => {
