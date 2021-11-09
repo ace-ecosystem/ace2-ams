@@ -161,6 +161,6 @@ describe("TheAlertsTable.vue", () => {
     // Do a keyword search
     cy.get(".p-input-icon-left > .p-inputtext").type("1.2.3.4");
     // Based on created alerts, there should only be 4 now (+1 for header row)
-    cy.get("tr").should("have.length", 5);
+    cy.get("tr").should("have.length", 3);
   });
 });
