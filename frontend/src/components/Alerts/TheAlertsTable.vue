@@ -12,9 +12,12 @@
     :global-filter-fields="selectedColumns.field"
     :paginator="true"
     :resizable-columns="true"
+    :totalRecords="totalAlerts"
     :rows="10"
-    :rows-per-page-options="[5, 10, 50]"
+    :rows-per-page-options="[5, 10, 50, 100]"
     :sort-order="-1"
+    :lazy="true"
+    :loading="isLoading"
     column-resize-mode="expand"
     current-page-report-template="Showing {first} to {last} of {totalRecords}"
     data-key="uuid"
@@ -23,6 +26,7 @@
     responsive-layout="scroll"
     sort-field="eventTime"
     name="AlertsTable"
+    @page="onPage($event)"
     @rowSelect="alertSelect($event.data)"
     @rowUnselect="alertUnselect($event.data)"
     @rowSelect-all="alertSelectAll"
@@ -163,14 +167,15 @@
 
     computed: {
       ...mapGetters({
-        alerts: "alerts/queriedAlerts",
+        alerts: "alerts/visibleQueriedAlerts",
+        totalAlerts: "alerts/totalAlerts",
         selectedAlerts: "selectedAlerts/selected",
       }),
     },
 
     async created() {
       this.reset();
-      await this.loadAlerts();
+      await this.loadAlerts({ limit: 10, offset: 0 });
     },
 
     methods: {
@@ -220,10 +225,14 @@
         this.$refs.dt.exportCSV();
       },
 
-      async loadAlerts() {
+      onPage(event) {
+        this.loadAlerts({ limit: event.rows, offset: event.rows * event.page });
+      },
+
+      async loadAlerts(options) {
         this.isLoading = true;
         try {
-          await this.getAllAlerts();
+          await this.getAllAlerts(options);
         } catch (error) {
           this.error = error.message || "Something went wrong!";
         }

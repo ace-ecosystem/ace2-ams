@@ -31,18 +31,27 @@ const store = {
   state: {
     // currently opened alert
     openAlert: null,
-    // all alerts returned from current filter settings
-    queriedAlerts: [],
+    // all alerts returned from current page w/ current filter settings
+    visibleQueriedAlerts: [],
+    // total number of alerts of all pages
+    totalAlerts: 0,
   },
   getters: {
     openAlert: (state: {
       openAlert: alertSummary | null;
-      queriedAlerts: alertSummary[];
+      visibleQueriedAlerts: alertSummary[];
+      totalAlerts: number;
     }): alertSummary | null => state.openAlert,
-    queriedAlerts: (state: {
+    visibleQueriedAlerts: (state: {
       openAlert: alertSummary | null;
-      queriedAlerts: alertSummary[];
-    }): alertSummary[] => state.queriedAlerts,
+      visibleQueriedAlerts: alertSummary[];
+      totalAlerts: number;
+    }): alertSummary[] => state.visibleQueriedAlerts,
+    totalAlerts: (state: {
+      openAlert: alertSummary | null;
+      visibleQueriedAlerts: alertSummary[];
+      totalAlerts: number;
+    }): number => state.totalAlerts,
   },
   mutations: {
     SET_OPEN_ALERT(
@@ -51,11 +60,14 @@ const store = {
     ): void {
       state.openAlert = alert;
     },
-    SET_QUERIED_ALERTS(
-      state: { queriedAlerts: alertSummary[] },
+    SET_VISIBLE_QUERIED_ALERTS(
+      state: { visibleQueriedAlerts: alertSummary[] },
       alerts: alertSummary[],
     ): void {
-      state.queriedAlerts = alerts;
+      state.visibleQueriedAlerts = alerts;
+    },
+    SET_TOTAL_ALERTS(state: { totalAlerts: number }, total: number): void {
+      state.totalAlerts = total;
     },
   },
 
@@ -95,7 +107,8 @@ const store = {
             const parsedAlert = parseAlertSummary(alerts.items[index]);
             parsedAlerts.push(parsedAlert);
           }
-          commit("SET_QUERIED_ALERTS", parsedAlerts);
+          commit("SET_VISIBLE_QUERIED_ALERTS", parsedAlerts);
+          commit("SET_TOTAL_ALERTS", alerts.total);
           commit("SET_OPEN_ALERT", null);
         })
         .catch((error) => {

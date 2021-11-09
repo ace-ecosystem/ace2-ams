@@ -27,6 +27,7 @@ export class BaseApi {
     url: string,
     method: Method,
     data?: Record<string, any>,
+    options?: Record<string, any>,
     getAfterCreate = true,
   ): Promise<any> {
     const config: AxiosRequestConfig = {
@@ -37,6 +38,10 @@ export class BaseApi {
 
     if (data) {
       config["data"] = this.formatOutgoingData(data);
+    }
+
+    if (options) {
+      config["params"] = this.formatOutgoingData(options);
     }
 
     const response = await instance.request(config).catch((error) => {
@@ -61,14 +66,14 @@ export class BaseApi {
     data?: Record<string, any>,
     getAfterCreate = true,
   ): Promise<unknown> {
-    return await this.baseRequest(url, "POST", data, getAfterCreate);
+    return await this.baseRequest(url, "POST", data, {}, getAfterCreate);
   }
 
   async readRequest(
     url: string,
     options?: Record<string, any>,
   ): Promise<anyGetSingle & anyGetAll> {
-    return await this.baseRequest(url, "GET", options);
+    return await this.baseRequest(url, "GET", {}, options);
   }
 
   async updateRequest(
