@@ -98,9 +98,9 @@ const store = {
           throw error;
         });
     },
-    async getAll({ commit }: CommitFunction, options: any): Promise<void> {
+    async getAll({ commit }: CommitFunction, params: any): Promise<void> {
       await alertApi
-        .getAll(options)
+        .getAll(params)
         .then((alerts) => {
           const parsedAlerts = [];
           for (const index in alerts.items) {
@@ -122,7 +122,7 @@ const store = {
       // once we get around to updating alerts, we will need to update the base api service to have a
       // 'getAfterUpdate' option like there is for 'create'
       // then we can reset the open/queried alert(s)
-      //  might need to hadd some options to the vuex portion for that.. idk its down the road
+      //  might need to hadd some params to the vuex portion for that.. idk its down the road
       await alertApi
         .updateSingle(payload.updateData, payload.oldAlertUUID)
         .catch((error) => {

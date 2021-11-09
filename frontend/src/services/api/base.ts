@@ -26,8 +26,10 @@ export class BaseApi {
   protected async baseRequest(
     url: string,
     method: Method,
-    data?: Record<string, any>,
-    options?: Record<string, any>,
+    options?: {
+      data?: Record<string, any>;
+      params?: Record<string, any>;
+    },
     getAfterCreate = true,
   ): Promise<any> {
     const config: AxiosRequestConfig = {
@@ -36,12 +38,14 @@ export class BaseApi {
       withCredentials: true,
     };
 
-    if (data) {
-      config["data"] = this.formatOutgoingData(data);
-    }
-
     if (options) {
-      config["params"] = this.formatOutgoingData(options);
+      if (options.data) {
+        config["data"] = this.formatOutgoingData(options.data);
+      }
+
+      if (options.params) {
+        config["params"] = this.formatOutgoingData(options.params);
+      }
     }
 
     const response = await instance.request(config).catch((error) => {
@@ -66,21 +70,21 @@ export class BaseApi {
     data?: Record<string, any>,
     getAfterCreate = true,
   ): Promise<unknown> {
-    return await this.baseRequest(url, "POST", data, {}, getAfterCreate);
+    return await this.baseRequest(url, "POST", { data: data }, getAfterCreate);
   }
 
   async readRequest(
     url: string,
-    options?: Record<string, any>,
+    params?: Record<string, any>,
   ): Promise<anyGetSingle & anyGetAll> {
-    return await this.baseRequest(url, "GET", {}, options);
+    return await this.baseRequest(url, "GET", { params: params });
   }
 
   async updateRequest(
     url: string,
     data?: Record<string, any>,
   ): Promise<unknown> {
-    return await this.baseRequest(url, "PATCH", data);
+    return await this.baseRequest(url, "PATCH", { data: data });
   }
 }
 
@@ -105,9 +109,9 @@ export class GenericEndpoint {
   }
 
   // READ
-  async getAll(options?: Record<string, unknown>): Promise<anyGetAll> {
+  async getAll(params?: Record<string, unknown>): Promise<anyGetAll> {
     return await this.api
-      .readRequest(`${this.endpoint}`, options)
+      .readRequest(`${this.endpoint}`, params)
       .catch((err) => {
         throw err;
       });
