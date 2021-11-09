@@ -2,7 +2,7 @@ import { AxiosRequestConfig } from "axios";
 import instance from "./axios";
 import camelcaseKeys from "camelcase-keys";
 import snakecaseKeys from "snakecase-keys";
-import { anyGetAll, anyGetSingle } from "@/models/api";
+import { anyGetAll, anyGetSingle, getAllParams } from "@/models/api";
 import { UUID } from "@/models/base";
 
 type Method = "GET" | "DELETE" | "POST" | "PATCH";
@@ -28,7 +28,7 @@ export class BaseApi {
     method: Method,
     options?: {
       data?: Record<string, any>;
-      params?: Record<string, any>;
+      params?: getAllParams;
     },
     getAfterCreate = true,
   ): Promise<any> {
@@ -75,7 +75,7 @@ export class BaseApi {
 
   async readRequest(
     url: string,
-    params?: Record<string, any>,
+    params?: getAllParams,
   ): Promise<anyGetSingle & anyGetAll> {
     return await this.baseRequest(url, "GET", { params: params });
   }
@@ -109,7 +109,7 @@ export class GenericEndpoint {
   }
 
   // READ
-  async getAll(params?: Record<string, unknown>): Promise<anyGetAll> {
+  async getAll(params?: getAllParams): Promise<anyGetAll> {
     return await this.api
       .readRequest(`${this.endpoint}`, params)
       .catch((err) => {

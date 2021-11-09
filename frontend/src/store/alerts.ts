@@ -2,6 +2,7 @@ import alertApi from "@/services/api/alerts";
 import { CommitFunction } from "@/store/index";
 import { alert, alertSummary } from "@/models/alert";
 import { UUID } from "@/models/base";
+import { getAllParams } from "@/models/api";
 
 export function parseAlertSummary(alert: alert): alertSummary {
   return {
@@ -98,7 +99,10 @@ const store = {
           throw error;
         });
     },
-    async getAll({ commit }: CommitFunction, params: any): Promise<void> {
+    async getAll(
+      { commit }: CommitFunction,
+      params: getAllParams,
+    ): Promise<void> {
       await alertApi
         .getAll(params)
         .then((alerts) => {
