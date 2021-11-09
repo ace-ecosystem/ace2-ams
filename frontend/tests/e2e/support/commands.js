@@ -41,20 +41,3 @@ Cypress.Commands.add("login", () => {
 Cypress.Commands.add("addFormObservable", () => {
   cy.get("#add-observable").click();
 });
-
-Cypress.Commands.add("toggleLastFormObservableMultiInput", () => {
-  cy.get("div[name='observable-type']").last().click();
-});
-
-Cypress.Commands.add("switchLastFormObservableType", (type) => {
-  cy.get("div[name='observable-type']").last().click();
-  cy.get("div[name='observable-input']")
-    .get(".p-dropdown-item", { timeout: 5_000 })
-    .contains(type)
-    .click();
-});
-
-// type should be 'input' or 'textarea'
-Cypress.Commands.add("typeLastFormObservableValue", (type, typeText) => {
-  cy.get("div[name='observable-value']").find(type).last().type(typeText);
-});

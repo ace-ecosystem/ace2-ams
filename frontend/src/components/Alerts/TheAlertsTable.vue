@@ -1,3 +1,4 @@
+/* eslint-disable vue/attribute-hyphenation */
 <!-- TheAlertsTable.vue -->
 <!-- The table where all currently filtered alerts are displayed, selected to take action, or link to an individual alert page -->
 
@@ -8,36 +9,24 @@
     v-model:filters="alertTableFilter"
     v-model:selection="selectedRows"
     :value="alerts"
-    :global-filter-fields="[
-      'alert_date',
-      'disposition',
-      'disposition_by',
-      'event_date',
-      'name',
-      'owner',
-      'queue',
-      'remediated_by',
-      'remediated_date',
-      'remediation_status',
-      'type',
-    ]"
+    :global-filter-fields="selectedColumns.field"
     :paginator="true"
     :resizable-columns="true"
     :rows="10"
     :rows-per-page-options="[5, 10, 50]"
-    :sort-order="1"
-    column-resize-mode="fit"
+    :sort-order="-1"
+    column-resize-mode="expand"
     current-page-report-template="Showing {first} to {last} of {totalRecords}"
-    data-key="id"
+    data-key="uuid"
     paginator-template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
     removable-sort
     responsive-layout="scroll"
-    sort-field="name"
+    sort-field="eventTime"
     name="AlertsTable"
-    @row-select="alertSelect($event.data)"
-    @row-unselect="alertUnselect($event.data)"
-    @row-select-all="alertSelectAll"
-    @row-unselect-all="alertUnselectAll"
+    @rowSelect="alertSelect($event.data)"
+    @rowUnselect="alertUnselect($event.data)"
+    @rowSelect-all="alertSelectAll"
+    @rowUnselect-all="alertUnselectAll"
   >
     <!--        ALERT TABLE TOOLBAR-->
     <template #header>
@@ -63,7 +52,7 @@
           <Button
             icon="pi pi-refresh"
             class="p-button-rounded p-m-1"
-            @click="resetAlertTable()"
+            @click="reset()"
           />
           <!--            EXPORT TABLE -->
           <Button
@@ -79,9 +68,10 @@
     <Column id="alert-expand" :expander="true" header-style="width: 3rem" />
 
     <!-- CHECKBOX COLUMN -->
+    <!-- It's annoying, but the PrimeVue DataTable selectionMode attribute works when camelCase -->
     <Column
       id="alert-select"
-      selection-mode="multiple"
+      selectionMode="multiple"
       header-style="width: 3em"
     />
 
@@ -114,7 +104,7 @@
       <h5>Observables:</h5>
       <ul>
         <li v-for="obs of slotProps.data.observables" :key="obs.value">
-          {{ obs.type }} - {{ obs.value }}
+          {{ obs }}
         </li>
       </ul>
     </template>
@@ -122,6 +112,8 @@
 </template>
 
 <script>
+  import { mapActions, mapGetters } from "vuex";
+
   import Button from "primevue/button";
   import Column from "primevue/column";
   import DataTable from "primevue/datatable";
@@ -145,60 +137,67 @@
 
     data() {
       return {
-        alerts: [],
         alertTableFilter: null,
 
         columns: [
-          { field: "alert_date", header: "Alert Date" },
+          { field: "dispositionTime", header: "Dispositioned Time" },
+          { field: "insertTime", header: "Insert Date" },
+          { field: "eventTime", header: "Event Date" },
           { field: "name", header: "Name" },
-          { field: "disposition", header: "Disposition" },
           { field: "owner", header: "Owner" },
-          { field: "type", header: "Type" },
-          { field: "disposition_by", header: "Dispositioned By" },
-          { field: "event_date", header: "Event Date" },
+          { field: "disposition", header: "Disposition" },
+          { field: "dispositionUser", header: "Dispositioned By" },
           { field: "queue", header: "Queue" },
-          { field: "remediated_by", header: "Remediated By" },
-          { field: "remediated_date", header: "Remediated Date" },
-          { field: "remediation_status", header: "Remediation Status" },
+          { field: "type", header: "Type" },
         ],
 
+        defaultColumns: ["eventTime", "name", "owner", "disposition"],
+
         expandedRows: [],
+        error: null,
+        isLoading: false,
         selectedColumns: null,
         selectedRows: null,
       };
     },
 
+    computed: {
+      ...mapGetters({
+        alerts: "alerts/queriedAlerts",
+        selectedAlerts: "selectedAlerts/selected",
+      }),
+    },
+
     async created() {
-      this.resetAlertTable();
-      // this is where we can query for alerts to show
-      // this.alerts = await alert.getAlerts();
+      this.reset();
+      await this.loadAlerts();
     },
 
     methods: {
-      alertSelect(alert) {
-        this.$store.dispatch("selectedAlerts/select", alert.uuid);
-      },
-
-      alertUnselect(alert) {
-        this.$store.dispatch("selectedAlerts/unselect", alert.uuid);
-      },
+      ...mapActions({
+        alertSelect: "selectedAlerts/select",
+        alertUnselect: "selectedAlerts/selectAll",
+        alertUnselectAll: "selectedAlerts/unselectAll",
+        selectAll: "selectedAlerts/selectAll",
+        getAllAlerts: "alerts/getAll",
+      }),
 
       alertSelectAll() {
-        let all_alert_uuids = [];
+        let allAlertUuids = [];
         for (let i = 0; i < this.alerts.length; i++) {
-          all_alert_uuids.push(this.alerts[i].uuid);
+          allAlertUuids.push(this.alerts[i].uuid);
         }
-        this.$store.dispatch("selectedAlerts/selectAll", all_alert_uuids);
+        this.selectAll(allAlertUuids);
       },
 
-      alertUnselectAll() {
-        this.$store.dispatch("selectedAlerts/unselectAll");
-      },
-
-      resetAlertTable() {
+      reset() {
         // Sets the alert table selected columns and keyword search back to default
         this.initAlertTable();
-        this.selectedColumns = this.columns.slice(0, 5);
+        this.selectedColumns = [];
+        this.selectedColumns = this.columns.filter((column) => {
+          return this.defaultColumns.includes(column.field);
+        });
+        this.error = null;
       },
 
       initAlertTable() {
@@ -210,6 +209,7 @@
 
       onColumnToggle(value) {
         // Toggles selected columns to display
+        // This method required/provided by Primevue 'ColToggle' docs
         this.selectedColumns = this.columns.filter((col) =>
           value.includes(col),
         );
@@ -218,6 +218,16 @@
       exportCSV() {
         // Exports currently filtered alerts to CSV
         this.$refs.dt.exportCSV();
+      },
+
+      async loadAlerts() {
+        this.isLoading = true;
+        try {
+          await this.getAllAlerts();
+        } catch (error) {
+          this.error = error.message || "Something went wrong!";
+        }
+        this.isLoading = false;
       },
     },
   };

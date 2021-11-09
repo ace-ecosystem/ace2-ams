@@ -1,5 +1,7 @@
 // Taken from: https://markus.oberlehner.net/blog/generic-content-vuex-modules/
 
+import { genericObject } from "@/models/base";
+
 // Many of our API calls serve solely to get a list of data types from the backend to display in the GUI
 // To reduce the number of nearly identical vuex stores, we can use this base vuex module
 // Note that only the getAll action is implemented at the moment
@@ -7,7 +9,7 @@
 
 export default function makeGenericModule(service: any = {}): {
   namespaced: boolean;
-  state: { items: any[] };
+  state: { items: genericObject[] };
   getters: {
     allItems: (state: any, getters: any) => any;
   };
