@@ -27,8 +27,8 @@
     sort-field="eventTime"
     name="AlertsTable"
     @page="onPage($event)"
-    @rowSelect="alertSelect($event.data)"
-    @rowUnselect="alertUnselect($event.data)"
+    @rowSelect="alertSelect($event.data.uuid)"
+    @rowUnselect="alertUnselect($event.data.uuid)"
     @rowSelect-all="alertSelectAll"
     @rowUnselect-all="alertUnselectAll"
   >
@@ -181,7 +181,7 @@
     methods: {
       ...mapActions({
         alertSelect: "selectedAlerts/select",
-        alertUnselect: "selectedAlerts/selectAll",
+        alertUnselect: "selectedAlerts/unselect",
         alertUnselectAll: "selectedAlerts/unselectAll",
         selectAll: "selectedAlerts/selectAll",
         getAllAlerts: "alerts/getAll",

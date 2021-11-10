@@ -21,7 +21,7 @@ export function parseAlertSummary(alert: alert): alertSummary {
     queue: alert.queue ? alert.queue.value : "None",
     tags: alert.tags ? alert.tags : [],
     tool: alert.tool ? alert.tool.value : "None",
-    type: alert.type ? alert.type : "",
+    type: alert.type ? alert.type.value : "",
     uuid: alert.uuid,
   };
 }
