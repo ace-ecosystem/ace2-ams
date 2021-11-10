@@ -92,7 +92,7 @@ describe("alerts utilities", () => {
       queue: "Default",
       tags: [{ value: "a tag", description: "tag", uuid: "uuid1" }],
       tool: "GUI",
-      type: { value: "Manual", description: "type", uuid: "uuid1" },
+      type: "Manual",
       uuid: "uuid1",
     });
   });
@@ -102,22 +102,35 @@ describe("alerts Mutations", () => {
   it("will set the openAlert state value to a given alert object", () => {
     const state = {
       openAlert: null,
-      queriedAlerts: [],
+      visibleQueriedAlerts: [],
+      totalAlerts: 0,
     };
     const store = new Vuex.Store({ state, mutations });
 
     store.commit("SET_OPEN_ALERT", mockAlert);
     expect(state.openAlert).toEqual(mockAlert);
   });
-  it("will add a list of queried alerts to the queriedAlerts list", () => {
+  it("will add a list of queried alerts to the visibleQueriedAlerts list", () => {
     const state = {
       openAlert: null,
-      queriedAlerts: [],
+      visibleQueriedAlerts: [],
+      totalAlerts: 0,
     };
     const store = new Vuex.Store({ state, mutations });
 
-    store.commit("SET_QUERIED_ALERTS", [mockAlert, mockAlert]);
-    expect(state.queriedAlerts.length).toBe(2);
+    store.commit("SET_VISIBLE_QUERIED_ALERTS", [mockAlert, mockAlert]);
+    expect(state.visibleQueriedAlerts.length).toBe(2);
+  });
+  it("will set the total alerts to a given number", () => {
+    const state = {
+      openAlert: null,
+      visibleQueriedAlerts: [],
+      totalAlerts: 0,
+    };
+    const store = new Vuex.Store({ state, mutations });
+
+    store.commit("SET_TOTAL_ALERTS", 2);
+    expect(state.totalAlerts).toEqual(2);
   });
 });
 
@@ -125,7 +138,8 @@ describe("alerts Actions", () => {
   it("will request to create an alert with a given AlertCreate object, and set the openAlert to result on success", async () => {
     const state = {
       openAlert: null,
-      queriedAlerts: [],
+      visibleQueriedAlerts: [],
+      totalAlerts: 0,
     };
     const store = new Vuex.Store({ state, mutations, actions });
     const mockRequest = myNock
@@ -141,7 +155,8 @@ describe("alerts Actions", () => {
   it("will fetch alert data given an alert ID", async () => {
     const state = {
       openAlert: null,
-      queriedAlerts: [],
+      visibleQueriedAlerts: [],
+      totalAlerts: 0,
     };
     const store = new Vuex.Store({ state, mutations, actions });
     const mockRequest = myNock.get("/alert/uuid1").reply(200, mockAlert);
@@ -155,24 +170,46 @@ describe("alerts Actions", () => {
   it("will fetch all alerts when getAll is called and no filter options are set", async () => {
     const state = {
       openAlert: null,
-      queriedAlerts: [],
+      visibleQueriedAlerts: [],
+      totalAlerts: 0,
     };
     const store = new Vuex.Store({ state, mutations, actions });
     const mockRequest = myNock
       .get("/alert/")
-      .reply(200, { items: [{ uuid: "uuid1" }, { uuid: "uuid2" }] });
+      .reply(200, { items: [{ uuid: "uuid1" }, { uuid: "uuid2" }], total: 2 });
     await store.dispatch("getAll");
 
     expect(mockRequest.isDone()).toEqual(true);
 
     expect(state.openAlert).toBeNull();
-    expect(state.queriedAlerts).toHaveLength(2);
+    expect(state.totalAlerts).toEqual(2);
+    expect(state.visibleQueriedAlerts).toHaveLength(2);
+  });
+
+  it("will pass params along when getAll is and pagination options are set", async () => {
+    const state = {
+      openAlert: null,
+      visibleQueriedAlerts: [],
+      totalAlerts: 0,
+    };
+    const store = new Vuex.Store({ state, mutations, actions });
+    const mockRequest = myNock
+      .get("/alert/?limit=2&offset=0")
+      .reply(200, { items: [{ uuid: "uuid1" }, { uuid: "uuid2" }], total: 2 });
+    await store.dispatch("getAll", { limit: 2, offset: 0 });
+
+    expect(mockRequest.isDone()).toEqual(true);
+
+    expect(state.openAlert).toBeNull();
+    expect(state.totalAlerts).toEqual(2);
+    expect(state.visibleQueriedAlerts).toHaveLength(2);
   });
 
   it("will make a request to update an alert given the UUID and update data upon the updateAlert action", async () => {
     const state = {
       openAlert: null,
-      queriedAlerts: [],
+      visibleQueriedAlerts: [],
+      totalAlerts: 0,
     };
     const store = new Vuex.Store({ state, mutations, actions });
     const mockRequest = myNock.patch("/alert/uuid1").reply(200);
@@ -184,13 +221,14 @@ describe("alerts Actions", () => {
     expect(mockRequest.isDone()).toEqual(true);
     // None of these should be changed
     expect(state.openAlert).toBeNull();
-    expect(state.queriedAlerts).toEqual([]);
+    expect(state.visibleQueriedAlerts).toEqual([]);
   });
 
   it("will make multiple reqs to update multiple alerts given a list of UUIDS and update data upon the updateAlerts action", async () => {
     const state = {
       openAlert: null,
-      queriedAlerts: [],
+      visibleQueriedAlerts: [],
+      totalAlerts: 0,
     };
     const store = new Vuex.Store({ state, mutations, actions });
     const mockRequest = myNock
@@ -205,13 +243,14 @@ describe("alerts Actions", () => {
     expect(mockRequest.isDone()).toEqual(true);
     // None of these should be changed
     expect(state.openAlert).toBeNull();
-    expect(state.queriedAlerts).toEqual([]);
+    expect(state.visibleQueriedAlerts).toEqual([]);
   });
 
   it("will throw an error when a request fails in any action", async () => {
     const state = {
       openAlert: null,
-      queriedAlerts: [],
+      visibleQueriedAlerts: [],
+      totalAlerts: 0,
     };
     const store = new Vuex.Store({ state, mutations, actions });
     const mockRequest = myNock
