@@ -275,6 +275,73 @@ def test_get_filter_observable(client_valid_access_token, db):
     assert any(a["uuid"] == str(alert3.uuid) for a in get.json()["items"])
 
 
+def test_get_filter_observable_types(client_valid_access_token, db):
+    # Create an empty alert
+    helpers.create_alert(db=db)
+
+    # Create some alerts with one observable
+    alert1 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1.analysis, db=db
+    )
+
+    # Create an alert with multiple observables
+    alert2 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value_asdf", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value1", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+
+    # There should be 3 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 3
+
+    # There should be 2 alerts when we filter by just test_type1
+    get = client_valid_access_token.get("/api/alert/?observable_types=test_type1")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(alert1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(alert2.uuid) for a in get.json()["items"])
+
+    # There should only be 1 alert when we filter by the test_type1 and test_type2
+    get = client_valid_access_token.get("/api/alert/?observable_types=test_type1,test_type2")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+
+
+def test_get_filter_observable_and_observable_types(client_valid_access_token, db):
+    # Create an empty alert
+    helpers.create_alert(db=db)
+
+    # Create an alert with multiple observables
+    alert2 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value1", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+
+    # Create an alert with one observable
+    alert3 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value1", alert=alert3, parent_analysis=alert3.analysis, db=db
+    )
+
+    # There should be 3 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 3
+
+    # There should only be 1 alert when we filter by observable and observable_types
+    get = client_valid_access_token.get("/api/alert/?observable_types=test_type1&observable=test_type2|test_value2")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+
+
 def test_get_filter_owner(client_valid_access_token, db):
     # Create an analyst user
     helpers.create_user(username="analyst", db=db)
