@@ -157,7 +157,7 @@ describe("TheAlertsTable.vue", () => {
     cy.get(".p-datatable-row-expansion > td").should("not.exist");
   });
 
-  it("shows observable dropdown when arrow is clicked", () => {
+  it("lazy pagination works correctly when page size or number is changed", () => {
     cy.intercept("GET", "/api/alert/?limit=10&offset=0").as(
       "getAlertsDefaultRows",
     );
