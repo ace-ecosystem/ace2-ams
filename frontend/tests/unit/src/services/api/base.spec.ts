@@ -91,6 +91,12 @@ describe("BaseAPI calls", () => {
     ]);
   });
 
+  it("will correctly format URL parameters when given", async () => {
+    myNock.get("/read?limit=5&offset=0").reply(200, "Read successful");
+    const res = await api.readRequest("/read", { limit: 5, offset: 0 });
+    expect(res).toEqual("Read successful");
+  });
+
   it("will throw an error if a request completes, but without a successful response code", async () => {
     myNock.patch("/update").reply(404, "Not found :(");
     await expect(api.updateRequest("/update")).rejects.toEqual(
