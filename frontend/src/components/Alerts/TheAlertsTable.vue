@@ -67,7 +67,6 @@
     <Column
       id="alert-select"
       header-style="width: 3em"
-      @onChange="console.log($event)"
       selectionMode="multiple"
     />
 
