@@ -225,8 +225,8 @@
         this.$refs.dt.exportCSV();
       },
 
-      onPage(event) {
-        this.loadAlerts({
+      async onPage(event) {
+        await this.loadAlerts({
           limit: event.rows,
           offset: event.rows * event.page,
         });
