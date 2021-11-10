@@ -12,6 +12,7 @@ import Toolbar from "primevue/toolbar";
 import DataTable from "primevue/datatable";
 import Button from "primevue/button";
 import Column from "primevue/column";
+import Paginator from "primevue/paginator";
 import nock from "nock";
 
 // DATA/CREATION
@@ -53,6 +54,7 @@ describe("TheAlertsTable data/creation", () => {
     expect(wrapper.findComponent(InputText).exists()).toBe(true);
     expect(wrapper.findComponent(MultiSelect).exists()).toBe(true);
     expect(wrapper.findComponent(Toolbar).exists()).toBe(true);
+    expect(wrapper.findComponent(Paginator).exists()).toBe(true);
   });
 
   it("initializes data as expected", async () => {
@@ -88,6 +90,7 @@ describe("TheAlertsTable data/creation", () => {
     expect(wrapper.vm.error).toBeNull();
     expect(wrapper.vm.alerts).toHaveLength(2);
     expect(wrapper.vm.totalAlerts).toEqual(2);
+    expect(wrapper.vm.numRows).toEqual(10);
   });
 });
 
@@ -154,6 +157,8 @@ describe("TheAlertsTable methods success", () => {
         total: 2,
       });
     await wrapper.vm.onPage({ rows: 1, page: 1 });
+    expect(wrapper.vm.numRows).toEqual(1);
+    expect(wrapper.vm.selectedRows).toEqual([]);
     expect(mockRequest.isDone()).toEqual(true);
   });
 });

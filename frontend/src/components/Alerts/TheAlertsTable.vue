@@ -10,27 +10,18 @@
     v-model:selection="selectedRows"
     :value="alerts"
     :global-filter-fields="selectedColumns.field"
-    :paginator="true"
     :resizable-columns="true"
-    :totalRecords="totalAlerts"
-    :rows="10"
-    :rows-per-page-options="[5, 10, 50, 100]"
     :sort-order="-1"
-    :lazy="true"
     :loading="isLoading"
     column-resize-mode="expand"
-    current-page-report-template="Showing {first} to {last} of {totalRecords}"
     data-key="uuid"
-    paginator-template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
     removable-sort
     responsive-layout="scroll"
     sort-field="eventTime"
-    name="AlertsTable"
-    @page="onPage($event)"
     @rowSelect="alertSelect($event.data.uuid)"
     @rowUnselect="alertUnselect($event.data.uuid)"
-    @rowSelect-all="alertSelectAll"
-    @rowUnselect-all="alertUnselectAll"
+    @rowSelect-all="alertSelectAll(allAlertUuids)"
+    @rowUnselect-all="alertUnselectAll()"
   >
     <!--        ALERT TABLE TOOLBAR-->
     <template #header>
@@ -75,8 +66,9 @@
     <!-- It's annoying, but the PrimeVue DataTable selectionMode attribute works when camelCase -->
     <Column
       id="alert-select"
-      selectionMode="multiple"
       header-style="width: 3em"
+      @onChange="console.log($event)"
+      selectionMode="multiple"
     />
 
     <!-- DATA COLUMN -->
@@ -113,6 +105,17 @@
       </ul>
     </template>
   </DataTable>
+  <Paginator
+    :rows="numRows"
+    :rows-per-page-options="[5, 10, 50, 100]"
+    :total-records="totalAlerts"
+    template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+    current-page-report-template="Showing {first} to {last} of {totalRecords}"
+    @page="
+      onPage($event);
+      alertUnselectAll();
+    "
+  ></Paginator>
 </template>
 
 <script>
@@ -126,6 +129,7 @@
   import MultiSelect from "primevue/multiselect";
   import Tag from "primevue/tag";
   import Toolbar from "primevue/toolbar";
+  import Paginator from "primevue/paginator";
 
   export default {
     name: "TheAlertsTable",
@@ -137,6 +141,7 @@
       MultiSelect,
       Tag,
       Toolbar,
+      Paginator,
     },
 
     data() {
@@ -162,12 +167,14 @@
         isLoading: false,
         selectedColumns: null,
         selectedRows: null,
+        numRows: 10,
       };
     },
 
     computed: {
       ...mapGetters({
         alerts: "alerts/visibleQueriedAlerts",
+        allAlertUuids: "alerts/visibleQueriedAlertsUuids",
         totalAlerts: "alerts/totalAlerts",
         selectedAlerts: "selectedAlerts/selected",
       }),
@@ -175,7 +182,7 @@
 
     async created() {
       this.reset();
-      await this.loadAlerts({ limit: 10, offset: 0 });
+      await this.loadAlerts({ limit: this.numRows, offset: 0 });
     },
 
     methods: {
@@ -183,17 +190,9 @@
         alertSelect: "selectedAlerts/select",
         alertUnselect: "selectedAlerts/unselect",
         alertUnselectAll: "selectedAlerts/unselectAll",
-        selectAll: "selectedAlerts/selectAll",
+        alertSelectAll: "selectedAlerts/selectAll",
         getAllAlerts: "alerts/getAll",
       }),
-
-      alertSelectAll() {
-        let allAlertUuids = [];
-        for (let i = 0; i < this.alerts.length; i++) {
-          allAlertUuids.push(this.alerts[i].uuid);
-        }
-        this.selectAll(allAlertUuids);
-      },
 
       reset() {
         // Sets the alert table selected columns and keyword search back to default
@@ -226,9 +225,11 @@
       },
 
       async onPage(event) {
+        this.selectedRows = [];
+        this.numRows = event.rows;
         await this.loadAlerts({
-          limit: event.rows,
-          offset: event.rows * event.page,
+          limit: this.numRows,
+          offset: this.numRows * event.page,
         });
       },
 

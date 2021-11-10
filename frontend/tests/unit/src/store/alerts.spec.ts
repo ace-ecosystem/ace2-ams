@@ -92,7 +92,7 @@ describe("alerts utilities", () => {
       queue: "Default",
       tags: [{ value: "a tag", description: "tag", uuid: "uuid1" }],
       tool: "GUI",
-      type: { value: "Manual", description: "type", uuid: "uuid1" },
+      type: "Manual",
       uuid: "uuid1",
     });
   });

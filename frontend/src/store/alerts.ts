@@ -48,6 +48,17 @@ const store = {
       visibleQueriedAlerts: alertSummary[];
       totalAlerts: number;
     }): alertSummary[] => state.visibleQueriedAlerts,
+    visibleQueriedAlertsUuids: (state: {
+      openAlert: alertSummary | null;
+      visibleQueriedAlerts: alertSummary[];
+      totalAlerts: number;
+    }): UUID[] => {
+      const allAlertUuids = [];
+      for (let i = 0; i < state.visibleQueriedAlerts.length; i++) {
+        allAlertUuids.push(state.visibleQueriedAlerts[i].uuid);
+      }
+      return allAlertUuids;
+    },
     totalAlerts: (state: {
       openAlert: alertSummary | null;
       visibleQueriedAlerts: alertSummary[];
