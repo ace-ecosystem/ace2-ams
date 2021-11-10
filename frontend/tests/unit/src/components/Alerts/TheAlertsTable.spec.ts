@@ -12,23 +12,34 @@ import Toolbar from "primevue/toolbar";
 import DataTable from "primevue/datatable";
 import Button from "primevue/button";
 import Column from "primevue/column";
+import nock from "nock";
 
 // DATA/CREATION
 describe("TheAlertsTable data/creation", () => {
-  myNock
-    .get("/alert/")
-    .times(4)
-    .reply(200, { items: [{ uuid: "alert_1" }, { uuid: "alert_2" }] });
-
   const wrapper = mount(TheAlertsTable, {
     global: {
       plugins: [store, PrimeVue, router],
     },
   });
 
+  beforeAll(async () => {
+    nock.cleanAll();
+    myNock
+      .get("/alert/?limit=10&offset=0")
+      .reply(200, {
+        items: [{ uuid: "alert_1" }, { uuid: "alert_2" }],
+        total: 2,
+      })
+      .persist();
+  });
+
   beforeEach(async () => {
     wrapper.vm.reset();
-    await wrapper.vm.loadAlerts();
+    await wrapper.vm.loadAlerts({ limit: 10, offset: 0 });
+  });
+
+  afterAll(() => {
+    nock.cleanAll();
   });
 
   it("renders", async () => {
@@ -76,25 +87,36 @@ describe("TheAlertsTable data/creation", () => {
     expect(wrapper.vm.isLoading).toEqual(false);
     expect(wrapper.vm.error).toBeNull();
     expect(wrapper.vm.alerts).toHaveLength(2);
+    expect(wrapper.vm.totalAlerts).toEqual(2);
   });
 });
 
-// METHODS
-describe("AnalyzeAlertForm methods", () => {
-  myNock
-    .get("/alert/")
-    .times(5)
-    .reply(200, { items: [{ uuid: "alert_1" }, { uuid: "alert_2" }] });
-
+// METHODS (SUCCESS)
+describe("TheAlertsTable methods success", () => {
   const wrapper = mount(TheAlertsTable, {
     global: {
       plugins: [store, PrimeVue, router],
     },
   });
 
+  beforeAll(async () => {
+    nock.cleanAll();
+    myNock
+      .get("/alert/?limit=10&offset=0")
+      .reply(200, {
+        items: [{ uuid: "alert_1" }, { uuid: "alert_2" }],
+        total: 2,
+      })
+      .persist();
+  });
+
   beforeEach(async () => {
     wrapper.vm.reset();
-    await wrapper.vm.loadAlerts();
+    await wrapper.vm.loadAlerts({ limit: 10, offset: 0 });
+  });
+
+  afterAll(() => {
+    nock.cleanAll();
   });
 
   it("will reset Alert table to defaults upon reset()", async () => {
@@ -123,18 +145,44 @@ describe("AnalyzeAlertForm methods", () => {
       global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
   });
+  it("will reload the alerts with new pagination settings on 'onPage'", async () => {
+    const mockRequest = myNock
+      .get("/alert/?limit=1&offset=1")
+      .thrice()
+      .reply(200, {
+        items: [{ uuid: "alert_2" }],
+        total: 2,
+      });
+    await wrapper.vm.onPage({ rows: 1, page: 1 });
+    expect(mockRequest.isDone()).toEqual(true);
+  });
+});
 
-  it("will build a list of UUIDs from currently queried alerts and selectAll within the selectedAlerts store upon alertSelectAll()", async () => {
-    expect(wrapper.vm.selectedAlerts).toEqual([]);
-    wrapper.vm.alertSelectAll();
-    expect(wrapper.vm.selectedAlerts).toEqual(["alert_1", "alert_2"]);
+// METHODS (FAILED)
+describe("TheAlertsTable methods failed", () => {
+  const wrapper = mount(TheAlertsTable, {
+    global: {
+      plugins: [store, PrimeVue, router],
+    },
+  });
+
+  beforeAll(async () => {
+    nock.cleanAll();
+  });
+
+  afterAll(() => {
+    nock.cleanAll();
   });
 
   it("will set the error data property to the given error if getAllAlerts fails within loadAlerts", async () => {
-    myNock.get("/alert/").reply(403, "Request Failed");
+    const mockRequest = myNock
+      .get("/alert/?limit=10&offset=0")
+      .twice()
+      .reply(403, "Request Failed");
 
     expect(wrapper.vm.error).toBeNull();
-    wrapper.vm.loadAlerts();
-    expect(wrapper.vm.error).toBeNull();
+    await wrapper.vm.loadAlerts({ limit: 10, offset: 0 });
+    expect(mockRequest.isDone()).toEqual(true);
+    expect(wrapper.vm.error).toEqual("Request failed with status code 403");
   });
 });

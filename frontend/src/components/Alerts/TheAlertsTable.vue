@@ -226,7 +226,10 @@
       },
 
       onPage(event) {
-        this.loadAlerts({ limit: event.rows, offset: event.rows * event.page });
+        this.loadAlerts({
+          limit: event.rows,
+          offset: event.rows * event.page,
+        });
       },
 
       async loadAlerts(options) {
