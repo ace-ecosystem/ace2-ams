@@ -84,6 +84,11 @@ helpers.api_route_create(router, create_alert)
 #
 
 
+def _join_as_subquery(query: select, subquery: select):
+    s = subquery.subquery()
+    return query.join(s, Alert.uuid == s.c.uuid).group_by(Alert.uuid, Node.uuid)
+
+
 def get_all_alerts(
     db: Session = Depends(get_db),
     disposition: Optional[str] = None,
@@ -98,6 +103,7 @@ def get_all_alerts(
     name: Optional[str] = None,
     observable: Optional[str] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
     observable_types: Optional[str] = None,
+    observable_value: Optional[str] = None,
     owner: Optional[str] = None,
     queue: Optional[str] = None,
     tags: Optional[str] = None,
@@ -110,44 +116,60 @@ def get_all_alerts(
     query = select(Alert)
 
     if disposition:
+        disposition_query = select(Alert)
         if disposition.lower() == "none":
-            query = query.where(Alert.disposition_uuid == None)  # pylint: disable=singleton-comparison
+            disposition_query = disposition_query.where(
+                Alert.disposition_uuid == None  # pylint: disable=singleton-comparison
+            )
         else:
-            query = query.join(AlertDisposition).where(AlertDisposition.value == disposition)
+            disposition_query = disposition_query.join(AlertDisposition).where(AlertDisposition.value == disposition)
+
+        query = _join_as_subquery(query, disposition_query)
 
     if disposition_user:
-        query = query.join(User, onclause=Alert.disposition_user_uuid == User.uuid).where(
-            User.username == disposition_user
+        disposition_user_query = (
+            select(Alert)
+            .join(User, onclause=Alert.disposition_user_uuid == User.uuid)
+            .where(User.username == disposition_user)
         )
 
+        query = _join_as_subquery(query, disposition_user_query)
+
     if dispositioned_after:
-        query = query.where(Alert.disposition_time > dispositioned_after)
+        dispositioned_after_query = select(Alert).where(Alert.disposition_time > dispositioned_after)
+        query = _join_as_subquery(query, dispositioned_after_query)
 
     if dispositioned_before:
-        query = query.where(Alert.disposition_time < dispositioned_before)
+        dispositioned_before_query = select(Alert).where(Alert.disposition_time < dispositioned_before)
+        query = _join_as_subquery(query, dispositioned_before_query)
 
     if event_time_after:
-        query = query.where(Alert.event_time > event_time_after)
+        event_time_after_query = select(Alert).where(Alert.event_time > event_time_after)
+        query = _join_as_subquery(query, event_time_after_query)
 
     if event_time_before:
-        query = query.where(Alert.event_time < event_time_before)
+        event_time_before_query = select(Alert).where(Alert.event_time < event_time_before)
+        query = _join_as_subquery(query, event_time_before_query)
 
     if event_uuid:
-        query = query.join(Event, onclause=Alert.event_uuid == Event.uuid).where(Event.uuid == event_uuid)
+        event_uuid_query = (
+            select(Alert).join(Event, onclause=Alert.event_uuid == Event.uuid).where(Event.uuid == event_uuid)
+        )
+        query = _join_as_subquery(query, event_uuid_query)
 
     if insert_time_after:
-        query = query.where(Alert.insert_time > insert_time_after)
+        insert_time_after_query = select(Alert).where(Alert.insert_time > insert_time_after)
+        query = _join_as_subquery(query, insert_time_after_query)
 
     if insert_time_before:
-        query = query.where(Alert.insert_time < insert_time_before)
+        insert_time_before_query = select(Alert).where(Alert.insert_time < insert_time_before)
+        query = _join_as_subquery(query, insert_time_before_query)
 
     if name:
-        query = query.where(Alert.name.ilike(f"%{name}%"))
+        name_query = select(Alert).where(Alert.name.ilike(f"%{name}%"))
+        query = _join_as_subquery(query, name_query)
 
-    # If both the observable and observable_types filters were specified, special care needs to be taken so that they work properly
-    if observable and observable_types:
-
-        # Build a query for the observable type and value
+    if observable:
         observable_split = observable.split("|", maxsplit=1)
         observable_query = (
             select(Alert)
@@ -157,7 +179,9 @@ def get_all_alerts(
             .where(ObservableType.value == observable_split[0], Observable.value == observable_split[1])
         )
 
-        # Build a query for the observable types
+        query = _join_as_subquery(query, observable_query)
+
+    if observable_types:
         type_filters = [func.count(1).filter(ObservableType.value == t) > 0 for t in observable_types.split(",")]
         observable_types_query = (
             select(Alert)
@@ -168,62 +192,57 @@ def get_all_alerts(
             .group_by(Alert.uuid, Node.uuid)
         )
 
-        # Join the results of the observable types query with the observable query
-        sub = observable_types_query.subquery()
-        observable_query = observable_query.join(sub, Alert.uuid == sub.c.uuid).group_by(Alert.uuid, Node.uuid)
+        query = _join_as_subquery(query, observable_types_query)
 
-        # Join the results of the combined observable and observable types query with the main query
-        sub = observable_query.subquery()
-        query = query.join(sub, Alert.uuid == sub.c.uuid).group_by(Alert.uuid, Node.uuid)
-
-    elif observable:
-        observable_split = observable.split("|", maxsplit=1)
-        query = (
-            query.join(ObservableInstance, onclause=ObservableInstance.alert_uuid == Alert.uuid)
+    if observable_value:
+        observable_value_query = (
+            select(Alert)
+            .join(ObservableInstance, onclause=ObservableInstance.alert_uuid == Alert.uuid)
             .join(Observable)
-            .join(ObservableType)
-            .where(ObservableType.value == observable_split[0], Observable.value == observable_split[1])
+            .where(Observable.value == observable_value)
         )
 
-    elif observable_types:
-        type_filters = [func.count(1).filter(ObservableType.value == t) > 0 for t in observable_types.split(",")]
-        query = (
-            query.join(ObservableInstance, onclause=ObservableInstance.alert_uuid == Alert.uuid)
-            .join(Observable)
-            .join(ObservableType)
-            .having(and_(*type_filters))
-            .group_by(Alert.uuid, Node.uuid)
-        )
+        query = _join_as_subquery(query, observable_value_query)
 
     if owner:
-        query = query.join(User, onclause=Alert.owner_uuid == User.uuid).where(User.username == owner)
+        owner_query = select(Alert).join(User, onclause=Alert.owner_uuid == User.uuid).where(User.username == owner)
+        query = _join_as_subquery(query, owner_query)
 
     if queue:
-        query = query.join(AlertQueue).where(AlertQueue.value == queue)
+        queue_query = select(Alert).join(AlertQueue).where(AlertQueue.value == queue)
+        query = _join_as_subquery(query, queue_query)
 
     if tags:
         tag_filters = []
         for tag in tags.split(","):
             tag_filters.append(Alert.tags.any(NodeTag.value == tag))
-        query = query.where(and_(*tag_filters))
+        tags_query = select(Alert).where(and_(*tag_filters))
+
+        query = _join_as_subquery(query, tags_query)
 
     if threat_actor:
-        query = query.join(NodeThreatActor).where(NodeThreatActor.value == threat_actor)
+        threat_actor_query = select(Alert).join(NodeThreatActor).where(NodeThreatActor.value == threat_actor)
+        query = _join_as_subquery(query, threat_actor_query)
 
     if threats:
         threat_filters = []
         for threat in threats.split(","):
             threat_filters.append(Alert.threats.any(NodeThreat.value == threat))
-        query = query.where(and_(*threat_filters))
+        threats_query = select(Alert).where(and_(*threat_filters))
+
+        query = _join_as_subquery(query, threats_query)
 
     if tool:
-        query = query.join(AlertTool).where(AlertTool.value == tool)
+        tool_query = select(Alert).join(AlertTool).where(AlertTool.value == tool)
+        query = _join_as_subquery(query, tool_query)
 
     if tool_instance:
-        query = query.join(AlertToolInstance).where(AlertToolInstance.value == tool_instance)
+        tool_instance_query = select(Alert).join(AlertToolInstance).where(AlertToolInstance.value == tool_instance)
+        query = _join_as_subquery(query, tool_instance_query)
 
     if type:
-        query = query.join(AlertType).where(AlertType.value == type)
+        type_query = select(Alert).join(AlertType).where(AlertType.value == type)
+        query = _join_as_subquery(query, type_query)
 
     results = paginate(db, query)
 
