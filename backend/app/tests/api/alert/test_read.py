@@ -128,6 +128,24 @@ def test_get_filter_dispositioned_before(client_valid_access_token, db):
     assert get.json()["total"] == 1
 
 
+def test_get_filter_dispositioned_after_and_before(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, disposition_time=datetime.utcnow() - timedelta(days=1))
+    helpers.create_alert(db, disposition_time=datetime.utcnow())
+    alert3 = helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(days=1))
+
+    # There should be 3 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 3
+
+    # There should only be 1 alert when we filter by dispositioned_after and dispositioned_before.
+    # But the timestamp has a timezone specified, which uses the + symbol that needs to be
+    # urlencoded since it is a reserved URL character.
+    params = {"dispositioned_after": alert1.disposition_time, "dispositioned_before": alert3.disposition_time}
+    get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
+    assert get.json()["total"] == 1
+
+
 def test_get_filter_event_time_after(client_valid_access_token, db):
     # Create some alerts
     alert = helpers.create_alert(db, event_time=datetime.utcnow())
@@ -311,6 +329,49 @@ def test_get_filter_observable_types(client_valid_access_token, db):
     get = client_valid_access_token.get("/api/alert/?observable_types=test_type1,test_type2")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+
+
+def test_get_filter_observable_value(client_valid_access_token, db):
+    # Create an empty alert
+    helpers.create_alert(db=db)
+
+    # Create some alerts with one observable
+    alert1 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1.analysis, db=db
+    )
+
+    alert2 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+
+    # Create an alert with multiple observables
+    alert3 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value_asdf", alert=alert3, parent_analysis=alert3.analysis, db=db
+    )
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value1", alert=alert3, parent_analysis=alert3.analysis, db=db
+    )
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value2", alert=alert3, parent_analysis=alert3.analysis, db=db
+    )
+
+    # There should be 4 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 4
+
+    # There should only be 1 alert when we filter by the test_value_asdf observable value
+    get = client_valid_access_token.get("/api/alert/?observable_value=test_value_asdf")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["uuid"] == str(alert3.uuid)
+
+    # There should be 2 alerts when we filter by the test_value1 observable value
+    get = client_valid_access_token.get("/api/alert/?observable_value=test_value1")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(alert1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(alert3.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_observable_and_observable_types(client_valid_access_token, db):
