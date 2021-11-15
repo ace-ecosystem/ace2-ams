@@ -571,3 +571,165 @@ def test_get_multiple_filters(client_valid_access_token, db):
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["type"]["value"] == "test_type1"
     assert get.json()["items"][0]["disposition"]["value"] == "FALSE_POSITIVE"
+
+
+def test_get_sort_by_disposition(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, disposition="DELIVERY")
+    alert2 = helpers.create_alert(db, disposition="FALSE_POSITIVE")
+
+    # If you sort descending, the FALSE_POSITIVE alert (alert2) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=disposition|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, the DELIVERY alert (alert1) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=disposition|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_disposition_time(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, disposition_time=datetime.utcnow())
+    alert2 = helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(seconds=5))
+
+    # If you sort descending, the newest alert (alert2) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=disposition_time|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, the oldest alert (alert1) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=disposition_time|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_disposition_user(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, disposition_user="alice")
+    alert2 = helpers.create_alert(db, disposition_user="bob")
+
+    # If you sort descending, bob's alert (alert2) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=disposition_user|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, alice's alert (alert1) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=disposition_user|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_event_time(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, event_time=datetime.utcnow())
+    alert2 = helpers.create_alert(db, event_time=datetime.utcnow() + timedelta(seconds=5))
+
+    # If you sort descending, the newest alert (alert2) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=event_time|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, the oldest alert (alert1) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=event_time|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_insert_time(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, insert_time=datetime.utcnow())
+    alert2 = helpers.create_alert(db, insert_time=datetime.utcnow() + timedelta(seconds=5))
+
+    # If you sort descending, the newest alert (alert2) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=insert_time|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, the oldest alert (alert1) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=insert_time|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_name(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, name="alert1")
+    alert2 = helpers.create_alert(db, name="alert2")
+
+    # If you sort descending, alert2 should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=name|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, alert1 should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=name|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_owner(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, owner="alice")
+    alert2 = helpers.create_alert(db, owner="bob")
+
+    # If you sort descending, bob's alert (alert2) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=owner|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, alice's alert (alert1) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=owner|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_queue(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, alert_queue="detect")
+    alert2 = helpers.create_alert(db, alert_queue="intel")
+
+    # If you sort descending, alert2 should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=queue|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, alert1 should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=queue|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_type(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, alert_type="type1")
+    alert2 = helpers.create_alert(db, alert_type="type2")
+
+    # If you sort descending, alert2 should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=type|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, alert1 should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=type|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)

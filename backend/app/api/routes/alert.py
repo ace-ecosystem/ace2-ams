@@ -106,6 +106,25 @@ def get_all_alerts(
     observable_value: Optional[str] = None,
     owner: Optional[str] = None,
     queue: Optional[str] = None,
+    sort: Optional[str] = Query(
+        None,
+        regex=""
+        "^("
+        "(disposition)|"
+        "(disposition_time)|"
+        "(disposition_user)|"
+        "(event_time)|"
+        "(insert_time)|"
+        "(name)|"
+        "(owner)|"
+        "(queue)|"
+        "(type)"
+        ")\|"
+        "("
+        "(asc)|"
+        "(desc)"
+        ")$",
+    ),  # Example: event_time|desc,
     tags: Optional[str] = None,
     threat_actor: Optional[str] = None,
     threats: Optional[str] = None,
@@ -243,6 +262,76 @@ def get_all_alerts(
     if type:
         type_query = select(Alert).join(AlertType).where(AlertType.value == type)
         query = _join_as_subquery(query, type_query)
+
+    if sort:
+        sort_split = sort.split("|")
+        sort_by = sort_split[0]
+        order = sort_split[1]
+
+        # Only sort by disposition if we are not also filtering by disposition
+        if sort_by.lower() == "disposition" and not disposition:
+            if order == "asc":
+                query = query.join(AlertDisposition).order_by(AlertDisposition.value.asc())
+            else:
+                query = query.join(AlertDisposition).order_by(AlertDisposition.value.desc())
+
+        elif sort_by.lower() == "disposition_time":
+            if order == "asc":
+                query = query.order_by(Alert.disposition_time.asc())
+            else:
+                query = query.order_by(Alert.disposition_time.desc())
+
+        # Only sort by disposition_user if we are not also filtering by disposition_user
+        elif sort_by.lower() == "disposition_user" and not disposition_user:
+            query = query.join(User, onclause=Alert.disposition_user_uuid == User.uuid).group_by(
+                Alert.uuid, Node.uuid, User.username
+            )
+            if order == "asc":
+                query = query.order_by(User.username.asc())
+            else:
+                query = query.order_by(User.username.desc())
+
+        elif sort_by.lower() == "event_time":
+            if order == "asc":
+                query = query.order_by(Alert.event_time.asc())
+            else:
+                query = query.order_by(Alert.event_time.desc())
+
+        elif sort_by.lower() == "insert_time":
+            if order == "asc":
+                query = query.order_by(Alert.insert_time.asc())
+            else:
+                query = query.order_by(Alert.insert_time.desc())
+
+        elif sort_by.lower() == "name":
+            if order == "asc":
+                query = query.order_by(Alert.name.asc())
+            else:
+                query = query.order_by(Alert.name.desc())
+
+        # Only sort by owner if we are not also filtering by owner
+        elif sort_by.lower() == "owner" and not owner:
+            query = query.join(User, onclause=Alert.owner_uuid == User.uuid).group_by(
+                Alert.uuid, Node.uuid, User.username
+            )
+            if order == "asc":
+                query = query.order_by(User.username.asc())
+            else:
+                query = query.order_by(User.username.desc())
+
+        # Only sort by queue if we are not also filtering by queue
+        elif sort_by.lower() == "queue" and not queue:
+            if order == "asc":
+                query = query.join(AlertQueue).order_by(AlertQueue.value.asc())
+            else:
+                query = query.join(AlertQueue).order_by(AlertQueue.value.desc())
+
+        # Only sort by type if we are not also filtering by type
+        elif sort_by.lower() == "type" and not type:
+            if order == "asc":
+                query = query.join(AlertType).order_by(AlertType.value.asc())
+            else:
+                query = query.join(AlertType).order_by(AlertType.value.desc())
 
     results = paginate(db, query)
 
