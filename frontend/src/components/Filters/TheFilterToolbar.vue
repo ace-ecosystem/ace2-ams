@@ -8,31 +8,35 @@
       <i class="pi pi-calendar"></i>
       <Calendar
         id="startTimeFilter"
-        v-model="startTimeFilterData"
+        v-model="eventTimeAfterDate"
         class="p-m-1"
         :manual-input="true"
         :show-time="true"
         selection-mode="single"
         style="width: 180px"
-        @update:model-value="dateSelect($event, 'eventTimeAfter')"
+        placeholder="The beginning of time"
+        :show-button-bar="true"
+        @clear-click="clearDate(eventTimeAfter)"
+        @update:model-value="dateSelect($event, eventTimeAfter)"
         @update:model-value.delete="dateSelect(null)"
-        @month-change="
-          monthChange($event, 'eventTimeAfter', startTimeFilterData)
-        "
+        @month-change="monthChange($event, eventTimeAfter, eventTimeAfterDate)"
       />
       to
       <Calendar
         id="endTimeFilter"
-        v-model="endTimeFilterData"
+        v-model="eventTimeBeforeDate"
         class="p-m-1"
         :manual-input="true"
         :show-time="true"
+        :show-button-bar="true"
         selection-mode="single"
         style="width: 180px"
-        @update:model-value="dateSelect($event, 'eventTimeBefore')"
+        placeholder="Now"
+        @clear-click="clearDate(eventTimeBefore)"
+        @update:model-value="dateSelect($event, eventTimeBefore)"
         @update:model-value.delete="dateSelect(null)"
         @month-change="
-          monthChange($event, 'eventTimeBefore', endTimeFilterData)
+          monthChange($event, eventTimeBefore, eventTimeBeforeDate)
         "
       />
       <!--      EDIT FILTERS -->
@@ -67,6 +71,11 @@
 </template>
 
 <script>
+  import {
+    EVENT_TIME_AFTER_FILTER,
+    EVENT_TIME_BEFORE_FILTER,
+  } from "@/etc/constants";
+
   import { mapActions, mapGetters } from "vuex";
 
   import Button from "primevue/button";
@@ -81,29 +90,20 @@
 
     computed: {
       ...mapGetters({
-        filters: "filters/setFilters",
+        filters: "filters/filters",
       }),
-      endTimeFilterData() {
-        return this.filters["eventTimeBefore"];
+      eventTimeAfter() {
+        return EVENT_TIME_AFTER_FILTER;
       },
-      startTimeFilterData() {
-        return this.filters["eventTimeAfter"];
+      eventTimeBefore() {
+        return EVENT_TIME_BEFORE_FILTER;
       },
-    },
-
-    async created() {
-      if (this.endTimeFilterData == null) {
-        this.setFilter({
-          filterType: "eventTimeBefore",
-          filterValue: new Date(),
-        });
-      }
-      if (this.startTimeFilterData == null) {
-        this.setFilter({
-          filterType: "eventTimeAfter",
-          filterValue: new Date(),
-        });
-      }
+      eventTimeAfterDate() {
+        return this.filters[EVENT_TIME_AFTER_FILTER];
+      },
+      eventTimeBeforeDate() {
+        return this.filters[EVENT_TIME_BEFORE_FILTER];
+      },
     },
 
     methods: {
@@ -112,22 +112,28 @@
         unsetFilter: "filters/unsetFilter",
       }),
 
-      dateSelect(event, filterName) {
+      clearDate(filterType) {
+        this.unsetFilter({
+          filterType: filterType,
+        });
+      },
+
+      dateSelect(event, filterType) {
         if (event == null) {
           return;
         }
         this.setFilter({
-          filterType: filterName,
+          filterType: filterType,
           filterValue: event,
         });
       },
 
-      monthChange(event, filterName, oldDate) {
+      monthChange(event, filterType, oldDate) {
         let updatedDate = new Date(oldDate);
         updatedDate.setMonth(event.month);
         updatedDate.setYear(event.year);
         this.setFilter({
-          filterType: filterName,
+          filterType: filterType,
           filterValue: updatedDate,
         });
       },

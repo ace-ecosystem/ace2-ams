@@ -177,7 +177,7 @@
         allAlertUuids: "alerts/visibleQueriedAlertsUuids",
         totalAlerts: "alerts/totalAlerts",
         selectedAlerts: "selectedAlerts/selected",
-        filters: "filters/setFilters",
+        filters: "filters/filters",
       }),
       pageOptions() {
         return {
@@ -188,8 +188,11 @@
     },
 
     watch: {
-      filters: function () {
-        this.loadAlerts();
+      filters: {
+        deep: true,
+        handler: function () {
+          this.loadAlerts();
+        },
       },
     },
 
