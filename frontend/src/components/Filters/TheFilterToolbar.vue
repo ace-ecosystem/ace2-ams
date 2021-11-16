@@ -58,6 +58,7 @@
         icon="pi pi-filter-slash"
         label="Clear"
         class="p-button-outlined p-m-1"
+        @click="clearFilters"
       />
       <!--      RESET FILTERS-->
       <Button
@@ -65,6 +66,7 @@
         icon="pi pi-refresh"
         label="Reset"
         class="p-button-outlined p-m-1"
+        @click="resetFilters"
       />
     </template>
   </Toolbar>
@@ -111,6 +113,16 @@
         setFilter: "filters/setFilter",
         unsetFilter: "filters/unsetFilter",
       }),
+
+      clearFilters() {
+        this.clearDate(this.eventTimeAfter);
+        this.clearDate(this.eventTimeBefore);
+      },
+
+      resetFilters() {
+        this.clearDate(this.eventTimeAfter);
+        this.clearDate(this.eventTimeBefore);
+      },
 
       clearDate(filterType) {
         this.unsetFilter({
