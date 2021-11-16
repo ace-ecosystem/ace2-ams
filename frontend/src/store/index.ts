@@ -6,6 +6,7 @@ import alertType from "@/services/api/alertType";
 import observableType from "@/services/api/observableType";
 import auth from "@/store/auth";
 import alerts from "@/store/alerts";
+import filters from "@/store/filters";
 import modals from "@/store/modals";
 import nodeDirective from "@/services/api/nodeDirective";
 import selectedAlerts from "@/store/selectedAlerts";
@@ -22,6 +23,7 @@ const store = createStore({
   modules: {
     auth,
     alerts,
+    filters,
     modals,
     selectedAlerts,
   },

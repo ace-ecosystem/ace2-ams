@@ -14,6 +14,11 @@
         :show-time="true"
         selection-mode="single"
         style="width: 180px"
+        @update:model-value="dateSelect($event, 'eventTimeAfter')"
+        @update:model-value.delete="dateSelect(null)"
+        @month-change="
+          monthChange($event, 'eventTimeAfter', startTimeFilterData)
+        "
       />
       to
       <Calendar
@@ -24,6 +29,11 @@
         :show-time="true"
         selection-mode="single"
         style="width: 180px"
+        @update:model-value="dateSelect($event, 'eventTimeBefore')"
+        @update:model-value.delete="dateSelect(null)"
+        @month-change="
+          monthChange($event, 'eventTimeBefore', endTimeFilterData)
+        "
       />
       <!--      EDIT FILTERS -->
       <Button
@@ -57,6 +67,8 @@
 </template>
 
 <script>
+  import { mapActions, mapGetters } from "vuex";
+
   import Button from "primevue/button";
   import Calendar from "primevue/calendar";
   import Toolbar from "primevue/toolbar";
@@ -67,14 +79,59 @@
     name: "TheFilterToolbar",
     components: { Button, Calendar, EditFilterModal, Toolbar },
 
-    data() {
-      return {
-        endTimeFilterData: null,
-        startTimeFilterData: null,
-      };
+    computed: {
+      ...mapGetters({
+        filters: "filters/setFilters",
+      }),
+      endTimeFilterData() {
+        return this.filters["eventTimeBefore"];
+      },
+      startTimeFilterData() {
+        return this.filters["eventTimeAfter"];
+      },
+    },
+
+    async created() {
+      if (this.endTimeFilterData == null) {
+        this.setFilter({
+          filterType: "eventTimeBefore",
+          filterValue: new Date(),
+        });
+      }
+      if (this.startTimeFilterData == null) {
+        this.setFilter({
+          filterType: "eventTimeAfter",
+          filterValue: new Date(),
+        });
+      }
     },
 
     methods: {
+      ...mapActions({
+        setFilter: "filters/setFilter",
+        unsetFilter: "filters/unsetFilter",
+      }),
+
+      dateSelect(event, filterName) {
+        if (event == null) {
+          return;
+        }
+        this.setFilter({
+          filterType: filterName,
+          filterValue: event,
+        });
+      },
+
+      monthChange(event, filterName, oldDate) {
+        let updatedDate = new Date(oldDate);
+        updatedDate.setMonth(event.month);
+        updatedDate.setYear(event.year);
+        this.setFilter({
+          filterType: filterName,
+          filterValue: updatedDate,
+        });
+      },
+
       open(name) {
         this.$store.dispatch("modals/open", name);
       },
