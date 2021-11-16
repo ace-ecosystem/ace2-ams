@@ -96,7 +96,7 @@ def test_get_filter_dispositioned_after(client_valid_access_token, db):
     # Create some alerts
     helpers.create_alert(db)
     alert = helpers.create_alert(db, disposition_time=datetime.utcnow())
-    helpers.create_alert(db, disposition_time=datetime.utcnow()+timedelta(seconds=5))
+    helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(seconds=5))
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -113,7 +113,7 @@ def test_get_filter_dispositioned_after(client_valid_access_token, db):
 def test_get_filter_dispositioned_before(client_valid_access_token, db):
     # Create some alerts
     helpers.create_alert(db)
-    helpers.create_alert(db, disposition_time=datetime.utcnow()-timedelta(seconds=5))
+    helpers.create_alert(db, disposition_time=datetime.utcnow() - timedelta(seconds=5))
     alert = helpers.create_alert(db, disposition_time=datetime.utcnow())
 
     # There should be 3 total alerts
@@ -128,10 +128,28 @@ def test_get_filter_dispositioned_before(client_valid_access_token, db):
     assert get.json()["total"] == 1
 
 
+def test_get_filter_dispositioned_after_and_before(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, disposition_time=datetime.utcnow() - timedelta(days=1))
+    helpers.create_alert(db, disposition_time=datetime.utcnow())
+    alert3 = helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(days=1))
+
+    # There should be 3 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 3
+
+    # There should only be 1 alert when we filter by dispositioned_after and dispositioned_before.
+    # But the timestamp has a timezone specified, which uses the + symbol that needs to be
+    # urlencoded since it is a reserved URL character.
+    params = {"dispositioned_after": alert1.disposition_time, "dispositioned_before": alert3.disposition_time}
+    get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
+    assert get.json()["total"] == 1
+
+
 def test_get_filter_event_time_after(client_valid_access_token, db):
     # Create some alerts
     alert = helpers.create_alert(db, event_time=datetime.utcnow())
-    helpers.create_alert(db, event_time=datetime.utcnow()+timedelta(seconds=5))
+    helpers.create_alert(db, event_time=datetime.utcnow() + timedelta(seconds=5))
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -148,7 +166,7 @@ def test_get_filter_event_time_after(client_valid_access_token, db):
 def test_get_filter_event_time_before(client_valid_access_token, db):
     # Create some alerts
     helpers.create_alert(db, event_time=datetime.utcnow())
-    alert = helpers.create_alert(db, event_time=datetime.utcnow()+timedelta(seconds=5))
+    alert = helpers.create_alert(db, event_time=datetime.utcnow() + timedelta(seconds=5))
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -186,7 +204,7 @@ def test_get_filter_event_uuid(client_valid_access_token, db):
 def test_get_filter_insert_time_after(client_valid_access_token, db):
     # Create some alerts
     alert = helpers.create_alert(db, insert_time=datetime.utcnow())
-    helpers.create_alert(db, insert_time=datetime.utcnow()+timedelta(seconds=5))
+    helpers.create_alert(db, insert_time=datetime.utcnow() + timedelta(seconds=5))
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -202,7 +220,7 @@ def test_get_filter_insert_time_after(client_valid_access_token, db):
 
 def test_get_filter_insert_time_before(client_valid_access_token, db):
     # Create some alerts
-    helpers.create_alert(db, insert_time=datetime.utcnow()-timedelta(seconds=5))
+    helpers.create_alert(db, insert_time=datetime.utcnow() - timedelta(seconds=5))
     alert = helpers.create_alert(db, insert_time=datetime.utcnow())
 
     # There should be 2 total alerts
@@ -230,6 +248,159 @@ def test_get_filter_name(client_valid_access_token, db):
     get = client_valid_access_token.get("/api/alert/?name=test alert")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "Test Alert"
+
+
+def test_get_filter_observable(client_valid_access_token, db):
+    # Create an empty alert
+    helpers.create_alert(db=db)
+
+    # Create some alerts with one observable
+    alert1 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1.analysis, db=db
+    )
+
+    alert2 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+
+    # Create an alert with multiple observables
+    alert3 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value_asdf", alert=alert3, parent_analysis=alert3.analysis, db=db
+    )
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value1", alert=alert3, parent_analysis=alert3.analysis, db=db
+    )
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value2", alert=alert3, parent_analysis=alert3.analysis, db=db
+    )
+
+    # There should be 4 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 4
+
+    # There should only be 1 alert when we filter by the test_type1/test_value1 observable
+    get = client_valid_access_token.get("/api/alert/?observable=test_type1|test_value1")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+
+    # There should be 2 alerts when we filter by the test_type2/test_value2 observable
+    get = client_valid_access_token.get("/api/alert/?observable=test_type2|test_value2")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(alert2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(alert3.uuid) for a in get.json()["items"])
+
+
+def test_get_filter_observable_types(client_valid_access_token, db):
+    # Create an empty alert
+    helpers.create_alert(db=db)
+
+    # Create some alerts with one observable
+    alert1 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1.analysis, db=db
+    )
+
+    # Create an alert with multiple observables
+    alert2 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value_asdf", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value1", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+
+    # There should be 3 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 3
+
+    # There should be 2 alerts when we filter by just test_type1
+    get = client_valid_access_token.get("/api/alert/?observable_types=test_type1")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(alert1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(alert2.uuid) for a in get.json()["items"])
+
+    # There should only be 1 alert when we filter by the test_type1 and test_type2
+    get = client_valid_access_token.get("/api/alert/?observable_types=test_type1,test_type2")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+
+
+def test_get_filter_observable_value(client_valid_access_token, db):
+    # Create an empty alert
+    helpers.create_alert(db=db)
+
+    # Create some alerts with one observable
+    alert1 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1.analysis, db=db
+    )
+
+    alert2 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+
+    # Create an alert with multiple observables
+    alert3 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value_asdf", alert=alert3, parent_analysis=alert3.analysis, db=db
+    )
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value1", alert=alert3, parent_analysis=alert3.analysis, db=db
+    )
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value2", alert=alert3, parent_analysis=alert3.analysis, db=db
+    )
+
+    # There should be 4 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 4
+
+    # There should only be 1 alert when we filter by the test_value_asdf observable value
+    get = client_valid_access_token.get("/api/alert/?observable_value=test_value_asdf")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["uuid"] == str(alert3.uuid)
+
+    # There should be 2 alerts when we filter by the test_value1 observable value
+    get = client_valid_access_token.get("/api/alert/?observable_value=test_value1")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(alert1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(alert3.uuid) for a in get.json()["items"])
+
+
+def test_get_filter_observable_and_observable_types(client_valid_access_token, db):
+    # Create an empty alert
+    helpers.create_alert(db=db)
+
+    # Create an alert with multiple observables
+    alert2 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value1", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+    helpers.create_observable_instance(
+        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2.analysis, db=db
+    )
+
+    # Create an alert with one observable
+    alert3 = helpers.create_alert(db=db)
+    helpers.create_observable_instance(
+        type="test_type1", value="test_value1", alert=alert3, parent_analysis=alert3.analysis, db=db
+    )
+
+    # There should be 3 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 3
+
+    # There should only be 1 alert when we filter by observable and observable_types
+    get = client_valid_access_token.get("/api/alert/?observable_types=test_type1&observable=test_type2|test_value2")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
 
 
 def test_get_filter_owner(client_valid_access_token, db):
@@ -263,6 +434,81 @@ def test_get_filter_queue(client_valid_access_token, db):
     get = client_valid_access_token.get("/api/alert/?queue=test_queue1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["queue"]["value"] == "test_queue1"
+
+
+def test_get_filter_tags(client_valid_access_token, db):
+    # Create some alerts
+    helpers.create_alert(db)
+    helpers.create_alert(db, tags=["tag1"])
+    helpers.create_alert(db, tags=["tag2", "tag3", "tag4"])
+
+    # There should be 3 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 3
+
+    # There should only be 1 alert when we filter by a single tag
+    get = client_valid_access_token.get("/api/alert/?tags=tag1")
+    assert get.json()["total"] == 1
+    assert len(get.json()["items"][0]["tags"]) == 1
+    assert get.json()["items"][0]["tags"][0]["value"] == "tag1"
+
+    # There should only be 1 alert when we filter by multiple tags
+    get = client_valid_access_token.get("/api/alert/?tags=tag2,tag3")
+    assert get.json()["total"] == 1
+    assert len(get.json()["items"][0]["tags"]) == 3
+    assert any(t["value"] == "tag2" for t in get.json()["items"][0]["tags"])
+    assert any(t["value"] == "tag3" for t in get.json()["items"][0]["tags"])
+
+    # All the alerts should be returned if you don't specify any tags for the filter
+    get = client_valid_access_token.get("/api/alert/?tags=")
+    assert get.json()["total"] == 3
+
+
+def test_get_filter_threat_actor(client_valid_access_token, db):
+    # Create some alerts
+    helpers.create_alert(db)
+    helpers.create_alert(db, threat_actor="test_actor")
+
+    # There should be 2 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 2
+
+    # There should only be 1 alert when we filter by a single threat
+    get = client_valid_access_token.get("/api/alert/?threat_actor=test_actor")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["threat_actor"]["value"] == "test_actor"
+
+    # All the alerts should be returned if you don't specify anything for the filter
+    get = client_valid_access_token.get("/api/alert/?threat_actor=")
+    assert get.json()["total"] == 2
+
+
+def test_get_filter_threats(client_valid_access_token, db):
+    # Create some alerts
+    helpers.create_alert(db)
+    helpers.create_alert(db, threats=["threat1"])
+    helpers.create_alert(db, threats=["threat2", "threat3", "threat4"])
+
+    # There should be 3 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 3
+
+    # There should only be 1 alert when we filter by a single threat
+    get = client_valid_access_token.get("/api/alert/?threats=threat1")
+    assert get.json()["total"] == 1
+    assert len(get.json()["items"][0]["threats"]) == 1
+    assert get.json()["items"][0]["threats"][0]["value"] == "threat1"
+
+    # There should only be 1 alert when we filter by multiple threats
+    get = client_valid_access_token.get("/api/alert/?threats=threat2,threat3")
+    assert get.json()["total"] == 1
+    assert len(get.json()["items"][0]["threats"]) == 3
+    assert any(t["value"] == "threat2" for t in get.json()["items"][0]["threats"])
+    assert any(t["value"] == "threat3" for t in get.json()["items"][0]["threats"])
+
+    # All the alerts should be returned if you don't specify any threats for the filter
+    get = client_valid_access_token.get("/api/alert/?threats=")
+    assert get.json()["total"] == 3
 
 
 def test_get_filter_tool(client_valid_access_token, db):
@@ -325,3 +571,165 @@ def test_get_multiple_filters(client_valid_access_token, db):
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["type"]["value"] == "test_type1"
     assert get.json()["items"][0]["disposition"]["value"] == "FALSE_POSITIVE"
+
+
+def test_get_sort_by_disposition(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, disposition="DELIVERY")
+    alert2 = helpers.create_alert(db, disposition="FALSE_POSITIVE")
+
+    # If you sort descending, the FALSE_POSITIVE alert (alert2) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=disposition|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, the DELIVERY alert (alert1) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=disposition|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_disposition_time(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, disposition_time=datetime.utcnow())
+    alert2 = helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(seconds=5))
+
+    # If you sort descending, the newest alert (alert2) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=disposition_time|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, the oldest alert (alert1) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=disposition_time|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_disposition_user(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, disposition_user="alice")
+    alert2 = helpers.create_alert(db, disposition_user="bob")
+
+    # If you sort descending, bob's alert (alert2) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=disposition_user|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, alice's alert (alert1) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=disposition_user|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_event_time(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, event_time=datetime.utcnow())
+    alert2 = helpers.create_alert(db, event_time=datetime.utcnow() + timedelta(seconds=5))
+
+    # If you sort descending, the newest alert (alert2) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=event_time|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, the oldest alert (alert1) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=event_time|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_insert_time(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, insert_time=datetime.utcnow())
+    alert2 = helpers.create_alert(db, insert_time=datetime.utcnow() + timedelta(seconds=5))
+
+    # If you sort descending, the newest alert (alert2) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=insert_time|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, the oldest alert (alert1) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=insert_time|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_name(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, name="alert1")
+    alert2 = helpers.create_alert(db, name="alert2")
+
+    # If you sort descending, alert2 should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=name|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, alert1 should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=name|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_owner(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, owner="alice")
+    alert2 = helpers.create_alert(db, owner="bob")
+
+    # If you sort descending, bob's alert (alert2) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=owner|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, alice's alert (alert1) should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=owner|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_queue(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, alert_queue="detect")
+    alert2 = helpers.create_alert(db, alert_queue="intel")
+
+    # If you sort descending, alert2 should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=queue|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, alert1 should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=queue|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_sort_by_type(client_valid_access_token, db):
+    # Create some alerts
+    alert1 = helpers.create_alert(db, alert_type="type1")
+    alert2 = helpers.create_alert(db, alert_type="type2")
+
+    # If you sort descending, alert2 should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=type|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, alert1 should appear first
+    get = client_valid_access_token.get("/api/alert/?sort=type|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)

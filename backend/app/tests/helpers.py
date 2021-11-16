@@ -91,6 +91,9 @@ def create_alert(
     insert_time: datetime = None,
     name: str = "Test Alert",
     owner: Optional[str] = None,
+    tags: Optional[List[str]] = None,
+    threat_actor: Optional[str] = None,
+    threats: Optional[List[str]] = None,
     tool: str = "test_tool",
     tool_instance: str = "test_tool_instance",
 ) -> Alert:
@@ -130,6 +133,15 @@ def create_alert(
 
     if owner:
         alert.owner = create_user(username=owner, db=db, alert_queue=alert_queue)
+
+    if tags:
+        alert.tags = [create_node_tag(value=tag, db=db) for tag in tags]
+
+    if threat_actor:
+        alert.threat_actor = create_node_threat_actor(value=threat_actor, db=db)
+
+    if threats:
+        alert.threats = [create_node_threat(value=threat, db=db) for threat in threats]
 
     db.add(alert)
     crud.commit(db)
@@ -293,6 +305,10 @@ def create_node_threat_type(value: str, db: Session) -> NodeThreatType:
 def create_observable(
     type: str, value: str, db: Session, expires_on: Optional[datetime] = None, for_detection: bool = False
 ) -> Observable:
+    existing = crud.read_observable(type=type, value=value, db=db)
+    if existing:
+        return existing
+
     obj = Observable(
         expires_on=expires_on,
         for_detection=for_detection,
