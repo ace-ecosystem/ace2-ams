@@ -7,7 +7,7 @@
   <TheFilterToolbar id="FilterToolbar" />
   <br />
   <div id="AlertsTable" class="card">
-    <TheAlertsTable id="AlertsTable" />
+    <TheAlertsTable />
   </div>
 </template>
 
