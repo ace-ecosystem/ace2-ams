@@ -177,7 +177,7 @@
         allAlertUuids: "alerts/visibleQueriedAlertsUuids",
         totalAlerts: "alerts/totalAlerts",
         selectedAlerts: "selectedAlerts/selected",
-        filters: "filters/filters",
+        filters: "filters/alerts",
       }),
       pageOptions() {
         return {

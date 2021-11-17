@@ -1,6 +1,6 @@
 import {
   alertFilterParams,
-  alertFilterTypes,
+  alertFilterNames,
   alertFilterValues,
 } from "@/models/alert";
 import { CommitFunction } from "@/store/index";
@@ -8,34 +8,39 @@ import { CommitFunction } from "@/store/index";
 const store = {
   namespaced: true,
   state: {
-    filters: {},
+    alerts: {},
   },
   getters: {
-    filters: (state: { filters: alertFilterParams }): alertFilterParams =>
-      state.filters,
+    alerts: (state: { alerts: alertFilterParams }): alertFilterParams =>
+      state.alerts,
   },
   mutations: {
     SET_FILTER: (
-      state: { filters: alertFilterParams },
+      state: { alerts: alertFilterParams },
       payload: {
-        filterType: alertFilterTypes;
+        filterType: "alerts";
+        filterName: alertFilterNames;
         filterValue: alertFilterValues;
       },
     ): alertFilterValues =>
-      (state.filters[payload.filterType] = payload.filterValue),
+      (state[payload.filterType][payload.filterName] = payload.filterValue),
     UNSET_FILTER: (
-      state: { filters: alertFilterParams },
-      payload: { filterType: alertFilterTypes },
-    ): boolean => delete state.filters[payload.filterType],
+      state: { alerts: alertFilterParams },
+      payload: { filterType: "alerts"; filterName: alertFilterNames },
+    ): boolean => delete state[payload.filterType][payload.filterName],
   },
   actions: {
     setFilter: (
       { commit }: CommitFunction,
-      payload: { filterType: string; filterValue: string },
+      payload: {
+        filterType: "alerts";
+        filterName: string;
+        filterValue: string;
+      },
     ): void => commit("SET_FILTER", payload),
     unsetFilter: (
       { commit }: CommitFunction,
-      payload: { filterType: string },
+      payload: { filterType: "alerts"; filterName: string },
     ): void => commit("UNSET_FILTER", payload),
   },
 };

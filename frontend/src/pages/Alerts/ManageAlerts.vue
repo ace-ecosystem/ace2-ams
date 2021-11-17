@@ -29,6 +29,7 @@
     components: { TheAlertsTable, TheFilterToolbar, TheAlertActionToolbar },
     provide() {
       return {
+        filterType: "alerts",
         rangeFilterOptions: ["Event Time", "Insert Time", "Dispositioned Time"],
         rangeFilters: {
           "Event Time": {

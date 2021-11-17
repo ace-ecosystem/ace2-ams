@@ -77,7 +77,7 @@ export type alertFilterParams = {
   type?: string;
 };
 
-export type alertFilterTypes = typeof alertFilters[number];
+export type alertFilterNames = typeof alertFilters[number];
 export type alertFilterValues =
   | (string & string[] & Date & { type: string; value: string })
   | undefined;

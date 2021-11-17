@@ -137,7 +137,7 @@
       tooltip: Tooltip,
     },
 
-    inject: ["rangeFilterOptions", "rangeFilters"],
+    inject: ["filterType", "rangeFilterOptions", "rangeFilters"],
 
     data() {
       return {
@@ -146,9 +146,9 @@
     },
 
     computed: {
-      ...mapGetters({
-        filters: "filters/filters",
-      }),
+      filters() {
+        return this.$store.getters[`filters/${this.filterType}`];
+      },
       startFilter() {
         return this.rangeFilters[this.currentRangeFilter].start;
       },
@@ -186,9 +186,10 @@
         unsetFilter: "filters/unsetFilter",
       }),
 
-      clearDate(filterType) {
+      clearDate(filterName) {
         this.unsetFilter({
-          filterType: filterType,
+          filterType: this.filterType,
+          filterName: filterName,
         });
       },
 
@@ -247,12 +248,13 @@
         this.dateSelect(startDate, this.startFilter);
         this.dateSelect(endDate, this.endfilter);
       },
-      dateSelect(event, filterType) {
+      dateSelect(event, filterName) {
         if (event == null) {
           return;
         }
         this.setFilter({
-          filterType: filterType,
+          filterType: this.filterType,
+          filterName: filterName,
           filterValue: event,
         });
       },
