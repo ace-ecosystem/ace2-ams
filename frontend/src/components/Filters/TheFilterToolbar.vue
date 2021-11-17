@@ -3,42 +3,53 @@
 
 <template>
   <Toolbar style="overflow-x: auto">
+    <!--      DATE PICKER -->
     <template #left>
-      <!--      DATE PICKER -->
-      <i class="pi pi-calendar"></i>
-      <Calendar
-        id="startTimeFilter"
+      <DatePicker
         v-model="eventTimeAfterDate"
-        class="p-m-1"
-        :manual-input="true"
-        :show-time="true"
-        selection-mode="single"
-        style="width: 180px"
-        placeholder="The beginning of time"
-        :show-button-bar="true"
-        @clear-click="clearDate(eventTimeAfter)"
-        @update:model-value="dateSelect($event, eventTimeAfter)"
+        mode="dateTime"
+        is24hr
+        @update:model-value="dateSelect($event, EVENT_TIME_AFTER_FILTER)"
         @update:model-value.delete="dateSelect(null)"
-        @month-change="monthChange($event, eventTimeAfter, eventTimeAfterDate)"
-      />
+      >
+        <template #default="{ inputValue, inputEvents }">
+          <div class="p-inputgroup">
+            <InputText
+              :value="inputValue"
+              placeholder="The beginning of time"
+              v-on="inputEvents"
+            />
+            <Button
+              icon="pi pi-times"
+              class="p-button-outlined p-button-secondary"
+              @click="clearDate(EVENT_TIME_AFTER_FILTER)"
+            />
+          </div>
+        </template>
+      </DatePicker>
       to
-      <Calendar
-        id="endTimeFilter"
+      <DatePicker
         v-model="eventTimeBeforeDate"
-        class="p-m-1"
-        :manual-input="true"
-        :show-time="true"
-        :show-button-bar="true"
-        selection-mode="single"
-        style="width: 180px"
-        placeholder="Now"
-        @clear-click="clearDate(eventTimeBefore)"
-        @update:model-value="dateSelect($event, eventTimeBefore)"
+        mode="dateTime"
+        is24hr
+        @update:model-value="dateSelect($event, EVENT_TIME_BEFORE_FILTER)"
         @update:model-value.delete="dateSelect(null)"
-        @month-change="
-          monthChange($event, eventTimeBefore, eventTimeBeforeDate)
-        "
-      />
+      >
+        <template #default="{ inputValue, inputEvents }">
+          <div class="p-inputgroup">
+            <InputText
+              :value="inputValue"
+              placeholder="Now"
+              v-on="inputEvents"
+            />
+            <Button
+              icon="pi pi-times"
+              class="p-button-outlined p-button-secondary"
+              @click="clearDate(EVENT_TIME_BEFORE_FILTER)"
+            />
+          </div>
+        </template>
+      </DatePicker>
       <!--      EDIT FILTERS -->
       <Button
         type="button"
@@ -81,30 +92,41 @@
   import { mapActions, mapGetters } from "vuex";
 
   import Button from "primevue/button";
-  import Calendar from "primevue/calendar";
   import Toolbar from "primevue/toolbar";
+  import InputText from "primevue/inputtext";
+  import { DatePicker } from "v-calendar";
 
   import EditFilterModal from "@/components/Modals/FilterModal";
 
   export default {
     name: "TheFilterToolbar",
-    components: { Button, Calendar, EditFilterModal, Toolbar },
+    components: {
+      Button,
+      DatePicker,
+      EditFilterModal,
+      InputText,
+      Toolbar,
+    },
 
     computed: {
       ...mapGetters({
         filters: "filters/filters",
       }),
-      eventTimeAfter() {
+      EVENT_TIME_AFTER_FILTER() {
         return EVENT_TIME_AFTER_FILTER;
       },
-      eventTimeBefore() {
+      EVENT_TIME_BEFORE_FILTER() {
         return EVENT_TIME_BEFORE_FILTER;
       },
       eventTimeAfterDate() {
-        return this.filters[EVENT_TIME_AFTER_FILTER];
+        return this.filters[EVENT_TIME_AFTER_FILTER]
+          ? this.filters[EVENT_TIME_AFTER_FILTER]
+          : null;
       },
       eventTimeBeforeDate() {
-        return this.filters[EVENT_TIME_BEFORE_FILTER];
+        return this.filters[EVENT_TIME_BEFORE_FILTER]
+          ? this.filters[EVENT_TIME_AFTER_FILTER]
+          : null;
       },
     },
 
@@ -115,13 +137,13 @@
       }),
 
       clearFilters() {
-        this.clearDate(this.eventTimeAfter);
-        this.clearDate(this.eventTimeBefore);
+        this.clearDate(this.EVENT_TIME_AFTER_FILTER);
+        this.clearDate(this.EVENT_TIME_BEFORE_FILTER);
       },
 
       resetFilters() {
-        this.clearDate(this.eventTimeAfter);
-        this.clearDate(this.eventTimeBefore);
+        this.clearDate(this.EVENT_TIME_AFTER_FILTER);
+        this.clearDate(this.EVENT_TIME_BEFORE_FILTER);
       },
 
       clearDate(filterType) {
@@ -137,16 +159,6 @@
         this.setFilter({
           filterType: filterType,
           filterValue: event,
-        });
-      },
-
-      monthChange(event, filterType, oldDate) {
-        let updatedDate = new Date(oldDate);
-        updatedDate.setMonth(event.month);
-        updatedDate.setYear(event.year);
-        this.setFilter({
-          filterType: filterType,
-          filterValue: updatedDate,
         });
       },
 
