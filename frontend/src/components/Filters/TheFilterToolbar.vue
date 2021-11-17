@@ -15,6 +15,11 @@
         <template #default="{ inputValue, inputEvents }">
           <div class="p-inputgroup">
             <InputText
+              v-tooltip.top="{
+                value: eventTimeAfterUTC,
+                disabled: !eventTimeAfterUTC,
+              }"
+              type="text"
               :value="inputValue"
               placeholder="The beginning of time"
               v-on="inputEvents"
@@ -38,6 +43,11 @@
         <template #default="{ inputValue, inputEvents }">
           <div class="p-inputgroup">
             <InputText
+              v-tooltip.top="{
+                value: eventTimeBeforeUTC,
+                disabled: !eventTimeBeforeUTC,
+              }"
+              type="text"
               :value="inputValue"
               placeholder="Now"
               v-on="inputEvents"
@@ -94,6 +104,7 @@
   import Button from "primevue/button";
   import Toolbar from "primevue/toolbar";
   import InputText from "primevue/inputtext";
+  import Tooltip from "primevue/tooltip";
   import { DatePicker } from "v-calendar";
 
   import EditFilterModal from "@/components/Modals/FilterModal";
@@ -106,6 +117,10 @@
       EditFilterModal,
       InputText,
       Toolbar,
+    },
+
+    directives: {
+      tooltip: Tooltip,
     },
 
     computed: {
@@ -125,7 +140,17 @@
       },
       eventTimeBeforeDate() {
         return this.filters[EVENT_TIME_BEFORE_FILTER]
-          ? this.filters[EVENT_TIME_AFTER_FILTER]
+          ? this.filters[EVENT_TIME_BEFORE_FILTER]
+          : null;
+      },
+      eventTimeAfterUTC() {
+        return this.eventTimeAfterDate
+          ? this.eventTimeAfterDate.toUTCString()
+          : null;
+      },
+      eventTimeBeforeUTC() {
+        return this.eventTimeBeforeDate
+          ? this.eventTimeBeforeDate.toUTCString()
           : null;
       },
     },
