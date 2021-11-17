@@ -1,54 +1,54 @@
 <template>
   <!--      DATE PICKER OPTIONS  -->
-  <Button icon="pi pi-calendar" @click="toggle" />
+  <Button icon="pi pi-calendar" @click="toggleOptionsMenu" />
   <OverlayPanel ref="op">
     <div class="p-d-flex">
       <Dropdown v-model="currentRangeFilter" :options="rangeFilterOptions" />
     </div>
     <div class="p-d-flex p-flex-column p-jc-center">
       <div class="p-mb-2">
-        <Button label="Today" class="p-button-sm" @click="setRange('today')" />
+        <Button label="Today" class="p-button-sm" @click="setRange(TODAY)" />
       </div>
       <div class="p-mb-2">
         <Button
           label="Yesterday"
           class="p-button-sm"
-          @click="setRange('yesterday')"
+          @click="setRange(YESTERDAY)"
         />
       </div>
       <div class="p-mb-2">
         <Button
           label="Last 7 Days"
           class="p-button-sm"
-          @click="setRange('last_seven')"
+          @click="setRange(LAST_SEVEN)"
         />
       </div>
       <div class="p-mb-2">
         <Button
           label="Last 30 Days"
           class="p-button-sm"
-          @click="setRange('last_thirty')"
+          @click="setRange(LAST_THIRTY)"
         />
       </div>
       <div class="p-mb-2">
         <Button
           label="Last 60 Days"
           class="p-button-sm"
-          @click="setRange('last_sixty')"
+          @click="setRange(LAST_SIXTY)"
         />
       </div>
       <div class="p-mb-2">
         <Button
           label="This Month"
           class="p-button-sm"
-          @click="setRange('this_month')"
+          @click="setRange(THIS_MONTH)"
         />
       </div>
       <div class="p-mb-2">
         <Button
           label="Last Month"
           class="p-button-sm"
-          @click="setRange('last_month')"
+          @click="setRange(LAST_MONTH)"
         />
       </div>
     </div>
@@ -142,6 +142,13 @@
     data() {
       return {
         currentRangeFilter: this.rangeFilterOptions[0],
+        TODAY: "today",
+        YESTERDAY: "yesterday",
+        LAST_SEVEN: "last_seven",
+        LAST_THIRTY: "last_thirty",
+        LAST_SIXTY: "last_sixty",
+        THIS_MONTH: "this_month",
+        LAST_MONTH: "last_month",
       };
     },
 
@@ -186,68 +193,6 @@
         unsetFilter: "filters/unsetFilter",
       }),
 
-      clearDate(filterName) {
-        this.unsetFilter({
-          filterType: this.filterType,
-          filterName: filterName,
-        });
-      },
-
-      toggle(event) {
-        this.$refs.op.toggle(event);
-      },
-
-      setRange(rangeType) {
-        const today = new Date();
-        let startDate = null;
-        let endDate = null;
-        let pastDate = null;
-        switch (rangeType) {
-          case "today":
-            startDate = new Date();
-            endDate = new Date();
-            break;
-          case "yesterday":
-            pastDate = today.getDate() - 1;
-            startDate = new Date(today.setDate(pastDate));
-            endDate = new Date(today.setDate(pastDate));
-            break;
-          case "last_seven":
-            pastDate = today.getDate() - 7;
-            startDate = new Date(today.setDate(pastDate));
-            endDate = new Date();
-            break;
-          case "last_thirty":
-            pastDate = today.getDate() - 30;
-            startDate = new Date(today.setDate(pastDate));
-            endDate = new Date();
-            break;
-          case "last_sixty":
-            pastDate = today.getDate() - 60;
-            startDate = new Date(today.setDate(pastDate));
-            endDate = new Date();
-            break;
-          case "this_month":
-            pastDate = today.getMonth();
-            startDate = new Date(today.setMonth(pastDate));
-            startDate.setDate(1);
-            endDate = new Date();
-            break;
-          case "last_month":
-            pastDate = today.getMonth() - 1;
-            startDate = new Date(today.setMonth(pastDate));
-            endDate = new Date(today.setMonth(pastDate + 1));
-            startDate.setDate(1);
-            endDate.setDate(0);
-            break;
-          default:
-            break;
-        }
-        startDate.setHours(0, 0, 0);
-        endDate.setHours(23, 59, 59);
-        this.dateSelect(startDate, this.startFilter);
-        this.dateSelect(endDate, this.endfilter);
-      },
       dateSelect(event, filterName) {
         if (event == null) {
           return;
@@ -258,6 +203,70 @@
           filterValue: event,
         });
       },
+
+      clearDate(filterName) {
+        this.unsetFilter({
+          filterType: this.filterType,
+          filterName: filterName,
+        });
+      },
+
+      setRange(rangeType) {
+        const today = new Date();
+        let startDate = null;
+        let endDate = null;
+        let pastDate = null;
+        switch (rangeType) {
+          case this.TODAY:
+            startDate = new Date();
+            endDate = new Date();
+            break;
+          case this.YESTERDAY:
+            pastDate = today.getDate() - 1;
+            startDate = new Date(today.setDate(pastDate));
+            endDate = new Date(today.setDate(pastDate));
+            break;
+          case this.LAST_SEVEN:
+            pastDate = today.getDate() - 7;
+            startDate = new Date(today.setDate(pastDate));
+            endDate = new Date();
+            break;
+          case this.LAST_THIRTY:
+            pastDate = today.getDate() - 30;
+            startDate = new Date(today.setDate(pastDate));
+            endDate = new Date();
+            break;
+          case this.LAST_SIXTY:
+            pastDate = today.getDate() - 60;
+            startDate = new Date(today.setDate(pastDate));
+            endDate = new Date();
+            break;
+          case this.THIS_MONTH:
+            pastDate = today.getMonth();
+            startDate = new Date(today.setMonth(pastDate));
+            startDate.setDate(1);
+            endDate = new Date();
+            break;
+          case this.LAST_MONTH:
+            pastDate = today.getMonth() - 1;
+            startDate = new Date(today.setMonth(pastDate));
+            endDate = new Date(today.setMonth(pastDate + 1));
+            startDate.setDate(1);
+            endDate.setDate(0); // 0 will set the date to the last day of the previous month
+            break;
+          default:
+            break;
+        }
+        // Set start and end date times to capture entierty of each day
+        startDate.setHours(0, 0, 0);
+        endDate.setHours(23, 59, 59);
+        this.dateSelect(startDate, this.startFilter);
+        this.dateSelect(endDate, this.endfilter);
+      },
+    },
+
+    toggleOptionsMenu(event) {
+      this.$refs.op.toggle(event);
     },
   };
 </script>
