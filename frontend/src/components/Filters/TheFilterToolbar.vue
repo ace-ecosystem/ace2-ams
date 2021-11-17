@@ -25,7 +25,7 @@
         icon="pi pi-filter-slash"
         label="Clear"
         class="p-button-outlined p-m-1"
-        @click="clearFilters"
+        @click="clear"
       />
       <!--      RESET FILTERS-->
       <Button
@@ -33,13 +33,15 @@
         icon="pi pi-refresh"
         label="Reset"
         class="p-button-outlined p-m-1"
-        @click="resetFilters"
+        @click="reset"
       />
     </template>
   </Toolbar>
 </template>
 
 <script>
+  import { mapActions } from "vuex";
+
   import Button from "primevue/button";
   import DateRangePicker from "@/components/UserInterface/DateRangePicker";
   import EditFilterModal from "@/components/Modals/FilterModal";
@@ -54,15 +56,19 @@
       Toolbar,
     },
 
+    inject: ["filterType"],
+
     methods: {
-      clearFilters() {
-        this.clearDate(this.startFilter);
-        this.clearDate(this.endfilter);
+      ...mapActions({
+        clearAllFilters: "filters/clearAllFilters",
+      }),
+
+      clear() {
+        this.clearAllFilters({ filterType: this.filterType });
       },
 
-      resetFilters() {
-        this.clearDate(this.startFilter);
-        this.clearDate(this.endfilter);
+      reset() {
+        this.clearAllFilters({ filterType: this.filterType });
       },
 
       open(name) {

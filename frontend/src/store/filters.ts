@@ -28,6 +28,10 @@ const store = {
       state: { alerts: alertFilterParams },
       payload: { filterType: "alerts"; filterName: alertFilterNames },
     ): boolean => delete state[payload.filterType][payload.filterName],
+    CLEAR_ALL: (
+      state: { alerts: alertFilterParams },
+      payload: { filterType: "alerts" },
+    ): alertFilterParams => (state[payload.filterType] = {}),
   },
   actions: {
     setFilter: (
@@ -42,6 +46,10 @@ const store = {
       { commit }: CommitFunction,
       payload: { filterType: "alerts"; filterName: string },
     ): void => commit("UNSET_FILTER", payload),
+    clearAllFilters: (
+      { commit }: CommitFunction,
+      payload: { filterType: "alerts" },
+    ): void => commit("CLEAR_ALL", payload),
   },
 };
 
