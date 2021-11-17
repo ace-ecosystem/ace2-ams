@@ -82,7 +82,7 @@
       </div>
     </template>
   </DatePicker>
-  to
+  <span> to </span>
   <DatePicker
     v-model="endDate"
     mode="dateTime"
@@ -263,10 +263,9 @@
         this.dateSelect(startDate, this.startFilter);
         this.dateSelect(endDate, this.endfilter);
       },
-    },
-
-    toggleOptionsMenu(event) {
-      this.$refs.op.toggle(event);
+      toggleOptionsMenu(event) {
+        this.$refs.op.toggle(event);
+      },
     },
   };
 </script>
