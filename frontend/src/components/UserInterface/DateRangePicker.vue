@@ -193,14 +193,14 @@
         unsetFilter: "filters/unsetFilter",
       }),
 
-      dateSelect(event, filterName) {
-        if (event == null) {
+      dateSelect(date, filterName) {
+        if (date == null) {
           return;
         }
         this.setFilter({
           filterType: this.filterType,
           filterName: filterName,
-          filterValue: event,
+          filterValue: date,
         });
       },
 
@@ -258,8 +258,8 @@
             break;
         }
         // Set start and end date times to capture entierty of each day
-        startDate.setHours(0, 0, 0);
-        endDate.setHours(23, 59, 59);
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 0);
         this.dateSelect(startDate, this.startFilter);
         this.dateSelect(endDate, this.endfilter);
       },
