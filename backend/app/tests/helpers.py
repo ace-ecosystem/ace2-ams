@@ -432,15 +432,6 @@ def create_user_role(value: str, db: Session) -> UserRole:
 
 
 def create_realistic_alert(db: Session) -> Alert:
-    """
-    1. Create the alert and set the UUID so the GUI knows what it is without fetching it
-
-    IF ADDING OBSERVABLES TO THE ALERT:
-
-    2. Create the "root analysis" and set the UUID so the GUI knows what it is without fetching it
-    3. Create the observable instance
-    """
-
     # alert
     #     analysis
     #         file: email.rfc822
