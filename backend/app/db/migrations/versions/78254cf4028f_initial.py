@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 4ad0db307f2e
+Revision ID: 78254cf4028f
 Revises: 
-Create Date: 2021-11-17 16:32:35.086009
+Create Date: 2021-11-18 20:35:03.109575
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '4ad0db307f2e'
+revision = '78254cf4028f'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -328,7 +328,7 @@ def upgrade() -> None:
     sa.Column('event_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('insert_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
     sa.Column('instructions', sa.String(), nullable=True),
-    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('name', sa.String(), nullable=False),
     sa.Column('owner_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('tool_uuid', postgresql.UUID(as_uuid=True), nullable=True),
@@ -387,12 +387,12 @@ def upgrade() -> None:
     sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('details', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('error_message', sa.String(), nullable=True),
-    sa.Column('parent_observable_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('parent_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('stack_trace', sa.String(), nullable=True),
     sa.Column('summary', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['alert_uuid'], ['alert.uuid'], ),
     sa.ForeignKeyConstraint(['analysis_module_type_uuid'], ['analysis_module_type.uuid'], ),
-    sa.ForeignKeyConstraint(['parent_observable_uuid'], ['observable_instance.uuid'], use_alter=True),
+    sa.ForeignKeyConstraint(['parent_uuid'], ['observable_instance.uuid'], use_alter=True),
     sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
     sa.PrimaryKeyConstraint('uuid')
     )
@@ -402,12 +402,12 @@ def upgrade() -> None:
     sa.Column('alert_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('context', sa.String(), nullable=True),
     sa.Column('observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('parent_analysis_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('parent_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('redirection_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
     sa.ForeignKeyConstraint(['alert_uuid'], ['alert.uuid'], ),
     sa.ForeignKeyConstraint(['observable_uuid'], ['observable.uuid'], ),
-    sa.ForeignKeyConstraint(['parent_analysis_uuid'], ['analysis.uuid'], use_alter=True),
+    sa.ForeignKeyConstraint(['parent_uuid'], ['analysis.uuid'], use_alter=True),
     sa.ForeignKeyConstraint(['redirection_uuid'], ['observable_instance.uuid'], ),
     sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
     sa.PrimaryKeyConstraint('uuid')

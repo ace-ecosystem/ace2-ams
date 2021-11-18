@@ -24,9 +24,9 @@ class ObservableInstance(Node):
     # use_alter is used on the ForeignKey so that SQLAlchemy/Alembic uses ALTER to create the foreign key
     # constraint after the tables are created. This is needed because the analysis and observable_instance
     # tables have foreign keys to one another, and there would be no way to determine which table to create first.
-    parent_analysis_uuid = Column(UUID(as_uuid=True), ForeignKey("analysis.uuid", use_alter=True), nullable=False)
+    parent_uuid = Column(UUID(as_uuid=True), ForeignKey("analysis.uuid", use_alter=True), nullable=False)
 
-    parent_analysis = relationship("Analysis", foreign_keys=[parent_analysis_uuid], uselist=False)
+    parent_analysis = relationship("Analysis", foreign_keys=[parent_uuid], uselist=False)
 
     redirection_uuid = Column(UUID(as_uuid=True), ForeignKey("observable_instance.uuid"))
 

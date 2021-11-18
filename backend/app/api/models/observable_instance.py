@@ -37,7 +37,7 @@ class ObservableInstanceCreateBase(NodeCreate, ObservableInstanceBase):
 class ObservableInstanceCreate(ObservableInstanceCreateBase):
     alert_uuid: UUID4 = Field(description="The UUID of the alert containing this observable instance")
 
-    parent_analysis_uuid: UUID4 = Field(description="The UUID of the analysis containing this observable instance")
+    parent_uuid: UUID4 = Field(description="The UUID of the analysis containing this observable instance")
 
 
 class ObservableInstanceCreateWithAlert(ObservableInstanceCreateBase):
@@ -49,7 +49,7 @@ class ObservableInstanceRead(NodeRead, ObservableInstanceBase):
 
     observable: ObservableRead = Field(description="The observable represented by this instance")
 
-    parent_analysis_uuid: UUID4 = Field(description="The UUID of the analysis containing this observable instance")
+    parent_uuid: UUID4 = Field(description="The UUID of the analysis containing this observable instance")
 
     uuid: UUID4 = Field(description="The UUID of the observable instance")
 
@@ -58,7 +58,7 @@ class ObservableInstanceRead(NodeRead, ObservableInstanceBase):
 
 
 class ObservableInstanceUpdate(NodeUpdate):
-    # At this point, editing an observable instance's alert_uuid and parent_analysis_uuid is not permitted.
+    # At this point, editing an observable instance's alert_uuid and parent_uuid is not permitted.
 
     context: Optional[type_str] = Field(
         description="""Optional context surrounding the observation. This is used to communicate additional information

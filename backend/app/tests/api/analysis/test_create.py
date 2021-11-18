@@ -91,11 +91,11 @@ def test_create_nonexistent_analysis_module_type(client_valid_access_token, db):
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_create_nonexistent_parent_observable_uuid(client_valid_access_token, db):
+def test_create_nonexistent_parent_uuid(client_valid_access_token, db):
     alert = helpers.create_alert(db=db)
 
     create = client_valid_access_token.post(
-        "/api/analysis/", json={"alert_uuid": str(alert.uuid), "parent_observable_uuid": str(uuid.uuid4())}
+        "/api/analysis/", json={"alert_uuid": str(alert.uuid), "parent_uuid": str(uuid.uuid4())}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
@@ -163,7 +163,7 @@ def test_create_valid_analysis_module_type(client_valid_access_token, db):
     assert get.json()["analysis_module_type"]["uuid"] == str(analysis_module_type.uuid)
 
 
-def test_create_valid_parent_observable_uuid(client_valid_access_token, db):
+def test_create_valid_parent_uuid(client_valid_access_token, db):
     alert = helpers.create_alert(db=db)
     root_analysis = helpers.create_analysis(db=db, alert=alert)
 
@@ -179,7 +179,7 @@ def test_create_valid_parent_observable_uuid(client_valid_access_token, db):
         "/api/analysis/",
         json={
             "alert_uuid": str(alert.uuid),
-            "parent_observable_uuid": str(observable_instance.uuid),
+            "parent_uuid": str(observable_instance.uuid),
             "uuid": str(child_analysis_uuid),
         },
     )
@@ -187,7 +187,7 @@ def test_create_valid_parent_observable_uuid(client_valid_access_token, db):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["parent_observable_uuid"] == str(observable_instance.uuid)
+    assert get.json()["parent_uuid"] == str(observable_instance.uuid)
 
     # Adding the child analysis to the observable instance should trigger
     # the observable instance to get a new version.

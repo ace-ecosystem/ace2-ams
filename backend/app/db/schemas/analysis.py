@@ -31,13 +31,11 @@ class Analysis(Node):
     #
     # An "alert" is a combination of analysis and observable instance objects along with some extra metadata.
     # An analysis object is always at the root of an alert, but in the rest of the tree structure, an analysis
-    # can be either the parent or a child of an observable instance. Because of this, the parent_observable_uuid
+    # can be either the parent or a child of an observable instance. Because of this, the parent_uuid
     # foreign key can be nullable, which implies that it is the root analysis object of an alert.
-    parent_observable_uuid = Column(
-        UUID(as_uuid=True), ForeignKey("observable_instance.uuid", use_alter=True), nullable=True
-    )
+    parent_uuid = Column(UUID(as_uuid=True), ForeignKey("observable_instance.uuid", use_alter=True), nullable=True)
 
-    parent_observable = relationship("ObservableInstance", foreign_keys=[parent_observable_uuid], uselist=False)
+    parent_observable = relationship("ObservableInstance", foreign_keys=[parent_uuid], uselist=False)
 
     stack_trace = Column(String)
 

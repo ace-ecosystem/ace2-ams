@@ -419,7 +419,7 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     assert observable_instances[0].observable.type.value == "o_type"
     assert observable_instances[0].observable.value == "o_value"
     assert str(observable_instances[0].alert_uuid) == get.json()["uuid"]
-    assert observable_instances[0].parent_analysis_uuid == analyses[0].uuid
+    assert observable_instances[0].parent_uuid == analyses[0].uuid
 
 
 @pytest.mark.parametrize(

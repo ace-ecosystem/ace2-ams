@@ -32,9 +32,7 @@ def create_analysis(
     db: Session = Depends(get_db),
 ):
     # Create the new analysis Node using the data from the request
-    new_analysis: Analysis = create_node(
-        node_create=analysis, db_node_type=Analysis, db=db, exclude={"parent_observable_uuid"}
-    )
+    new_analysis: Analysis = create_node(node_create=analysis, db_node_type=Analysis, db=db, exclude={"parent_uuid"})
 
     # If an analysis module type was given, get it from the database to use with the new analysis
     if analysis.analysis_module_type:
@@ -43,10 +41,8 @@ def create_analysis(
         )
 
     # Set the parent observable if one was given
-    if analysis.parent_observable_uuid:
-        new_analysis.parent_observable = crud.read(
-            uuid=analysis.parent_observable_uuid, db_table=ObservableInstance, db=db
-        )
+    if analysis.parent_uuid:
+        new_analysis.parent_observable = crud.read(uuid=analysis.parent_uuid, db_table=ObservableInstance, db=db)
 
         # This counts as editing the observable instance, so it should receive an updated version
         new_analysis.parent_observable.version = uuid4()

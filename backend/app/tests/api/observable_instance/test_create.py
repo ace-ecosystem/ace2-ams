@@ -29,10 +29,10 @@ from tests import helpers
         ("alert_uuid", "abc"),
         ("context", 123),
         ("context", ""),
-        ("parent_analysis_uuid", 123),
-        ("parent_analysis_uuid", None),
-        ("parent_analysis_uuid", ""),
-        ("parent_analysis_uuid", "abc"),
+        ("parent_uuid", 123),
+        ("parent_uuid", None),
+        ("parent_uuid", ""),
+        ("parent_uuid", "abc"),
         ("redirection_uuid", 123),
         ("redirection_uuid", ""),
         ("redirection_uuid", "abc"),
@@ -56,7 +56,7 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
     create_json = {
         key: value,
         "alert_uuid": str(uuid.uuid4()),
-        "parent_analysis_uuid": str(uuid.uuid4()),
+        "parent_uuid": str(uuid.uuid4()),
         "type": "test_type",
         "value": "test",
     }
@@ -74,7 +74,7 @@ def test_create_invalid_node_fields(client_valid_access_token, key, value):
     create_json = {
         key: value,
         "alert_uuid": str(uuid.uuid4()),
-        "parent_analysis_uuid": str(uuid.uuid4()),
+        "parent_uuid": str(uuid.uuid4()),
         "type": "test_type",
         "value": "test",
     }
@@ -95,7 +95,7 @@ def test_create_duplicate_uuid(client_valid_access_token, db):
     create_json = {
         "uuid": str(uuid.uuid4()),
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
     }
@@ -118,7 +118,7 @@ def test_create_nonexistent_alert(client_valid_access_token, db):
     nonexistent_alert_uuid = str(uuid.uuid4())
     create_json = {
         "alert_uuid": nonexistent_alert_uuid,
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
     }
@@ -138,7 +138,7 @@ def test_create_nonexistent_analysis(client_valid_access_token, db):
     nonexistent_analysis_uuid = str(uuid.uuid4())
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": nonexistent_analysis_uuid,
+        "parent_uuid": nonexistent_analysis_uuid,
         "type": "test_type",
         "value": "test",
     }
@@ -159,7 +159,7 @@ def test_create_nonexistent_redirection(client_valid_access_token, db):
     nonexistent_redirection_uuid = str(uuid.uuid4())
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "redirection_uuid": nonexistent_redirection_uuid,
         "type": "test_type",
         "value": "test",
@@ -180,7 +180,7 @@ def test_create_nonexistent_type(client_valid_access_token, db):
     # Ensure you cannot create an observable instance with a nonexistent type
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "type": "abc",
         "value": "test",
     }
@@ -204,7 +204,7 @@ def test_create_nonexistent_node_fields(client_valid_access_token, db, key, valu
     # Ensure you cannot create an observable instance with a nonexistent type
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
     }
@@ -235,7 +235,7 @@ def test_create_bulk(client_valid_access_token, db):
         observable_instances.append(
             {
                 "alert_uuid": str(alert.uuid),
-                "parent_analysis_uuid": str(root_analysis.uuid),
+                "parent_uuid": str(root_analysis.uuid),
                 "type": "test_type",
                 "uuid": observable_uuid,
                 "value": f"test{i}",
@@ -247,7 +247,7 @@ def test_create_bulk(client_valid_access_token, db):
     # Their should be 3 observable instances in the database
     observable_instances = db.query(ObservableInstance).all()
     assert len(observable_instances) == 3
-    assert all(o.parent_analysis_uuid == root_analysis.uuid for o in observable_instances)
+    assert all(o.parent_uuid == root_analysis.uuid for o in observable_instances)
 
     # Additionally, creating an observable instance should trigger the alert and analysis to get a new version.
     assert alert.version != initial_alert_version
@@ -278,7 +278,7 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
     # Create the observable instance
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
     }
@@ -307,7 +307,7 @@ def test_create_valid_redirection(client_valid_access_token, db):
     observable_instance_uuid = str(uuid.uuid4())
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "uuid": observable_instance_uuid,
         "value": "test",
@@ -317,7 +317,7 @@ def test_create_valid_redirection(client_valid_access_token, db):
     # Create another observable instance that redirects to the previously created one
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "redirection_uuid": observable_instance_uuid,
         "type": "test_type",
         "value": "test",
@@ -343,7 +343,7 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     observable_uuid = uuid.uuid4()
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "uuid": str(observable_uuid),
         "value": "test",
@@ -355,7 +355,7 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     get = client_valid_access_token.get(create.headers["Content-Location"])
     assert get.status_code == 200
     assert get.json()["alert_uuid"] == str(alert.uuid)
-    assert get.json()["parent_analysis_uuid"] == str(root_analysis.uuid)
+    assert get.json()["parent_uuid"] == str(root_analysis.uuid)
     assert get.json()["observable"]["type"]["value"] == "test_type"
     assert get.json()["uuid"] == str(observable_uuid)
     assert get.json()["observable"]["value"] == "test"
@@ -384,7 +384,7 @@ def test_create_valid_node_directives(client_valid_access_token, db, values):
     # Create an observable instance
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
         "directives": values,
@@ -416,7 +416,7 @@ def test_create_valid_node_tags(client_valid_access_token, db, values):
     # Create an observable instance
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
         "tags": values,
@@ -448,7 +448,7 @@ def test_create_valid_node_threat_actor(client_valid_access_token, db, value):
     # Create an observable instance
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
         "threat_actor": value,
@@ -483,7 +483,7 @@ def test_create_valid_node_threats(client_valid_access_token, db, values):
     # Create an observable instance
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(root_analysis.uuid),
+        "parent_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
         "threats": values,

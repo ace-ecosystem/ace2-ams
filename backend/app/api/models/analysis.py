@@ -33,7 +33,7 @@ class AnalysisBase(NodeBase):
 class AnalysisCreate(NodeCreate, AnalysisBase):
     alert_uuid: UUID4 = Field(description="The UUID of the alert containing this analysis")
 
-    parent_observable_uuid: Optional[UUID4] = Field(description="The UUID of the observable containing this analysis")
+    parent_uuid: Optional[UUID4] = Field(description="The UUID of the observable containing this analysis")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
 
@@ -47,7 +47,7 @@ class AnalysisRead(NodeRead, AnalysisBase):
 
     details: Optional[dict] = Field(description="A JSON representation of the details produced by the analysis")
 
-    parent_observable_uuid: Optional[UUID4] = Field(description="The UUID of the observable containing this analysis")
+    parent_uuid: Optional[UUID4] = Field(description="The UUID of the observable containing this analysis")
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
 

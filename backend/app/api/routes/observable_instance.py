@@ -38,7 +38,7 @@ def _create_observable_instance(
         node_create=observable_instance,
         db_node_type=ObservableInstance,
         db=db,
-        exclude={"parent_analysis_uuid", "type", "value"},
+        exclude={"parent_uuid", "type", "value"},
     )
 
     # Set the redirection observable instance if one was given
@@ -74,7 +74,7 @@ def create_observable_instances(
         # Read the required fields from the database to use with the new observable instance
         new_observable_instance.alert = crud.read(uuid=observable_instance.alert_uuid, db_table=Alert, db=db)
         new_observable_instance.parent_analysis = crud.read(
-            uuid=observable_instance.parent_analysis_uuid, db_table=Analysis, db=db
+            uuid=observable_instance.parent_uuid, db_table=Analysis, db=db
         )
 
         # Adding an observable instance counts as modifying the alert and the analysis, so they should both get new versions
