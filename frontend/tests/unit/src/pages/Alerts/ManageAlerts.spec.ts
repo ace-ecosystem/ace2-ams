@@ -4,7 +4,7 @@ import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
 import TheAlertsTable from "@/components/Alerts/TheAlertsTable.vue";
 import DateRangePicker from "@/components/UserInterface/DateRangePicker.vue";
 import store from "@/store";
-import { mount, shallowMount } from "@vue/test-utils";
+import { mount } from "@vue/test-utils";
 
 describe("ManageAlerts.vue", () => {
   const wrapper = mount(ManageAlerts, {
