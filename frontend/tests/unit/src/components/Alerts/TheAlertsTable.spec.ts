@@ -198,5 +198,3 @@ describe("TheAlertsTable methods failed", () => {
     expect(wrapper.vm.error).toEqual("Request failed with status code 403");
   });
 });
-
-// Add tests
