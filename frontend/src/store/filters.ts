@@ -46,7 +46,7 @@ const store = {
       { commit }: CommitFunction,
       payload: { filterType: "alerts"; filterName: string },
     ): void => commit("UNSET_FILTER", payload),
-    clearAllFilters: (
+    clearAll: (
       { commit }: CommitFunction,
       payload: { filterType: "alerts" },
     ): void => commit("CLEAR_ALL", payload),

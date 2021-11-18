@@ -3,13 +3,13 @@ import { shallowMount, VueWrapper } from "@vue/test-utils";
 import { createStore } from "vuex";
 
 describe("TheFilterToolbar.vue", () => {
-  let actions: { clearAllFilters: jest.Mock<any, any> },
+  let actions: { clearAll: jest.Mock<any, any> },
     store,
     wrapper: VueWrapper<any>;
 
   beforeEach(() => {
     actions = {
-      clearAllFilters: jest.fn(),
+      clearAll: jest.fn(),
     };
     store = createStore({
       modules: {
@@ -37,19 +37,19 @@ describe("TheFilterToolbar.vue", () => {
     expect(wrapper.vm.filterType).toEqual("alerts");
   });
   it("correctly maps vuex action", () => {
-    wrapper.vm.clearAllFilters();
-    expect(actions.clearAllFilters).toHaveBeenCalled();
+    wrapper.vm.clearAll();
+    expect(actions.clearAll).toHaveBeenCalled();
   });
-  it("calls clearAllFilters on clear and reset", () => {
+  it("calls clearAll on clear and reset", () => {
     wrapper.vm.clear();
     wrapper.vm.reset();
-    expect(actions.clearAllFilters).toBeCalledTimes(2);
+    expect(actions.clearAll).toBeCalledTimes(2);
 
     // Checks that correct arguments were sent
-    expect(actions.clearAllFilters.mock.calls[0][1]).toEqual({
+    expect(actions.clearAll.mock.calls[0][1]).toEqual({
       filterType: "alerts",
     });
-    expect(actions.clearAllFilters.mock.calls[1][1]).toEqual({
+    expect(actions.clearAll.mock.calls[1][1]).toEqual({
       filterType: "alerts",
     });
   });

@@ -60,15 +60,15 @@
 
     methods: {
       ...mapActions({
-        clearAllFilters: "filters/clearAllFilters",
+        clearAll: "filters/clearAll",
       }),
 
       clear() {
-        this.clearAllFilters({ filterType: this.filterType });
+        this.clearAll({ filterType: this.filterType });
       },
 
       reset() {
-        this.clearAllFilters({ filterType: this.filterType });
+        this.clearAll({ filterType: this.filterType });
       },
 
       open(name) {
