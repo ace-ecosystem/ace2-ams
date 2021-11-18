@@ -24,9 +24,7 @@ describe("TheFilterToolbar.vue", () => {
       global: {
         plugins: [store],
         provide: {
-          filterType() {
-            return "alerts";
-          },
+          filterType: "alerts",
         },
       },
     });
@@ -36,7 +34,7 @@ describe("TheFilterToolbar.vue", () => {
     expect(wrapper.exists()).toBe(true);
   });
   it("correctly receives injected data", () => {
-    expect(wrapper.vm.filterType()).toEqual("alerts");
+    expect(wrapper.vm.filterType).toEqual("alerts");
   });
   it("correctly maps vuex action", () => {
     wrapper.vm.clearAllFilters();
@@ -49,10 +47,10 @@ describe("TheFilterToolbar.vue", () => {
 
     // Checks that correct arguments were sent
     expect(actions.clearAllFilters.mock.calls[0][1]).toEqual({
-      filterType: wrapper.vm.filterType,
+      filterType: "alerts",
     });
     expect(actions.clearAllFilters.mock.calls[1][1]).toEqual({
-      filterType: wrapper.vm.filterType,
+      filterType: "alerts",
     });
   });
 });
