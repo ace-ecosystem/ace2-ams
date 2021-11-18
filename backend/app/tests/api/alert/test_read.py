@@ -256,25 +256,28 @@ def test_get_filter_observable(client_valid_access_token, db):
 
     # Create some alerts with one observable
     alert1 = helpers.create_alert(db=db)
+    alert1_root_analysis = helpers.create_analysis(db=db, alert=alert1)
     helpers.create_observable_instance(
-        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1.analysis, db=db
+        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1_root_analysis, db=db
     )
 
     alert2 = helpers.create_alert(db=db)
+    alert2_root_analysis = helpers.create_analysis(db=db, alert=alert2)
     helpers.create_observable_instance(
-        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2.analysis, db=db
+        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2_root_analysis, db=db
     )
 
     # Create an alert with multiple observables
     alert3 = helpers.create_alert(db=db)
+    alert3_root_analysis = helpers.create_analysis(db=db, alert=alert3)
     helpers.create_observable_instance(
-        type="test_type1", value="test_value_asdf", alert=alert3, parent_analysis=alert3.analysis, db=db
+        type="test_type1", value="test_value_asdf", alert=alert3, parent_analysis=alert3_root_analysis, db=db
     )
     helpers.create_observable_instance(
-        type="test_type2", value="test_value1", alert=alert3, parent_analysis=alert3.analysis, db=db
+        type="test_type2", value="test_value1", alert=alert3, parent_analysis=alert3_root_analysis, db=db
     )
     helpers.create_observable_instance(
-        type="test_type2", value="test_value2", alert=alert3, parent_analysis=alert3.analysis, db=db
+        type="test_type2", value="test_value2", alert=alert3, parent_analysis=alert3_root_analysis, db=db
     )
 
     # There should be 4 total alerts
@@ -299,20 +302,22 @@ def test_get_filter_observable_types(client_valid_access_token, db):
 
     # Create some alerts with one observable
     alert1 = helpers.create_alert(db=db)
+    alert1_root_analysis = helpers.create_analysis(db=db, alert=alert1)
     helpers.create_observable_instance(
-        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1.analysis, db=db
+        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1_root_analysis, db=db
     )
 
     # Create an alert with multiple observables
     alert2 = helpers.create_alert(db=db)
+    alert2_root_analysis = helpers.create_analysis(db=db, alert=alert2)
     helpers.create_observable_instance(
-        type="test_type1", value="test_value_asdf", alert=alert2, parent_analysis=alert2.analysis, db=db
+        type="test_type1", value="test_value_asdf", alert=alert2, parent_analysis=alert2_root_analysis, db=db
     )
     helpers.create_observable_instance(
-        type="test_type2", value="test_value1", alert=alert2, parent_analysis=alert2.analysis, db=db
+        type="test_type2", value="test_value1", alert=alert2, parent_analysis=alert2_root_analysis, db=db
     )
     helpers.create_observable_instance(
-        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2.analysis, db=db
+        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2_root_analysis, db=db
     )
 
     # There should be 3 total alerts
@@ -337,25 +342,28 @@ def test_get_filter_observable_value(client_valid_access_token, db):
 
     # Create some alerts with one observable
     alert1 = helpers.create_alert(db=db)
+    alert1_root_analysis = helpers.create_analysis(db=db, alert=alert1)
     helpers.create_observable_instance(
-        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1.analysis, db=db
+        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1_root_analysis, db=db
     )
 
     alert2 = helpers.create_alert(db=db)
+    alert2_root_analysis = helpers.create_analysis(db=db, alert=alert2)
     helpers.create_observable_instance(
-        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2.analysis, db=db
+        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2_root_analysis, db=db
     )
 
     # Create an alert with multiple observables
     alert3 = helpers.create_alert(db=db)
+    alert3_root_analysis = helpers.create_analysis(db=db, alert=alert3)
     helpers.create_observable_instance(
-        type="test_type1", value="test_value_asdf", alert=alert3, parent_analysis=alert3.analysis, db=db
+        type="test_type1", value="test_value_asdf", alert=alert3, parent_analysis=alert3_root_analysis, db=db
     )
     helpers.create_observable_instance(
-        type="test_type2", value="test_value1", alert=alert3, parent_analysis=alert3.analysis, db=db
+        type="test_type2", value="test_value1", alert=alert3, parent_analysis=alert3_root_analysis, db=db
     )
     helpers.create_observable_instance(
-        type="test_type2", value="test_value2", alert=alert3, parent_analysis=alert3.analysis, db=db
+        type="test_type2", value="test_value2", alert=alert3, parent_analysis=alert3_root_analysis, db=db
     )
 
     # There should be 4 total alerts
@@ -380,17 +388,19 @@ def test_get_filter_observable_and_observable_types(client_valid_access_token, d
 
     # Create an alert with multiple observables
     alert2 = helpers.create_alert(db=db)
+    alert2_root_analysis = helpers.create_analysis(db=db, alert=alert2)
     helpers.create_observable_instance(
-        type="test_type1", value="test_value1", alert=alert2, parent_analysis=alert2.analysis, db=db
+        type="test_type1", value="test_value1", alert=alert2, parent_analysis=alert2_root_analysis, db=db
     )
     helpers.create_observable_instance(
-        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2.analysis, db=db
+        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2_root_analysis, db=db
     )
 
     # Create an alert with one observable
     alert3 = helpers.create_alert(db=db)
+    alert3_root_analysis = helpers.create_analysis(db=db, alert=alert3)
     helpers.create_observable_instance(
-        type="test_type1", value="test_value1", alert=alert3, parent_analysis=alert3.analysis, db=db
+        type="test_type1", value="test_value1", alert=alert3, parent_analysis=alert3_root_analysis, db=db
     )
 
     # There should be 3 total alerts

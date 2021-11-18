@@ -2,7 +2,6 @@ import { UUID } from "./base";
 import { genericObject } from "./base";
 
 export type alert = {
-  analysis?: Record<string, any>;
   comments?: genericObject[];
   description?: string;
   directives?: genericObject[];
@@ -36,7 +35,6 @@ export type alertSummary = {
   eventTime: Date | null;
   insertTime: Date | null;
   name: string;
-  observables: genericObject[];
   owner: genericObject | string;
   queue: genericObject | string;
   tags: genericObject[];

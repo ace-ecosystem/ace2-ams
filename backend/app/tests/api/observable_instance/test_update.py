@@ -25,12 +25,6 @@ from tests import helpers
     [
         ("context", 123),
         ("context", ""),
-        ("performed_analysis_uuids", 123),
-        ("performed_analysis_uuids", "abc"),
-        ("performed_analysis_uuids", [123]),
-        ("performed_analysis_uuids", [None]),
-        ("performed_analysis_uuids", [""]),
-        ("performed_analysis_uuids", ["abc"]),
         ("redirection_uuid", 123),
         ("redirection_uuid", ""),
         ("redirection_uuid", "abc"),
@@ -74,12 +68,13 @@ def test_update_invalid_uuid(client_valid_access_token):
 
 
 def test_update_invalid_version(client_valid_access_token, db):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable instance
     obj = helpers.create_observable_instance(
-        type="test_type", value="test", alert=alert, parent_analysis=alert.analysis, db=db
+        type="test_type", value="test", alert=alert, parent_analysis=root_analysis, db=db
     )
 
     # Make sure you cannot update it using an invalid version
@@ -89,30 +84,14 @@ def test_update_invalid_version(client_valid_access_token, db):
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
-def test_update_nonexistent_performed_analysis_uuids(client_valid_access_token, db):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
-    # Create an observable instance
-    obj = helpers.create_observable_instance(
-        type="test_type", value="test", alert=alert, parent_analysis=alert.analysis, db=db
-    )
-
-    # Make sure you cannot update it to use a nonexistent analysis UUID
-    update = client_valid_access_token.patch(
-        f"/api/observable/instance/{obj.uuid}",
-        json={"performed_analysis_uuids": [str(uuid.uuid4())], "version": str(obj.version)},
-    )
-    assert update.status_code == status.HTTP_404_NOT_FOUND
-
-
 def test_update_nonexistent_redirection_uuid(client_valid_access_token, db):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable instance
     obj = helpers.create_observable_instance(
-        type="test_type", value="test", alert=alert, parent_analysis=alert.analysis, db=db
+        type="test_type", value="test", alert=alert, parent_analysis=root_analysis, db=db
     )
 
     # Make sure you cannot update it to use a nonexistent redirection UUID
@@ -128,12 +107,13 @@ def test_update_nonexistent_redirection_uuid(client_valid_access_token, db):
     NONEXISTENT_FIELDS,
 )
 def test_update_nonexistent_node_fields(client_valid_access_token, db, key, value):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable instance
     obj = helpers.create_observable_instance(
-        type="test_type", value="test", alert=alert, parent_analysis=alert.analysis, db=db
+        type="test_type", value="test", alert=alert, parent_analysis=root_analysis, db=db
     )
 
     # Make sure you cannot update it to use a nonexistent node field value
@@ -155,53 +135,21 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_update_performed_analysis_uuids(client_valid_access_token, db):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
-    # Create an observable instance
-    obj = helpers.create_observable_instance(
-        type="test_type", value="test", alert=alert, parent_analysis=alert.analysis, db=db
-    )
-    initial_observable_instance_version = obj.version
-    assert obj.performed_analysis_uuids == []
-
-    # Create a child analysis
-    child_analysis = helpers.create_analysis(db=db)
-    initial_child_analysis_version = child_analysis.version
-
-    # Update the performed analyses
-    update = client_valid_access_token.patch(
-        f"/api/observable/instance/{obj.uuid}",
-        json={"performed_analysis_uuids": [str(child_analysis.uuid)], "version": str(obj.version)},
-    )
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert obj.performed_analysis_uuids == [child_analysis.uuid]
-    assert obj.version != initial_observable_instance_version
-
-    # By updating the observable instance and setting its performed_analysis_uuids, you should be able
-    # to read the analysis back and see the observable instance listed as its parent_observable_uuid even
-    # though it was not explicitly added.
-    assert child_analysis.parent_observable_uuid == obj.uuid
-
-    # Additionally, adding the observable instance as the parent should trigger the analysis to have a new version.
-    assert child_analysis.version != initial_child_analysis_version
-
-
 def test_update_redirection_uuid(client_valid_access_token, db):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable instance
     obj1 = helpers.create_observable_instance(
-        type="test_type", value="test", alert=alert, parent_analysis=alert.analysis, db=db
+        type="test_type", value="test", alert=alert, parent_analysis=root_analysis, db=db
     )
     initial_observable_instance_version = obj1.version
     assert obj1.redirection is None
 
     # Create a second observable instance to use for redirection
     obj2 = helpers.create_observable_instance(
-        type="test_type", value="test2", alert=alert, parent_analysis=alert.analysis, db=db
+        type="test_type", value="test2", alert=alert, parent_analysis=root_analysis, db=db
     )
 
     # Update the redirection UUID
@@ -218,12 +166,13 @@ def test_update_redirection_uuid(client_valid_access_token, db):
     VALID_DIRECTIVES,
 )
 def test_update_valid_node_directives(client_valid_access_token, db, values):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable instance
     obj = helpers.create_observable_instance(
-        type="test_type", value="test", alert=alert, parent_analysis=alert.analysis, db=db
+        type="test_type", value="test", alert=alert, parent_analysis=root_analysis, db=db
     )
     initial_observable_instance_version = obj.version
     assert obj.directives == []
@@ -246,12 +195,13 @@ def test_update_valid_node_directives(client_valid_access_token, db, values):
     VALID_TAGS,
 )
 def test_update_valid_node_tags(client_valid_access_token, db, values):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable instance
     obj = helpers.create_observable_instance(
-        type="test_type", value="test", alert=alert, parent_analysis=alert.analysis, db=db
+        type="test_type", value="test", alert=alert, parent_analysis=root_analysis, db=db
     )
     initial_observable_instance_version = obj.version
     assert obj.tags == []
@@ -274,12 +224,13 @@ def test_update_valid_node_tags(client_valid_access_token, db, values):
     VALID_THREAT_ACTOR,
 )
 def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable instance
     obj = helpers.create_observable_instance(
-        type="test_type", value="test", alert=alert, parent_analysis=alert.analysis, db=db
+        type="test_type", value="test", alert=alert, parent_analysis=root_analysis, db=db
     )
     initial_observable_instance_version = obj.version
     assert obj.threat_actor is None
@@ -307,12 +258,13 @@ def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
     VALID_THREATS,
 )
 def test_update_valid_node_threats(client_valid_access_token, db, values):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable instance
     obj = helpers.create_observable_instance(
-        type="test_type", value="test", alert=alert, parent_analysis=alert.analysis, db=db
+        type="test_type", value="test", alert=alert, parent_analysis=root_analysis, db=db
     )
     initial_observable_instance_version = obj.version
     assert obj.threats == []
@@ -344,12 +296,13 @@ def test_update_valid_node_threats(client_valid_access_token, db, values):
     ],
 )
 def test_update(client_valid_access_token, key, db, initial_value, updated_value):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable instance
     obj = helpers.create_observable_instance(
-        type="test_type", value="test", alert=alert, parent_analysis=alert.analysis, db=db
+        type="test_type", value="test", alert=alert, parent_analysis=root_analysis, db=db
     )
     initial_observable_instance_version = obj.version
 

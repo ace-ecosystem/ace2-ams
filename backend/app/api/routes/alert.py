@@ -11,6 +11,7 @@ from api.models.alert import AlertCreate, AlertRead, AlertUpdate
 from api.models.analysis import AnalysisCreate
 from api.routes import helpers
 from api.routes.node import create_node, update_node
+from api.routes.observable_instance import _create_observable_instance
 from core.auth import validate_access_token
 from db import crud
 from db.database import get_db
@@ -50,7 +51,12 @@ def create_alert(
     db: Session = Depends(get_db),
 ):
     # Create the new alert Node using the data from the request
-    new_alert: Alert = create_node(node_create=alert, db_node_type=Alert, db=db)
+    new_alert: Alert = create_node(
+        node_create=alert,
+        db_node_type=Alert,
+        db=db,
+        exclude={"observable_instances"},
+    )
 
     # Set the required alert properties
     new_alert.queue = crud.read_by_value(value=alert.queue, db_table=AlertQueue, db=db)
@@ -66,13 +72,21 @@ def create_alert(
     if alert.tool_instance:
         new_alert.tool_instance = crud.read_by_value(value=alert.tool_instance, db_table=AlertToolInstance, db=db)
 
-    # Alerts must point to an Analysis, so if we get this far without any errors, a new Analysis needs to be created.
-    new_alert.analysis = create_node(node_create=AnalysisCreate(), db_node_type=Analysis, db=db)
+    # Create a root analysis object for the alert
+    root_analysis: Analysis = create_node(
+        node_create=AnalysisCreate(alert_uuid=new_alert.uuid), db_node_type=Analysis, db=db
+    )
 
-    # Save the new alert (including the new analysis) to the database
+    # Add the observable instances to the root analysis
+    for observable_instance in alert.observable_instances:
+        db_observable_instance = _create_observable_instance(observable_instance, db=db)
+        db_observable_instance.alert_uuid = new_alert.uuid
+        db_observable_instance.parent_analysis_uuid = root_analysis.uuid
+        db.add(db_observable_instance)
+
     db.add(new_alert)
+    db.add(root_analysis)
     crud.commit(db)
-
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=new_alert.uuid)
 
 
@@ -386,27 +400,11 @@ def update_alert(
     if "instructions" in update_data:
         db_alert.instructions = update_data["instructions"]
 
-    if "name" in update_data:
-        db_alert.name = update_data["name"]
-
     if "owner" in update_data:
         db_alert.owner = crud.read_user_by_username(username=update_data["owner"], db=db)
 
     if "queue" in update_data:
         db_alert.queue = crud.read_by_value(value=update_data["queue"], db_table=AlertQueue, db=db)
-
-    if "tool" in update_data:
-        db_alert.tool = crud.read_by_value(value=update_data["tool"], db_table=AlertTool, db=db)
-
-    if "tool_instance" in update_data:
-        db_alert.tool_instance = crud.read_by_value(
-            value=update_data["tool_instance"],
-            db_table=AlertToolInstance,
-            db=db,
-        )
-
-    if "type" in update_data:
-        db_alert.type = crud.read_by_value(value=update_data["type"], db_table=AlertType, db=db)
 
     crud.commit(db)
 

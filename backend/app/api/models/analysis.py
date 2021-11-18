@@ -1,8 +1,8 @@
 from pydantic import Field, Json, UUID4
-from typing import List, Optional
+from typing import Optional
 from uuid import uuid4
 
-from api.models import type_str, validators
+from api.models import type_str
 from api.models.analysis_module_type import AnalysisModuleTypeRead
 from api.models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 
@@ -31,27 +31,25 @@ class AnalysisBase(NodeBase):
 
 
 class AnalysisCreate(NodeCreate, AnalysisBase):
+    alert_uuid: UUID4 = Field(description="The UUID of the alert containing this analysis")
+
     parent_observable_uuid: Optional[UUID4] = Field(description="The UUID of the observable containing this analysis")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
 
 
 class AnalysisRead(NodeRead, AnalysisBase):
+    alert_uuid: UUID4 = Field(description="The UUID of the alert containing this analysis")
+
     analysis_module_type: Optional[AnalysisModuleTypeRead] = Field(
         description="The analysis module type that was used to perform this analysis"
     )
 
     details: Optional[dict] = Field(description="A JSON representation of the details produced by the analysis")
 
-    discovered_observable_uuids: List[UUID4] = Field(
-        description="A list of observable instances discovered while performing this analysis"
-    )
-
     parent_observable_uuid: Optional[UUID4] = Field(description="The UUID of the observable containing this analysis")
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
-
-    _convert_association_list: classmethod = validators.convert_association_list("discovered_observable_uuids")
 
     class Config:
         orm_mode = True

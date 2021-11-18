@@ -2,6 +2,7 @@ import pytest
 import uuid
 
 from fastapi import status
+from db.schemas.observable_instance import ObservableInstance
 
 from tests.api.node import (
     INVALID_CREATE_FIELDS,
@@ -32,12 +33,6 @@ from tests import helpers
         ("parent_analysis_uuid", None),
         ("parent_analysis_uuid", ""),
         ("parent_analysis_uuid", "abc"),
-        ("performed_analysis_uuids", 123),
-        ("performed_analysis_uuids", "abc"),
-        ("performed_analysis_uuids", [123]),
-        ("performed_analysis_uuids", [None]),
-        ("performed_analysis_uuids", [""]),
-        ("performed_analysis_uuids", ["abc"]),
         ("redirection_uuid", 123),
         ("redirection_uuid", ""),
         ("redirection_uuid", "abc"),
@@ -89,8 +84,9 @@ def test_create_invalid_node_fields(client_valid_access_token, key, value):
 
 
 def test_create_duplicate_uuid(client_valid_access_token, db):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -99,7 +95,7 @@ def test_create_duplicate_uuid(client_valid_access_token, db):
     create_json = {
         "uuid": str(uuid.uuid4()),
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
     }
@@ -111,8 +107,9 @@ def test_create_duplicate_uuid(client_valid_access_token, db):
 
 
 def test_create_nonexistent_alert(client_valid_access_token, db):
-    # Create an analysis
-    analysis = helpers.create_analysis(db=db)
+    # Create an alert and analysis
+    alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -121,7 +118,7 @@ def test_create_nonexistent_alert(client_valid_access_token, db):
     nonexistent_alert_uuid = str(uuid.uuid4())
     create_json = {
         "alert_uuid": nonexistent_alert_uuid,
-        "parent_analysis_uuid": str(analysis.uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
     }
@@ -150,30 +147,10 @@ def test_create_nonexistent_analysis(client_valid_access_token, db):
     assert nonexistent_analysis_uuid in create.text
 
 
-def test_create_nonexistent_performed_analysis(client_valid_access_token, db):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
-    # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
-
-    # Ensure you cannot create an observable instance with a nonexistent performed analysis
-    nonexistent_analysis_uuid = str(uuid.uuid4())
-    create_json = {
-        "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
-        "performed_analysis_uuids": [nonexistent_analysis_uuid],
-        "type": "test_type",
-        "value": "test",
-    }
-    create = client_valid_access_token.post("/api/observable/instance/", json=[create_json])
-    assert create.status_code == status.HTTP_404_NOT_FOUND
-    assert nonexistent_analysis_uuid in create.text
-
-
 def test_create_nonexistent_redirection(client_valid_access_token, db):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -182,7 +159,7 @@ def test_create_nonexistent_redirection(client_valid_access_token, db):
     nonexistent_redirection_uuid = str(uuid.uuid4())
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "redirection_uuid": nonexistent_redirection_uuid,
         "type": "test_type",
         "value": "test",
@@ -193,8 +170,9 @@ def test_create_nonexistent_redirection(client_valid_access_token, db):
 
 
 def test_create_nonexistent_type(client_valid_access_token, db):
-    # Create an alert
+    ## Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -202,7 +180,7 @@ def test_create_nonexistent_type(client_valid_access_token, db):
     # Ensure you cannot create an observable instance with a nonexistent type
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "type": "abc",
         "value": "test",
     }
@@ -216,8 +194,9 @@ def test_create_nonexistent_type(client_valid_access_token, db):
     NONEXISTENT_FIELDS,
 )
 def test_create_nonexistent_node_fields(client_valid_access_token, db, key, value):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -225,7 +204,7 @@ def test_create_nonexistent_node_fields(client_valid_access_token, db, key, valu
     # Ensure you cannot create an observable instance with a nonexistent type
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
     }
@@ -240,10 +219,11 @@ def test_create_nonexistent_node_fields(client_valid_access_token, db, key, valu
 
 
 def test_create_bulk(client_valid_access_token, db):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
     initial_alert_version = alert.version
-    initial_analysis_version = alert.analysis.version
+    initial_analysis_version = root_analysis.version
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -255,7 +235,7 @@ def test_create_bulk(client_valid_access_token, db):
         observable_instances.append(
             {
                 "alert_uuid": str(alert.uuid),
-                "parent_analysis_uuid": str(alert.analysis_uuid),
+                "parent_analysis_uuid": str(root_analysis.uuid),
                 "type": "test_type",
                 "uuid": observable_uuid,
                 "value": f"test{i}",
@@ -264,12 +244,14 @@ def test_create_bulk(client_valid_access_token, db):
     create = client_valid_access_token.post("/api/observable/instance/", json=observable_instances)
     assert create.status_code == status.HTTP_201_CREATED
 
-    # The analysis should have 3 discovered observable instance UUIDs.
-    assert len(alert.analysis.discovered_observable_uuids) == 3
+    # Their should be 3 observable instances in the database
+    observable_instances = db.query(ObservableInstance).all()
+    assert len(observable_instances) == 3
+    assert all(o.parent_analysis_uuid == root_analysis.uuid for o in observable_instances)
 
     # Additionally, creating an observable instance should trigger the alert and analysis to get a new version.
     assert alert.version != initial_alert_version
-    assert alert.analysis.version != initial_analysis_version
+    assert root_analysis.version != initial_analysis_version
 
 
 @pytest.mark.parametrize(
@@ -286,8 +268,9 @@ def test_create_bulk(client_valid_access_token, db):
     ],
 )
 def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -295,7 +278,7 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
     # Create the observable instance
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
     }
@@ -312,43 +295,10 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
         assert get.json()[key] == value
 
 
-def test_create_valid_performed_analysis_uuids(client_valid_access_token, db):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
-    # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
-
-    # Create a child analysis for the observable instance
-    child_analysis = helpers.create_analysis(db=db)
-    initial_child_analysis_version = child_analysis.version
-
-    # Create the observable instance
-    create_json = {
-        "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
-        "performed_analysis_uuids": [str(child_analysis.uuid)],
-        "type": "test_type",
-        "value": "test",
-    }
-    create = client_valid_access_token.post("/api/observable/instance/", json=[create_json])
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["performed_analysis_uuids"] == [str(child_analysis.uuid)]
-
-    # By creating the observable instance and setting its performed_analysis_uuids, you should
-    # be able to see the observable instance listed as the analysis' parent_observable_uuid even
-    # though it was not explicitly added.
-    assert str(child_analysis.parent_observable_uuid) == get.json()["uuid"]
-
-    # Additionally, adding the observable instance as the parent should trigger the analysis to have a new version.
-    assert child_analysis.version != initial_child_analysis_version
-
-
 def test_create_valid_redirection(client_valid_access_token, db):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -357,7 +307,7 @@ def test_create_valid_redirection(client_valid_access_token, db):
     observable_instance_uuid = str(uuid.uuid4())
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "uuid": observable_instance_uuid,
         "value": "test",
@@ -367,7 +317,7 @@ def test_create_valid_redirection(client_valid_access_token, db):
     # Create another observable instance that redirects to the previously created one
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "redirection_uuid": observable_instance_uuid,
         "type": "test_type",
         "value": "test",
@@ -380,10 +330,11 @@ def test_create_valid_redirection(client_valid_access_token, db):
 
 
 def test_create_valid_required_fields(client_valid_access_token, db):
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
     initial_alert_version = alert.version
-    initial_analysis_version = alert.analysis.version
+    initial_analysis_version = root_analysis.version
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -392,7 +343,7 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     observable_uuid = uuid.uuid4()
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "uuid": str(observable_uuid),
         "value": "test",
@@ -404,18 +355,14 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     get = client_valid_access_token.get(create.headers["Content-Location"])
     assert get.status_code == 200
     assert get.json()["alert_uuid"] == str(alert.uuid)
-    assert get.json()["parent_analysis_uuid"] == str(alert.analysis_uuid)
+    assert get.json()["parent_analysis_uuid"] == str(root_analysis.uuid)
     assert get.json()["observable"]["type"]["value"] == "test_type"
     assert get.json()["uuid"] == str(observable_uuid)
     assert get.json()["observable"]["value"] == "test"
 
-    # You should see this observable instance in the analysis' discovered_observable_uuids list
-    # even though it was not explicitly added.
-    assert alert.analysis.discovered_observable_uuids == [observable_uuid]
-
-    # Additionally, creating an observable instance should trigger the alert and analysis to get a new version.
+    # Creating an observable instance should trigger the alert and analysis to get a new version.
     assert alert.version != initial_alert_version
-    assert alert.analysis.version != initial_analysis_version
+    assert root_analysis.version != initial_analysis_version
 
 
 @pytest.mark.parametrize(
@@ -427,8 +374,9 @@ def test_create_valid_node_directives(client_valid_access_token, db, values):
     for value in values:
         helpers.create_node_directive(value=value, db=db)
 
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -436,7 +384,7 @@ def test_create_valid_node_directives(client_valid_access_token, db, values):
     # Create an observable instance
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
         "directives": values,
@@ -458,8 +406,9 @@ def test_create_valid_node_tags(client_valid_access_token, db, values):
     for value in values:
         helpers.create_node_tag(value=value, db=db)
 
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -467,7 +416,7 @@ def test_create_valid_node_tags(client_valid_access_token, db, values):
     # Create an observable instance
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
         "tags": values,
@@ -489,8 +438,9 @@ def test_create_valid_node_threat_actor(client_valid_access_token, db, value):
     if value:
         helpers.create_node_threat_actor(value=value, db=db)
 
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -498,7 +448,7 @@ def test_create_valid_node_threat_actor(client_valid_access_token, db, value):
     # Create an observable instance
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
         "threat_actor": value,
@@ -523,8 +473,9 @@ def test_create_valid_node_threats(client_valid_access_token, db, values):
     for value in values:
         helpers.create_node_threat(value=value, db=db)
 
-    # Create an alert
+    # Create an alert and analysis
     alert = helpers.create_alert(db=db)
+    root_analysis = helpers.create_analysis(db=db, alert=alert)
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -532,7 +483,7 @@ def test_create_valid_node_threats(client_valid_access_token, db, values):
     # Create an observable instance
     create_json = {
         "alert_uuid": str(alert.uuid),
-        "parent_analysis_uuid": str(alert.analysis_uuid),
+        "parent_analysis_uuid": str(root_analysis.uuid),
         "type": "test_type",
         "value": "test",
         "threats": values,

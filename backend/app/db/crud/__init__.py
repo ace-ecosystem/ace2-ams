@@ -56,14 +56,15 @@ def read_all(db_table: DeclarativeMeta, db: Session) -> List:
     return db.execute(select(db_table)).scalars().all()
 
 
-def read(uuid: UUID, db_table: DeclarativeMeta, db: Session):
-    """Returns the single object with the given UUID if it exists, otherwise returns None.
+def read(uuid: UUID, db_table: DeclarativeMeta, db: Session, err_on_not_found: bool = True):
+    """Returns the single object with the given UUID if it exists, otherwise raises HTTPException.
     Designed to be called only by the API since it raises an HTTPException."""
 
     result = db.execute(select(db_table).where(db_table.uuid == uuid)).scalars().one_or_none()
 
     if result is None:
-        raise HTTPException(status_code=404, detail=f"UUID {uuid} does not exist.")
+        if err_on_not_found:
+            raise HTTPException(status_code=404, detail=f"UUID {uuid} does not exist.")
 
     return result
 
