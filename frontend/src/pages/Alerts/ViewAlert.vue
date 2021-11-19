@@ -1,21 +1,42 @@
 <!-- ViewAlert.vue -->
 
 <template>
-  <pre>{{ prettyAlert }}</pre>
+  <AlertTree :items="alertTree" />
+
+  <pre>{{ alertTree }}</pre>
 </template>
 
 <script>
   import { mapGetters } from "vuex";
+  import { arrayToTree } from "performant-array-to-tree";
+
+  import AlertTree from "@/components/Alerts/AlertTree";
 
   export default {
+    components: { AlertTree },
+
     computed: {
       ...mapGetters({
         openAlert: "alerts/openAlert",
       }),
-      prettyAlert() {
-        return JSON.stringify(this.openAlert, null, 2);
+
+      alertTree() {
+        // Join the analyses and observableInstances arrays into a single array
+        const items = this.openAlert.analyses.concat(
+          this.openAlert.observableInstances,
+        );
+
+        // Turn the flat array into a nested tree structure
+        const tree = arrayToTree(items, {
+          id: "uuid",
+          parentId: "parentUuid",
+          dataField: null,
+        });
+
+        return tree;
       },
     },
+
     async created() {
       this.$store.dispatch(
         "selectedAlerts/unselectAll",
