@@ -101,7 +101,7 @@ const store = {
       alertUUID: UUID,
     ): Promise<void> {
       await alertApi
-        .getSingle(alertUUID + "/tree")
+        .getSingle(alertUUID)
         .then((alert) => {
           commit("SET_OPEN_ALERT", alert);
         })
