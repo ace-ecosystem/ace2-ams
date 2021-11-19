@@ -379,8 +379,6 @@ def get_alert_tree(uuid: UUID, db: Session = Depends(get_db)):
     observable_instances: List[ObservableInstance] = (
         db.execute(
             select(ObservableInstance)
-            .join(Observable)
-            .join(ObservableType)
             .where(ObservableInstance.alert_uuid == alert.uuid)
             .options(
                 joinedload(ObservableInstance.observable).options(joinedload(Observable.type)),
