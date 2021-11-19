@@ -67,7 +67,7 @@ helpers.api_route_create(router, create_analysis)
 
 
 def get_analysis(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read(uuid=uuid, db_table=Analysis, db=db)
+    return crud.read(uuid=uuid, db_table=Analysis, undefer_column="details", db=db)
 
 
 # It does not make sense to have a get_all_analysis route at this point (and certainly not without pagination).

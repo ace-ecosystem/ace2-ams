@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy import delete as sql_delete, select, update as sql_update
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import undefer, Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.orm.exc import NoResultFound
 from typing import List, Optional, Union
@@ -56,11 +56,16 @@ def read_all(db_table: DeclarativeMeta, db: Session) -> List:
     return db.execute(select(db_table)).scalars().all()
 
 
-def read(uuid: UUID, db_table: DeclarativeMeta, db: Session, err_on_not_found: bool = True):
+def read(uuid: UUID, db_table: DeclarativeMeta, db: Session, err_on_not_found: bool = True, undefer_column: str = None):
     """Returns the single object with the given UUID if it exists, otherwise raises HTTPException.
     Designed to be called only by the API since it raises an HTTPException."""
 
-    result = db.execute(select(db_table).where(db_table.uuid == uuid)).scalars().one_or_none()
+    query = select(db_table).where(db_table.uuid == uuid)
+
+    if undefer_column:
+        query = query.options(undefer(undefer_column))
+
+    result = db.execute(query).scalars().one_or_none()
 
     if result is None:
         if err_on_not_found:

@@ -62,6 +62,8 @@ class AnalysisRead(NodeRead, AnalysisBase):
         description="The analysis module type that was used to perform this analysis"
     )
 
+    details: Optional[dict] = Field(description="A JSON representation of the details produced by the analysis")
+
     parent_uuid: Optional[UUID4] = Field(description="The UUID of the observable containing this analysis")
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
