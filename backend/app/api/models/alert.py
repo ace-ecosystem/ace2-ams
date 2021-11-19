@@ -96,6 +96,12 @@ class AlertUpdate(NodeUpdate, AlertBase):
 
 
 class AlertTreeRead(BaseModel):
-    analyses: List[AnalysisAlertTreeRead]
+    alert: AlertRead = Field(description="The metadata about the alert")
 
-    observable_instances: List[ObservableInstanceRead]
+    analyses: List[AnalysisAlertTreeRead] = Field(
+        description="A list of the analysis objects associated with the alert"
+    )
+
+    observable_instances: List[ObservableInstanceRead] = Field(
+        description="A list of the observable instance objects associated with the alert"
+    )
