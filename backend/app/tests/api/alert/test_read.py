@@ -743,3 +743,12 @@ def test_get_sort_by_type(client_valid_access_token, db):
     assert get.json()["total"] == 2
     assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
     assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
+def test_get_alert_tree(client_valid_access_token, db):
+    # Create an alert with a tree of analyses and observable instances
+    alert = helpers.create_realistic_alert(db)
+
+    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
+    assert len(get.json()["analyses"]) == 7
+    assert len(get.json()["observable_instances"]) == 12
