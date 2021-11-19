@@ -302,9 +302,9 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
 
     # If the test is for event_time, make sure that the retrieved value matches the proper UTC timestamp
     if key == "event_time" and value:
-        assert get.json()[key] == "2022-01-01T00:00:00+00:00"
+        assert get.json()["alert"][key] == "2022-01-01T00:00:00+00:00"
     else:
-        assert get.json()[key] == value
+        assert get.json()["alert"][key] == value
 
 
 def test_create_valid_owner(client_valid_access_token, db):
@@ -330,7 +330,7 @@ def test_create_valid_owner(client_valid_access_token, db):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["owner"]["username"] == "johndoe"
+    assert get.json()["alert"]["owner"]["username"] == "johndoe"
 
 
 def test_create_valid_tool(client_valid_access_token, db):
@@ -356,7 +356,7 @@ def test_create_valid_tool(client_valid_access_token, db):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["tool"]["value"] == "test_tool"
+    assert get.json()["alert"]["tool"]["value"] == "test_tool"
 
 
 def test_create_valid_tool_instance(client_valid_access_token, db):
@@ -382,7 +382,7 @@ def test_create_valid_tool_instance(client_valid_access_token, db):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["tool_instance"]["value"] == "test_tool_instance"
+    assert get.json()["alert"]["tool_instance"]["value"] == "test_tool_instance"
 
 
 def test_create_valid_required_fields(client_valid_access_token, db):
@@ -405,20 +405,20 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
     assert get.status_code == 200
-    assert get.json()["queue"]["value"] == "test_queue"
-    assert get.json()["type"]["value"] == "test_type"
+    assert get.json()["alert"]["queue"]["value"] == "test_queue"
+    assert get.json()["alert"]["type"]["value"] == "test_type"
 
     # There should be 1 analysis associated with the alert
     analyses = db.query(Analysis).all()
     assert len(analyses) == 1
-    assert str(analyses[0].alert_uuid) == get.json()["uuid"]
+    assert str(analyses[0].alert_uuid) == get.json()["alert"]["uuid"]
 
     # There should also be 1 observable instance associated with the alert
     observable_instances = db.query(ObservableInstance).all()
     assert len(observable_instances) == 1
     assert observable_instances[0].observable.type.value == "o_type"
     assert observable_instances[0].observable.value == "o_value"
-    assert str(observable_instances[0].alert_uuid) == get.json()["uuid"]
+    assert str(observable_instances[0].alert_uuid) == get.json()["alert"]["uuid"]
     assert observable_instances[0].parent_uuid == analyses[0].uuid
 
 
@@ -449,7 +449,7 @@ def test_create_valid_node_directives(client_valid_access_token, db, values):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["directives"]) == len(list(set(values)))
+    assert len(get.json()["alert"]["directives"]) == len(list(set(values)))
 
 
 @pytest.mark.parametrize(
@@ -479,7 +479,7 @@ def test_create_valid_node_tags(client_valid_access_token, db, values):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["tags"]) == len(list(set(values)))
+    assert len(get.json()["alert"]["tags"]) == len(list(set(values)))
 
 
 @pytest.mark.parametrize(
@@ -510,9 +510,9 @@ def test_create_valid_node_threat_actor(client_valid_access_token, db, value):
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
     if value:
-        assert get.json()["threat_actor"]["value"] == value
+        assert get.json()["alert"]["threat_actor"]["value"] == value
     else:
-        assert get.json()["threat_actor"] is None
+        assert get.json()["alert"]["threat_actor"] is None
 
 
 @pytest.mark.parametrize(
@@ -542,4 +542,4 @@ def test_create_valid_node_threats(client_valid_access_token, db, values):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["threats"]) == len(list(set(values)))
+    assert len(get.json()["alert"]["threats"]) == len(list(set(values)))
