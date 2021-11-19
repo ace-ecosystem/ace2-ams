@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import Field, UUID4
+from pydantic import BaseModel, Field, UUID4
 from typing import List, Optional
 from uuid import uuid4
 
@@ -9,8 +9,9 @@ from api.models.alert_queue import AlertQueueRead
 from api.models.alert_tool import AlertToolRead
 from api.models.alert_tool_instance import AlertToolInstanceRead
 from api.models.alert_type import AlertTypeRead
+from api.models.analysis import AnalysisAlertTreeRead
 from api.models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
-from api.models.observable_instance import ObservableInstanceCreateWithAlert
+from api.models.observable_instance import ObservableInstanceCreateWithAlert, ObservableInstanceRead
 from api.models.user import UserRead
 
 
@@ -92,3 +93,9 @@ class AlertUpdate(NodeUpdate, AlertBase):
     queue: Optional[type_str] = Field(description="The alert queue containing this alert")
 
     _prevent_none: classmethod = validators.prevent_none("queue")
+
+
+class AlertTreeRead(BaseModel):
+    analyses: List[AnalysisAlertTreeRead]
+
+    observable_instances: List[ObservableInstanceRead]
