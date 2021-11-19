@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 78254cf4028f
+Revision ID: a4c955d60e7d
 Revises: 
-Create Date: 2021-11-18 20:35:03.109575
+Create Date: 2021-11-19 21:06:06.139355
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '78254cf4028f'
+revision = 'a4c955d60e7d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -383,7 +383,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_event_vector_mapping_event_uuid'), 'event_vector_mapping', ['event_uuid'], unique=False)
     op.create_table('analysis',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('alert_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('alert_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('details', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('error_message', sa.String(), nullable=True),
@@ -399,7 +399,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_analysis_alert_uuid'), 'analysis', ['alert_uuid'], unique=False)
     op.create_table('observable_instance',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('alert_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('alert_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('context', sa.String(), nullable=True),
     sa.Column('observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('parent_uuid', postgresql.UUID(as_uuid=True), nullable=False),
