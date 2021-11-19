@@ -4,27 +4,8 @@
 <template>
   <Toolbar style="overflow-x: auto">
     <template #left>
-      <!--      DATE PICKER -->
-      <i class="pi pi-calendar"></i>
-      <Calendar
-        id="startTimeFilter"
-        v-model="startTimeFilterData"
-        class="p-m-1"
-        :manual-input="true"
-        :show-time="true"
-        selection-mode="single"
-        style="width: 180px"
-      />
-      to
-      <Calendar
-        id="endTimeFilter"
-        v-model="endTimeFilterData"
-        class="p-m-1"
-        :manual-input="true"
-        :show-time="true"
-        selection-mode="single"
-        style="width: 180px"
-      />
+      <!--      DATE PICKERS  -->
+      <DateRangePicker />
       <!--      EDIT FILTERS -->
       <Button
         type="button"
@@ -44,6 +25,7 @@
         icon="pi pi-filter-slash"
         label="Clear"
         class="p-button-outlined p-m-1"
+        @click="clear"
       />
       <!--      RESET FILTERS-->
       <Button
@@ -51,30 +33,44 @@
         icon="pi pi-refresh"
         label="Reset"
         class="p-button-outlined p-m-1"
+        @click="reset"
       />
     </template>
   </Toolbar>
 </template>
 
 <script>
-  import Button from "primevue/button";
-  import Calendar from "primevue/calendar";
-  import Toolbar from "primevue/toolbar";
+  import { mapActions } from "vuex";
 
+  import Button from "primevue/button";
+  import DateRangePicker from "@/components/UserInterface/DateRangePicker";
   import EditFilterModal from "@/components/Modals/FilterModal";
+  import Toolbar from "primevue/toolbar";
 
   export default {
     name: "TheFilterToolbar",
-    components: { Button, Calendar, EditFilterModal, Toolbar },
-
-    data() {
-      return {
-        endTimeFilterData: null,
-        startTimeFilterData: null,
-      };
+    components: {
+      Button,
+      DateRangePicker,
+      EditFilterModal,
+      Toolbar,
     },
 
+    inject: ["filterType"],
+
     methods: {
+      ...mapActions({
+        clearAll: "filters/clearAll",
+      }),
+
+      clear() {
+        this.clearAll({ filterType: this.filterType });
+      },
+
+      reset() {
+        this.clearAll({ filterType: this.filterType });
+      },
+
       open(name) {
         this.$store.dispatch("modals/open", name);
       },

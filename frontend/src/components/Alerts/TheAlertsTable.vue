@@ -167,6 +167,7 @@
         selectedColumns: null,
         selectedRows: null,
         numRows: 10,
+        page: 0,
       };
     },
 
@@ -176,12 +177,28 @@
         allAlertUuids: "alerts/visibleQueriedAlertsUuids",
         totalAlerts: "alerts/totalAlerts",
         selectedAlerts: "selectedAlerts/selected",
+        filters: "filters/alerts",
       }),
+      pageOptions() {
+        return {
+          limit: this.numRows,
+          offset: this.numRows * this.page,
+        };
+      },
+    },
+
+    watch: {
+      filters: {
+        deep: true,
+        handler: function () {
+          this.loadAlerts();
+        },
+      },
     },
 
     async created() {
       this.reset();
-      await this.loadAlerts({ limit: this.numRows, offset: 0 });
+      await this.loadAlerts(this.pageOptions);
     },
 
     methods: {
@@ -226,16 +243,14 @@
       async onPage(event) {
         this.selectedRows = [];
         this.numRows = event.rows;
-        await this.loadAlerts({
-          limit: this.numRows,
-          offset: this.numRows * event.page,
-        });
+        this.page = event.page;
+        await this.loadAlerts();
       },
 
-      async loadAlerts(options) {
+      async loadAlerts() {
         this.isLoading = true;
         try {
-          await this.getAllAlerts(options);
+          await this.getAllAlerts({ ...this.pageOptions, ...this.filters });
         } catch (error) {
           this.error = error.message || "Something went wrong!";
         }

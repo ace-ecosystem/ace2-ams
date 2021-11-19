@@ -38,6 +38,10 @@ Cypress.Commands.add("login", () => {
   cy.getCookies().should("have.length", 2);
 });
 
+Cypress.Commands.add("logout", () => {
+  cy.get('[href="/login"] > .p-button').click();
+});
+
 Cypress.Commands.add("addFormObservable", () => {
   cy.get("#add-observable").click();
 });

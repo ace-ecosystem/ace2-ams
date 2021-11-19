@@ -1,3 +1,4 @@
+import { alertFilters } from "@/etc/constants";
 import { UUID } from "./base";
 import { genericObject } from "./base";
 
@@ -49,3 +50,32 @@ export type alertGetAll = {
   offset: number;
   total: number;
 };
+
+export type alertFilterParams = {
+  disposition?: string;
+  dispositionUser?: string;
+  dispositionedAfter?: Date;
+  dispositionedBefore?: Date;
+  eventUuid?: string;
+  eventTimeAfter?: Date;
+  eventTimeBefore?: Date;
+  insertTimeAfter?: Date;
+  insertTimeBefore?: Date;
+  name?: string;
+  observable?: { type: string; value: string };
+  observableTypes?: string[];
+  observableValue?: string;
+  owner?: string;
+  queue?: string;
+  tags?: string[];
+  threatActor?: string;
+  threats?: string[];
+  tool?: string;
+  toolInstance?: string;
+  type?: string;
+};
+
+export type alertFilterNames = typeof alertFilters[number];
+export type alertFilterValues =
+  | (string & string[] & Date & { type: string; value: string })
+  | undefined;
