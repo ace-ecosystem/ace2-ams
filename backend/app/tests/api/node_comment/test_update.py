@@ -37,7 +37,7 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 
 def test_update_duplicate_node_uuid_value(client_valid_access_token, db):
     # Create a node
-    node = helpers.create_analysis(db=db)
+    node = helpers.create_alert(db=db)
 
     # Create some comments
     comment1 = helpers.create_node_comment(node=node, username="johndoe", value="test", db=db)
@@ -55,7 +55,7 @@ def test_update_duplicate_node_uuid_value(client_valid_access_token, db):
 
 def test_update(client_valid_access_token, db):
     # Create a node
-    node = helpers.create_analysis(db=db)
+    node = helpers.create_alert(db=db)
 
     # Create a comment
     comment = helpers.create_node_comment(node=node, username="johndoe", value="test", db=db)

@@ -11,10 +11,6 @@ class Alert(Node):
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
 
-    analysis_uuid = Column(UUID(as_uuid=True), ForeignKey("analysis.uuid"), nullable=False, unique=True)
-
-    analysis = relationship("Analysis", foreign_keys=[analysis_uuid])
-
     description = Column(String)
 
     disposition = relationship("AlertDisposition")
@@ -37,7 +33,7 @@ class Alert(Node):
 
     instructions = Column(String)
 
-    name = Column(String)
+    name = Column(String, nullable=False)
 
     owner_uuid = Column(UUID(as_uuid=True), ForeignKey("user.uuid"), index=True)
 
@@ -63,7 +59,6 @@ class Alert(Node):
         "polymorphic_identity": "alert",
     }
 
-    # TODO: We need a lot more indices here for when we introduce searching API endpoints.
     __table_args__ = (
         Index(
             "name_trgm",

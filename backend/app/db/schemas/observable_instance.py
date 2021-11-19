@@ -1,10 +1,7 @@
 from sqlalchemy import Column, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
-from db.schemas.analysis_observable_instance_mapping import analysis_observable_instance_mapping
-from db.schemas.observable_instance_analysis_mapping import observable_instance_analysis_mapping
 from db.schemas.helpers import utcnow
 from db.schemas.node import Node
 
@@ -14,7 +11,7 @@ class ObservableInstance(Node):
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
 
-    alert_uuid = Column(UUID(as_uuid=True), ForeignKey("alert.uuid"))
+    alert_uuid = Column(UUID(as_uuid=True), ForeignKey("alert.uuid"), nullable=False, index=True)
 
     alert = relationship("Alert", foreign_keys=[alert_uuid])
 
@@ -24,13 +21,12 @@ class ObservableInstance(Node):
 
     observable = relationship("Observable", foreign_keys=[observable_uuid])
 
-    parent_analysis = relationship("Analysis", secondary=analysis_observable_instance_mapping, uselist=False)
+    # use_alter is used on the ForeignKey so that SQLAlchemy/Alembic uses ALTER to create the foreign key
+    # constraint after the tables are created. This is needed because the analysis and observable_instance
+    # tables have foreign keys to one another, and there would be no way to determine which table to create first.
+    parent_uuid = Column(UUID(as_uuid=True), ForeignKey("analysis.uuid", use_alter=True), nullable=False)
 
-    parent_analysis_uuid = association_proxy("parent_analysis", "uuid")
-
-    performed_analyses = relationship("Analysis", secondary=observable_instance_analysis_mapping)
-
-    performed_analysis_uuids = association_proxy("performed_analyses", "uuid")
+    parent_analysis = relationship("Analysis", foreign_keys=[parent_uuid], uselist=False)
 
     redirection_uuid = Column(UUID(as_uuid=True), ForeignKey("observable_instance.uuid"))
 

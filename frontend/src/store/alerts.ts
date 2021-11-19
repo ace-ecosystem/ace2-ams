@@ -16,7 +16,6 @@ export function parseAlertSummary(alert: alert): alertSummary {
     eventTime: alert.eventTime ? alert.eventTime : null,
     insertTime: alert.insertTime ? alert.insertTime : null,
     name: alert.name ? alert.name : "Unnamed",
-    observables: alert.analysis ? alert.analysis.discoveredObservableUuids : [],
     owner: alert.owner ? alert.owner.value : "None",
     queue: alert.queue ? alert.queue.value : "None",
     tags: alert.tags ? alert.tags : [],
