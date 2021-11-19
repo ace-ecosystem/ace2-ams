@@ -474,7 +474,7 @@
         return index == this.lastObservableIndex;
       },
       routeToNewAlert() {
-        this.$router.push({ path: `/alert/${this.openAlert.uuid}` });
+        this.$router.push({ path: `/alert/${this.openAlert.alert.uuid}` });
       },
       addError(object, error) {
         let responseError = null;
