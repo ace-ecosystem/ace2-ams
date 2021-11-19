@@ -3,11 +3,11 @@ from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi_pagination import LimitOffsetPage
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy import and_, func, select
-from sqlalchemy.orm import Session
-from typing import Optional
+from sqlalchemy.orm import Session, joinedload
+from typing import List, Optional
 from uuid import UUID, uuid4
 
-from api.models.alert import AlertCreate, AlertRead, AlertUpdate
+from api.models.alert import AlertCreate, AlertRead, AlertTreeRead, AlertUpdate
 from api.models.analysis import AnalysisCreate
 from api.routes import helpers
 from api.routes.node import create_node, update_node
@@ -81,7 +81,7 @@ def create_alert(
     for observable_instance in alert.observable_instances:
         db_observable_instance = _create_observable_instance(observable_instance, db=db)
         db_observable_instance.alert_uuid = new_alert.uuid
-        db_observable_instance.parent_analysis_uuid = root_analysis.uuid
+        db_observable_instance.parent_uuid = root_analysis.uuid
         db.add(db_observable_instance)
 
     db.add(new_alert)
@@ -356,9 +356,51 @@ def get_alert(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=Alert, db=db)
 
 
-# It does not make sense to have a get_all_alerts route at this point (and certainly not without pagination).
+def get_alert_tree(uuid: UUID, db: Session = Depends(get_db)):
+    alert: Alert = crud.read(uuid=uuid, db_table=Alert, db=db)
+
+    analyses: List[Analysis] = (
+        db.execute(
+            select(Analysis)
+            .where(Analysis.alert_uuid == alert.uuid)
+            .options(
+                joinedload(Analysis.analysis_module_type),
+                joinedload(Analysis.comments),
+                joinedload(Analysis.directives),
+                joinedload(Analysis.tags),
+                joinedload(Analysis.threats),
+            )
+        )
+        .unique()
+        .scalars()
+        .all()
+    )
+
+    observable_instances: List[ObservableInstance] = (
+        db.execute(
+            select(ObservableInstance)
+            .join(Observable)
+            .join(ObservableType)
+            .where(ObservableInstance.alert_uuid == alert.uuid)
+            .options(
+                joinedload(ObservableInstance.observable).options(joinedload(Observable.type)),
+                joinedload(ObservableInstance.comments),
+                joinedload(ObservableInstance.directives),
+                joinedload(ObservableInstance.tags),
+                joinedload(ObservableInstance.threats),
+            )
+        )
+        .unique()
+        .scalars()
+        .all()
+    )
+
+    return AlertTreeRead(analyses=analyses, observable_instances=observable_instances)
+
+
 helpers.api_route_read_all(router, get_all_alerts, LimitOffsetPage[AlertRead])
 helpers.api_route_read(router, get_alert, AlertRead)
+helpers.api_route_read(router, get_alert_tree, AlertTreeRead, path="/{uuid}/tree")
 
 
 #
