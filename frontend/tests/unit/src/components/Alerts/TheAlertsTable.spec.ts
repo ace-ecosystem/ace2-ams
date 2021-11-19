@@ -26,7 +26,7 @@ describe("TheAlertsTable data/creation", () => {
   beforeAll(async () => {
     nock.cleanAll();
     myNock
-      .get("/alert/?limit=10&offset=0")
+      .get("/alert/?sort=event_time%7Casc&limit=10&offset=0")
       .reply(200, {
         items: [{ uuid: "alert_1" }, { uuid: "alert_2" }],
         total: 2,
@@ -112,7 +112,7 @@ describe("TheAlertsTable methods success", () => {
   beforeAll(async () => {
     nock.cleanAll();
     myNock
-      .get("/alert/?limit=10&offset=0")
+      .get("/alert/?sort=event_time%7Casc&limit=10&offset=0")
       .reply(200, {
         items: [{ uuid: "alert_1" }, { uuid: "alert_2" }],
         total: 2,
@@ -157,7 +157,7 @@ describe("TheAlertsTable methods success", () => {
   });
   it("will reload the alerts with new pagination settings on 'onPage'", async () => {
     const mockRequest = myNock
-      .get("/alert/?limit=1&offset=1")
+      .get("/alert/?sort=event_time%7Casc&limit=1&offset=1")
       .thrice()
       .reply(200, {
         items: [{ uuid: "alert_2" }],
@@ -188,7 +188,7 @@ describe("TheAlertsTable methods failed", () => {
 
   it("will set the error data property to the given error if getAllAlerts fails within loadAlerts", async () => {
     const mockRequest = myNock
-      .get("/alert/?limit=10&offset=0")
+      .get("/alert/?sort=event_time%7Casc&limit=10&offset=0")
       .twice()
       .reply(403, "Request Failed");
 

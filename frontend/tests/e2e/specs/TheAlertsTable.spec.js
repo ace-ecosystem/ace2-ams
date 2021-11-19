@@ -158,15 +158,18 @@ describe("TheAlertsTable.vue", () => {
   });
 
   it("lazy pagination works correctly when page size or number is changed", () => {
-    cy.intercept("GET", "/api/alert/?limit=10&offset=0").as(
-      "getAlertsDefaultRows",
-    );
-    cy.intercept("GET", "/api/alert/?limit=5&offset=0").as(
-      "getAlertsChangedRows",
-    );
-    cy.intercept("GET", "/api/alert/?limit=5&offset=5").as(
-      "getAlertsChangedRowsOffset",
-    );
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Casc&limit=10&offset=0",
+    ).as("getAlertsDefaultRows");
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Casc&limit=5&offset=0",
+    ).as("getAlertsChangedRows");
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Casc&limit=5&offset=5",
+    ).as("getAlertsChangedRowsOffset");
     // Should start with default number of rows
     cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
     cy.get("tr").should("have.length", 11);
