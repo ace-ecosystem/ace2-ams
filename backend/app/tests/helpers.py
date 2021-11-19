@@ -131,7 +131,12 @@ def create_alert(
         alert.disposition_time = disposition_time
 
     if disposition_user:
-        alert.disposition_user = create_user(username=disposition_user, db=db, alert_queue=alert_queue)
+        alert.disposition_user = create_user(
+            email=f"{disposition_user}@{disposition_user}.com",
+            username=disposition_user,
+            db=db,
+            alert_queue=alert_queue,
+        )
 
     if event_time:
         alert.event_time = event_time
@@ -152,7 +157,7 @@ def create_alert(
             )
 
     if owner:
-        alert.owner = create_user(username=owner, db=db, alert_queue=alert_queue)
+        alert.owner = create_user(email=f"{owner}@{owner}.com", username=owner, db=db, alert_queue=alert_queue)
 
     if tags:
         alert.tags = [create_node_tag(value=tag, db=db) for tag in tags]
@@ -366,6 +371,7 @@ def create_observable_instance(
     db: Session,
     context: Optional[str] = None,
     redirection: Optional[ObservableInstance] = None,
+    tags: Optional[List[str]] = None,
     time: Optional[datetime] = None,
 ) -> ObservableInstance:
     observable = create_observable(type=type, value=value, db=db)
@@ -373,12 +379,18 @@ def create_observable_instance(
     if time is None:
         time = datetime.utcnow()
 
+    if tags:
+        tags = [create_node_tag(value=t, db=db) for t in tags]
+    else:
+        tags = []
+
     obj = ObservableInstance(
         observable=observable,
         alert_uuid=alert.uuid,
         parent_analysis=parent_analysis,
         context=context,
         redirection=redirection,
+        tags=tags,
         time=time,
         uuid=uuid.uuid4(),
         version=uuid.uuid4(),
@@ -457,7 +469,7 @@ def create_realistic_alert(db: Session) -> Alert:
     if existing:
         return existing
 
-    alert = create_alert(db=db, alert_uuid=REALISTIC_ALERT_UUID)
+    alert = create_alert(db=db, alert_uuid=REALISTIC_ALERT_UUID, owner="bob", disposition_user="alice")
 
     root_analysis = create_analysis(db=db, alert=alert)
 
@@ -466,7 +478,13 @@ def create_realistic_alert(db: Session) -> Alert:
     )
 
     email_analysis = create_analysis(
-        db=db, alert=alert, amt_value="Email Analysis", parent_observable=file_root_observable
+        db=db,
+        alert=alert,
+        amt_value="Email Analysis",
+        amt_observable_types=["file"],
+        amt_required_directives=["email"],
+        amt_required_tags=["scan_me"],
+        parent_observable=file_root_observable,
     )
 
     badguy_email_observable = create_observable_instance(
@@ -513,4 +531,8 @@ def create_realistic_alert(db: Session) -> Alert:
         type="md5", value="912ec803b2ce49e4a541068d495ab570", alert=alert, parent_analysis=file_analysis, db=db
     )
 
-    create_observable_instance(type="ipv4", value="127.0.0.1", alert=alert, parent_analysis=root_analysis, db=db)
+    create_observable_instance(
+        type="ipv4", value="127.0.0.1", tags=["c2"], alert=alert, parent_analysis=root_analysis, db=db
+    )
+
+    return alert
