@@ -39,6 +39,11 @@ describe("AnalyzeAlert.vue", () => {
     cy.login();
   });
 
+  after(() => {
+    cy.log("logging out");
+    cy.logout();
+  });
+
   beforeEach(() => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/analyze");
