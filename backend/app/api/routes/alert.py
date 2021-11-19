@@ -1,5 +1,6 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, Query, Request, Response
+from fastapi.exceptions import HTTPException
 from fastapi_pagination import LimitOffsetPage
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy import and_, func, select
@@ -353,11 +354,31 @@ def get_all_alerts(
 
 
 def get_alert(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read(uuid=uuid, db_table=Alert, db=db)
+    alert: Alert = (
+        db.execute(
+            select(Alert)
+            .where(Alert.uuid == uuid)
+            .options(
+                joinedload(Alert.comments),
+                joinedload(Alert.directives),
+                joinedload(Alert.disposition),
+                joinedload(Alert.disposition_user).options(joinedload(User.roles)),
+                joinedload(Alert.owner).options(joinedload(User.roles)),
+                joinedload(Alert.queue),
+                joinedload(Alert.tags),
+                joinedload(Alert.threats),
+                joinedload(Alert.tool),
+                joinedload(Alert.tool_instance),
+                joinedload(Alert.type),
+            )
+        )
+        .unique()
+        .scalars()
+        .one_or_none()
+    )
 
-
-def get_alert_tree(uuid: UUID, db: Session = Depends(get_db)):
-    alert: Alert = crud.read(uuid=uuid, db_table=Alert, db=db)
+    if not alert:
+        raise HTTPException(status_code=404, detail=f"Alert {uuid} does not exist.")
 
     analyses: List[Analysis] = (
         db.execute(
@@ -381,9 +402,9 @@ def get_alert_tree(uuid: UUID, db: Session = Depends(get_db)):
             select(ObservableInstance)
             .where(ObservableInstance.alert_uuid == alert.uuid)
             .options(
-                joinedload(ObservableInstance.observable).options(joinedload(Observable.type)),
                 joinedload(ObservableInstance.comments),
                 joinedload(ObservableInstance.directives),
+                joinedload(ObservableInstance.observable).options(joinedload(Observable.type)),
                 joinedload(ObservableInstance.tags),
                 joinedload(ObservableInstance.threats),
             )
@@ -393,12 +414,11 @@ def get_alert_tree(uuid: UUID, db: Session = Depends(get_db)):
         .all()
     )
 
-    return AlertTreeRead(analyses=analyses, observable_instances=observable_instances)
+    return AlertTreeRead(alert=alert, analyses=analyses, observable_instances=observable_instances)
 
 
 helpers.api_route_read_all(router, get_all_alerts, LimitOffsetPage[AlertRead])
-helpers.api_route_read(router, get_alert, AlertRead)
-helpers.api_route_read(router, get_alert_tree, AlertTreeRead, path="/{uuid}/tree")
+helpers.api_route_read(router, get_alert, AlertTreeRead)
 
 
 #
