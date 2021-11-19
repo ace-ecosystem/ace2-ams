@@ -11,7 +11,7 @@ class ObservableInstance(Node):
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
 
-    alert_uuid = Column(UUID(as_uuid=True), ForeignKey("alert.uuid"), index=True)
+    alert_uuid = Column(UUID(as_uuid=True), ForeignKey("alert.uuid"), nullable=False, index=True)
 
     alert = relationship("Alert", foreign_keys=[alert_uuid])
 
