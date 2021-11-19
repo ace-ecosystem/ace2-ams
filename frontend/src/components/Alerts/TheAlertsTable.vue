@@ -227,7 +227,7 @@
         this.selectedColumns = this.columns.filter((column) => {
           return this.defaultColumns.includes(column.field);
         });
-        this.sort({ sortField: "eventTime", sortOrder: "1" });
+        this.sort({ sortField: "eventTime", sortOrder: "-1" });
         this.error = null;
       },
 
