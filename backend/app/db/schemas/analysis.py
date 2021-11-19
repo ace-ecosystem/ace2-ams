@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import deferred, relationship
 
 from db.schemas.node import Node
 
@@ -18,7 +18,10 @@ class Analysis(Node):
 
     analysis_module_type_uuid = Column(UUID(as_uuid=True), ForeignKey("analysis_module_type.uuid"), nullable=True)
 
-    details = Column(JSONB)
+    # Using deferred means that when you query the Analysis table, you will not select the details field unless
+    # you explicitly ask for it. This is so that we can more efficiently load alert trees without selecting
+    # all of the analysis details, which can be very large.
+    details = deferred(Column(JSONB))
 
     error_message = Column(String)
 
