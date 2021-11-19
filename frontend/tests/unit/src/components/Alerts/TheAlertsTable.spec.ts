@@ -36,7 +36,7 @@ describe("TheAlertsTable data/creation", () => {
 
   beforeEach(async () => {
     wrapper.vm.reset();
-    await wrapper.vm.loadAlerts({ limit: 10, offset: 0 });
+    await wrapper.vm.loadAlerts();
   });
 
   afterAll(() => {
@@ -91,6 +91,13 @@ describe("TheAlertsTable data/creation", () => {
     expect(wrapper.vm.alerts).toHaveLength(2);
     expect(wrapper.vm.totalAlerts).toEqual(2);
     expect(wrapper.vm.numRows).toEqual(10);
+    expect(wrapper.vm.page).toEqual(0);
+  });
+  it("computes computed properties correctly", async () => {
+    expect(wrapper.vm.pageOptions).toStrictEqual({
+      limit: 10,
+      offset: 0,
+    });
   });
 });
 
@@ -115,7 +122,7 @@ describe("TheAlertsTable methods success", () => {
 
   beforeEach(async () => {
     wrapper.vm.reset();
-    await wrapper.vm.loadAlerts({ limit: 10, offset: 0 });
+    await wrapper.vm.loadAlerts();
   });
 
   afterAll(() => {
@@ -186,7 +193,7 @@ describe("TheAlertsTable methods failed", () => {
       .reply(403, "Request Failed");
 
     expect(wrapper.vm.error).toBeNull();
-    await wrapper.vm.loadAlerts({ limit: 10, offset: 0 });
+    await wrapper.vm.loadAlerts();
     expect(mockRequest.isDone()).toEqual(true);
     expect(wrapper.vm.error).toEqual("Request failed with status code 403");
   });
