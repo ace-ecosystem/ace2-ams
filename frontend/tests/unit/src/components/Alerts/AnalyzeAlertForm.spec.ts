@@ -101,10 +101,11 @@ describe("AnalyzeAlertForm computed data", () => {
 // METHOD MOCKS/STUBS
 
 const readAlertStub = {
-  uuid: "alertID",
-  analysis: {
-    uuid: "analysisID",
+  alert: {
+    uuid: "alertID",
   },
+  analyses: [],
+  observableInstances: [],
 };
 
 const expectedObservableCreate = {
