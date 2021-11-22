@@ -101,7 +101,7 @@ describe("TheAlertsTable data/creation", () => {
       offset: 0,
     });
     expect(wrapper.vm.sortFilter).toEqual("event_time|desc");
-    wrapper.setData({sortField: null})
+    wrapper.setData({ sortField: null });
     expect(wrapper.vm.sortFilter).toBeNull();
   });
 });
@@ -180,9 +180,9 @@ describe("TheAlertsTable methods success", () => {
         items: [{ uuid: "alert_2" }],
         total: 2,
       });
-    await wrapper.vm.sort({ sortField: 'name', sortOrder: 1 });
-    expect(wrapper.vm.sortField).toEqual('name');
-    expect(wrapper.vm.sortOrder).toEqual('asc');
+    await wrapper.vm.sort({ sortField: "name", sortOrder: 1 });
+    expect(wrapper.vm.sortField).toEqual("name");
+    expect(wrapper.vm.sortOrder).toEqual("asc");
     expect(mockRequestSort.isDone()).toEqual(true);
   });
 });

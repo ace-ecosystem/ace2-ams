@@ -193,14 +193,12 @@ describe("TheAlertsTable.vue", () => {
   });
 
   it("correctly changes the sort filter when a column is clicked", () => {
-    cy.intercept(
-      "GET",
-      "/api/alert/?sort=name%7Casc&limit=10&offset=0",
-    ).as("nameSortAsc");
-    cy.intercept(
-      "GET",
-      "/api/alert/?sort=name%7Cdesc&limit=10&offset=0",
-    ).as("nameSortDesc");
+    cy.intercept("GET", "/api/alert/?sort=name%7Casc&limit=10&offset=0").as(
+      "nameSortAsc",
+    );
+    cy.intercept("GET", "/api/alert/?sort=name%7Cdesc&limit=10&offset=0").as(
+      "nameSortDesc",
+    );
     cy.intercept(
       "GET",
       "/api/alert/?sort=event_time%7Casc&limit=10&offset=0",
@@ -211,35 +209,51 @@ describe("TheAlertsTable.vue", () => {
     ).as("defaultSort");
 
     // sort by name to start, will default to ascending
-    cy.get('.p-datatable-thead > tr > :nth-child(4)').click();
+    cy.get(".p-datatable-thead > tr > :nth-child(4)").click();
     // check api call
     cy.wait("@nameSortAsc").its("state").should("eq", "Complete");
     // check first alerts name
-    cy.get('.p-datatable-tbody > :nth-child(1) > :nth-child(4)').should('have.text', 'Manual Alert');
+    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(4)").should(
+      "have.text",
+      "Manual Alert",
+    );
     // sort by name again, will change to descending
-    cy.get('.p-datatable-thead > tr > :nth-child(4)').click();
+    cy.get(".p-datatable-thead > tr > :nth-child(4)").click();
     // check api call
     cy.wait("@nameSortDesc").its("state").should("eq", "Complete");
     // check first alerts name
-    cy.get('.p-datatable-tbody > :nth-child(1) > :nth-child(4)').should('have.text', 'Manual Alert 8.7.6.5');
+    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(4)").should(
+      "have.text",
+      "Manual Alert 8.7.6.5",
+    );
     // sort by name again, this time it will remove all sorts
-    cy.get('.p-datatable-thead > tr > :nth-child(4)').click();
+    cy.get(".p-datatable-thead > tr > :nth-child(4)").click();
     // there shouldn't be an API call this time
     // check first alerts name (will be the same)
-    cy.get('.p-datatable-tbody > :nth-child(1) > :nth-child(4)').should('have.text', 'Manual Alert 8.7.6.5');
+    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(4)").should(
+      "have.text",
+      "Manual Alert 8.7.6.5",
+    );
     // sort by event time again, will default to ascending
-    cy.get('.p-datatable-thead > tr > :nth-child(3)').click();
+    cy.get(".p-datatable-thead > tr > :nth-child(3)").click();
     // check api call
     cy.wait("@eventTimeSortAsc").its("state").should("eq", "Complete");
     // check first alerts name
-    cy.get('.p-datatable-tbody > :nth-child(1) > :nth-child(4)').should('have.text', 'Manual Alert');
+    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(4)").should(
+      "have.text",
+      "Manual Alert",
+    );
     // click the reset table button
-    cy.get('.p-datatable-header > .p-toolbar > .p-toolbar-group-right > :nth-child(2)').click();
+    cy.get(
+      ".p-datatable-header > .p-toolbar > .p-toolbar-group-right > :nth-child(2)",
+    ).click();
     // check api call
     cy.wait("@defaultSort").its("state").should("eq", "Complete");
     // check first alerts name
-    cy.get('.p-datatable-tbody > :nth-child(1) > :nth-child(4)').should('have.text', 'Manual Alert 4.3.2.1');
-
+    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(4)").should(
+      "have.text",
+      "Manual Alert 4.3.2.1",
+    );
   });
 
   // This test broken by pagination changes
