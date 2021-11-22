@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.models.node_threat import NodeThreatCreate, NodeThreatRead, NodeThreatUpdate
@@ -53,14 +54,14 @@ helpers.api_route_create(router, create_node_threat)
 
 
 def get_all_node_threats(db: Session = Depends(get_db)):
-    return crud.read_all(db_table=NodeThreat, db=db)
+    return paginate(db, select(NodeThreat))
 
 
 def get_node_threat(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=NodeThreat, db=db)
 
 
-helpers.api_route_read_all(router, get_all_node_threats, List[NodeThreatRead])
+helpers.api_route_read_all(router, get_all_node_threats, NodeThreatRead)
 helpers.api_route_read(router, get_node_threat, NodeThreatRead)
 
 

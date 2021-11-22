@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.models.user import (
@@ -63,14 +64,14 @@ helpers.api_route_create(router, create_user)
 
 
 def get_all_users(db: Session = Depends(get_db)):
-    return crud.read_all(db_table=User, db=db)
+    return paginate(db, select(User))
 
 
 def get_user(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=User, db=db)
 
 
-helpers.api_route_read_all(router, get_all_users, List[UserRead])
+helpers.api_route_read_all(router, get_all_users, UserRead)
 helpers.api_route_read(router, get_user, UserRead)
 
 

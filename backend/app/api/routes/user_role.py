@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.models.user_role import UserRoleCreate, UserRoleRead, UserRoleUpdate
@@ -41,14 +42,14 @@ helpers.api_route_create(router, create_user_role)
 
 
 def get_all_user_roles(db: Session = Depends(get_db)):
-    return crud.read_all(db_table=UserRole, db=db)
+    return paginate(db, select(UserRole))
 
 
 def get_user_role(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=UserRole, db=db)
 
 
-helpers.api_route_read_all(router, get_all_user_roles, List[UserRoleRead])
+helpers.api_route_read_all(router, get_all_user_roles, UserRoleRead)
 helpers.api_route_read(router, get_user_role, UserRoleRead)
 
 

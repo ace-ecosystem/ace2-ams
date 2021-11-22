@@ -38,7 +38,7 @@ def test_expired_token(client, db, monkeypatch):
     # Attempt to use the token to access a protected API endpoint
     get = client.get("/api/user/", headers={"Authorization": f"Bearer {access_token}"})
     assert get.status_code == status.HTTP_200_OK
-    assert len(get.json()) == 1
+    assert get.json()["total"] == 1
 
     # Wait for the token to expire
     time.sleep(2)

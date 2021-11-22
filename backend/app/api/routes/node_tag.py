@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.models.node_tag import NodeTagCreate, NodeTagRead, NodeTagUpdate
@@ -41,14 +42,14 @@ helpers.api_route_create(router, create_node_tag)
 
 
 def get_all_node_tags(db: Session = Depends(get_db)):
-    return crud.read_all(db_table=NodeTag, db=db)
+    return paginate(db, select(NodeTag))
 
 
 def get_node_tag(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=NodeTag, db=db)
 
 
-helpers.api_route_read_all(router, get_all_node_tags, List[NodeTagRead])
+helpers.api_route_read_all(router, get_all_node_tags, NodeTagRead)
 helpers.api_route_read(router, get_node_tag, NodeTagRead)
 
 
