@@ -1,6 +1,6 @@
 from datetime import datetime
-from pydantic import Field, UUID4
-from typing import Optional
+from pydantic import BaseModel, Field, UUID4
+from typing import List, Optional
 from uuid import uuid4
 
 from api.models import type_str, validators
@@ -9,8 +9,9 @@ from api.models.alert_queue import AlertQueueRead
 from api.models.alert_tool import AlertToolRead
 from api.models.alert_tool_instance import AlertToolInstanceRead
 from api.models.alert_type import AlertTypeRead
-from api.models.analysis import AnalysisRead
+from api.models.analysis import AnalysisAlertTreeRead
 from api.models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
+from api.models.observable_instance import ObservableInstanceCreateWithAlert, ObservableInstanceRead
 from api.models.user import UserRead
 
 
@@ -30,15 +31,14 @@ class AlertBase(NodeBase):
             reviewing this alert."""
     )
 
-    name: Optional[type_str] = Field(
-        description="""An optional property that defines a name for an alert. Used to track and document analyst
-            response instructions."""
-    )
+    queue: type_str = Field(description="The alert queue containing this alert")
 
     # TODO: When we have authentication, creating a manual alert will infer the owner from the token.
     owner: Optional[type_str] = Field(description="The username of the user who has taken ownership of this alert")
 
-    queue: type_str = Field(description="The alert queue containing this alert")
+
+class AlertCreate(NodeCreate, AlertBase):
+    name: type_str = Field(description="""The name of the alert""")
 
     tool: Optional[type_str] = Field(description="The tool that created this alert")
 
@@ -46,14 +46,12 @@ class AlertBase(NodeBase):
 
     type: type_str = Field(description="The type of this alert")
 
-
-class AlertCreate(NodeCreate, AlertBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the alert")
+
+    observable_instances: List[ObservableInstanceCreateWithAlert]
 
 
 class AlertRead(NodeRead, AlertBase):
-    analysis: AnalysisRead = Field(description="The analysis representing this alert")
-
     disposition: Optional[AlertDispositionRead] = Field(description="The disposition assigned to this alert")
 
     disposition_time: Optional[datetime] = Field(description="The time this alert was most recently dispositioned")
@@ -61,6 +59,8 @@ class AlertRead(NodeRead, AlertBase):
     disposition_user: Optional[UserRead] = Field(description="The user who most recently dispositioned this alert")
 
     event_uuid: Optional[UUID4] = Field(description="The UUID of the event containing this alert")
+
+    name: type_str = Field(description="""The name of the alert""")
 
     owner: Optional[UserRead] = Field(description="The user who has taken ownership of this alert")
 
@@ -92,6 +92,16 @@ class AlertUpdate(NodeUpdate, AlertBase):
 
     queue: Optional[type_str] = Field(description="The alert queue containing this alert")
 
-    type: Optional[type_str] = Field(description="The type of this alert")
+    _prevent_none: classmethod = validators.prevent_none("queue")
 
-    _prevent_none: classmethod = validators.prevent_none("queue", "type")
+
+class AlertTreeRead(BaseModel):
+    alert: AlertRead = Field(description="The metadata about the alert")
+
+    analyses: List[AnalysisAlertTreeRead] = Field(
+        description="A list of the analysis objects associated with the alert"
+    )
+
+    observable_instances: List[ObservableInstanceRead] = Field(
+        description="A list of the observable instance objects associated with the alert"
+    )

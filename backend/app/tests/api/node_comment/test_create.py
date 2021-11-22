@@ -37,7 +37,7 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
 
 def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
     # Create a node
-    node = helpers.create_analysis(db=db)
+    node = helpers.create_alert(db=db)
 
     # Create a user
     helpers.create_user(username="johndoe", db=db)
@@ -71,7 +71,7 @@ def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
 )
 def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     # Create a node
-    node = helpers.create_analysis(db=db)
+    node = helpers.create_alert(db=db)
 
     # Create a user
     helpers.create_user(username="johndoe", db=db)
@@ -114,7 +114,7 @@ def test_create_nonexistent_node_uuid(client_valid_access_token, db):
 
 def test_create_nonexistent_user(client_valid_access_token, db):
     # Create a node
-    node = helpers.create_analysis(db=db)
+    node = helpers.create_alert(db=db)
 
     # Create a comment
     create_json = {
@@ -134,7 +134,7 @@ def test_create_nonexistent_user(client_valid_access_token, db):
 
 def test_create_valid_required_fields(client_valid_access_token, db):
     # Create a node
-    node = helpers.create_analysis(db=db)
+    node = helpers.create_alert(db=db)
     initial_node_version = node.version
 
     # Create a user

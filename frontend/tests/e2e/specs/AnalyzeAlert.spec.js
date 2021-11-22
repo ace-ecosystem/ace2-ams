@@ -110,13 +110,11 @@ describe("AnalyzeAlert.vue", () => {
 
   it("submits alert/observable data to API and routes user to new alert page after submission", () => {
     cy.intercept("POST", "/api/alert").as("createAlert");
-    cy.intercept("POST", "/api/observable/instance").as("createObservable");
     cy.intercept("GET", "/api/alert/*").as("getAlert");
     addMultipleObservables();
     cy.get(".p-splitbutton-defaultbutton").click();
     cy.wait("@createAlert").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@createObservable").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
     cy.url().should("include", "/alert/");
   });
@@ -133,33 +131,8 @@ describe("AnalyzeAlert.vue", () => {
     cy.url().should("include", "/analyze");
   });
 
-  it("submits alert/observable data to API and shows information and error messages, continue button, and routes to new alert when continue button is clicked", () => {
-    cy.intercept("POST", "/api/alert").as("createAlert");
-    cy.intercept("GET", "/api/alert/*").as("getAlert");
-
-    addMultipleObservables();
-    cy.intercept("POST", "/api/observable/instance/", {
-      statusCode: 500,
-      body: "Server error",
-    }).as("createObservable");
-    cy.get(".p-splitbutton-defaultbutton").click();
-    cy.wait("@createAlert").its("state").should("eq", "Complete");
-    cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@createObservable").its("state").should("eq", "Complete");
-
-    //  check for info/error messages
-    cy.get(".p-message-info > .p-message-wrapper").should("exist");
-    cy.get(".p-message-error > .p-message-wrapper").should("exist");
-
-    // click continue button
-    cy.get("#alert-form > :nth-child(5) > .p-button").should("exist").click();
-    cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.url().should("include", "/alert/");
-  });
-
   it("submits alert/observable data to API for ea. observable when multi-alert option is clicked, and then routes to last created alert", () => {
     cy.intercept("POST", "/api/alert").as("createAlert");
-    cy.intercept("POST", "/api/observable/instance").as("createObservable");
     cy.intercept("GET", "/api/alert/*").as("getAlert");
     addMultipleObservables();
     cy.get(".p-splitbutton > .p-button-icon-only").click();
@@ -168,23 +141,18 @@ describe("AnalyzeAlert.vue", () => {
     // 5 alerts and 5 respsective observables should be created
     cy.wait("@createAlert").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@createObservable").its("state").should("eq", "Complete");
 
     cy.wait("@createAlert").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@createObservable").its("state").should("eq", "Complete");
 
     cy.wait("@createAlert").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@createObservable").its("state").should("eq", "Complete");
 
     cy.wait("@createAlert").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@createObservable").its("state").should("eq", "Complete");
 
     cy.wait("@createAlert").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@createObservable").its("state").should("eq", "Complete");
 
     // Last alert will have an extra GET request to display it
     cy.wait("@getAlert").its("state").should("eq", "Complete");
@@ -202,42 +170,5 @@ describe("AnalyzeAlert.vue", () => {
     cy.wait("@createAlert").its("state").should("eq", "Complete");
     cy.get(".p-message-wrapper").should("exist");
     cy.url().should("include", "/analyze");
-  });
-
-  it("submits alert/observable data to API for ea. observable when multi-alert create option is clicked, and routes to last created alert even if observable creation fails", () => {
-    cy.intercept("POST", "/api/alert").as("createAlert");
-    cy.intercept("GET", "/api/alert/*").as("getAlert");
-    addMultipleObservables();
-    cy.intercept("POST", "/api/observable/instance/", {
-      statusCode: 500,
-      body: "Server error",
-    }).as("createObservable");
-    cy.get(".p-splitbutton > .p-button-icon-only").click();
-    cy.get(".p-menuitem-link").click();
-
-    // 5 alerts and 5 (attempted) respsective observables should be created
-    cy.wait("@createAlert").its("state").should("eq", "Complete");
-    cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@createObservable").its("state").should("eq", "Complete");
-
-    cy.wait("@createAlert").its("state").should("eq", "Complete");
-    cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@createObservable").its("state").should("eq", "Complete");
-
-    cy.wait("@createAlert").its("state").should("eq", "Complete");
-    cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@createObservable").its("state").should("eq", "Complete");
-
-    cy.wait("@createAlert").its("state").should("eq", "Complete");
-    cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@createObservable").its("state").should("eq", "Complete");
-
-    cy.wait("@createAlert").its("state").should("eq", "Complete");
-    cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@createObservable").its("state").should("eq", "Complete");
-
-    // Last alert will have an extra GET request to display it
-    cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.url().should("include", "/alert/");
   });
 });

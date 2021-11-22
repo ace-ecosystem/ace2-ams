@@ -56,6 +56,17 @@ class AnalysisModuleTypeCreate(AnalysisModuleTypeBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis module type")
 
 
+class AnalysisModuleTypeAlertTreeRead(BaseModel):
+    """Model used to control which information for an AnalysisModuleType is displayed when getting an alert tree"""
+
+    value: type_str = Field(description="The value of the analysis module type")
+
+    uuid: UUID4 = Field(description="The UUID of the analysis module type")
+
+    class Config:
+        orm_mode = True
+
+
 class AnalysisModuleTypeRead(AnalysisModuleTypeBase):
     extended_version: Optional[dict] = Field(
         description="""An optional dictionary of arbitrary key/value pairs that

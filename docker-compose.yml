@@ -34,6 +34,7 @@ services:
       - JWT_REFRESH_EXPIRE_SECONDS=${JWT_REFRESH_EXPIRE_SECONDS}
       - JWT_SECRET=${JWT_SECRET}
       - LOG_LEVEL=debug
+      - SQL_ECHO=${SQL_ECHO}
     ports:
       - 7777:80
     volumes:

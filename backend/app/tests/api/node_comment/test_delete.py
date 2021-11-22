@@ -33,7 +33,7 @@ def test_delete_nonexistent_uuid(client_valid_access_token):
 
 def test_delete(client_valid_access_token, db):
     # Create a node
-    node = helpers.create_analysis(db=db)
+    node = helpers.create_alert(db=db)
 
     # Create a comment
     comment = helpers.create_node_comment(node=node, username="johndoe", value="test", db=db)

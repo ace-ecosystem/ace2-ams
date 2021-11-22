@@ -23,7 +23,7 @@ describe("TheAlertsTable.vue", () => {
   });
 
   it("shows alerts", () => {
-    cy.get("tr").should("have.length", 11);
+    cy.get("tr").should("have.length", 7);
   });
 
   it("has default columns visible", () => {
@@ -71,7 +71,7 @@ describe("TheAlertsTable.vue", () => {
 
   it("selects/deselects as expected when checkboxes clicked", () => {
     // There should be this many checkboxes to start
-    cy.get(".p-checkbox-box").should("have.length", 11);
+    cy.get(".p-checkbox-box").should("have.length", 7);
     // Test that they all start unchecked
     cy.get(".p-checkbox-box").each((item, index) => {
       if (index == 0) {
@@ -143,7 +143,7 @@ describe("TheAlertsTable.vue", () => {
 
   it("shows observable dropdown when arrow is clicked", () => {
     // There should be this many to start with
-    cy.get(".p-row-toggler-icon").should("have.length", 10);
+    cy.get(".p-row-toggler-icon").should("have.length", 6);
     // The observable dropdown should not be showing to start
     cy.get(".p-datatable-row-expansion > td").should("not.exist");
     // Click the chevron
@@ -177,7 +177,7 @@ describe("TheAlertsTable.vue", () => {
     ).as("getAlertsChangedRowsOffset");
     // Should start with default number of rows
     cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
-    cy.get("tr").should("have.length", 11);
+    cy.get("tr").should("have.length", 7);
     // Change number of rows to 5 per page
     cy.get(".p-dropdown-trigger").click();
     cy.get('[aria-label="5"]').click();
@@ -189,7 +189,7 @@ describe("TheAlertsTable.vue", () => {
     cy.wait("@getAlertsChangedRowsOffset")
       .its("state")
       .should("eq", "Complete");
-    cy.get("tr").should("have.length", 6);
+    cy.get("tr").should("have.length", 2);
   });
 
   it("correctly changes the sort filter when a column is clicked", () => {

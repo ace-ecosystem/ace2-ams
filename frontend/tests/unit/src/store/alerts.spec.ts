@@ -9,7 +9,6 @@ import myNock from "@unit/services/api/nock";
 import snakecaseKeys from "snakecase-keys";
 
 const actions = alerts.actions;
-const getters = alerts.getters;
 const mutations = alerts.mutations;
 
 const mockAlertCreate = {
@@ -30,7 +29,6 @@ const mockAlert = {
   eventTime: Date(),
   insertTime: Date(),
   name: "Test Alert",
-  observables: [],
   owner: "Analyst",
   queue: "Default",
   tags: [],
@@ -48,7 +46,6 @@ const mockAPIAlert = {
   eventTime: new Date(0),
   insertTime: new Date(0),
   name: "Test Alert",
-  analysis: { discoveredObservableUuids: ["obsUuid1"] },
   owner: { value: "Analyst", description: "user", uuid: "uuid1" },
   queue: { value: "Default", description: "queue", uuid: "uuid1" },
   tags: [{ value: "a tag", description: "tag", uuid: "uuid1" }],
@@ -68,7 +65,6 @@ describe("alerts utilities", () => {
       eventTime: null,
       insertTime: null,
       name: "Unnamed",
-      observables: [],
       owner: "None",
       queue: "None",
       tags: [],
@@ -87,7 +83,6 @@ describe("alerts utilities", () => {
       eventTime: new Date(0),
       insertTime: new Date(0),
       name: "Test Alert",
-      observables: ["obsUuid1"],
       owner: "Analyst",
       queue: "Default",
       tags: [{ value: "a tag", description: "tag", uuid: "uuid1" }],
