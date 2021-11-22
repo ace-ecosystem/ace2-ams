@@ -26,7 +26,7 @@ describe("TheAlertsTable data/creation", () => {
   beforeAll(async () => {
     nock.cleanAll();
     myNock
-      .get("/alert/?limit=10&offset=0")
+      .get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0")
       .reply(200, {
         items: [{ uuid: "alert_1" }, { uuid: "alert_2" }],
         total: 2,
@@ -90,6 +90,8 @@ describe("TheAlertsTable data/creation", () => {
     expect(wrapper.vm.error).toBeNull();
     expect(wrapper.vm.alerts).toHaveLength(2);
     expect(wrapper.vm.totalAlerts).toEqual(2);
+    expect(wrapper.vm.sortField).toEqual("eventTime");
+    expect(wrapper.vm.sortOrder).toEqual("desc");
     expect(wrapper.vm.numRows).toEqual(10);
     expect(wrapper.vm.page).toEqual(0);
   });
@@ -98,6 +100,9 @@ describe("TheAlertsTable data/creation", () => {
       limit: 10,
       offset: 0,
     });
+    expect(wrapper.vm.sortFilter).toEqual("event_time|desc");
+    wrapper.setData({ sortField: null });
+    expect(wrapper.vm.sortFilter).toBeNull();
   });
 });
 
@@ -112,7 +117,7 @@ describe("TheAlertsTable methods success", () => {
   beforeAll(async () => {
     nock.cleanAll();
     myNock
-      .get("/alert/?limit=10&offset=0")
+      .get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0")
       .reply(200, {
         items: [{ uuid: "alert_1" }, { uuid: "alert_2" }],
         total: 2,
@@ -157,7 +162,7 @@ describe("TheAlertsTable methods success", () => {
   });
   it("will reload the alerts with new pagination settings on 'onPage'", async () => {
     const mockRequest = myNock
-      .get("/alert/?limit=1&offset=1")
+      .get("/alert/?sort=event_time%7Cdesc&limit=1&offset=1")
       .thrice()
       .reply(200, {
         items: [{ uuid: "alert_2" }],
@@ -167,6 +172,18 @@ describe("TheAlertsTable methods success", () => {
     expect(wrapper.vm.numRows).toEqual(1);
     expect(wrapper.vm.selectedRows).toEqual([]);
     expect(mockRequest.isDone()).toEqual(true);
+  });
+  it("will reload the alerts with new sort settings on 'sort'", async () => {
+    const mockRequestSort = myNock
+      .get("/alert/?sort=name%7Casc&limit=1&offset=1")
+      .reply(200, {
+        items: [{ uuid: "alert_2" }],
+        total: 2,
+      });
+    await wrapper.vm.sort({ sortField: "name", sortOrder: 1 });
+    expect(wrapper.vm.sortField).toEqual("name");
+    expect(wrapper.vm.sortOrder).toEqual("asc");
+    expect(mockRequestSort.isDone()).toEqual(true);
   });
 });
 
@@ -188,7 +205,7 @@ describe("TheAlertsTable methods failed", () => {
 
   it("will set the error data property to the given error if getAllAlerts fails within loadAlerts", async () => {
     const mockRequest = myNock
-      .get("/alert/?limit=10&offset=0")
+      .get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0")
       .twice()
       .reply(403, "Request Failed");
 
