@@ -252,7 +252,7 @@ describe("TheAlertsTable.vue", () => {
     // check first alerts name
     cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(4)").should(
       "have.text",
-      "Manual Alert 4.3.2.1",
+      "Manual Alert",
     );
   });
 
