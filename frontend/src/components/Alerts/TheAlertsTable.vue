@@ -83,7 +83,11 @@
       <template #body="{ data }">
         <!-- NAME COLUMN - INCL. TAGS AND TODO: ALERT ICONS-->
         <div v-if="col.field === 'name'">
-          <span class="p-m-1"> {{ data.name }}</span>
+          <span class="p-m-1">
+            <router-link :to="getAlertLink(data.uuid)">{{
+              data.name
+            }}</router-link></span
+          >
           <br />
           <span>
             <Tag v-for="tag in data.tags" :key="tag" class="p-mr-2" rounded>{{
@@ -281,6 +285,10 @@
           this.error = error.message || "Something went wrong!";
         }
         this.isLoading = false;
+      },
+
+      getAlertLink(uuid) {
+        return "/alert/" + uuid;
       },
     },
   };
