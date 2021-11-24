@@ -48,17 +48,17 @@ def test_disabled_user(client, db):
     headers = {"Authorization": f"Bearer {access_token}"}
     get = client.get("/api/user/", headers=headers)
     assert get.status_code == status.HTTP_200_OK
-    assert len(get.json()) == 1
+    assert get.json()["total"] == 1
 
     # Disable the user
-    user_uuid = get.json()[0]["uuid"]
+    user_uuid = get.json()["items"][0]["uuid"]
     update = client.patch(f"/api/user/{user_uuid}", headers=headers, json={"enabled": False})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     # The user is disabled, but the token is still valid, so they will still have access until it expires.
     get = client.get("/api/user/", headers=headers)
     assert get.status_code == status.HTTP_200_OK
-    assert len(get.json()) == 1
+    assert get.json()["total"] == 1
 
     # However, they will not be able to authenticate again to receive a new token.
     auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
@@ -87,7 +87,7 @@ def test_expired_token(client, db, monkeypatch):
     # Attempt to use the token to access a protected API endpoint
     get = client.get("/api/user/", headers={"Authorization": f"Bearer {access_token}"})
     assert get.status_code == status.HTTP_200_OK
-    assert len(get.json()) == 1
+    assert get.json()["total"] == 1
 
     # Wait for the token to expire
     time.sleep(2)
@@ -186,4 +186,4 @@ def test_auth_success(client, db):
     # Attempt to use the token to access a protected API endpoint
     get = client.get("/api/user/", headers={"Authorization": f"Bearer {access_token}"})
     assert get.status_code == status.HTTP_200_OK
-    assert len(get.json()) == 1
+    assert get.json()["total"] == 1

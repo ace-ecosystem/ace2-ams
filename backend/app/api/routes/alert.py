@@ -1,7 +1,6 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi.exceptions import HTTPException
-from fastapi_pagination import LimitOffsetPage
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session, joinedload
@@ -417,7 +416,7 @@ def get_alert(uuid: UUID, db: Session = Depends(get_db)):
     return AlertTreeRead(alert=alert, analyses=analyses, observable_instances=observable_instances)
 
 
-helpers.api_route_read_all(router, get_all_alerts, LimitOffsetPage[AlertRead])
+helpers.api_route_read_all(router, get_all_alerts, AlertRead)
 helpers.api_route_read(router, get_alert, AlertTreeRead)
 
 

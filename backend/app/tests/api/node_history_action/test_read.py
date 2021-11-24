@@ -33,10 +33,10 @@ def test_get_all(client_valid_access_token, db):
     # Read them back
     get = client_valid_access_token.get("/api/node/history/action/")
     assert get.status_code == status.HTTP_200_OK
-    assert len(get.json()) == 2
+    assert get.json()["total"] == 2
 
 
 def test_get_all_empty(client_valid_access_token):
     get = client_valid_access_token.get("/api/node/history/action/")
     assert get.status_code == status.HTTP_200_OK
-    assert get.json() == []
+    assert get.json()["total"] == 0

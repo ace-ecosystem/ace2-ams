@@ -14,6 +14,31 @@ import Button from "primevue/button";
 import Column from "primevue/column";
 import Paginator from "primevue/paginator";
 import nock from "nock";
+import { alertSummaryRead } from "@/models/alert";
+
+const mockAPIAlert: alertSummaryRead = {
+  comments: [],
+  description: "",
+  directives: [],
+  disposition: null,
+  dispositionTime: null,
+  dispositionUser: null,
+  eventTime: new Date(0),
+  eventUuid: null,
+  insertTime: new Date(0),
+  instructions: null,
+  name: "Test Alert",
+  owner: null,
+  queue: { value: "Default", description: "queue", uuid: "uuid1" },
+  tags: [],
+  threatActor: null,
+  threats: [],
+  tool: null,
+  toolInstance: null,
+  type: { value: "Manual", description: "type", uuid: "uuid1" },
+  uuid: "uuid1",
+  version: "uuid2",
+};
 
 // DATA/CREATION
 describe("TheAlertsTable data/creation", () => {
@@ -28,7 +53,7 @@ describe("TheAlertsTable data/creation", () => {
     myNock
       .get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0")
       .reply(200, {
-        items: [{ uuid: "alert_1" }, { uuid: "alert_2" }],
+        items: [mockAPIAlert, mockAPIAlert],
         total: 2,
       })
       .persist();
@@ -62,7 +87,7 @@ describe("TheAlertsTable data/creation", () => {
       global: { matchMode: "contains", value: null },
     });
     expect(wrapper.vm.selectedColumns).toStrictEqual([
-      { field: "eventTime", header: "Event Date" },
+      { field: "eventTime", header: "Event Time" },
       { field: "name", header: "Name" },
       { field: "owner", header: "Owner" },
       { field: "disposition", header: "Disposition" },
@@ -71,8 +96,8 @@ describe("TheAlertsTable data/creation", () => {
     expect(wrapper.vm.expandedRows).toStrictEqual([]);
     expect(wrapper.vm.columns).toStrictEqual([
       { field: "dispositionTime", header: "Dispositioned Time" },
-      { field: "insertTime", header: "Insert Date" },
-      { field: "eventTime", header: "Event Date" },
+      { field: "insertTime", header: "Insert Time" },
+      { field: "eventTime", header: "Event Time" },
       { field: "name", header: "Name" },
       { field: "owner", header: "Owner" },
       { field: "disposition", header: "Disposition" },
@@ -119,7 +144,7 @@ describe("TheAlertsTable methods success", () => {
     myNock
       .get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0")
       .reply(200, {
-        items: [{ uuid: "alert_1" }, { uuid: "alert_2" }],
+        items: [mockAPIAlert, mockAPIAlert],
         total: 2,
       })
       .persist();
@@ -141,7 +166,7 @@ describe("TheAlertsTable methods success", () => {
     });
     wrapper.vm.reset();
     expect(wrapper.vm.selectedColumns).toStrictEqual([
-      { field: "eventTime", header: "Event Date" },
+      { field: "eventTime", header: "Event Time" },
       { field: "name", header: "Name" },
       { field: "owner", header: "Owner" },
       { field: "disposition", header: "Disposition" },
@@ -165,7 +190,7 @@ describe("TheAlertsTable methods success", () => {
       .get("/alert/?sort=event_time%7Cdesc&limit=1&offset=1")
       .thrice()
       .reply(200, {
-        items: [{ uuid: "alert_2" }],
+        items: [mockAPIAlert],
         total: 2,
       });
     await wrapper.vm.onPage({ rows: 1, page: 1 });

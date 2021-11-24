@@ -29,9 +29,9 @@ describe("TheAlertsTable.vue", () => {
   it("has default columns visible", () => {
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Event Date, Name, Owner, Disposition",
+      "Event Time, Name, Owner, Disposition",
     );
-    cy.get("tr > .p-highlight").should("have.text", "Event Date");
+    cy.get("tr > .p-highlight").should("have.text", "Event Time");
     cy.get(".p-datatable-thead > tr > :nth-child(4)").should(
       "have.text",
       "Name",
@@ -54,7 +54,7 @@ describe("TheAlertsTable.vue", () => {
     // Test that all of the selected columns are there
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Dispositioned Time, Insert Date, Event Date, Name, Owner, Disposition, Dispositioned By, Queue, Type",
+      "Dispositioned Time, Insert Time, Event Time, Name, Owner, Disposition, Dispositioned By, Queue, Type",
     );
     // Close the column multiselect
     cy.get(".p-multiselect-close").click();
@@ -65,7 +65,7 @@ describe("TheAlertsTable.vue", () => {
     // Test that it's gone back to the normal columns
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Event Date, Name, Owner, Disposition",
+      "Event Time, Name, Owner, Disposition",
     );
   });
 

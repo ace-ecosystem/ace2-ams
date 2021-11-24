@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.models.event_prevention_tool import (
@@ -45,14 +46,14 @@ helpers.api_route_create(router, create_event_prevention_tool)
 
 
 def get_all_event_prevention_tools(db: Session = Depends(get_db)):
-    return crud.read_all(db_table=EventPreventionTool, db=db)
+    return paginate(db, select(EventPreventionTool))
 
 
 def get_event_prevention_tool(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=EventPreventionTool, db=db)
 
 
-helpers.api_route_read_all(router, get_all_event_prevention_tools, List[EventPreventionToolRead])
+helpers.api_route_read_all(router, get_all_event_prevention_tools, EventPreventionToolRead)
 helpers.api_route_read(router, get_event_prevention_tool, EventPreventionToolRead)
 
 

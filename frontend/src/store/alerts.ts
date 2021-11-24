@@ -1,26 +1,31 @@
-import alertApi from "@/services/api/alerts";
+import { Alert } from "@/services/api/alerts";
 import { CommitFunction } from "@/store/index";
-import { alert, alertSummary } from "@/models/alert";
+import {
+  alertCreate,
+  alertFilterParams,
+  alertSummaryRead,
+  alertTableSummary,
+  alertUpdate,
+} from "@/models/alert";
 import { UUID } from "@/models/base";
-import { getAllParams } from "@/models/api";
 
-export function parseAlertSummary(alert: alert): alertSummary {
+export function parseAlertSummary(alert: alertSummaryRead): alertTableSummary {
   return {
     comments: alert.comments ? alert.comments : [],
     description: alert.description ? alert.description : "",
     disposition: alert.disposition ? alert.disposition.value : "OPEN",
     dispositionTime: alert.dispositionTime ? alert.dispositionTime : null,
     dispositionUser: alert.dispositionUser
-      ? alert.dispositionUser.value
+      ? alert.dispositionUser.displayName
       : "None",
-    eventTime: alert.eventTime ? alert.eventTime : null,
-    insertTime: alert.insertTime ? alert.insertTime : null,
-    name: alert.name ? alert.name : "Unnamed",
-    owner: alert.owner ? alert.owner.value : "None",
+    eventTime: alert.eventTime,
+    insertTime: alert.insertTime,
+    name: alert.name,
+    owner: alert.owner ? alert.owner.displayName : "None",
     queue: alert.queue ? alert.queue.value : "None",
     tags: alert.tags ? alert.tags : [],
     tool: alert.tool ? alert.tool.value : "None",
-    type: alert.type ? alert.type.value : "",
+    type: alert.type.value,
     uuid: alert.uuid,
   };
 }
@@ -38,18 +43,18 @@ const store = {
   },
   getters: {
     openAlert: (state: {
-      openAlert: alertSummary | null;
-      visibleQueriedAlerts: alertSummary[];
+      openAlert: alertSummaryRead | null;
+      visibleQueriedAlerts: alertTableSummary[];
       totalAlerts: number;
-    }): alertSummary | null => state.openAlert,
+    }): alertSummaryRead | null => state.openAlert,
     visibleQueriedAlerts: (state: {
-      openAlert: alertSummary | null;
-      visibleQueriedAlerts: alertSummary[];
+      openAlert: alertSummaryRead | null;
+      visibleQueriedAlerts: alertTableSummary[];
       totalAlerts: number;
-    }): alertSummary[] => state.visibleQueriedAlerts,
+    }): alertTableSummary[] => state.visibleQueriedAlerts,
     visibleQueriedAlertsUuids: (state: {
-      openAlert: alertSummary | null;
-      visibleQueriedAlerts: alertSummary[];
+      openAlert: alertSummaryRead | null;
+      visibleQueriedAlerts: alertTableSummary[];
       totalAlerts: number;
     }): UUID[] => {
       const allAlertUuids = [];
@@ -59,21 +64,21 @@ const store = {
       return allAlertUuids;
     },
     totalAlerts: (state: {
-      openAlert: alertSummary | null;
-      visibleQueriedAlerts: alertSummary[];
+      openAlert: alertSummaryRead | null;
+      visibleQueriedAlerts: alertTableSummary[];
       totalAlerts: number;
     }): number => state.totalAlerts,
   },
   mutations: {
     SET_OPEN_ALERT(
-      state: { openAlert: alertSummary | null },
-      alert: alertSummary,
+      state: { openAlert: alertSummaryRead | null },
+      alert: alertSummaryRead,
     ): void {
       state.openAlert = alert;
     },
     SET_VISIBLE_QUERIED_ALERTS(
-      state: { visibleQueriedAlerts: alertSummary[] },
-      alerts: alertSummary[],
+      state: { visibleQueriedAlerts: alertTableSummary[] },
+      alerts: alertTableSummary[],
     ): void {
       state.visibleQueriedAlerts = alerts;
     },
@@ -85,10 +90,9 @@ const store = {
   actions: {
     async createAlert(
       { commit }: CommitFunction,
-      newAlert: any,
+      newAlert: alertCreate,
     ): Promise<void> {
-      await alertApi
-        .create(newAlert)
+      await Alert.create(newAlert)
         .then((alert) => {
           commit("SET_OPEN_ALERT", alert);
         })
@@ -100,8 +104,7 @@ const store = {
       { commit }: CommitFunction,
       alertUUID: UUID,
     ): Promise<void> {
-      await alertApi
-        .getSingle(alertUUID)
+      await Alert.read(alertUUID)
         .then((alert) => {
           commit("SET_OPEN_ALERT", alert);
         })
@@ -109,12 +112,11 @@ const store = {
           throw error;
         });
     },
-    async getAll(
+    async getPage(
       { commit }: CommitFunction,
-      params: getAllParams,
+      params: alertFilterParams,
     ): Promise<void> {
-      await alertApi
-        .getAll(params)
+      await Alert.readPage(params)
         .then((alerts) => {
           const parsedAlerts = [];
           for (const index in alerts.items) {
@@ -131,28 +133,28 @@ const store = {
     },
     async updateAlert(
       { commit }: CommitFunction,
-      payload: { oldAlertUUID: UUID; updateData: any },
+      payload: { oldAlertUUID: UUID; updateData: alertUpdate },
     ): Promise<void> {
       // once we get around to updating alerts, we will need to update the base api service to have a
       // 'getAfterUpdate' option like there is for 'create'
       // then we can reset the open/queried alert(s)
       //  might need to hadd some params to the vuex portion for that.. idk its down the road
-      await alertApi
-        .updateSingle(payload.updateData, payload.oldAlertUUID)
-        .catch((error) => {
+      await Alert.update(payload.oldAlertUUID, payload.updateData).catch(
+        (error) => {
           throw error;
-        });
+        },
+      );
     },
     async updateAlerts(
       { commit }: CommitFunction,
-      payload: { oldAlertUUIDs: UUID[]; updateData: any },
+      payload: { oldAlertUUIDs: UUID[]; updateData: alertUpdate },
     ): Promise<void> {
       // I have no idea if this is the right way to do this
       // but basically pushing all the requests to update into an array
       const promises = [];
       for (let i = 0; i < payload.oldAlertUUIDs.length; i++) {
         promises.push(
-          alertApi.updateSingle(payload.updateData, payload.oldAlertUUIDs[i]),
+          Alert.update(payload.oldAlertUUIDs[i], payload.updateData),
         );
       }
 

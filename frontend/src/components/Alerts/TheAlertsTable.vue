@@ -83,7 +83,11 @@
       <template #body="{ data }">
         <!-- NAME COLUMN - INCL. TAGS AND TODO: ALERT ICONS-->
         <div v-if="col.field === 'name'">
-          <span class="p-m-1"> {{ data.name }}</span>
+          <span class="p-m-1">
+            <router-link :to="getAlertLink(data.uuid)">{{
+              data.name
+            }}</router-link></span
+          >
           <br />
           <span>
             <Tag v-for="tag in data.tags" :key="tag" class="p-mr-2" rounded>{{
@@ -91,6 +95,9 @@
             }}</Tag>
           </span>
         </div>
+        <span v-else-if="col.field.includes('Time')">
+          {{ formatDateTime(data[col.field]) }}</span
+        >
         <span v-else> {{ data[col.field] }}</span>
       </template>
     </Column>
@@ -152,8 +159,8 @@
 
         columns: [
           { field: "dispositionTime", header: "Dispositioned Time" },
-          { field: "insertTime", header: "Insert Date" },
-          { field: "eventTime", header: "Event Date" },
+          { field: "insertTime", header: "Insert Time" },
+          { field: "eventTime", header: "Event Time" },
           { field: "name", header: "Name" },
           { field: "owner", header: "Owner" },
           { field: "disposition", header: "Disposition" },
@@ -217,7 +224,7 @@
         alertUnselect: "selectedAlerts/unselect",
         alertUnselectAll: "selectedAlerts/unselectAll",
         alertSelectAll: "selectedAlerts/selectAll",
-        getAllAlerts: "alerts/getAll",
+        getAlertPage: "alerts/getPage",
       }),
 
       reset() {
@@ -272,7 +279,7 @@
       async loadAlerts() {
         this.isLoading = true;
         try {
-          await this.getAllAlerts({
+          await this.getAlertPage({
             sort: this.sortFilter,
             ...this.pageOptions,
             ...this.filters,
@@ -281,6 +288,19 @@
           this.error = error.message || "Something went wrong!";
         }
         this.isLoading = false;
+      },
+
+      getAlertLink(uuid) {
+        return "/alert/" + uuid;
+      },
+
+      formatDateTime(dateTime) {
+        if (dateTime) {
+          const d = new Date(dateTime);
+          return d.toLocaleString("en-US");
+        }
+
+        return "None";
       },
     },
   };
