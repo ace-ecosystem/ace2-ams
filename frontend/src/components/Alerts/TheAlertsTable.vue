@@ -156,8 +156,8 @@
 
         columns: [
           { field: "dispositionTime", header: "Dispositioned Time" },
-          { field: "insertTime", header: "Insert Date" },
-          { field: "eventTime", header: "Event Date" },
+          { field: "insertTime", header: "Insert Time" },
+          { field: "eventTime", header: "Event Time" },
           { field: "name", header: "Name" },
           { field: "owner", header: "Owner" },
           { field: "disposition", header: "Disposition" },
