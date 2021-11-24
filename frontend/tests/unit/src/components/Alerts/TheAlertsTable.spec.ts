@@ -14,6 +14,31 @@ import Button from "primevue/button";
 import Column from "primevue/column";
 import Paginator from "primevue/paginator";
 import nock from "nock";
+import { alertSummaryRead } from "@/models/alert";
+
+const mockAPIAlert: alertSummaryRead = {
+  comments: [],
+  description: "",
+  directives: [],
+  disposition: null,
+  dispositionTime: null,
+  dispositionUser: null,
+  eventTime: new Date(0),
+  eventUuid: null,
+  insertTime: new Date(0),
+  instructions: null,
+  name: "Test Alert",
+  owner: null,
+  queue: { value: "Default", description: "queue", uuid: "uuid1" },
+  tags: [],
+  threatActor: null,
+  threats: [],
+  tool: null,
+  toolInstance: null,
+  type: { value: "Manual", description: "type", uuid: "uuid1" },
+  uuid: "uuid1",
+  version: "uuid2",
+};
 
 // DATA/CREATION
 describe("TheAlertsTable data/creation", () => {
@@ -28,7 +53,7 @@ describe("TheAlertsTable data/creation", () => {
     myNock
       .get("/alert/?limit=10&offset=0")
       .reply(200, {
-        items: [{ uuid: "alert_1" }, { uuid: "alert_2" }],
+        items: [mockAPIAlert, mockAPIAlert],
         total: 2,
       })
       .persist();
@@ -114,7 +139,7 @@ describe("TheAlertsTable methods success", () => {
     myNock
       .get("/alert/?limit=10&offset=0")
       .reply(200, {
-        items: [{ uuid: "alert_1" }, { uuid: "alert_2" }],
+        items: [mockAPIAlert, mockAPIAlert],
         total: 2,
       })
       .persist();
@@ -160,7 +185,7 @@ describe("TheAlertsTable methods success", () => {
       .get("/alert/?limit=1&offset=1")
       .thrice()
       .reply(200, {
-        items: [{ uuid: "alert_2" }],
+        items: [mockAPIAlert],
         total: 2,
       });
     await wrapper.vm.onPage({ rows: 1, page: 1 });
