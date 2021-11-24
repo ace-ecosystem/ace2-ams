@@ -22,9 +22,10 @@ describe("ManageAlerts.vue", () => {
   });
 
   it("will reload alerts table with 'after' filter applied when 'start' input changed by using date picker", () => {
-    cy.intercept("GET", "/api/alert/?limit=10&offset=0&event_time_after=*").as(
-      "getAlerts",
-    );
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_after=*",
+    ).as("getAlerts");
     // Click the first available day in the date picker for 'start' input
     cy.get(":nth-child(2) > .p-inputgroup > .p-inputtext").click();
     cy.get(".vc-popover-content").should("be.visible");
@@ -36,7 +37,7 @@ describe("ManageAlerts.vue", () => {
   it("will reload alerts table with 'after' filter applied when 'start' input changed by typing", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?limit=10&offset=0&event_time_after=2021-03-02T*",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_after=2021-03-02T*",
     ).as("getAlerts");
     // Type the date into the 'start' input
     cy.get(":nth-child(2) > .p-inputgroup > .p-inputtext")
@@ -48,9 +49,10 @@ describe("ManageAlerts.vue", () => {
   });
 
   it("will reload alerts table with 'before' filter applied when 'end' input changed by using date picker", () => {
-    cy.intercept("GET", "/api/alert/?limit=10&offset=0&event_time_before=*").as(
-      "getAlerts",
-    );
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_before=*",
+    ).as("getAlerts");
     // Click the first available day in the date picker for 'end' input
     cy.get(":nth-child(4) > .p-inputgroup > .p-inputtext").click();
     cy.get(".vc-popover-content").should("be.visible");
@@ -61,7 +63,7 @@ describe("ManageAlerts.vue", () => {
   it("will reload alerts table with 'before' filter applied when 'end' input changed by typing", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?limit=10&offset=0&event_time_before=2021-03-02T*",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_before=2021-03-02T*",
     ).as("getAlerts");
     // Type the date into the 'end' input
     cy.get(":nth-child(4) > .p-inputgroup > .p-inputtext")
@@ -164,7 +166,7 @@ describe("ManageAlerts.vue", () => {
   it("will use the set time filter will be used for requests ", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?limit=10&offset=0&insert_time_after=2021-03-02T*",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&insert_time_after=2021-03-02T*",
     ).as("getAlerts");
 
     // Set the date range filter type to be "Insert Time"
@@ -200,9 +202,10 @@ describe("ManageAlerts.vue", () => {
       "03/02/2021 13:00",
     );
 
-    cy.intercept("GET", "/api/alert/?limit=10&offset=0").as(
-      "getAlertsNoFilters",
-    );
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
+    ).as("getAlertsNoFilters");
     // Change the date range filter type to "Insert Time"
     cy.get("#FilterToolbar > .p-toolbar-group-left > :nth-child(1)").click();
     cy.get(".p-overlaypanel-content").should("be.visible");

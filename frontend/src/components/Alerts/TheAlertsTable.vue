@@ -17,7 +17,8 @@
     data-key="uuid"
     removable-sort
     responsive-layout="scroll"
-    sort-field="eventTime"
+    :sort-field="sortField"
+    @sort="sort"
     @rowSelect="alertSelect($event.data.uuid)"
     @rowUnselect="alertUnselect($event.data.uuid)"
     @rowSelect-all="alertSelectAll(allAlertUuids)"
@@ -120,6 +121,8 @@
 <script>
   import { mapActions, mapGetters } from "vuex";
 
+  import { camelToSnakeCase } from "@/etc/helpers";
+
   import Button from "primevue/button";
   import Column from "primevue/column";
   import DataTable from "primevue/datatable";
@@ -166,6 +169,8 @@
         isLoading: false,
         selectedColumns: null,
         selectedRows: null,
+        sortField: "eventTime",
+        sortOrder: "desc",
         numRows: 10,
         page: 0,
       };
@@ -179,6 +184,11 @@
         selectedAlerts: "selectedAlerts/selected",
         filters: "filters/alerts",
       }),
+      sortFilter() {
+        return this.sortField
+          ? `${camelToSnakeCase(this.sortField)}|${this.sortOrder}`
+          : null;
+      },
       pageOptions() {
         return {
           limit: this.numRows,
@@ -217,6 +227,7 @@
         this.selectedColumns = this.columns.filter((column) => {
           return this.defaultColumns.includes(column.field);
         });
+        this.sort({ sortField: "eventTime", sortOrder: "-1" });
         this.error = null;
       },
 
@@ -240,6 +251,17 @@
         this.$refs.dt.exportCSV();
       },
 
+      async sort(event) {
+        if (event.sortField) {
+          this.sortField = event.sortField;
+          this.sortOrder = event.sortOrder > 0 ? "asc" : "desc";
+          await this.loadAlerts();
+        } else {
+          this.sortField = null;
+          this.sortOrder = null;
+        }
+      },
+
       async onPage(event) {
         this.selectedRows = [];
         this.numRows = event.rows;
@@ -250,7 +272,11 @@
       async loadAlerts() {
         this.isLoading = true;
         try {
-          await this.getAlertPage({ ...this.pageOptions, ...this.filters });
+          await this.getAlertPage({
+            sort: this.sortFilter,
+            ...this.pageOptions,
+            ...this.filters,
+          });
         } catch (error) {
           this.error = error.message || "Something went wrong!";
         }

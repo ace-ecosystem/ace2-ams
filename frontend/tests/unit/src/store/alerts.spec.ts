@@ -262,6 +262,25 @@ describe("alerts Actions", () => {
     expect(state.visibleQueriedAlerts).toHaveLength(2);
   });
 
+  it("will pass params along when getAll is called and sort options are set", async () => {
+    const state = {
+      openAlert: null,
+      visibleQueriedAlerts: [],
+      totalAlerts: 0,
+    };
+    const store = new Vuex.Store({ state, mutations, actions });
+    const mockRequest = myNock
+      .get("/alert/?sort=event_time%7Casc")
+      .reply(200, { items: [{ uuid: "uuid1" }, { uuid: "uuid2" }], total: 2 });
+    await store.dispatch("getAll", { sort: "event_time|asc" });
+
+    expect(mockRequest.isDone()).toEqual(true);
+
+    expect(state.openAlert).toBeNull();
+    expect(state.totalAlerts).toEqual(2);
+    expect(state.visibleQueriedAlerts).toHaveLength(2);
+  });
+
   it("will make a request to update an alert given the UUID and update data upon the updateAlert action", async () => {
     const state = {
       openAlert: null,
