@@ -95,6 +95,9 @@
             }}</Tag>
           </span>
         </div>
+        <span v-else-if="col.field.includes('Time')">
+          {{ formatDateTime(data[col.field]) }}</span
+        >
         <span v-else> {{ data[col.field] }}</span>
       </template>
     </Column>
@@ -289,6 +292,15 @@
 
       getAlertLink(uuid) {
         return "/alert/" + uuid;
+      },
+
+      formatDateTime(dateTime) {
+        if (dateTime) {
+          const d = new Date(dateTime);
+          return d.toLocaleString("en-US");
+        }
+
+        return "None";
       },
     },
   };
