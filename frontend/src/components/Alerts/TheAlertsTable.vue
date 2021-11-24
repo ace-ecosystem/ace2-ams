@@ -207,7 +207,7 @@
         alertUnselect: "selectedAlerts/unselect",
         alertUnselectAll: "selectedAlerts/unselectAll",
         alertSelectAll: "selectedAlerts/selectAll",
-        getAllAlerts: "alerts/getAll",
+        getAlertPage: "alerts/getPage",
       }),
 
       reset() {
@@ -250,7 +250,7 @@
       async loadAlerts() {
         this.isLoading = true;
         try {
-          await this.getAllAlerts({ ...this.pageOptions, ...this.filters });
+          await this.getAlertPage({ ...this.pageOptions, ...this.filters });
         } catch (error) {
           this.error = error.message || "Something went wrong!";
         }
