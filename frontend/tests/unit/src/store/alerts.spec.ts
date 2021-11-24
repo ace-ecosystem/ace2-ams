@@ -243,7 +243,7 @@ describe("alerts Actions", () => {
     expect(state.visibleQueriedAlerts).toHaveLength(2);
   });
 
-  it("will pass params along when getPage is and pagination options are set", async () => {
+  it("will pass params along when getPage is called and pagination options are set", async () => {
     const state = {
       openAlert: null,
       visibleQueriedAlerts: [],
@@ -262,7 +262,7 @@ describe("alerts Actions", () => {
     expect(state.visibleQueriedAlerts).toHaveLength(2);
   });
 
-  it("will pass params along when getAll is called and sort options are set", async () => {
+  it("will pass params along when getPage is called and sort options are set", async () => {
     const state = {
       openAlert: null,
       visibleQueriedAlerts: [],
@@ -271,8 +271,8 @@ describe("alerts Actions", () => {
     const store = new Vuex.Store({ state, mutations, actions });
     const mockRequest = myNock
       .get("/alert/?sort=event_time%7Casc")
-      .reply(200, { items: [{ uuid: "uuid1" }, { uuid: "uuid2" }], total: 2 });
-    await store.dispatch("getAll", { sort: "event_time|asc" });
+      .reply(200, { items: [mockAPIAlert, mockAPIAlert], total: 2 });
+    await store.dispatch("getPage", { sort: "event_time|asc" });
 
     expect(mockRequest.isDone()).toEqual(true);
 

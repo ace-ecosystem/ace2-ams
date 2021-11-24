@@ -103,6 +103,7 @@ export interface alertFilterParams extends pageOptionParams {
   observableValue?: string;
   owner?: string;
   queue?: string;
+  sort?: string;
   tags?: string[];
   threatActor?: string;
   threats?: string[];
