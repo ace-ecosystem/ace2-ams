@@ -1,9 +1,38 @@
 export type UUID = string;
-export type genericObject = {
-  description: string;
+
+export interface genericObjectCreate {
+  description?: string;
+  uuid?: UUID;
   value: string;
+  [key: string]: unknown;
+}
+
+export interface genericObjectRead {
+  description: string | null;
   uuid: UUID;
-  rank?: string;
-  types?: string;
-};
-export type genericGetAll = genericObject[];
+  value: string;
+}
+
+export interface genericObjectReadPage extends page {
+  items: genericObjectRead[];
+}
+
+export interface genericObjectUpdate {
+  description?: string;
+  value?: string;
+  [key: string]: unknown;
+}
+
+export interface page {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  items: any[];
+  limit: number;
+  offset: number;
+  total: number;
+}
+
+export interface pageOptionParams {
+  limit?: number;
+  offset?: number;
+  [key: string]: unknown;
+}
