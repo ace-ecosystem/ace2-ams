@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { AxiosRequestConfig } from "axios";
 import instance from "./axios";
 import camelcaseKeys from "camelcase-keys";
 import snakecaseKeys from "snakecase-keys";
-import { anyGetAll, anyGetSingle, getAllParams } from "@/models/api";
-import { UUID } from "@/models/base";
+import { page } from "@/models/base";
 
 type Method = "GET" | "DELETE" | "POST" | "PATCH";
 
@@ -27,10 +28,10 @@ export class BaseApi {
     url: string,
     method: Method,
     options?: {
-      data?: Record<string, any>;
-      params?: getAllParams;
+      data?: Record<string, unknown>;
+      params?: Record<string, unknown>;
     },
-    getAfterCreate = true,
+    getAfterCreate = false,
   ): Promise<any> {
     const config: AxiosRequestConfig = {
       url: url,
@@ -54,7 +55,7 @@ export class BaseApi {
 
     if (response) {
       if ("content-location" in response.headers && getAfterCreate) {
-        return await this.readRequest(response.headers["content-location"]);
+        return await this.read(response.headers["content-location"]);
       }
 
       if (Array.isArray(response.data)) {
@@ -65,75 +66,47 @@ export class BaseApi {
     throw new Error(`${this.methodDict[method]} failed!`);
   }
 
-  async createRequest(
+  async create(
     url: string,
-    data?: Record<string, any>,
-    getAfterCreate = true,
-  ): Promise<unknown> {
+    data: Record<string, unknown>,
+    getAfterCreate: boolean,
+  ): Promise<any> {
     return await this.baseRequest(url, "POST", { data: data }, getAfterCreate);
   }
 
-  async readRequest(
-    url: string,
-    params?: getAllParams,
-  ): Promise<anyGetSingle & anyGetAll> {
+  async read(url: string, params?: Record<string, unknown>): Promise<any> {
     return await this.baseRequest(url, "GET", { params: params });
   }
 
-  async updateRequest(
-    url: string,
-    data?: Record<string, any>,
-  ): Promise<unknown> {
+  async readAll(url: string, params?: Record<string, unknown>): Promise<any> {
+    let results: any[] = [];
+    let offset = 0;
+
+    if (typeof params === "undefined") {
+      params = {};
+    }
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      params.offset = offset;
+      const page: page = await this.read(url, params).catch((err) => {
+        throw err;
+      });
+
+      results = results.concat(page.items);
+
+      if (results.length < page.total) {
+        offset = offset + page.limit;
+        continue;
+      }
+
+      break;
+    }
+
+    return results;
+  }
+
+  async update(url: string, data?: Record<string, unknown>): Promise<any> {
     return await this.baseRequest(url, "PATCH", { data: data });
-  }
-}
-
-export class GenericEndpoint {
-  api = new BaseApi();
-  endpoint: string;
-
-  constructor(endpoint: string) {
-    this.endpoint = endpoint;
-  }
-
-  // CREATE
-  async create(
-    object: Record<string, unknown>,
-    getAfterCreate = true,
-  ): Promise<unknown> {
-    return await this.api
-      .createRequest(`${this.endpoint}`, object, getAfterCreate)
-      .catch((err) => {
-        throw err;
-      });
-  }
-
-  // READ
-  async getAll(params?: getAllParams): Promise<anyGetAll> {
-    return await this.api
-      .readRequest(`${this.endpoint}`, params)
-      .catch((err) => {
-        throw err;
-      });
-  }
-
-  async getSingle(uuid: UUID): Promise<anyGetSingle> {
-    return await this.api
-      .readRequest(`${this.endpoint}${uuid}`)
-      .catch((err) => {
-        throw err;
-      });
-  }
-
-  // UPDATE
-  async updateSingle(
-    object: Record<string, unknown>,
-    uuid: UUID,
-  ): Promise<unknown> {
-    return await this.api
-      .updateRequest(`${this.endpoint}${uuid}`, object)
-      .catch((err) => {
-        throw err;
-      });
   }
 }
