@@ -2,36 +2,119 @@
 <!-- 'Filter' editing modal, agnostic to what data types are being filtered -->
 
 <template>
-  <BaseModal :name="this.name" header="Edit Filters">
-    <p class="p-m-0">Edit Filters.</p>
+  <BaseModal :name="name" header="Edit Filters">
+    <div v-for="(filter, index) in formFilters" :key="filter.index">
+      <AlertFilterInput
+        v-model="formFilters[index]"
+        @deleteFormFilter="deleteFormFilter(index)"
+      ></AlertFilterInput>
+    </div>
     <template #footer>
       <Button
-        label="No"
+        label="Clear"
         icon="pi pi-times"
-        @click="close"
         class="p-button-text"
+        @click="clear"
       />
-      <Button label="Yes" icon="pi pi-check" @click="close" />
+      <Button
+        label="Add"
+        icon="pi pi-plus"
+        class="p-button-text"
+        @click="addNewFilter"
+      />
+      <Button label="Cancel" class="p-button-text" @click="close" />
+      <Button
+        label="Submit"
+        icon="pi pi-check"
+        @click="
+          submit();
+          close();
+        "
+      />
     </template>
   </BaseModal>
 </template>
 
 <script>
+  import { mapActions } from "vuex";
+
   import Button from "primevue/button";
+  import Dropdown from "primevue/dropdown";
 
   import BaseModal from "@/components/Modals/BaseModal";
+  import AlertFilterInput from "../Alerts/AlertFilterInput.vue";
 
   export default {
     name: "EditFilterModal",
-    components: { BaseModal, Button },
+    components: { BaseModal, Button, AlertFilterInput },
+
+    inject: ["filterType", "rangeFilterOptions", "rangeFilters"],
+
+    data() {
+      return {
+        formFilters: [],
+      };
+    },
 
     computed: {
+      currentlySetFilters() {
+        return this.$store.getters[`${this.filterType}/filters`];
+      },
+      submitFilters() {
+        let submitFilters = {};
+        for (const index in this.formFilters) {
+          const filter = this.formFilters[index];
+          submitFilters[filter.filterName.name] = filter.filterValue;
+        }
+        return submitFilters;
+      },
       name() {
         return this.$options.name;
       },
     },
 
+    watch: {
+      currentlySetFilters: {
+        deep: true,
+        handler: function () {
+          this.resetFormFilters();
+        },
+      },
+    },
+
     methods: {
+      ...mapActions({
+        bulkSetFilters: "filters/bulkSetFilters",
+      }),
+      updateForm(index, event) {
+        console.log(index);
+        console.log(event);
+        this.formFilters[index][event.attr] = event.value;
+      },
+      submit() {
+        this.bulkSetFilters({
+          filterType: this.filterType,
+          filters: this.submitFilters,
+        });
+      },
+      deleteFormFilter(index) {
+        this.formFilters.splice(index, 1);
+      },
+      clear() {
+        this.formFilters = [];
+      },
+      addNewFilter() {
+        this.formFilters.push({ filterName: null, filterValue: null });
+      },
+      resetFormFilters() {
+        this.formFilters = [];
+        for (const filter in this.currentlySetFilters) {
+          this.formFilters.push({
+            filterName: filter,
+            filterValue: this.currentlySetFilters[filter],
+          });
+        }
+      },
       close() {
         this.$store.dispatch("modals/close", this.name);
       },

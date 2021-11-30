@@ -1,3 +1,10 @@
+export const filterTypes = {
+  MULTISELECT: "multiselect",
+  SELECT: "select",
+  DATE: "date",
+  INPUT_TEXT: "inputText",
+}
+
 export const DISPOSITION_FILTER = "disposition";
 export const DISPOSITION_USER_FILTER = "dispositionUser";
 export const DISPOSITIONED_AFTER_FILTER = "dispositionedAfter";
@@ -21,25 +28,100 @@ export const TOOL_INSTANCE_FILTER = "toolInstance";
 export const TYPE_FILTER = "type";
 
 export const alertFilters = [
-  DISPOSITION_FILTER,
-  DISPOSITION_USER_FILTER,
-  DISPOSITIONED_AFTER_FILTER,
-  DISPOSITIONED_BEFORE_FILTER,
-  EVENT_UUID_FILTER,
-  EVENT_TIME_AFTER_FILTER,
-  EVENT_TIME_BEFORE_FILTER,
-  INSERT_TIME_AFTER_FILTER,
-  INSERT_TIME_BEFORE_FILTER,
-  NAME_FILTER,
-  OBSERVABLE_FILTER,
-  OBSERVABLE_TYPES_FILTER,
-  OBSERVABLE_VALUE_FILTER,
-  OWNER_FILTER,
-  QUEUE_FILTER,
-  TAGS_FILTER,
-  THREAT_ACTOR_FILTER,
-  THREATS_FILTER,
-  TOOL_FILTER,
-  TOOL_INSTANCE_FILTER,
-  TYPE_FILTER,
+  {
+    name: DISPOSITION_FILTER,
+    label: "Disposition",
+    type: filterTypes.SELECT,
+  },
+  {
+    name: DISPOSITION_USER_FILTER, label: "Dispositioned By",
+    type: filterTypes.SELECT,
+  },
+  {
+    name: DISPOSITIONED_AFTER_FILTER, label: "Disposition Time",
+    type: filterTypes.DATE,
+  },
+  {
+    name: DISPOSITIONED_BEFORE_FILTER, label: "Disposition Time",
+    type: filterTypes.DATE,
+  },
+  { name: EVENT_UUID_FILTER, label: "Event" },
+  {
+    name: EVENT_TIME_AFTER_FILTER, label: "Event Time",
+    type: filterTypes.DATE,
+  },
+  {
+    name: EVENT_TIME_BEFORE_FILTER, label: "Event Time",
+    type: filterTypes.DATE,
+  },
+  {
+    name: INSERT_TIME_AFTER_FILTER, label: "Insert Time",
+    type: filterTypes.DATE,
+  },
+  {
+    name: INSERT_TIME_BEFORE_FILTER, label: "Insert Time",
+    type: filterTypes.DATE,
+  },
+  {
+    name: NAME_FILTER, label: "Name",
+    type: filterTypes.INPUT_TEXT,
+  },
+  {
+    name: OBSERVABLE_FILTER, label: "Observable",
+  },
+  {
+    name: OBSERVABLE_TYPES_FILTER, label: "Observable Types",
+    type: filterTypes.MULTISELECT,
+  },
+  {
+    name: OBSERVABLE_VALUE_FILTER, label: "Observable Value",
+    type: filterTypes.INPUT_TEXT,
+  },
+  {
+    name: OWNER_FILTER, label: "Owner",
+    type: filterTypes.SELECT,
+  },
+  {
+    name: QUEUE_FILTER, label: "Queue",
+    type: filterTypes.SELECT,
+  },
+  {
+    name: TAGS_FILTER, label: "Tags",
+    type: filterTypes.MULTISELECT,
+  },
+  {
+    name: THREAT_ACTOR_FILTER, label: "Threat Actor",
+    type: filterTypes.SELECT,
+  },
+  {
+    name: THREATS_FILTER, label: "Threats",
+    type: filterTypes.MULTISELECT,
+  },
+  {
+    name: TOOL_FILTER, label: "Tool",
+    type: filterTypes.SELECT,
+  },
+  {
+    name: TOOL_INSTANCE_FILTER, label: "Tool Instance",
+    type: filterTypes.SELECT,
+  },
+  {
+    name: TYPE_FILTER, label: "Type",
+    type: filterTypes.SELECT,
+  },
 ] as const;
+
+export const alertRangeFilters = {
+  eventTime: {
+    start: EVENT_TIME_AFTER_FILTER,
+    end: EVENT_TIME_BEFORE_FILTER,
+  },
+  insertTime: {
+    start: INSERT_TIME_AFTER_FILTER,
+    end: INSERT_TIME_BEFORE_FILTER,
+  },
+  dispositionedTime: {
+    start: DISPOSITIONED_AFTER_FILTER,
+    end: DISPOSITIONED_BEFORE_FILTER,
+  },
+};
