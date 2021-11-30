@@ -4,10 +4,11 @@
 <template>
   <BaseModal :name="name" header="Edit Filters">
     <div v-for="(filter, index) in formFilters" :key="filter.index">
-      <AlertFilterInput
+      <component
+        :is="filterInputComponent"
         v-model="formFilters[index]"
         @deleteFormFilter="deleteFormFilter(index)"
-      ></AlertFilterInput>
+      ></component>
     </div>
     <template #footer>
       <Button
@@ -36,19 +37,26 @@
 </template>
 
 <script>
+  import { defineAsyncComponent } from "vue";
+
   import { mapActions } from "vuex";
 
   import Button from "primevue/button";
   import Dropdown from "primevue/dropdown";
 
   import BaseModal from "@/components/Modals/BaseModal";
-  import AlertFilterInput from "../Alerts/AlertFilterInput.vue";
+  import AlertFilterInput from "@/components/Alerts/AlertFilterInput";
 
   export default {
     name: "EditFilterModal",
     components: { BaseModal, Button, AlertFilterInput },
 
-    inject: ["filterType", "rangeFilterOptions", "rangeFilters"],
+    inject: [
+      "filterType",
+      "rangeFilterOptions",
+      "rangeFilters",
+      "filterInputType",
+    ],
 
     data() {
       return {
@@ -67,6 +75,14 @@
           submitFilters[filter.filterName.name] = filter.filterValue;
         }
         return submitFilters;
+      },
+      filterInputComponent() {
+        return defineAsyncComponent(() =>
+          import(`@/components/${this.filterInputType}`),
+        );
+      },
+      filterInputPath() {
+        return `@/components/${this.filterInputType}`;
       },
       name() {
         return this.$options.name;

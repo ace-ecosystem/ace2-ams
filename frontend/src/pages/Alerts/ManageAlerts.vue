@@ -30,6 +30,7 @@
     provide() {
       return {
         filterType: "alerts",
+        filterInputType: "Alerts/AlertFilterInput",
         rangeFilterOptions: ["Event Time", "Insert Time", "Dispositioned Time"],
         rangeFilters: {
           "Event Time": {
