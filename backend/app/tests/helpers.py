@@ -541,3 +541,5 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
 
     for observable in data["observables"]:
         _create_observable_instance(observable, alert, root_analysis)
+
+    return alert
