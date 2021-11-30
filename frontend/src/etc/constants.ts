@@ -1,5 +1,6 @@
 export const filterTypes = {
   MULTISELECT: "multiselect",
+  CHIPS: "chips",
   SELECT: "select",
   DATE: "date",
   INPUT_TEXT: "inputText",
@@ -32,10 +33,12 @@ export const alertFilters = [
     name: DISPOSITION_FILTER,
     label: "Disposition",
     type: filterTypes.SELECT,
+    options: "alertDisposition",
   },
   {
     name: DISPOSITION_USER_FILTER, label: "Dispositioned By",
     type: filterTypes.SELECT,
+    options: "users"
   },
   {
     name: DISPOSITIONED_AFTER_FILTER, label: "Disposition Time",
@@ -72,6 +75,8 @@ export const alertFilters = [
   {
     name: OBSERVABLE_TYPES_FILTER, label: "Observable Types",
     type: filterTypes.MULTISELECT,
+    options: "type",
+
   },
   {
     name: OBSERVABLE_VALUE_FILTER, label: "Observable Value",
@@ -80,34 +85,50 @@ export const alertFilters = [
   {
     name: OWNER_FILTER, label: "Owner",
     type: filterTypes.SELECT,
+    options: "users",
+
   },
   {
     name: QUEUE_FILTER, label: "Queue",
     type: filterTypes.SELECT,
+    options: "alertQueue",
+
   },
   {
     name: TAGS_FILTER, label: "Tags",
-    type: filterTypes.MULTISELECT,
+    type: filterTypes.CHIPS,
+    options: "nodeTag",
+
   },
   {
     name: THREAT_ACTOR_FILTER, label: "Threat Actor",
     type: filterTypes.SELECT,
+    options: "nodeThreat",
+
   },
   {
     name: THREATS_FILTER, label: "Threats",
-    type: filterTypes.MULTISELECT,
+    type: filterTypes.CHIPS,
+    options: "nodeThreatActor",
+
   },
   {
     name: TOOL_FILTER, label: "Tool",
     type: filterTypes.SELECT,
+    options: "tool",
+
   },
   {
     name: TOOL_INSTANCE_FILTER, label: "Tool Instance",
     type: filterTypes.SELECT,
+    options: "toolInstance",
+
   },
   {
     name: TYPE_FILTER, label: "Type",
     type: filterTypes.SELECT,
+    options: "type",
+
   },
 ] as const;
 
