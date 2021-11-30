@@ -2,7 +2,7 @@
   <div>
     <ul>
       <li v-for="i of items" :key="i.uuid">
-        {{ treeItemName(i) }}
+        {{ treeItemName(i) }} {{ tagString(i) }}
         <AlertTree v-if="i.children" :items="i.children" />
       </li>
     </ul>
@@ -29,6 +29,18 @@
         if ("observable" in item) {
           return item.observable.type.value + ": " + item.observable.value;
         }
+      },
+
+      tagString(item) {
+        let string = "";
+
+        if ("tags" in item) {
+          for (let i = 0; i < item.tags.length; i++) {
+            string = string + "(" + item.tags[i].value + ") ";
+          }
+        }
+
+        return string;
       },
     },
   };

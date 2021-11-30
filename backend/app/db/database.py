@@ -11,7 +11,7 @@ if "TESTING" in os.environ and os.environ["TESTING"]:
     database_url = f"{database_url}_test"
 
 echo_value = False
-if "SQL_ECHO" in os.environ and os.environ["SQL_ECHO"]:
+if "SQL_ECHO" in os.environ and os.environ["SQL_ECHO"] == "yes":
     echo_value = True
 
 engine = create_engine(database_url, echo=echo_value)

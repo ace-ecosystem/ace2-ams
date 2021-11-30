@@ -1,0 +1,87 @@
+{
+  "name": "<ALERT_NAME>",
+  "observables": [
+    {
+      "type": "<O_TYPE>",
+      "value": "<O_VALUE>",
+      "tags": ["<TAG>", "<TAG>", "<TAG>"],
+      "analyses": [
+        {
+          "type": "<A_TYPE> Analysis",
+          "observables": [
+            {
+              "type": "<O_TYPE>",
+              "value": "<O_VALUE>",
+              "tags": ["<TAG>"],
+              "analyses": [
+                {
+                  "type": "<A_TYPE> Analysis",
+                  "observables": [{ "type": "<O_TYPE>", "value": "<O_VALUE>" }]
+                }
+              ]
+            },
+            {
+              "type": "<O_TYPE>",
+              "value": "<O_VALUE>",
+              "tags": ["<TAG>"],
+              "analyses": [
+                {
+                  "type": "<A_TYPE> Analysis",
+                  "observables": [{ "type": "<O_TYPE>", "value": "<O_VALUE>" }]
+                }
+              ]
+            },
+            {
+              "type": "<O_TYPE>",
+              "value": "<O_VALUE>"
+            },
+            {
+              "type": "<O_TYPE>",
+              "value": "<O_VALUE>",
+              "analyses": [
+                {
+                  "type": "<A_TYPE> Analysis",
+                  "observables": [
+                    {
+                      "type": "<O_TYPE>",
+                      "value": "<O_VALUE>",
+                      "analyses": [
+                        {
+                          "type": "<A_TYPE> Analysis",
+                          "observables": [
+                            {
+                              "type": "<O_TYPE>",
+                              "value": "<O_VALUE>"
+                            },
+                            {
+                              "type": "<O_TYPE>",
+                              "value": "<O_VALUE>"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "<A_TYPE> Analysis",
+          "observables": [
+            {
+              "type": "<O_TYPE>",
+              "value": "<O_VALUE>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "<O_TYPE>",
+      "value": "<O_VALUE>",
+      "tags": ["<TAG>", "<TAG>"]
+    }
+  ]
+}
