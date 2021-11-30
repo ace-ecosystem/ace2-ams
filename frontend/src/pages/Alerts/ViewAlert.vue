@@ -2,8 +2,6 @@
 
 <template>
   <AlertTree :items="alertTree" />
-
-  <pre>{{ alertTree }}</pre>
 </template>
 
 <script>
