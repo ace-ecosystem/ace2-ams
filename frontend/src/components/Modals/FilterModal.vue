@@ -7,8 +7,13 @@
       <component
         :is="filterInputComponent"
         v-model="formFilters[index]"
-        @deleteFormFilter="deleteFormFilter(index)"
       ></component>
+      <Button
+        name="delete-filter"
+        icon="pi pi-times"
+        class="inputfield"
+        @click="deleteFormFilter(index)"
+      />
     </div>
     <template #footer>
       <Button
