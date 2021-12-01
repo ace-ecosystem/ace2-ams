@@ -98,12 +98,7 @@
       DatePicker,
     },
 
-    inject: [
-      "availableFilters",
-      "filterType",
-      "rangeFilterOptions",
-      "rangeFilters",
-    ],
+    inject: ["availableFilters", "filterType"],
 
     props: ["modelValue"],
     emits: ["update:modelValue"],

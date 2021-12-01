@@ -148,15 +148,16 @@ export const alertFilters = [
 ] as const;
 
 export const alertRangeFilters = {
-  eventTime: {
+  "Event Time": {
     start: EVENT_TIME_AFTER_FILTER,
     end: EVENT_TIME_BEFORE_FILTER,
   },
-  insertTime: {
+  "Insert Time": {
     start: INSERT_TIME_AFTER_FILTER,
     end: INSERT_TIME_BEFORE_FILTER,
+
   },
-  dispositionedTime: {
+  "Disposition Time": {
     start: DISPOSITIONED_AFTER_FILTER,
     end: DISPOSITIONED_BEFORE_FILTER,
   },

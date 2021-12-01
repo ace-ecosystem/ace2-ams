@@ -50,12 +50,7 @@
     name: "EditFilterModal",
     components: { BaseModal, Button, FilterInput },
 
-    inject: [
-      "filterType",
-      "rangeFilterOptions",
-      "rangeFilters",
-      "filterInputType",
-    ],
+    inject: ["filterType"],
 
     data() {
       return {

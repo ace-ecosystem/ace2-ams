@@ -137,11 +137,11 @@
       tooltip: Tooltip,
     },
 
-    inject: ["filterType", "rangeFilterOptions", "rangeFilters"],
+    inject: ["filterType", "rangeFilters"],
 
     data() {
       return {
-        currentRangeFilter: this.rangeFilterOptions[0],
+        currentRangeFilter: Object.keys(this.rangeFilters)[0],
         TODAY: "today",
         YESTERDAY: "yesterday",
         LAST_SEVEN: "last_seven",
@@ -177,6 +177,9 @@
       },
       endDateUTC() {
         return this.endDate ? this.endDate.toUTCString() : null;
+      },
+      rangeFilterOptions() {
+        return Object.keys(this.rangeFilters);
       },
     },
 
