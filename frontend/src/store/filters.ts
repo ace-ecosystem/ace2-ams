@@ -15,6 +15,13 @@ const store = {
       state.alerts,
   },
   mutations: {
+    BULK_SET_FILTERS: (
+      state: { alerts: alertFilterParams },
+      payload: {
+        filterType: "alerts";
+        filters: alertFilterParams;
+      },
+    ): alertFilterParams => (state[payload.filterType] = payload.filters),
     SET_FILTER: (
       state: { alerts: alertFilterParams },
       payload: {
@@ -23,17 +30,24 @@ const store = {
         filterValue: alertFilterValues;
       },
     ): alertFilterValues =>
-      (state[payload.filterType][payload.filterName] = payload.filterValue),
+      (state[payload.filterType][payload.filterName.name] = payload.filterValue),
     UNSET_FILTER: (
       state: { alerts: alertFilterParams },
       payload: { filterType: "alerts"; filterName: alertFilterNames },
-    ): boolean => delete state[payload.filterType][payload.filterName],
+    ): boolean => delete state[payload.filterType][payload.filterName.name],
     CLEAR_ALL: (
       state: { alerts: alertFilterParams },
       payload: { filterType: "alerts" },
     ): alertFilterParams => (state[payload.filterType] = {}),
   },
   actions: {
+    bulkSetFilters: (
+      { commit }: CommitFunction,
+      payload: {
+        filterType: "alerts";
+        filters: alertFilterParams;
+      },
+    ): void => commit("BULK_SET_FILTERS", payload),
     setFilter: (
       { commit }: CommitFunction,
       payload: {

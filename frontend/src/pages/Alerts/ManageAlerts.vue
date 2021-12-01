@@ -13,6 +13,7 @@
 
 <script>
   import {
+    alertFilters,
     EVENT_TIME_AFTER_FILTER,
     EVENT_TIME_BEFORE_FILTER,
     INSERT_TIME_AFTER_FILTER,
@@ -29,6 +30,7 @@
     components: { TheAlertsTable, TheFilterToolbar, TheAlertActionToolbar },
     provide() {
       return {
+        availableFilters: alertFilters,
         filterType: "alerts",
         filterInputType: "Alerts/AlertFilterInput",
         rangeFilterOptions: ["Event Time", "Insert Time", "Dispositioned Time"],

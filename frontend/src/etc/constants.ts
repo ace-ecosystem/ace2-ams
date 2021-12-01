@@ -4,7 +4,7 @@ export const filterTypes = {
   SELECT: "select",
   DATE: "date",
   INPUT_TEXT: "inputText",
-}
+};
 
 export const DISPOSITION_FILTER = "disposition";
 export const DISPOSITION_USER_FILTER = "dispositionUser";
@@ -36,99 +36,111 @@ export const alertFilters = [
     options: "alertDisposition",
   },
   {
-    name: DISPOSITION_USER_FILTER, label: "Dispositioned By",
+    name: DISPOSITION_USER_FILTER,
+    label: "Dispositioned By",
     type: filterTypes.SELECT,
-    options: "users"
+    options: "users",
+    optionValue: "displayName",
   },
   {
-    name: DISPOSITIONED_AFTER_FILTER, label: "Disposition Time",
+    name: DISPOSITIONED_AFTER_FILTER,
+    label: "Dispositioned After",
     type: filterTypes.DATE,
   },
   {
-    name: DISPOSITIONED_BEFORE_FILTER, label: "Disposition Time",
+    name: DISPOSITIONED_BEFORE_FILTER,
+    label: "Dispositioned Before",
     type: filterTypes.DATE,
   },
   { name: EVENT_UUID_FILTER, label: "Event" },
   {
-    name: EVENT_TIME_AFTER_FILTER, label: "Event Time",
+    name: EVENT_TIME_AFTER_FILTER,
+    label: "Event Time After",
     type: filterTypes.DATE,
   },
   {
-    name: EVENT_TIME_BEFORE_FILTER, label: "Event Time",
+    name: EVENT_TIME_BEFORE_FILTER,
+    label: "Event Time Before",
     type: filterTypes.DATE,
   },
   {
-    name: INSERT_TIME_AFTER_FILTER, label: "Insert Time",
+    name: INSERT_TIME_AFTER_FILTER,
+    label: "Insert Time After",
     type: filterTypes.DATE,
   },
   {
-    name: INSERT_TIME_BEFORE_FILTER, label: "Insert Time",
+    name: INSERT_TIME_BEFORE_FILTER,
+    label: "Insert Time Before",
     type: filterTypes.DATE,
   },
   {
-    name: NAME_FILTER, label: "Name",
+    name: NAME_FILTER,
+    label: "Name",
     type: filterTypes.INPUT_TEXT,
   },
   {
-    name: OBSERVABLE_FILTER, label: "Observable",
+    name: OBSERVABLE_FILTER,
+    label: "Observable",
   },
   {
-    name: OBSERVABLE_TYPES_FILTER, label: "Observable Types",
+    name: OBSERVABLE_TYPES_FILTER,
+    label: "Observable Types",
     type: filterTypes.MULTISELECT,
-    options: "type",
-
+    options: "observableType",
   },
   {
-    name: OBSERVABLE_VALUE_FILTER, label: "Observable Value",
+    name: OBSERVABLE_VALUE_FILTER,
+    label: "Observable Value",
     type: filterTypes.INPUT_TEXT,
   },
   {
-    name: OWNER_FILTER, label: "Owner",
+    name: OWNER_FILTER,
+    label: "Owner",
     type: filterTypes.SELECT,
     options: "users",
-
+    optionValue: "displayName",
   },
   {
-    name: QUEUE_FILTER, label: "Queue",
+    name: QUEUE_FILTER,
+    label: "Queue",
     type: filterTypes.SELECT,
     options: "alertQueue",
-
   },
   {
-    name: TAGS_FILTER, label: "Tags",
+    name: TAGS_FILTER,
+    label: "Tags",
     type: filterTypes.CHIPS,
     options: "nodeTag",
-
   },
   {
-    name: THREAT_ACTOR_FILTER, label: "Threat Actor",
+    name: THREAT_ACTOR_FILTER,
+    label: "Threat Actor",
     type: filterTypes.SELECT,
     options: "nodeThreat",
-
   },
   {
-    name: THREATS_FILTER, label: "Threats",
+    name: THREATS_FILTER,
+    label: "Threats",
     type: filterTypes.CHIPS,
     options: "nodeThreatActor",
-
   },
   {
-    name: TOOL_FILTER, label: "Tool",
+    name: TOOL_FILTER,
+    label: "Tool",
     type: filterTypes.SELECT,
     options: "tool",
-
   },
   {
-    name: TOOL_INSTANCE_FILTER, label: "Tool Instance",
+    name: TOOL_INSTANCE_FILTER,
+    label: "Tool Instance",
     type: filterTypes.SELECT,
     options: "toolInstance",
-
   },
   {
-    name: TYPE_FILTER, label: "Type",
+    name: TYPE_FILTER,
+    label: "Type",
     type: filterTypes.SELECT,
-    options: "type",
-
+    options: "alertType",
   },
 ] as const;
 

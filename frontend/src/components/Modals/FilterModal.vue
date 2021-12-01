@@ -4,10 +4,7 @@
 <template>
   <BaseModal :name="name" header="Edit Filters">
     <div v-for="(filter, index) in formFilters" :key="filter.index">
-      <component
-        :is="filterInputComponent"
-        v-model="formFilters[index]"
-      ></component>
+      <FilterInput v-model="formFilters[index]"></FilterInput>
       <Button
         name="delete-filter"
         icon="pi pi-times"
@@ -42,19 +39,16 @@
 </template>
 
 <script>
-  import { defineAsyncComponent } from "vue";
-
   import { mapActions } from "vuex";
 
   import Button from "primevue/button";
-  import Dropdown from "primevue/dropdown";
 
   import BaseModal from "@/components/Modals/BaseModal";
-  import AlertFilterInput from "@/components/Alerts/AlertFilterInput";
+  import FilterInput from "../UserInterface/FilterInput.vue";
 
   export default {
     name: "EditFilterModal",
-    components: { BaseModal, Button, AlertFilterInput },
+    components: { BaseModal, Button, FilterInput },
 
     inject: [
       "filterType",
@@ -71,7 +65,7 @@
 
     computed: {
       currentlySetFilters() {
-        return this.$store.getters[`${this.filterType}/filters`];
+        return this.$store.getters[`filters/${this.filterType}`];
       },
       submitFilters() {
         let submitFilters = {};
@@ -80,14 +74,6 @@
           submitFilters[filter.filterName.name] = filter.filterValue;
         }
         return submitFilters;
-      },
-      filterInputComponent() {
-        return defineAsyncComponent(() =>
-          import(`@/components/${this.filterInputType}`),
-        );
-      },
-      filterInputPath() {
-        return `@/components/${this.filterInputType}`;
       },
       name() {
         return this.$options.name;
@@ -107,11 +93,6 @@
       ...mapActions({
         bulkSetFilters: "filters/bulkSetFilters",
       }),
-      updateForm(index, event) {
-        console.log(index);
-        console.log(event);
-        this.formFilters[index][event.attr] = event.value;
-      },
       submit() {
         this.bulkSetFilters({
           filterType: this.filterType,
