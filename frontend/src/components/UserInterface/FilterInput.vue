@@ -52,6 +52,29 @@
       </div>
     </template>
   </DatePicker>
+  <div v-else-if="isCategorizedValue">
+    <Dropdown
+      v-model="filterValue.category"
+      :options="filterOptions"
+      type="text"
+      @change="
+        updateValue(
+          'filterValue',
+          updatedCategorizedValueObject('category', $event.target.value),
+        )
+      "
+    ></Dropdown>
+    <InputText
+      v-model="filterValue.value"
+      type="text"
+      @input="
+        updateValue(
+          'filterValue',
+          updatedCategorizedValueObject('value', $event.target.value),
+        )
+      "
+    ></InputText>
+  </div>
 </template>
 
 <script>
@@ -111,6 +134,9 @@
       isDate() {
         return this.inputType == "date";
       },
+      isCategorizedValue() {
+        return this.inputType == "categorizedValue";
+      },
       isChips() {
         return this.inputType == "chips";
       },
@@ -133,8 +159,27 @@
     },
 
     methods: {
+      updatedCategorizedValueObject(attr, event) {
+        let category = null;
+        let value = null;
+        if (attr == "category") {
+          category = event;
+          value = this.filterValue.value;
+        } else {
+          category = this.filterValue.category;
+          value = event;
+        }
+        return {
+          category: category,
+          value: value,
+        };
+      },
       clearFilterValue() {
-        this.filterValue = null;
+        if (this.isCategorizedValue) {
+          this.filterValue = { category: this.filterOptions[0], val: null };
+        } else {
+          this.filterValue = null;
+        }
       },
       getFilterNameObject(filterName) {
         if (!filterName) {

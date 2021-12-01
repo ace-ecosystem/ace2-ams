@@ -4,6 +4,7 @@ export const filterTypes = {
   SELECT: "select",
   DATE: "date",
   INPUT_TEXT: "inputText",
+  CATEGORIZED_VALUE: "categorizedValue",
 };
 
 export const DISPOSITION_FILTER = "disposition";
@@ -81,6 +82,8 @@ export const alertFilters = [
   {
     name: OBSERVABLE_FILTER,
     label: "Observable",
+    type: filterTypes.CATEGORIZED_VALUE,
+    options: "observableType"
   },
   {
     name: OBSERVABLE_TYPES_FILTER,
