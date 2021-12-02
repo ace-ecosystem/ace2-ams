@@ -4,6 +4,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from typing import List, Optional
+from uuid import UUID
 
 from core.auth import hash_password
 from db import crud
@@ -36,6 +37,9 @@ from db.schemas.observable_instance import ObservableInstance
 from db.schemas.observable_type import ObservableType
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
+
+
+REALISTIC_ALERT_UUID = "02f8299b-2a24-400f-9751-7dd9164daf6a"
 
 
 def _create_basic_object(value: str, db_table: DeclarativeMeta, db: Session):
@@ -84,12 +88,14 @@ def create_alert(
     db: Session,
     alert_queue: str = "test_queue",
     alert_type: str = "test_type",
+    alert_uuid: Optional[UUID] = None,
     disposition: Optional[str] = None,
     disposition_time: Optional[datetime] = None,
     disposition_user: Optional[str] = None,
     event_time: datetime = None,
     insert_time: datetime = None,
     name: str = "Test Alert",
+    observable_instances: Optional[List[dict]] = None,
     owner: Optional[str] = None,
     tags: Optional[List[str]] = None,
     threat_actor: Optional[str] = None,
@@ -97,6 +103,9 @@ def create_alert(
     tool: str = "test_tool",
     tool_instance: str = "test_tool_instance",
 ) -> Alert:
+    if alert_uuid is None:
+        alert_uuid = uuid.uuid4()
+
     if event_time is None:
         event_time = datetime.utcnow()
 
@@ -104,7 +113,6 @@ def create_alert(
         insert_time = datetime.utcnow()
 
     alert = Alert(
-        analysis=Analysis(version=uuid.uuid4()),
         event_time=event_time,
         insert_time=insert_time,
         name=name,
@@ -112,7 +120,7 @@ def create_alert(
         tool=create_alert_tool(value=tool, db=db),
         tool_instance=create_alert_tool_instance(value=tool_instance, db=db),
         type=create_alert_type(value=alert_type, db=db),
-        uuid=uuid.uuid4(),
+        uuid=alert_uuid,
         version=uuid.uuid4(),
     )
 
@@ -123,7 +131,12 @@ def create_alert(
         alert.disposition_time = disposition_time
 
     if disposition_user:
-        alert.disposition_user = create_user(username=disposition_user, db=db, alert_queue=alert_queue)
+        alert.disposition_user = create_user(
+            email=f"{disposition_user}@{disposition_user}.com",
+            username=disposition_user,
+            db=db,
+            alert_queue=alert_queue,
+        )
 
     if event_time:
         alert.event_time = event_time
@@ -131,8 +144,20 @@ def create_alert(
     if insert_time:
         alert.insert_time = insert_time
 
+    if observable_instances:
+        root_analysis = create_analysis(db=db, alert=alert)
+
+        for observable_instance in observable_instances:
+            create_observable_instance(
+                type=observable_instance["type"],
+                value=observable_instance["value"],
+                alert=alert,
+                parent_analysis=root_analysis,
+                db=db,
+            )
+
     if owner:
-        alert.owner = create_user(username=owner, db=db, alert_queue=alert_queue)
+        alert.owner = create_user(email=f"{owner}@{owner}.com", username=owner, db=db, alert_queue=alert_queue)
 
     if tags:
         alert.tags = [create_node_tag(value=tag, db=db) for tag in tags]
@@ -151,6 +176,7 @@ def create_alert(
 
 def create_analysis(
     db: Session,
+    alert: Alert,
     amt_value: Optional[str] = None,
     amt_description: Optional[str] = None,
     amt_extended_version: Optional[dict] = None,
@@ -159,6 +185,7 @@ def create_analysis(
     amt_required_directives: List[str] = None,
     amt_required_tags: List[str] = None,
     amt_version: str = "1.0.0",
+    parent_observable: Optional[ObservableInstance] = None,
 ) -> Analysis:
     if amt_value:
         analysis_module_type = create_analysis_module_type(
@@ -173,11 +200,18 @@ def create_analysis(
             db=db,
         )
 
-        obj = Analysis(analysis_module_type=analysis_module_type, uuid=uuid.uuid4(), version=uuid.uuid4())
+        obj = Analysis(
+            alert=alert,
+            analysis_module_type=analysis_module_type,
+            parent_observable=parent_observable,
+            uuid=uuid.uuid4(),
+            version=uuid.uuid4(),
+        )
     else:
-        obj = Analysis(uuid=uuid.uuid4(), version=uuid.uuid4())
+        obj = Analysis(alert=alert, parent_observable=parent_observable, uuid=uuid.uuid4(), version=uuid.uuid4())
 
     db.add(obj)
+    crud.commit(db)
     return obj
 
 
@@ -192,6 +226,10 @@ def create_analysis_module_type(
     required_tags: List[str] = None,
     version: str = "1.0.0",
 ) -> AnalysisModuleType:
+    existing = crud.read_by_value(value=value, db_table=AnalysisModuleType, db=db, err_on_not_found=False)
+    if existing and existing.version == version:
+        return existing
+
     if observable_types:
         observable_types = [create_observable_type(value=o, db=db) for o in observable_types]
     else:
@@ -219,12 +257,14 @@ def create_analysis_module_type(
         version=version,
     )
     db.add(obj)
+    crud.commit(db)
     return obj
 
 
 def create_event(name: str, db: Session, status: str = "OPEN") -> Event:
     obj = Event(name=name, status=create_event_status(value=status, db=db), uuid=uuid.uuid4(), version=uuid.uuid4())
     db.add(obj)
+    crud.commit(db)
     return obj
 
 
@@ -266,6 +306,7 @@ def create_node_comment(
 
     obj = NodeComment(insert_time=insert_time, node_uuid=node.uuid, user=user, uuid=uuid.uuid4(), value=value)
     db.add(obj)
+    crud.commit(db)
     return obj
 
 
@@ -295,6 +336,7 @@ def create_node_threat(value: str, db: Session, types: List[str] = None) -> Node
 
     obj = NodeThreat(value=value, types=[create_node_threat_type(value=t, db=db) for t in types], uuid=uuid.uuid4())
     db.add(obj)
+    crud.commit(db)
     return obj
 
 
@@ -317,6 +359,7 @@ def create_observable(
         value=value,
     )
     db.add(obj)
+    crud.commit(db)
     return obj
 
 
@@ -327,30 +370,33 @@ def create_observable_instance(
     parent_analysis: Analysis,
     db: Session,
     context: Optional[str] = None,
-    performed_analyses: List[Analysis] = None,
     redirection: Optional[ObservableInstance] = None,
+    tags: Optional[List[str]] = None,
     time: Optional[datetime] = None,
 ) -> ObservableInstance:
     observable = create_observable(type=type, value=value, db=db)
 
-    if performed_analyses is None:
-        performed_analyses = []
-
     if time is None:
         time = datetime.utcnow()
+
+    if tags:
+        tags = [create_node_tag(value=t, db=db) for t in tags]
+    else:
+        tags = []
 
     obj = ObservableInstance(
         observable=observable,
         alert_uuid=alert.uuid,
         parent_analysis=parent_analysis,
         context=context,
-        performed_analyses=performed_analyses,
         redirection=redirection,
+        tags=tags,
         time=time,
         uuid=uuid.uuid4(),
         version=uuid.uuid4(),
     )
     db.add(obj)
+    crud.commit(db)
     return obj
 
 
@@ -389,8 +435,104 @@ def create_user(
         uuid=uuid.uuid4(),
     )
     db.add(obj)
+    crud.commit(db)
     return obj
 
 
 def create_user_role(value: str, db: Session) -> UserRole:
     return _create_basic_object(db_table=UserRole, value=value, db=db)
+
+
+def create_realistic_alert(db: Session) -> Alert:
+    # alert
+    #     analysis
+    #         file: email.rfc822
+    #             Email Analysis
+    #                 email_address: badguy@evil.com
+    #                     Email Address Analysis
+    #                         fqdn: evil.com
+    #                 email_address: goodguy@company.com
+    #                     Email Address Analysis
+    #                         fqdn: company.com
+    #                 email_subject: Hello
+    #                 file: email.rfc822.unknown_plain_text_000
+    #                     URL Extraction Analysis
+    #                         url: http://evil.com/malware.exe
+    #                             URL Parse Analysis
+    #                                 fqdn: evil.com
+    #                                 uri_path: /malware.exe
+    #             File Analysis
+    #                 md5: 912ec803b2ce49e4a541068d495ab570
+    #         ipv4: 127.0.0.1
+
+    existing = crud.read(uuid=REALISTIC_ALERT_UUID, db_table=Alert, db=db, err_on_not_found=False)
+    if existing:
+        return existing
+
+    alert = create_alert(db=db, alert_uuid=REALISTIC_ALERT_UUID, owner="bob", disposition_user="alice")
+
+    root_analysis = create_analysis(db=db, alert=alert)
+
+    file_root_observable = create_observable_instance(
+        type="file", value="email.rfc822", alert=alert, parent_analysis=root_analysis, db=db
+    )
+
+    email_analysis = create_analysis(
+        db=db,
+        alert=alert,
+        amt_value="Email Analysis",
+        amt_observable_types=["file"],
+        amt_required_directives=["email"],
+        amt_required_tags=["scan_me"],
+        parent_observable=file_root_observable,
+    )
+
+    badguy_email_observable = create_observable_instance(
+        type="email_address", value="badguy@evil.com", alert=alert, parent_analysis=email_analysis, db=db
+    )
+    badguy_email_analysis = create_analysis(
+        db=db, alert=alert, amt_value="Email Address Analysis", parent_observable=badguy_email_observable
+    )
+    create_observable_instance(type="fqdn", value="evil.com", alert=alert, parent_analysis=badguy_email_analysis, db=db)
+
+    goodguy_email_observable = create_observable_instance(
+        type="email_address", value="goodguy@company.com", alert=alert, parent_analysis=email_analysis, db=db
+    )
+    goodguy_email_analysis = create_analysis(
+        db=db, alert=alert, amt_value="Email Address Analysis", parent_observable=goodguy_email_observable
+    )
+    create_observable_instance(
+        type="fqdn", value="company.com", alert=alert, parent_analysis=goodguy_email_analysis, db=db
+    )
+
+    create_observable_instance(type="email_subject", value="Hello", alert=alert, parent_analysis=email_analysis, db=db)
+
+    body_observable = create_observable_instance(
+        type="file", value="email.rfc822.unknown_plain_text_000", alert=alert, parent_analysis=email_analysis, db=db
+    )
+    url_extraction_analysis = create_analysis(
+        db=db, alert=alert, amt_value="URL Extraction Analysis", parent_observable=body_observable
+    )
+    url_observable = create_observable_instance(
+        type="url", value="http://evil.com/malware.exe", alert=alert, parent_analysis=url_extraction_analysis, db=db
+    )
+    url_parse_analysis = create_analysis(
+        db=db, alert=alert, amt_value="URL Parse Analysis", parent_observable=url_observable
+    )
+    create_observable_instance(type="fqdn", value="evil.com", alert=alert, parent_analysis=url_parse_analysis, db=db)
+    create_observable_instance(
+        type="uri_path", value="/malware.exe", alert=alert, parent_analysis=url_parse_analysis, db=db
+    )
+
+    file_analysis = create_analysis(
+        db=db, alert=alert, amt_value="File Analysis", parent_observable=file_root_observable
+    )
+    create_observable_instance(
+        type="md5", value="912ec803b2ce49e4a541068d495ab570", alert=alert, parent_analysis=file_analysis, db=db
+    )
+
+    create_observable_instance(
+        type="ipv4", value="127.0.0.1", tags=["c2"], alert=alert, parent_analysis=root_analysis, db=db
+    )
+
+    return alert

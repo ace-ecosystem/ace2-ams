@@ -13,4 +13,4 @@ docker-compose -f backend/docker-compose.yml up -d
 while !</dev/tcp/localhost/6666; do sleep 1; done;
 
 # Create the database revision
-docker exec ace2-ams-api alembic revision --autogenerate -m "$1"
+docker-compose run api alembic revision --autogenerate -m "$1"

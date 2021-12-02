@@ -341,10 +341,6 @@
       },
       // create a single alert that contains all observables currently in the form
       async submitSingleAlert() {
-        this.alertCreateLoading = true;
-        await this.submitAlert();
-        this.alertCreateLoading = false;
-
         if (this.errors.length) {
           return;
         }
@@ -352,8 +348,13 @@
         if (this.observables.length) {
           this.addingObservables = true;
           let observables = this.expandObservablesList();
-          observables = observables.map(this.generateSubmissionObservable);
-          await this.submitObservables(observables);
+
+          this.alertCreateLoading = true;
+          await this.submitAlert(
+            observables.map(this.generateSubmissionObservable),
+          );
+          this.alertCreateLoading = false;
+
           this.addingObservables = false;
         }
 
@@ -374,17 +375,13 @@
           // Update the alert name with observable value to easily from manage alerts page
           this.alertDescriptionAppendString = ` ${current_observable.value}`;
 
-          await this.submitAlert();
+          await this.submitAlert([
+            this.generateSubmissionObservable(current_observable),
+          ]);
           if (this.errors.length) {
             // If first alert can't be created, bail trying a bunch of times
             return;
           }
-
-          await this.submitObservables([
-            this.generateSubmissionObservable(current_observable), // Generate the submission object here so that it has correct alert/analysis UUIDs
-          ]);
-          // Ignore observable created errors
-          this.clearErrors();
         }
 
         this.alertCreateLoading = false;
@@ -392,11 +389,12 @@
         this.routeToNewAlert();
       },
       // Submit alert create object to API to create an alert
-      async submitAlert() {
+      async submitAlert(observableInstances) {
         const alert = {
           alertDescription: this.alertDescriptionFormatted,
           eventTime: this.adjustedAlertDate,
           name: this.alertDescriptionFormatted,
+          observableInstances: observableInstances,
           queue: this.alertQueue,
           type: this.alertType,
         };
@@ -404,14 +402,6 @@
           await this.createAlert(alert);
         } catch (error) {
           this.addError(`alert ${alert.name}`, error);
-        }
-      },
-      // Submit a list of observables to API for latest alert
-      async submitObservables(observables) {
-        try {
-          await ObservableInstance.create(observables, false);
-        } catch (error) {
-          this.addError("at least one observable", error);
         }
       },
       // Generate a list of all observables (single observables plus expanded multi-observables)
@@ -454,8 +444,6 @@
       // Given an observable object, return a formatted observable instance 'create' object
       generateSubmissionObservable(observable) {
         const submissionObservable = {
-          alertUuid: this.openAlert.uuid,
-          parentAnalysisUuid: this.openAlert.analysis.uuid,
           type: observable.type,
           value: observable.value,
         };
@@ -486,7 +474,7 @@
         return index == this.lastObservableIndex;
       },
       routeToNewAlert() {
-        this.$router.push({ path: `/alert/${this.openAlert.uuid}` });
+        this.$router.push({ path: `/alert/${this.openAlert.alert.uuid}` });
       },
       addError(object, error) {
         let responseError = null;

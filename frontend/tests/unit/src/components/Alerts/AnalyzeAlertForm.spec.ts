@@ -101,15 +101,14 @@ describe("AnalyzeAlertForm computed data", () => {
 // METHOD MOCKS/STUBS
 
 const readAlertStub = {
-  uuid: "alertID",
-  analysis: {
-    uuid: "analysisID",
+  alert: {
+    uuid: "alertID",
   },
+  analyses: [],
+  observableInstances: [],
 };
 
 const expectedObservableCreate = {
-  alertUuid: "alertID",
-  parentAnalysisUuid: "analysisID",
   type: "ipv4",
   value: "1.2.3.4",
 };
@@ -303,19 +302,13 @@ describe("AnalyzeAlertForm async methods", () => {
     alertDescription: "Manual Alert",
     eventTime: moment(wrapper.vm.alertDate).tz(moment.tz.guess()).format(),
     name: "Manual Alert",
+    observableInstances: [expectedObservableCreate],
     queue: "default",
     type: "manual",
   };
 
-  const expectedObservableCreateList = [
-    expectedObservableCreate,
-    expectedObservableCreate,
-  ];
-
   const alertCreateErrorMessage =
     'Could not create alert Manual Alert: Error: Request failed with status code 404 "Create failed"';
-  const observableCreateErrorMessage =
-    'Could not create at least one observable: Error: Request failed with status code 404 "Create failed"';
 
   beforeEach(async () => {
     myNock.persist().get("/alert/queue/").reply(200, ["default"]);
@@ -346,66 +339,39 @@ describe("AnalyzeAlertForm async methods", () => {
       .post("/alert/", JSON.stringify(snakecaseKeys(expectedAlertCreate)))
       .reply(201, "Create successful");
 
-    await wrapper.vm.submitAlert();
+    await wrapper.vm.submitAlert([{ type: "ipv4", value: "1.2.3.4" }]);
     expect(alertCreate.isDone()).toBe(true);
   });
+
   it("will add an error to errors when submitAlert is called and the API call fails", async () => {
     const alertCreateFail = myNock
       .post("/alert/", JSON.stringify(snakecaseKeys(expectedAlertCreate)))
       .reply(404, "Create failed");
 
-    await wrapper.vm.submitAlert();
+    await wrapper.vm.submitAlert([expectedObservableCreate]);
     expect(alertCreateFail.isDone()).toBe(true);
     expect(wrapper.vm.errors.length).toEqual(1);
     expect(wrapper.vm.errors[0].content).toEqual(alertCreateErrorMessage);
-  });
-
-  // submitObservables
-  it("will submit observables to the backend using when submitObservables is called", async () => {
-    const observableCreate = myNock
-      .post(
-        "/observable/instance/",
-        JSON.stringify(snakecaseKeys(expectedObservableCreateList)),
-      )
-      .reply(201, "Create successful");
-    store.commit("alerts/SET_OPEN_ALERT", readAlertStub);
-
-    await wrapper.vm.submitObservables([
-      expectedObservableCreate,
-      expectedObservableCreate,
-    ]);
-    expect(observableCreate.isDone()).toBe(true);
-  });
-  it("will add an error to errors when submitObservables is called and the API call fails", async () => {
-    const observableCreateFail = myNock
-      .post(
-        "/observable/instance/",
-        JSON.stringify(snakecaseKeys(expectedObservableCreateList)),
-      )
-      .reply(404, "Create failed");
-    store.commit("alerts/SET_OPEN_ALERT", readAlertStub);
-
-    await wrapper.vm.submitObservables([
-      expectedObservableCreate,
-      expectedObservableCreate,
-    ]);
-    expect(observableCreateFail.isDone()).toBe(true);
-    expect(wrapper.vm.errors.length).toEqual(1);
-    expect(wrapper.vm.errors[0].content).toEqual(observableCreateErrorMessage);
   });
 
   // submitSingleAlert
   it("will attempt to route the new alert page when submitSingleAlert is called and completes successfully", async () => {
     const alertCreate = myNock
-      .post("/alert/", JSON.stringify(snakecaseKeys(expectedAlertCreate)))
-      .reply(201, readAlertStub);
-
-    const observableCreate = myNock
       .post(
-        "/observable/instance/",
-        JSON.stringify(snakecaseKeys(expectedObservableCreateList)),
+        "/alert/",
+        JSON.stringify(
+          snakecaseKeys(
+            snakecaseKeys({
+              ...expectedAlertCreate,
+              observableInstances: [
+                { type: "ipv4", value: "1.2.3.4" },
+                { type: "ipv4", value: "1.2.3.4" },
+              ],
+            }),
+          ),
+        ),
       )
-      .reply(201, "Create successful");
+      .reply(201, readAlertStub);
 
     wrapper.setData({
       observables: [observableStub, observableStub],
@@ -413,41 +379,22 @@ describe("AnalyzeAlertForm async methods", () => {
 
     await wrapper.vm.submitSingleAlert();
     expect(alertCreate.isDone()).toBe(true);
-    expect(observableCreate.isDone()).toBe(true);
     expect(wrapper.vm.errors.length).toEqual(0);
   });
-  it("will display an error and not attempt to submit observables if submitSingleAlert is called and fails at submitAlert", async () => {
+
+  it("will add an error to errors when submitSingleAlert is called and the API call fails", async () => {
     const alertCreateFail = myNock
       .post("/alert/", JSON.stringify(snakecaseKeys(expectedAlertCreate)))
       .reply(404, "Create failed");
+
+    wrapper.setData({
+      observables: [observableStub],
+    });
 
     await wrapper.vm.submitSingleAlert();
     expect(alertCreateFail.isDone()).toBe(true);
     expect(wrapper.vm.errors.length).toEqual(1);
     expect(wrapper.vm.errors[0].content).toEqual(alertCreateErrorMessage);
-  });
-  it("will display error(s), the warning message, and continue button if submitSingleAlert is called and failures occur in submitObservables", async () => {
-    const alertCreate = myNock
-      .post("/alert/", JSON.stringify(snakecaseKeys(expectedAlertCreate)))
-      .reply(201, readAlertStub);
-
-    const observableCreateFail = myNock
-      .post(
-        "/observable/instance/",
-        JSON.stringify(snakecaseKeys(expectedObservableCreateList)),
-      )
-      .reply(404, "Create failed");
-    store.commit("alerts/SET_OPEN_ALERT", readAlertStub);
-
-    wrapper.setData({
-      observables: [observableStub, observableStub],
-    });
-
-    await wrapper.vm.submitSingleAlert();
-    expect(alertCreate.isDone()).toBe(true);
-    expect(observableCreateFail.isDone()).toBe(true);
-    expect(wrapper.vm.errors.length).toEqual(1);
-    expect(wrapper.vm.errors[0].content).toEqual(observableCreateErrorMessage);
   });
 
   // submitMultiAlerts
@@ -460,6 +407,7 @@ describe("AnalyzeAlertForm async methods", () => {
             ...expectedAlertCreate,
             name: "Manual Alert 1.2.3.4",
             alertDescription: "Manual Alert 1.2.3.4",
+            observableInstances: [{ type: "ipv4", value: "1.2.3.4" }],
           }),
         ),
       )
@@ -472,6 +420,7 @@ describe("AnalyzeAlertForm async methods", () => {
             ...expectedAlertCreate,
             name: "Manual Alert 0.0.0.0",
             alertDescription: "Manual Alert 0.0.0.0",
+            observableInstances: [{ type: "ipv4", value: "0.0.0.0" }],
           }),
         ),
       )
@@ -484,33 +433,11 @@ describe("AnalyzeAlertForm async methods", () => {
             ...expectedAlertCreate,
             name: "Manual Alert 4.3.2.1",
             alertDescription: "Manual Alert 4.3.2.1",
+            observableInstances: [{ type: "ipv4", value: "4.3.2.1" }],
           }),
         ),
       )
       .reply(201, readAlertStub);
-
-    const observableCreateA = myNock
-      .post(
-        "/observable/instance/",
-        JSON.stringify(snakecaseKeys([expectedObservableCreate])),
-      )
-      .reply(201, "Create successful");
-    const observableCreateB = myNock
-      .post(
-        "/observable/instance/",
-        JSON.stringify(
-          snakecaseKeys([{ ...expectedObservableCreate, value: "0.0.0.0" }]),
-        ),
-      )
-      .reply(201, "Create successful");
-    const observableCreateC = myNock
-      .post(
-        "/observable/instance/",
-        JSON.stringify(
-          snakecaseKeys([{ ...expectedObservableCreate, value: "4.3.2.1" }]),
-        ),
-      )
-      .reply(201, "Create successful");
 
     wrapper.setData({
       observables: [observableStub, multiObservableCommaStub],
@@ -520,11 +447,9 @@ describe("AnalyzeAlertForm async methods", () => {
     expect(alertCreateA.isDone()).toBe(true);
     expect(alertCreateB.isDone()).toBe(true);
     expect(alertCreateC.isDone()).toBe(true);
-    expect(observableCreateA.isDone()).toBe(true);
-    expect(observableCreateB.isDone()).toBe(true);
-    expect(observableCreateC.isDone()).toBe(true);
     expect(wrapper.vm.errors.length).toEqual(0);
   });
+
   it("will return from submitMultipleAlerts early if the first submitAlert call fails", async () => {
     const alertCreate = myNock
       .post(
@@ -534,6 +459,7 @@ describe("AnalyzeAlertForm async methods", () => {
             ...expectedAlertCreate,
             name: "Manual Alert 1.2.3.4",
             alertDescription: "Manual Alert 1.2.3.4",
+            observableInstances: [{ type: "ipv4", value: "1.2.3.4" }],
           }),
         ),
       )
@@ -549,79 +475,5 @@ describe("AnalyzeAlertForm async methods", () => {
     expect(wrapper.vm.errors[0].content).toEqual(
       'Could not create alert Manual Alert 1.2.3.4: Error: Request failed with status code 403 "Create failed"',
     );
-  });
-  it("will finish the loop and ignore errors if submitObservables fails during a call to submitMultipleAlerts", async () => {
-    const alertCreateA = myNock
-      .post(
-        "/alert/",
-        JSON.stringify(
-          snakecaseKeys({
-            ...expectedAlertCreate,
-            name: "Manual Alert 1.2.3.4",
-            alertDescription: "Manual Alert 1.2.3.4",
-          }),
-        ),
-      )
-      .reply(201, readAlertStub);
-    const alertCreateB = myNock
-      .post(
-        "/alert/",
-        JSON.stringify(
-          snakecaseKeys({
-            ...expectedAlertCreate,
-            name: "Manual Alert 0.0.0.0",
-            alertDescription: "Manual Alert 0.0.0.0",
-          }),
-        ),
-      )
-      .reply(201, readAlertStub);
-    const alertCreateC = myNock
-      .post(
-        "/alert/",
-        JSON.stringify(
-          snakecaseKeys({
-            ...expectedAlertCreate,
-            name: "Manual Alert 4.3.2.1",
-            alertDescription: "Manual Alert 4.3.2.1",
-          }),
-        ),
-      )
-      .reply(201, readAlertStub);
-
-    const observableCreateA = myNock
-      .post(
-        "/observable/instance/",
-        JSON.stringify(snakecaseKeys([expectedObservableCreate])),
-      )
-      .reply(403, "Create successful");
-    const observableCreateB = myNock
-      .post(
-        "/observable/instance/",
-        JSON.stringify(
-          snakecaseKeys([{ ...expectedObservableCreate, value: "0.0.0.0" }]),
-        ),
-      )
-      .reply(403, "Create successful");
-    const observableCreateC = myNock
-      .post(
-        "/observable/instance/",
-        JSON.stringify(
-          snakecaseKeys([{ ...expectedObservableCreate, value: "4.3.2.1" }]),
-        ),
-      )
-      .reply(403, "Create successful");
-
-    wrapper.setData({
-      observables: [observableStub, multiObservableCommaStub],
-    });
-
-    await wrapper.vm.submitMultipleAlerts();
-    expect(alertCreateA.isDone()).toBe(true);
-    expect(alertCreateB.isDone()).toBe(true);
-    expect(alertCreateC.isDone()).toBe(true);
-    expect(observableCreateA.isDone()).toBe(true);
-    expect(observableCreateB.isDone()).toBe(true);
-    expect(observableCreateC.isDone()).toBe(true);
-    expect(wrapper.vm.errors.length).toEqual(0);
   });
 });

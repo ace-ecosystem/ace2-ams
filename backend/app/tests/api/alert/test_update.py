@@ -36,20 +36,11 @@ from tests import helpers
         ("event_time", "2022-01-01"),
         ("instructions", 123),
         ("instructions", ""),
-        ("name", 123),
-        ("name", ""),
         ("owner", 123),
         ("owner", ""),
         ("queue", 123),
         ("queue", None),
         ("queue", ""),
-        ("tool", 123),
-        ("tool", ""),
-        ("tool_instance", 123),
-        ("tool_instance", ""),
-        ("type", 123),
-        ("type", None),
-        ("type", ""),
     ],
 )
 def test_update_invalid_fields(client_valid_access_token, key, value):
@@ -93,9 +84,6 @@ def test_update_invalid_version(client_valid_access_token, db):
         ("event_uuid", str(uuid.uuid4())),
         ("owner", "johndoe"),
         ("queue", "abc"),
-        ("tool", "abc"),
-        ("tool_instance", "abc"),
-        ("type", "abc"),
     ],
 )
 def test_update_nonexistent_fields(client_valid_access_token, db, key, value):
@@ -213,57 +201,6 @@ def test_update_queue(client_valid_access_token, db):
     assert alert.version != initial_alert_version
 
 
-def test_update_tool(client_valid_access_token, db):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-    initial_alert_version = alert.version
-
-    # Create an alert tool
-    helpers.create_alert_tool(value="test", db=db)
-
-    # Update the tool
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={"tool": "test", "version": str(alert.version)}
-    )
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert alert.tool.value == "test"
-    assert alert.version != initial_alert_version
-
-
-def test_update_tool_instance(client_valid_access_token, db):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-    initial_alert_version = alert.version
-
-    # Create an alert tool instance
-    helpers.create_alert_tool_instance(value="test", db=db)
-
-    # Update the tool instance
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={"tool_instance": "test", "version": str(alert.version)}
-    )
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert alert.tool_instance.value == "test"
-    assert alert.version != initial_alert_version
-
-
-def test_update_type(client_valid_access_token, db):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-    initial_alert_version = alert.version
-
-    # Create a new alert type
-    helpers.create_alert_type(value="test_type2", db=db)
-
-    # Update the disposition
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={"type": "test_type2", "version": str(alert.version)}
-    )
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert alert.type.value == "test_type2"
-    assert alert.version != initial_alert_version
-
-
 @pytest.mark.parametrize(
     "values",
     VALID_DIRECTIVES,
@@ -371,9 +308,6 @@ def test_update_valid_node_threats(client_valid_access_token, db, values):
         ("instructions", None, "test"),
         ("instructions", "test", None),
         ("instructions", "test", "test"),
-        ("name", None, "test"),
-        ("name", "test", None),
-        ("name", "test", "test"),
     ],
 )
 def test_update(client_valid_access_token, db, key, initial_value, updated_value):
