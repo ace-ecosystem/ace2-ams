@@ -32,12 +32,12 @@ describe("ManageAlerts.vue", () => {
     expect(datepicker.rangeFilterOptions).toEqual([
       "Event Time",
       "Insert Time",
-      "Dispositioned Time",
+      "Disposition Time",
     ]);
     expect(datepicker.rangeFilters).toEqual({
       "Event Time": { start: "eventTimeAfter", end: "eventTimeBefore" },
       "Insert Time": { start: "insertTimeAfter", end: "insertTimeBefore" },
-      "Dispositioned Time": {
+      "Disposition Time": {
         start: "dispositionedAfter",
         end: "dispositionedBefore",
       },
