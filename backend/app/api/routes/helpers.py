@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, Response, status
+from fastapi_pagination.limit_offset import LimitOffsetPage
 from pydantic import BaseModel
 from typing import Callable
 
@@ -71,7 +72,7 @@ def api_route_read_all(router: APIRouter, endpoint: Callable, response_model: Ba
         path=path,
         endpoint=endpoint,
         methods=["GET"],
-        response_model=response_model,
+        response_model=LimitOffsetPage[response_model],
     )
 
 

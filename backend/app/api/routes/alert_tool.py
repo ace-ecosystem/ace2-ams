@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.models.alert_tool import AlertToolCreate, AlertToolRead, AlertToolUpdate
@@ -41,14 +42,14 @@ helpers.api_route_create(router, create_alert_tool)
 
 
 def get_all_alert_tools(db: Session = Depends(get_db)):
-    return crud.read_all(db_table=AlertTool, db=db)
+    return paginate(db, select(AlertTool))
 
 
 def get_alert_tool(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=AlertTool, db=db)
 
 
-helpers.api_route_read_all(router, get_all_alert_tools, List[AlertToolRead])
+helpers.api_route_read_all(router, get_all_alert_tools, AlertToolRead)
 helpers.api_route_read(router, get_alert_tool, AlertToolRead)
 
 

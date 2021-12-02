@@ -4,7 +4,7 @@ import myNock from "../services/api/nock";
 import axios from "axios";
 
 class stubService {
-  async getAll() {
+  async readAll() {
     const response = await axios
       .get("http://test_app.com:1234/item/")
       .catch((error) => {
@@ -50,24 +50,24 @@ describe("generic Mutations", () => {
 });
 
 describe("generic Actions", () => {
-  it("will call the given service's getAll method upon the getAll action", async () => {
+  it("will call the given service's readAll method upon the readAll action", async () => {
     const state = { items: [] };
     const store = new Vuex.Store({ state, getters, mutations, actions });
     const mockRequest = myNock.get("/item/").reply(200, [mockItem, mockItem]);
 
-    await store.dispatch("getAll");
+    await store.dispatch("readAll");
 
     expect(mockRequest.isDone()).toEqual(true);
     expect(state.items[0]).toEqual(mockItem);
     expect(state.items.length).toEqual(2);
   });
 
-  it("will throw an error if the call to getAll items fails", async () => {
+  it("will throw an error if the call to readAll items fails", async () => {
     const state = { items: [] };
     const store = new Vuex.Store({ state, getters, mutations, actions });
     myNock.get("/item/").reply(403, "Bad request :(");
 
-    await expect(store.dispatch("getAll")).rejects.toEqual(
+    await expect(store.dispatch("readAll")).rejects.toEqual(
       new Error("Request failed with status code 403"),
     );
   });

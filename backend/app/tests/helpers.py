@@ -1,9 +1,11 @@
+import json
 import uuid
 
 from datetime import datetime
+from faker import Faker
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
-from typing import List, Optional
+from typing import List, Optional, Union
 from uuid import UUID
 
 from core.auth import hash_password
@@ -88,7 +90,7 @@ def create_alert(
     db: Session,
     alert_queue: str = "test_queue",
     alert_type: str = "test_type",
-    alert_uuid: Optional[UUID] = None,
+    alert_uuid: Optional[Union[str, UUID]] = None,
     disposition: Optional[str] = None,
     disposition_time: Optional[datetime] = None,
     disposition_user: Optional[str] = None,
@@ -443,96 +445,101 @@ def create_user_role(value: str, db: Session) -> UserRole:
     return _create_basic_object(db_table=UserRole, value=value, db=db)
 
 
-def create_realistic_alert(db: Session) -> Alert:
-    # alert
-    #     analysis
-    #         file: email.rfc822
-    #             Email Analysis
-    #                 email_address: badguy@evil.com
-    #                     Email Address Analysis
-    #                         fqdn: evil.com
-    #                 email_address: goodguy@company.com
-    #                     Email Address Analysis
-    #                         fqdn: company.com
-    #                 email_subject: Hello
-    #                 file: email.rfc822.unknown_plain_text_000
-    #                     URL Extraction Analysis
-    #                         url: http://evil.com/malware.exe
-    #                             URL Parse Analysis
-    #                                 fqdn: evil.com
-    #                                 uri_path: /malware.exe
-    #             File Analysis
-    #                 md5: 912ec803b2ce49e4a541068d495ab570
-    #         ipv4: 127.0.0.1
+def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
+    def _create_analysis(a, alert, parent_observable):
+        observable_types = None
+        if "observable_types" in a:
+            observable_types = a["observable_types"]
 
-    existing = crud.read(uuid=REALISTIC_ALERT_UUID, db_table=Alert, db=db, err_on_not_found=False)
-    if existing:
-        return existing
+        required_directives = None
+        if "required_directives" in a:
+            required_directives = a["required_directives"]
 
-    alert = create_alert(db=db, alert_uuid=REALISTIC_ALERT_UUID, owner="bob", disposition_user="alice")
+        required_tags = None
+        if "required_tags" in a:
+            required_tags = a["required_tags"]
+
+        analysis = create_analysis(
+            db=db,
+            alert=alert,
+            parent_observable=parent_observable,
+            amt_value=a["type"],
+            amt_observable_types=observable_types,
+            amt_required_directives=required_directives,
+            amt_required_tags=required_tags,
+        )
+
+        if "observables" in a:
+            for observable in a["observables"]:
+                _create_observable_instance(observable, alert, analysis)
+
+    def _create_observable_instance(o, alert, parent_analysis):
+        tags = None
+        if "tags" in o:
+            tags = o["tags"]
+
+        observable_instance = create_observable_instance(
+            db=db, alert=alert, parent_analysis=parent_analysis, type=o["type"], value=o["value"], tags=tags
+        )
+
+        if "analyses" in o:
+            for analysis in o["analyses"]:
+                _create_analysis(analysis, alert, observable_instance)
+
+    def _replace_tokens(text: str, token: str, num_words: int = 1) -> str:
+        num_tokens = text.count(token)
+        if num_words == 1:
+            replacements = faker.words(nb=num_tokens, unique=True)
+        else:
+            replacements = [" ".join(faker.words(nb=num_words, unique=True)) for _ in range(num_tokens)]
+
+        for i in range(num_tokens):
+            text = text.replace(token, replacements[i], 1)
+
+        return text
+
+    faker = Faker()
+    with open(json_path) as f:
+        text = f.read()
+
+        text = text.replace("<ALERT_NAME>", faker.sentence(nb_words=8))
+        text = _replace_tokens(text, "<A_TYPE>", 3)
+        text = _replace_tokens(text, "<O_TYPE>")
+        text = _replace_tokens(text, "<O_VALUE>", 2)
+        text = _replace_tokens(text, "<TAG>")
+
+        data = json.loads(text)
+
+    alert_uuid = None
+    if "alert_uuid" in data:
+        alert_uuid = data["alert_uuid"]
+        existing = crud.read(uuid=alert_uuid, db_table=Alert, db=db, err_on_not_found=False)
+        if existing:
+            return existing
+
+    disposition_user = None
+    if "disposition_user" in data:
+        disposition_user = data["disposition_user"]
+
+    name = "Test Alert"
+    if "name" in data:
+        name = data["name"]
+
+    owner = None
+    if "owner" in data:
+        owner = data["owner"]
+
+    alert = create_alert(
+        db=db,
+        alert_uuid=alert_uuid,
+        disposition_user=disposition_user,
+        name=name,
+        owner=owner,
+    )
 
     root_analysis = create_analysis(db=db, alert=alert)
 
-    file_root_observable = create_observable_instance(
-        type="file", value="email.rfc822", alert=alert, parent_analysis=root_analysis, db=db
-    )
-
-    email_analysis = create_analysis(
-        db=db,
-        alert=alert,
-        amt_value="Email Analysis",
-        amt_observable_types=["file"],
-        amt_required_directives=["email"],
-        amt_required_tags=["scan_me"],
-        parent_observable=file_root_observable,
-    )
-
-    badguy_email_observable = create_observable_instance(
-        type="email_address", value="badguy@evil.com", alert=alert, parent_analysis=email_analysis, db=db
-    )
-    badguy_email_analysis = create_analysis(
-        db=db, alert=alert, amt_value="Email Address Analysis", parent_observable=badguy_email_observable
-    )
-    create_observable_instance(type="fqdn", value="evil.com", alert=alert, parent_analysis=badguy_email_analysis, db=db)
-
-    goodguy_email_observable = create_observable_instance(
-        type="email_address", value="goodguy@company.com", alert=alert, parent_analysis=email_analysis, db=db
-    )
-    goodguy_email_analysis = create_analysis(
-        db=db, alert=alert, amt_value="Email Address Analysis", parent_observable=goodguy_email_observable
-    )
-    create_observable_instance(
-        type="fqdn", value="company.com", alert=alert, parent_analysis=goodguy_email_analysis, db=db
-    )
-
-    create_observable_instance(type="email_subject", value="Hello", alert=alert, parent_analysis=email_analysis, db=db)
-
-    body_observable = create_observable_instance(
-        type="file", value="email.rfc822.unknown_plain_text_000", alert=alert, parent_analysis=email_analysis, db=db
-    )
-    url_extraction_analysis = create_analysis(
-        db=db, alert=alert, amt_value="URL Extraction Analysis", parent_observable=body_observable
-    )
-    url_observable = create_observable_instance(
-        type="url", value="http://evil.com/malware.exe", alert=alert, parent_analysis=url_extraction_analysis, db=db
-    )
-    url_parse_analysis = create_analysis(
-        db=db, alert=alert, amt_value="URL Parse Analysis", parent_observable=url_observable
-    )
-    create_observable_instance(type="fqdn", value="evil.com", alert=alert, parent_analysis=url_parse_analysis, db=db)
-    create_observable_instance(
-        type="uri_path", value="/malware.exe", alert=alert, parent_analysis=url_parse_analysis, db=db
-    )
-
-    file_analysis = create_analysis(
-        db=db, alert=alert, amt_value="File Analysis", parent_observable=file_root_observable
-    )
-    create_observable_instance(
-        type="md5", value="912ec803b2ce49e4a541068d495ab570", alert=alert, parent_analysis=file_analysis, db=db
-    )
-
-    create_observable_instance(
-        type="ipv4", value="127.0.0.1", tags=["c2"], alert=alert, parent_analysis=root_analysis, db=db
-    )
+    for observable in data["observables"]:
+        _create_observable_instance(observable, alert, root_analysis)
 
     return alert

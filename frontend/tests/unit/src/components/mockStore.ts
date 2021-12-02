@@ -56,7 +56,7 @@ const usersStore = {
   mutations: usersMutations,
 
   actions: {
-    getAll({ commit }: CommitFunction) {
+    readAll({ commit }: CommitFunction) {
       let promise = Promise.resolve<Array<string> | Error>(["Alice", "Bob"]);
 
       if (testVars.errorCondition) {

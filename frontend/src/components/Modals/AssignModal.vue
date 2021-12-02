@@ -97,7 +97,7 @@
       async loadUsers() {
         this.isLoading = true;
         try {
-          await this.$store.dispatch("users/getAll");
+          await this.$store.dispatch("users/readAll");
         } catch (error) {
           this.error = error.message || "Something went wrong!";
         }

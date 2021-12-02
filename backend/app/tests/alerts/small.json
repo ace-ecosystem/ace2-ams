@@ -1,0 +1,92 @@
+{
+  "alert_uuid": "02f8299b-2a24-400f-9751-7dd9164daf6a",
+  "disposition_user": "alice",
+  "name": "Small Alert",
+  "owner": "bob",
+  "observables": [
+    {
+      "type": "file",
+      "value": "email.rfc822",
+      "analyses": [
+        {
+          "type": "Email Analysis",
+          "observable_types": ["file"],
+          "required_directives": ["email"],
+          "required_tags": ["scan_me"],
+          "observables": [
+            {
+              "type": "email_address",
+              "value": "badguy@evil.com",
+              "tags": ["from_address"],
+              "analyses": [
+                {
+                  "type": "Email Address Analysis",
+                  "observables": [{ "type": "fqdn", "value": "evil.com" }]
+                }
+              ]
+            },
+            {
+              "type": "email_address",
+              "value": "goodguy@company.com",
+              "tags": ["recipient"],
+              "analyses": [
+                {
+                  "type": "Email Address Analysis",
+                  "observables": [{ "type": "fqdn", "value": "company.com" }]
+                }
+              ]
+            },
+            {
+              "type": "email_subject",
+              "value": "Hello"
+            },
+            {
+              "type": "file",
+              "value": "email.rfc822.unknown_plain_text_000",
+              "analyses": [
+                {
+                  "type": "URL Extraction Analysis",
+                  "observables": [
+                    {
+                      "type": "url",
+                      "value": "http://evil.com/malware.exe",
+                      "analyses": [
+                        {
+                          "type": "URL Parse Analysis",
+                          "observables": [
+                            {
+                              "type": "fqdn",
+                              "value": "evil.com"
+                            },
+                            {
+                              "type": "uri_path",
+                              "value": "/malware.exe"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "File Analysis",
+          "observables": [
+            {
+              "type": "md5",
+              "value": "912ec803b2ce49e4a541068d495ab570"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ipv4",
+      "value": "127.0.0.1",
+      "tags": ["c2", "contacted_host"]
+    }
+  ]
+}

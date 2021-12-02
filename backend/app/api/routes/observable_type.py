@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.models.observable_type import (
@@ -45,14 +46,14 @@ helpers.api_route_create(router, create_observable_type)
 
 
 def get_all_observable_types(db: Session = Depends(get_db)):
-    return crud.read_all(db_table=ObservableType, db=db)
+    return paginate(db, select(ObservableType))
 
 
 def get_observable_type(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=ObservableType, db=db)
 
 
-helpers.api_route_read_all(router, get_all_observable_types, List[ObservableTypeRead])
+helpers.api_route_read_all(router, get_all_observable_types, ObservableTypeRead)
 helpers.api_route_read(router, get_observable_type, ObservableTypeRead)
 
 

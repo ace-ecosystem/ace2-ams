@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.models.analysis_module_type import (
@@ -77,14 +78,14 @@ helpers.api_route_create(router, create_analysis_module_type)
 
 
 def get_all_analysis_module_types(db: Session = Depends(get_db)):
-    return crud.read_all(db_table=AnalysisModuleType, db=db)
+    return paginate(db, select(AnalysisModuleType))
 
 
 def get_analysis_module_type(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=AnalysisModuleType, db=db)
 
 
-helpers.api_route_read_all(router, get_all_analysis_module_types, List[AnalysisModuleTypeRead])
+helpers.api_route_read_all(router, get_all_analysis_module_types, AnalysisModuleTypeRead)
 helpers.api_route_read(router, get_analysis_module_type, AnalysisModuleTypeRead)
 
 

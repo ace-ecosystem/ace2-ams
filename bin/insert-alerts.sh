@@ -7,4 +7,4 @@ source "$ACE2_ENV_PATH"
 set +a
 
 docker-compose up -d
-docker exec ace2-ams-api python insert-sample-alert.py
+docker exec -e SQL_ECHO=no ace2-ams-api python insert-alerts.py $@

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.models.event_source import (
@@ -45,14 +46,14 @@ helpers.api_route_create(router, create_event_source)
 
 
 def get_all_event_sources(db: Session = Depends(get_db)):
-    return crud.read_all(db_table=EventSource, db=db)
+    return paginate(db, select(EventSource))
 
 
 def get_event_source(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=EventSource, db=db)
 
 
-helpers.api_route_read_all(router, get_all_event_sources, List[EventSourceRead])
+helpers.api_route_read_all(router, get_all_event_sources, EventSourceRead)
 helpers.api_route_read(router, get_event_source, EventSourceRead)
 
 

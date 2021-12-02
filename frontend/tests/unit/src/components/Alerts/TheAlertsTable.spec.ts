@@ -14,6 +14,31 @@ import Button from "primevue/button";
 import Column from "primevue/column";
 import Paginator from "primevue/paginator";
 import nock from "nock";
+import { alertSummaryRead } from "@/models/alert";
+
+const mockAPIAlert: alertSummaryRead = {
+  comments: [],
+  description: "",
+  directives: [],
+  disposition: null,
+  dispositionTime: null,
+  dispositionUser: null,
+  eventTime: new Date(0),
+  eventUuid: null,
+  insertTime: new Date(0),
+  instructions: null,
+  name: "Test Alert",
+  owner: null,
+  queue: { value: "Default", description: "queue", uuid: "uuid1" },
+  tags: [],
+  threatActor: null,
+  threats: [],
+  tool: null,
+  toolInstance: null,
+  type: { value: "Manual", description: "type", uuid: "uuid1" },
+  uuid: "uuid1",
+  version: "uuid2",
+};
 
 // DATA/CREATION
 describe("TheAlertsTable data/creation", () => {
@@ -26,9 +51,9 @@ describe("TheAlertsTable data/creation", () => {
   beforeAll(async () => {
     nock.cleanAll();
     myNock
-      .get("/alert/?limit=10&offset=0")
+      .get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0")
       .reply(200, {
-        items: [{ uuid: "alert_1" }, { uuid: "alert_2" }],
+        items: [mockAPIAlert, mockAPIAlert],
         total: 2,
       })
       .persist();
@@ -62,7 +87,7 @@ describe("TheAlertsTable data/creation", () => {
       global: { matchMode: "contains", value: null },
     });
     expect(wrapper.vm.selectedColumns).toStrictEqual([
-      { field: "eventTime", header: "Event Date" },
+      { field: "eventTime", header: "Event Time" },
       { field: "name", header: "Name" },
       { field: "owner", header: "Owner" },
       { field: "disposition", header: "Disposition" },
@@ -71,8 +96,8 @@ describe("TheAlertsTable data/creation", () => {
     expect(wrapper.vm.expandedRows).toStrictEqual([]);
     expect(wrapper.vm.columns).toStrictEqual([
       { field: "dispositionTime", header: "Dispositioned Time" },
-      { field: "insertTime", header: "Insert Date" },
-      { field: "eventTime", header: "Event Date" },
+      { field: "insertTime", header: "Insert Time" },
+      { field: "eventTime", header: "Event Time" },
       { field: "name", header: "Name" },
       { field: "owner", header: "Owner" },
       { field: "disposition", header: "Disposition" },
@@ -90,6 +115,8 @@ describe("TheAlertsTable data/creation", () => {
     expect(wrapper.vm.error).toBeNull();
     expect(wrapper.vm.alerts).toHaveLength(2);
     expect(wrapper.vm.totalAlerts).toEqual(2);
+    expect(wrapper.vm.sortField).toEqual("eventTime");
+    expect(wrapper.vm.sortOrder).toEqual("desc");
     expect(wrapper.vm.numRows).toEqual(10);
     expect(wrapper.vm.page).toEqual(0);
   });
@@ -98,6 +125,9 @@ describe("TheAlertsTable data/creation", () => {
       limit: 10,
       offset: 0,
     });
+    expect(wrapper.vm.sortFilter).toEqual("event_time|desc");
+    wrapper.setData({ sortField: null });
+    expect(wrapper.vm.sortFilter).toBeNull();
   });
 });
 
@@ -112,9 +142,9 @@ describe("TheAlertsTable methods success", () => {
   beforeAll(async () => {
     nock.cleanAll();
     myNock
-      .get("/alert/?limit=10&offset=0")
+      .get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0")
       .reply(200, {
-        items: [{ uuid: "alert_1" }, { uuid: "alert_2" }],
+        items: [mockAPIAlert, mockAPIAlert],
         total: 2,
       })
       .persist();
@@ -136,7 +166,7 @@ describe("TheAlertsTable methods success", () => {
     });
     wrapper.vm.reset();
     expect(wrapper.vm.selectedColumns).toStrictEqual([
-      { field: "eventTime", header: "Event Date" },
+      { field: "eventTime", header: "Event Time" },
       { field: "name", header: "Name" },
       { field: "owner", header: "Owner" },
       { field: "disposition", header: "Disposition" },
@@ -157,16 +187,28 @@ describe("TheAlertsTable methods success", () => {
   });
   it("will reload the alerts with new pagination settings on 'onPage'", async () => {
     const mockRequest = myNock
-      .get("/alert/?limit=1&offset=1")
+      .get("/alert/?sort=event_time%7Cdesc&limit=1&offset=1")
       .thrice()
       .reply(200, {
-        items: [{ uuid: "alert_2" }],
+        items: [mockAPIAlert],
         total: 2,
       });
     await wrapper.vm.onPage({ rows: 1, page: 1 });
     expect(wrapper.vm.numRows).toEqual(1);
     expect(wrapper.vm.selectedRows).toEqual([]);
     expect(mockRequest.isDone()).toEqual(true);
+  });
+  it("will reload the alerts with new sort settings on 'sort'", async () => {
+    const mockRequestSort = myNock
+      .get("/alert/?sort=name%7Casc&limit=1&offset=1")
+      .reply(200, {
+        items: [{ uuid: "alert_2" }],
+        total: 2,
+      });
+    await wrapper.vm.sort({ sortField: "name", sortOrder: 1 });
+    expect(wrapper.vm.sortField).toEqual("name");
+    expect(wrapper.vm.sortOrder).toEqual("asc");
+    expect(mockRequestSort.isDone()).toEqual(true);
   });
 });
 
@@ -188,7 +230,7 @@ describe("TheAlertsTable methods failed", () => {
 
   it("will set the error data property to the given error if getAllAlerts fails within loadAlerts", async () => {
     const mockRequest = myNock
-      .get("/alert/?limit=10&offset=0")
+      .get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0")
       .twice()
       .reply(403, "Request Failed");
 

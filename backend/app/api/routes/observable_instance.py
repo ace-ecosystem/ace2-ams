@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
-from typing import List, Optional, Union
+from typing import List, Union
 from uuid import UUID, uuid4
 
 from api.models.observable_instance import (

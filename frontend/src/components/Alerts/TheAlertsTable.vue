@@ -17,7 +17,8 @@
     data-key="uuid"
     removable-sort
     responsive-layout="scroll"
-    sort-field="eventTime"
+    :sort-field="sortField"
+    @sort="sort"
     @rowSelect="alertSelect($event.data.uuid)"
     @rowUnselect="alertUnselect($event.data.uuid)"
     @rowSelect-all="alertSelectAll(allAlertUuids)"
@@ -82,7 +83,11 @@
       <template #body="{ data }">
         <!-- NAME COLUMN - INCL. TAGS AND TODO: ALERT ICONS-->
         <div v-if="col.field === 'name'">
-          <span class="p-m-1"> {{ data.name }}</span>
+          <span class="p-m-1">
+            <router-link :to="getAlertLink(data.uuid)">{{
+              data.name
+            }}</router-link></span
+          >
           <br />
           <span>
             <Tag v-for="tag in data.tags" :key="tag" class="p-mr-2" rounded>{{
@@ -90,6 +95,9 @@
             }}</Tag>
           </span>
         </div>
+        <span v-else-if="col.field.includes('Time')">
+          {{ formatDateTime(data[col.field]) }}</span
+        >
         <span v-else> {{ data[col.field] }}</span>
       </template>
     </Column>
@@ -120,6 +128,8 @@
 <script>
   import { mapActions, mapGetters } from "vuex";
 
+  import { camelToSnakeCase } from "@/etc/helpers";
+
   import Button from "primevue/button";
   import Column from "primevue/column";
   import DataTable from "primevue/datatable";
@@ -149,8 +159,8 @@
 
         columns: [
           { field: "dispositionTime", header: "Dispositioned Time" },
-          { field: "insertTime", header: "Insert Date" },
-          { field: "eventTime", header: "Event Date" },
+          { field: "insertTime", header: "Insert Time" },
+          { field: "eventTime", header: "Event Time" },
           { field: "name", header: "Name" },
           { field: "owner", header: "Owner" },
           { field: "disposition", header: "Disposition" },
@@ -166,6 +176,8 @@
         isLoading: false,
         selectedColumns: null,
         selectedRows: null,
+        sortField: "eventTime",
+        sortOrder: "desc",
         numRows: 10,
         page: 0,
       };
@@ -179,6 +191,11 @@
         selectedAlerts: "selectedAlerts/selected",
         filters: "filters/alerts",
       }),
+      sortFilter() {
+        return this.sortField
+          ? `${camelToSnakeCase(this.sortField)}|${this.sortOrder}`
+          : null;
+      },
       pageOptions() {
         return {
           limit: this.numRows,
@@ -207,7 +224,7 @@
         alertUnselect: "selectedAlerts/unselect",
         alertUnselectAll: "selectedAlerts/unselectAll",
         alertSelectAll: "selectedAlerts/selectAll",
-        getAllAlerts: "alerts/getAll",
+        getAlertPage: "alerts/getPage",
       }),
 
       reset() {
@@ -217,6 +234,7 @@
         this.selectedColumns = this.columns.filter((column) => {
           return this.defaultColumns.includes(column.field);
         });
+        this.sort({ sortField: "eventTime", sortOrder: "-1" });
         this.error = null;
       },
 
@@ -240,6 +258,17 @@
         this.$refs.dt.exportCSV();
       },
 
+      async sort(event) {
+        if (event.sortField) {
+          this.sortField = event.sortField;
+          this.sortOrder = event.sortOrder > 0 ? "asc" : "desc";
+          await this.loadAlerts();
+        } else {
+          this.sortField = null;
+          this.sortOrder = null;
+        }
+      },
+
       async onPage(event) {
         this.selectedRows = [];
         this.numRows = event.rows;
@@ -250,11 +279,28 @@
       async loadAlerts() {
         this.isLoading = true;
         try {
-          await this.getAllAlerts({ ...this.pageOptions, ...this.filters });
+          await this.getAlertPage({
+            sort: this.sortFilter,
+            ...this.pageOptions,
+            ...this.filters,
+          });
         } catch (error) {
           this.error = error.message || "Something went wrong!";
         }
         this.isLoading = false;
+      },
+
+      getAlertLink(uuid) {
+        return "/alert/" + uuid;
+      },
+
+      formatDateTime(dateTime) {
+        if (dateTime) {
+          const d = new Date(dateTime);
+          return d.toLocaleString("en-US");
+        }
+
+        return "None";
       },
     },
   };

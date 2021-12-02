@@ -7,6 +7,9 @@ import alerts from "@/store/alerts";
 import { parseAlertSummary } from "@/store/alerts";
 import myNock from "@unit/services/api/nock";
 import snakecaseKeys from "snakecase-keys";
+import { userRead } from "@/models/user";
+import { nodeCommentRead } from "@/models/nodeComment";
+import { alertSummaryRead } from "@/models/alert";
 
 const actions = alerts.actions;
 const mutations = alerts.mutations;
@@ -37,53 +40,112 @@ const mockAlert = {
   uuid: "uuid1",
 };
 
-const mockAPIAlert = {
-  comments: [{ value: "A comment", description: "comment", uuid: "uuid1" }],
-  description: "A test alert",
-  disposition: { value: "False Positive", description: "fp", uuid: "uuid1" },
-  dispositionTime: new Date(0),
-  dispositionUser: { value: "Analyst", description: "user", uuid: "uuid1" },
-  eventTime: new Date(0),
+const mockUser: userRead = {
+  defaultAlertQueue: {
+    value: "Default",
+    description: "queue",
+    uuid: "uuid1",
+  },
+  displayName: "Imma Analyst",
+  email: "analyst@company.com",
+  enabled: true,
+  roles: [{ value: "test_role", description: null, uuid: "uuid1" }],
+  timezone: "UTC",
+  username: "analyst",
+  uuid: "uuid1",
+};
+
+const mockComment: nodeCommentRead = {
   insertTime: new Date(0),
+  nodeUuid: "uuid1",
+  user: mockUser,
+  uuid: "uuid1",
+  value: "A comment",
+};
+
+const mockAPIAlert: alertSummaryRead = {
+  comments: [],
+  description: "",
+  directives: [],
+  disposition: null,
+  dispositionTime: null,
+  dispositionUser: null,
+  eventTime: new Date(0),
+  eventUuid: null,
+  insertTime: new Date(0),
+  instructions: null,
   name: "Test Alert",
-  owner: { value: "Analyst", description: "user", uuid: "uuid1" },
+  owner: null,
   queue: { value: "Default", description: "queue", uuid: "uuid1" },
-  tags: [{ value: "a tag", description: "tag", uuid: "uuid1" }],
-  tool: { value: "GUI", description: "tool", uuid: "uuid1" },
+  tags: [],
+  threatActor: null,
+  threats: [],
+  tool: null,
+  toolInstance: null,
   type: { value: "Manual", description: "type", uuid: "uuid1" },
   uuid: "uuid1",
+  version: "uuid2",
+};
+
+const mockAPIAlertOptionalProperties: alertSummaryRead = {
+  comments: [mockComment],
+  description: "A test alert",
+  directives: [],
+  disposition: {
+    value: "False Positive",
+    description: "fp",
+    rank: 1,
+    uuid: "uuid1",
+  },
+  dispositionTime: new Date(0),
+  dispositionUser: mockUser,
+  eventTime: new Date(0),
+  eventUuid: null,
+  insertTime: new Date(0),
+  instructions: null,
+  name: "Test Alert",
+  owner: mockUser,
+  queue: { value: "Default", description: "queue", uuid: "uuid1" },
+  tags: [{ value: "a tag", description: "tag", uuid: "uuid1" }],
+  threatActor: null,
+  threats: [],
+  tool: { value: "GUI", description: null, uuid: "uuid1" },
+  toolInstance: null,
+  type: { value: "Manual", description: "type", uuid: "uuid1" },
+  uuid: "uuid1",
+  version: "uuid2",
 };
 
 describe("alerts utilities", () => {
   it("will use default values when parsing an API alert object that has missing properties", () => {
-    expect(parseAlertSummary({ uuid: "uuid1" })).toStrictEqual({
+    expect(parseAlertSummary(mockAPIAlert)).toStrictEqual({
       comments: [],
       description: "",
       disposition: "OPEN",
       dispositionTime: null,
       dispositionUser: "None",
-      eventTime: null,
-      insertTime: null,
-      name: "Unnamed",
+      eventTime: new Date(0),
+      insertTime: new Date(0),
+      name: "Test Alert",
       owner: "None",
-      queue: "None",
+      queue: "Default",
       tags: [],
       tool: "None",
-      type: "",
+      type: "Manual",
       uuid: "uuid1",
     });
   });
   it("will use the available values when parsing an API alert object with all optional properties", () => {
-    expect(parseAlertSummary(mockAPIAlert)).toStrictEqual({
-      comments: [{ value: "A comment", description: "comment", uuid: "uuid1" }],
+    expect(parseAlertSummary(mockAPIAlertOptionalProperties)).toStrictEqual({
+      comments: [mockComment],
       description: "A test alert",
       disposition: "False Positive",
       dispositionTime: new Date(0),
-      dispositionUser: "Analyst",
+      dispositionUser: "Imma Analyst",
       eventTime: new Date(0),
       insertTime: new Date(0),
       name: "Test Alert",
-      owner: "Analyst",
+      owner: "Imma Analyst",
       queue: "Default",
       tags: [{ value: "a tag", description: "tag", uuid: "uuid1" }],
       tool: "GUI",
@@ -162,7 +224,7 @@ describe("alerts Actions", () => {
     expect(state.openAlert).toEqual(mockAlert);
   });
 
-  it("will fetch all alerts when getAll is called and no filter options are set", async () => {
+  it("will fetch all alerts when getPage is called and no filter options are set", async () => {
     const state = {
       openAlert: null,
       visibleQueriedAlerts: [],
@@ -171,8 +233,8 @@ describe("alerts Actions", () => {
     const store = new Vuex.Store({ state, mutations, actions });
     const mockRequest = myNock
       .get("/alert/")
-      .reply(200, { items: [{ uuid: "uuid1" }, { uuid: "uuid2" }], total: 2 });
-    await store.dispatch("getAll");
+      .reply(200, { items: [mockAPIAlert, mockAPIAlert], total: 2 });
+    await store.dispatch("getPage");
 
     expect(mockRequest.isDone()).toEqual(true);
 
@@ -181,7 +243,7 @@ describe("alerts Actions", () => {
     expect(state.visibleQueriedAlerts).toHaveLength(2);
   });
 
-  it("will pass params along when getAll is and pagination options are set", async () => {
+  it("will pass params along when getPage is called and pagination options are set", async () => {
     const state = {
       openAlert: null,
       visibleQueriedAlerts: [],
@@ -190,8 +252,27 @@ describe("alerts Actions", () => {
     const store = new Vuex.Store({ state, mutations, actions });
     const mockRequest = myNock
       .get("/alert/?limit=2&offset=0")
-      .reply(200, { items: [{ uuid: "uuid1" }, { uuid: "uuid2" }], total: 2 });
-    await store.dispatch("getAll", { limit: 2, offset: 0 });
+      .reply(200, { items: [mockAPIAlert, mockAPIAlert], total: 2 });
+    await store.dispatch("getPage", { limit: 2, offset: 0 });
+
+    expect(mockRequest.isDone()).toEqual(true);
+
+    expect(state.openAlert).toBeNull();
+    expect(state.totalAlerts).toEqual(2);
+    expect(state.visibleQueriedAlerts).toHaveLength(2);
+  });
+
+  it("will pass params along when getPage is called and sort options are set", async () => {
+    const state = {
+      openAlert: null,
+      visibleQueriedAlerts: [],
+      totalAlerts: 0,
+    };
+    const store = new Vuex.Store({ state, mutations, actions });
+    const mockRequest = myNock
+      .get("/alert/?sort=event_time%7Casc")
+      .reply(200, { items: [mockAPIAlert, mockAPIAlert], total: 2 });
+    await store.dispatch("getPage", { sort: "event_time|asc" });
 
     expect(mockRequest.isDone()).toEqual(true);
 

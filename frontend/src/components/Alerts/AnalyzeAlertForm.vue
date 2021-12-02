@@ -244,8 +244,6 @@
 
   import moment from "moment-timezone";
 
-  import ObservableInstance from "@/services/api/observableInstance";
-
   export default {
     name: "AnalyzeAlertForm",
     components: {
@@ -314,10 +312,10 @@
     methods: {
       ...mapActions({
         createAlert: "alerts/createAlert",
-        getAllAlertQueue: "alertQueue/getAll",
-        getAllAlertType: "alertType/getAll",
-        getAllNodeDirective: "nodeDirective/getAll",
-        getAllObservableType: "observableType/getAll",
+        readAllAlertQueue: "alertQueue/readAll",
+        readAllAlertType: "alertType/readAll",
+        readAllNodeDirective: "nodeDirective/readAll",
+        readAllObservableType: "observableType/readAll",
       }),
       initData() {
         this.alertDate = new Date();
@@ -331,10 +329,10 @@
         this.addFormObservable();
       },
       async initExternalData() {
-        await this.getAllAlertQueue();
-        await this.getAllAlertType();
-        await this.getAllNodeDirective();
-        await this.getAllObservableType();
+        await this.readAllAlertQueue();
+        await this.readAllAlertType();
+        await this.readAllNodeDirective();
+        await this.readAllObservableType();
       },
       adjustForTimezone(datetime, timezone) {
         return moment(datetime).tz(timezone).format();

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.models.node_history_action import (
@@ -45,14 +46,14 @@ helpers.api_route_create(router, create_node_history_action)
 
 
 def get_all_node_history_actions(db: Session = Depends(get_db)):
-    return crud.read_all(db_table=NodeHistoryAction, db=db)
+    return paginate(db, select(NodeHistoryAction))
 
 
 def get_node_history_action(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=NodeHistoryAction, db=db)
 
 
-helpers.api_route_read_all(router, get_all_node_history_actions, List[NodeHistoryActionRead])
+helpers.api_route_read_all(router, get_all_node_history_actions, NodeHistoryActionRead)
 helpers.api_route_read(router, get_node_history_action, NodeHistoryActionRead)
 
 
