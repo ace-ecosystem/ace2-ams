@@ -183,19 +183,18 @@
         let filter = this.availableFilters.filter((filter) => {
           return filter.name === filterName;
         });
-        console.log(filter);
         filter = filter ? filter[0] : null;
         return filter;
       },
       updateValue(attribute, newValue) {
         if (attribute === "filterName") {
           this.$emit("update:modelValue", {
-            filterName: newValue,
+            filterName: newValue ? newValue.name : this.filterName.name,
             filterValue: this.filterValue,
           });
         } else if (attribute === "filterValue") {
           this.$emit("update:modelValue", {
-            filterName: this.filterName,
+            filterName: this.filterName.name,
             filterValue: newValue,
           });
         }
