@@ -1,3 +1,5 @@
+import { alertFilterNames } from "@/models/alert";
+
 export const filterTypes = {
   MULTISELECT: "multiselect",
   CHIPS: "chips",
@@ -29,7 +31,16 @@ export const TOOL_FILTER = "tool";
 export const TOOL_INSTANCE_FILTER = "toolInstance";
 export const TYPE_FILTER = "type";
 
-export const alertFilters = [
+export type alertFilterOption = {
+  readonly name: string;
+  readonly label: string;
+  readonly type: string;
+  readonly options?: string;
+  readonly optionValue?: string;
+  readonly formatForAPI?: (filter: any) => string;
+};
+
+export const alertFilters: readonly alertFilterOption[] = [
   {
     name: DISPOSITION_FILTER,
     label: "Disposition",
@@ -53,7 +64,12 @@ export const alertFilters = [
     label: "Dispositioned Before",
     type: filterTypes.DATE,
   },
-  { name: EVENT_UUID_FILTER, label: "Event" },
+  {
+    name: EVENT_UUID_FILTER,
+    label: "Event",
+    type: filterTypes.SELECT,
+    options: "events",
+  },
   {
     name: EVENT_TIME_AFTER_FILTER,
     label: "Event Time After",
@@ -83,13 +99,19 @@ export const alertFilters = [
     name: OBSERVABLE_FILTER,
     label: "Observable",
     type: filterTypes.CATEGORIZED_VALUE,
-    options: "observableType"
+    options: "observableType",
+    formatForAPI: (filter: { category: string; value: string }) => {
+      return `${filter.category}|${filter.value}`;
+    },
   },
   {
     name: OBSERVABLE_TYPES_FILTER,
     label: "Observable Types",
     type: filterTypes.MULTISELECT,
     options: "observableType",
+    formatForAPI: (filter: string[]) => {
+      return filter.join();
+    },
   },
   {
     name: OBSERVABLE_VALUE_FILTER,
@@ -114,6 +136,9 @@ export const alertFilters = [
     label: "Tags",
     type: filterTypes.CHIPS,
     options: "nodeTag",
+    formatForAPI: (filter: string[]) => {
+      return filter.join();
+    },
   },
   {
     name: THREAT_ACTOR_FILTER,
@@ -126,6 +151,9 @@ export const alertFilters = [
     label: "Threats",
     type: filterTypes.CHIPS,
     options: "nodeThreatActor",
+    formatForAPI: (filter: string[]) => {
+      return filter.join();
+    },
   },
   {
     name: TOOL_FILTER,
@@ -155,7 +183,6 @@ export const alertRangeFilters = {
   "Insert Time": {
     start: INSERT_TIME_AFTER_FILTER,
     end: INSERT_TIME_BEFORE_FILTER,
-
   },
   "Disposition Time": {
     start: DISPOSITIONED_AFTER_FILTER,
