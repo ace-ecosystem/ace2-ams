@@ -60,7 +60,7 @@
       @change="
         updateValue(
           'filterValue',
-          updatedCategorizedValueObject('category', $event.target.value),
+          updatedCategorizedValueObject('category', $event.value),
         )
       "
     ></Dropdown>

@@ -66,7 +66,8 @@
         let submitFilters = {};
         for (const index in this.formFilters) {
           const filter = this.formFilters[index];
-          submitFilters[filter.filterName.name] = filter.filterValue;
+          const filterName = filter.filterName ? filter.filterName : filter;
+          submitFilters[filterName] = filter.filterValue;
         }
         return submitFilters;
       },
