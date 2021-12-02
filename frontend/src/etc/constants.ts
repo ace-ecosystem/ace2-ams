@@ -1,4 +1,4 @@
-import { alertFilterNames } from "@/models/alert";
+import { alertFilterNameTypes, alertFilterOption } from "@/models/alert";
 
 export const filterTypes = {
   MULTISELECT: "multiselect",
@@ -9,94 +9,88 @@ export const filterTypes = {
   CATEGORIZED_VALUE: "categorizedValue",
 };
 
-export const DISPOSITION_FILTER = "disposition";
-export const DISPOSITION_USER_FILTER = "dispositionUser";
-export const DISPOSITIONED_AFTER_FILTER = "dispositionedAfter";
-export const DISPOSITIONED_BEFORE_FILTER = "dispositionedBefore";
-export const EVENT_UUID_FILTER = "eventUuid";
-export const EVENT_TIME_AFTER_FILTER = "eventTimeAfter";
-export const EVENT_TIME_BEFORE_FILTER = "eventTimeBefore";
-export const INSERT_TIME_AFTER_FILTER = "insertTimeAfter";
-export const INSERT_TIME_BEFORE_FILTER = "insertTimeBefore";
-export const NAME_FILTER = "name";
-export const OBSERVABLE_FILTER = "observable";
-export const OBSERVABLE_TYPES_FILTER = "observableTypes";
-export const OBSERVABLE_VALUE_FILTER = "observableValue";
-export const OWNER_FILTER = "owner";
-export const QUEUE_FILTER = "queue";
-export const TAGS_FILTER = "tags";
-export const THREAT_ACTOR_FILTER = "threatActor";
-export const THREATS_FILTER = "threats";
-export const TOOL_FILTER = "tool";
-export const TOOL_INSTANCE_FILTER = "toolInstance";
-export const TYPE_FILTER = "type";
+export const alertFilterNames: Record<string, alertFilterNameTypes> = {
+  DISPOSITION_FILTER: "disposition",
+  DISPOSITION_USER_FILTER: "dispositionUser",
+  DISPOSITIONED_AFTER_FILTER: "dispositionedAfter",
+  DISPOSITIONED_BEFORE_FILTER: "dispositionedBefore",
+  EVENT_UUID_FILTER: "eventUuid",
+  EVENT_TIME_AFTER_FILTER: "eventTimeAfter",
+  EVENT_TIME_BEFORE_FILTER: "eventTimeBefore",
+  INSERT_TIME_AFTER_FILTER: "insertTimeAfter",
+  INSERT_TIME_BEFORE_FILTER: "insertTimeBefore",
+  NAME_FILTER: "name",
+  OBSERVABLE_FILTER: "observable",
+  OBSERVABLE_TYPES_FILTER: "observableTypes",
+  OBSERVABLE_VALUE_FILTER: "observableValue",
+  OWNER_FILTER: "owner",
+  QUEUE_FILTER: "queue",
+  TAGS_FILTER: "tags",
+  THREAT_ACTOR_FILTER: "threatActor",
+  THREATS_FILTER: "threats",
+  TOOL_FILTER: "tool",
+  TOOL_INSTANCE_FILTER: "toolInstance",
+  TYPE_FILTER: "type",
 
-export type alertFilterOption = {
-  readonly name: string;
-  readonly label: string;
-  readonly type: string;
-  readonly options?: string;
-  readonly optionValue?: string;
-  readonly formatForAPI?: (filter: any) => string;
-};
+}
 
 export const alertFilters: readonly alertFilterOption[] = [
   {
-    name: DISPOSITION_FILTER,
+    name: alertFilterNames.DISPOSITION_FILTER,
     label: "Disposition",
     type: filterTypes.SELECT,
     options: "alertDisposition",
   },
   {
-    name: DISPOSITION_USER_FILTER,
+    name: alertFilterNames.DISPOSITION_USER_FILTER,
     label: "Dispositioned By",
     type: filterTypes.SELECT,
     options: "users",
     optionValue: "displayName",
   },
   {
-    name: DISPOSITIONED_AFTER_FILTER,
+    name: alertFilterNames.DISPOSITIONED_AFTER_FILTER,
     label: "Dispositioned After",
     type: filterTypes.DATE,
   },
   {
-    name: DISPOSITIONED_BEFORE_FILTER,
+    name: alertFilterNames.DISPOSITIONED_BEFORE_FILTER,
     label: "Dispositioned Before",
     type: filterTypes.DATE,
   },
   {
-    name: EVENT_UUID_FILTER,
+    name: alertFilterNames.EVENT_UUID_FILTER,
     label: "Event",
     type: filterTypes.SELECT,
     options: "events",
   },
   {
-    name: EVENT_TIME_AFTER_FILTER,
+    name: alertFilterNames.EVENT_TIME_AFTER_FILTER,
     label: "Event Time After",
     type: filterTypes.DATE,
   },
   {
-    name: EVENT_TIME_BEFORE_FILTER,
+    name: alertFilterNames.EVENT_TIME_BEFORE_FILTER,
     label: "Event Time Before",
     type: filterTypes.DATE,
   },
   {
-    name: INSERT_TIME_AFTER_FILTER,
+    name: alertFilterNames.INSERT_TIME_AFTER_FILTER,
     label: "Insert Time After",
     type: filterTypes.DATE,
   },
   {
-    name: INSERT_TIME_BEFORE_FILTER,
+    name: alertFilterNames.INSERT_TIME_BEFORE_FILTER,
     label: "Insert Time Before",
     type: filterTypes.DATE,
   },
   {
-    name: NAME_FILTER,
+    name: alertFilterNames.NAME_FILTER,
     label: "Name",
     type: filterTypes.INPUT_TEXT,
   },
   {
-    name: OBSERVABLE_FILTER,
+    name: alertFilterNames.OBSERVABLE_FILTER,
     label: "Observable",
     type: filterTypes.CATEGORIZED_VALUE,
     options: "observableType",
@@ -105,7 +99,7 @@ export const alertFilters: readonly alertFilterOption[] = [
     },
   },
   {
-    name: OBSERVABLE_TYPES_FILTER,
+    name: alertFilterNames.OBSERVABLE_TYPES_FILTER,
     label: "Observable Types",
     type: filterTypes.MULTISELECT,
     options: "observableType",
@@ -114,25 +108,25 @@ export const alertFilters: readonly alertFilterOption[] = [
     },
   },
   {
-    name: OBSERVABLE_VALUE_FILTER,
+    name: alertFilterNames.OBSERVABLE_VALUE_FILTER,
     label: "Observable Value",
     type: filterTypes.INPUT_TEXT,
   },
   {
-    name: OWNER_FILTER,
+    name: alertFilterNames.OWNER_FILTER,
     label: "Owner",
     type: filterTypes.SELECT,
     options: "users",
     optionValue: "displayName",
   },
   {
-    name: QUEUE_FILTER,
+    name: alertFilterNames.QUEUE_FILTER,
     label: "Queue",
     type: filterTypes.SELECT,
     options: "alertQueue",
   },
   {
-    name: TAGS_FILTER,
+    name: alertFilterNames.TAGS_FILTER,
     label: "Tags",
     type: filterTypes.CHIPS,
     options: "nodeTag",
@@ -141,13 +135,13 @@ export const alertFilters: readonly alertFilterOption[] = [
     },
   },
   {
-    name: THREAT_ACTOR_FILTER,
+    name: alertFilterNames.THREAT_ACTOR_FILTER,
     label: "Threat Actor",
     type: filterTypes.SELECT,
     options: "nodeThreat",
   },
   {
-    name: THREATS_FILTER,
+    name: alertFilterNames.THREATS_FILTER,
     label: "Threats",
     type: filterTypes.CHIPS,
     options: "nodeThreatActor",
@@ -156,19 +150,19 @@ export const alertFilters: readonly alertFilterOption[] = [
     },
   },
   {
-    name: TOOL_FILTER,
+    name: alertFilterNames.TOOL_FILTER,
     label: "Tool",
     type: filterTypes.SELECT,
     options: "tool",
   },
   {
-    name: TOOL_INSTANCE_FILTER,
+    name: alertFilterNames.TOOL_INSTANCE_FILTER,
     label: "Tool Instance",
     type: filterTypes.SELECT,
     options: "toolInstance",
   },
   {
-    name: TYPE_FILTER,
+    name: alertFilterNames.TYPE_FILTER,
     label: "Type",
     type: filterTypes.SELECT,
     options: "alertType",
@@ -177,15 +171,15 @@ export const alertFilters: readonly alertFilterOption[] = [
 
 export const alertRangeFilters = {
   "Event Time": {
-    start: EVENT_TIME_AFTER_FILTER,
-    end: EVENT_TIME_BEFORE_FILTER,
+    start: alertFilterNames.EVENT_TIME_AFTER_FILTER,
+    end: alertFilterNames.EVENT_TIME_BEFORE_FILTER,
   },
   "Insert Time": {
-    start: INSERT_TIME_AFTER_FILTER,
-    end: INSERT_TIME_BEFORE_FILTER,
+    start: alertFilterNames.INSERT_TIME_AFTER_FILTER,
+    end: alertFilterNames.INSERT_TIME_BEFORE_FILTER,
   },
   "Disposition Time": {
-    start: DISPOSITIONED_AFTER_FILTER,
-    end: DISPOSITIONED_BEFORE_FILTER,
+    start: alertFilterNames.DISPOSITIONED_AFTER_FILTER,
+    end: alertFilterNames.DISPOSITIONED_BEFORE_FILTER,
   },
 };

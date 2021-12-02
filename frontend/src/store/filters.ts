@@ -1,7 +1,7 @@
 import {
   alertFilterParams,
-  alertFilterNames,
   alertFilterValues,
+  alertFilterNameTypes,
 } from "@/models/alert";
 import { CommitFunction } from "@/store/index";
 
@@ -26,15 +26,15 @@ const store = {
       state: { alerts: alertFilterParams },
       payload: {
         filterType: "alerts";
-        filterName: alertFilterNames;
+        filterName: alertFilterNameTypes;
         filterValue: alertFilterValues;
       },
     ): alertFilterValues =>
-      (state[payload.filterType][payload.filterName.name] = payload.filterValue),
+      (state[payload.filterType][payload.filterName] = payload.filterValue),
     UNSET_FILTER: (
       state: { alerts: alertFilterParams },
-      payload: { filterType: "alerts"; filterName: alertFilterNames },
-    ): boolean => delete state[payload.filterType][payload.filterName.name],
+      payload: { filterType: "alerts"; filterName: alertFilterNameTypes },
+    ): boolean => delete state[payload.filterType][payload.filterName],
     CLEAR_ALL: (
       state: { alerts: alertFilterParams },
       payload: { filterType: "alerts" },

@@ -202,7 +202,7 @@
         }
         this.setFilter({
           filterType: this.filterType,
-          filterName: { name: filterName },
+          filterName: filterName,
           filterValue: date,
         });
       },
@@ -210,7 +210,7 @@
       clearDate(filterName) {
         this.unsetFilter({
           filterType: this.filterType,
-          filterName: { name: filterName },
+          filterName: filterName,
         });
       },
 

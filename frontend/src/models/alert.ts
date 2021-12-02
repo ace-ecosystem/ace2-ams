@@ -1,4 +1,4 @@
-import { alertFilters } from "@/etc/constants";
+import { alertFilterNames } from "@/etc/constants";
 import { UUID } from "./base";
 import { genericObject } from "./base";
 
@@ -77,7 +77,16 @@ export type alertFilterParams = {
   type?: string;
 };
 
-export type alertFilterNames = typeof alertFilters[number];
+export type alertFilterNameTypes = keyof alertFilterParams;
 export type alertFilterValues =
   | (string & string[] & Date & { type: string; value: string })
   | undefined;
+
+export type alertFilterOption = {
+  readonly name: alertFilterNameTypes;
+  readonly label: string;
+  readonly type: string;
+  readonly options?: string;
+  readonly optionValue?: string;
+  readonly formatForAPI?: (filter: any) => string;
+};
