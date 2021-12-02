@@ -114,6 +114,7 @@
         }
       },
       close() {
+        this.resetFormFilters();
         this.$store.dispatch("modals/close", this.name);
       },
     },
