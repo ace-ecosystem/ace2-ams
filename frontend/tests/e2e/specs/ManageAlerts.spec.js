@@ -76,9 +76,11 @@ describe("ManageAlerts.vue", () => {
   it("will set a range (before and after filters) and update input boxes and reload alerts when a range is selected", () => {
     // Calculate the expected start and end strings for the 'today' range
     const today = new Date();
-    const todayString = `${
-      today.getMonth() + 1
-    }/${today.getDate()}/${today.getFullYear()}`;
+    const todayString = today.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
     const todayStartString = `${todayString} 00:00`;
     const todayEndString = `${todayString} 23:59`;
     // Click on the date options button
