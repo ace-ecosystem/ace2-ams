@@ -6,17 +6,18 @@
         :options="availableFilters"
         option-label="label"
         type="text"
+        class="w-13rem"
         @change="
           clearFilterValue();
           updateValue('filterName', $event.value);
         "
       />
     </div>
-    <div class="col">
+    <div class="col w-16rem">
       <div v-if="isInputText" class="field">
         <InputText
           v-model="filterValue"
-          class="inputfield w-full"
+          class="inputfield w-16rem"
           type="text"
           @input="updateValue('filterValue', $event.target.value)"
         ></InputText>
@@ -24,7 +25,7 @@
       <div v-else-if="isDropdown" class="field">
         <Dropdown
           v-model="filterValue"
-          class="inputfield w-full"
+          class="inputfield w-16rem"
           :options="filterOptions"
           type="text"
           @change="updateValue('filterValue', $event.value)"
@@ -33,16 +34,16 @@
       <div v-else-if="isMultiSelect" class="field">
         <Multiselect
           v-model="filterValue"
-          class="inputfield w-full"
+          class="inputfield w-16rem"
           :options="filterOptions"
           type="text"
           @change="updateValue('filterValue', $event.value)"
         ></Multiselect>
       </div>
-      <div v-else-if="isChips" class="field">
+      <div v-else-if="isChips" class="field p-fluid">
         <Chips
           v-model="filterValue"
-          class="inputfield w-full"
+          class="w-full"
           @update:model-value="updateValue('filterValue', $event)"
         ></Chips>
       </div>
@@ -50,14 +51,14 @@
         <DatePicker
           v-model="filterValue"
           mode="dateTime"
-          class="inputfield w-full"
+          class="inputfield w-16rem"
           is24hr
           @update:model-value="updateValue('filterValue', $event)"
         >
           <template #default="{ inputValue, inputEvents }">
             <div class="p-inputgroup">
               <InputText
-                class="inputfield w-full"
+                class="inputfield w-16rem"
                 type="text"
                 :value="inputValue"
                 placeholder="Enter a date!"
@@ -68,12 +69,12 @@
         </DatePicker>
       </div>
       <div v-else-if="isCategorizedValue">
-        <div class="col field">
+        <div class="field">
           <Dropdown
             v-model="filterValue.category"
             :options="filterOptions"
+            class="w-16rem"
             type="text"
-            class="inputfield w-full"
             @change="
               updateValue(
                 'filterValue',
@@ -82,10 +83,10 @@
             "
           ></Dropdown>
         </div>
-        <div class="col field">
+        <div class="field">
           <InputText
             v-model="filterValue.value"
-            class="inputfield w-full"
+            class="w-16rem"
             type="text"
             @input="
               updateValue(
@@ -101,7 +102,7 @@
       <Button
         name="delete-filter"
         icon="pi pi-times"
-        class="inputfield"
+        class="w-3rem"
         @click="$emit('deleteFormFilter')"
       />
     </div>
