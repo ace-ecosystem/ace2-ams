@@ -2,15 +2,15 @@
 <!-- 'Filter' editing modal, agnostic to what data types are being filtered -->
 
 <template>
-  <BaseModal :name="name" header="Edit Filters">
-    <div v-for="(filter, index) in formFilters" :key="filter.index">
-      <FilterInput v-model="formFilters[index]"></FilterInput>
-      <Button
-        name="delete-filter"
-        icon="pi pi-times"
-        class="inputfield"
-        @click="deleteFormFilter(index)"
-      />
+  <BaseModal :name="name" header="Edit Filters" class="xl: w-5 lg:w-5 md:w-8">
+    <div class="flex flex-wrap">
+      <FilterInput
+        v-for="(filter, index) in formFilters"
+        :key="filter.index"
+        v-model="formFilters[index]"
+        class="w-12"
+        @deleteFormFilter="deleteFormFilter(index)"
+      ></FilterInput>
     </div>
     <template #footer>
       <Button

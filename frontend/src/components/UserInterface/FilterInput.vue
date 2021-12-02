@@ -1,85 +1,117 @@
 <template>
-  <Dropdown
-    v-model="filterName"
-    :options="availableFilters"
-    option-label="label"
-    type="text"
-    @change="
-      clearFilterValue();
-      updateValue('filterName', $event.value);
-    "
-  />
-  <InputText
-    v-if="isInputText"
-    v-model="filterValue"
-    type="text"
-    @input="updateValue('filterValue', $event.target.value)"
-  ></InputText>
-  <Dropdown
-    v-else-if="isDropdown"
-    v-model="filterValue"
-    :options="filterOptions"
-    type="text"
-    @change="updateValue('filterValue', $event.value)"
-  ></Dropdown>
-  <Multiselect
-    v-else-if="isMultiSelect"
-    v-model="filterValue"
-    :options="filterOptions"
-    type="text"
-    @change="updateValue('filterValue', $event.value)"
-  ></Multiselect>
-  <Chips
-    v-else-if="isChips"
-    v-model="filterValue"
-    @update:model-value="updateValue('filterValue', $event)"
-  ></Chips>
-  <DatePicker
-    v-else-if="isDate"
-    v-model="filterValue"
-    mode="dateTime"
-    is24hr
-    @update:model-value="updateValue('filterValue', $event)"
-  >
-    <template #default="{ inputValue, inputEvents }">
-      <div class="p-inputgroup">
+  <div class="formgrid grid">
+    <div class="field col-fixed">
+      <Dropdown
+        v-model="filterName"
+        :options="availableFilters"
+        option-label="label"
+        type="text"
+        @change="
+          clearFilterValue();
+          updateValue('filterName', $event.value);
+        "
+      />
+    </div>
+    <div class="col">
+      <div v-if="isInputText" class="field">
         <InputText
+          v-model="filterValue"
+          class="inputfield w-full"
           type="text"
-          :value="inputValue"
-          placeholder="Enter a date!"
-          v-on="inputEvents"
-        />
+          @input="updateValue('filterValue', $event.target.value)"
+        ></InputText>
       </div>
-    </template>
-  </DatePicker>
-  <div v-else-if="isCategorizedValue">
-    <Dropdown
-      v-model="filterValue.category"
-      :options="filterOptions"
-      type="text"
-      @change="
-        updateValue(
-          'filterValue',
-          updatedCategorizedValueObject('category', $event.value),
-        )
-      "
-    ></Dropdown>
-    <InputText
-      v-model="filterValue.value"
-      type="text"
-      @input="
-        updateValue(
-          'filterValue',
-          updatedCategorizedValueObject('value', $event.target.value),
-        )
-      "
-    ></InputText>
+      <div v-else-if="isDropdown" class="field">
+        <Dropdown
+          v-model="filterValue"
+          class="inputfield w-full"
+          :options="filterOptions"
+          type="text"
+          @change="updateValue('filterValue', $event.value)"
+        ></Dropdown>
+      </div>
+      <div v-else-if="isMultiSelect" class="field">
+        <Multiselect
+          v-model="filterValue"
+          class="inputfield w-full"
+          :options="filterOptions"
+          type="text"
+          @change="updateValue('filterValue', $event.value)"
+        ></Multiselect>
+      </div>
+      <div v-else-if="isChips" class="field">
+        <Chips
+          v-model="filterValue"
+          class="inputfield w-full"
+          @update:model-value="updateValue('filterValue', $event)"
+        ></Chips>
+      </div>
+      <div v-else-if="isDate" class="field">
+        <DatePicker
+          v-model="filterValue"
+          mode="dateTime"
+          class="inputfield w-full"
+          is24hr
+          @update:model-value="updateValue('filterValue', $event)"
+        >
+          <template #default="{ inputValue, inputEvents }">
+            <div class="p-inputgroup">
+              <InputText
+                class="inputfield w-full"
+                type="text"
+                :value="inputValue"
+                placeholder="Enter a date!"
+                v-on="inputEvents"
+              />
+            </div>
+          </template>
+        </DatePicker>
+      </div>
+      <div v-else-if="isCategorizedValue">
+        <div class="col field">
+          <Dropdown
+            v-model="filterValue.category"
+            :options="filterOptions"
+            type="text"
+            class="inputfield w-full"
+            @change="
+              updateValue(
+                'filterValue',
+                updatedCategorizedValueObject('category', $event.value),
+              )
+            "
+          ></Dropdown>
+        </div>
+        <div class="col field">
+          <InputText
+            v-model="filterValue.value"
+            class="inputfield w-full"
+            type="text"
+            @input="
+              updateValue(
+                'filterValue',
+                updatedCategorizedValueObject('value', $event.target.value),
+              )
+            "
+          ></InputText>
+        </div>
+      </div>
+    </div>
+    <div class="field col-fixed">
+      <Button
+        name="delete-filter"
+        icon="pi pi-times"
+        class="inputfield"
+        @click="$emit('deleteFormFilter')"
+      />
+    </div>
   </div>
 </template>
 
 <script>
   import InputText from "primevue/inputtext";
 
+  import Button from "primevue/button";
   import Dropdown from "primevue/dropdown";
 
   import { DatePicker } from "v-calendar";
@@ -91,6 +123,7 @@
   export default {
     name: "FilterInput",
     components: {
+      Button,
       Dropdown,
       InputText,
       Multiselect,
@@ -101,7 +134,7 @@
     inject: ["availableFilters", "filterType"],
 
     props: ["modelValue"],
-    emits: ["update:modelValue"],
+    emits: ["update:modelValue", "deleteFormFilter"],
 
     data() {
       return {
