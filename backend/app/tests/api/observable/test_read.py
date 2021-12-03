@@ -26,9 +26,12 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 
 
 def test_get_all(client_valid_access_token, db):
+    # Create an alert
+    alert = helpers.create_alert(db=db)
+
     # Create some objects
-    helpers.create_observable(type="test_type", value="test", db=db)
-    helpers.create_observable(type="test_type", value="test2", db=db)
+    helpers.create_observable(root_node=alert, type="test_type", value="test", db=db)
+    helpers.create_observable(root_node=alert, type="test_type", value="test2", db=db)
 
     # Read them back
     get = client_valid_access_token.get("/api/observable/")

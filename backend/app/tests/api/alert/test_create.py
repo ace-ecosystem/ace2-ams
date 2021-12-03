@@ -3,7 +3,8 @@ import uuid
 
 from fastapi import status
 from db.schemas.analysis import Analysis
-from db.schemas.observable_instance import ObservableInstance
+from db.schemas.node_tree import NodeTree
+from db.schemas.observable import Observable
 
 from tests.api.node import (
     INVALID_CREATE_FIELDS,
@@ -34,13 +35,13 @@ from tests import helpers
         ("instructions", ""),
         ("name", 123),
         ("name", ""),
-        ("observable_instances", 123),
-        ("observable_instances", ""),
-        ("observable_instances", "abc"),
-        ("observable_instances", [123]),
-        ("observable_instances", [None]),
-        ("observable_instances", [""]),
-        ("observable_instances", ["abc", 123]),
+        ("observables", 123),
+        ("observables", ""),
+        ("observables", "abc"),
+        ("observables", [123]),
+        ("observables", [None]),
+        ("observables", [""]),
+        ("observables", ["abc", 123]),
         ("owner", 123),
         ("owner", ""),
         ("queue", 123),
@@ -63,7 +64,7 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
     create_json = {
         "name": "test alert",
         "queue": "test_queue",
-        "observable_instances": [{"type": "o_type", "value": "o_value"}],
+        "observables": [{"type": "o_type", "value": "o_value"}],
         "type": "test_type",
     }
     create_json[key] = value
@@ -83,7 +84,7 @@ def test_create_invalid_node_fields(client_valid_access_token, key, value):
             key: value,
             "name": "test alert",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -106,7 +107,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "uuid": str(uuid.uuid4()),
         "name": "test alert",
         "queue": "test_queue",
-        "observable_instances": [{"type": "o_type", "value": "o_value"}],
+        "observables": [{"type": "o_type", "value": "o_value"}],
         "type": "test_type",
     }
     client_valid_access_token.post("/api/alert/", json=create1_json)
@@ -115,7 +116,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     create2_json = {
         "name": "test alert",
         "queue": "test_queue",
-        "observable_instances": [{"type": "o_type", "value": "o_value"}],
+        "observables": [{"type": "o_type", "value": "o_value"}],
         "type": "test_type",
     }
     create2_json[key] = create1_json[key]
@@ -133,7 +134,7 @@ def test_create_nonexistent_observable_type(client_valid_access_token, db):
         json={
             "name": "test alert",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -153,7 +154,7 @@ def test_create_nonexistent_owner(client_valid_access_token, db):
             "name": "test alert",
             "owner": "johndoe",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -171,7 +172,7 @@ def test_create_nonexistent_queue(client_valid_access_token, db):
         json={
             "name": "test alert",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -191,7 +192,7 @@ def test_create_nonexistent_tool(client_valid_access_token, db):
             "name": "test alert",
             "tool": "abc",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -211,7 +212,7 @@ def test_create_nonexistent_tool_instance(client_valid_access_token, db):
             "name": "test alert",
             "tool_instance": "abc",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -229,7 +230,7 @@ def test_create_nonexistent_type(client_valid_access_token, db):
         json={
             "name": "test alert",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -252,7 +253,7 @@ def test_create_nonexistent_node_fields(client_valid_access_token, db, key, valu
             key: value,
             "name": "test alert",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -291,7 +292,7 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
             key: value,
             "name": "test alert",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -322,7 +323,7 @@ def test_create_valid_owner(client_valid_access_token, db):
             "name": "test alert",
             "owner": "johndoe",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -348,7 +349,7 @@ def test_create_valid_tool(client_valid_access_token, db):
             "name": "test alert",
             "tool": "test_tool",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -374,7 +375,7 @@ def test_create_valid_tool_instance(client_valid_access_token, db):
             "name": "test alert",
             "tool_instance": "test_tool_instance",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -396,7 +397,7 @@ def test_create_valid_required_fields(client_valid_access_token, db):
         json={
             "name": "test alert",
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -408,18 +409,13 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     assert get.json()["alert"]["queue"]["value"] == "test_queue"
     assert get.json()["alert"]["type"]["value"] == "test_type"
 
-    # There should be 1 analysis associated with the alert
-    analyses = db.query(Analysis).all()
-    assert len(analyses) == 1
-    assert str(analyses[0].alert_uuid) == get.json()["alert"]["uuid"]
-
     # There should also be 1 observable instance associated with the alert
-    observable_instances = db.query(ObservableInstance).all()
-    assert len(observable_instances) == 1
-    assert observable_instances[0].observable.type.value == "o_type"
-    assert observable_instances[0].observable.value == "o_value"
-    assert str(observable_instances[0].alert_uuid) == get.json()["alert"]["uuid"]
-    assert observable_instances[0].parent_uuid == analyses[0].uuid
+    node_tree = db.query(NodeTree).all()
+    assert len(node_tree) == 1
+    assert str(node_tree[0].root_node_uuid) == get.json()["alert"]["uuid"]
+    observable = db.query(Observable).where(Observable.uuid == node_tree[0].node_uuid).one()
+    assert observable.type.value == "o_type"
+    assert observable.value == "o_value"
 
 
 @pytest.mark.parametrize(
@@ -441,7 +437,7 @@ def test_create_valid_node_directives(client_valid_access_token, db, values):
             "name": "test alert",
             "directives": values,
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -471,7 +467,7 @@ def test_create_valid_node_tags(client_valid_access_token, db, values):
             "name": "test alert",
             "tags": values,
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -501,7 +497,7 @@ def test_create_valid_node_threat_actor(client_valid_access_token, db, value):
             "name": "test alert",
             "threat_actor": value,
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}],
             "type": "test_type",
         },
     )
@@ -534,7 +530,7 @@ def test_create_valid_node_threats(client_valid_access_token, db, values):
             "name": "test alert",
             "threats": values,
             "queue": "test_queue",
-            "observable_instances": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value"}, {"type": "o_type", "value": "o_value2"}],
             "type": "test_type",
         },
     )

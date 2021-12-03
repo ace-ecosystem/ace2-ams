@@ -43,7 +43,8 @@ def test_update_invalid_fields(client_valid_access_token, key, value):
         f"/api/analysis/{uuid.uuid4()}", json={key: value, "version": str(uuid.uuid4())}
     )
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert key in update.text
+    assert len(update.json()["detail"]) == 1
+    assert key in update.json()["detail"][0]["loc"]
 
 
 @pytest.mark.parametrize(
@@ -55,7 +56,8 @@ def test_update_invalid_node_fields(client_valid_access_token, key, value):
         f"/api/analysis/{uuid.uuid4()}", json={"version": str(uuid.uuid4()), key: value}
     )
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert key in update.text
+    assert len(update.json()["detail"]) == 1
+    assert key in update.json()["detail"][0]["loc"]
 
 
 def test_update_invalid_uuid(client_valid_access_token):
@@ -66,7 +68,7 @@ def test_update_invalid_uuid(client_valid_access_token):
 def test_update_invalid_version(client_valid_access_token, db):
     # Create an alert and analysis
     alert = helpers.create_alert(db=db)
-    analysis = helpers.create_analysis(db=db, alert=alert)
+    analysis = helpers.create_analysis(db=db, root_node=alert)
 
     # Make sure you cannot update it using an invalid version
     update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={"version": str(uuid.uuid4())})
@@ -76,7 +78,7 @@ def test_update_invalid_version(client_valid_access_token, db):
 def test_update_nonexistent_analysis_module_type(client_valid_access_token, db):
     # Create an alert and analysis
     alert = helpers.create_alert(db=db)
-    analysis = helpers.create_analysis(db=db, alert=alert)
+    analysis = helpers.create_analysis(db=db, root_node=alert)
 
     # Make sure you cannot update it to use a nonexistent analysis module type
     update = client_valid_access_token.patch(
@@ -93,7 +95,7 @@ def test_update_nonexistent_analysis_module_type(client_valid_access_token, db):
 def test_update_nonexistent_node_fields(client_valid_access_token, db, key, value):
     # Create an alert and analysis
     alert = helpers.create_alert(db=db)
-    analysis = helpers.create_analysis(db=db, alert=alert)
+    analysis = helpers.create_analysis(db=db, root_node=alert)
 
     # Make sure you cannot update it to use a nonexistent node field value
     update = client_valid_access_token.patch(
@@ -115,7 +117,7 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 def test_update_analysis_module_type(client_valid_access_token, db):
     # Create an alert and analysis
     alert = helpers.create_alert(db=db)
-    analysis = helpers.create_analysis(db=db, alert=alert)
+    analysis = helpers.create_analysis(db=db, root_node=alert)
     initial_analysis_version = analysis.version
 
     # Create a new analysis module type
@@ -138,7 +140,7 @@ def test_update_analysis_module_type(client_valid_access_token, db):
 def test_update_valid_node_directives(client_valid_access_token, db, values):
     # Create an alert and analysis
     alert = helpers.create_alert(db=db)
-    analysis = helpers.create_analysis(db=db, alert=alert)
+    analysis = helpers.create_analysis(db=db, root_node=alert)
     initial_analysis_version = analysis.version
 
     # Create the directives
@@ -161,7 +163,7 @@ def test_update_valid_node_directives(client_valid_access_token, db, values):
 def test_update_valid_node_tags(client_valid_access_token, db, values):
     # Create an alert and analysis
     alert = helpers.create_alert(db=db)
-    analysis = helpers.create_analysis(db=db, alert=alert)
+    analysis = helpers.create_analysis(db=db, root_node=alert)
     initial_analysis_version = analysis.version
 
     # Create the tags
@@ -184,7 +186,7 @@ def test_update_valid_node_tags(client_valid_access_token, db, values):
 def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
     # Create an alert and analysis
     alert = helpers.create_alert(db=db)
-    analysis = helpers.create_analysis(db=db, alert=alert)
+    analysis = helpers.create_analysis(db=db, root_node=alert)
     initial_analysis_version = analysis.version
 
     # Create the threat actor
@@ -212,7 +214,7 @@ def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
 def test_update_valid_node_threats(client_valid_access_token, db, values):
     # Create an alert and analysis
     alert = helpers.create_alert(db=db)
-    analysis = helpers.create_analysis(db=db, alert=alert)
+    analysis = helpers.create_analysis(db=db, root_node=alert)
     initial_analysis_version = analysis.version
 
     # Create the threats
@@ -244,7 +246,7 @@ def test_update_valid_node_threats(client_valid_access_token, db, values):
 def test_update(client_valid_access_token, db, key, initial_value, updated_value):
     # Create an alert and analysis
     alert = helpers.create_alert(db=db)
-    analysis = helpers.create_analysis(db=db, alert=alert)
+    analysis = helpers.create_analysis(db=db, root_node=alert)
     initial_analysis_version = analysis.version
 
     # Set the initial value

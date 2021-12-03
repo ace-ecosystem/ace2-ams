@@ -23,10 +23,6 @@ from tests import helpers
 @pytest.mark.parametrize(
     "key,value",
     [
-        ("alert_uuid", 123),
-        ("alert_uuid", None),
-        ("alert_uuid", ""),
-        ("alert_uuid", "abc"),
         ("analysis_module_type", 123),
         ("analysis_module_type", ""),
         ("analysis_module_type", "abc"),
@@ -47,10 +43,14 @@ from tests import helpers
     ],
 )
 def test_create_invalid_fields(client_valid_access_token, key, value):
-    create_json = {"alert_uuid": str(uuid.uuid4())}
+    create_json = {
+        "node_tree": {"root_node_uuid": str(uuid.uuid4())},
+    }
     create_json[key] = value
     create = client_valid_access_token.post("/api/analysis/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert len(create.json()["detail"]) == 1
+    assert key in create.json()["detail"][0]["loc"]
 
 
 @pytest.mark.parametrize(
@@ -58,8 +58,16 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
     INVALID_CREATE_FIELDS,
 )
 def test_create_invalid_node_fields(client_valid_access_token, key, value):
-    create = client_valid_access_token.post("/api/analysis/", json={key: value, "alert_uuid": str(uuid.uuid4())})
+    create = client_valid_access_token.post(
+        "/api/analysis/",
+        json={
+            key: value,
+            "node_tree": {"root_node_uuid": str(uuid.uuid4())},
+        },
+    )
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert len(create.json()["detail"]) == 1
+    assert key in create.json()["detail"][0]["loc"]
 
 
 @pytest.mark.parametrize(
@@ -72,11 +80,11 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     alert = helpers.create_alert(db=db)
 
     # Create an object
-    create1_json = {"uuid": str(uuid.uuid4()), "alert_uuid": str(alert.uuid)}
+    create1_json = {"uuid": str(uuid.uuid4()), "node_tree": {"root_node_uuid": str(alert.uuid)}}
     client_valid_access_token.post("/api/analysis/", json=create1_json)
 
     # Ensure you cannot create another object with the same unique field value
-    create2_json = {"alert_uuid": str(alert.uuid)}
+    create2_json = {"node_tree": {"root_node_uuid": str(alert.uuid)}}
     create2_json[key] = create1_json[key]
     create2 = client_valid_access_token.post("/api/analysis/", json=create2_json)
     assert create2.status_code == status.HTTP_409_CONFLICT
@@ -86,16 +94,8 @@ def test_create_nonexistent_analysis_module_type(client_valid_access_token, db):
     alert = helpers.create_alert(db=db)
 
     create = client_valid_access_token.post(
-        "/api/analysis/", json={"alert_uuid": str(alert.uuid), "analysis_module_type": str(uuid.uuid4())}
-    )
-    assert create.status_code == status.HTTP_404_NOT_FOUND
-
-
-def test_create_nonexistent_parent_uuid(client_valid_access_token, db):
-    alert = helpers.create_alert(db=db)
-
-    create = client_valid_access_token.post(
-        "/api/analysis/", json={"alert_uuid": str(alert.uuid), "parent_uuid": str(uuid.uuid4())}
+        "/api/analysis/",
+        json={"node_tree": {"root_node_uuid": str(alert.uuid)}, "analysis_module_type": str(uuid.uuid4())},
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
@@ -107,7 +107,9 @@ def test_create_nonexistent_parent_uuid(client_valid_access_token, db):
 def test_create_nonexistent_node_fields(client_valid_access_token, db, key, value):
     alert = helpers.create_alert(db=db)
 
-    create = client_valid_access_token.post("/api/analysis/", json={"alert_uuid": str(alert.uuid), key: value})
+    create = client_valid_access_token.post(
+        "/api/analysis/", json={"node_tree": {"root_node_uuid": str(alert.uuid)}, key: value}
+    )
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -135,7 +137,9 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
     alert = helpers.create_alert(db=db)
 
     # Create the object
-    create = client_valid_access_token.post("/api/analysis/", json={"alert_uuid": str(alert.uuid), key: value})
+    create = client_valid_access_token.post(
+        "/api/analysis/", json={"node_tree": {"root_node_uuid": str(alert.uuid)}, key: value}
+    )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
@@ -154,7 +158,8 @@ def test_create_valid_analysis_module_type(client_valid_access_token, db):
 
     # Use the analysis module type to create a new analysis
     create = client_valid_access_token.post(
-        "/api/analysis/", json={"alert_uuid": str(alert.uuid), "analysis_module_type": str(analysis_module_type.uuid)}
+        "/api/analysis/",
+        json={"node_tree": {"root_node_uuid": str(alert.uuid)}, "analysis_module_type": str(analysis_module_type.uuid)},
     )
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -163,42 +168,11 @@ def test_create_valid_analysis_module_type(client_valid_access_token, db):
     assert get.json()["analysis_module_type"]["uuid"] == str(analysis_module_type.uuid)
 
 
-def test_create_valid_parent_uuid(client_valid_access_token, db):
-    alert = helpers.create_alert(db=db)
-    root_analysis = helpers.create_analysis(db=db, alert=alert)
-
-    # Create an observable instance
-    observable_instance = helpers.create_observable_instance(
-        type="test_type", value="test", alert=alert, parent_analysis=root_analysis, db=db
-    )
-    initial_observable_instance_version = observable_instance.version
-
-    # Use the observable instance as the parent for a new analysis
-    child_analysis_uuid = uuid.uuid4()
-    create = client_valid_access_token.post(
-        "/api/analysis/",
-        json={
-            "alert_uuid": str(alert.uuid),
-            "parent_uuid": str(observable_instance.uuid),
-            "uuid": str(child_analysis_uuid),
-        },
-    )
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["parent_uuid"] == str(observable_instance.uuid)
-
-    # Adding the child analysis to the observable instance should trigger
-    # the observable instance to get a new version.
-    assert observable_instance.version != initial_observable_instance_version
-
-
 def test_create_valid_required_fields(client_valid_access_token, db):
     alert = helpers.create_alert(db=db)
 
     # Create the object
-    create = client_valid_access_token.post("/api/analysis/", json={"alert_uuid": str(alert.uuid)})
+    create = client_valid_access_token.post("/api/analysis/", json={"node_tree": {"root_node_uuid": str(alert.uuid)}})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back, but since there are no required fields to create the analysis, there is nothing to verify.
@@ -217,7 +191,7 @@ def test_create_valid_node_directives(client_valid_access_token, db, values):
 
     # Create the node
     create = client_valid_access_token.post(
-        "/api/analysis/", json={"alert_uuid": str(alert.uuid), "directives": values}
+        "/api/analysis/", json={"node_tree": {"root_node_uuid": str(alert.uuid)}, "directives": values}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -236,7 +210,9 @@ def test_create_valid_node_tags(client_valid_access_token, db, values):
         helpers.create_node_tag(value=value, db=db)
 
     # Create the node
-    create = client_valid_access_token.post("/api/analysis/", json={"alert_uuid": str(alert.uuid), "tags": values})
+    create = client_valid_access_token.post(
+        "/api/analysis/", json={"node_tree": {"root_node_uuid": str(alert.uuid)}, "tags": values}
+    )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
@@ -255,7 +231,7 @@ def test_create_valid_node_threat_actor(client_valid_access_token, db, value):
 
     # Create the node
     create = client_valid_access_token.post(
-        "/api/analysis/", json={"alert_uuid": str(alert.uuid), "threat_actor": value}
+        "/api/analysis/", json={"node_tree": {"root_node_uuid": str(alert.uuid)}, "threat_actor": value}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -277,7 +253,9 @@ def test_create_valid_node_threats(client_valid_access_token, db, values):
         helpers.create_node_threat(value=value, types=["test_type"], db=db)
 
     # Create the node
-    create = client_valid_access_token.post("/api/analysis/", json={"alert_uuid": str(alert.uuid), "threats": values})
+    create = client_valid_access_token.post(
+        "/api/analysis/", json={"node_tree": {"root_node_uuid": str(alert.uuid)}, "threats": values}
+    )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
