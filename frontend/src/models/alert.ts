@@ -117,11 +117,12 @@ export type alertFilterValues =
   | (string & string[] & Date & { type: string; value: string })
   | undefined;
 
-export type alertFilterOption = {
+export interface alertFilterOption {
   readonly name: alertFilterNameTypes;
   readonly label: string;
   readonly type: string;
   readonly options?: string;
+  readonly optionLabel?: string;
   readonly optionValue?: string;
   readonly formatForAPI?: (filter: any) => string;
 };

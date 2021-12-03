@@ -46,7 +46,8 @@ export const alertFilters: readonly alertFilterOption[] = [
     label: "Dispositioned By",
     type: filterTypes.SELECT,
     options: "users",
-    optionValue: "displayName",
+    optionValue: "username",
+    optionLabel: "displayName",
   },
   {
     name: alertFilterNames.DISPOSITIONED_AFTER_FILTER,
@@ -117,7 +118,8 @@ export const alertFilters: readonly alertFilterOption[] = [
     label: "Owner",
     type: filterTypes.SELECT,
     options: "users",
-    optionValue: "displayName",
+    optionLabel: "displayName",
+    optionValue: "username",
   },
   {
     name: alertFilterNames.QUEUE_FILTER,

@@ -27,6 +27,7 @@
           v-model="filterValue"
           class="inputfield w-16rem"
           :options="filterOptions"
+          :option-label="filterOptionLabel"
           type="text"
           @change="updateValue('filterValue', $event.value)"
         ></Dropdown>
@@ -150,15 +151,19 @@
           const options =
             this.$store.getters[`${this.filterName.options}/allItems`];
           if (options) {
-            return options.map((option) => option[this.filterOptionLabel]);
+            // return options.map((option) => option[this.filterOptionLabel]);
+            return options;
           }
         }
         return null;
       },
       filterOptionLabel() {
-        return this.filterName.optionValue
-          ? this.filterName.optionValue
+        return this.filterName.optionLabel
+          ? this.filterName.optionLabel
           : "value";
+      },
+      filterOptionValue() {
+        return this.filterName.optionValue ? this.filterName.optionValue : null;
       },
       isDate() {
         return this.inputType == "date";
@@ -185,6 +190,7 @@
 
     mounted() {
       this.updateValue("filterName", null, this.filterName);
+      this.filterValue = this.getFilterValueObject(this.filterValue);
     },
 
     methods: {
@@ -220,6 +226,16 @@
         filter = filter ? filter[0] : null;
         return filter;
       },
+      getFilterValueObject(filterValue) {
+        if (!filterValue || !this.filterOptions) {
+          return filterValue;
+        }
+        let value = this.filterOptions.filter((option) => {
+          return option[this.filterOptionValue] === filterValue;
+        });
+        value = value ? value[0] : null;
+        return value;
+      },
       updateValue(attribute, newValue) {
         if (attribute === "filterName") {
           this.$emit("update:modelValue", {
@@ -229,7 +245,9 @@
         } else if (attribute === "filterValue") {
           this.$emit("update:modelValue", {
             filterName: this.filterName.name,
-            filterValue: newValue,
+            filterValue: this.filterOptionValue
+              ? newValue[this.filterOptionValue]
+              : newValue,
           });
         }
       },

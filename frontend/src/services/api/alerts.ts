@@ -20,12 +20,15 @@ export const Alert = {
 
   readPage: (params?: alertFilterParams): Promise<alertReadPage> => {
     if (params) {
-      let param: keyof alertFilterParams;
-      for (param in params) {
+      for (const param in params) {
         const paramValue = params[param];
+
+        //  check if the given param is specific to alerts, i.e. disposition
         const filterType = alertFilters.find((filter) => {
           return filter.name === param;
         });
+
+        // if so, check if the param's value needs to be formatted, and replace with the newly formatted val
         if (filterType && filterType.formatForAPI) {
           params[param] = filterType.formatForAPI(paramValue) as never;
         }
