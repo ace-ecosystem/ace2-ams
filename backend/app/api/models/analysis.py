@@ -6,7 +6,7 @@ from pydantic.main import BaseModel
 
 from api.models import type_str
 from api.models.analysis_module_type import AnalysisModuleTypeAlertTreeRead, AnalysisModuleTypeRead
-from api.models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
+from api.models.node import NodeBase, NodeCreate, NodeRead, NodeTreeCreateWithNode, NodeUpdate
 
 
 class AnalysisBase(NodeBase):
@@ -27,15 +27,13 @@ class AnalysisBase(NodeBase):
 
 
 class AnalysisCreate(NodeCreate, AnalysisBase):
-    alert_uuid: UUID4 = Field(description="The UUID of the alert containing this analysis")
-
     # TODO - save for the end, still need to flesh out this functionality
     # event_summary: Optional[AnalysisEventSummary] = Field(
     #     description="""Optional summary information to display on an event page if this analysis is ever added to an
     #     event"""
     # )
 
-    parent_uuid: Optional[UUID4] = Field(description="The UUID of the observable containing this analysis")
+    node_tree: NodeTreeCreateWithNode = Field(description="This defines where in a Node Tree this analysis fits")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
 
@@ -47,8 +45,6 @@ class AnalysisAlertTreeRead(BaseModel):
         description="The analysis module type that was used to perform this analysis"
     )
 
-    parent_uuid: Optional[UUID4] = Field(description="The UUID of the observable containing this analysis")
-
     uuid: UUID4 = Field(description="The UUID of the analysis")
 
     class Config:
@@ -56,15 +52,11 @@ class AnalysisAlertTreeRead(BaseModel):
 
 
 class AnalysisRead(NodeRead, AnalysisBase):
-    alert_uuid: UUID4 = Field(description="The UUID of the alert containing this analysis")
-
     analysis_module_type: Optional[AnalysisModuleTypeRead] = Field(
         description="The analysis module type that was used to perform this analysis"
     )
 
     details: Optional[dict] = Field(description="A JSON representation of the details produced by the analysis")
-
-    parent_uuid: Optional[UUID4] = Field(description="The UUID of the observable containing this analysis")
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
 

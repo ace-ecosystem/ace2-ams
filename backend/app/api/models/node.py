@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, UUID4
-from typing import Dict, List, Optional
+from typing import List, Optional
 from uuid import uuid4
 
 from api.models import type_str
@@ -50,6 +50,8 @@ class NodeRead(NodeBase):
 
     directives: List[NodeDirectiveRead] = Field(description="A list of directives added to the node")
 
+    parent_uuid: Optional[UUID4] = Field(description="The node's parent UUID if the node is inside a node tree")
+
     tags: List[NodeTagRead] = Field(description="A list of tags added to the node")
 
     threat_actor: Optional[NodeThreatActorRead] = Field(description="The threat actor added to the node")
@@ -74,3 +76,46 @@ class NodeUpdate(NodeBase):
     version: UUID4 = Field(
         description="""The version of the Node being updated. This must match its current version to succeed."""
     )
+
+
+class NodeTreeBase(BaseModel):
+    """Represents a leaf in a Node tree."""
+
+    node_uuid: UUID4 = Field(description="The node UUID of the leaf")
+
+    root_node_uuid: UUID4 = Field(
+        description="""The node UUID that contains the tree.
+            For example, an alert UUID that contains a tree of analyses and observables."""
+    )
+
+    parent_node_uuid: Optional[UUID4] = Field(description="The node UUID of the leaf node")
+
+    class Config:
+        orm_mode = True
+
+
+class NodeTreeCreateWithNode(BaseModel):
+    root_node_uuid: UUID4 = Field(
+        description="""The node UUID that contains the tree.
+            For example, an alert UUID that contains a tree of analyses and observables."""
+    )
+
+    parent_node_uuid: Optional[UUID4] = Field(description="The node UUID of the leaf node")
+
+
+class NodeTreeRead(BaseModel):
+    root_node: NodeRead = Field(description="The root node of the tree. For example, this will often be an Alert.")
+
+    leaves: List[NodeTreeBase] = Field(description="A list of the Node leaves that make up the tree")
+
+    class Config:
+        orm_mode = True
+
+
+class NodeTreeUpdate(NodeTreeBase):
+    root_node_uuid: Optional[UUID4] = Field(
+        description="""The node UUID that contains the tree.
+            For example, an alert UUID that contains a tree of analyses and observables."""
+    )
+
+    node_uuid: Optional[UUID4] = Field(description="The node UUID of the leaf")

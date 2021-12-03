@@ -35,7 +35,6 @@ from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.observable import Observable
-from db.schemas.observable_instance import ObservableInstance
 from db.schemas.observable_type import ObservableType
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
@@ -97,7 +96,7 @@ def create_alert(
     event_time: datetime = None,
     insert_time: datetime = None,
     name: str = "Test Alert",
-    observable_instances: Optional[List[dict]] = None,
+    observables: Optional[List[dict]] = None,
     owner: Optional[str] = None,
     tags: Optional[List[str]] = None,
     threat_actor: Optional[str] = None,
@@ -146,15 +145,12 @@ def create_alert(
     if insert_time:
         alert.insert_time = insert_time
 
-    if observable_instances:
-        root_analysis = create_analysis(db=db, alert=alert)
-
-        for observable_instance in observable_instances:
-            create_observable_instance(
-                type=observable_instance["type"],
-                value=observable_instance["value"],
-                alert=alert,
-                parent_analysis=root_analysis,
+    if observables:
+        for observable in observables:
+            create_observable(
+                type=observable["type"],
+                value=observable["value"],
+                root_node=alert,
                 db=db,
             )
 
@@ -178,7 +174,8 @@ def create_alert(
 
 def create_analysis(
     db: Session,
-    alert: Alert,
+    root_node: Node,
+    parent_node: Optional[Node] = None,
     amt_value: Optional[str] = None,
     amt_description: Optional[str] = None,
     amt_extended_version: Optional[dict] = None,
@@ -187,7 +184,6 @@ def create_analysis(
     amt_required_directives: List[str] = None,
     amt_required_tags: List[str] = None,
     amt_version: str = "1.0.0",
-    parent_observable: Optional[ObservableInstance] = None,
 ) -> Analysis:
     if amt_value:
         analysis_module_type = create_analysis_module_type(
@@ -203,16 +199,24 @@ def create_analysis(
         )
 
         obj = Analysis(
-            alert=alert,
             analysis_module_type=analysis_module_type,
-            parent_observable=parent_observable,
             uuid=uuid.uuid4(),
             version=uuid.uuid4(),
         )
     else:
-        obj = Analysis(alert=alert, parent_observable=parent_observable, uuid=uuid.uuid4(), version=uuid.uuid4())
+        obj = Analysis(uuid=uuid.uuid4(), version=uuid.uuid4())
 
     db.add(obj)
+    crud.commit(db)
+
+    parent_node_uuid = None
+    if parent_node:
+        parent_node_uuid = parent_node.uuid
+
+    crud.create_node_tree_leaf(
+        root_node_uuid=root_node.uuid, parent_node_uuid=parent_node_uuid, node_uuid=obj.uuid, db=db
+    )
+
     crud.commit(db)
     return obj
 
@@ -347,37 +351,18 @@ def create_node_threat_type(value: str, db: Session) -> NodeThreatType:
 
 
 def create_observable(
-    type: str, value: str, db: Session, expires_on: Optional[datetime] = None, for_detection: bool = False
-) -> Observable:
-    existing = crud.read_observable(type=type, value=value, db=db)
-    if existing:
-        return existing
-
-    obj = Observable(
-        expires_on=expires_on,
-        for_detection=for_detection,
-        type=create_observable_type(value=type, db=db),
-        uuid=uuid.uuid4(),
-        value=value,
-    )
-    db.add(obj)
-    crud.commit(db)
-    return obj
-
-
-def create_observable_instance(
     type: str,
     value: str,
-    alert: Alert,
-    parent_analysis: Analysis,
+    root_node: Node,
     db: Session,
     context: Optional[str] = None,
-    redirection: Optional[ObservableInstance] = None,
+    expires_on: Optional[datetime] = None,
+    for_detection: bool = False,
+    parent_node: Optional[Node] = None,
+    redirection: Optional[Observable] = None,
     tags: Optional[List[str]] = None,
     time: Optional[datetime] = None,
-) -> ObservableInstance:
-    observable = create_observable(type=type, value=value, db=db)
-
+) -> Observable:
     if time is None:
         time = datetime.utcnow()
 
@@ -386,18 +371,31 @@ def create_observable_instance(
     else:
         tags = []
 
-    obj = ObservableInstance(
-        observable=observable,
-        alert_uuid=alert.uuid,
-        parent_analysis=parent_analysis,
-        context=context,
-        redirection=redirection,
-        tags=tags,
-        time=time,
-        uuid=uuid.uuid4(),
-        version=uuid.uuid4(),
+    obj = crud.read_observable(type=type, value=value, db=db)
+    if not obj:
+        obj = Observable(
+            context=context,
+            expires_on=expires_on,
+            for_detection=for_detection,
+            redirection=redirection,
+            tags=tags,
+            time=time,
+            type=create_observable_type(value=type, db=db),
+            uuid=uuid.uuid4(),
+            value=value,
+            version=uuid.uuid4(),
+        )
+        db.add(obj)
+        crud.commit(db)
+
+    parent_node_uuid = None
+    if parent_node:
+        parent_node_uuid = parent_node.uuid
+
+    crud.create_node_tree_leaf(
+        root_node_uuid=root_node.uuid, parent_node_uuid=parent_node_uuid, node_uuid=obj.uuid, db=db
     )
-    db.add(obj)
+
     crud.commit(db)
     return obj
 
@@ -446,7 +444,7 @@ def create_user_role(value: str, db: Session) -> UserRole:
 
 
 def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
-    def _create_analysis(a, alert, parent_observable):
+    def _create_analysis(a, root_node: Node, parent_node: Node):
         observable_types = None
         if "observable_types" in a:
             observable_types = a["observable_types"]
@@ -461,8 +459,8 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
 
         analysis = create_analysis(
             db=db,
-            alert=alert,
-            parent_observable=parent_observable,
+            root_node=root_node,
+            parent_node=parent_node,
             amt_value=a["type"],
             amt_observable_types=observable_types,
             amt_required_directives=required_directives,
@@ -471,20 +469,20 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
 
         if "observables" in a:
             for observable in a["observables"]:
-                _create_observable_instance(observable, alert, analysis)
+                _create_observable(observable, root_node, analysis)
 
-    def _create_observable_instance(o, alert, parent_analysis):
+    def _create_observable(o, root_node: Node, parent_node: Optional[Node] = None):
         tags = None
         if "tags" in o:
             tags = o["tags"]
 
-        observable_instance = create_observable_instance(
-            db=db, alert=alert, parent_analysis=parent_analysis, type=o["type"], value=o["value"], tags=tags
+        observable = create_observable(
+            db=db, root_node=root_node, parent_node=parent_node, type=o["type"], value=o["value"], tags=tags
         )
 
         if "analyses" in o:
             for analysis in o["analyses"]:
-                _create_analysis(analysis, alert, observable_instance)
+                _create_analysis(analysis, root_node, observable)
 
     def _replace_tokens(text: str, token: str, num_words: int = 1) -> str:
         num_tokens = text.count(token)
@@ -537,9 +535,7 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
         owner=owner,
     )
 
-    root_analysis = create_analysis(db=db, alert=alert)
-
     for observable in data["observables"]:
-        _create_observable_instance(observable, alert, root_analysis)
+        _create_observable(o=observable, root_node=alert, parent_node=None)
 
     return alert

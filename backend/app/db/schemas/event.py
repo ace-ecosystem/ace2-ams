@@ -61,6 +61,4 @@ class Event(Node):
 
     vectors = relationship("EventVector", secondary=event_vector_mapping)
 
-    __mapper_args__ = {
-        "polymorphic_identity": "event",
-    }
+    __mapper_args__ = {"polymorphic_identity": "event", "polymorphic_load": "inline"}

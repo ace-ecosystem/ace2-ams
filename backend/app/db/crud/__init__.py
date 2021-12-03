@@ -2,13 +2,20 @@ from fastapi import HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy import delete as sql_delete, select, update as sql_update
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import undefer, Session
+from sqlalchemy.orm import joinedload, undefer, Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.orm.exc import NoResultFound
-from typing import List, Optional, Union
-from uuid import UUID
+from sqlalchemy.sql.expression import join
+from typing import List, Optional, Tuple, Union
+from uuid import UUID, uuid4
 
+from api.models.analysis import AnalysisRead
+from api.models.observable import ObservableRead
 from core.auth import verify_password
+from db.schemas.analysis import Analysis
+from db.schemas.node import Node
+from db.schemas.node_comment import NodeComment
+from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.user import User
@@ -45,9 +52,44 @@ def create(obj: BaseModel, db_table: DeclarativeMeta, db: Session) -> UUID:
     return new_obj.uuid
 
 
+def create_node_tree_leaf(
+    root_node_uuid: UUID, node_uuid: UUID, db: Session, parent_node_uuid: Optional[UUID] = None
+) -> NodeTree:
+    """Creates an entry in the NodeTree table."""
+
+    root_node: Node = read(uuid=root_node_uuid, db_table=Node, db=db)
+
+    leaf = NodeTree()
+    leaf.root_node_uuid = root_node.uuid
+    leaf.node_uuid = node_uuid
+
+    if parent_node_uuid:
+        parent_node: Node = read(uuid=parent_node_uuid, db_table=Node, db=db)
+        leaf.parent_node_uuid = parent_node.uuid
+
+        # Update the parent node's version
+        parent_node.version = uuid4()
+
+    # Update the root node's version
+    root_node.version = uuid4()
+
+    db.add(leaf)
+
+    return leaf
+
+
 #
 # READ
 #
+
+
+# Common Node joinedload parameters used in several database queries
+node_joinedloads = (
+    joinedload(Node.comments).options(joinedload(NodeComment.user).options(joinedload(User.roles))),
+    joinedload(Node.directives),
+    joinedload(Node.tags),
+    joinedload(Node.threats),
+)
 
 
 def read_all(db_table: DeclarativeMeta, db: Session) -> List:
@@ -69,7 +111,7 @@ def read(uuid: UUID, db_table: DeclarativeMeta, db: Session, err_on_not_found: b
 
     if result is None:
         if err_on_not_found:
-            raise HTTPException(status_code=404, detail=f"UUID {uuid} does not exist.")
+            raise HTTPException(status_code=404, detail=f"UUID {uuid} does not exist in {db_table}.")
 
     return result
 
@@ -132,7 +174,8 @@ def read_by_value(value: str, db_table: DeclarativeMeta, db: Session, err_on_not
         return None
 
     try:
-        return db.execute(select(db_table).where(db_table.value == value)).scalars().one()
+        result = db.execute(select(db_table).where(db_table.value == value)).scalars().one()
+        return result
     # MultipleResultsFound exception is not caught since each database table that has a
     # value column should be configured to have that column be unique.
     except NoResultFound:
@@ -164,6 +207,54 @@ def read_by_values(values: List[str], db_table: DeclarativeMeta, db: Session):
             )
 
     return resources
+
+
+def read_node_tree(root_node_uuid: UUID, db: Session) -> List[Node]:
+    """Returns a list of Node objects that comprise a Node Tree. The returned objects
+    are manually serialized into their Pydantic models since Pydantic cannot handle
+    returning a list of multiple types of objects in this case."""
+
+    # While we can query the Node table and get back a list of various types of objects (Analysis, Observable, etc)
+    # due to the polymorphic loading, Pydantic cannot handle returning multiple types of similar objects in a list.
+    # If you try to use a Union of types in the response model, it will try to match the object with the first type
+    # in the Union that fits. And since all of the Node child objects share certain properties, there is no way for
+    # Pydantic to properly match the types.
+    #
+    # It's not an ideal solution, but the only way I've found around this is to query the database for all the Node
+    # objects and then manually check their types to serialize them into their correct Pydantic models. Then the
+    # response model for this API endpoint is simply a "list" without specifying the type of objects in the list.
+    #
+    # Source: https://github.com/samuelcolvin/pydantic/issues/514#issuecomment-491298181
+
+    node_tree_and_nodes: List[Tuple[NodeTree, Node]] = (
+        db.execute(
+            select([NodeTree, Node])
+            .select_from(join(NodeTree, Node, NodeTree.node_uuid == Node.uuid))
+            .where(NodeTree.root_node_uuid == root_node_uuid)
+            .options(
+                *node_joinedloads,
+                joinedload(Analysis.analysis_module_type),
+                joinedload(Observable.redirection),
+                joinedload(Observable.type),
+            )
+        )
+        .unique()
+        .fetchall()
+    )
+
+    tree = []
+
+    for leaf, node in node_tree_and_nodes:
+        # Inject the parent_uuid into the Node
+        node.parent_uuid = leaf.parent_node_uuid
+
+        # Serialize the database objects into their correct Pydantic models
+        if isinstance(node, Analysis):
+            tree.append(AnalysisRead(**node.__dict__))
+        elif isinstance(node, Observable):
+            tree.append(ObservableRead(**node.__dict__))
+
+    return tree
 
 
 #
