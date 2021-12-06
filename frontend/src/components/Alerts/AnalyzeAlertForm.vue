@@ -387,12 +387,12 @@
         this.routeToNewAlert();
       },
       // Submit alert create object to API to create an alert
-      async submitAlert(observableInstances) {
+      async submitAlert(observables) {
         const alert = {
           alertDescription: this.alertDescriptionFormatted,
           eventTime: this.adjustedAlertDate,
           name: this.alertDescriptionFormatted,
-          observableInstances: observableInstances,
+          observables: observables,
           queue: this.alertQueue,
           type: this.alertType,
         };

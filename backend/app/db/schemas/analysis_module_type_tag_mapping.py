@@ -18,6 +18,7 @@ analysis_module_type_tag_mapping = Table(
         "tag_uuid",
         UUID(as_uuid=True),
         ForeignKey("node_tag.uuid"),
+        index=True,
         primary_key=True,
     ),
 )

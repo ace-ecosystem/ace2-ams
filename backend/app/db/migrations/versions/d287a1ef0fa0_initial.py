@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: a4c955d60e7d
+Revision ID: d287a1ef0fa0
 Revises: 
-Create Date: 2021-11-19 21:06:06.139355
+Create Date: 2021-12-06 18:44:32.460223
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'a4c955d60e7d'
+revision = 'd287a1ef0fa0'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -178,6 +178,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('analysis_module_type_uuid', 'directive_uuid')
     )
     op.create_index(op.f('ix_analysis_module_type_directive_mapping_analysis_module_type_uuid'), 'analysis_module_type_directive_mapping', ['analysis_module_type_uuid'], unique=False)
+    op.create_index(op.f('ix_analysis_module_type_directive_mapping_directive_uuid'), 'analysis_module_type_directive_mapping', ['directive_uuid'], unique=False)
     op.create_table('analysis_module_type_observable_type_mapping',
     sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('observable_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -186,6 +187,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('analysis_module_type_uuid', 'observable_type_uuid')
     )
     op.create_index(op.f('ix_analysis_module_type_observable_type_mapping_analysis_module_type_uuid'), 'analysis_module_type_observable_type_mapping', ['analysis_module_type_uuid'], unique=False)
+    op.create_index(op.f('ix_analysis_module_type_observable_type_mapping_observable_type_uuid'), 'analysis_module_type_observable_type_mapping', ['observable_type_uuid'], unique=False)
     op.create_table('analysis_module_type_tag_mapping',
     sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('tag_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -194,6 +196,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('analysis_module_type_uuid', 'tag_uuid')
     )
     op.create_index(op.f('ix_analysis_module_type_tag_mapping_analysis_module_type_uuid'), 'analysis_module_type_tag_mapping', ['analysis_module_type_uuid'], unique=False)
+    op.create_index(op.f('ix_analysis_module_type_tag_mapping_tag_uuid'), 'analysis_module_type_tag_mapping', ['tag_uuid'], unique=False)
     op.create_table('node',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('node_type', sa.String(), nullable=True),
@@ -209,19 +212,8 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['node_threat_uuid'], ['node_threat.uuid'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('node_threat_uuid', 'node_threat_type_uuid')
     )
+    op.create_index(op.f('ix_node_threat_node_threat_type_mapping_node_threat_type_uuid'), 'node_threat_node_threat_type_mapping', ['node_threat_type_uuid'], unique=False)
     op.create_index(op.f('ix_node_threat_node_threat_type_mapping_node_threat_uuid'), 'node_threat_node_threat_type_mapping', ['node_threat_uuid'], unique=False)
-    op.create_table('observable',
-    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
-    sa.Column('expires_on', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('for_detection', sa.Boolean(), nullable=False),
-    sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('value', sa.String(), nullable=False),
-    sa.ForeignKeyConstraint(['type_uuid'], ['observable_type.uuid'], ),
-    sa.PrimaryKeyConstraint('uuid'),
-    sa.UniqueConstraint('type_uuid', 'value', name='type_value_uc')
-    )
-    op.create_index('observable_value_trgm', 'observable', ['value'], unique=False, postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
-    op.create_index('type_value', 'observable', ['type_uuid', 'value'], unique=False)
     op.create_table('user',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('default_alert_queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -236,6 +228,17 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
+    )
+    op.create_table('analysis',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('details', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('error_message', sa.String(), nullable=True),
+    sa.Column('stack_trace', sa.String(), nullable=True),
+    sa.Column('summary', sa.String(), nullable=True),
+    sa.ForeignKeyConstraint(['analysis_module_type_uuid'], ['analysis_module_type.uuid'], ),
+    sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
     )
     op.create_table('event',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -280,6 +283,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['node_uuid'], ['node.uuid'], ),
     sa.PrimaryKeyConstraint('node_uuid', 'directive_uuid')
     )
+    op.create_index(op.f('ix_node_directive_mapping_directive_uuid'), 'node_directive_mapping', ['directive_uuid'], unique=False)
     op.create_index(op.f('ix_node_directive_mapping_node_uuid'), 'node_directive_mapping', ['node_uuid'], unique=False)
     op.create_table('node_history',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
@@ -302,6 +306,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('node_uuid', 'tag_uuid')
     )
     op.create_index(op.f('ix_node_tag_mapping_node_uuid'), 'node_tag_mapping', ['node_uuid'], unique=False)
+    op.create_index(op.f('ix_node_tag_mapping_tag_uuid'), 'node_tag_mapping', ['tag_uuid'], unique=False)
     op.create_table('node_threat_mapping',
     sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('threat_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -310,6 +315,37 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('node_uuid', 'threat_uuid')
     )
     op.create_index(op.f('ix_node_threat_mapping_node_uuid'), 'node_threat_mapping', ['node_uuid'], unique=False)
+    op.create_index(op.f('ix_node_threat_mapping_threat_uuid'), 'node_threat_mapping', ['threat_uuid'], unique=False)
+    op.create_table('node_tree',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('root_node_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('parent_tree_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.ForeignKeyConstraint(['node_uuid'], ['node.uuid'], ),
+    sa.ForeignKeyConstraint(['parent_tree_uuid'], ['node_tree.uuid'], ),
+    sa.ForeignKeyConstraint(['root_node_uuid'], ['node.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_node_tree_root_node_uuid'), 'node_tree', ['root_node_uuid'], unique=False)
+    op.create_index('uix_root_node', 'node_tree', ['root_node_uuid', 'node_uuid'], unique=True, postgresql_where=sa.text('parent_tree_uuid IS NULL'))
+    op.create_index('uix_root_node_parent', 'node_tree', ['root_node_uuid', 'node_uuid', 'parent_tree_uuid'], unique=True, postgresql_where=sa.text('parent_tree_uuid IS NOT NULL'))
+    op.create_table('observable',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('context', sa.String(), nullable=True),
+    sa.Column('expires_on', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('for_detection', sa.Boolean(), nullable=False),
+    sa.Column('redirection_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
+    sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['redirection_uuid'], ['observable.uuid'], ),
+    sa.ForeignKeyConstraint(['type_uuid'], ['observable_type.uuid'], ),
+    sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid'),
+    sa.UniqueConstraint('type_uuid', 'value', name='type_value_uc')
+    )
+    op.create_index('observable_value_trgm', 'observable', ['value'], unique=False, postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
+    op.create_index('type_value', 'observable', ['type_uuid', 'value'], unique=False)
     op.create_table('user_role_mapping',
     sa.Column('user_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('user_role_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -317,6 +353,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_uuid'], ['user.uuid'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_uuid', 'user_role_uuid')
     )
+    op.create_index(op.f('ix_user_role_mapping_user_role_uuid'), 'user_role_mapping', ['user_role_uuid'], unique=False)
     op.create_index(op.f('ix_user_role_mapping_user_uuid'), 'user_role_mapping', ['user_uuid'], unique=False)
     op.create_table('alert',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -365,6 +402,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('event_uuid', 'prevention_tool_uuid')
     )
     op.create_index(op.f('ix_event_prevention_tool_mapping_event_uuid'), 'event_prevention_tool_mapping', ['event_uuid'], unique=False)
+    op.create_index(op.f('ix_event_prevention_tool_mapping_prevention_tool_uuid'), 'event_prevention_tool_mapping', ['prevention_tool_uuid'], unique=False)
     op.create_table('event_remediation_mapping',
     sa.Column('event_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('remediation_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -373,6 +411,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('event_uuid', 'remediation_uuid')
     )
     op.create_index(op.f('ix_event_remediation_mapping_event_uuid'), 'event_remediation_mapping', ['event_uuid'], unique=False)
+    op.create_index(op.f('ix_event_remediation_mapping_remediation_uuid'), 'event_remediation_mapping', ['remediation_uuid'], unique=False)
     op.create_table('event_vector_mapping',
     sa.Column('event_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('vector_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -381,50 +420,18 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('event_uuid', 'vector_uuid')
     )
     op.create_index(op.f('ix_event_vector_mapping_event_uuid'), 'event_vector_mapping', ['event_uuid'], unique=False)
-    op.create_table('analysis',
-    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('alert_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('details', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('error_message', sa.String(), nullable=True),
-    sa.Column('parent_uuid', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('stack_trace', sa.String(), nullable=True),
-    sa.Column('summary', sa.String(), nullable=True),
-    sa.ForeignKeyConstraint(['alert_uuid'], ['alert.uuid'], ),
-    sa.ForeignKeyConstraint(['analysis_module_type_uuid'], ['analysis_module_type.uuid'], ),
-    sa.ForeignKeyConstraint(['parent_uuid'], ['observable_instance.uuid'], use_alter=True),
-    sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
-    sa.PrimaryKeyConstraint('uuid')
-    )
-    op.create_index(op.f('ix_analysis_alert_uuid'), 'analysis', ['alert_uuid'], unique=False)
-    op.create_table('observable_instance',
-    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('alert_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('context', sa.String(), nullable=True),
-    sa.Column('observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('parent_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('redirection_uuid', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
-    sa.ForeignKeyConstraint(['alert_uuid'], ['alert.uuid'], ),
-    sa.ForeignKeyConstraint(['observable_uuid'], ['observable.uuid'], ),
-    sa.ForeignKeyConstraint(['parent_uuid'], ['analysis.uuid'], use_alter=True),
-    sa.ForeignKeyConstraint(['redirection_uuid'], ['observable_instance.uuid'], ),
-    sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
-    sa.PrimaryKeyConstraint('uuid')
-    )
-    op.create_index(op.f('ix_observable_instance_alert_uuid'), 'observable_instance', ['alert_uuid'], unique=False)
+    op.create_index(op.f('ix_event_vector_mapping_vector_uuid'), 'event_vector_mapping', ['vector_uuid'], unique=False)
     # ### end Alembic commands ###
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_index(op.f('ix_observable_instance_alert_uuid'), table_name='observable_instance')
-    op.drop_table('observable_instance')
-    op.drop_index(op.f('ix_analysis_alert_uuid'), table_name='analysis')
-    op.drop_table('analysis')
+    op.drop_index(op.f('ix_event_vector_mapping_vector_uuid'), table_name='event_vector_mapping')
     op.drop_index(op.f('ix_event_vector_mapping_event_uuid'), table_name='event_vector_mapping')
     op.drop_table('event_vector_mapping')
+    op.drop_index(op.f('ix_event_remediation_mapping_remediation_uuid'), table_name='event_remediation_mapping')
     op.drop_index(op.f('ix_event_remediation_mapping_event_uuid'), table_name='event_remediation_mapping')
     op.drop_table('event_remediation_mapping')
+    op.drop_index(op.f('ix_event_prevention_tool_mapping_prevention_tool_uuid'), table_name='event_prevention_tool_mapping')
     op.drop_index(op.f('ix_event_prevention_tool_mapping_event_uuid'), table_name='event_prevention_tool_mapping')
     op.drop_table('event_prevention_tool_mapping')
     op.drop_index('name_trgm', table_name='alert', postgresql_ops={'name': 'gin_trgm_ops'}, postgresql_using='gin')
@@ -441,29 +448,42 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_alert_disposition_time'), table_name='alert')
     op.drop_table('alert')
     op.drop_index(op.f('ix_user_role_mapping_user_uuid'), table_name='user_role_mapping')
+    op.drop_index(op.f('ix_user_role_mapping_user_role_uuid'), table_name='user_role_mapping')
     op.drop_table('user_role_mapping')
+    op.drop_index('type_value', table_name='observable')
+    op.drop_index('observable_value_trgm', table_name='observable', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
+    op.drop_table('observable')
+    op.drop_index('uix_root_node_parent', table_name='node_tree', postgresql_where=sa.text('parent_tree_uuid IS NOT NULL'))
+    op.drop_index('uix_root_node', table_name='node_tree', postgresql_where=sa.text('parent_tree_uuid IS NULL'))
+    op.drop_index(op.f('ix_node_tree_root_node_uuid'), table_name='node_tree')
+    op.drop_table('node_tree')
+    op.drop_index(op.f('ix_node_threat_mapping_threat_uuid'), table_name='node_threat_mapping')
     op.drop_index(op.f('ix_node_threat_mapping_node_uuid'), table_name='node_threat_mapping')
     op.drop_table('node_threat_mapping')
+    op.drop_index(op.f('ix_node_tag_mapping_tag_uuid'), table_name='node_tag_mapping')
     op.drop_index(op.f('ix_node_tag_mapping_node_uuid'), table_name='node_tag_mapping')
     op.drop_table('node_tag_mapping')
     op.drop_table('node_history')
     op.drop_index(op.f('ix_node_directive_mapping_node_uuid'), table_name='node_directive_mapping')
+    op.drop_index(op.f('ix_node_directive_mapping_directive_uuid'), table_name='node_directive_mapping')
     op.drop_table('node_directive_mapping')
     op.drop_index(op.f('ix_node_comment_node_uuid'), table_name='node_comment')
     op.drop_index('comment_value_trgm', table_name='node_comment', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_table('node_comment')
     op.drop_table('event')
+    op.drop_table('analysis')
     op.drop_table('user')
-    op.drop_index('type_value', table_name='observable')
-    op.drop_index('observable_value_trgm', table_name='observable', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
-    op.drop_table('observable')
     op.drop_index(op.f('ix_node_threat_node_threat_type_mapping_node_threat_uuid'), table_name='node_threat_node_threat_type_mapping')
+    op.drop_index(op.f('ix_node_threat_node_threat_type_mapping_node_threat_type_uuid'), table_name='node_threat_node_threat_type_mapping')
     op.drop_table('node_threat_node_threat_type_mapping')
     op.drop_table('node')
+    op.drop_index(op.f('ix_analysis_module_type_tag_mapping_tag_uuid'), table_name='analysis_module_type_tag_mapping')
     op.drop_index(op.f('ix_analysis_module_type_tag_mapping_analysis_module_type_uuid'), table_name='analysis_module_type_tag_mapping')
     op.drop_table('analysis_module_type_tag_mapping')
+    op.drop_index(op.f('ix_analysis_module_type_observable_type_mapping_observable_type_uuid'), table_name='analysis_module_type_observable_type_mapping')
     op.drop_index(op.f('ix_analysis_module_type_observable_type_mapping_analysis_module_type_uuid'), table_name='analysis_module_type_observable_type_mapping')
     op.drop_table('analysis_module_type_observable_type_mapping')
+    op.drop_index(op.f('ix_analysis_module_type_directive_mapping_directive_uuid'), table_name='analysis_module_type_directive_mapping')
     op.drop_index(op.f('ix_analysis_module_type_directive_mapping_analysis_module_type_uuid'), table_name='analysis_module_type_directive_mapping')
     op.drop_table('analysis_module_type_directive_mapping')
     op.drop_index(op.f('ix_user_role_value'), table_name='user_role')

@@ -14,5 +14,5 @@ node_tag_mapping = Table(
         index=True,
         primary_key=True,
     ),
-    Column("tag_uuid", UUID(as_uuid=True), ForeignKey("node_tag.uuid"), primary_key=True),
+    Column("tag_uuid", UUID(as_uuid=True), ForeignKey("node_tag.uuid"), index=True, primary_key=True),
 )

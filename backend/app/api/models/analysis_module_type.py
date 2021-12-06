@@ -56,7 +56,7 @@ class AnalysisModuleTypeCreate(AnalysisModuleTypeBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis module type")
 
 
-class AnalysisModuleTypeAlertTreeRead(BaseModel):
+class AnalysisModuleTypeNodeTreeRead(BaseModel):
     """Model used to control which information for an AnalysisModuleType is displayed when getting an alert tree"""
 
     value: type_str = Field(description="The value of the analysis module type")

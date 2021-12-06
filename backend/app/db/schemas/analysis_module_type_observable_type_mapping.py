@@ -18,6 +18,7 @@ analysis_module_type_observable_type_mapping = Table(
         "observable_type_uuid",
         UUID(as_uuid=True),
         ForeignKey("observable_type.uuid"),
+        index=True,
         primary_key=True,
     ),
 )

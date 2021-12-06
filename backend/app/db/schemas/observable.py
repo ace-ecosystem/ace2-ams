@@ -3,7 +3,6 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
-    func,
     Index,
     String,
     UniqueConstraint,
@@ -11,13 +10,16 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from db.database import Base
+from db.schemas.helpers import utcnow
+from db.schemas.node import Node
 
 
-class Observable(Base):
+class Observable(Node):
     __tablename__ = "observable"
 
-    uuid = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+    uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
+
+    context = Column(String)
 
     # Using timezone=True causes PostgreSQL to store the datetime as UTC. Datetimes without timezone
     # information will be assumed to be UTC, whereas datetimes with timezone data will be converted to UTC.
@@ -25,11 +27,19 @@ class Observable(Base):
 
     for_detection = Column(Boolean, default=False, nullable=False)
 
+    redirection_uuid = Column(UUID(as_uuid=True), ForeignKey("observable.uuid"))
+
+    redirection = relationship("Observable", foreign_keys=[redirection_uuid], uselist=False)
+
+    time = Column(DateTime(timezone=True), server_default=utcnow(), nullable=False)
+
     type = relationship("ObservableType")
 
     type_uuid = Column(UUID(as_uuid=True), ForeignKey("observable_type.uuid"), nullable=False)
 
     value = Column(String, nullable=False)
+
+    __mapper_args__ = {"polymorphic_identity": "observable", "polymorphic_load": "inline"}
 
     __table_args__ = (
         Index(

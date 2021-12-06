@@ -105,7 +105,7 @@ const readAlertStub = {
     uuid: "alertID",
   },
   analyses: [],
-  observableInstances: [],
+  observables: [],
 };
 
 const expectedObservableCreate = {
@@ -302,7 +302,7 @@ describe("AnalyzeAlertForm async methods", () => {
     alertDescription: "Manual Alert",
     eventTime: moment(wrapper.vm.alertDate).tz(moment.tz.guess()).format(),
     name: "Manual Alert",
-    observableInstances: [expectedObservableCreate],
+    observables: [expectedObservableCreate],
     queue: "default",
     type: "manual",
   };
@@ -372,7 +372,7 @@ describe("AnalyzeAlertForm async methods", () => {
           snakecaseKeys(
             snakecaseKeys({
               ...expectedAlertCreate,
-              observableInstances: [
+              observables: [
                 { type: "ipv4", value: "1.2.3.4" },
                 { type: "ipv4", value: "1.2.3.4" },
               ],
@@ -416,7 +416,7 @@ describe("AnalyzeAlertForm async methods", () => {
             ...expectedAlertCreate,
             name: "Manual Alert 1.2.3.4",
             alertDescription: "Manual Alert 1.2.3.4",
-            observableInstances: [{ type: "ipv4", value: "1.2.3.4" }],
+            observables: [{ type: "ipv4", value: "1.2.3.4" }],
           }),
         ),
       )
@@ -429,7 +429,7 @@ describe("AnalyzeAlertForm async methods", () => {
             ...expectedAlertCreate,
             name: "Manual Alert 0.0.0.0",
             alertDescription: "Manual Alert 0.0.0.0",
-            observableInstances: [{ type: "ipv4", value: "0.0.0.0" }],
+            observables: [{ type: "ipv4", value: "0.0.0.0" }],
           }),
         ),
       )
@@ -442,7 +442,7 @@ describe("AnalyzeAlertForm async methods", () => {
             ...expectedAlertCreate,
             name: "Manual Alert 4.3.2.1",
             alertDescription: "Manual Alert 4.3.2.1",
-            observableInstances: [{ type: "ipv4", value: "4.3.2.1" }],
+            observables: [{ type: "ipv4", value: "4.3.2.1" }],
           }),
         ),
       )
@@ -468,7 +468,7 @@ describe("AnalyzeAlertForm async methods", () => {
             ...expectedAlertCreate,
             name: "Manual Alert 1.2.3.4",
             alertDescription: "Manual Alert 1.2.3.4",
-            observableInstances: [{ type: "ipv4", value: "1.2.3.4" }],
+            observables: [{ type: "ipv4", value: "1.2.3.4" }],
           }),
         ),
       )

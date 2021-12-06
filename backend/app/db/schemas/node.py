@@ -30,4 +30,4 @@ class Node(Base):
 
     version = Column(UUID(as_uuid=True), nullable=False)
 
-    __mapper_args__ = {"polymorphic_identity": "node", "polymorphic_on": node_type}
+    __mapper_args__ = {"polymorphic_identity": "node", "polymorphic_on": node_type, "with_polymorphic": "*"}

@@ -18,6 +18,7 @@ event_vector_mapping = Table(
         "vector_uuid",
         UUID(as_uuid=True),
         ForeignKey("event_vector.uuid"),
+        index=True,
         primary_key=True,
     ),
 )
