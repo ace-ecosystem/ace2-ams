@@ -256,16 +256,16 @@ def test_get_filter_observable(client_valid_access_token, db):
 
     # Create some alerts with one observable
     alert1 = helpers.create_alert(db=db)
-    helpers.create_observable(root_node=alert1, type="test_type1", value="test_value1", db=db)
+    helpers.create_observable_in_tree(root_node=alert1, type="test_type1", value="test_value1", db=db)
 
     alert2 = helpers.create_alert(db=db)
-    helpers.create_observable(root_node=alert2, type="test_type2", value="test_value2", db=db)
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value2", db=db)
 
     # Create an alert with multiple observables
     alert3 = helpers.create_alert(db=db)
-    helpers.create_observable(root_node=alert3, type="test_type1", value="test_value_asdf", db=db)
-    helpers.create_observable(root_node=alert3, type="test_type2", value="test_value1", db=db)
-    helpers.create_observable(root_node=alert3, type="test_type2", value="test_value2", db=db)
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type1", value="test_value_asdf", db=db)
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type2", value="test_value1", db=db)
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type2", value="test_value2", db=db)
 
     # There should be 4 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -289,13 +289,13 @@ def test_get_filter_observable_types(client_valid_access_token, db):
 
     # Create some alerts with one observable
     alert1 = helpers.create_alert(db=db)
-    helpers.create_observable(root_node=alert1, type="test_type1", value="test_value1", db=db)
+    helpers.create_observable_in_tree(root_node=alert1, type="test_type1", value="test_value1", db=db)
 
     # Create an alert with multiple observables
     alert2 = helpers.create_alert(db=db)
-    helpers.create_observable(root_node=alert2, type="test_type1", value="test_value_asdf", db=db)
-    helpers.create_observable(root_node=alert2, type="test_type2", value="test_value1", db=db)
-    helpers.create_observable(root_node=alert2, type="test_type2", value="test_value2", db=db)
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type1", value="test_value_asdf", db=db)
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value1", db=db)
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value2", db=db)
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -319,16 +319,16 @@ def test_get_filter_observable_value(client_valid_access_token, db):
 
     # Create some alerts with one observable
     alert1 = helpers.create_alert(db=db)
-    helpers.create_observable(root_node=alert1, type="test_type1", value="test_value1", db=db)
+    helpers.create_observable_in_tree(root_node=alert1, type="test_type1", value="test_value1", db=db)
 
     alert2 = helpers.create_alert(db=db)
-    helpers.create_observable(root_node=alert2, type="test_type2", value="test_value2", db=db)
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value2", db=db)
 
     # Create an alert with multiple observables
     alert3 = helpers.create_alert(db=db)
-    helpers.create_observable(root_node=alert3, type="test_type1", value="test_value_asdf", db=db)
-    helpers.create_observable(root_node=alert3, type="test_type2", value="test_value1", db=db)
-    helpers.create_observable(root_node=alert3, type="test_type2", value="test_value2", db=db)
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type1", value="test_value_asdf", db=db)
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type2", value="test_value1", db=db)
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type2", value="test_value2", db=db)
 
     # There should be 4 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -352,12 +352,12 @@ def test_get_filter_observable_and_observable_types(client_valid_access_token, d
 
     # Create an alert with multiple observables
     alert2 = helpers.create_alert(db=db)
-    helpers.create_observable(root_node=alert2, type="test_type1", value="test_value1", db=db)
-    helpers.create_observable(root_node=alert2, type="test_type2", value="test_value2", db=db)
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type1", value="test_value1", db=db)
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value2", db=db)
 
     # Create an alert with one observable
     alert3 = helpers.create_alert(db=db)
-    helpers.create_observable(root_node=alert3, type="test_type1", value="test_value1", db=db)
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type1", value="test_value1", db=db)
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")

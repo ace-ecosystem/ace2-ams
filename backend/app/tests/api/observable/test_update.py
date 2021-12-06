@@ -81,11 +81,8 @@ def test_update_invalid_uuid(client_valid_access_token):
 
 
 def test_update_invalid_version(client_valid_access_token, db):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
     # Create an observable
-    obj = helpers.create_observable(root_node=alert, type="test_type", value="test", db=db)
+    obj = helpers.create_observable(type="test_type", value="test", db=db)
 
     # Make sure you cannot update it using an invalid version
     update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"version": str(uuid.uuid4())})
@@ -93,12 +90,9 @@ def test_update_invalid_version(client_valid_access_token, db):
 
 
 def test_update_duplicate_type_value(client_valid_access_token, db):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
     # Create some observables
-    obj1 = helpers.create_observable(root_node=alert, type="test_type", value="test", db=db)
-    obj2 = helpers.create_observable(root_node=alert, type="test_type", value="test2", db=db)
+    obj1 = helpers.create_observable(type="test_type", value="test", db=db)
+    obj2 = helpers.create_observable(type="test_type", value="test2", db=db)
 
     # Ensure you cannot update an observable to have a duplicate type+value combination
     update = client_valid_access_token.patch(
@@ -108,11 +102,8 @@ def test_update_duplicate_type_value(client_valid_access_token, db):
 
 
 def test_update_nonexistent_redirection_uuid(client_valid_access_token, db):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
     # Create an observable
-    obj = helpers.create_observable(root_node=alert, type="test_type", value="test", db=db)
+    obj = helpers.create_observable(type="test_type", value="test", db=db)
 
     # Make sure you cannot update it to use a nonexistent redirection UUID
     update = client_valid_access_token.patch(
@@ -127,11 +118,8 @@ def test_update_nonexistent_redirection_uuid(client_valid_access_token, db):
     NONEXISTENT_FIELDS,
 )
 def test_update_nonexistent_node_fields(client_valid_access_token, db, key, value):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
     # Create an observable
-    obj = helpers.create_observable(root_node=alert, type="test_type", value="test", db=db)
+    obj = helpers.create_observable(type="test_type", value="test", db=db)
 
     # Make sure you cannot update it to use a nonexistent node field value
     update = client_valid_access_token.patch(
@@ -153,11 +141,8 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 
 
 def test_update_type(client_valid_access_token, db):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
     # Create the object
-    obj = helpers.create_observable(root_node=alert, type="test_type", value="test", db=db)
+    obj = helpers.create_observable(type="test_type", value="test", db=db)
     assert obj.type.value == "test_type"
 
     # Create a new observable type
@@ -172,16 +157,13 @@ def test_update_type(client_valid_access_token, db):
 
 
 def test_update_redirection_uuid(client_valid_access_token, db):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
-    # Create an observable instance
-    obj1 = helpers.create_observable(root_node=alert, type="test_type", value="test", db=db)
+    # Create an observable
+    obj1 = helpers.create_observable(type="test_type", value="test", db=db)
     initial_observable_version = obj1.version
     assert obj1.redirection is None
 
     # Create a second observable to use for redirection
-    obj2 = helpers.create_observable(root_node=alert, type="test_type", value="test2", db=db)
+    obj2 = helpers.create_observable(type="test_type", value="test2", db=db)
 
     # Update the redirection UUID
     update = client_valid_access_token.patch(
@@ -197,11 +179,8 @@ def test_update_redirection_uuid(client_valid_access_token, db):
     VALID_DIRECTIVES,
 )
 def test_update_valid_node_directives(client_valid_access_token, db, values):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
-    # Create an observable instance
-    obj = helpers.create_observable(root_node=alert, type="test_type", value="test", db=db)
+    # Create an observable
+    obj = helpers.create_observable(type="test_type", value="test", db=db)
     initial_observable_version = obj.version
     assert obj.directives == []
 
@@ -223,11 +202,8 @@ def test_update_valid_node_directives(client_valid_access_token, db, values):
     VALID_TAGS,
 )
 def test_update_valid_node_tags(client_valid_access_token, db, values):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
-    # Create an observable instance
-    obj = helpers.create_observable(root_node=alert, type="test_type", value="test", db=db)
+    # Create an observable
+    obj = helpers.create_observable(type="test_type", value="test", db=db)
     initial_observable_version = obj.version
     assert obj.tags == []
 
@@ -249,11 +225,8 @@ def test_update_valid_node_tags(client_valid_access_token, db, values):
     VALID_THREAT_ACTOR,
 )
 def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
-    # Create an observable instance
-    obj = helpers.create_observable(root_node=alert, type="test_type", value="test", db=db)
+    # Create an observable
+    obj = helpers.create_observable(type="test_type", value="test", db=db)
     initial_observable_version = obj.version
     assert obj.threat_actor is None
 
@@ -280,11 +253,8 @@ def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
     VALID_THREATS,
 )
 def test_update_valid_node_threats(client_valid_access_token, db, values):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
-    # Create an observable instance
-    obj = helpers.create_observable(root_node=alert, type="test_type", value="test", db=db)
+    # Create an observable
+    obj = helpers.create_observable(type="test_type", value="test", db=db)
     initial_observable_version = obj.version
     assert obj.threats == []
 
@@ -326,11 +296,8 @@ def test_update_valid_node_threats(client_valid_access_token, db, values):
     ],
 )
 def test_update(client_valid_access_token, db, key, initial_value, updated_value):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
     # Create the object
-    obj = helpers.create_observable(root_node=alert, type="test_type", value="test", db=db)
+    obj = helpers.create_observable(type="test_type", value="test", db=db)
 
     # Set the initial value
     if key == "expires_on" and initial_value:
