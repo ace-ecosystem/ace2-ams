@@ -19,18 +19,12 @@
       }),
 
       alertTree() {
-        // Join the analyses and observableInstances arrays into a single array
-        const items = this.openAlert.analyses.concat(
-          this.openAlert.observableInstances,
-        );
-
         // Turn the flat array into a nested tree structure
-        const tree = arrayToTree(items, {
-          id: "uuid",
-          parentId: "parentUuid",
+        const tree = arrayToTree(this.openAlert.tree, {
+          id: "treeUuid",
+          parentId: "parentTreeUuid",
           dataField: null,
         });
-
         return tree;
       },
     },
