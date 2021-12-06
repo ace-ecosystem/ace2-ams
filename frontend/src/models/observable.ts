@@ -1,19 +1,26 @@
 import { UUID } from "./base";
+import { nodeCreate, nodeRead, nodeTreeCreate, nodeUpdate } from "./node";
 import { observableTypeRead } from "./observableType";
 
-export interface observableCreate {
+export interface observableCreate extends nodeCreate {
+  context?: string;
   expiresOn?: Date;
-  forDetection: boolean;
+  forDetection?: boolean;
+  nodeTree: nodeTreeCreate;
+  redirectionUuid?: UUID;
+  time?: Date;
   type: string;
-  uuid?: UUID;
   value: string;
+  [key: string]: unknown;
 }
 
-export interface observableRead {
+export interface observableRead extends nodeRead {
+  context: string | null;
   expiresOn: Date | null;
   forDetection: boolean;
+  redirectionUuid: UUID | null;
+  time: Date;
   type: observableTypeRead;
-  uuid: UUID;
   value: string;
 }
 
@@ -24,9 +31,18 @@ export interface observableReadPage {
   total: number;
 }
 
-export interface observableUpdate {
+export interface observableTreeRead extends observableRead {
+  parentTreeUuid: UUID | null;
+  treeUuid: UUID;
+}
+
+export interface observableUpdate extends nodeUpdate {
+  context?: string;
   expiresOn?: Date;
   forDetection?: boolean;
+  redirectionUuid?: UUID;
+  time?: Date;
   type?: string;
   value?: string;
+  [key: string]: unknown;
 }

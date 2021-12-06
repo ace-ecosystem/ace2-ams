@@ -3,6 +3,7 @@ import {
   genericObjectRead,
   genericObjectReadPage,
   genericObjectUpdate,
+  UUID,
 } from "./base";
 
 import { nodeDirectiveRead } from "./nodeDirective";
@@ -25,6 +26,11 @@ export interface analysisModuleTypeRead extends genericObjectRead {
   requiredDirectives: nodeDirectiveRead[];
   requiredTags: nodeTagRead[];
   version: string;
+}
+
+export interface analysisModuleTypeNodeTreeRead {
+  uuid: UUID;
+  value: string;
 }
 
 export interface analysisModuleTypeReadPage extends genericObjectReadPage {

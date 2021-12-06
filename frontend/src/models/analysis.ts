@@ -1,13 +1,16 @@
 import { UUID } from "./base";
-import { nodeCreate, nodeRead, nodeUpdate } from "./node";
-import { analysisModuleTypeRead } from "./analysisModuleType";
+import { nodeCreate, nodeRead, nodeTreeCreate, nodeUpdate } from "./node";
+import {
+  analysisModuleTypeNodeTreeRead,
+  analysisModuleTypeRead,
+} from "./analysisModuleType";
 
 export interface analysisCreate extends nodeCreate {
   alertUuid: UUID;
   analysisModuleType?: UUID;
   details?: Record<string, unknown>;
   errorMessage?: string;
-  parentUuid?: UUID;
+  nodeTree: nodeTreeCreate;
   stackTrace?: string;
   summary?: string;
 }
@@ -17,9 +20,15 @@ export interface analysisRead extends nodeRead {
   analysisModuleType: analysisModuleTypeRead;
   details: Record<string, unknown> | null;
   errorMessage: string | null;
-  parentUuid: UUID | null;
   stackTrace: string | null;
   summary: string | null;
+}
+
+export interface analysisTreeRead {
+  analysisModuleType: analysisModuleTypeNodeTreeRead;
+  parentTreeUuid: UUID | null;
+  treeUuid: UUID;
+  uuid: UUID;
 }
 
 export interface analysisUpdate extends nodeUpdate {

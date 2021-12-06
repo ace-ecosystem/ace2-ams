@@ -38,3 +38,8 @@ export interface nodeUpdate {
   threats?: string[];
   version: UUID;
 }
+
+export interface nodeTreeCreate {
+  rootNodeUuid: UUID;
+  parentTreeUuid?: UUID;
+}
