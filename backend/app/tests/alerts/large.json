@@ -1305,7 +1305,7 @@
                                                                                   "type": "File Type Analysis: (HTML document, ASCII text, with very long lines) (text/html)"
                                                                                 },
                                                                                 {
-                                                                                  "type": "URL Extraction Analysis (13 urls)",
+                                                                                  "type": "URL Extraction Analysis (12 urls)",
                                                                                   "observables": [
                                                                                     {
                                                                                       "type": "url",
@@ -1561,53 +1561,6 @@
                                                                                                 },
                                                                                                 {
                                                                                                   "type": "FA Queue Elasticsearch URI Path Analysis - 1000 hits"
-                                                                                                }
-                                                                                              ]
-                                                                                            }
-                                                                                          ]
-                                                                                        }
-                                                                                      ]
-                                                                                    },
-                                                                                    {
-                                                                                      "type": "url",
-                                                                                      "value": "http://wiki.centos.org/GettingHelp/ListInfo",
-                                                                                      "analyses": [
-                                                                                        {
-                                                                                          "type": "FA Queue Splunk URL Analysis - 0 hits"
-                                                                                        },
-                                                                                        {
-                                                                                          "type": "FA Queue Elasticsearch URL Analysis - 0 hits"
-                                                                                        },
-                                                                                        {
-                                                                                          "type": "Parsed: wiki.centos.org",
-                                                                                          "observables": [
-                                                                                            {
-                                                                                              "type": "fqdn",
-                                                                                              "value": "wiki.centos.org",
-                                                                                              "analyses": [
-                                                                                                {
-                                                                                                  "type": "FA Queue Splunk FQDN Analysis - 0 hits"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "FA Queue Elasticsearch FQDN Analysis - 0 hits"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "Proxy Domain HTTP Method Analysis: No activity observed"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "Proxy Domain Traffic Analysis: No activity observed"
-                                                                                                }
-                                                                                              ]
-                                                                                            },
-                                                                                            {
-                                                                                              "type": "uri_path",
-                                                                                              "value": "/GettingHelp/ListInfo",
-                                                                                              "analyses": [
-                                                                                                {
-                                                                                                  "type": "FA Queue Splunk URI Path Analysis - 0 hits"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "FA Queue Elasticsearch URI Path Analysis - 0 hits"
                                                                                                 }
                                                                                               ]
                                                                                             }
@@ -2007,7 +1960,7 @@
                                                                                   "type": "File Type Analysis: (HTML document, ASCII text, with very long lines) (text/html)"
                                                                                 },
                                                                                 {
-                                                                                  "type": "URL Extraction Analysis (13 urls)",
+                                                                                  "type": "URL Extraction Analysis (12 urls)",
                                                                                   "observables": [
                                                                                     {
                                                                                       "type": "url",
@@ -2263,53 +2216,6 @@
                                                                                                 },
                                                                                                 {
                                                                                                   "type": "FA Queue Elasticsearch URI Path Analysis - 1000 hits"
-                                                                                                }
-                                                                                              ]
-                                                                                            }
-                                                                                          ]
-                                                                                        }
-                                                                                      ]
-                                                                                    },
-                                                                                    {
-                                                                                      "type": "url",
-                                                                                      "value": "http://wiki.centos.org/GettingHelp/ListInfo",
-                                                                                      "analyses": [
-                                                                                        {
-                                                                                          "type": "FA Queue Splunk URL Analysis - 0 hits"
-                                                                                        },
-                                                                                        {
-                                                                                          "type": "FA Queue Elasticsearch URL Analysis - 0 hits"
-                                                                                        },
-                                                                                        {
-                                                                                          "type": "Parsed: wiki.centos.org",
-                                                                                          "observables": [
-                                                                                            {
-                                                                                              "type": "fqdn",
-                                                                                              "value": "wiki.centos.org",
-                                                                                              "analyses": [
-                                                                                                {
-                                                                                                  "type": "FA Queue Splunk FQDN Analysis - 0 hits"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "FA Queue Elasticsearch FQDN Analysis - 0 hits"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "Proxy Domain HTTP Method Analysis: No activity observed"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "Proxy Domain Traffic Analysis: No activity observed"
-                                                                                                }
-                                                                                              ]
-                                                                                            },
-                                                                                            {
-                                                                                              "type": "uri_path",
-                                                                                              "value": "/GettingHelp/ListInfo",
-                                                                                              "analyses": [
-                                                                                                {
-                                                                                                  "type": "FA Queue Splunk URI Path Analysis - 0 hits"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "FA Queue Elasticsearch URI Path Analysis - 0 hits"
                                                                                                 }
                                                                                               ]
                                                                                             }
@@ -2747,7 +2653,7 @@
                                                                                   "type": "File Type Analysis: (HTML document, ASCII text, with very long lines) (text/html)"
                                                                                 },
                                                                                 {
-                                                                                  "type": "URL Extraction Analysis (13 urls)",
+                                                                                  "type": "URL Extraction Analysis (12 urls)",
                                                                                   "observables": [
                                                                                     {
                                                                                       "type": "url",
@@ -3003,53 +2909,6 @@
                                                                                                 },
                                                                                                 {
                                                                                                   "type": "FA Queue Elasticsearch URI Path Analysis - 1000 hits"
-                                                                                                }
-                                                                                              ]
-                                                                                            }
-                                                                                          ]
-                                                                                        }
-                                                                                      ]
-                                                                                    },
-                                                                                    {
-                                                                                      "type": "url",
-                                                                                      "value": "http://wiki.centos.org/GettingHelp/ListInfo",
-                                                                                      "analyses": [
-                                                                                        {
-                                                                                          "type": "FA Queue Splunk URL Analysis - 0 hits"
-                                                                                        },
-                                                                                        {
-                                                                                          "type": "FA Queue Elasticsearch URL Analysis - 0 hits"
-                                                                                        },
-                                                                                        {
-                                                                                          "type": "Parsed: wiki.centos.org",
-                                                                                          "observables": [
-                                                                                            {
-                                                                                              "type": "fqdn",
-                                                                                              "value": "wiki.centos.org",
-                                                                                              "analyses": [
-                                                                                                {
-                                                                                                  "type": "FA Queue Splunk FQDN Analysis - 0 hits"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "FA Queue Elasticsearch FQDN Analysis - 0 hits"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "Proxy Domain HTTP Method Analysis: No activity observed"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "Proxy Domain Traffic Analysis: No activity observed"
-                                                                                                }
-                                                                                              ]
-                                                                                            },
-                                                                                            {
-                                                                                              "type": "uri_path",
-                                                                                              "value": "/GettingHelp/ListInfo",
-                                                                                              "analyses": [
-                                                                                                {
-                                                                                                  "type": "FA Queue Splunk URI Path Analysis - 0 hits"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "FA Queue Elasticsearch URI Path Analysis - 0 hits"
                                                                                                 }
                                                                                               ]
                                                                                             }
@@ -3449,7 +3308,7 @@
                                                                                   "type": "File Type Analysis: (HTML document, ASCII text, with very long lines) (text/html)"
                                                                                 },
                                                                                 {
-                                                                                  "type": "URL Extraction Analysis (13 urls)",
+                                                                                  "type": "URL Extraction Analysis (12 urls)",
                                                                                   "observables": [
                                                                                     {
                                                                                       "type": "url",
@@ -3705,53 +3564,6 @@
                                                                                                 },
                                                                                                 {
                                                                                                   "type": "FA Queue Elasticsearch URI Path Analysis - 1000 hits"
-                                                                                                }
-                                                                                              ]
-                                                                                            }
-                                                                                          ]
-                                                                                        }
-                                                                                      ]
-                                                                                    },
-                                                                                    {
-                                                                                      "type": "url",
-                                                                                      "value": "http://wiki.centos.org/GettingHelp/ListInfo",
-                                                                                      "analyses": [
-                                                                                        {
-                                                                                          "type": "FA Queue Splunk URL Analysis - 0 hits"
-                                                                                        },
-                                                                                        {
-                                                                                          "type": "FA Queue Elasticsearch URL Analysis - 0 hits"
-                                                                                        },
-                                                                                        {
-                                                                                          "type": "Parsed: wiki.centos.org",
-                                                                                          "observables": [
-                                                                                            {
-                                                                                              "type": "fqdn",
-                                                                                              "value": "wiki.centos.org",
-                                                                                              "analyses": [
-                                                                                                {
-                                                                                                  "type": "FA Queue Splunk FQDN Analysis - 0 hits"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "FA Queue Elasticsearch FQDN Analysis - 0 hits"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "Proxy Domain HTTP Method Analysis: No activity observed"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "Proxy Domain Traffic Analysis: No activity observed"
-                                                                                                }
-                                                                                              ]
-                                                                                            },
-                                                                                            {
-                                                                                              "type": "uri_path",
-                                                                                              "value": "/GettingHelp/ListInfo",
-                                                                                              "analyses": [
-                                                                                                {
-                                                                                                  "type": "FA Queue Splunk URI Path Analysis - 0 hits"
-                                                                                                },
-                                                                                                {
-                                                                                                  "type": "FA Queue Elasticsearch URI Path Analysis - 0 hits"
                                                                                                 }
                                                                                               ]
                                                                                             }
