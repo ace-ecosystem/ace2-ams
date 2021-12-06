@@ -18,6 +18,7 @@ event_remediation_mapping = Table(
         "remediation_uuid",
         UUID(as_uuid=True),
         ForeignKey("event_remediation.uuid"),
+        index=True,
         primary_key=True,
     ),
 )

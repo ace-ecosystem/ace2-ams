@@ -18,6 +18,7 @@ node_threat_mapping = Table(
         "threat_uuid",
         UUID(as_uuid=True),
         ForeignKey("node_threat.uuid"),
+        index=True,
         primary_key=True,
     ),
 )

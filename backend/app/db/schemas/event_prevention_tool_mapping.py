@@ -18,6 +18,7 @@ event_prevention_tool_mapping = Table(
         "prevention_tool_uuid",
         UUID(as_uuid=True),
         ForeignKey("event_prevention_tool.uuid"),
+        index=True,
         primary_key=True,
     ),
 )
