@@ -50,13 +50,17 @@ class NodeRead(NodeBase):
 
     directives: List[NodeDirectiveRead] = Field(description="A list of directives added to the node")
 
-    parent_uuid: Optional[UUID4] = Field(description="The node's parent UUID if the node is inside a node tree")
+    parent_tree_uuid: Optional[UUID4] = Field(
+        description="The node's parent leaf UUID if the node is inside a NodeTree"
+    )
 
     tags: List[NodeTagRead] = Field(description="A list of tags added to the node")
 
     threat_actor: Optional[NodeThreatActorRead] = Field(description="The threat actor added to the node")
 
     threats: List[NodeThreatRead] = Field(description="A list of threats added to the node")
+
+    tree_uuid: Optional[UUID4] = Field(description="The UUID of the leaf if this Node is inside a NodeTree")
 
     uuid: UUID4 = Field(description="The UUID of the node")
 
@@ -81,14 +85,14 @@ class NodeUpdate(NodeBase):
 class NodeTreeBase(BaseModel):
     """Represents a leaf in a Node tree."""
 
-    node_uuid: UUID4 = Field(description="The node UUID of the leaf")
+    node_uuid: UUID4 = Field(description="The UUID of the Node represented by the leaf")
 
     root_node_uuid: UUID4 = Field(
-        description="""The node UUID that contains the tree.
+        description="""The Node UUID that contains the tree.
             For example, an alert UUID that contains a tree of analyses and observables."""
     )
 
-    parent_node_uuid: Optional[UUID4] = Field(description="The node UUID of the leaf node")
+    parent_tree_uuid: Optional[UUID4] = Field(description="The UUID of the parent leaf")
 
     class Config:
         orm_mode = True
@@ -100,13 +104,13 @@ class NodeTreeCreateWithNode(BaseModel):
             For example, an alert UUID that contains a tree of analyses and observables."""
     )
 
-    parent_node_uuid: Optional[UUID4] = Field(description="The node UUID of the leaf node")
+    parent_tree_uuid: Optional[UUID4] = Field(description="The UUID of the leaf in the tree that should be the parent")
 
 
 class NodeTreeRead(BaseModel):
     root_node: NodeRead = Field(description="The root node of the tree. For example, this will often be an Alert.")
 
-    leaves: List[NodeTreeBase] = Field(description="A list of the Node leaves that make up the tree")
+    leaves: List[NodeTreeBase] = Field(description="A list of the leaves that make up the tree")
 
     class Config:
         orm_mode = True
@@ -118,4 +122,4 @@ class NodeTreeUpdate(NodeTreeBase):
             For example, an alert UUID that contains a tree of analyses and observables."""
     )
 
-    node_uuid: Optional[UUID4] = Field(description="The node UUID of the leaf")
+    node_uuid: Optional[UUID4] = Field(description="The UUID of the Node represented by the leaf")

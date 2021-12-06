@@ -79,7 +79,7 @@ def create_observables(
     for observable in observables:
         crud.create_node_tree_leaf(
             root_node_uuid=observable.node_tree.root_node_uuid,
-            parent_node_uuid=observable.node_tree.parent_node_uuid,
+            parent_tree_uuid=observable.node_tree.parent_tree_uuid,
             node_uuid=observable.uuid,
             db=db,
         )

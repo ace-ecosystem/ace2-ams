@@ -9,7 +9,7 @@ from sqlalchemy.sql.expression import join
 from typing import List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
-from api.models.analysis import AnalysisRead
+from api.models.analysis import AnalysisNodeTreeRead
 from api.models.observable import ObservableRead
 from core.auth import verify_password
 from db.schemas.analysis import Analysis
@@ -53,7 +53,7 @@ def create(obj: BaseModel, db_table: DeclarativeMeta, db: Session) -> UUID:
 
 
 def create_node_tree_leaf(
-    root_node_uuid: UUID, node_uuid: UUID, db: Session, parent_node_uuid: Optional[UUID] = None
+    root_node_uuid: UUID, node_uuid: UUID, db: Session, parent_tree_uuid: Optional[UUID] = None
 ) -> NodeTree:
     """Creates an entry in the NodeTree table."""
 
@@ -63,11 +63,12 @@ def create_node_tree_leaf(
     leaf.root_node_uuid = root_node.uuid
     leaf.node_uuid = node_uuid
 
-    if parent_node_uuid:
-        parent_node: Node = read(uuid=parent_node_uuid, db_table=Node, db=db)
-        leaf.parent_node_uuid = parent_node.uuid
+    if parent_tree_uuid:
+        parent_tree: NodeTree = read(uuid=parent_tree_uuid, db_table=NodeTree, db=db)
+        leaf.parent_tree_uuid = parent_tree.uuid
 
         # Update the parent node's version
+        parent_node: Node = read(uuid=parent_tree.node_uuid, db_table=Node, db=db)
         parent_node.version = uuid4()
 
     # Update the root node's version
@@ -245,12 +246,13 @@ def read_node_tree(root_node_uuid: UUID, db: Session) -> List[Node]:
     tree = []
 
     for leaf, node in node_tree_and_nodes:
-        # Inject the parent_uuid into the Node
-        node.parent_uuid = leaf.parent_node_uuid
+        # Inject the tree information into the Node
+        node.tree_uuid = leaf.uuid
+        node.parent_tree_uuid = leaf.parent_tree_uuid
 
         # Serialize the database objects into their correct Pydantic models
         if isinstance(node, Analysis):
-            tree.append(AnalysisRead(**node.__dict__))
+            tree.append(AnalysisNodeTreeRead(**node.__dict__))
         elif isinstance(node, Observable):
             tree.append(ObservableRead(**node.__dict__))
 
