@@ -26,7 +26,7 @@ describe("filters Mutations", () => {
 
     store.commit("BULK_SET_FILTERS", {
       filterType: "alerts",
-      filters: { testFilterName: "testFilterValue" }
+      filters: { testFilterName: "testFilterValue" },
     });
     expect(state).toEqual({
       alerts: {
