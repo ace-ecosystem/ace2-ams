@@ -302,7 +302,7 @@ describe("ManageAlerts.vue", () => {
     cy.get(".p-chips-input-token").should("be.visible");
   });
 
-  it.only("will clear unsubmitted form filters when the Edit Filter modal is exited or cancelled", () => {
+  it("will clear unsubmitted form filters when the Edit Filter modal is exited or cancelled", () => {
     cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
     cy.get(".p-dialog-footer > :nth-child(2)").click();
 
@@ -316,10 +316,67 @@ describe("ManageAlerts.vue", () => {
     cy.get(".p-dialog-header-icon").click();
     cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
     cy.get(".flex").children().should("have.length", 0);
+
+    // Exit modal for end of test
+    cy.get(".p-dialog-header-close-icon").click();
   });
 
-  it.skip("will make a request to update filters when a new filter is set", () => {
+  it("will make a request to update filters when a new filter is set", () => {
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&name=hello+world",
+    ).as("getAlertWithFilters");
+
+    // Open the modal
     cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
-    cy.get(".p-dialog-header").should("be.visible");
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
+    cy.get(".col > .field > .p-dropdown").should("be.visible");
+
+    // Select name filter
+    cy.get(
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+    ).click();
+    cy.get(".p-dropdown-items-wrapper").should("be.visible");
+    cy.get("[aria-label='Name']").click();
+    cy.get(".field > .p-inputtext").should("be.visible");
+
+    // Add a filter value
+    cy.get(".field > .p-inputtext").type("hello world");
+
+    // Submit
+    cy.get(".p-dialog-footer > :nth-child(4)").click();
+    cy.wait("@getAlertWithFilters").its("state").should("eq", "Complete");
+  });
+
+  it("will load any currently set filters in the form", () => {
+    // Open the modal
+    cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
+    cy.get(".col > .field > .p-dropdown").should("be.visible");
+
+    // Select name filter
+    cy.get(
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+    ).click();
+    cy.get(".p-dropdown-items-wrapper").should("be.visible");
+    cy.get("[aria-label='Name']").click();
+    cy.get(".field > .p-inputtext").should("be.visible");
+
+    // Add a filter value
+    cy.get(".field > .p-inputtext").type("hello world");
+
+    // Submit
+    cy.get(".p-dialog-footer > :nth-child(4)").click();
+
+    // Reopen the modal
+    cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
+
+    // Verify the form data
+    cy.get(".flex").children().should("have.length", 1);
+    cy.get(":nth-child(1) > .p-dropdown").should("have.text", "Name");
+    cy.get(".inputfield").should("have.value", "hello world");
+
+    // Exit modal for end of test
+    cy.get(".p-dialog-header-close-icon").click();
   });
 });

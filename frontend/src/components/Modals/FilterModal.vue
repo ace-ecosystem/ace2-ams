@@ -2,7 +2,12 @@
 <!-- 'Filter' editing modal, agnostic to what data types are being filtered -->
 
 <template>
-  <BaseModal :name="name" header="Edit Filters" class="xl: w-5 lg:w-5 md:w-8">
+  <BaseModal
+    :name="name"
+    header="Edit Filters"
+    class="xl: w-5 lg:w-5 md:w-8"
+    @dialogClose="clear"
+  >
     <div class="flex flex-wrap">
       <FilterInput
         v-for="(filter, index) in formFilters"
