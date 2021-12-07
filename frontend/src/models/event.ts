@@ -46,17 +46,6 @@ export interface eventSummaryRead extends nodeRead {
   vectors: eventVectorRead[];
 }
 
-// TODO: Event pages are not implemented yet
-// export interface eventTreeRead {
-//   event: eventSummaryRead;
-//   analyses: {
-//     analysisModuleType: { uuid: UUID; value: string };
-//     parentUuid: UUID | null;
-//     uuid: UUID;
-//   }[];
-//   observableInstances: observableInstanceRead[];
-// }
-
 export interface eventReadPage extends nodeReadPage {
   items: eventSummaryRead[];
 }

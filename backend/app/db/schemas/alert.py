@@ -55,9 +55,7 @@ class Alert(Node):
 
     type_uuid = Column(UUID(as_uuid=True), ForeignKey("alert_type.uuid"), nullable=False, index=True)
 
-    __mapper_args__ = {
-        "polymorphic_identity": "alert",
-    }
+    __mapper_args__ = {"polymorphic_identity": "alert", "polymorphic_load": "inline"}
 
     __table_args__ = (
         Index(

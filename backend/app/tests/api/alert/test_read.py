@@ -256,29 +256,16 @@ def test_get_filter_observable(client_valid_access_token, db):
 
     # Create some alerts with one observable
     alert1 = helpers.create_alert(db=db)
-    alert1_root_analysis = helpers.create_analysis(db=db, alert=alert1)
-    helpers.create_observable_instance(
-        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1_root_analysis, db=db
-    )
+    helpers.create_observable_in_tree(root_node=alert1, type="test_type1", value="test_value1", db=db)
 
     alert2 = helpers.create_alert(db=db)
-    alert2_root_analysis = helpers.create_analysis(db=db, alert=alert2)
-    helpers.create_observable_instance(
-        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2_root_analysis, db=db
-    )
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value2", db=db)
 
     # Create an alert with multiple observables
     alert3 = helpers.create_alert(db=db)
-    alert3_root_analysis = helpers.create_analysis(db=db, alert=alert3)
-    helpers.create_observable_instance(
-        type="test_type1", value="test_value_asdf", alert=alert3, parent_analysis=alert3_root_analysis, db=db
-    )
-    helpers.create_observable_instance(
-        type="test_type2", value="test_value1", alert=alert3, parent_analysis=alert3_root_analysis, db=db
-    )
-    helpers.create_observable_instance(
-        type="test_type2", value="test_value2", alert=alert3, parent_analysis=alert3_root_analysis, db=db
-    )
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type1", value="test_value_asdf", db=db)
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type2", value="test_value1", db=db)
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type2", value="test_value2", db=db)
 
     # There should be 4 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -302,23 +289,13 @@ def test_get_filter_observable_types(client_valid_access_token, db):
 
     # Create some alerts with one observable
     alert1 = helpers.create_alert(db=db)
-    alert1_root_analysis = helpers.create_analysis(db=db, alert=alert1)
-    helpers.create_observable_instance(
-        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1_root_analysis, db=db
-    )
+    helpers.create_observable_in_tree(root_node=alert1, type="test_type1", value="test_value1", db=db)
 
     # Create an alert with multiple observables
     alert2 = helpers.create_alert(db=db)
-    alert2_root_analysis = helpers.create_analysis(db=db, alert=alert2)
-    helpers.create_observable_instance(
-        type="test_type1", value="test_value_asdf", alert=alert2, parent_analysis=alert2_root_analysis, db=db
-    )
-    helpers.create_observable_instance(
-        type="test_type2", value="test_value1", alert=alert2, parent_analysis=alert2_root_analysis, db=db
-    )
-    helpers.create_observable_instance(
-        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2_root_analysis, db=db
-    )
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type1", value="test_value_asdf", db=db)
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value1", db=db)
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value2", db=db)
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -342,29 +319,16 @@ def test_get_filter_observable_value(client_valid_access_token, db):
 
     # Create some alerts with one observable
     alert1 = helpers.create_alert(db=db)
-    alert1_root_analysis = helpers.create_analysis(db=db, alert=alert1)
-    helpers.create_observable_instance(
-        type="test_type1", value="test_value1", alert=alert1, parent_analysis=alert1_root_analysis, db=db
-    )
+    helpers.create_observable_in_tree(root_node=alert1, type="test_type1", value="test_value1", db=db)
 
     alert2 = helpers.create_alert(db=db)
-    alert2_root_analysis = helpers.create_analysis(db=db, alert=alert2)
-    helpers.create_observable_instance(
-        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2_root_analysis, db=db
-    )
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value2", db=db)
 
     # Create an alert with multiple observables
     alert3 = helpers.create_alert(db=db)
-    alert3_root_analysis = helpers.create_analysis(db=db, alert=alert3)
-    helpers.create_observable_instance(
-        type="test_type1", value="test_value_asdf", alert=alert3, parent_analysis=alert3_root_analysis, db=db
-    )
-    helpers.create_observable_instance(
-        type="test_type2", value="test_value1", alert=alert3, parent_analysis=alert3_root_analysis, db=db
-    )
-    helpers.create_observable_instance(
-        type="test_type2", value="test_value2", alert=alert3, parent_analysis=alert3_root_analysis, db=db
-    )
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type1", value="test_value_asdf", db=db)
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type2", value="test_value1", db=db)
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type2", value="test_value2", db=db)
 
     # There should be 4 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -388,20 +352,12 @@ def test_get_filter_observable_and_observable_types(client_valid_access_token, d
 
     # Create an alert with multiple observables
     alert2 = helpers.create_alert(db=db)
-    alert2_root_analysis = helpers.create_analysis(db=db, alert=alert2)
-    helpers.create_observable_instance(
-        type="test_type1", value="test_value1", alert=alert2, parent_analysis=alert2_root_analysis, db=db
-    )
-    helpers.create_observable_instance(
-        type="test_type2", value="test_value2", alert=alert2, parent_analysis=alert2_root_analysis, db=db
-    )
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type1", value="test_value1", db=db)
+    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value2", db=db)
 
     # Create an alert with one observable
     alert3 = helpers.create_alert(db=db)
-    alert3_root_analysis = helpers.create_analysis(db=db, alert=alert3)
-    helpers.create_observable_instance(
-        type="test_type1", value="test_value1", alert=alert3, parent_analysis=alert3_root_analysis, db=db
-    )
+    helpers.create_observable_in_tree(root_node=alert3, type="test_type1", value="test_value1", db=db)
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -749,6 +705,7 @@ def test_get_alert_tree(client_valid_access_token, db):
     # Create an alert with a tree of analyses and observable instances
     alert = helpers.create_alert_from_json_file(db=db, json_path="/app/tests/alerts/small.json")
 
+    # The small.json alert has 12 observables and 6 analyses. Even though some of the observables
+    # are in the alert multiple times, the tree should have 18 items.
     get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert len(get.json()["analyses"]) == 7
-    assert len(get.json()["observable_instances"]) == 12
+    assert len(get.json()["tree"]) == 18

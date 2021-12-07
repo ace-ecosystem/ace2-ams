@@ -2,14 +2,17 @@ from fastapi import APIRouter, Depends, Request, Response
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
+from typing import List, Union
 from uuid import UUID
 
 from api.models.observable import (
     ObservableCreate,
+    ObservableCreateWithAlert,
     ObservableRead,
     ObservableUpdate,
 )
 from api.routes import helpers
+from api.routes.node import create_node, update_node
 from db import crud
 from db.database import get_db
 from db.schemas.observable import Observable
@@ -27,26 +30,66 @@ router = APIRouter(
 #
 
 
-def create_observable(
-    observable: ObservableCreate,
-    request: Request,
-    response: Response,
-    db: Session = Depends(get_db),
-):
-    # Create the new observable using the data from the request
-    new_observable = Observable(**observable.dict())
+def _create_observable(observable: Union[ObservableCreate, ObservableCreateWithAlert], db: Session) -> Observable:
+    # First check if this observable already exists
+    existing_observable = crud.read_observable(type=observable.type, value=observable.value, db=db)
+    if existing_observable:
+        return existing_observable
+
+    new_observable: Observable = create_node(
+        node_create=observable,
+        db_node_type=Observable,
+        db=db,
+        exclude={"node_tree"},
+    )
 
     # Get the observable type from the database to associate with the new observable
     new_observable.type = crud.read_by_value(observable.type, db_table=ObservableType, db=db)
 
-    # Save the new observable to the database
-    db.add(new_observable)
+    # Set the redirection observable if one was given
+    if observable.redirection_uuid:
+        new_observable.redirection = crud.read(
+            uuid=observable.redirection_uuid,
+            db_table=Observable,
+            db=db,
+        )
+
+    return new_observable
+
+
+def create_observables(
+    observables: List[ObservableCreate],
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+):
+    # NOTE: There are multiple crud.commit(db) statements to avoid the possibility of
+    # getting an IntegrityError when trying to read the observable from the Node table. This
+    # can happen due to autoflush in the case of trying to create observables with the same UUID.
+
+    # Add each observable to the database
+    for observable in observables:
+        new_observable: Observable = _create_observable(observable=observable, db=db)
+        db.add(new_observable)
+        observable.uuid = new_observable.uuid
+
+    crud.commit(db)
+
+    # Then link them to a Node Tree
+    for observable in observables:
+        crud.create_node_tree_leaf(
+            root_node_uuid=observable.node_tree.root_node_uuid,
+            parent_tree_uuid=observable.node_tree.parent_tree_uuid,
+            node_uuid=observable.uuid,
+            db=db,
+        )
+
     crud.commit(db)
 
     response.headers["Content-Location"] = request.url_for("get_observable", uuid=new_observable.uuid)
 
 
-helpers.api_route_create(router, create_observable)
+helpers.api_route_create(router, create_observables)
 
 
 #
@@ -78,17 +121,30 @@ def update_observable(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    # Read the current observable from the database
-    db_observable: Observable = crud.read(uuid=uuid, db_table=Observable, db=db)
+    # Update the Node attributes
+    db_observable: Observable = update_node(node_update=observable, uuid=uuid, db_table=Observable, db=db)
 
     # Get the data that was given in the request and use it to update the database object
     update_data = observable.dict(exclude_unset=True)
+
+    if "context" in update_data:
+        db_observable.context = update_data["context"]
 
     if "expires_on" in update_data:
         db_observable.expires_on = update_data["expires_on"]
 
     if "for_detection" in update_data:
         db_observable.for_detection = update_data["for_detection"]
+
+    if "redirection_uuid" in update_data:
+        db_observable.redirection = crud.read(uuid=update_data["redirection_uuid"], db_table=Observable, db=db)
+
+        # TODO: Figure out why setting the redirection field above does not set the redirection_uuid
+        # the same way it does in the create endpoint.
+        db_observable.redirection_uuid = update_data["redirection_uuid"]
+
+    if "time" in update_data:
+        db_observable.time = update_data["time"]
 
     if "type" in update_data:
         db_observable.type = crud.read_by_value(value=update_data["type"], db_table=ObservableType, db=db)
@@ -109,8 +165,4 @@ helpers.api_route_update(router, update_observable)
 #
 
 
-def delete_observable(uuid: UUID, db: Session = Depends(get_db)):
-    crud.delete(uuid=uuid, db_table=Observable, db=db)
-
-
-helpers.api_route_delete(router, delete_observable)
+# We currently do not support deleting observables

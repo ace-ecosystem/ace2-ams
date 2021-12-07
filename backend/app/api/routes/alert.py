@@ -4,14 +4,14 @@ from fastapi.exceptions import HTTPException
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session, joinedload
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID, uuid4
 
+
 from api.models.alert import AlertCreate, AlertRead, AlertTreeRead, AlertUpdate
-from api.models.analysis import AnalysisCreate
 from api.routes import helpers
 from api.routes.node import create_node, update_node
-from api.routes.observable_instance import _create_observable_instance
+from api.routes.observable import _create_observable
 from core.auth import validate_access_token
 from db import crud
 from db.database import get_db
@@ -21,14 +21,13 @@ from db.schemas.alert_queue import AlertQueue
 from db.schemas.alert_tool import AlertTool
 from db.schemas.alert_tool_instance import AlertToolInstance
 from db.schemas.alert_type import AlertType
-from db.schemas.analysis import Analysis
 from db.schemas.event import Event
 from db.schemas.node import Node
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
+from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
-from db.schemas.observable_instance import ObservableInstance
 from db.schemas.observable_type import ObservableType
 from db.schemas.user import User
 
@@ -55,7 +54,7 @@ def create_alert(
         node_create=alert,
         db_node_type=Alert,
         db=db,
-        exclude={"observable_instances"},
+        exclude={"observables"},
     )
 
     # Set the required alert properties
@@ -72,20 +71,22 @@ def create_alert(
     if alert.tool_instance:
         new_alert.tool_instance = crud.read_by_value(value=alert.tool_instance, db_table=AlertToolInstance, db=db)
 
-    # Create a root analysis object for the alert
-    root_analysis: Analysis = create_node(
-        node_create=AnalysisCreate(alert_uuid=new_alert.uuid), db_node_type=Analysis, db=db
-    )
-
-    # Add the observable instances to the root analysis
-    for observable_instance in alert.observable_instances:
-        db_observable_instance = _create_observable_instance(observable_instance, db=db)
-        db_observable_instance.alert_uuid = new_alert.uuid
-        db_observable_instance.parent_uuid = root_analysis.uuid
-        db.add(db_observable_instance)
-
     db.add(new_alert)
-    db.add(root_analysis)
+
+    crud.commit(db)
+
+    # Add the observables to database
+    for observable in alert.observables:
+        db_observable = _create_observable(observable, db=db)
+        db.add(db_observable)
+        observable.uuid = db_observable.uuid
+
+    crud.commit(db)
+
+    # Then link them to a Node Tree
+    for observable in alert.observables:
+        crud.create_node_tree_leaf(root_node_uuid=new_alert.uuid, node_uuid=observable.uuid, db=db)
+
     crud.commit(db)
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=new_alert.uuid)
 
@@ -206,8 +207,8 @@ def get_all_alerts(
         observable_split = observable.split("|", maxsplit=1)
         observable_query = (
             select(Alert)
-            .join(ObservableInstance, onclause=ObservableInstance.alert_uuid == Alert.uuid)
-            .join(Observable)
+            .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
+            .join(Observable, onclause=Observable.uuid == NodeTree.node_uuid)
             .join(ObservableType)
             .where(ObservableType.value == observable_split[0], Observable.value == observable_split[1])
         )
@@ -218,8 +219,8 @@ def get_all_alerts(
         type_filters = [func.count(1).filter(ObservableType.value == t) > 0 for t in observable_types.split(",")]
         observable_types_query = (
             select(Alert)
-            .join(ObservableInstance, onclause=ObservableInstance.alert_uuid == Alert.uuid)
-            .join(Observable)
+            .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
+            .join(Observable, onclause=Observable.uuid == NodeTree.node_uuid)
             .join(ObservableType)
             .having(and_(*type_filters))
             .group_by(Alert.uuid, Node.uuid)
@@ -230,8 +231,8 @@ def get_all_alerts(
     if observable_value:
         observable_value_query = (
             select(Alert)
-            .join(ObservableInstance, onclause=ObservableInstance.alert_uuid == Alert.uuid)
-            .join(Observable)
+            .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
+            .join(Observable, onclause=Observable.uuid == NodeTree.node_uuid)
             .where(Observable.value == observable_value)
         )
 
@@ -358,14 +359,11 @@ def get_alert(uuid: UUID, db: Session = Depends(get_db)):
             select(Alert)
             .where(Alert.uuid == uuid)
             .options(
-                joinedload(Alert.comments),
-                joinedload(Alert.directives),
+                *crud.node_joinedloads,
                 joinedload(Alert.disposition),
                 joinedload(Alert.disposition_user).options(joinedload(User.roles)),
                 joinedload(Alert.owner).options(joinedload(User.roles)),
                 joinedload(Alert.queue),
-                joinedload(Alert.tags),
-                joinedload(Alert.threats),
                 joinedload(Alert.tool),
                 joinedload(Alert.tool_instance),
                 joinedload(Alert.type),
@@ -379,41 +377,7 @@ def get_alert(uuid: UUID, db: Session = Depends(get_db)):
     if not alert:
         raise HTTPException(status_code=404, detail=f"Alert {uuid} does not exist.")
 
-    analyses: List[Analysis] = (
-        db.execute(
-            select(Analysis)
-            .where(Analysis.alert_uuid == alert.uuid)
-            .options(
-                joinedload(Analysis.analysis_module_type),
-                joinedload(Analysis.comments),
-                joinedload(Analysis.directives),
-                joinedload(Analysis.tags),
-                joinedload(Analysis.threats),
-            )
-        )
-        .unique()
-        .scalars()
-        .all()
-    )
-
-    observable_instances: List[ObservableInstance] = (
-        db.execute(
-            select(ObservableInstance)
-            .where(ObservableInstance.alert_uuid == alert.uuid)
-            .options(
-                joinedload(ObservableInstance.comments),
-                joinedload(ObservableInstance.directives),
-                joinedload(ObservableInstance.observable).options(joinedload(Observable.type)),
-                joinedload(ObservableInstance.tags),
-                joinedload(ObservableInstance.threats),
-            )
-        )
-        .unique()
-        .scalars()
-        .all()
-    )
-
-    return AlertTreeRead(alert=alert, analyses=analyses, observable_instances=observable_instances)
+    return AlertTreeRead(alert=alert, tree=crud.read_node_tree(root_node_uuid=uuid, db=db))
 
 
 helpers.api_route_read_all(router, get_all_alerts, AlertRead)

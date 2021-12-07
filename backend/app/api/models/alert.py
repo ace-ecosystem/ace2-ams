@@ -9,9 +9,8 @@ from api.models.alert_queue import AlertQueueRead
 from api.models.alert_tool import AlertToolRead
 from api.models.alert_tool_instance import AlertToolInstanceRead
 from api.models.alert_type import AlertTypeRead
-from api.models.analysis import AnalysisAlertTreeRead
 from api.models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
-from api.models.observable_instance import ObservableInstanceCreateWithAlert, ObservableInstanceRead
+from api.models.observable import ObservableCreateWithAlert
 from api.models.user import UserRead
 
 
@@ -48,7 +47,9 @@ class AlertCreate(NodeCreate, AlertBase):
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the alert")
 
-    observable_instances: List[ObservableInstanceCreateWithAlert]
+    observables: List[ObservableCreateWithAlert] = Field(
+        description="A list of observables that should be added to the alert"
+    )
 
 
 class AlertRead(NodeRead, AlertBase):
@@ -96,12 +97,9 @@ class AlertUpdate(NodeUpdate, AlertBase):
 
 
 class AlertTreeRead(BaseModel):
-    alert: AlertRead = Field(description="The metadata about the alert")
+    alert: AlertRead = Field(description="The alert's metadata")
 
-    analyses: List[AnalysisAlertTreeRead] = Field(
-        description="A list of the analysis objects associated with the alert"
-    )
+    tree: List = Field(description="A list of the Node objects in the alert tree")
 
-    observable_instances: List[ObservableInstanceRead] = Field(
-        description="A list of the observable instance objects associated with the alert"
-    )
+    class Config:
+        orm_mode = True

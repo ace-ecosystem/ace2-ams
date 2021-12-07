@@ -6,10 +6,11 @@ import { alertQueueRead } from "./alertQueue";
 import { alertToolRead } from "./alertTool";
 import { alertToolInstanceRead } from "./alertToolInstance";
 import { alertTypeRead } from "./alertType";
-import { observableInstanceRead } from "./observableInstance";
+import { analysisTreeRead } from "./analysis";
 import { userRead } from "./user";
 import { nodeCommentRead } from "./nodeComment";
 import { nodeTagRead } from "./nodeTag";
+import { observableTreeRead } from "./observable";
 
 export interface alertCreate extends nodeCreate {
   description?: string;
@@ -17,7 +18,7 @@ export interface alertCreate extends nodeCreate {
   insertTime?: Date;
   instructions?: string;
   name: string;
-  observableInstances: { type: string; value: string }[];
+  observables: { type: string; value: string }[];
   owner?: string;
   queue: string;
   tool?: string;
@@ -63,12 +64,7 @@ export interface alertTableSummary {
 
 export interface alertTreeRead {
   alert: alertSummaryRead;
-  analyses: {
-    analysisModuleType: { uuid: UUID; value: string };
-    parentUuid: UUID | null;
-    uuid: UUID;
-  }[];
-  observableInstances: observableInstanceRead[];
+  tree: (analysisTreeRead | observableTreeRead)[];
 }
 
 export interface alertReadPage extends nodeReadPage {
