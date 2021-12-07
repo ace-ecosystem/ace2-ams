@@ -98,7 +98,7 @@ export interface alertFilterParams extends pageOptionParams {
   insertTimeAfter?: Date;
   insertTimeBefore?: Date;
   name?: string;
-  observable?: { type: string; value: string };
+  observable?: { category: string; value: string };
   observableTypes?: string[];
   observableValue?: string;
   owner?: string;
@@ -125,4 +125,4 @@ export interface alertFilterOption {
   readonly optionLabel?: string;
   readonly optionValue?: string;
   readonly formatForAPI?: (filter: any) => string;
-};
+}

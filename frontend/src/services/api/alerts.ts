@@ -23,7 +23,7 @@ export const Alert = {
       for (const param in params) {
         const paramValue = params[param];
 
-        //  check if the given param is specific to alerts, i.e. disposition
+        //  check if the given param is specific to alerts and not pageOptionParams, i.e. disposition
         const filterType = alertFilters.find((filter) => {
           return filter.name === param;
         });

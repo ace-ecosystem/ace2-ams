@@ -31,8 +31,7 @@ export const alertFilterNames: Record<string, alertFilterNameTypes> = {
   TOOL_FILTER: "tool",
   TOOL_INSTANCE_FILTER: "toolInstance",
   TYPE_FILTER: "type",
-
-}
+};
 
 export const alertFilters: readonly alertFilterOption[] = [
   {

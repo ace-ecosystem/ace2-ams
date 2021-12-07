@@ -20,6 +20,20 @@ describe("filters Getters", () => {
 });
 
 describe("filters Mutations", () => {
+  it("will set the given filterTypes filter object to the given filter object argument upon the BULK_SET_FILTERS mutation", () => {
+    const state = { alerts: {} };
+    const store = new Vuex.Store({ state, mutations });
+
+    store.commit("BULK_SET_FILTERS", {
+      filterType: "alerts",
+      filters: { testFilterName: "testFilterValue" }
+    });
+    expect(state).toEqual({
+      alerts: {
+        testFilterName: "testFilterValue",
+      },
+    });
+  });
   it("will add a new property and specified to a given filter object upon the SET_FILTER mutation", () => {
     const state = { alerts: {} };
     const store = new Vuex.Store({ state, mutations });
@@ -60,7 +74,21 @@ describe("filters Mutations", () => {
   });
 });
 
-describe("modals Actions", () => {
+describe("filters Actions", () => {
+  it("will set the given filterTypes filter object to the given filter object argument upon the bulkSetFilters action", () => {
+    const state = { alerts: {} };
+    const store = new Vuex.Store({ state, mutations, actions });
+
+    store.dispatch("bulkSetFilters", {
+      filterType: "alerts",
+      filters: { testFilterName: "testFilterValue" },
+    });
+    expect(state).toEqual({
+      alerts: {
+        testFilterName: "testFilterValue",
+      },
+    });
+  });
   it("will add a new property and specified to a given filter object upon the setFilter action", () => {
     const state = { alerts: {} };
     const store = new Vuex.Store({ state, mutations, actions });
