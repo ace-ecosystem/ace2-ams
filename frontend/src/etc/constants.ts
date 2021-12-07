@@ -1,4 +1,13 @@
 import { alertFilterNameTypes, alertFilterOption } from "@/models/alert";
+import { alertDispositionRead } from "@/models/alertDisposition";
+import { alertQueueRead } from "@/models/alertQueue";
+import { alertToolRead } from "@/models/alertTool";
+import { alertToolInstanceRead } from "@/models/alertToolInstance";
+import { alertTypeRead } from "@/models/alertType";
+import { nodeTagRead } from "@/models/nodeTag";
+import { nodeThreatActorRead } from "@/models/nodeThreatActor";
+import { observableTypeRead } from "@/models/observableType";
+import { userRead } from "@/models/user";
 
 export const filterTypes = {
   MULTISELECT: "multiselect",
@@ -39,14 +48,19 @@ export const alertFilters: readonly alertFilterOption[] = [
     label: "Disposition",
     type: filterTypes.SELECT,
     options: "alertDisposition",
+    formatForAPI: (filter: alertDispositionRead) => {
+      return filter.value;
+    },
   },
   {
     name: alertFilterNames.DISPOSITION_USER_FILTER,
     label: "Dispositioned By",
     type: filterTypes.SELECT,
     options: "users",
-    optionValue: "username",
     optionLabel: "displayName",
+    formatForAPI: (filter: userRead) => {
+      return filter.username;
+    },
   },
   {
     name: alertFilterNames.DISPOSITIONED_AFTER_FILTER,
@@ -94,8 +108,8 @@ export const alertFilters: readonly alertFilterOption[] = [
     label: "Observable",
     type: filterTypes.CATEGORIZED_VALUE,
     options: "observableType",
-    formatForAPI: (filter: { category: string; value: string }) => {
-      return `${filter.category}|${filter.value}`;
+    formatForAPI: (filter: { category: observableTypeRead; value: string }) => {
+      return `${filter.category.value}|${filter.value}`;
     },
   },
   {
@@ -103,8 +117,12 @@ export const alertFilters: readonly alertFilterOption[] = [
     label: "Observable Types",
     type: filterTypes.MULTISELECT,
     options: "observableType",
-    formatForAPI: (filter: string[]) => {
-      return filter.join();
+    formatForAPI: (filter: observableTypeRead[]) => {
+      return filter
+        .map(function (elem) {
+          return elem.value;
+        })
+        .join();
     },
   },
   {
@@ -118,21 +136,30 @@ export const alertFilters: readonly alertFilterOption[] = [
     type: filterTypes.SELECT,
     options: "users",
     optionLabel: "displayName",
-    optionValue: "username",
+    formatForAPI: (filter: userRead) => {
+      return filter.username;
+    },
   },
   {
     name: alertFilterNames.QUEUE_FILTER,
     label: "Queue",
     type: filterTypes.SELECT,
     options: "alertQueue",
+    formatForAPI: (filter: alertQueueRead) => {
+      return filter.value;
+    },
   },
   {
     name: alertFilterNames.TAGS_FILTER,
     label: "Tags",
     type: filterTypes.CHIPS,
     options: "nodeTag",
-    formatForAPI: (filter: string[]) => {
-      return filter.join();
+    formatForAPI: (filter: nodeTagRead[]) => {
+      return filter
+        .map(function (elem) {
+          return elem.value;
+        })
+        .join();
     },
   },
   {
@@ -140,14 +167,21 @@ export const alertFilters: readonly alertFilterOption[] = [
     label: "Threat Actor",
     type: filterTypes.SELECT,
     options: "nodeThreat",
+    formatForAPI: (filter: nodeThreatActorRead) => {
+      return filter.value;
+    },
   },
   {
     name: alertFilterNames.THREATS_FILTER,
     label: "Threats",
     type: filterTypes.CHIPS,
     options: "nodeThreatActor",
-    formatForAPI: (filter: string[]) => {
-      return filter.join();
+    formatForAPI: (filter: nodeThreatActorRead[]) => {
+      return filter
+        .map(function (elem) {
+          return elem.value;
+        })
+        .join();
     },
   },
   {
@@ -155,18 +189,27 @@ export const alertFilters: readonly alertFilterOption[] = [
     label: "Tool",
     type: filterTypes.SELECT,
     options: "tool",
+    formatForAPI: (filter: alertToolRead) => {
+      return filter.value;
+    },
   },
   {
     name: alertFilterNames.TOOL_INSTANCE_FILTER,
     label: "Tool Instance",
     type: filterTypes.SELECT,
     options: "toolInstance",
+    formatForAPI: (filter: alertToolInstanceRead) => {
+      return filter.value;
+    },
   },
   {
     name: alertFilterNames.TYPE_FILTER,
     label: "Type",
     type: filterTypes.SELECT,
     options: "alertType",
+    formatForAPI: (filter: alertTypeRead) => {
+      return filter.value;
+    },
   },
 ] as const;
 

@@ -1,7 +1,6 @@
 import FilterModal from "@/components/Modals/FilterModal.vue";
 import store from "@/store";
 import { mount } from "@vue/test-utils";
-import { wrap } from "module";
 
 describe("FilterModal setup", () => {
   const wrapper = mount(FilterModal, {

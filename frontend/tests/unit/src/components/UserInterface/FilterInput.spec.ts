@@ -87,7 +87,7 @@ describe("FilterInput setup w/o set filter", () => {
 describe("FilterInput setup w/ set filter", () => {
   store.commit("users/addItems", USERS_STUB);
 
-  const filter = { filterName: "owner", filterValue: "test analyst" };
+  const filter = { filterName: "owner", filterValue: USERS_STUB[0] };
   const wrapper = mount(FilterInput, {
     props: {
       modelValue: filter,
@@ -130,7 +130,6 @@ describe("FilterInput computed properties w/o set filter", () => {
   it("contains expected computed data when no filters are set (default to an input filter)", () => {
     expect(wrapper.vm.filterOptions).toBeNull();
     expect(wrapper.vm.filterOptionLabel).toEqual("value");
-    expect(wrapper.vm.filterOptionValue).toBeNull();
     expect(wrapper.vm.isDate).toBeFalsy();
     expect(wrapper.vm.isCategorizedValue).toBeFalsy();
     expect(wrapper.vm.isChips).toBeFalsy();
@@ -144,7 +143,7 @@ describe("FilterInput computed properties w/o set filter", () => {
 describe("FilterInput computed properties w/ set filter", () => {
   store.commit("users/addItems", USERS_STUB);
 
-  const filter = { filterName: "owner", filterValue: "test analyst" };
+  const filter = { filterName: "owner", filterValue: null };
   const wrapper = mount(FilterInput, {
     props: {
       modelValue: filter,
@@ -161,7 +160,6 @@ describe("FilterInput computed properties w/ set filter", () => {
   it("contains expected computed data when select/dropdown filter is set", () => {
     expect(wrapper.vm.filterOptions).toEqual(USERS_STUB);
     expect(wrapper.vm.filterOptionLabel).toEqual("displayName");
-    expect(wrapper.vm.filterOptionValue).toEqual("username");
     expect(wrapper.vm.isDate).toBeFalsy();
     expect(wrapper.vm.isCategorizedValue).toBeFalsy();
     expect(wrapper.vm.isChips).toBeFalsy();
@@ -177,7 +175,6 @@ describe("FilterInput computed properties w/ set filter", () => {
 
     expect(wrapper.vm.filterOptions).toEqual(OBSERVABLE_TYPES_STUB);
     expect(wrapper.vm.filterOptionLabel).toEqual("value");
-    expect(wrapper.vm.filterOptionValue).toEqual(null);
     expect(wrapper.vm.isDate).toBeFalsy();
     expect(wrapper.vm.isCategorizedValue).toBeTruthy();
     expect(wrapper.vm.isChips).toBeFalsy();
@@ -193,7 +190,6 @@ describe("FilterInput computed properties w/ set filter", () => {
 
     expect(wrapper.vm.filterOptions).toBeNull();
     expect(wrapper.vm.filterOptionLabel).toEqual("value");
-    expect(wrapper.vm.filterOptionValue).toEqual(null);
     expect(wrapper.vm.isDate).toBeFalsy();
     expect(wrapper.vm.isCategorizedValue).toBeFalsy();
     expect(wrapper.vm.isChips).toBeTruthy();
@@ -209,7 +205,6 @@ describe("FilterInput computed properties w/ set filter", () => {
 
     expect(wrapper.vm.filterOptions).toBeNull();
     expect(wrapper.vm.filterOptionLabel).toEqual("value");
-    expect(wrapper.vm.filterOptionValue).toEqual(null);
     expect(wrapper.vm.isDate).toBeFalsy();
     expect(wrapper.vm.isCategorizedValue).toBeFalsy();
     expect(wrapper.vm.isChips).toBeFalsy();
@@ -224,7 +219,6 @@ describe("FilterInput computed properties w/ set filter", () => {
 
     expect(wrapper.vm.filterOptions).toBeNull();
     expect(wrapper.vm.filterOptionLabel).toEqual("value");
-    expect(wrapper.vm.filterOptionValue).toEqual(null);
     expect(wrapper.vm.isDate).toBeTruthy();
     expect(wrapper.vm.isCategorizedValue).toBeFalsy();
     expect(wrapper.vm.isChips).toBeFalsy();
@@ -299,19 +293,6 @@ describe("FilterInput methods", () => {
     expect(result).toEqual(FILTERS_STUB[0]);
   });
 
-  it("executes getFilterValueObject as expected", () => {
-    wrapper.vm.filterName = FILTERS_STUB[1];
-    let result = wrapper.vm.getFilterValueObject("test analyst 2");
-    expect(result).toEqual(USERS_STUB[1]);
-    result = wrapper.vm.getFilterValueObject("made up");
-    expect(result).toBeNull();
-    result = wrapper.vm.getFilterValueObject(null);
-    expect(result).toBeNull();
-
-    wrapper.vm.filterName = FILTERS_STUB[3];
-    result = wrapper.vm.getFilterValueObject("a tag");
-    expect(result).toEqual("a tag");
-  });
   it("executes updateValue as expected", async () => {
     await wrapper.vm.$nextTick();
 

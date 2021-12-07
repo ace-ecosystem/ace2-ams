@@ -37,6 +37,7 @@
           v-model="filterValue"
           class="inputfield w-16rem"
           :options="filterOptions"
+          :option-label="filterOptionLabel"
           type="text"
           @change="updateValue('filterValue', $event.value)"
         ></Multiselect>
@@ -74,6 +75,7 @@
           <Dropdown
             v-model="filterValue.category"
             :options="filterOptions"
+            :option-label="filterOptionLabel"
             class="w-16rem"
             type="text"
             @change="
@@ -161,9 +163,9 @@
           ? this.filterName.optionLabel
           : "value";
       },
-      filterOptionValue() {
-        return this.filterName.optionValue ? this.filterName.optionValue : null;
-      },
+      // filterOptionValue() {
+      //   return this.filterName.optionValue ? this.filterName.optionValue : null;
+      // },
       isDate() {
         return this.inputType == "date";
       },
@@ -189,7 +191,6 @@
 
     mounted() {
       this.updateValue("filterName", null, this.filterName);
-      this.filterValue = this.getFilterValueObject(this.filterValue);
     },
 
     methods: {
@@ -225,16 +226,6 @@
         filter = filter ? filter : null;
         return filter;
       },
-      getFilterValueObject(filterValue) {
-        if (!filterValue || !this.filterOptions) {
-          return filterValue;
-        }
-        let value = this.filterOptions.find((option) => {
-          return option[this.filterOptionValue] === filterValue;
-        });
-        value = value ? value : null;
-        return value;
-      },
       updateValue(attribute, newValue) {
         if (attribute === "filterName") {
           this.$emit("update:modelValue", {
@@ -244,9 +235,7 @@
         } else if (attribute === "filterValue") {
           this.$emit("update:modelValue", {
             filterName: this.filterName.name,
-            filterValue: this.filterOptionValue
-              ? newValue[this.filterOptionValue]
-              : newValue,
+            filterValue: newValue,
           });
         }
       },

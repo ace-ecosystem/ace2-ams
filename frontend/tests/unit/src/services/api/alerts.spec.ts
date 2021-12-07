@@ -17,10 +17,22 @@ const MOCK_PARAMS: alertFilterParams = {
   limit: 10,
   offset: 10,
   name: "Test Name",
-  observableTypes: ["testA", "testB"],
-  tags: ["tagA", "tagB"],
-  threats: ["threatA", "threatB"],
-  observable: { category: "test", value: "example" },
+  observableTypes: [
+    { value: "testA", description: null, uuid: "1" },
+    { value: "testB", description: null, uuid: "2" },
+  ],
+  tags: [
+    { value: "tagA", description: null, uuid: "1" },
+    { value: "tagB", description: null, uuid: "2" },
+  ],
+  threats: [
+    { value: "threatA", description: null, types: [], uuid: "1" },
+    { value: "threatB", description: null, types: [], uuid: "2" },
+  ],
+  observable: {
+    category: { value: "test", description: null, uuid: "1" },
+    value: "example",
+  },
 };
 
 describe("Alert calls", () => {
