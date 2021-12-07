@@ -151,7 +151,6 @@
           const options =
             this.$store.getters[`${this.filterName.options}/allItems`];
           if (options) {
-            // return options.map((option) => option[this.filterOptionLabel]);
             return options;
           }
         }
@@ -211,29 +210,29 @@
       },
       clearFilterValue() {
         if (this.isCategorizedValue) {
-          this.filterValue = { category: this.filterOptions[0], val: null };
+          this.filterValue = { category: this.filterOptions[0], value: null };
         } else {
           this.filterValue = null;
         }
       },
       getFilterNameObject(filterName) {
         if (!filterName) {
-          filterName = "disposition";
+          return this.availableFilters[0];
         }
-        let filter = this.availableFilters.filter((filter) => {
+        let filter = this.availableFilters.find((filter) => {
           return filter.name === filterName;
         });
-        filter = filter ? filter[0] : null;
+        filter = filter ? filter : null;
         return filter;
       },
       getFilterValueObject(filterValue) {
         if (!filterValue || !this.filterOptions) {
           return filterValue;
         }
-        let value = this.filterOptions.filter((option) => {
+        let value = this.filterOptions.find((option) => {
           return option[this.filterOptionValue] === filterValue;
         });
-        value = value ? value[0] : null;
+        value = value ? value : null;
         return value;
       },
       updateValue(attribute, newValue) {
