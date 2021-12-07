@@ -10,7 +10,7 @@ const MOCK_ALERT_CREATE: alertCreate = {
   name: "Test",
   queue: "Default",
   type: "test",
-  observableInstances: [],
+  observables: [],
 };
 const MOCK_ALERT_UPDATE: alertUpdate = { version: "test" };
 const MOCK_PARAMS: alertFilterParams = {
