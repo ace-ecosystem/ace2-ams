@@ -36,3 +36,11 @@ export interface pageOptionParams {
   offset?: number;
   [key: string]: unknown;
 }
+export interface filterOption {
+  readonly name: string;
+  readonly label: string;
+  readonly type: string;
+  readonly options?: string;
+  readonly optionLabel?: string;
+  readonly formatForAPI?: (filter: any) => string;
+}

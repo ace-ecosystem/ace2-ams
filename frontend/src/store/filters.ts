@@ -1,7 +1,7 @@
 import {
   alertFilterParams,
-  alertFilterNames,
   alertFilterValues,
+  alertFilterNameTypes,
 } from "@/models/alert";
 import { CommitFunction } from "@/store/index";
 
@@ -15,18 +15,25 @@ const store = {
       state.alerts,
   },
   mutations: {
+    BULK_SET_FILTERS: (
+      state: { alerts: alertFilterParams },
+      payload: {
+        filterType: "alerts";
+        filters: alertFilterParams;
+      },
+    ): alertFilterParams => (state[payload.filterType] = payload.filters),
     SET_FILTER: (
       state: { alerts: alertFilterParams },
       payload: {
         filterType: "alerts";
-        filterName: alertFilterNames;
+        filterName: alertFilterNameTypes;
         filterValue: alertFilterValues;
       },
     ): alertFilterValues =>
       (state[payload.filterType][payload.filterName] = payload.filterValue),
     UNSET_FILTER: (
       state: { alerts: alertFilterParams },
-      payload: { filterType: "alerts"; filterName: alertFilterNames },
+      payload: { filterType: "alerts"; filterName: alertFilterNameTypes },
     ): boolean => delete state[payload.filterType][payload.filterName],
     CLEAR_ALL: (
       state: { alerts: alertFilterParams },
@@ -34,6 +41,13 @@ const store = {
     ): alertFilterParams => (state[payload.filterType] = {}),
   },
   actions: {
+    bulkSetFilters: (
+      { commit }: CommitFunction,
+      payload: {
+        filterType: "alerts";
+        filters: alertFilterParams;
+      },
+    ): void => commit("BULK_SET_FILTERS", payload),
     setFilter: (
       { commit }: CommitFunction,
       payload: {

@@ -5,8 +5,8 @@
 
 <template>
   <Dialog
-    append-to="self"
     v-model:visible="isOpen"
+    append-to="self"
     :header="header"
     :modal="true"
     @update:visible="close"
@@ -34,6 +34,8 @@
       header: { type: String, required: false },
     },
 
+    emits: ["dialogClose"],
+
     computed: {
       isActive() {
         return this.$store.getters["modals/active"] === this.name;
@@ -50,6 +52,7 @@
 
     methods: {
       close() {
+        this.$emit("dialogClose");
         this.$store.dispatch("modals/close", this.name);
       },
     },

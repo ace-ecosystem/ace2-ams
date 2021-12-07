@@ -1,3 +1,4 @@
+import { alertFilters } from "@/etc/constants";
 import {
   alertCreate,
   alertFilterParams,
@@ -17,8 +18,27 @@ export const Alert = {
 
   read: (uuid: UUID): Promise<alertTreeRead> => api.read(`${endpoint}${uuid}`),
 
-  readPage: (params?: alertFilterParams): Promise<alertReadPage> =>
-    api.read(`${endpoint}`, params),
+  readPage: (params?: alertFilterParams): Promise<alertReadPage> => {
+    if (params) {
+      for (const param in params) {
+        const paramValue = params[param] as unknown;
+
+        //  check if the given param is specific to alerts and not pageOptionParams, i.e. disposition
+        const filterType = alertFilters.find((filter) => {
+          return filter.name === param;
+        });
+
+        // if so, check if the param's value needs to be formatted, and replace with the newly formatted val
+        if (filterType && filterType.formatForAPI) {
+          if (filterType.formatForAPI) {
+            params[param] = filterType.formatForAPI(paramValue) as never;
+          }
+        }
+      }
+    }
+
+    return api.read(`${endpoint}`, params);
+  },
 
   update: (uuid: UUID, data: alertUpdate): Promise<void> =>
     api.update(`${endpoint}${uuid}`, data),

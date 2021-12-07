@@ -1,4 +1,3 @@
-import { alertFilters } from "@/etc/constants";
 import { pageOptionParams, UUID } from "./base";
 import { nodeCreate, nodeRead, nodeReadPage, nodeUpdate } from "./node";
 import { alertDispositionRead } from "./alertDisposition";
@@ -11,6 +10,9 @@ import { userRead } from "./user";
 import { nodeCommentRead } from "./nodeComment";
 import { nodeTagRead } from "./nodeTag";
 import { observableTreeRead } from "./observable";
+import { observableTypeRead } from "./observableType";
+import { nodeThreatActorRead } from "./nodeThreatActor";
+import { nodeThreatRead } from "./nodeThreat";
 
 export interface alertCreate extends nodeCreate {
   description?: string;
@@ -84,8 +86,8 @@ export interface alertUpdate extends nodeUpdate {
 }
 
 export interface alertFilterParams extends pageOptionParams {
-  disposition?: string;
-  dispositionUser?: string;
+  disposition?: alertDispositionRead;
+  dispositionUser?: userRead;
   dispositionedAfter?: Date;
   dispositionedBefore?: Date;
   eventUuid?: string;
@@ -94,21 +96,34 @@ export interface alertFilterParams extends pageOptionParams {
   insertTimeAfter?: Date;
   insertTimeBefore?: Date;
   name?: string;
-  observable?: { type: string; value: string };
-  observableTypes?: string[];
+  observable?: { category: observableTypeRead; value: string };
+  observableTypes?: observableTypeRead[];
   observableValue?: string;
-  owner?: string;
-  queue?: string;
+  owner?: userRead;
+  queue?: alertQueueRead;
   sort?: string;
-  tags?: string[];
-  threatActor?: string;
-  threats?: string[];
-  tool?: string;
-  toolInstance?: string;
-  type?: string;
+  tags?: nodeTagRead[];
+  threatActor?: nodeThreatActorRead;
+  threats?: nodeThreatRead[];
+  tool?: alertToolRead;
+  toolInstance?: alertToolInstanceRead;
+  type?: alertTypeRead;
 }
 
-export type alertFilterNames = typeof alertFilters[number];
+export type alertFilterNameTypes = Extract<keyof alertFilterParams, string>;
 export type alertFilterValues =
-  | (string & string[] & Date & { type: string; value: string })
+  | (string &
+      observableTypeRead[] &
+      nodeThreatRead[] &
+      nodeTagRead[] &
+      Date & {
+        category: observableTypeRead;
+        value: string;
+      } & alertDispositionRead &
+      userRead &
+      alertQueueRead &
+      nodeThreatActorRead &
+      alertToolRead &
+      alertToolInstanceRead &
+      alertTypeRead)
   | undefined;
