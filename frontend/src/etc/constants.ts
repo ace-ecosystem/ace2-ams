@@ -1,4 +1,5 @@
-import { alertFilterNameTypes, alertFilterOption } from "@/models/alert";
+import { alertFilterNameTypes } from "@/models/alert";
+import { filterOption } from "@/models/base";
 import { alertDispositionRead } from "@/models/alertDisposition";
 import { alertQueueRead } from "@/models/alertQueue";
 import { alertToolRead } from "@/models/alertTool";
@@ -9,6 +10,8 @@ import { nodeThreatActorRead } from "@/models/nodeThreatActor";
 import { observableTypeRead } from "@/models/observableType";
 import { userRead } from "@/models/user";
 
+// ** Base ** //
+
 export const filterTypes = {
   MULTISELECT: "multiselect",
   CHIPS: "chips",
@@ -17,6 +20,8 @@ export const filterTypes = {
   INPUT_TEXT: "inputText",
   CATEGORIZED_VALUE: "categorizedValue",
 };
+
+// ** Alerts ** //
 
 export const alertFilterNames: Record<string, alertFilterNameTypes> = {
   DISPOSITION_FILTER: "disposition",
@@ -42,7 +47,7 @@ export const alertFilterNames: Record<string, alertFilterNameTypes> = {
   TYPE_FILTER: "type",
 };
 
-export const alertFilters: readonly alertFilterOption[] = [
+export const alertFilters: readonly filterOption[] = [
   {
     name: alertFilterNames.DISPOSITION_FILTER,
     label: "Disposition",

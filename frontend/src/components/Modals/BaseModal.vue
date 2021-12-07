@@ -5,8 +5,8 @@
 
 <template>
   <Dialog
-    append-to="self"
     v-model:visible="isOpen"
+    append-to="self"
     :header="header"
     :modal="true"
     @update:visible="close"

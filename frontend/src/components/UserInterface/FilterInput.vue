@@ -163,9 +163,6 @@
           ? this.filterName.optionLabel
           : "value";
       },
-      // filterOptionValue() {
-      //   return this.filterName.optionValue ? this.filterName.optionValue : null;
-      // },
       isDate() {
         return this.inputType == "date";
       },
