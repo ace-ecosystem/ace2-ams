@@ -40,6 +40,7 @@
 
 <script>
   import { mapState, mapGetters, mapActions } from "vuex";
+  import { mapState as piniaMapState } from "pinia";
 
   import Button from "primevue/button";
   import Dropdown from "primevue/dropdown";
@@ -48,9 +49,19 @@
 
   import BaseModal from "@/components/Modals/BaseModal";
 
+  import { useUserStore } from "@/stores/user";
+
   export default {
     name: "AssignModal",
     components: { BaseModal, Button, Dropdown, Message, ProgressSpinner },
+
+    data() {
+      return {
+        error: null,
+        isLoading: false,
+        selectedUser: null,
+      };
+    },
 
     computed: {
       name() {
@@ -63,30 +74,10 @@
         selectedAlerts: (state) => state.selectedAlerts.selected,
       }),
       ...mapGetters({
-        users: "users/allItems",
         anyAlertsSelected: "selectedAlerts/anySelected",
         multipleAlertsSelected: "selectedAlerts/multipleSelected",
       }),
-    },
-
-    data() {
-      return {
-        error: null,
-        isLoading: false,
-        selectedUser: null,
-      };
-    },
-
-    watch: {
-      isOpen: function (oldValue, newValue) {
-        if (newValue === false) {
-          this.loadUsers();
-        }
-      },
-    },
-
-    created() {
-      this.loadUsers();
+      ...piniaMapState(useUserStore, { users: "allItems" }),
     },
 
     methods: {
@@ -94,15 +85,7 @@
         updateAlert: "alerts/updateAlert",
         updateAlerts: "alerts/updateAlerts",
       }),
-      async loadUsers() {
-        this.isLoading = true;
-        try {
-          await this.$store.dispatch("users/readAll");
-        } catch (error) {
-          this.error = error.message || "Something went wrong!";
-        }
-        this.isLoading = false;
-      },
+
       assignUserClicked() {
         this.isLoading = true;
         if (this.multipleAlertsSelected) {

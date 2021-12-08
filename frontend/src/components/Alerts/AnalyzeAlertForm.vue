@@ -227,6 +227,7 @@
 
 <script>
   import { mapActions, mapGetters } from "vuex";
+  import { mapState } from "pinia";
 
   import Button from "primevue/button";
   import Calendar from "primevue/calendar";
@@ -243,6 +244,11 @@
   import Textarea from "primevue/textarea";
 
   import moment from "moment-timezone";
+
+  import { alertQueueStore } from "@/stores/alertQueue";
+  import { alertTypeStore } from "@/stores/alertType";
+  import { useNodeDirectiveStore } from "@/stores/nodeDirective";
+  import { useObservableTypeStore } from "@/stores/observableType";
 
   export default {
     name: "AnalyzeAlertForm",
@@ -299,21 +305,19 @@
       },
       ...mapGetters({
         openAlert: "alerts/openAlert",
-        directives: "nodeDirective/allItems",
-        alertTypes: "alertType/allItems",
-        alertQueues: "alertQueue/allItems",
-        observableTypes: "observableType/allItems",
       }),
+
+      ...mapState(alertQueueStore, { alertQueues: "allItems" }),
+      ...mapState(alertTypeStore, { alertTypes: "allItems" }),
+      ...mapState(useNodeDirectiveStore, { directives: "allItems" }),
+      ...mapState(useObservableTypeStore, { observableTypes: "allItems" }),
     },
     created() {
       this.initData();
-      this.initExternalData();
     },
     methods: {
       ...mapActions({
         createAlert: "alerts/createAlert",
-        readAllAlertQueue: "alertQueue/readAll",
-        readAllAlertType: "alertType/readAll",
         readAllNodeDirective: "nodeDirective/readAll",
         readAllObservableType: "observableType/readAll",
       }),
@@ -327,12 +331,6 @@
         this.timezone = moment.tz.guess();
         this.observables = [];
         this.addFormObservable();
-      },
-      async initExternalData() {
-        await this.readAllAlertQueue();
-        await this.readAllAlertType();
-        await this.readAllNodeDirective();
-        await this.readAllObservableType();
       },
       adjustForTimezone(datetime, timezone) {
         return moment(datetime).tz(timezone).format();
