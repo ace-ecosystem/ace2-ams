@@ -245,8 +245,8 @@
 
   import moment from "moment-timezone";
 
-  import { alertQueueStore } from "@/stores/alertQueue";
-  import { alertTypeStore } from "@/stores/alertType";
+  import { useAlertQueueStore } from "@/stores/alertQueue";
+  import { useAlertTypeStore } from "@/stores/alertType";
   import { useNodeDirectiveStore } from "@/stores/nodeDirective";
   import { useObservableTypeStore } from "@/stores/observableType";
 
@@ -307,8 +307,8 @@
         openAlert: "alerts/openAlert",
       }),
 
-      ...mapState(alertQueueStore, { alertQueues: "allItems" }),
-      ...mapState(alertTypeStore, { alertTypes: "allItems" }),
+      ...mapState(useAlertQueueStore, { alertQueues: "allItems" }),
+      ...mapState(useAlertTypeStore, { alertTypes: "allItems" }),
       ...mapState(useNodeDirectiveStore, { directives: "allItems" }),
       ...mapState(useObservableTypeStore, { observableTypes: "allItems" }),
     },

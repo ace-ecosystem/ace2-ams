@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { alertQueueRead } from "@/models/alertQueue";
 import { AlertQueue } from "@/services/api/alertQueue";
 
-export const alertQueueStore = defineStore({
+export const useAlertQueueStore = defineStore({
   id: "alertQueueStore",
 
   state: () => ({

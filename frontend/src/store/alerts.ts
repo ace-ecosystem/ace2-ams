@@ -1,4 +1,4 @@
-import { Alert } from "@/services/api/alerts";
+import { Alert } from "@/services/api/alert";
 import { CommitFunction } from "@/store/index";
 import {
   alertCreate,

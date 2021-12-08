@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { alertTypeRead } from "@/models/alertType";
 import { AlertType } from "@/services/api/alertType";
 
-export const alertTypeStore = defineStore({
+export const useAlertTypeStore = defineStore({
   id: "alertTypeStore",
 
   state: () => ({
