@@ -7,16 +7,13 @@
 </template>
 
 <script>
-  import { mapActions, mapState } from "pinia";
+  import { mapState } from "pinia";
 
   import TheHeader from "@/components/UserInterface/TheHeader";
+
+  import { populateCommonStores } from "@/etc/helpers";
   import authApi from "@/services/api/auth";
-  import { alertQueueStore } from "@/stores/alertQueue";
-  import { alertTypeStore } from "@/stores/alertType";
   import { useAuthStore } from "@/stores/auth";
-  import { useNodeDirectiveStore } from "@/stores/nodeDirective";
-  import { useObservableTypeStore } from "@/stores/observableType";
-  import { useUserStore } from "@/stores/user";
 
   export default {
     components: { TheHeader },
@@ -40,28 +37,8 @@
       // If the user is authenticated, some of the stores with items
       // from the API that will be used throughout the application.
       if (this.isAuthenticated) {
-        await Promise.all([
-          this.readAllAlertQueues(),
-          this.readAllAlertTypes(),
-          this.readAllNodeDirectives(),
-          this.readAllObservableTypes(),
-          this.readAllUsers(),
-        ]).catch((error) => {
-          throw error;
-        });
+        await populateCommonStores();
       }
-    },
-
-    methods: {
-      ...mapActions(alertQueueStore, { readAllAlertQueues: "readAll" }),
-      ...mapActions(alertTypeStore, { readAllAlertTypes: "readAll" }),
-      ...mapActions(useNodeDirectiveStore, {
-        readAllNodeDirectives: "readAll",
-      }),
-      ...mapActions(useObservableTypeStore, {
-        readAllObservableTypes: "readAll",
-      }),
-      ...mapActions(useUserStore, { readAllUsers: "readAll" }),
     },
   };
 </script>
