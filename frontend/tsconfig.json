@@ -16,7 +16,8 @@
       "@/*": ["src/*"],
       "@unit/*": ["tests/unit/src/*"]
     },
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+    "allowJs": true
   },
   "include": [
     "src/**/*.ts",
