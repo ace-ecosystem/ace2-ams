@@ -49,7 +49,12 @@
   import InputText from "primevue/inputtext";
 
   import authApi from "@/services/api/auth";
+  import { alertQueueStore } from "@/stores/alertQueue";
+  import { alertTypeStore } from "@/stores/alertType";
   import { useAuthStore } from "@/stores/auth";
+  import { useNodeDirectiveStore } from "@/stores/nodeDirective";
+  import { useObservableTypeStore } from "@/stores/observableType";
+  import { useUserStore } from "@/stores/user";
 
   export default {
     components: {
@@ -68,13 +73,35 @@
       },
     },
     methods: {
+      ...mapActions(alertQueueStore, { readAllAlertQueues: "readAll" }),
+      ...mapActions(alertTypeStore, { readAllAlertTypes: "readAll" }),
       ...mapActions(useAuthStore, ["setAuthenticated"]),
+      ...mapActions(useNodeDirectiveStore, {
+        readAllNodeDirectives: "readAll",
+      }),
+      ...mapActions(useObservableTypeStore, {
+        readAllObservableTypes: "readAll",
+      }),
+      ...mapActions(useUserStore, { readAllUsers: "readAll" }),
 
       async login() {
         await authApi
           .authenticate(this.loginData)
-          .then(() => {
+          .then(async () => {
+            // If the API request to login succeeded, set the authenticated state
             this.setAuthenticated(true);
+
+            // And then populate some of the stores with items from the API that
+            // will be used throughout the application.
+            await Promise.all([
+              this.readAllAlertQueues(),
+              this.readAllAlertTypes(),
+              this.readAllNodeDirectives(),
+              this.readAllObservableTypes(),
+              this.readAllUsers(),
+            ]).catch((error) => {
+              throw error;
+            });
           })
           .catch(() => {
             // TODO: Add a proper message saying the login failed
