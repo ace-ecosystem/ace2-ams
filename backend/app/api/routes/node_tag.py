@@ -42,7 +42,7 @@ helpers.api_route_create(router, create_node_tag)
 
 
 def get_all_node_tags(db: Session = Depends(get_db)):
-    return paginate(db, select(NodeTag))
+    return paginate(db, select(NodeTag).order_by(NodeTag.value))
 
 
 def get_node_tag(uuid: UUID, db: Session = Depends(get_db)):

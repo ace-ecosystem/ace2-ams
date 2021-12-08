@@ -42,7 +42,7 @@ helpers.api_route_create(router, create_event_type)
 
 
 def get_all_event_types(db: Session = Depends(get_db)):
-    return paginate(db, select(EventType))
+    return paginate(db, select(EventType).order_by(EventType.value))
 
 
 def get_event_type(uuid: UUID, db: Session = Depends(get_db)):

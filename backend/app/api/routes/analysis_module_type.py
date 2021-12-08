@@ -78,7 +78,7 @@ helpers.api_route_create(router, create_analysis_module_type)
 
 
 def get_all_analysis_module_types(db: Session = Depends(get_db)):
-    return paginate(db, select(AnalysisModuleType))
+    return paginate(db, select(AnalysisModuleType).order_by(AnalysisModuleType.value, AnalysisModuleType.version))
 
 
 def get_analysis_module_type(uuid: UUID, db: Session = Depends(get_db)):

@@ -42,7 +42,7 @@ helpers.api_route_create(router, create_alert_tool_instance)
 
 
 def get_all_alert_tool_instances(db: Session = Depends(get_db)):
-    return paginate(db, select(AlertToolInstance))
+    return paginate(db, select(AlertToolInstance).order_by(AlertToolInstance.value))
 
 
 def get_alert_tool_instance(uuid: UUID, db: Session = Depends(get_db)):

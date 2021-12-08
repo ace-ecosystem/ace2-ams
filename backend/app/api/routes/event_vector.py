@@ -46,7 +46,7 @@ helpers.api_route_create(router, create_event_vector)
 
 
 def get_all_event_vectors(db: Session = Depends(get_db)):
-    return paginate(db, select(EventVector))
+    return paginate(db, select(EventVector).order_by(EventVector.value))
 
 
 def get_event_vector(uuid: UUID, db: Session = Depends(get_db)):

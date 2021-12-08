@@ -42,7 +42,7 @@ helpers.api_route_create(router, create_alert_queue)
 
 
 def get_all_alert_queues(db: Session = Depends(get_db)):
-    return paginate(db, select(AlertQueue))
+    return paginate(db, select(AlertQueue).order_by(AlertQueue.value))
 
 
 def get_alert_queue(uuid: UUID, db: Session = Depends(get_db)):

@@ -42,7 +42,7 @@ helpers.api_route_create(router, create_user_role)
 
 
 def get_all_user_roles(db: Session = Depends(get_db)):
-    return paginate(db, select(UserRole))
+    return paginate(db, select(UserRole).order_by(UserRole.value))
 
 
 def get_user_role(uuid: UUID, db: Session = Depends(get_db)):

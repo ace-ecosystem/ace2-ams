@@ -54,7 +54,7 @@ helpers.api_route_create(router, create_node_threat)
 
 
 def get_all_node_threats(db: Session = Depends(get_db)):
-    return paginate(db, select(NodeThreat))
+    return paginate(db, select(NodeThreat).order_by(NodeThreat.value))
 
 
 def get_node_threat(uuid: UUID, db: Session = Depends(get_db)):

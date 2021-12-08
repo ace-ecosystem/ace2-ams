@@ -46,7 +46,7 @@ helpers.api_route_create(router, create_node_history_action)
 
 
 def get_all_node_history_actions(db: Session = Depends(get_db)):
-    return paginate(db, select(NodeHistoryAction))
+    return paginate(db, select(NodeHistoryAction).order_by(NodeHistoryAction.value))
 
 
 def get_node_history_action(uuid: UUID, db: Session = Depends(get_db)):
