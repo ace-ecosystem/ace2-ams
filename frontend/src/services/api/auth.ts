@@ -23,17 +23,14 @@ export default {
     };
 
     await instance.request(config).catch((error) => {
-      sessionStorage.removeItem("authenticated");
       throw error;
     });
-
-    sessionStorage.setItem("authenticated", "yes");
   },
 
   // REFRESH AUTH
   async refresh(): Promise<void> {
     // The axiosRefresh function is used to avoid circular dependencies between auth.ts and axios.ts
-    return axiosRefresh();
+    await axiosRefresh();
   },
 
   // VALIDATE
@@ -46,7 +43,6 @@ export default {
 
     await instance.request(config).catch((error) => {
       console.debug("refresh token not present or expired");
-      sessionStorage.removeItem("authenticated");
       throw error;
     });
   },
@@ -62,7 +58,5 @@ export default {
     await instance.request(config).catch((error) => {
       throw error;
     });
-
-    sessionStorage.removeItem("authenticated");
   },
 };
