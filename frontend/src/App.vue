@@ -37,18 +37,16 @@
         }
       }, 60000);
 
-      // If the user is authenticated, populate the stores with items from the
-      // API that will be used throughout the application.
+      // If the user is authenticated, some of the stores with items
+      // from the API that will be used throughout the application.
       if (this.isAuthenticated) {
-        const promises = [];
-
-        promises.push(this.readAllAlertQueues());
-        promises.push(this.readAllAlertTypes());
-        promises.push(this.readAllNodeDirectives());
-        promises.push(this.readAllObservableTypes());
-        promises.push(this.readAllUsers());
-
-        await Promise.all(promises).catch((error) => {
+        await Promise.all([
+          this.readAllAlertQueues(),
+          this.readAllAlertTypes(),
+          this.readAllNodeDirectives(),
+          this.readAllObservableTypes(),
+          this.readAllUsers(),
+        ]).catch((error) => {
           throw error;
         });
       }
