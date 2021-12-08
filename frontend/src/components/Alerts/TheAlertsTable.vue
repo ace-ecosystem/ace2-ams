@@ -214,7 +214,7 @@
     },
 
     async created() {
-      this.reset();
+      this.initAlertTable();
       await this.loadAlerts(this.pageOptions);
     },
 
@@ -228,14 +228,9 @@
       }),
 
       reset() {
-        // Sets the alert table selected columns and keyword search back to default
+        // Sets the alert table selected columns, keyword search, and sort back to default
         this.initAlertTable();
-        this.selectedColumns = [];
-        this.selectedColumns = this.columns.filter((column) => {
-          return this.defaultColumns.includes(column.field);
-        });
         this.sort({ sortField: "eventTime", sortOrder: "-1" });
-        this.error = null;
       },
 
       initAlertTable() {
@@ -243,6 +238,11 @@
         this.alertTableFilter = {
           global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         };
+        this.selectedColumns = [];
+        this.selectedColumns = this.columns.filter((column) => {
+          return this.defaultColumns.includes(column.field);
+        });
+        this.error = null;
       },
 
       onColumnToggle(value) {
