@@ -226,8 +226,7 @@
 </template>
 
 <script>
-  import { mapActions, mapGetters } from "vuex";
-  import { mapState } from "pinia";
+  import { mapActions, mapState } from "pinia";
 
   import Button from "primevue/button";
   import Calendar from "primevue/calendar";
@@ -245,6 +244,7 @@
 
   import moment from "moment-timezone";
 
+  import { useAlertStore } from "@/stores/alert";
   import { useAlertQueueStore } from "@/stores/alertQueue";
   import { useAlertTypeStore } from "@/stores/alertType";
   import { useNodeDirectiveStore } from "@/stores/nodeDirective";
@@ -303,10 +303,8 @@
       lastObservableIndex() {
         return this.observables.length - 1;
       },
-      ...mapGetters({
-        openAlert: "alerts/openAlert",
-      }),
 
+      ...mapState(useAlertStore, { openAlert: "openAlert" }),
       ...mapState(useAlertQueueStore, { alertQueues: "allItems" }),
       ...mapState(useAlertTypeStore, { alertTypes: "allItems" }),
       ...mapState(useNodeDirectiveStore, { directives: "allItems" }),
@@ -316,11 +314,8 @@
       this.initData();
     },
     methods: {
-      ...mapActions({
-        createAlert: "alerts/createAlert",
-        readAllNodeDirective: "nodeDirective/readAll",
-        readAllObservableType: "observableType/readAll",
-      }),
+      ...mapActions(useAlertStore, { createAlert: "create" }),
+
       initData() {
         this.alertDate = new Date();
         this.alertDescription = "Manual Alert";
