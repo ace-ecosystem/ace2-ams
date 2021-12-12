@@ -149,12 +149,9 @@
 
     computed: {
       filterOptions() {
-        if (this.filterName.options) {
-          const options =
-            this.$store.getters[`${this.filterName.options}/allItems`];
-          if (options) {
-            return options;
-          }
+        if (this.filterName.store) {
+          const store = this.filterName.store();
+          return store.allItems;
         }
         return null;
       },
@@ -183,6 +180,17 @@
       },
       inputType() {
         return this.filterName ? this.filterName.type : null;
+      },
+    },
+
+    watch: {
+      filterName: {
+        handler: async function () {
+          if (this.filterName.store) {
+            const store = this.filterName.store();
+            await store.readAll();
+          }
+        },
       },
     },
 

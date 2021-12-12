@@ -6,9 +6,22 @@ import { alertToolRead } from "@/models/alertTool";
 import { alertToolInstanceRead } from "@/models/alertToolInstance";
 import { alertTypeRead } from "@/models/alertType";
 import { nodeTagRead } from "@/models/nodeTag";
+import { nodeThreatRead } from "@/models/nodeThreat";
 import { nodeThreatActorRead } from "@/models/nodeThreatActor";
 import { observableTypeRead } from "@/models/observableType";
 import { userRead } from "@/models/user";
+
+import { useAlertDispositionStore } from "@/stores/alertDisposition";
+import { useAlertQueueStore } from "@/stores/alertQueue";
+import { useAlertToolStore } from "@/stores/alertTool";
+import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
+import { useAlertTypeStore } from "@/stores/alertType";
+import { useEventStore } from "@/stores/event";
+import { useNodeTagStore } from "@/stores/nodeTag";
+import { useNodeThreatStore } from "@/stores/nodeThreat";
+import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
+import { useObservableTypeStore } from "@/stores/observableType";
+import { useUserStore } from "@/stores/user";
 
 // ** Base ** //
 
@@ -52,7 +65,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.DISPOSITION_FILTER,
     label: "Disposition",
     type: filterTypes.SELECT,
-    options: "alertDisposition",
+    store: useAlertDispositionStore,
     formatForAPI: (filter: alertDispositionRead) => {
       return filter.value;
     },
@@ -61,7 +74,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.DISPOSITION_USER_FILTER,
     label: "Dispositioned By",
     type: filterTypes.SELECT,
-    options: "users",
+    store: useUserStore,
     optionLabel: "displayName",
     formatForAPI: (filter: userRead) => {
       return filter.username;
@@ -81,7 +94,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.EVENT_UUID_FILTER,
     label: "Event",
     type: filterTypes.SELECT,
-    options: "events",
+    store: useEventStore,
   },
   {
     name: alertFilterNames.EVENT_TIME_AFTER_FILTER,
@@ -112,7 +125,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.OBSERVABLE_FILTER,
     label: "Observable",
     type: filterTypes.CATEGORIZED_VALUE,
-    options: "observableType",
+    store: useObservableTypeStore,
     formatForAPI: (filter: { category: observableTypeRead; value: string }) => {
       return `${filter.category.value}|${filter.value}`;
     },
@@ -121,7 +134,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.OBSERVABLE_TYPES_FILTER,
     label: "Observable Types",
     type: filterTypes.MULTISELECT,
-    options: "observableType",
+    store: useObservableTypeStore,
     formatForAPI: (filter: observableTypeRead[]) => {
       return filter
         .map(function (elem) {
@@ -139,7 +152,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.OWNER_FILTER,
     label: "Owner",
     type: filterTypes.SELECT,
-    options: "users",
+    store: useUserStore,
     optionLabel: "displayName",
     formatForAPI: (filter: userRead) => {
       return filter.username;
@@ -149,7 +162,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.QUEUE_FILTER,
     label: "Queue",
     type: filterTypes.SELECT,
-    options: "alertQueue",
+    store: useAlertQueueStore,
     formatForAPI: (filter: alertQueueRead) => {
       return filter.value;
     },
@@ -158,7 +171,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.TAGS_FILTER,
     label: "Tags",
     type: filterTypes.CHIPS,
-    options: "nodeTag",
+    store: useNodeTagStore,
     formatForAPI: (filter: nodeTagRead[]) => {
       return filter
         .map(function (elem) {
@@ -171,7 +184,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.THREAT_ACTOR_FILTER,
     label: "Threat Actor",
     type: filterTypes.SELECT,
-    options: "nodeThreat",
+    store: useNodeThreatActorStore,
     formatForAPI: (filter: nodeThreatActorRead) => {
       return filter.value;
     },
@@ -179,9 +192,9 @@ export const alertFilters: readonly filterOption[] = [
   {
     name: alertFilterNames.THREATS_FILTER,
     label: "Threats",
-    type: filterTypes.CHIPS,
-    options: "nodeThreatActor",
-    formatForAPI: (filter: nodeThreatActorRead[]) => {
+    type: filterTypes.MULTISELECT,
+    store: useNodeThreatStore,
+    formatForAPI: (filter: nodeThreatRead[]) => {
       return filter
         .map(function (elem) {
           return elem.value;
@@ -193,7 +206,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.TOOL_FILTER,
     label: "Tool",
     type: filterTypes.SELECT,
-    options: "tool",
+    store: useAlertToolStore,
     formatForAPI: (filter: alertToolRead) => {
       return filter.value;
     },
@@ -202,7 +215,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.TOOL_INSTANCE_FILTER,
     label: "Tool Instance",
     type: filterTypes.SELECT,
-    options: "toolInstance",
+    store: useAlertToolInstanceStore,
     formatForAPI: (filter: alertToolInstanceRead) => {
       return filter.value;
     },
@@ -211,7 +224,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.TYPE_FILTER,
     label: "Type",
     type: filterTypes.SELECT,
-    options: "alertType",
+    store: useAlertTypeStore,
     formatForAPI: (filter: alertTypeRead) => {
       return filter.value;
     },
