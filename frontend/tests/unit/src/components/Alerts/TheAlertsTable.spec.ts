@@ -14,9 +14,9 @@ import Button from "primevue/button";
 import Column from "primevue/column";
 import Paginator from "primevue/paginator";
 import nock from "nock";
-import { alertSummaryRead } from "@/models/alert";
+import { alertRead } from "@/models/alert";
 
-const mockAPIAlert: alertSummaryRead = {
+const mockAPIAlert: alertRead = {
   comments: [],
   description: "",
   directives: [],
