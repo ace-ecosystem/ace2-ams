@@ -264,6 +264,7 @@ describe("ManageAlerts.vue", () => {
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Dispositioned After']").click();
+    cy.get(".p-dropdown-items-wrapper").should("not.exist");
     cy.get("div.inputfield > .p-inputgroup > .p-inputtext")
       .invoke("attr", "placeholder")
       .should("contain", "Enter a date!");
