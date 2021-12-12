@@ -113,6 +113,7 @@
   };
 
   const close = () => {
+    resetFormFilters();
     modalStore.close(props.name);
   };
 </script>
