@@ -23,38 +23,42 @@
 </template>
 
 <script>
-  import Dialog from "primevue/dialog";
-
   export default {
     name: "BaseModal",
-    components: { Dialog },
-
-    props: {
-      name: { type: String, required: true },
-      header: { type: String, required: false },
-    },
-
-    emits: ["dialogClose"],
-
-    computed: {
-      isActive() {
-        return this.$store.getters["modals/active"] === this.name;
-      },
-
-      isOpen() {
-        return this.$store.getters["modals/allOpen"].includes(this.name);
-      },
-    },
-
-    beforeUnmount() {
-      if (this.isOpen) this.close();
-    },
-
-    methods: {
-      close() {
-        this.$emit("dialogClose");
-        this.$store.dispatch("modals/close", this.name);
-      },
-    },
   };
+</script>
+
+<script setup>
+  import { onBeforeUnmount, computed, defineEmits, defineProps } from "vue";
+  import Dialog from "primevue/dialog";
+
+  import { useModalStore } from "@/stores/modal";
+
+  const store = useModalStore();
+
+  const emit = defineEmits(["dialogClose"]);
+
+  const props = defineProps({
+    name: { type: String, required: true },
+    header: { type: String, required: false },
+  });
+
+  const isActive = computed(() => {
+    return store.active === props.name;
+  });
+
+  const isOpen = computed(() => {
+    return store.openModals.includes(props.name);
+  });
+
+  const close = () => {
+    emit("dialogClose");
+    store.close(props.name);
+  };
+
+  onBeforeUnmount(() => {
+    if (isOpen.value) {
+      close();
+    }
+  });
 </script>
