@@ -24,9 +24,10 @@ export interface eventCreate extends nodeCreate {
   status?: string;
   type?: string;
   vectors?: string[];
+  [key: string]: unknown;
 }
 
-export interface eventSummaryRead extends nodeRead {
+export interface eventRead extends nodeRead {
   alertTime: Date | null;
   alertUuids: UUID[];
   containTime: Date | null;
@@ -47,7 +48,7 @@ export interface eventSummaryRead extends nodeRead {
 }
 
 export interface eventReadPage extends nodeReadPage {
-  items: eventSummaryRead[];
+  items: eventRead[];
 }
 
 export interface eventUpdate extends nodeUpdate {
@@ -65,4 +66,5 @@ export interface eventUpdate extends nodeUpdate {
   status?: string | null;
   type?: string | null;
   vectors?: string[];
+  [key: string]: unknown;
 }
