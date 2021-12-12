@@ -13,8 +13,8 @@ const api = new BaseApi();
 const endpoint = "/alert/";
 
 export const Alert = {
-  create: (data: alertCreate, getAfterCreate = true): Promise<void> =>
-    api.create(endpoint, data, getAfterCreate),
+  createAndRead: async (data: alertCreate): Promise<alertTreeRead> =>
+    await api.create(endpoint, data, true),
 
   read: (uuid: UUID): Promise<alertTreeRead> => api.read(`${endpoint}${uuid}`),
 
