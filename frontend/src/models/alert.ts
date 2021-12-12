@@ -29,7 +29,7 @@ export interface alertCreate extends nodeCreate {
   [key: string]: unknown;
 }
 
-export interface alertSummaryRead extends nodeRead {
+export interface alertRead extends nodeRead {
   description: string | null;
   disposition: alertDispositionRead | null;
   dispositionTime: Date | null;
@@ -47,7 +47,7 @@ export interface alertSummaryRead extends nodeRead {
 }
 
 // High-level alert data that will be displayed in Manage Alerts or in an event
-export interface alertTableSummary {
+export interface alertSummary {
   comments: nodeCommentRead[];
   description: string;
   disposition: string;
@@ -65,12 +65,12 @@ export interface alertTableSummary {
 }
 
 export interface alertTreeRead {
-  alert: alertSummaryRead;
+  alert: alertRead;
   tree: (analysisTreeRead | observableTreeRead)[];
 }
 
 export interface alertReadPage extends nodeReadPage {
-  items: alertSummaryRead[];
+  items: alertRead[];
 }
 
 export interface alertUpdate extends nodeUpdate {
