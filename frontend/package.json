@@ -26,8 +26,7 @@
     "snakecase-keys": "^5.0.0",
     "v-calendar": "^3.0.0-alpha.6",
     "vue": "^3.2.19",
-    "vue-router": "^4.0.11",
-    "vuex": "^4.0.2"
+    "vue-router": "^4.0.11"
   },
   "devDependencies": {
     "@cypress/vue": "^3.0.3",
@@ -42,7 +41,6 @@
     "@vue/cli-plugin-router": "^4.5.13",
     "@vue/cli-plugin-typescript": "^4.5.13",
     "@vue/cli-plugin-unit-jest": "^4.5.13",
-    "@vue/cli-plugin-vuex": "^4.5.13",
     "@vue/cli-service": "^4.5.13",
     "@vue/compiler-sfc": "^3.2.19",
     "@vue/eslint-config-prettier": "^6.0.0",
