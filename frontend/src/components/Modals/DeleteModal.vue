@@ -2,7 +2,7 @@
 <!-- 'Delete' action modal, agnostic to what type of data is being deleted -->
 
 <template>
-  <BaseModal :name="this.name" header="Delete">
+  <BaseModal :name="name" header="Delete">
     <div class="confirmation-content">
       <i class="pi pi-exclamation-triangle p-mr-3" style="font-size: 2rem" />
       <span>Are you sure you want to delete this?</span>
@@ -19,25 +19,22 @@
   </BaseModal>
 </template>
 
-<script>
+<script setup>
+  import { defineProps } from "vue";
+
   import Button from "primevue/button";
 
   import BaseModal from "@/components/Modals/BaseModal";
 
-  export default {
-    name: "DeleteModal",
-    components: { BaseModal, Button },
+  import { useModalStore } from "@/stores/modal";
 
-    computed: {
-      name() {
-        return this.$options.name;
-      },
-    },
+  const modalStore = useModalStore();
 
-    methods: {
-      close() {
-        this.$store.dispatch("modals/close", this.name);
-      },
-    },
+  const props = defineProps({
+    name: { type: String, required: true },
+  });
+
+  const close = () => {
+    modalStore.close(props.name);
   };
 </script>
