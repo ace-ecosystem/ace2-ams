@@ -15,7 +15,7 @@
         style="float: right"
         @click="open('EditFilterModal')"
       />
-      <EditFilterModal />
+      <EditFilterModal name="EditFilterModal" />
     </template>
     <!--    TODO: SHOW APPLIED FILTERS -->
     <template #right>
@@ -40,40 +40,36 @@
 </template>
 
 <script>
-  import { mapActions } from "vuex";
+  export default {
+    name: "TheFilterToolbar",
+  };
+</script>
+
+<script setup>
+  import { inject } from "vue";
 
   import Button from "primevue/button";
   import DateRangePicker from "@/components/UserInterface/DateRangePicker";
   import EditFilterModal from "@/components/Modals/FilterModal";
   import Toolbar from "primevue/toolbar";
 
-  export default {
-    name: "TheFilterToolbar",
-    components: {
-      Button,
-      DateRangePicker,
-      EditFilterModal,
-      Toolbar,
-    },
+  import { useFilterStore } from "@/stores/filter";
+  import { useModalStore } from "@/stores/modal";
 
-    inject: ["filterType"],
+  const filterType = inject("filterType");
 
-    methods: {
-      ...mapActions({
-        clearAll: "filters/clearAll",
-      }),
+  const filterStore = useFilterStore();
+  const modalStore = useModalStore();
 
-      clear() {
-        this.clearAll({ filterType: this.filterType });
-      },
+  const clear = () => {
+    filterStore.clearAll({ filterType: filterType });
+  };
 
-      reset() {
-        this.clearAll({ filterType: this.filterType });
-      },
+  const open = (name) => {
+    modalStore.open(name);
+  };
 
-      open(name) {
-        this.$store.dispatch("modals/open", name);
-      },
-    },
+  const reset = () => {
+    filterStore.clearAll({ filterType: filterType });
   };
 </script>
