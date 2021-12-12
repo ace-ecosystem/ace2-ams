@@ -34,7 +34,7 @@
         }
       }, 60000);
 
-      // If the user is authenticated, some of the stores with items
+      // If the user is authenticated, populate some of the stores with items
       // from the API that will be used throughout the application.
       if (this.isAuthenticated) {
         await populateCommonStores();
