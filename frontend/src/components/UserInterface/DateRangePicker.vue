@@ -87,7 +87,7 @@
     v-model="endDate"
     mode="dateTime"
     is24hr
-    @update:model-value="dateSelect($event, endfilter)"
+    @update:model-value="dateSelect($event, endFilter)"
     @update:model-value.delete="dateSelect(null)"
   >
     <template #default="{ inputValue, inputEvents }">
@@ -105,170 +105,154 @@
         <Button
           icon="pi pi-times"
           class="p-button-outlined p-button-secondary"
-          @click="clearDate(endfilter)"
+          @click="clearDate(endFilter)"
         />
       </div>
     </template>
   </DatePicker>
 </template>
 
-<script>
-  import { mapActions } from "vuex";
+<script setup>
+  import { computed, inject, ref, watch } from "vue";
 
   import Dropdown from "primevue/dropdown";
   import Button from "primevue/button";
   import OverlayPanel from "primevue/overlaypanel";
-
   import InputText from "primevue/inputtext";
-  import Tooltip from "primevue/tooltip";
   import { DatePicker } from "v-calendar";
 
-  export default {
-    name: "DateRangePicker",
-    components: {
-      Button,
-      DatePicker,
-      Dropdown,
-      InputText,
-      OverlayPanel,
-    },
+  import { useFilterStore } from "@/stores/filter";
 
-    directives: {
-      tooltip: Tooltip,
-    },
+  const TODAY = "today";
+  const YESTERDAY = "yesterday";
+  const LAST_SEVEN = "last_seven";
+  const LAST_THIRTY = "last_thirty";
+  const LAST_SIXTY = "last_sixty";
+  const THIS_MONTH = "this_month";
+  const LAST_MONTH = "last_month";
 
-    inject: ["filterType", "rangeFilters"],
+  const filterStore = useFilterStore();
 
-    data() {
-      return {
-        currentRangeFilter: Object.keys(this.rangeFilters)[0],
-        TODAY: "today",
-        YESTERDAY: "yesterday",
-        LAST_SEVEN: "last_seven",
-        LAST_THIRTY: "last_thirty",
-        LAST_SIXTY: "last_sixty",
-        THIS_MONTH: "this_month",
-        LAST_MONTH: "last_month",
-      };
-    },
+  const filterType = inject("filterType");
+  const rangeFilters = inject("rangeFilters");
 
-    computed: {
-      filters() {
-        return this.$store.getters[`filters/${this.filterType}`];
-      },
-      startFilter() {
-        return this.rangeFilters[this.currentRangeFilter].start;
-      },
-      endfilter() {
-        return this.rangeFilters[this.currentRangeFilter].end;
-      },
-      startDate() {
-        return this.filters[this.startFilter]
-          ? this.filters[this.startFilter]
-          : null;
-      },
-      endDate() {
-        return this.filters[this.endfilter]
-          ? this.filters[this.endfilter]
-          : null;
-      },
-      startDateUTC() {
-        return this.startDate ? this.startDate.toUTCString() : null;
-      },
-      endDateUTC() {
-        return this.endDate ? this.endDate.toUTCString() : null;
-      },
-      rangeFilterOptions() {
-        return Object.keys(this.rangeFilters);
-      },
-    },
+  const currentRangeFilter = ref(Object.keys(rangeFilters)[0]);
+  const op = ref(null);
 
-    watch: {
-      currentRangeFilter: function (_newValue, oldValue) {
-        this.clearDate(this.rangeFilters[oldValue].start);
-        this.clearDate(this.rangeFilters[oldValue].end);
-      },
-    },
+  const filters = computed(() => {
+    return filterStore.$state[filterType];
+  });
 
-    methods: {
-      ...mapActions({
-        setFilter: "filters/setFilter",
-        unsetFilter: "filters/unsetFilter",
-      }),
+  const startFilter = computed(() => {
+    return rangeFilters[currentRangeFilter.value].start;
+  });
 
-      dateSelect(date, filterName) {
-        if (date == null) {
-          return;
-        }
-        this.setFilter({
-          filterType: this.filterType,
-          filterName: filterName,
-          filterValue: date,
-        });
-      },
+  const endFilter = computed(() => {
+    return rangeFilters[currentRangeFilter.value].end;
+  });
 
-      clearDate(filterName) {
-        this.unsetFilter({
-          filterType: this.filterType,
-          filterName: filterName,
-        });
-      },
+  const startDate = computed(() => {
+    return filters.value[startFilter.value]
+      ? filters.value[startFilter.value]
+      : null;
+  });
 
-      setRange(rangeType) {
-        const today = new Date();
-        let startDate = null;
-        let endDate = null;
-        let pastDate = null;
-        switch (rangeType) {
-          case this.TODAY:
-            startDate = new Date();
-            endDate = new Date();
-            break;
-          case this.YESTERDAY:
-            pastDate = today.getDate() - 1;
-            startDate = new Date(today.setDate(pastDate));
-            endDate = new Date(today.setDate(pastDate));
-            break;
-          case this.LAST_SEVEN:
-            pastDate = today.getDate() - 7;
-            startDate = new Date(today.setDate(pastDate));
-            endDate = new Date();
-            break;
-          case this.LAST_THIRTY:
-            pastDate = today.getDate() - 30;
-            startDate = new Date(today.setDate(pastDate));
-            endDate = new Date();
-            break;
-          case this.LAST_SIXTY:
-            pastDate = today.getDate() - 60;
-            startDate = new Date(today.setDate(pastDate));
-            endDate = new Date();
-            break;
-          case this.THIS_MONTH:
-            pastDate = today.getMonth();
-            startDate = new Date(today.setMonth(pastDate));
-            startDate.setDate(1);
-            endDate = new Date();
-            break;
-          case this.LAST_MONTH:
-            pastDate = today.getMonth() - 1;
-            startDate = new Date(today.setMonth(pastDate));
-            endDate = new Date(today.setMonth(pastDate + 1));
-            startDate.setDate(1);
-            endDate.setDate(0); // 0 will set the date to the last day of the previous month
-            break;
-          default:
-            break;
-        }
-        // Set start and end date times to capture entierty of each day
-        startDate.setHours(0, 0, 0, 0);
-        endDate.setHours(23, 59, 59, 0);
-        this.dateSelect(startDate, this.startFilter);
-        this.dateSelect(endDate, this.endfilter);
-      },
-      toggleOptionsMenu(event) {
-        this.$refs.op.toggle(event);
-      },
-    },
+  const endDate = computed(() => {
+    return filters.value[endFilter.value]
+      ? filters.value[endFilter.value]
+      : null;
+  });
+
+  const startDateUTC = computed(() => {
+    return startDate.value ? startDate.value.toUTCString() : null;
+  });
+
+  const endDateUTC = computed(() => {
+    return endDate.value ? endDate.value.toUTCString() : null;
+  });
+
+  const rangeFilterOptions = computed(() => {
+    return Object.keys(rangeFilters);
+  });
+
+  watch(currentRangeFilter, (_newValue, oldValue) => {
+    clearDate(rangeFilters[oldValue].start);
+    clearDate(rangeFilters[oldValue].end);
+  });
+
+  const dateSelect = (date, filterName) => {
+    if (date == null) {
+      return;
+    }
+
+    filterStore.setFilter({
+      filterType: filterType,
+      filterName: filterName,
+      filterValue: date,
+    });
+  };
+
+  const clearDate = (filterName) => {
+    filterStore.unsetFilter({
+      filterType: filterType,
+      filterName: filterName,
+    });
+  };
+
+  const setRange = (rangeType) => {
+    const today = new Date();
+    let startDate = null;
+    let endDate = null;
+    let pastDate = null;
+    switch (rangeType) {
+      case TODAY:
+        startDate = new Date();
+        endDate = new Date();
+        break;
+      case YESTERDAY:
+        pastDate = today.getDate() - 1;
+        startDate = new Date(today.setDate(pastDate));
+        endDate = new Date(today.setDate(pastDate));
+        break;
+      case LAST_SEVEN:
+        pastDate = today.getDate() - 7;
+        startDate = new Date(today.setDate(pastDate));
+        endDate = new Date();
+        break;
+      case LAST_THIRTY:
+        pastDate = today.getDate() - 30;
+        startDate = new Date(today.setDate(pastDate));
+        endDate = new Date();
+        break;
+      case LAST_SIXTY:
+        pastDate = today.getDate() - 60;
+        startDate = new Date(today.setDate(pastDate));
+        endDate = new Date();
+        break;
+      case THIS_MONTH:
+        pastDate = today.getMonth();
+        startDate = new Date(today.setMonth(pastDate));
+        startDate.setDate(1);
+        endDate = new Date();
+        break;
+      case LAST_MONTH:
+        pastDate = today.getMonth() - 1;
+        startDate = new Date(today.setMonth(pastDate));
+        endDate = new Date(today.setMonth(pastDate + 1));
+        startDate.setDate(1);
+        endDate.setDate(0); // 0 will set the date to the last day of the previous month
+        break;
+      default:
+        break;
+    }
+    // Set start and end date times to capture entierty of each day
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 0);
+    dateSelect(startDate, startFilter.value);
+    dateSelect(endDate, endFilter.value);
+  };
+
+  const toggleOptionsMenu = (event) => {
+    op.value.toggle(event);
   };
 </script>
