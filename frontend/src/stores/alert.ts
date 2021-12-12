@@ -1,36 +1,53 @@
 import { defineStore } from "pinia";
-import {
-  alertCreate,
-  alertFilterParams,
-  alertSummaryRead,
-  alertTableSummary,
-  alertUpdate,
-} from "@/models/alert";
+
+import { alertCreate, alertTreeRead, alertUpdate } from "@/models/alert";
+import { UUID } from "@/models/base";
 import { Alert } from "@/services/api/alert";
 
 export const useAlertStore = defineStore({
   id: "alertStore",
 
   state: () => ({
-    // currently opened alert
-    openAlert: null,
-
-    // all alerts returned from the current page using the current filters
-    visibleQueriedAlerts: [],
-
-    // total number of alerts from all pages
-    totalAlerts: 0,
+    openAlert: null as unknown as alertTreeRead,
   }),
 
-  getters: {
-    openAlert(): boolean {
-      return this.openAlert;
-    },
-  },
-
   actions: {
-    async readAll() {
-      this.items = await AlertQueue.readAll();
+    async create(newAlert: alertCreate) {
+      await Alert.createAndRead(newAlert)
+        .then((alert) => {
+          this.$state.openAlert = alert;
+        })
+        .catch((error) => {
+          throw error;
+        });
+    },
+
+    async read(uuid: UUID) {
+      await Alert.read(uuid)
+        .then((alert) => {
+          this.$state.openAlert = alert;
+        })
+        .catch((error) => {
+          throw error;
+        });
+    },
+
+    async update(uuid: UUID, data: alertUpdate) {
+      // once we get around to updating alerts, we will need to update the base api service to have a
+      // 'getAfterUpdate' option like there is for 'create'
+      // then we can reset the open/queried alert(s)
+      await Alert.update(uuid, data).catch((error) => {
+        throw error;
+      });
+    },
+
+    // reason enough to have an updateMultiple in api?
+    async updateMultiple(uuids: UUID[], data: alertUpdate) {
+      const promises = uuids.map((u) => Alert.update(u, data));
+
+      await Promise.all(promises).catch((error) => {
+        throw error;
+      });
     },
   },
 });
