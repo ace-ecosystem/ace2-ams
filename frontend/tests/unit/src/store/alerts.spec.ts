@@ -9,7 +9,7 @@ import myNock from "@unit/services/api/nock";
 import snakecaseKeys from "snakecase-keys";
 import { userRead } from "@/models/user";
 import { nodeCommentRead } from "@/models/nodeComment";
-import { alertSummaryRead } from "@/models/alert";
+import { alertRead } from "@/models/alert";
 
 const actions = alerts.actions;
 const mutations = alerts.mutations;
@@ -63,7 +63,7 @@ const mockComment: nodeCommentRead = {
   value: "A comment",
 };
 
-const mockAPIAlert: alertSummaryRead = {
+const mockAPIAlert: alertRead = {
   comments: [],
   description: "",
   directives: [],
@@ -87,7 +87,7 @@ const mockAPIAlert: alertSummaryRead = {
   version: "uuid2",
 };
 
-const mockAPIAlertOptionalProperties: alertSummaryRead = {
+const mockAPIAlertOptionalProperties: alertRead = {
   comments: [mockComment],
   description: "A test alert",
   directives: [],
