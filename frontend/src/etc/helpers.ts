@@ -1,3 +1,4 @@
+import { useAlertDispositionStore } from "@/stores/alertDisposition";
 import { useAlertQueueStore } from "@/stores/alertQueue";
 import { useAlertTypeStore } from "@/stores/alertType";
 import { useNodeDirectiveStore } from "@/stores/nodeDirective";
@@ -8,6 +9,7 @@ export const camelToSnakeCase = (str: string): string =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 
 export async function populateCommonStores(): Promise<void> {
+  const alertDispositionStore = useAlertDispositionStore();
   const alertQueueStore = useAlertQueueStore();
   const alertTypeStore = useAlertTypeStore();
   const nodeDirectiveStore = useNodeDirectiveStore();
@@ -15,6 +17,7 @@ export async function populateCommonStores(): Promise<void> {
   const userStore = useUserStore();
 
   await Promise.all([
+    alertDispositionStore.readAll(),
     alertQueueStore.readAll(),
     alertTypeStore.readAll(),
     nodeDirectiveStore.readAll(),
