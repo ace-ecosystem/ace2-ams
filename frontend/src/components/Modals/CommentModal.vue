@@ -2,7 +2,7 @@
 <!-- 'Comment' action modal, agnostic to what is being commented on -->
 
 <template>
-  <BaseModal :name="this.name" header="Add Comment">
+  <BaseModal :name="name" header="Add Comment">
     <div class="p-m-1 p-grid p-fluid p-formgrid p-grid">
       <div class="p-field p-col">
         <Textarea
@@ -32,35 +32,28 @@
   </BaseModal>
 </template>
 
-<script>
+<script setup>
+  import { defineProps, ref } from "vue";
+
   import Button from "primevue/button";
   import Dropdown from "primevue/dropdown";
   import Textarea from "primevue/textarea";
 
   import BaseModal from "@/components/Modals/BaseModal";
 
-  export default {
-    name: "CommentModal",
-    components: { BaseModal, Button, Dropdown, Textarea },
+  import { useModalStore } from "@/stores/modal";
 
-    computed: {
-      name() {
-        return this.$options.name;
-      },
-    },
+  const modalStore = useModalStore();
 
-    data() {
-      return {
-        newComment: null,
-        suggestedComments: ["this is an old comment", "and another"],
-      };
-    },
+  const newComment = ref(null);
+  const suggestedComments = ref(["this is an old comment", "and another"]);
 
-    methods: {
-      close() {
-        this.newComment = null;
-        this.$store.dispatch("modals/close", this.name);
-      },
-    },
+  const props = defineProps({
+    name: { type: String, required: true },
+  });
+
+  const close = () => {
+    newComment.value = null;
+    modalStore.close(props.name);
   };
 </script>
