@@ -1,5 +1,5 @@
 import auth from "@/services/api/auth";
-import { User } from "@/services/api/users";
+import { User } from "@/services/api/user";
 import myNock from "@unit/services/api/nock";
 
 describe("Axios interceptor functionality", () => {

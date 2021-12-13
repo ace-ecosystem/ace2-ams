@@ -3,7 +3,7 @@
  */
 
 import { alertCreate, alertFilterParams, alertUpdate } from "@/models/alert";
-import { Alert } from "@/services/api/alerts";
+import { Alert } from "@/services/api/alert";
 import myNock from "@unit/services/api/nock";
 
 const MOCK_ALERT_CREATE: alertCreate = {
