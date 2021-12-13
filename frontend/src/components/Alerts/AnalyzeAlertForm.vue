@@ -405,11 +405,8 @@
           type: this.alertType,
         };
         try {
-          console.log("createAlert");
           await this.createAlert(alert);
-          console.log("after createAlert");
         } catch (error) {
-          console.log("createAlert error");
           this.addError(`alert ${alert.name}`, error);
         }
       },
