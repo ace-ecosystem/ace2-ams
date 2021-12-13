@@ -31,6 +31,7 @@
   "devDependencies": {
     "@cypress/vue": "^3.0.3",
     "@cypress/webpack-dev-server": "^1.6.0",
+    "@pinia/testing": "^0.0.8",
     "@types/jest": "^27.0.2",
     "@types/js-cookie": "^3.0.0",
     "@types/node": "^16.10.2",
