@@ -35,14 +35,14 @@
   import Menubar from "primevue/menubar";
   import Button from "primevue/button";
 
-  import auth from "@/services/api/auth";
+  import authApi from "@/services/api/auth";
 
   export default {
     name: "TheHeader",
     components: { Menubar, Button },
     methods: {
       async logout() {
-        await auth.logout().catch((error) => {
+        await authApi.logout().catch((error) => {
           throw error;
         });
 

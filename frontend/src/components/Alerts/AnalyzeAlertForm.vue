@@ -226,7 +226,7 @@
 </template>
 
 <script>
-  import { mapActions, mapGetters } from "vuex";
+  import { mapActions, mapState } from "pinia";
 
   import Button from "primevue/button";
   import Calendar from "primevue/calendar";
@@ -243,6 +243,12 @@
   import Textarea from "primevue/textarea";
 
   import moment from "moment-timezone";
+
+  import { useAlertStore } from "@/stores/alert";
+  import { useAlertQueueStore } from "@/stores/alertQueue";
+  import { useAlertTypeStore } from "@/stores/alertType";
+  import { useNodeDirectiveStore } from "@/stores/nodeDirective";
+  import { useObservableTypeStore } from "@/stores/observableType";
 
   export default {
     name: "AnalyzeAlertForm",
@@ -297,26 +303,26 @@
       lastObservableIndex() {
         return this.observables.length - 1;
       },
-      ...mapGetters({
-        openAlert: "alerts/openAlert",
-        directives: "nodeDirective/allItems",
-        alertTypes: "alertType/allItems",
-        alertQueues: "alertQueue/allItems",
-        observableTypes: "observableType/allItems",
-      }),
+
+      ...mapState(useAlertStore, { openAlert: "openAlert" }),
+      ...mapState(useAlertQueueStore, { alertQueues: "allItems" }),
+      ...mapState(useAlertTypeStore, { alertTypes: "allItems" }),
+      ...mapState(useNodeDirectiveStore, { directives: "allItems" }),
+      ...mapState(useObservableTypeStore, { observableTypes: "allItems" }),
     },
     created() {
       this.initData();
       this.initExternalData();
     },
     methods: {
-      ...mapActions({
-        createAlert: "alerts/createAlert",
-        readAllAlertQueue: "alertQueue/readAll",
-        readAllAlertType: "alertType/readAll",
-        readAllNodeDirective: "nodeDirective/readAll",
-        readAllObservableType: "observableType/readAll",
+      ...mapActions(useAlertStore, { createAlert: "create" }),
+      ...mapActions(useAlertQueueStore, { readAllAlertQueue: "readAll" }),
+      ...mapActions(useAlertTypeStore, { readAllAlertType: "readAll" }),
+      ...mapActions(useNodeDirectiveStore, { readAllNodeDirective: "readAll" }),
+      ...mapActions(useObservableTypeStore, {
+        readAllObservableType: "readAll",
       }),
+
       initData() {
         this.alertDate = new Date();
         this.alertDescription = "Manual Alert";
@@ -328,12 +334,14 @@
         this.observables = [];
         this.addFormObservable();
       },
+
       async initExternalData() {
         await this.readAllAlertQueue();
         await this.readAllAlertType();
         await this.readAllNodeDirective();
         await this.readAllObservableType();
       },
+
       adjustForTimezone(datetime, timezone) {
         return moment(datetime).tz(timezone).format();
       },

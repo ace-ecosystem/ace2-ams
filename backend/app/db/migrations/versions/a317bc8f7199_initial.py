@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: d287a1ef0fa0
+Revision ID: a317bc8f7199
 Revises: 
-Create Date: 2021-12-06 18:44:32.460223
+Create Date: 2021-12-08 18:19:04.421802
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'd287a1ef0fa0'
+revision = 'a317bc8f7199'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -65,6 +65,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('value', 'version', name='value_version_uc')
     )
     op.create_index(op.f('ix_analysis_module_type_value'), 'analysis_module_type', ['value'], unique=False)
+    op.create_index(op.f('ix_analysis_module_type_version'), 'analysis_module_type', ['version'], unique=False)
     op.create_table('event_prevention_tool',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -516,6 +517,7 @@ def downgrade() -> None:
     op.drop_table('event_remediation')
     op.drop_index(op.f('ix_event_prevention_tool_value'), table_name='event_prevention_tool')
     op.drop_table('event_prevention_tool')
+    op.drop_index(op.f('ix_analysis_module_type_version'), table_name='analysis_module_type')
     op.drop_index(op.f('ix_analysis_module_type_value'), table_name='analysis_module_type')
     op.drop_table('analysis_module_type')
     op.drop_index(op.f('ix_alert_type_value'), table_name='alert_type')

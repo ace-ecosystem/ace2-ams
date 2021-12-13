@@ -42,7 +42,7 @@ helpers.api_route_create(router, create_alert_type)
 
 
 def get_all_alert_types(db: Session = Depends(get_db)):
-    return paginate(db, select(AlertType))
+    return paginate(db, select(AlertType).order_by(AlertType.value))
 
 
 def get_alert_type(uuid: UUID, db: Session = Depends(get_db)):

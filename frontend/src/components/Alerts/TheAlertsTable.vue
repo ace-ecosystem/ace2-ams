@@ -8,7 +8,7 @@
     v-model:expandedRows="expandedRows"
     v-model:filters="alertTableFilter"
     v-model:selection="selectedRows"
-    :value="alerts"
+    :value="visibleQueriedAlertSummaries"
     :global-filter-fields="selectedColumns.field"
     :resizable-columns="true"
     :sort-order="-1"
@@ -21,7 +21,7 @@
     @sort="sort"
     @rowSelect="alertSelect($event.data.uuid)"
     @rowUnselect="alertUnselect($event.data.uuid)"
-    @rowSelect-all="alertSelectAll(allAlertUuids)"
+    @rowSelect-all="alertSelectAll(visibleQueriedAlertsUuids)"
     @rowUnselect-all="alertUnselectAll()"
   >
     <!--        ALERT TABLE TOOLBAR-->
@@ -126,9 +126,12 @@
 </template>
 
 <script>
-  import { mapActions, mapGetters } from "vuex";
+  import { mapState, mapActions } from "pinia";
 
   import { camelToSnakeCase } from "@/etc/helpers";
+  import { useAlertTableStore } from "@/stores/alertTable";
+  import { useFilterStore } from "@/stores/filter";
+  import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
   import Button from "primevue/button";
   import Column from "primevue/column";
@@ -184,13 +187,20 @@
     },
 
     computed: {
-      ...mapGetters({
-        alerts: "alerts/visibleQueriedAlerts",
-        allAlertUuids: "alerts/visibleQueriedAlertsUuids",
-        totalAlerts: "alerts/totalAlerts",
-        selectedAlerts: "selectedAlerts/selected",
-        filters: "filters/alerts",
+      ...mapState(useFilterStore, {
+        filters: "alerts",
       }),
+
+      ...mapState(useAlertTableStore, {
+        totalAlerts: (store) => store.totalAlerts,
+        visibleQueriedAlertSummaries: "visibleQueriedAlertSummaries",
+        visibleQueriedAlertsUuids: "visibleQueriedAlertsUuids",
+      }),
+
+      ...mapState(useSelectedAlertStore, {
+        selectedAlerts: (store) => store.selected,
+      }),
+
       sortFilter() {
         return this.sortField
           ? `${camelToSnakeCase(this.sortField)}|${this.sortOrder}`
@@ -219,12 +229,13 @@
     },
 
     methods: {
-      ...mapActions({
-        alertSelect: "selectedAlerts/select",
-        alertUnselect: "selectedAlerts/unselect",
-        alertUnselectAll: "selectedAlerts/unselectAll",
-        alertSelectAll: "selectedAlerts/selectAll",
-        getAlertPage: "alerts/getPage",
+      ...mapActions(useAlertTableStore, ["readPage"]),
+
+      ...mapActions(useSelectedAlertStore, {
+        alertSelect: "select",
+        alertSelectAll: "selectAll",
+        alertUnselect: "unselect",
+        alertUnselectAll: "unselectAll",
       }),
 
       reset() {
@@ -279,7 +290,7 @@
       async loadAlerts() {
         this.isLoading = true;
         try {
-          await this.getAlertPage({
+          await this.readPage({
             sort: this.sortFilter,
             ...this.pageOptions,
             ...this.filters,

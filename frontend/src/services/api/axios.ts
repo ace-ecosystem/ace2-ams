@@ -60,12 +60,10 @@ export async function axiosRefresh(): Promise<void> {
 
   await instance.request(config).catch((error) => {
     console.debug("need to authenticate");
-    sessionStorage.removeItem("authenticated");
     throw error;
   });
 
   console.debug("successfully refreshed tokens");
-  sessionStorage.setItem("authenticated", "yes");
 }
 
 export default instance;

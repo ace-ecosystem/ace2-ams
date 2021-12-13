@@ -46,7 +46,7 @@ helpers.api_route_create(router, create_node_threat_type)
 
 
 def get_all_node_threat_types(db: Session = Depends(get_db)):
-    return paginate(db, select(NodeThreatType))
+    return paginate(db, select(NodeThreatType).order_by(NodeThreatType.value))
 
 
 def get_node_threat_type(uuid: UUID, db: Session = Depends(get_db)):

@@ -11,7 +11,7 @@
         label="Disposition"
         @click="open('DispositionModal')"
       />
-      <DispositionModal />
+      <DispositionModal name="DispositionModal" />
       <!--      COMMENT -->
       <Button
         class="p-m-1 p-button-sm"
@@ -19,7 +19,7 @@
         label="Comment"
         @click="open('CommentModal')"
       />
-      <CommentModal />
+      <CommentModal name="CommentModal" />
       <!--      TAKE OWNERSHIP -- NO MODAL -->
       <Button
         class="p-m-1 p-button-sm"
@@ -33,7 +33,7 @@
         label="Assign"
         @click="open('AssignModal')"
       />
-      <AssignModal />
+      <AssignModal name="AssignModal" />
       <!--      TAG MODAL -->
       <Button
         class="p-m-1 p-button-sm"
@@ -57,7 +57,7 @@
         label="Delete"
         @click="open('DeleteModal')"
       />
-      <DeleteModal />
+      <DeleteModal name="DeleteModal" />
     </template>
     <template #right>
       <Button icon="pi pi-link" class="p-button-rounded" label="Link" />
@@ -65,7 +65,7 @@
   </Toolbar>
 </template>
 
-<script>
+<script setup>
   import Button from "primevue/button";
   import Toolbar from "primevue/toolbar";
 
@@ -76,22 +76,11 @@
   import DeleteModal from "@/components/Modals/DeleteModal";
   import DispositionModal from "@/components/Modals/DispositionModal";
 
-  export default {
-    name: "TheAlertActionToolbar",
-    components: {
-      Button,
-      DispositionModal,
-      DeleteModal,
-      RemediationModal,
-      TagModal,
-      Toolbar,
-      CommentModal,
-      AssignModal,
-    },
-    methods: {
-      open(name) {
-        this.$store.dispatch("modals/open", name);
-      },
-    },
+  import { useModalStore } from "@/stores/modal";
+
+  const store = useModalStore();
+
+  const open = (name) => {
+    store.open(name);
   };
 </script>

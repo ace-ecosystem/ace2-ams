@@ -1,3 +1,5 @@
+import { StoreDefinition } from "pinia";
+
 export type UUID = string;
 
 export interface genericObjectCreate {
@@ -40,7 +42,7 @@ export interface filterOption {
   readonly name: string;
   readonly label: string;
   readonly type: string;
-  readonly options?: string;
   readonly optionLabel?: string;
+  readonly store?: StoreDefinition;
   readonly formatForAPI?: (filter: any) => string;
 }

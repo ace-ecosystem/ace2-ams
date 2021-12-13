@@ -46,7 +46,7 @@ helpers.api_route_create(router, create_event_status)
 
 
 def get_all_event_statuses(db: Session = Depends(get_db)):
-    return paginate(db, select(EventStatus))
+    return paginate(db, select(EventStatus).order_by(EventStatus.value))
 
 
 def get_event_status(uuid: UUID, db: Session = Depends(get_db)):

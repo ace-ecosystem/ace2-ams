@@ -46,7 +46,7 @@ helpers.api_route_create(router, create_observable_type)
 
 
 def get_all_observable_types(db: Session = Depends(get_db)):
-    return paginate(db, select(ObservableType))
+    return paginate(db, select(ObservableType).order_by(ObservableType.value))
 
 
 def get_observable_type(uuid: UUID, db: Session = Depends(get_db)):

@@ -46,7 +46,7 @@ helpers.api_route_create(router, create_event_source)
 
 
 def get_all_event_sources(db: Session = Depends(get_db)):
-    return paginate(db, select(EventSource))
+    return paginate(db, select(EventSource).order_by(EventSource.value))
 
 
 def get_event_source(uuid: UUID, db: Session = Depends(get_db)):

@@ -46,7 +46,7 @@ helpers.api_route_create(router, create_event_remediation)
 
 
 def get_all_event_remediations(db: Session = Depends(get_db)):
-    return paginate(db, select(EventRemediation))
+    return paginate(db, select(EventRemediation).order_by(EventRemediation.value))
 
 
 def get_event_remediation(uuid: UUID, db: Session = Depends(get_db)):

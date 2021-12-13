@@ -64,7 +64,7 @@ helpers.api_route_create(router, create_user)
 
 
 def get_all_users(db: Session = Depends(get_db)):
-    return paginate(db, select(User))
+    return paginate(db, select(User).order_by(User.username))
 
 
 def get_user(uuid: UUID, db: Session = Depends(get_db)):

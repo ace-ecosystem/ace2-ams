@@ -44,10 +44,13 @@
 </template>
 
 <script>
+  import { mapActions } from "pinia";
   import Button from "primevue/button";
   import InputText from "primevue/inputtext";
 
-  import auth from "@/services/api/auth";
+  import { populateCommonStores } from "@/etc/helpers";
+  import authApi from "@/services/api/auth";
+  import { useAuthStore } from "@/stores/auth";
 
   export default {
     components: {
@@ -66,15 +69,29 @@
       },
     },
     methods: {
+      ...mapActions(useAuthStore, ["setAuthenticated"]),
+
       async login() {
-        await auth.authenticate(this.loginData).catch(() => {
-          // TODO: Add a proper message saying the login failed
-          console.error("Invalid username or password");
-        });
+        await authApi
+          .authenticate(this.loginData)
+          .then(async () => {
+            // If the API request to login succeeded, set the authenticated state
+            this.setAuthenticated(true);
+
+            // And then populate some of the stores with items from the API that
+            // will be used throughout the application.
+            await populateCommonStores();
+          })
+          .catch(() => {
+            // TODO: Add a proper message saying the login failed
+            console.error("Invalid username or password");
+            this.setAuthenticated(false);
+          });
 
         this.resetData();
         this.$router.replace({ name: "Manage Alerts" });
       },
+
       resetData() {
         (this.username = null), (this.password = null);
       },

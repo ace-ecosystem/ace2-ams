@@ -1,44 +1,38 @@
 <!-- ViewAlert.vue -->
 
 <template>
-  <AlertTree :items="alertTree" />
+  <AlertTree v-if="alertStore.openAlert" :items="alertTree" />
 </template>
 
-<script>
-  import { mapGetters } from "vuex";
+<script setup>
+  import { computed, onMounted, onUnmounted } from "vue";
+  import { useRoute } from "vue-router";
   import { arrayToTree } from "performant-array-to-tree";
 
   import AlertTree from "@/components/Alerts/AlertTree";
+  import { useAlertStore } from "@/stores/alert";
+  import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
-  export default {
-    components: { AlertTree },
+  const alertStore = useAlertStore();
+  const selectedAlertStore = useSelectedAlertStore();
 
-    computed: {
-      ...mapGetters({
-        openAlert: "alerts/openAlert",
-      }),
+  onMounted(async () => {
+    selectedAlertStore.unselectAll();
+    selectedAlertStore.select(useRoute().params.alertID);
 
-      alertTree() {
-        // Turn the flat array into a nested tree structure
-        const tree = arrayToTree(this.openAlert.tree, {
-          id: "treeUuid",
-          parentId: "parentTreeUuid",
-          dataField: null,
-        });
-        return tree;
-      },
-    },
+    alertStore.$reset();
+    await alertStore.read(useRoute().params.alertID);
+  });
 
-    async created() {
-      this.$store.dispatch(
-        "selectedAlerts/unselectAll",
-        this.$route.params.alertID,
-      );
-      this.$store.dispatch("selectedAlerts/select", this.$route.params.alertID);
-      await this.$store.dispatch(
-        "alerts/getSingle",
-        this.$route.params.alertID,
-      );
-    },
-  };
+  onUnmounted(() => {
+    selectedAlertStore.unselectAll();
+  });
+
+  const alertTree = computed(() =>
+    arrayToTree(alertStore.openAlert.tree, {
+      id: "treeUuid",
+      parentId: "parentTreeUuid",
+      dataField: null,
+    }),
+  );
 </script>

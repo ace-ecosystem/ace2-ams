@@ -46,7 +46,7 @@ helpers.api_route_create(router, create_node_threat_actor)
 
 
 def get_all_node_threat_actors(db: Session = Depends(get_db)):
-    return paginate(db, select(NodeThreatActor))
+    return paginate(db, select(NodeThreatActor).order_by(NodeThreatActor.value))
 
 
 def get_node_threat_actor(uuid: UUID, db: Session = Depends(get_db)):

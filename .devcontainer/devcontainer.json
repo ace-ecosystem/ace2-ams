@@ -55,7 +55,7 @@
     "ms-python.vscode-pylance",
     "ms-vsliveshare.vsliveshare-pack",
     "dbaeumer.vscode-eslint",
-    "octref.vetur",
+    "johnsoncodehk.volar",
     "esbenp.prettier-vscode",
     "stylelint.vscode-stylelint"
   ],

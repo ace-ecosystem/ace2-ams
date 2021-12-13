@@ -43,85 +43,77 @@
   </BaseModal>
 </template>
 
-<script>
-  import { mapActions } from "vuex";
+<script setup>
+  import { computed, defineProps, inject, ref, watch } from "vue";
 
   import Button from "primevue/button";
 
   import BaseModal from "@/components/Modals/BaseModal";
-  import FilterInput from "../UserInterface/FilterInput.vue";
+  import FilterInput from "@/components/UserInterface/FilterInput.vue";
 
-  export default {
-    name: "EditFilterModal",
-    components: { BaseModal, Button, FilterInput },
+  import { useFilterStore } from "@/stores/filter";
+  import { useModalStore } from "@/stores/modal";
 
-    inject: ["filterType"],
+  const filterStore = useFilterStore();
+  const modalStore = useModalStore();
 
-    data() {
-      return {
-        formFilters: [],
-      };
+  const props = defineProps({
+    name: { type: String, required: true },
+  });
+
+  const filterType = inject("filterType");
+
+  watch(
+    filterStore.$state[filterType],
+    () => {
+      resetFormFilters();
     },
+    { deep: true },
+  );
 
-    computed: {
-      currentlySetFilters() {
-        return this.$store.getters[`filters/${this.filterType}`];
-      },
-      submitFilters() {
-        let submitFilters = {};
-        for (const index in this.formFilters) {
-          const filter = this.formFilters[index];
-          const filterName = filter.filterName ? filter.filterName : filter;
-          submitFilters[filterName] = filter.filterValue;
-        }
-        return submitFilters;
-      },
-      name() {
-        return this.$options.name;
-      },
-    },
+  const formFilters = ref([]);
 
-    watch: {
-      currentlySetFilters: {
-        deep: true,
-        handler: function () {
-          this.resetFormFilters();
-        },
-      },
-    },
+  const submitFilters = computed(() => {
+    let submitFilters = {};
+    for (const index in formFilters.value) {
+      const filter = formFilters.value[index];
+      const filterName = filter.filterName ? filter.filterName : filter;
+      submitFilters[filterName] = filter.filterValue;
+    }
+    return submitFilters;
+  });
 
-    methods: {
-      ...mapActions({
-        bulkSetFilters: "filters/bulkSetFilters",
-      }),
-      submit() {
-        this.bulkSetFilters({
-          filterType: this.filterType,
-          filters: this.submitFilters,
-        });
-      },
-      deleteFormFilter(index) {
-        this.formFilters.splice(index, 1);
-      },
-      clear() {
-        this.formFilters = [];
-      },
-      addNewFilter() {
-        this.formFilters.push({ filterName: null, filterValue: null });
-      },
-      resetFormFilters() {
-        this.formFilters = [];
-        for (const filter in this.currentlySetFilters) {
-          this.formFilters.push({
-            filterName: filter,
-            filterValue: this.currentlySetFilters[filter],
-          });
-        }
-      },
-      close() {
-        this.resetFormFilters();
-        this.$store.dispatch("modals/close", this.name);
-      },
-    },
+  const submit = () => {
+    filterStore.bulkSetFilters({
+      filterType: filterType,
+      filters: submitFilters.value,
+    });
+  };
+
+  const deleteFormFilter = (index) => {
+    formFilters.value.splice(index, 1);
+  };
+
+  const clear = () => {
+    formFilters.value = [];
+  };
+
+  const addNewFilter = () => {
+    formFilters.value.push({ filterName: null, filterValue: null });
+  };
+
+  const resetFormFilters = () => {
+    formFilters.value = [];
+    for (const filter in filterStore.$state[filterType]) {
+      formFilters.value.push({
+        filterName: filter,
+        filterValue: filterStore.$state[filterType][filter],
+      });
+    }
+  };
+
+  const close = () => {
+    resetFormFilters();
+    modalStore.close(props.name);
   };
 </script>
