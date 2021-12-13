@@ -312,9 +312,16 @@
     },
     created() {
       this.initData();
+      this.initExternalData();
     },
     methods: {
       ...mapActions(useAlertStore, { createAlert: "create" }),
+      ...mapActions(useAlertQueueStore, { readAllAlertQueue: "readAll" }),
+      ...mapActions(useAlertTypeStore, { readAllAlertType: "readAll" }),
+      ...mapActions(useNodeDirectiveStore, { readAllNodeDirective: "readAll" }),
+      ...mapActions(useObservableTypeStore, {
+        readAllObservableType: "readAll",
+      }),
 
       initData() {
         this.alertDate = new Date();
@@ -327,6 +334,14 @@
         this.observables = [];
         this.addFormObservable();
       },
+
+      async initExternalData() {
+        await this.readAllAlertQueue();
+        await this.readAllAlertType();
+        await this.readAllNodeDirective();
+        await this.readAllObservableType();
+      },
+
       adjustForTimezone(datetime, timezone) {
         return moment(datetime).tz(timezone).format();
       },
@@ -390,8 +405,11 @@
           type: this.alertType,
         };
         try {
+          console.log("createAlert");
           await this.createAlert(alert);
+          console.log("after createAlert");
         } catch (error) {
+          console.log("createAlert error");
           this.addError(`alert ${alert.name}`, error);
         }
       },
