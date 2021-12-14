@@ -28,7 +28,7 @@ const routes: Array<RouteRecordRaw> = [
     component: ViewAlert,
   },
   {
-    path: "/analysis/:observableID/:analysisID",
+    path: "/analysis/:analysisID",
     name: "View Analysis",
     component: ViewAnalysis,
   },
