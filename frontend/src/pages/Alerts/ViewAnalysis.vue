@@ -2,7 +2,9 @@
 
 <template>
   <Card>
-    <template #header> {{ alertName }}: {{ analysisName }} </template>
+    <template #header>
+      <Breadcrumb :home="home" :model="items"></Breadcrumb>
+    </template>
     <template #content>
       {{ analysisDetails }}
     </template>
@@ -10,15 +12,10 @@
 </template>
 
 <script setup>
-  import {
-    computed,
-    onMounted,
-    onBeforeMount,
-    onUnmounted,
-    provide,
-    ref,
-  } from "vue";
+  import { computed, onMounted, ref } from "vue";
   import { useRoute } from "vue-router";
+  import Breadcrumb from "primevue/breadcrumb";
+
   import Card from "primevue/card";
   import { useAlertStore } from "@/stores/alert";
   const alertStore = useAlertStore();
@@ -43,6 +40,12 @@
     }
     return "Unknown Analysis";
   });
+
+  const home = { icon: "pi pi-home", to: "/" };
+  const items = [
+    { label: alertName, to: `/alert/${alertStore.openAlert.alert.uuid}` },
+    { label: analysisName },
+  ];
   const analysisDetails = computed(() => {
     if (analysis.value) {
       return analysis.value.details;
