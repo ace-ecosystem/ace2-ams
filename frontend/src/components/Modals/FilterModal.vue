@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-  import { computed, defineProps, inject, ref, watch } from "vue";
+  import { computed, defineProps, inject, ref } from "vue";
 
   import Button from "primevue/button";
 
@@ -63,8 +63,7 @@
 
   const filterType = inject("filterType");
 
-  watch(
-    filterStore.$state[filterType],
+  filterStore.$subscribe(
     () => {
       resetFormFilters();
     },
