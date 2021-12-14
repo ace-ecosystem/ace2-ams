@@ -1,10 +1,10 @@
 import TheAlertsTable from "@/components/Alerts/TheAlertsTable.vue";
 import { mount } from "@vue/test-utils";
-import store from "@/store";
 import PrimeVue from "primevue/config";
 import myNock from "@unit/services/api/nock";
 import router from "@/router";
 import { FilterMatchMode } from "primevue/api";
+import { createTestingPinia } from "@pinia/testing";
 
 import InputText from "primevue/inputtext";
 import MultiSelect from "primevue/multiselect";
@@ -44,7 +44,7 @@ const mockAPIAlert: alertRead = {
 describe("TheAlertsTable data/creation", () => {
   const wrapper = mount(TheAlertsTable, {
     global: {
-      plugins: [store, PrimeVue, router],
+      plugins: [createTestingPinia({ stubActions: false }), PrimeVue, router],
     },
   });
 
@@ -60,7 +60,7 @@ describe("TheAlertsTable data/creation", () => {
   });
 
   beforeEach(async () => {
-    wrapper.vm.reset();
+    await wrapper.vm.reset();
     await wrapper.vm.loadAlerts();
   });
 
@@ -92,7 +92,7 @@ describe("TheAlertsTable data/creation", () => {
       { field: "owner", header: "Owner" },
       { field: "disposition", header: "Disposition" },
     ]);
-    expect(wrapper.vm.selectedRows).toBeNull();
+    expect(wrapper.vm.selectedRows).toStrictEqual([]);
     expect(wrapper.vm.expandedRows).toStrictEqual([]);
     expect(wrapper.vm.columns).toStrictEqual([
       { field: "dispositionTime", header: "Dispositioned Time" },
@@ -113,8 +113,10 @@ describe("TheAlertsTable data/creation", () => {
     ]);
     expect(wrapper.vm.isLoading).toEqual(false);
     expect(wrapper.vm.error).toBeNull();
-    expect(wrapper.vm.alerts).toHaveLength(2);
-    expect(wrapper.vm.totalAlerts).toEqual(2);
+    expect(
+      wrapper.vm.alertTableStore.visibleQueriedAlertSummaries,
+    ).toHaveLength(2);
+    expect(wrapper.vm.alertTableStore.totalAlerts).toEqual(2);
     expect(wrapper.vm.sortField).toEqual("eventTime");
     expect(wrapper.vm.sortOrder).toEqual("desc");
     expect(wrapper.vm.numRows).toEqual(10);
@@ -126,7 +128,7 @@ describe("TheAlertsTable data/creation", () => {
       offset: 0,
     });
     expect(wrapper.vm.sortFilter).toEqual("event_time|desc");
-    wrapper.setData({ sortField: null });
+    wrapper.vm.sortField = null;
     expect(wrapper.vm.sortFilter).toBeNull();
   });
 });
@@ -135,7 +137,7 @@ describe("TheAlertsTable data/creation", () => {
 describe("TheAlertsTable methods success", () => {
   const wrapper = mount(TheAlertsTable, {
     global: {
-      plugins: [store, PrimeVue, router],
+      plugins: [createTestingPinia({ stubActions: false }), PrimeVue, router],
     },
   });
 
@@ -151,7 +153,7 @@ describe("TheAlertsTable methods success", () => {
   });
 
   beforeEach(async () => {
-    wrapper.vm.reset();
+    await wrapper.vm.reset();
     await wrapper.vm.loadAlerts();
   });
 
@@ -160,10 +162,8 @@ describe("TheAlertsTable methods success", () => {
   });
 
   it("will reset Alert table to defaults upon reset()", async () => {
-    wrapper.setData({
-      alertTableFilter: [],
-      selectedColumns: [],
-    });
+    wrapper.vm.alertTableFilter = [];
+    wrapper.vm.selectedColumns = [];
     wrapper.vm.reset();
     expect(wrapper.vm.selectedColumns).toStrictEqual([
       { field: "eventTime", header: "Event Time" },
@@ -177,9 +177,7 @@ describe("TheAlertsTable methods success", () => {
   });
 
   it("will init Alert table to defaults upon initAlertTable()", async () => {
-    wrapper.setData({
-      alertTableFilter: [],
-    });
+    wrapper.vm.alertTableFilter = [];
     wrapper.vm.initAlertTable();
     expect(wrapper.vm.alertTableFilter).toStrictEqual({
       global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -216,11 +214,11 @@ describe("TheAlertsTable methods success", () => {
 describe("TheAlertsTable methods failed", () => {
   const wrapper = mount(TheAlertsTable, {
     global: {
-      plugins: [store, PrimeVue, router],
+      plugins: [createTestingPinia({ stubActions: false }), PrimeVue, router],
     },
   });
 
-  beforeAll(async () => {
+  beforeAll(() => {
     nock.cleanAll();
   });
 
