@@ -5,7 +5,14 @@
 </template>
 
 <script setup>
-  import { computed, onMounted, onUnmounted } from "vue";
+  import {
+    computed,
+    onMounted,
+    onUnmounted,
+    provide,
+    ref,
+    readonly,
+  } from "vue";
   import { useRoute } from "vue-router";
   import { arrayToTree } from "performant-array-to-tree";
 
@@ -16,12 +23,18 @@
   const alertStore = useAlertStore();
   const selectedAlertStore = useSelectedAlertStore();
 
+  provide("filterType", "alerts");
+
   onMounted(async () => {
     selectedAlertStore.unselectAll();
     selectedAlertStore.select(useRoute().params.alertID);
 
     alertStore.$reset();
     await alertStore.read(useRoute().params.alertID);
+
+    alertTree.value.forEach((node) => {
+      traverseTree(node);
+    });
   });
 
   onUnmounted(() => {
@@ -35,4 +48,19 @@
       dataField: null,
     }),
   );
+
+  let observableRefs = ref({});
+
+  function traverseTree(node) {
+    if (!(node.uuid in observableRefs.value) && "forDetection" in node) {
+      observableRefs.value[node.uuid] = node.treeUuid;
+    }
+    if (node.children.length) {
+      node.children.forEach((child) => {
+        traverseTree(child);
+      });
+    }
+  }
+
+  provide("observableRefs", readonly(observableRefs));
 </script>

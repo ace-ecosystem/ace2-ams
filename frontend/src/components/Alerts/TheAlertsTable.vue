@@ -217,8 +217,8 @@
     watch: {
       filters: {
         deep: true,
-        handler: function () {
-          this.loadAlerts();
+        handler: async function () {
+          await this.loadAlerts();
         },
       },
     },

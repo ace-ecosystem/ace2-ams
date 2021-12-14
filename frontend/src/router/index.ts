@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import AnalyzeAlert from "@/pages/Alerts/AnalyzeAlert.vue";
 import ViewAlert from "@/pages/Alerts/ViewAlert.vue";
+import ViewAnalysis from "@/pages/Alerts/ViewAnalysis.vue";
 import ManageAlerts from "@/pages/Alerts/ManageAlerts.vue";
 import TheLogin from "@/pages/User/TheLogin.vue";
 import { useAuthStore } from "@/stores/auth";
@@ -25,6 +26,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/alert/:alertID",
     name: "View Alert",
     component: ViewAlert,
+  },
+  {
+    path: "/analysis/:analysisID",
+    name: "View Analysis",
+    component: ViewAnalysis,
   },
   {
     path: "/",

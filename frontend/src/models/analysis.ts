@@ -13,6 +13,7 @@ export interface analysisCreate extends nodeCreate {
   nodeTree: nodeTreeCreate;
   stackTrace?: string;
   summary?: string;
+  [key: string]: unknown;
 }
 
 export interface analysisRead extends nodeRead {
@@ -37,4 +38,5 @@ export interface analysisUpdate extends nodeUpdate {
   errorMessage?: string | null;
   stackTrace?: string | null;
   summary?: string | null;
+  [key: string]: unknown;
 }
