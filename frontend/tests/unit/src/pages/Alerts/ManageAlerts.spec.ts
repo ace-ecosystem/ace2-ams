@@ -3,13 +3,15 @@ import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue
 import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
 import TheAlertsTable from "@/components/Alerts/TheAlertsTable.vue";
 import DateRangePicker from "@/components/UserInterface/DateRangePicker.vue";
-import store from "@/store";
 import { mount } from "@vue/test-utils";
+import { createTestingPinia } from "@pinia/testing";
+import Tooltip from "primevue/tooltip";
 
 describe("ManageAlerts.vue", () => {
   const wrapper = mount(ManageAlerts, {
     global: {
-      plugins: [store],
+      plugins: [createTestingPinia()],
+      directives: { tooltip: Tooltip },
       stubs: ["TheAlertsTable"],
     },
   });
