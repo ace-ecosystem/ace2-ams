@@ -6,19 +6,17 @@
   >
 </template>
 
-<script setup lang="ts">
+<script setup>
   import Chip from "primevue/chip";
 
-  import { defineProps, inject } from "vue";
-
-  import { useFilterStore } from "@/stores/filter";
-  const filterStore = useFilterStore();
-  const filterType = inject("filterType");
-
+  import { inject, defineExpose, defineProps } from "vue";
   const props = defineProps({
     tag: { type: Object, required: true },
   });
 
+  import { useFilterStore } from "@/stores/filter";
+  const filterStore = useFilterStore();
+  const filterType = inject("filterType");
   const filterByTag = () => {
     filterStore.setFilter({
       filterType: filterType,
@@ -26,4 +24,10 @@
       filterValue: props.tag,
     });
   };
+
+  defineExpose({
+    filterByTag,
+    props,
+    filterType
+  })
 </script>
