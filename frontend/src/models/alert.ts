@@ -112,18 +112,22 @@ export interface alertFilterParams extends pageOptionParams {
 
 export type alertFilterNameTypes = Extract<keyof alertFilterParams, string>;
 export type alertFilterValues =
-  | (string &
-      observableTypeRead[] &
-      nodeThreatRead[] &
-      nodeTagRead[] &
-      Date & {
-        category: observableTypeRead;
-        value: string;
-      } & alertDispositionRead &
-      userRead &
-      alertQueueRead &
-      nodeThreatActorRead &
-      alertToolRead &
-      alertToolInstanceRead &
-      alertTypeRead)
+  | (
+      | string
+      | observableTypeRead[]
+      | nodeThreatRead[]
+      | nodeTagRead[]
+      | Date
+      | {
+          category: observableTypeRead;
+          value: string;
+        }
+      | alertDispositionRead
+      | userRead
+      | alertQueueRead
+      | nodeThreatActorRead
+      | alertToolRead
+      | alertToolInstanceRead
+      | alertTypeRead
+    )
   | undefined;
