@@ -46,16 +46,8 @@ describe("Alert calls", () => {
       })
       .get("/newItem")
       .reply(200, "Read successful");
-    const res = await api.create(MOCK_ALERT_CREATE);
+    const res = await api.createAndRead(MOCK_ALERT_CREATE);
     expect(res).toEqual("Read successful");
-  });
-
-  it("will not get the created object when 'create' is called with getAfterCreate set to false", async () => {
-    myNock.post("/alert/").reply(200, "Create successful", {
-      "content-location": "http://test_app.com:1234/newItem",
-    });
-    const res = await api.create(MOCK_ALERT_CREATE, false);
-    expect(res).toEqual("Create successful");
   });
 
   it("will make a get request to the /alert/{uuid} endpoint when 'read' is called with a given UUID", async () => {

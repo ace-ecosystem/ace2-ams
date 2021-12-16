@@ -1,16 +1,14 @@
 import TheHeader from "@/components/UserInterface/TheHeader.vue";
-import { mount, VueWrapper } from "@vue/test-utils";
+import { mount } from "@vue/test-utils";
+import { createTestingPinia } from "@pinia/testing";
 import Button from "primevue/button";
 import router from "@/router";
 
 describe("TheHeader.vue", () => {
-  let wrapper: VueWrapper<any>;
-  beforeEach(() => {
-    wrapper = mount(TheHeader, {
-      global: {
-        plugins: [router],
-      },
-    });
+  const wrapper = mount(TheHeader, {
+    global: {
+      plugins: [router, createTestingPinia()],
+    },
   });
 
   it("renders", () => {

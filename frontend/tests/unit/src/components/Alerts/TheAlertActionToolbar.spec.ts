@@ -8,10 +8,12 @@ import DeleteModal from "@/components/Modals/DeleteModal.vue";
 import DispositionModal from "@/components/Modals/DispositionModal.vue";
 import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
+import { createTestingPinia } from "@pinia/testing";
 
 describe("TheAlertActionToolbar.vue", () => {
   const wrapper = mount(TheAlertActionToolbar, {
     global: {
+      plugins: [createTestingPinia()],
       stubs: {
         AssignModal: true,
         CommentModal: true,

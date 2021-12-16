@@ -66,13 +66,13 @@
     name: { type: String, required: true },
   });
 
-  const assignUserClicked = () => {
+  const assignUserClicked = async () => {
     isLoading.value = true;
 
     if (selectedAlertStore.multipleSelected) {
-      assignUserToMultiple();
+      await assignUserToMultiple();
     } else {
-      assignUser();
+      await assignUser();
     }
 
     isLoading.value = false;

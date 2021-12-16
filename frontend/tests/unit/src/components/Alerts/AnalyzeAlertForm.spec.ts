@@ -11,12 +11,12 @@ import MultiSelect from "primevue/multiselect";
 import TabPanel from "primevue/tabpanel";
 import TabView from "primevue/tabview";
 import { mount } from "@vue/test-utils";
-import store from "../../../../../src/store/index";
 import PrimeVue from "primevue/config";
 import moment from "moment-timezone";
 import myNock from "@unit/services/api/nock";
 import nock from "nock";
 import router from "@/router";
+import { createTestingPinia } from "@pinia/testing";
 
 import snakecaseKeys from "snakecase-keys";
 
@@ -24,7 +24,7 @@ import snakecaseKeys from "snakecase-keys";
 describe("AnalyzeAlertForm data/creation", () => {
   const wrapper = mount(AnalyzeAlertForm, {
     global: {
-      plugins: [store, PrimeVue, router],
+      plugins: [createTestingPinia(), PrimeVue, router],
     },
   });
 
@@ -51,7 +51,7 @@ describe("AnalyzeAlertForm data/creation", () => {
 describe("AnalyzeAlertForm computed data", () => {
   const wrapper = mount(AnalyzeAlertForm, {
     global: {
-      plugins: [store, PrimeVue, router],
+      plugins: [createTestingPinia(), PrimeVue, router],
     },
   });
 
@@ -133,7 +133,7 @@ const multiObservableCommaStub = {
 describe("AnalyzeAlertForm non-async methods", () => {
   const wrapper = mount(AnalyzeAlertForm, {
     global: {
-      plugins: [store, PrimeVue, router],
+      plugins: [createTestingPinia(), PrimeVue, router],
     },
   });
 
@@ -294,7 +294,7 @@ describe("AnalyzeAlertForm non-async methods", () => {
 describe("AnalyzeAlertForm async methods", () => {
   const wrapper = mount(AnalyzeAlertForm, {
     global: {
-      plugins: [store, PrimeVue, router],
+      plugins: [createTestingPinia({ stubActions: false }), PrimeVue, router],
     },
   });
 
@@ -335,7 +335,7 @@ describe("AnalyzeAlertForm async methods", () => {
   });
 
   // getters
-  it("will populate dropdowns using mapped vuex actions (which perform API calls) when initExternalData is called", async () => {
+  it("will populate dropdowns using mapped Pinia actions (which perform API calls) when initExternalData is called", async () => {
     expect(wrapper.vm.alertQueues).toStrictEqual(["default"]);
     expect(wrapper.vm.alertTypes).toStrictEqual(["manual"]);
     expect(wrapper.vm.observableTypes).toStrictEqual(["file", "ipv4"]);
