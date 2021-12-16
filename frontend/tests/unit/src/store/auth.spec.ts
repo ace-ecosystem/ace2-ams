@@ -5,6 +5,8 @@ import myNock from "@unit/services/api/nock";
 
 createTestingPinia();
 
+const store = useAuthStore();
+
 const mockUser: userRead = {
   defaultAlertQueue: { description: null, uuid: "1", value: "default" },
   displayName: "Test Analyst",
@@ -17,27 +19,25 @@ const mockUser: userRead = {
 };
 
 describe("auth Getters", () => {
-  it("will return isAuthenticated state when not logged in", () => {
-    const store = useAuthStore();
+  beforeEach(() => {
+    store.$reset();
+  });
 
+  it("will return isAuthenticated state when not logged in", () => {
     expect(store.isAuthenticated).toStrictEqual(false);
   });
 
   it("will return isAuthenticated state when logged in", () => {
-    const store = useAuthStore();
     store.authenticated = true;
 
     expect(store.isAuthenticated).toStrictEqual(true);
   });
 
   it("will return displayName when not logged in", () => {
-    const store = useAuthStore();
-
     expect(store.displayName).toStrictEqual("Unauthenticated User");
   });
 
   it("will return displayName when logged in", () => {
-    const store = useAuthStore();
     store.authenticated = true;
     store.user = mockUser;
 
@@ -46,10 +46,12 @@ describe("auth Getters", () => {
 });
 
 describe("auth Actions", () => {
+  beforeEach(() => {
+    store.$reset();
+  });
+
   it("will set authenticated state when the refreshTokens call fails", async () => {
     myNock.get("/auth/refresh").reply(403);
-
-    const store = useAuthStore();
 
     await store.refreshTokens();
     expect(store.authenticated).toStrictEqual(false);
@@ -58,20 +60,16 @@ describe("auth Actions", () => {
   it("will set authenticated state when the refreshTokens call succeeds", async () => {
     myNock.get("/auth/refresh").reply(200);
 
-    const store = useAuthStore();
-
     await store.refreshTokens();
     expect(store.authenticated).toStrictEqual(true);
   });
 
   it("will set authenticated state when setAuthenticated is called with false", () => {
-    const store = useAuthStore();
     store.setAuthenticated(false);
     expect(store.authenticated).toStrictEqual(false);
   });
 
   it("will set authenticated state when setAuthenticated is called with true", () => {
-    const store = useAuthStore();
     store.setAuthenticated(true);
     expect(store.authenticated).toStrictEqual(true);
   });
