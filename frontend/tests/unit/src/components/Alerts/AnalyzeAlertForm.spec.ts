@@ -342,6 +342,32 @@ describe("AnalyzeAlertForm async methods", () => {
   });
 
   // submitSingleAlert
+  it("will not make an API call if there is an error present", async () => {
+    const alertCreate = myNock
+      .post(
+        "/alert/",
+        JSON.stringify(
+          snakecaseKeys(
+            snakecaseKeys({
+              ...expectedAlertCreate,
+              observables: [
+                { type: "ipv4", value: "1.2.3.4" },
+                { type: "ipv4", value: "1.2.3.4" },
+              ],
+            }),
+          ),
+        ),
+      )
+      .reply(201, readAlertStub);
+
+    wrapper.vm.errors = ["blah"];
+    wrapper.vm.observables = [observableStub, observableStub];
+
+    await wrapper.vm.submitSingleAlert();
+    expect(alertCreate.isDone()).toBe(false);
+    expect(wrapper.vm.errors.length).toEqual(1);
+  });
+
   it("will attempt to route the new alert page when submitSingleAlert is called and completes successfully", async () => {
     const alertCreate = myNock
       .post(
@@ -381,6 +407,56 @@ describe("AnalyzeAlertForm async methods", () => {
   });
 
   // submitMultiAlerts
+  it("will call submitMultipleAlerts when the 'Create multiple alerts' button is clicked", async () => {
+    const alertCreateA = myNock
+      .post(
+        "/alert/",
+        JSON.stringify(
+          snakecaseKeys({
+            ...expectedAlertCreate,
+            name: "Manual Alert 1.2.3.4",
+            alertDescription: "Manual Alert 1.2.3.4",
+            observables: [{ type: "ipv4", value: "1.2.3.4" }],
+          }),
+        ),
+      )
+      .reply(201, readAlertStub);
+    const alertCreateB = myNock
+      .post(
+        "/alert/",
+        JSON.stringify(
+          snakecaseKeys({
+            ...expectedAlertCreate,
+            name: "Manual Alert 0.0.0.0",
+            alertDescription: "Manual Alert 0.0.0.0",
+            observables: [{ type: "ipv4", value: "0.0.0.0" }],
+          }),
+        ),
+      )
+      .reply(201, readAlertStub);
+    const alertCreateC = myNock
+      .post(
+        "/alert/",
+        JSON.stringify(
+          snakecaseKeys({
+            ...expectedAlertCreate,
+            name: "Manual Alert 4.3.2.1",
+            alertDescription: "Manual Alert 4.3.2.1",
+            observables: [{ type: "ipv4", value: "4.3.2.1" }],
+          }),
+        ),
+      )
+      .reply(201, readAlertStub);
+
+    wrapper.vm.observables = [observableStub, multiObservableCommaStub];
+
+    await wrapper.vm.splitButtonOptions[0].command();
+    expect(alertCreateA.isDone()).toBe(true);
+    expect(alertCreateB.isDone()).toBe(true);
+    expect(alertCreateC.isDone()).toBe(true);
+    expect(wrapper.vm.errors.length).toEqual(0);
+  });
+
   it("will make a call to create alert and add an observable for each observable to be added then route to most recent alert created when submitMultipleAlerts completes successfully", async () => {
     const alertCreateA = myNock
       .post(
