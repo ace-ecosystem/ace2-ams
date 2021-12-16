@@ -12,6 +12,8 @@ import { createTestingPinia } from "@pinia/testing";
 
 createTestingPinia();
 
+const store = useAlertStore();
+
 const mockAlertCreate: alertCreate = {
   queue: "default",
   type: "MockType",
@@ -157,8 +159,11 @@ const mockAPIAlertOptionalProperties: alertRead = {
 // });
 
 describe("alert Actions", () => {
+  beforeEach(() => {
+    store.$reset();
+  });
+
   it("will request to create an alert with a given AlertCreate object, and set the openAlert to result on success", async () => {
-    const store = useAlertStore();
     const mockRequest = myNock
       .post("/alert/", JSON.stringify(snakecaseKeys(mockAlertCreate)))
       .reply(200, mockAlert);
@@ -170,7 +175,6 @@ describe("alert Actions", () => {
   });
 
   it("will fetch alert data given an alert ID", async () => {
-    const store = useAlertStore();
     const mockRequest = myNock.get("/alert/uuid1").reply(200, mockAlert);
     await store.read("uuid1");
 
@@ -235,23 +239,15 @@ describe("alert Actions", () => {
   // });
 
   it("will make a request to update an alert given the UUID and update data upon the updateAlert action", async () => {
-    const state = {
-      openAlert: null,
-      visibleQueriedAlerts: [],
-      totalAlerts: 0,
-    };
-    const store = useAlertStore();
     const mockRequest = myNock.patch("/alert/uuid1").reply(200);
     await store.update("uuid1", { disposition: "test", version: "1" });
 
     expect(mockRequest.isDone()).toEqual(true);
     // None of these should be changed
-    expect(state.openAlert).toBeNull();
-    expect(state.visibleQueriedAlerts).toEqual([]);
+    expect(store.openAlert).toBeNull();
   });
 
   it("will make multiple reqs to update multiple alerts given a list of UUIDS and update data upon the updateAlerts action", async () => {
-    const store = useAlertStore();
     const mockRequest = myNock
       .patch(/\/alert\/uuid\d/)
       .twice()
@@ -267,7 +263,6 @@ describe("alert Actions", () => {
   });
 
   it("will throw an error when a request fails in any action", async () => {
-    const store = useAlertStore();
     const mockRequest = myNock
       .persist()
       .post(/\/alert\/*/)
