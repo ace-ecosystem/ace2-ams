@@ -433,11 +433,7 @@
 
   // create a single alert that contains all observables currently in the form
   const submitSingleAlert = async () => {
-    if (errors.value.length) {
-      return;
-    }
-
-    if (observables.value.length) {
+    if (!errors.value.length && observables.value.length) {
       addingObservables.value = true;
       let _observables = expandObservablesList();
 
@@ -445,12 +441,12 @@
       await submitAlert(_observables.map(generateSubmissionObservable));
       alertCreateLoading.value = false;
       addingObservables.value = false;
-    }
 
-    if (errors.value.length) {
-      showContinueButton.value = true;
-    } else {
-      routeToNewAlert();
+      if (errors.value.length) {
+        showContinueButton.value = true;
+      } else {
+        routeToNewAlert();
+      }
     }
   };
 
