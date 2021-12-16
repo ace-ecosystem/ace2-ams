@@ -1,23 +1,28 @@
 import NodeTag from "../../../../../src/components/Node/NodeTag.vue";
 import { mount, VueWrapper } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
-import router from "@/router";
+import { createRouterMock, getRouter, injectRouterMock } from "vue-router-mock";
 
 import { useFilterStore } from "@/stores/filter";
+import Chip from "primevue/chip";
+import { RouterLink } from "vue-router";
 
 const tagStub = { value: "my_tag" };
 
-describe("TheHeader.vue", () => {
+describe("NodeTag.vue", () => {
+  const router = createRouterMock();
+
   let wrapper: VueWrapper<any>;
   beforeEach(() => {
+    injectRouterMock(router);
+
     wrapper = mount(NodeTag, {
       props: {
         tag: tagStub,
       },
       global: {
-        stubs: ["router-link"],
         provide: {
-          plugins: [router, createTestingPinia()],
+          plugins: [createTestingPinia()],
           filterType: "alerts",
         },
       },
