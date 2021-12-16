@@ -49,7 +49,7 @@
                   id="type"
                   v-model="alertType"
                   class="inputfield w-full"
-                  :options="alertTypes"
+                  :options="alertTypeStore.items"
                   option-label="value"
                   option-value="value"
                 />
@@ -62,7 +62,7 @@
                   id="queue"
                   v-model="alertQueue"
                   class="inputfield w-full"
-                  :options="alertQueues"
+                  :options="alertQueueStore.items"
                   option-label="value"
                   option-value="value"
                 />
@@ -125,7 +125,7 @@
                     class="inputfield w-full"
                     option-label="value"
                     option-value="value"
-                    :options="observableTypes"
+                    :options="observableTypeStore.items"
                   />
                 </div>
                 <div class="field col-3 px-1" name="observable-value">
@@ -160,7 +160,7 @@
                     name="observable-directives"
                     placeholder="No directives selected"
                     class="inputfield w-full"
-                    :options="directives"
+                    :options="nodeDirectiveStore.items"
                   />
                 </div>
                 <div class="field col-1">
@@ -225,8 +225,9 @@
   </div>
 </template>
 
-<script>
-  import { mapActions, mapState } from "pinia";
+<script setup>
+  import { computed, onMounted, ref } from "vue";
+  import { useRouter } from "vue-router";
 
   import Button from "primevue/button";
   import Calendar from "primevue/calendar";
@@ -250,253 +251,234 @@
   import { useNodeDirectiveStore } from "@/stores/nodeDirective";
   import { useObservableTypeStore } from "@/stores/observableType";
 
-  export default {
-    name: "AnalyzeAlertForm",
-    components: {
-      Button,
-      Calendar,
-      Card,
-      Dropdown,
-      Fieldset,
-      FileUpload,
-      InputText,
-      Message,
-      MultiSelect,
-      SplitButton,
-      TabPanel,
-      TabView,
-      Textarea,
+  const router = useRouter();
+
+  const alertStore = useAlertStore();
+  const alertQueueStore = useAlertQueueStore();
+  const alertTypeStore = useAlertTypeStore();
+  const nodeDirectiveStore = useNodeDirectiveStore();
+  const observableTypeStore = useObservableTypeStore();
+
+  const addingObservables = ref(false);
+  const alertCreateLoading = ref(false);
+  const alertDate = ref(Date());
+  const alertDescription = ref("Manual Alert");
+  const alertDescriptionAppendString = ref("");
+  const alertQueue = ref("default");
+  const alertType = ref("manual");
+  const errors = ref([]);
+  const splitButtonOptions = ref([
+    {
+      label: "Create multiple alerts",
+      icon: "pi pi-copy",
+      command: async () => {
+        await submitMultipleAlerts();
+      },
     },
-    data() {
-      return {
-        addingObservables: false,
-        alertCreateLoading: false,
-        alertDate: null,
-        alertDescription: null,
-        alertDescriptionAppendString: null,
-        alertQueue: null,
-        alertType: null,
-        errors: [],
-        splitButtonOptions: [
-          {
-            label: "Create multiple alerts",
-            icon: "pi pi-copy",
-            command: this.submitMultipleAlerts,
-          },
-        ],
-        observables: [],
-        showContinueButton: false,
-        timezone: null,
-        timezones: moment.tz.names(),
+  ]);
+  const observables = ref([]);
+  const showContinueButton = ref(false);
+  const timezone = ref(moment.tz.guess());
+  const timezones = moment.tz.names();
+
+  const adjustedAlertDate = computed(() => {
+    return adjustForTimezone(alertDate.value, timezone.value);
+  });
+
+  const alertDescriptionFormatted = computed(() => {
+    return `${alertDescription.value}${alertDescriptionAppendString.value}`;
+  });
+
+  const observablesListEmpty = computed(() => {
+    return !observables.value.length;
+  });
+
+  const lastObservableIndex = computed(() => {
+    return observables.value.length - 1;
+  });
+
+  onMounted(async () => {
+    initData();
+    await initExternalData();
+  });
+
+  const addError = (object, error) => {
+    let responseError = null;
+    if (error.response) {
+      responseError = JSON.stringify(error.response.data);
+    }
+    errors.value.push({
+      content: `Could not create ${object}: ${error} ${responseError}`,
+    });
+  };
+
+  const addFormObservable = () => {
+    observables.value.push({
+      time: null,
+      type: "file",
+      multiAdd: false,
+      value: null,
+      directives: [],
+    });
+  };
+
+  const adjustForTimezone = (datetime, timezone) => {
+    return moment(datetime).tz(timezone).format();
+  };
+
+  const deleteFormObservable = (index) => {
+    observables.value.splice(index, 1);
+  };
+
+  // Generate a list of all observables (single observables plus expanded multi-observables)
+  const expandObservablesList = () => {
+    let _observables = [];
+    for (const obs_index in observables.value) {
+      let current_observable = observables.value[obs_index];
+      if (current_observable.multiAdd) {
+        const splitObservables = splitMultiObservable(current_observable);
+        _observables = [..._observables, ...splitObservables];
+      } else {
+        _observables.push(current_observable);
+      }
+    }
+    return _observables;
+  };
+
+  // Given an observable object, return a formatted observable instance 'create' object
+  const generateSubmissionObservable = (observable) => {
+    const submissionObservable = {
+      type: observable.type,
+      value: observable.value,
+    };
+    if (observable.time) {
+      submissionObservable["time"] = adjustForTimezone(
+        observable.time,
+        timezone.value,
+      );
+    }
+    return submissionObservable;
+  };
+
+  const handleError = (index) => {
+    errors.value.splice(index, 1);
+  };
+
+  const initData = () => {
+    alertDate.value = new Date();
+    alertDescription.value = "Manual Alert";
+    alertDescriptionAppendString.value = "";
+    alertType.value = "manual";
+    alertQueue.value = "default";
+    errors.value = [];
+    timezone.value = moment.tz.guess();
+    observables.value = [];
+    addFormObservable();
+  };
+
+  const initExternalData = async () => {
+    await alertQueueStore.readAll();
+    await alertTypeStore.readAll();
+    await nodeDirectiveStore.readAll();
+    await observableTypeStore.readAll();
+  };
+
+  const isLastObservable = (index) => {
+    return index == lastObservableIndex.value;
+  };
+
+  const routeToNewAlert = () => {
+    router.push({ path: `/alert/${alertStore.openAlert.alert.uuid}` });
+  };
+
+  // Given a multi-observable object, expand into a list of single observable objects for each sub-value
+  const splitMultiObservable = (multiObservable) => {
+    // Determine split character -- can be newline or comma
+    let splitValues = [];
+    var containsNewline = /\r?\n/.exec(multiObservable.value);
+    if (containsNewline) {
+      splitValues = multiObservable.value.split(/\r?\n/);
+    } else {
+      splitValues = multiObservable.value.split(",");
+    }
+    // Split and return new list
+    const splitObservables = [];
+    for (const index in splitValues) {
+      const subObservable = {
+        type: multiObservable.type,
+        value: splitValues[index],
+        time: multiObservable.time,
       };
-    },
-    computed: {
-      adjustedAlertDate() {
-        return this.adjustForTimezone(this.alertDate, this.timezone);
-      },
-      alertDescriptionFormatted() {
-        return `${this.alertDescription}${this.alertDescriptionAppendString}`;
-      },
-      observablesListEmpty() {
-        return !this.observables.length;
-      },
-      lastObservableIndex() {
-        return this.observables.length - 1;
-      },
+      splitObservables.push(subObservable);
+    }
+    return splitObservables;
+  };
 
-      ...mapState(useAlertStore, { openAlert: "openAlert" }),
-      ...mapState(useAlertQueueStore, { alertQueues: "allItems" }),
-      ...mapState(useAlertTypeStore, { alertTypes: "allItems" }),
-      ...mapState(useNodeDirectiveStore, { directives: "allItems" }),
-      ...mapState(useObservableTypeStore, { observableTypes: "allItems" }),
-    },
-    created() {
-      this.initData();
-      this.initExternalData();
-    },
-    methods: {
-      ...mapActions(useAlertStore, { createAlert: "create" }),
-      ...mapActions(useAlertQueueStore, { readAllAlertQueue: "readAll" }),
-      ...mapActions(useAlertTypeStore, { readAllAlertType: "readAll" }),
-      ...mapActions(useNodeDirectiveStore, { readAllNodeDirective: "readAll" }),
-      ...mapActions(useObservableTypeStore, {
-        readAllObservableType: "readAll",
-      }),
+  // Submit alert create object to API to create an alert
+  const submitAlert = async (observables) => {
+    const alert = {
+      alertDescription: alertDescriptionFormatted.value,
+      eventTime: adjustedAlertDate.value,
+      name: alertDescriptionFormatted.value,
+      observables: observables,
+      queue: alertQueue.value,
+      type: alertType.value,
+    };
+    try {
+      await alertStore.create(alert);
+    } catch (error) {
+      addError(`alert ${alert.name}`, error);
+    }
+  };
 
-      initData() {
-        this.alertDate = new Date();
-        this.alertDescription = "Manual Alert";
-        this.alertDescriptionAppendString = "";
-        this.alertType = "manual";
-        this.alertQueue = "default";
-        this.errors = [];
-        this.timezone = moment.tz.guess();
-        this.observables = [];
-        this.addFormObservable();
-      },
+  // create a single alert that contains all observables currently in the form
+  const submitSingleAlert = async () => {
+    if (errors.value.length) {
+      return;
+    }
 
-      async initExternalData() {
-        await this.readAllAlertQueue();
-        await this.readAllAlertType();
-        await this.readAllNodeDirective();
-        await this.readAllObservableType();
-      },
+    if (observables.value.length) {
+      addingObservables.value = true;
+      let _observables = expandObservablesList();
 
-      adjustForTimezone(datetime, timezone) {
-        return moment(datetime).tz(timezone).format();
-      },
-      // create a single alert that contains all observables currently in the form
-      async submitSingleAlert() {
-        if (this.errors.length) {
-          return;
-        }
+      alertCreateLoading.value = true;
+      await submitAlert(_observables.map(generateSubmissionObservable));
+      alertCreateLoading.value = false;
+      addingObservables.value = false;
+    }
 
-        if (this.observables.length) {
-          this.addingObservables = true;
-          let observables = this.expandObservablesList();
+    if (errors.value.length) {
+      showContinueButton.value = true;
+    } else {
+      routeToNewAlert();
+    }
+  };
 
-          this.alertCreateLoading = true;
-          await this.submitAlert(
-            observables.map(this.generateSubmissionObservable),
-          );
-          this.alertCreateLoading = false;
+  // create a single alert for each observable currently in the form
+  const submitMultipleAlerts = async () => {
+    alertCreateLoading.value = true;
 
-          this.addingObservables = false;
-        }
+    const _observables = expandObservablesList();
+    for (const obs_index in _observables) {
+      const current_observable = _observables[obs_index];
 
-        if (this.errors.length) {
-          this.showContinueButton = true;
-        } else {
-          this.routeToNewAlert();
-        }
-      },
-      // create a single alert for each observable currently in the form
-      async submitMultipleAlerts() {
-        this.alertCreateLoading = true;
+      // Update the alert name with observable value to easily from manage alerts page
+      alertDescriptionAppendString.value = ` ${current_observable.value}`;
 
-        const observables = this.expandObservablesList();
-        for (const obs_index in observables) {
-          const current_observable = observables[obs_index];
+      await submitAlert([generateSubmissionObservable(current_observable)]);
 
-          // Update the alert name with observable value to easily from manage alerts page
-          this.alertDescriptionAppendString = ` ${current_observable.value}`;
+      if (errors.value.length) {
+        // If first alert can't be created, bail trying a bunch of times
+        return;
+      }
+    }
 
-          await this.submitAlert([
-            this.generateSubmissionObservable(current_observable),
-          ]);
-          if (this.errors.length) {
-            // If first alert can't be created, bail trying a bunch of times
-            return;
-          }
-        }
+    alertCreateLoading.value = false;
+    // Routes you to latest alert
+    routeToNewAlert();
+  };
 
-        this.alertCreateLoading = false;
-        // Routes you to latest alert
-        this.routeToNewAlert();
-      },
-      // Submit alert create object to API to create an alert
-      async submitAlert(observables) {
-        const alert = {
-          alertDescription: this.alertDescriptionFormatted,
-          eventTime: this.adjustedAlertDate,
-          name: this.alertDescriptionFormatted,
-          observables: observables,
-          queue: this.alertQueue,
-          type: this.alertType,
-        };
-        try {
-          await this.createAlert(alert);
-        } catch (error) {
-          this.addError(`alert ${alert.name}`, error);
-        }
-      },
-      // Generate a list of all observables (single observables plus expanded multi-observables)
-      expandObservablesList() {
-        let observables = [];
-        for (const obs_index in this.observables) {
-          let current_observable = this.observables[obs_index];
-          if (current_observable.multiAdd) {
-            const splitObservables =
-              this.splitMultiObservable(current_observable);
-            observables = [...observables, ...splitObservables];
-          } else {
-            observables.push(current_observable);
-          }
-        }
-        return observables;
-      },
-      // Given a multi-observable object, expand into a list of single observable objects for each sub-value
-      splitMultiObservable(multiObservable) {
-        // Determine split character -- can be newline or comma
-        let splitValues = [];
-        var containsNewline = /\r?\n/.exec(multiObservable.value);
-        if (containsNewline) {
-          splitValues = multiObservable.value.split(/\r?\n/);
-        } else {
-          splitValues = multiObservable.value.split(",");
-        }
-        // Split and return new list
-        const splitObservables = [];
-        for (const index in splitValues) {
-          const subObservable = {
-            type: multiObservable.type,
-            value: splitValues[index],
-            time: multiObservable.time,
-          };
-          splitObservables.push(subObservable);
-        }
-        return splitObservables;
-      },
-      // Given an observable object, return a formatted observable instance 'create' object
-      generateSubmissionObservable(observable) {
-        const submissionObservable = {
-          type: observable.type,
-          value: observable.value,
-        };
-        if (observable.time) {
-          submissionObservable["time"] = this.adjustForTimezone(
-            observable.time,
-            this.timezone,
-          );
-        }
-        return submissionObservable;
-      },
-      toggleMultiObservable(index) {
-        this.observables[index].multiAdd = !this.observables[index].multiAdd;
-      },
-      addFormObservable() {
-        this.observables.push({
-          time: null,
-          type: "file",
-          multiAdd: false,
-          value: null,
-          directives: [],
-        });
-      },
-      deleteFormObservable(index) {
-        this.observables.splice(index, 1);
-      },
-      isLastObservable(index) {
-        return index == this.lastObservableIndex;
-      },
-      routeToNewAlert() {
-        this.$router.push({ path: `/alert/${this.openAlert.alert.uuid}` });
-      },
-      addError(object, error) {
-        let responseError = null;
-        if (error.response) {
-          responseError = JSON.stringify(error.response.data);
-        }
-        this.errors.push({
-          content: `Could not create ${object}: ${error} ${responseError}`,
-        });
-      },
-      clearErrors() {
-        this.errors = [];
-      },
-      handleError(index) {
-        this.errors.splice(index, 1);
-      },
-    },
+  const toggleMultiObservable = (index) => {
+    observables.value[index].multiAdd = !observables.value[index].multiAdd;
   };
 </script>

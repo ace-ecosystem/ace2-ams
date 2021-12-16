@@ -16,17 +16,23 @@ import moment from "moment-timezone";
 import myNock from "@unit/services/api/nock";
 import nock from "nock";
 import router from "@/router";
-import { createTestingPinia } from "@pinia/testing";
+import { createTestingPinia, TestingOptions } from "@pinia/testing";
 
 import snakecaseKeys from "snakecase-keys";
 
-// DATA/CREATION
-describe("AnalyzeAlertForm data/creation", () => {
+function factory(options?: TestingOptions) {
   const wrapper = mount(AnalyzeAlertForm, {
     global: {
-      plugins: [createTestingPinia(), PrimeVue, router],
+      plugins: [createTestingPinia(options), PrimeVue, router],
     },
   });
+
+  return { wrapper };
+}
+
+// DATA/CREATION
+describe("AnalyzeAlertForm data/creation", () => {
+  const { wrapper } = factory();
 
   it("renders", () => {
     expect(wrapper.exists()).toBe(true);
@@ -49,11 +55,7 @@ describe("AnalyzeAlertForm data/creation", () => {
 
 // COMPUTED DATA
 describe("AnalyzeAlertForm computed data", () => {
-  const wrapper = mount(AnalyzeAlertForm, {
-    global: {
-      plugins: [createTestingPinia(), PrimeVue, router],
-    },
-  });
+  const { wrapper } = factory();
 
   beforeEach(async () => {
     wrapper.vm.initData();
@@ -64,18 +66,14 @@ describe("AnalyzeAlertForm computed data", () => {
       .tz(moment.tz.guess())
       .format();
     expect(wrapper.vm.adjustedAlertDate).toEqual(adjustedAlertDate);
-    wrapper.setData({
-      timezone: "UTC",
-    });
+    wrapper.vm.timezone = "UTC";
     adjustedAlertDate = moment(wrapper.vm.alertDate).tz("UTC").format();
     expect(wrapper.vm.adjustedAlertDate).toEqual(adjustedAlertDate);
   });
 
   it("alertDescriptionFormatted", () => {
     expect(wrapper.vm.alertDescriptionFormatted).toEqual("Manual Alert");
-    wrapper.setData({
-      alertDescriptionAppendString: " new_string",
-    });
+    wrapper.vm.alertDescriptionAppendString = " new_string";
     expect(wrapper.vm.alertDescriptionFormatted).toEqual(
       "Manual Alert new_string",
     );
@@ -83,17 +81,13 @@ describe("AnalyzeAlertForm computed data", () => {
 
   it("observablesListEmpty", () => {
     expect(wrapper.vm.observablesListEmpty).toBe(false);
-    wrapper.setData({
-      observables: [],
-    });
+    wrapper.vm.observables = [];
     expect(wrapper.vm.observablesListEmpty).toBe(true);
   });
 
   it("lastObservableIndex", () => {
     expect(wrapper.vm.lastObservableIndex).toEqual(0);
-    wrapper.setData({
-      observables: ["1", "2", "3"],
-    });
+    wrapper.vm.observables = ["1", "2", "3"];
     expect(wrapper.vm.lastObservableIndex).toEqual(2);
   });
 });
@@ -131,11 +125,7 @@ const multiObservableCommaStub = {
 
 // NON-ASYNC METHODS
 describe("AnalyzeAlertForm non-async methods", () => {
-  const wrapper = mount(AnalyzeAlertForm, {
-    global: {
-      plugins: [createTestingPinia(), PrimeVue, router],
-    },
-  });
+  const { wrapper } = factory({ stubActions: false });
 
   const multiObservableNewlineStub = {
     time: null,
@@ -163,13 +153,10 @@ describe("AnalyzeAlertForm non-async methods", () => {
         directives: [],
       },
     ]);
-    expect(wrapper.vm.splitButtonOptions).toStrictEqual([
-      {
-        label: "Create multiple alerts",
-        icon: "pi pi-copy",
-        command: wrapper.vm.submitMultipleAlerts,
-      },
-    ]);
+    expect(wrapper.vm.splitButtonOptions[0].label).toStrictEqual(
+      "Create multiple alerts",
+    );
+    expect(wrapper.vm.splitButtonOptions[0].icon).toStrictEqual("pi pi-copy");
     expect(wrapper.vm.showContinueButton).toBe(false);
     expect(wrapper.vm.timezone).toBe(moment.tz.guess());
     expect(wrapper.vm.timezones).toStrictEqual(moment.tz.names());
@@ -191,9 +178,7 @@ describe("AnalyzeAlertForm non-async methods", () => {
   });
 
   it("will delete a given index from observables when deleteFormObservable is called", () => {
-    wrapper.setData({
-      observables: ["1", "2", "3"],
-    });
+    wrapper.vm.observables = ["1", "2", "3"];
     wrapper.vm.deleteFormObservable(1);
     expect(wrapper.vm.observables.length).toEqual(2);
     expect(wrapper.vm.observables.includes("2")).toBe(false);
@@ -210,9 +195,7 @@ describe("AnalyzeAlertForm non-async methods", () => {
   });
 
   it("will correctly return whether a given index is the last in the observables list in isLastObservable", () => {
-    wrapper.setData({
-      observables: ["1", "2", "3"],
-    });
+    wrapper.vm.observables = ["1", "2", "3"];
     expect(wrapper.vm.isLastObservable(2)).toEqual(true);
     expect(wrapper.vm.isLastObservable(1)).toEqual(false);
   });
@@ -226,9 +209,7 @@ describe("AnalyzeAlertForm non-async methods", () => {
   });
 
   it("will remove a given error when handleError is called", () => {
-    wrapper.setData({
-      errors: ["1", "2", "3"],
-    });
+    wrapper.vm.errors = ["1", "2", "3"];
     wrapper.vm.handleError(1);
     expect(wrapper.vm.errors.length).toEqual(2);
     expect(wrapper.vm.errors.includes("2")).toBe(false);
@@ -239,10 +220,9 @@ describe("AnalyzeAlertForm non-async methods", () => {
       ...observableStub,
       time: "2021-10-28T00:00:00.000Z",
     };
-    wrapper.setData({
-      timezone: "UTC",
-      openAlert: readAlertStub,
-    });
+    wrapper.vm.timezone = "UTC";
+    wrapper.vm.alertStore.openAlert = readAlertStub;
+
     const submissionObservableWithoutTime =
       wrapper.vm.generateSubmissionObservable(observableStub);
     const submissionObservableWithTime =
@@ -271,9 +251,8 @@ describe("AnalyzeAlertForm non-async methods", () => {
   });
 
   it("will expand the multi observables in observables form list to return a list of all single observables", () => {
-    wrapper.setData({
-      observables: [multiObservableCommaStub, observableStub],
-    });
+    wrapper.vm.observables = [multiObservableCommaStub, observableStub];
+
     const expandedObservables = wrapper.vm.expandObservablesList();
     expect(expandedObservables.length).toEqual(3);
     expect(expandedObservables[0]).toEqual({
@@ -292,11 +271,7 @@ describe("AnalyzeAlertForm non-async methods", () => {
 
 // ASYNC METHODS
 describe("AnalyzeAlertForm async methods", () => {
-  const wrapper = mount(AnalyzeAlertForm, {
-    global: {
-      plugins: [createTestingPinia({ stubActions: false }), PrimeVue, router],
-    },
-  });
+  const { wrapper } = factory({ stubActions: false });
 
   const expectedAlertCreate = {
     alertDescription: "Manual Alert",
@@ -336,10 +311,13 @@ describe("AnalyzeAlertForm async methods", () => {
 
   // getters
   it("will populate dropdowns using mapped Pinia actions (which perform API calls) when initExternalData is called", async () => {
-    expect(wrapper.vm.alertQueues).toStrictEqual(["default"]);
-    expect(wrapper.vm.alertTypes).toStrictEqual(["manual"]);
-    expect(wrapper.vm.observableTypes).toStrictEqual(["file", "ipv4"]);
-    expect(wrapper.vm.directives).toStrictEqual([]);
+    expect(wrapper.vm.alertQueueStore.items).toStrictEqual(["default"]);
+    expect(wrapper.vm.alertTypeStore.items).toStrictEqual(["manual"]);
+    expect(wrapper.vm.observableTypeStore.items).toStrictEqual([
+      "file",
+      "ipv4",
+    ]);
+    expect(wrapper.vm.nodeDirectiveStore.items).toStrictEqual([]);
   });
 
   // submitAlert
@@ -382,9 +360,7 @@ describe("AnalyzeAlertForm async methods", () => {
       )
       .reply(201, readAlertStub);
 
-    wrapper.setData({
-      observables: [observableStub, observableStub],
-    });
+    wrapper.vm.observables = [observableStub, observableStub];
 
     await wrapper.vm.submitSingleAlert();
     expect(alertCreate.isDone()).toBe(true);
@@ -396,9 +372,7 @@ describe("AnalyzeAlertForm async methods", () => {
       .post("/alert/", JSON.stringify(snakecaseKeys(expectedAlertCreate)))
       .reply(404, "Create failed");
 
-    wrapper.setData({
-      observables: [observableStub],
-    });
+    wrapper.vm.observables = [observableStub];
 
     await wrapper.vm.submitSingleAlert();
     expect(alertCreateFail.isDone()).toBe(true);
@@ -448,9 +422,7 @@ describe("AnalyzeAlertForm async methods", () => {
       )
       .reply(201, readAlertStub);
 
-    wrapper.setData({
-      observables: [observableStub, multiObservableCommaStub],
-    });
+    wrapper.vm.observables = [observableStub, multiObservableCommaStub];
 
     await wrapper.vm.submitMultipleAlerts();
     expect(alertCreateA.isDone()).toBe(true);
@@ -474,9 +446,7 @@ describe("AnalyzeAlertForm async methods", () => {
       )
       .reply(403, "Create failed");
 
-    wrapper.setData({
-      observables: [observableStub, multiObservableCommaStub],
-    });
+    wrapper.vm.observables = [observableStub, multiObservableCommaStub];
 
     await wrapper.vm.submitMultipleAlerts();
     expect(alertCreate.isDone()).toBe(true);
