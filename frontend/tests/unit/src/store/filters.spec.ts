@@ -1,10 +1,5 @@
 import { createTestingPinia } from "@pinia/testing";
 import { useFilterStore } from "@/stores/filter";
-import {
-  alertFilterParams,
-  alertFilterValues,
-  alertFilterNameTypes,
-} from "@/models/alert";
 
 createTestingPinia();
 
