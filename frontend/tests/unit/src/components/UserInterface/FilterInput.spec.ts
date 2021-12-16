@@ -1,7 +1,12 @@
+import { createTestingPinia, TestingOptions } from "@pinia/testing";
+
 import FilterInput from "@/components/UserInterface/FilterInput.vue";
-import store from "@/store";
 import { mount } from "@vue/test-utils";
 import { filterTypes } from "@/etc/constants";
+import { useObservableTypeStore } from "@/stores/observableType";
+import { useUserStore } from "@/stores/user";
+import { observableTypeRead } from "@/models/observableType";
+import { userRead } from "@/models/user";
 
 const FILTERS_STUB = [
   {
@@ -13,14 +18,14 @@ const FILTERS_STUB = [
     name: "owner",
     label: "Owner",
     type: filterTypes.SELECT,
-    options: "users",
+    store: useUserStore,
     optionLabel: "displayName",
     optionValue: "username",
   },
   {
     name: "observable",
     label: "Observable",
-    options: "observableType",
+    store: useObservableTypeStore,
     type: filterTypes.CATEGORIZED_VALUE,
   },
   {
@@ -40,33 +45,54 @@ const FILTERS_STUB = [
   },
 ];
 
-const USERS_STUB = [
+const USERS_STUB: userRead[] = [
   {
+    defaultAlertQueue: { description: null, uuid: "1", value: "default" },
     displayName: "Test Analyst",
+    email: "analyst@test.com",
+    enabled: true,
+    roles: [],
+    timezone: "UTC",
     username: "test analyst",
+    uuid: "1",
   },
   {
-    displayName: "Test Analyst",
-    username: "test analyst 2",
+    defaultAlertQueue: { description: null, uuid: "1", value: "default" },
+    displayName: "Test Analyst2",
+    email: "analyst2@test.com",
+    enabled: true,
+    roles: [],
+    timezone: "UTC",
+    username: "test analyst2",
+    uuid: "2",
   },
 ];
-const OBSERVABLE_TYPES_STUB = [
+const OBSERVABLE_TYPES_STUB: observableTypeRead[] = [
   {
+    description: null,
+    uuid: "1",
     value: "file",
   },
   {
+    description: null,
+    uuid: "2",
     value: "ipv4",
   },
 ];
 
-describe("FilterInput setup w/o set filter", () => {
-  const filter = { filterName: null, filterValue: null };
+function factory(
+  filter: {
+    filterName: string | null;
+    filterValue: Record<string, string> | null;
+  },
+  options?: TestingOptions,
+) {
   const wrapper = mount(FilterInput, {
     props: {
       modelValue: filter,
     },
     global: {
-      plugins: [store],
+      plugins: [createTestingPinia(options)],
       provide: {
         filterType: "alerts",
         availableFilters: FILTERS_STUB,
@@ -74,60 +100,62 @@ describe("FilterInput setup w/o set filter", () => {
     },
   });
 
+  return { wrapper };
+}
+
+describe("FilterInput setup w/o set filter", () => {
   it("renders", () => {
+    const { wrapper } = factory({ filterName: null, filterValue: null });
+
     expect(wrapper.exists()).toBe(true);
   });
 
   it("sets up data correctly", () => {
+    const { wrapper } = factory({ filterName: null, filterValue: null });
+
     expect(wrapper.vm.filterName).toEqual(FILTERS_STUB[0]);
     expect(wrapper.vm.filterValue).toBeNull();
   });
 });
 
 describe("FilterInput setup w/ set filter", () => {
-  store.commit("users/addItems", USERS_STUB);
-
-  const filter = { filterName: "owner", filterValue: USERS_STUB[0] };
-  const wrapper = mount(FilterInput, {
-    props: {
-      modelValue: filter,
-    },
-    global: {
-      plugins: [store],
-      provide: {
-        filterType: "alerts",
-        availableFilters: FILTERS_STUB,
-      },
-    },
-  });
-
   it("renders", () => {
+    const { wrapper } = factory({
+      filterName: "owner",
+      filterValue: {
+        displayName: "Test Analyst",
+        username: "test analyst",
+      },
+    });
+
     expect(wrapper.exists()).toBe(true);
   });
 
   it("sets up data correctly", () => {
+    const { wrapper } = factory({
+      filterName: "owner",
+      filterValue: {
+        displayName: "Test Analyst",
+        username: "test analyst",
+      },
+    });
+
+    const userStore = useUserStore();
+    userStore.items = USERS_STUB;
+
     expect(wrapper.vm.filterName).toEqual(FILTERS_STUB[1]);
     expect(wrapper.vm.filterOptions).toEqual(USERS_STUB);
-    expect(wrapper.vm.filterValue).toEqual(USERS_STUB[0]);
+    expect(wrapper.vm.filterValue).toEqual({
+      displayName: "Test Analyst",
+      username: "test analyst",
+    });
   });
 });
 
 describe("FilterInput computed properties w/o set filter", () => {
-  const filter = { filterName: null, filterValue: null };
-  const wrapper = mount(FilterInput, {
-    props: {
-      modelValue: filter,
-    },
-    global: {
-      plugins: [store],
-      provide: {
-        filterType: "alerts",
-        availableFilters: FILTERS_STUB,
-      },
-    },
-  });
-
   it("contains expected computed data when no filters are set (default to an input filter)", () => {
+    const { wrapper } = factory({ filterName: null, filterValue: null });
+
     expect(wrapper.vm.filterOptions).toBeNull();
     expect(wrapper.vm.filterOptionLabel).toEqual("value");
     expect(wrapper.vm.isDate).toBeFalsy();
@@ -141,23 +169,12 @@ describe("FilterInput computed properties w/o set filter", () => {
 });
 
 describe("FilterInput computed properties w/ set filter", () => {
-  store.commit("users/addItems", USERS_STUB);
-
-  const filter = { filterName: "owner", filterValue: null };
-  const wrapper = mount(FilterInput, {
-    props: {
-      modelValue: filter,
-    },
-    global: {
-      plugins: [store],
-      provide: {
-        filterType: "alerts",
-        availableFilters: FILTERS_STUB,
-      },
-    },
-  });
-
   it("contains expected computed data when select/dropdown filter is set", () => {
+    const { wrapper } = factory({ filterName: "owner", filterValue: null });
+
+    const userStore = useUserStore();
+    userStore.items = USERS_STUB;
+
     expect(wrapper.vm.filterOptions).toEqual(USERS_STUB);
     expect(wrapper.vm.filterOptionLabel).toEqual("displayName");
     expect(wrapper.vm.isDate).toBeFalsy();
@@ -170,6 +187,11 @@ describe("FilterInput computed properties w/ set filter", () => {
   });
 
   it("contains expected computed data when categorized value filter is set", () => {
+    const { wrapper } = factory({ filterName: "owner", filterValue: null });
+
+    const observableTypeStore = useObservableTypeStore();
+    observableTypeStore.items = OBSERVABLE_TYPES_STUB;
+
     wrapper.vm.filterName = FILTERS_STUB[2];
     wrapper.vm.filterValue = { category: null, value: null };
 
@@ -185,6 +207,8 @@ describe("FilterInput computed properties w/ set filter", () => {
   });
 
   it("contains expected computed data when chips filter is set", () => {
+    const { wrapper } = factory({ filterName: "owner", filterValue: null });
+
     wrapper.vm.filterName = FILTERS_STUB[3];
     wrapper.vm.filterValue = null;
 
@@ -200,6 +224,8 @@ describe("FilterInput computed properties w/ set filter", () => {
   });
 
   it("contains expected computed data when multiselect filter is set", () => {
+    const { wrapper } = factory({ filterName: "owner", filterValue: null });
+
     wrapper.vm.filterName = FILTERS_STUB[4];
     wrapper.vm.filterValue = null;
 
@@ -214,6 +240,8 @@ describe("FilterInput computed properties w/ set filter", () => {
     expect(wrapper.vm.inputType).toEqual(filterTypes.MULTISELECT);
   });
   it("contains expected computed data when date filter is set", () => {
+    const { wrapper } = factory({ filterName: "owner", filterValue: null });
+
     wrapper.vm.filterName = FILTERS_STUB[5];
     wrapper.vm.filterValue = null;
 
@@ -230,29 +258,14 @@ describe("FilterInput computed properties w/ set filter", () => {
 });
 
 describe("FilterInput methods", () => {
-  store.commit("users/addItems", USERS_STUB);
-  store.commit("observableType/addItems", OBSERVABLE_TYPES_STUB);
-
-  const filter = { filterName: null, filterValue: null };
-  const wrapper = mount(FilterInput, {
-    props: {
-      modelValue: filter,
-    },
-    global: {
-      plugins: [store],
-      provide: {
-        filterType: "alerts",
-        availableFilters: FILTERS_STUB,
-      },
-    },
-  });
-
-  beforeEach(() => {
-    wrapper.vm.filterName = FILTERS_STUB[0];
-    wrapper.vm.filterValue = null;
-  });
+  // beforeEach(() => {
+  //   wrapper.vm.filterName = FILTERS_STUB[0];
+  //   wrapper.vm.filterValue = null;
+  // });
 
   it("executes updatedCategorizedValueObject as expected", () => {
+    const { wrapper } = factory({ filterName: null, filterValue: null });
+
     wrapper.vm.filterName = FILTERS_STUB[2];
     wrapper.vm.filterValue = {
       category: OBSERVABLE_TYPES_STUB[0],
@@ -272,11 +285,16 @@ describe("FilterInput methods", () => {
   });
 
   it("executes clearFilterValue as expected", () => {
+    const { wrapper } = factory({ filterName: null, filterValue: null });
+
     wrapper.vm.filterValue = "test";
     wrapper.vm.clearFilterValue();
     expect(wrapper.vm.filterValue).toBeNull();
 
     wrapper.vm.filterName = FILTERS_STUB[2];
+    const observableTypeStore = useObservableTypeStore();
+    observableTypeStore.items = OBSERVABLE_TYPES_STUB;
+
     wrapper.vm.clearFilterValue();
     expect(wrapper.vm.filterValue).toEqual({
       category: OBSERVABLE_TYPES_STUB[0],
@@ -285,6 +303,8 @@ describe("FilterInput methods", () => {
   });
 
   it("executes getFilterNameObject as expected", () => {
+    const { wrapper } = factory({ filterName: null, filterValue: null });
+
     let result = wrapper.vm.getFilterNameObject("tags");
     expect(result).toEqual(FILTERS_STUB[3]);
     result = wrapper.vm.getFilterNameObject("made up");
@@ -294,6 +314,8 @@ describe("FilterInput methods", () => {
   });
 
   it("executes updateValue as expected", async () => {
+    const { wrapper } = factory({ filterName: null, filterValue: null });
+
     await wrapper.vm.$nextTick();
 
     wrapper.vm.updateValue("filterName", FILTERS_STUB[1]);

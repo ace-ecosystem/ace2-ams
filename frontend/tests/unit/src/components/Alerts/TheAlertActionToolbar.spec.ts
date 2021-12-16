@@ -8,10 +8,12 @@ import DeleteModal from "@/components/Modals/DeleteModal.vue";
 import DispositionModal from "@/components/Modals/DispositionModal.vue";
 import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
+import { createTestingPinia } from "@pinia/testing";
 
 describe("TheAlertActionToolbar.vue", () => {
   const wrapper = mount(TheAlertActionToolbar, {
     global: {
+      plugins: [createTestingPinia({ stubActions: false })],
       stubs: {
         AssignModal: true,
         CommentModal: true,
@@ -53,5 +55,11 @@ describe("TheAlertActionToolbar.vue", () => {
     expect(buttonsWrapper[5].vm.label).toBe("Remediate");
     expect(buttonsWrapper[6].vm.label).toBe("Delete");
     expect(buttonsWrapper[7].vm.label).toBe("Link");
+  });
+
+  it("opens a modal when the open function is called", () => {
+    expect(wrapper.vm.store.openModals).toStrictEqual([]);
+    wrapper.vm.open("modal1");
+    expect(wrapper.vm.store.openModals).toStrictEqual(["modal1"]);
   });
 });

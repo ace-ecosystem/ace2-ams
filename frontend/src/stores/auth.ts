@@ -12,11 +12,11 @@ export const useAuthStore = defineStore({
 
   getters: {
     displayName(): string {
-      if (this.user) {
+      if (this.authenticated && this.user) {
         return this.user.displayName;
       }
 
-      return "Unknown User";
+      return "Unauthenticated User";
     },
 
     isAuthenticated(): boolean {

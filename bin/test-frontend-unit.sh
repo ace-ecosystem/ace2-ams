@@ -10,4 +10,4 @@ set +a
 TEST_FILE=${1#frontend/}
 
 docker-compose up -d
-docker exec ace2-ams-gui npm run test:unit "$TEST_FILE" --coverage
+docker exec ace2-ams-gui npm run test:unit "$TEST_FILE" -- --coverage

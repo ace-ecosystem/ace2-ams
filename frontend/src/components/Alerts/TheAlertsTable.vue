@@ -8,7 +8,7 @@
     v-model:expandedRows="expandedRows"
     v-model:filters="alertTableFilter"
     v-model:selection="selectedRows"
-    :value="visibleQueriedAlertSummaries"
+    :value="alertTableStore.visibleQueriedAlertSummaries"
     :global-filter-fields="selectedColumns.field"
     :resizable-columns="true"
     :sort-order="-1"
@@ -19,10 +19,12 @@
     responsive-layout="scroll"
     :sort-field="sortField"
     @sort="sort"
-    @rowSelect="alertSelect($event.data.uuid)"
-    @rowUnselect="alertUnselect($event.data.uuid)"
-    @rowSelect-all="alertSelectAll(visibleQueriedAlertsUuids)"
-    @rowUnselect-all="alertUnselectAll()"
+    @rowSelect="selectedAlertStore.select($event.data.uuid)"
+    @rowUnselect="selectedAlertStore.unselect($event.data.uuid)"
+    @rowSelect-all="
+      selectedAlertStore.selectAll(alertTableStore.visibleQueriedAlertsUuids)
+    "
+    @rowUnselect-all="selectedAlertStore.unselectAll()"
   >
     <!--        ALERT TABLE TOOLBAR-->
     <template #header>
@@ -115,23 +117,18 @@
   <Paginator
     :rows="numRows"
     :rows-per-page-options="[5, 10, 50, 100]"
-    :total-records="totalAlerts"
+    :total-records="alertTableStore.totalAlerts"
     template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
     current-page-report-template="Showing {first} to {last} of {totalRecords}"
     @page="
       onPage($event);
-      alertUnselectAll();
+      selectedAlertStore.unselectAll();
     "
   ></Paginator>
 </template>
 
-<script>
-  import { mapState, mapActions } from "pinia";
-
-  import { camelToSnakeCase } from "@/etc/helpers";
-  import { useAlertTableStore } from "@/stores/alertTable";
-  import { useFilterStore } from "@/stores/filter";
-  import { useSelectedAlertStore } from "@/stores/selectedAlert";
+<script setup>
+  import { computed, onMounted, ref } from "vue";
 
   import Button from "primevue/button";
   import Column from "primevue/column";
@@ -143,176 +140,136 @@
   import Toolbar from "primevue/toolbar";
   import Paginator from "primevue/paginator";
 
-  export default {
-    name: "TheAlertsTable",
-    components: {
-      Button,
-      Column,
-      DataTable,
-      InputText,
-      MultiSelect,
-      Tag,
-      Toolbar,
-      Paginator,
+  import { camelToSnakeCase } from "@/etc/helpers";
+  import { useAlertTableStore } from "@/stores/alertTable";
+  import { useFilterStore } from "@/stores/filter";
+  import { useSelectedAlertStore } from "@/stores/selectedAlert";
+
+  const alertTableStore = useAlertTableStore();
+  const filterStore = useFilterStore();
+  const selectedAlertStore = useSelectedAlertStore();
+
+  const defaultColumns = ["eventTime", "name", "owner", "disposition"];
+
+  const alertTableFilter = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+  });
+  const columns = ref([
+    { field: "dispositionTime", header: "Dispositioned Time" },
+    { field: "insertTime", header: "Insert Time" },
+    { field: "eventTime", header: "Event Time" },
+    { field: "name", header: "Name" },
+    { field: "owner", header: "Owner" },
+    { field: "disposition", header: "Disposition" },
+    { field: "dispositionUser", header: "Dispositioned By" },
+    { field: "queue", header: "Queue" },
+    { field: "type", header: "Type" },
+  ]);
+  const dt = ref(null);
+  const error = ref(null);
+  const expandedRows = ref([]);
+  const isLoading = ref(false);
+  const selectedColumns = ref([]);
+  const selectedRows = ref([]);
+  const sortField = ref("eventTime");
+  const sortOrder = ref("desc");
+  const numRows = ref(10);
+  const page = ref(0);
+
+  const sortFilter = computed(() => {
+    return sortField.value
+      ? `${camelToSnakeCase(sortField.value)}|${sortOrder.value}`
+      : null;
+  });
+
+  const pageOptions = computed(() => {
+    return {
+      limit: numRows.value,
+      offset: numRows.value * page.value,
+    };
+  });
+
+  filterStore.$subscribe(
+    async () => {
+      await loadAlerts();
     },
+    { deep: true },
+  );
 
-    data() {
-      return {
-        alertTableFilter: null,
+  onMounted(async () => {
+    initAlertTable();
+    await loadAlerts();
+  });
 
-        columns: [
-          { field: "dispositionTime", header: "Dispositioned Time" },
-          { field: "insertTime", header: "Insert Time" },
-          { field: "eventTime", header: "Event Time" },
-          { field: "name", header: "Name" },
-          { field: "owner", header: "Owner" },
-          { field: "disposition", header: "Disposition" },
-          { field: "dispositionUser", header: "Dispositioned By" },
-          { field: "queue", header: "Queue" },
-          { field: "type", header: "Type" },
-        ],
+  const exportCSV = () => {
+    // Exports currently filtered alerts to CSV
+    dt.value.exportCSV();
+  };
 
-        defaultColumns: ["eventTime", "name", "owner", "disposition"],
+  const formatDateTime = (dateTime) => {
+    if (dateTime) {
+      const d = new Date(dateTime);
+      return d.toLocaleString("en-US");
+    }
 
-        expandedRows: [],
-        error: null,
-        isLoading: false,
-        selectedColumns: null,
-        selectedRows: null,
-        sortField: "eventTime",
-        sortOrder: "desc",
-        numRows: 10,
-        page: 0,
-      };
-    },
+    return "None";
+  };
 
-    computed: {
-      ...mapState(useFilterStore, {
-        filters: "alerts",
-      }),
+  const getAlertLink = (uuid) => {
+    return "/alert/" + uuid;
+  };
 
-      ...mapState(useAlertTableStore, {
-        totalAlerts: (store) => store.totalAlerts,
-        visibleQueriedAlertSummaries: "visibleQueriedAlertSummaries",
-        visibleQueriedAlertsUuids: "visibleQueriedAlertsUuids",
-      }),
+  const initAlertTable = () => {
+    // Initializes alert filter (the keyword search)
+    alertTableFilter.value = {
+      global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    };
+    selectedColumns.value = columns.value.filter((col) => {
+      return defaultColumns.includes(col.field);
+    });
+    error.value = null;
+  };
 
-      ...mapState(useSelectedAlertStore, {
-        selectedAlerts: (store) => store.selected,
-      }),
+  const loadAlerts = async () => {
+    isLoading.value = true;
+    try {
+      await alertTableStore.readPage({
+        sort: sortFilter.value,
+        ...pageOptions.value,
+        ...filterStore.alerts,
+      });
+    } catch (err) {
+      error.value = err.message || "Something went wrong!";
+    }
+    isLoading.value = false;
+  };
 
-      sortFilter() {
-        return this.sortField
-          ? `${camelToSnakeCase(this.sortField)}|${this.sortOrder}`
-          : null;
-      },
-      pageOptions() {
-        return {
-          limit: this.numRows,
-          offset: this.numRows * this.page,
-        };
-      },
-    },
+  const onColumnToggle = (val) => {
+    // Toggles selected columns to display
+    // This method required/provided by Primevue 'ColToggle' docs
+    selectedColumns.value = columns.value.filter((col) => val.includes(col));
+  };
 
-    watch: {
-      filters: {
-        deep: true,
-        handler: async function () {
-          await this.loadAlerts();
-        },
-      },
-    },
+  const onPage = async (event) => {
+    selectedRows.value = [];
+    numRows.value = event.rows;
+    page.value = event.page;
+    await loadAlerts();
+  };
 
-    async created() {
-      this.initAlertTable();
-      await this.loadAlerts(this.pageOptions);
-    },
+  const reset = async () => {
+    initAlertTable();
+    await sort({ sortField: "eventTime", sortOrder: "-1" });
+  };
 
-    methods: {
-      ...mapActions(useAlertTableStore, ["readPage"]),
-
-      ...mapActions(useSelectedAlertStore, {
-        alertSelect: "select",
-        alertSelectAll: "selectAll",
-        alertUnselect: "unselect",
-        alertUnselectAll: "unselectAll",
-      }),
-
-      reset() {
-        // Sets the alert table selected columns, keyword search, and sort back to default
-        this.initAlertTable();
-        this.sort({ sortField: "eventTime", sortOrder: "-1" });
-      },
-
-      initAlertTable() {
-        // Initializes alert filter (the keyword search)
-        this.alertTableFilter = {
-          global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        };
-        this.selectedColumns = [];
-        this.selectedColumns = this.columns.filter((column) => {
-          return this.defaultColumns.includes(column.field);
-        });
-        this.error = null;
-      },
-
-      onColumnToggle(value) {
-        // Toggles selected columns to display
-        // This method required/provided by Primevue 'ColToggle' docs
-        this.selectedColumns = this.columns.filter((col) =>
-          value.includes(col),
-        );
-      },
-
-      exportCSV() {
-        // Exports currently filtered alerts to CSV
-        this.$refs.dt.exportCSV();
-      },
-
-      async sort(event) {
-        if (event.sortField) {
-          this.sortField = event.sortField;
-          this.sortOrder = event.sortOrder > 0 ? "asc" : "desc";
-          await this.loadAlerts();
-        } else {
-          this.sortField = null;
-          this.sortOrder = null;
-        }
-      },
-
-      async onPage(event) {
-        this.selectedRows = [];
-        this.numRows = event.rows;
-        this.page = event.page;
-        await this.loadAlerts();
-      },
-
-      async loadAlerts() {
-        this.isLoading = true;
-        try {
-          await this.readPage({
-            sort: this.sortFilter,
-            ...this.pageOptions,
-            ...this.filters,
-          });
-        } catch (error) {
-          this.error = error.message || "Something went wrong!";
-        }
-        this.isLoading = false;
-      },
-
-      getAlertLink(uuid) {
-        return "/alert/" + uuid;
-      },
-
-      formatDateTime(dateTime) {
-        if (dateTime) {
-          const d = new Date(dateTime);
-          return d.toLocaleString("en-US");
-        }
-
-        return "None";
-      },
-    },
+  const sort = async (event) => {
+    if (event.sortField) {
+      sortField.value = event.sortField;
+      sortOrder.value = event.sortOrder > 0 ? "asc" : "desc";
+      await loadAlerts();
+    } else {
+      sortField.value = null;
+      sortOrder.value = null;
+    }
   };
 </script>
