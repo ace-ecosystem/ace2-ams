@@ -34,11 +34,11 @@
           </span>
         </span>
 
-        <div v-if="nodeExpanded(index)" class="p-treenode-children">
+        <div
+          v-if="nodeExpanded(index) && i.children.length"
+          class="p-treenode-children"
+        >
           <AlertTree :items="i.children" />
-        </div>
-        <div v-if="showJumpToAnalysis(i)">
-          <button @click="jumpToAnalysis(i)">Jump To Analysis</button>
         </div>
       </li>
     </ul>
@@ -48,29 +48,17 @@
 <script setup>
   import NodeTagVue from "../Node/NodeTag.vue";
 
-  import { defineProps, inject, ref } from "vue";
-
-  const observableRefs = inject("observableRefs");
+  import { defineProps, ref } from "vue";
 
   const props = defineProps({
     items: { type: Array, required: true },
   });
 
-  let itemsExpandedStatus = ref({});
+  const itemsExpandedStatus = ref({});
 
-  props.items.forEach((el, index) => {
-    itemsExpandedStatus.value[index] = true;
+  props.items.forEach((item, index) => {
+    itemsExpandedStatus.value[index] = item.firstAppearance ? true : false;
   });
-
-  function getReferenceObservable(item) {
-    if (!observableRefs.value) {
-      return null;
-    }
-    if (observableRefs.value[item.uuid] == item.treeUuid) {
-      return "self";
-    }
-    return observableRefs.value[item.uuid];
-  }
 
   function nodeExpanded(index) {
     return itemsExpandedStatus.value[index];
@@ -95,10 +83,6 @@
     return "forDetection" in item;
   }
 
-  function showJumpToAnalysis(item) {
-    return isObservable(item) && getReferenceObservable(item) != "self";
-  }
-
   function toggleIcon(index) {
     return [
       "p-tree-toggler-icon pi pi-fw",
@@ -107,13 +91,6 @@
         "pi-chevron-right": !nodeExpanded(index),
       },
     ];
-  }
-
-  function jumpToAnalysis(item) {
-    const reference = getReferenceObservable(item);
-
-    let element = document.querySelector(`#ID-${reference}`);
-    element.scrollIntoView({ behavior: "smooth" });
   }
 
   function treeItemName(item) {

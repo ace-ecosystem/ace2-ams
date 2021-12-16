@@ -9,7 +9,7 @@
 <script setup>
   import Chip from "primevue/chip";
 
-  import { inject, defineExpose, defineProps } from "vue";
+  import { inject, defineProps } from "vue";
   const props = defineProps({
     tag: { type: Object, required: true },
   });
@@ -24,10 +24,4 @@
       filterValue: props.tag,
     });
   };
-
-  defineExpose({
-    filterByTag,
-    props,
-    filterType
-  })
 </script>

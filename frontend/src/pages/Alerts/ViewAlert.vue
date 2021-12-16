@@ -11,14 +11,7 @@
 </template>
 
 <script setup>
-  import {
-    computed,
-    onMounted,
-    onUnmounted,
-    provide,
-    ref,
-    readonly,
-  } from "vue";
+  import { computed, onMounted, onUnmounted, provide } from "vue";
   import Card from "primevue/card";
   import { useRoute } from "vue-router";
   import { arrayToTree } from "performant-array-to-tree";
@@ -38,38 +31,45 @@
 
     alertStore.$reset();
     await alertStore.read(useRoute().params.alertID);
-
-    alertTree.value.forEach((node) => {
-      traverseTree(node);
-    });
   });
 
   onUnmounted(() => {
     selectedAlertStore.unselectAll();
   });
 
-  const alertTree = computed(() =>
-    arrayToTree(alertStore.openAlert.tree, {
+  const alertTree = computed(() => {
+    const tree = arrayToTree(alertStore.openAlert.tree, {
       id: "treeUuid",
       parentId: "parentTreeUuid",
       dataField: null,
-    }),
-  );
+    });
+    traverseTree({ treeUuid: "root", children: tree });
+    return tree;
+  });
 
-  let observableRefs = ref({});
+  // https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
+  function traverseTree(root) {
+    let uniqueIds = [];
+    let nodes = [];
 
-  function traverseTree(node) {
-    if (!(node.uuid in observableRefs.value) && "forDetection" in node) {
-      observableRefs.value[node.uuid] = node.treeUuid;
-    }
-    if (node.children.length) {
-      node.children.forEach((child) => {
-        traverseTree(child);
-      });
+    nodes.push(root);
+
+    while (nodes.length != 0) {
+      let current = nodes.pop();
+
+      if (current != null) {
+        if (uniqueIds.includes(current.uuid)) {
+          current.firstAppearance = false;
+        } else {
+          current.firstAppearance = true;
+          uniqueIds.push(current.uuid);
+        }
+        for (let i = current.children.length - 1; i >= 0; i--) {
+          nodes.push(current.children[i]);
+        }
+      }
     }
   }
-
-  provide("observableRefs", readonly(observableRefs));
 </script>
 
 <style>
