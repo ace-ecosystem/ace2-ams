@@ -44,9 +44,7 @@ from tests import helpers
     ],
 )
 def test_update_invalid_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(
-        f"/api/alert/{uuid.uuid4()}", json={key: value, "version": str(uuid.uuid4())}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{uuid.uuid4()}", json={key: value})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert key in update.text
 
@@ -56,15 +54,13 @@ def test_update_invalid_fields(client_valid_access_token, key, value):
     INVALID_UPDATE_FIELDS,
 )
 def test_update_invalid_node_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(
-        f"/api/alert/{uuid.uuid4()}", json={"version": str(uuid.uuid4()), key: value}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{uuid.uuid4()}", json={key: value})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert key in update.text
 
 
 def test_update_invalid_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch("/api/alert/1", json={"version": str(uuid.uuid4())})
+    update = client_valid_access_token.patch("/api/alert/1", json={})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -72,7 +68,8 @@ def test_update_invalid_version(client_valid_access_token, db):
     # Create an alert
     alert = helpers.create_alert(db=db)
 
-    # Make sure you cannot update it using an invalid version
+    # Make sure you cannot update it using an invalid version. The version is
+    # optional, but if given, it must match.
     update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"version": str(uuid.uuid4())})
     assert update.status_code == status.HTTP_409_CONFLICT
 
@@ -91,9 +88,7 @@ def test_update_nonexistent_fields(client_valid_access_token, db, key, value):
     alert = helpers.create_alert(db=db)
 
     # Make sure you cannot update it to use a nonexistent field value
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={key: value, "version": str(alert.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={key: value})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -106,14 +101,12 @@ def test_update_nonexistent_node_fields(client_valid_access_token, db, key, valu
     alert = helpers.create_alert(db=db)
 
     # Make sure you cannot update it to use a nonexistent node field value
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={key: value, "version": str(alert.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={key: value})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_update_nonexistent_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch(f"/api/alert/{uuid.uuid4()}", json={"version": str(uuid.uuid4())})
+    update = client_valid_access_token.patch(f"/api/alert/{uuid.uuid4()}", json={})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -134,9 +127,7 @@ def test_update_disposition(client_valid_access_token, db):
     helpers.create_alert_disposition(value="test", rank=1, db=db)
 
     # Update the disposition
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={"disposition": "test", "version": str(alert.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"disposition": "test"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert.disposition.value == "test"
     assert alert.version != initial_version
@@ -152,9 +143,7 @@ def test_update_event_uuid(client_valid_access_token, db):
     initial_event_version = event.version
 
     # Update the alert to add it to the event
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={"event_uuid": str(event.uuid), "version": str(alert.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"event_uuid": str(event.uuid)})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert.event_uuid == event.uuid
     assert alert.version != initial_alert_version
@@ -176,9 +165,7 @@ def test_update_owner(client_valid_access_token, db):
     helpers.create_user(username="johndoe", db=db)
 
     # Update the owner
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={"owner": "johndoe", "version": str(alert.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"owner": "johndoe"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert.owner.username == "johndoe"
     assert alert.version != initial_alert_version
@@ -193,9 +180,7 @@ def test_update_queue(client_valid_access_token, db):
     helpers.create_alert_queue(value="test_queue2", db=db)
 
     # Update the queue
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={"queue": "test_queue2", "version": str(alert.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"queue": "test_queue2"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert.queue.value == "test_queue2"
     assert alert.version != initial_alert_version
@@ -215,9 +200,7 @@ def test_update_valid_node_directives(client_valid_access_token, db, values):
         helpers.create_node_directive(value=value, db=db)
 
     # Update the alert
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={"directives": values, "version": str(alert.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"directives": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(alert.directives) == len(set(values))
     assert alert.version != initial_alert_version
@@ -237,9 +220,7 @@ def test_update_valid_node_tags(client_valid_access_token, db, values):
         helpers.create_node_tag(value=value, db=db)
 
     # Update the alert
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={"tags": values, "version": str(alert.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"tags": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(alert.tags) == len(set(values))
     assert alert.version != initial_alert_version
@@ -259,9 +240,7 @@ def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
         helpers.create_node_threat_actor(value=value, db=db)
 
     # Update the alert
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={"threat_actor": value, "version": str(alert.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"threat_actor": value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     if value:
@@ -286,9 +265,7 @@ def test_update_valid_node_threats(client_valid_access_token, db, values):
         helpers.create_node_threat(value=value, types=["test_type"], db=db)
 
     # Update the alert
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={"threats": values, "version": str(alert.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"threats": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(alert.threats) == len(set(values))
     assert alert.version != initial_alert_version
@@ -320,9 +297,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     assert getattr(alert, key) == initial_value
 
     # Update it
-    update = client_valid_access_token.patch(
-        f"/api/alert/{alert.uuid}", json={"version": str(alert.version), key: updated_value}
-    )
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     if key == "event_time":
