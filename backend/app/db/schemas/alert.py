@@ -2,6 +2,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
+from api.models.alert import AlertRead
 from db.schemas.node import Node
 from db.schemas.helpers import utcnow
 
@@ -65,3 +66,6 @@ class Alert(Node):
             postgresql_using="gin",
         ),
     )
+
+    def serialize_for_node_tree(self) -> AlertRead:
+        return AlertRead(**self.__dict__)

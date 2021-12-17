@@ -31,3 +31,6 @@ class Node(Base):
     version = Column(UUID(as_uuid=True), nullable=False)
 
     __mapper_args__ = {"polymorphic_identity": "node", "polymorphic_on": node_type, "with_polymorphic": "*"}
+
+    def serialize_for_node_tree(self):
+        raise NotImplementedError("A Node subclass must implement serialize_for_node_tree")
