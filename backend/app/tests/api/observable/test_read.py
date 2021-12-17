@@ -25,6 +25,14 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 
 
+def test_get(client_valid_access_token, db):
+    observable = helpers.create_observable(type="test_type", value="test_value", db=db)
+
+    get = client_valid_access_token.get(f"/api/observable/{observable.uuid}")
+    assert get.status_code == status.HTTP_200_OK
+    assert get.json()["node_type"] == "observable"
+
+
 def test_get_all(client_valid_access_token, db):
     # Create some objects
     helpers.create_observable(type="test_type", value="test", db=db)

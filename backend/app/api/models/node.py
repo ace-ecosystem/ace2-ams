@@ -10,6 +10,14 @@ from api.models.node_threat import NodeThreatRead
 from api.models.node_threat_actor import NodeThreatActorRead
 
 
+class NodeTreeItemRead(BaseModel):
+    parent_tree_uuid: Optional[UUID4] = Field(
+        description="The node's parent leaf UUID if the node is inside a NodeTree"
+    )
+
+    tree_uuid: Optional[UUID4] = Field(description="The UUID of the leaf if this Node is inside a NodeTree")
+
+
 class NodeBase(BaseModel):
     """Represents an individual node."""
 
@@ -45,22 +53,18 @@ class NodeCreate(NodeBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the node")
 
 
-class NodeRead(NodeBase):
+class NodeRead(NodeBase, NodeTreeItemRead):
     comments: List[NodeCommentRead] = Field(description="A list of comments added to the node")
 
     directives: List[NodeDirectiveRead] = Field(description="A list of directives added to the node")
 
-    parent_tree_uuid: Optional[UUID4] = Field(
-        description="The node's parent leaf UUID if the node is inside a NodeTree"
-    )
+    node_type: type_str = Field(description="The type of the Node")
 
     tags: List[NodeTagRead] = Field(description="A list of tags added to the node")
 
     threat_actor: Optional[NodeThreatActorRead] = Field(description="The threat actor added to the node")
 
     threats: List[NodeThreatRead] = Field(description="A list of threats added to the node")
-
-    tree_uuid: Optional[UUID4] = Field(description="The UUID of the leaf if this Node is inside a NodeTree")
 
     uuid: UUID4 = Field(description="The UUID of the node")
 
@@ -75,10 +79,11 @@ class NodeUpdate(NodeBase):
 
     threats: Optional[List[type_str]] = Field(description="A list of threats to add to the node")
 
-    # In order to update any Node, you must pass in the version that you want to update. If the version does not
-    # match, then the update will fail.
-    version: UUID4 = Field(
-        description="""The version of the Node being updated. This must match its current version to succeed."""
+    # The version is optional when updating a Node since certain actions in the GUI do not need to care
+    # about the version. However, if the version is given, the update will be rejected if it does not match.
+    version: Optional[UUID4] = Field(
+        description="""A version string that automatically changes every time the node is modified. If supplied,
+        the version must match when updating.""",
     )
 
 

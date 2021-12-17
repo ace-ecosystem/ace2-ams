@@ -1,16 +1,16 @@
 from fastapi import HTTPException, status
 from pydantic import BaseModel
+from pydantic.types import UUID4
 from sqlalchemy import delete as sql_delete, select, update as sql_update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload, undefer, Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import join
-from typing import List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
-from api.models.analysis import AnalysisNodeTreeRead
-from api.models.observable import ObservableRead
+from api.models.node import NodeTreeItemRead
 from core.auth import verify_password
 from db.schemas.analysis import Analysis
 from db.schemas.node import Node
@@ -210,7 +210,7 @@ def read_by_values(values: List[str], db_table: DeclarativeMeta, db: Session):
     return resources
 
 
-def read_node_tree(root_node_uuid: UUID, db: Session) -> List[Node]:
+def read_node_tree(root_node_uuid: UUID, db: Session) -> List[Dict]:
     """Returns a list of Node objects that comprise a Node Tree. The returned objects
     are manually serialized into their Pydantic models since Pydantic cannot handle
     returning a list of multiple types of objects in this case."""
@@ -243,20 +243,51 @@ def read_node_tree(root_node_uuid: UUID, db: Session) -> List[Node]:
         .fetchall()
     )
 
-    tree = []
-
+    node_tree_nodes = []
     for leaf, node in node_tree_and_nodes:
         # Inject the tree information into the Node
         node.tree_uuid = leaf.uuid
         node.parent_tree_uuid = leaf.parent_tree_uuid
 
         # Serialize the database objects into their correct Pydantic models
-        if isinstance(node, Analysis):
-            tree.append(AnalysisNodeTreeRead(**node.__dict__))
-        elif isinstance(node, Observable):
-            tree.append(ObservableRead(**node.__dict__))
+        node_tree_nodes.append(node.serialize_for_node_tree())
 
-    return tree
+    return unflatten_node_tree(node_tree_nodes)
+
+
+def unflatten_node_tree(node_tree_nodes: List[NodeTreeItemRead]) -> List[Dict]:
+    """Takes a flat list of nodes from a NodeTree after they've been serialized into
+    their Pydantic models and converts it into a nested structure.
+
+    Adapted from: https://www.npmjs.com/package/performant-array-to-tree"""
+
+    root_nodes = []
+
+    # Used to store the already processed nodes where the node's UUID is the key
+    lookup: Dict[UUID4, dict] = {}
+
+    for node in node_tree_nodes:
+        # If this node is not already in the lookup table, add a preliminary item for it
+        if node.tree_uuid not in lookup:
+            lookup[node.tree_uuid] = {"children": []}
+
+        # Add the node's data to the item in the lookup table. Remember the nodes in the
+        # list are Pydantic model objects, so to update the dictionary in the lookup table,
+        # we have to work with the Pydantic object's dictionary as well.
+        lookup[node.tree_uuid].update(node.dict())
+
+        # If the node does not have a parent, add it as a root node
+        if not node.parent_tree_uuid:
+            root_nodes.append(lookup[node.tree_uuid])
+        else:
+            # If the parent is not already in the lookup table, add a preliminary item for it
+            if node.parent_tree_uuid not in lookup:
+                lookup[node.parent_tree_uuid] = {"children": []}
+
+            # Add the node to its parent
+            lookup[node.parent_tree_uuid]["children"].append(lookup[node.tree_uuid])
+
+    return root_nodes
 
 
 #

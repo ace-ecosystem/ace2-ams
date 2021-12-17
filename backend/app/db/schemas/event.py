@@ -3,6 +3,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
+from api.models.event import EventRead
 from db.schemas.event_prevention_tool_mapping import event_prevention_tool_mapping
 from db.schemas.event_remediation_mapping import event_remediation_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
@@ -62,3 +63,6 @@ class Event(Node):
     vectors = relationship("EventVector", secondary=event_vector_mapping)
 
     __mapper_args__ = {"polymorphic_identity": "event", "polymorphic_load": "inline"}
+
+    def serialize_for_node_tree(self) -> EventRead:
+        return EventRead(**self.__dict__)

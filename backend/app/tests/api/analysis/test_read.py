@@ -2,6 +2,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 #
 # INVALID TESTS
@@ -23,19 +25,9 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 
 
-# There is currently no get_all endpoint for analysis
-# def test_get_all(client_valid_access_token):
-#     # Create some objects
-#     client_valid_access_token.post("/api/analysis/", json={})
-#     client_valid_access_token.post("/api/analysis/", json={})
+def test_get(client_valid_access_token, db):
+    analysis = helpers.create_analysis(db=db)
 
-#     # Read them back
-#     get = client_valid_access_token.get("/api/analysis/")
-#     assert get.status_code == status.HTTP_200_OK
-#     assert len(get.json()) == 2
-
-
-# def test_get_all_empty(client_valid_access_token):
-#     get = client_valid_access_token.get("/api/analysis/module_type/")
-#     assert get.status_code == status.HTTP_200_OK
-#     assert get.json() == []
+    get = client_valid_access_token.get(f"/api/analysis/{analysis.uuid}")
+    assert get.status_code == status.HTTP_200_OK
+    assert get.json()["node_type"] == "analysis"

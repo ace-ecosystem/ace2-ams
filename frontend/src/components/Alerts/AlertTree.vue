@@ -47,7 +47,6 @@
 
 <script setup>
   import NodeTagVue from "../Node/NodeTag.vue";
-
   import { defineProps, ref } from "vue";
 
   const props = defineProps({
@@ -77,10 +76,10 @@
   }
 
   function isAnalysis(item) {
-    return "analysisModuleType" in item;
+    return item.nodeType === "analysis";
   }
   function isObservable(item) {
-    return "forDetection" in item;
+    return item.nodeType === "observable";
   }
 
   function toggleIcon(index) {

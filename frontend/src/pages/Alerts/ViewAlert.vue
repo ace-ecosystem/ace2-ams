@@ -4,7 +4,7 @@
   <Card>
     <template #content>
       <div class="p-tree p-component p-tree-wrapper" style="border: none">
-        <AlertTree v-if="alertStore.openAlert" :items="alertTree" />
+        <AlertTree v-if="alertStore.openAlert":items="alertStore.openAlert.tree" />
       </div>
     </template>
   </Card>
@@ -14,7 +14,6 @@
   import { computed, onBeforeMount, onUnmounted, provide } from "vue";
   import Card from "primevue/card";
   import { useRoute } from "vue-router";
-  import { arrayToTree } from "performant-array-to-tree";
 
   import AlertTree from "@/components/Alerts/AlertTree";
   import { useAlertStore } from "@/stores/alert";
@@ -37,20 +36,7 @@
   onUnmounted(() => {
     selectedAlertStore.unselectAll();
   });
-
-  const alertTree = computed(() => {
-    // if (alertStore.openAlert) {
-    const tree = arrayToTree(alertStore.openAlert.tree, {
-      id: "treeUuid",
-      parentId: "parentTreeUuid",
-      dataField: null,
-    });
-    traverseTree({ treeUuid: "root", children: tree });
-    return tree;
-    // }
-    // return [];
-  });
-
+  
   // https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
   function traverseTree(root) {
     let uniqueIds = [];
