@@ -45,6 +45,8 @@ class AnalysisNodeTreeRead(BaseModel):
         description="The analysis module type that was used to perform this analysis"
     )
 
+    node_type: type_str = Field(description="The type of the Node")
+
     parent_tree_uuid: UUID4 = Field(description="The analysis' parent leaf UUID inside a NodeTree")
 
     tree_uuid: UUID4 = Field(description="The UUID of the leaf inside a NodeTree representing this analysis")
