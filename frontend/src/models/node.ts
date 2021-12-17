@@ -17,6 +17,7 @@ export interface nodeCreate {
 export interface nodeRead {
   comments: nodeCommentRead[];
   directives: nodeDirectiveRead[];
+  nodeType: string;
   tags: nodeTagRead[];
   threatActor: nodeThreatActorRead | null;
   threats: nodeThreatRead[];

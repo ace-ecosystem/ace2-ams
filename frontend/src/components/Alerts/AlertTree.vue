@@ -18,11 +18,9 @@
 
     methods: {
       treeItemName(item) {
-        if ("analysisModuleType" in item) {
+        if (item.nodeType === "analysis") {
           return item.analysisModuleType.value;
-        }
-
-        if ("forDetection" in item) {
+        } else if (item.nodeType === "observable") {
           return item.type.value + ": " + item.value;
         }
       },
