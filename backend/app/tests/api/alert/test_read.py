@@ -44,6 +44,9 @@ def test_get_all_pagination(client_valid_access_token, db):
         for alert in get.json()["items"]:
             unique_alert_uuids.add(alert["uuid"])
 
+            # Make sure the node_type field is "alert"
+            assert alert["node_type"] == "alert"
+
         # Check if there is another page to retrieve
         if len(unique_alert_uuids) < get.json()["total"]:
             # Increase the offset to get the next page
