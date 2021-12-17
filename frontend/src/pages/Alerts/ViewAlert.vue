@@ -1,13 +1,12 @@
 <!-- ViewAlert.vue -->
 
 <template>
-  <AlertTree v-if="alertStore.openAlert" :items="alertTree" />
+  <AlertTree v-if="alertStore.openAlert" :items="alertStore.openAlert.tree" />
 </template>
 
 <script setup>
-  import { computed, onMounted, onUnmounted } from "vue";
+  import { onMounted, onUnmounted } from "vue";
   import { useRoute } from "vue-router";
-  import { arrayToTree } from "performant-array-to-tree";
 
   import AlertTree from "@/components/Alerts/AlertTree";
   import { useAlertStore } from "@/stores/alert";
@@ -27,12 +26,4 @@
   onUnmounted(() => {
     selectedAlertStore.unselectAll();
   });
-
-  const alertTree = computed(() =>
-    arrayToTree(alertStore.openAlert.tree, {
-      id: "treeUuid",
-      parentId: "parentTreeUuid",
-      dataField: null,
-    }),
-  );
 </script>
