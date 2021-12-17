@@ -2,11 +2,9 @@ from pydantic import Field, Json, UUID4
 from typing import Optional
 from uuid import uuid4
 
-from pydantic.main import BaseModel
-
 from api.models import type_str
 from api.models.analysis_module_type import AnalysisModuleTypeNodeTreeRead, AnalysisModuleTypeRead
-from api.models.node import NodeBase, NodeCreate, NodeRead, NodeTreeCreateWithNode, NodeUpdate
+from api.models.node import NodeBase, NodeCreate, NodeRead, NodeTreeCreateWithNode, NodeTreeItemRead, NodeUpdate
 
 
 class AnalysisBase(NodeBase):
@@ -38,7 +36,7 @@ class AnalysisCreate(NodeCreate, AnalysisBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
 
 
-class AnalysisNodeTreeRead(BaseModel):
+class AnalysisNodeTreeRead(NodeTreeItemRead):
     """Model used to control which information for an Analysis is displayed when getting an alert tree"""
 
     analysis_module_type: Optional[AnalysisModuleTypeNodeTreeRead] = Field(
@@ -46,10 +44,6 @@ class AnalysisNodeTreeRead(BaseModel):
     )
 
     node_type: type_str = Field(description="The type of the Node")
-
-    parent_tree_uuid: UUID4 = Field(description="The analysis' parent leaf UUID inside a NodeTree")
-
-    tree_uuid: UUID4 = Field(description="The UUID of the leaf inside a NodeTree representing this analysis")
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
 
