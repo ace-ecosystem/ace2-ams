@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-  import { computed, onMounted, onUnmounted, provide } from "vue";
+  import { computed, onBeforeMount, onUnmounted, provide } from "vue";
   import Card from "primevue/card";
   import { useRoute } from "vue-router";
   import { arrayToTree } from "performant-array-to-tree";
@@ -25,12 +25,13 @@
 
   provide("filterType", "alerts");
 
-  onMounted(async () => {
-    selectedAlertStore.unselectAll();
-    selectedAlertStore.select(useRoute().params.alertID);
-
-    alertStore.$reset();
-    await alertStore.read(useRoute().params.alertID);
+  onBeforeMount(async () => {
+    console.log('onbeforemount')
+    console.log(useRoute())
+    // selectedAlertStore.unselectAll();
+    // selectedAlertStore.select(useRoute().params.alertID);
+    // alertStore.$reset();
+    // await alertStore.read(useRoute().params.alertID);
   });
 
   onUnmounted(() => {
@@ -38,6 +39,7 @@
   });
 
   const alertTree = computed(() => {
+    // if (alertStore.openAlert) {
     const tree = arrayToTree(alertStore.openAlert.tree, {
       id: "treeUuid",
       parentId: "parentTreeUuid",
@@ -45,6 +47,8 @@
     });
     traverseTree({ treeUuid: "root", children: tree });
     return tree;
+    // }
+    // return [];
   });
 
   // https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
