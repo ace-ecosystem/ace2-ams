@@ -251,10 +251,7 @@ def read_node_tree(root_node_uuid: UUID, db: Session) -> List[Node]:
         node.parent_tree_uuid = leaf.parent_tree_uuid
 
         # Serialize the database objects into their correct Pydantic models
-        if isinstance(node, Analysis):
-            tree.append(AnalysisNodeTreeRead(**node.__dict__))
-        elif isinstance(node, Observable):
-            tree.append(ObservableRead(**node.__dict__))
+        tree.append(node.serialize_for_node_tree())
 
     return tree
 

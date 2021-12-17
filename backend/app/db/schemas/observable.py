@@ -10,6 +10,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
+from api.models.observable import ObservableRead
 from db.schemas.helpers import utcnow
 from db.schemas.node import Node
 
@@ -51,3 +52,6 @@ class Observable(Node):
         Index("type_value", type_uuid, value),
         UniqueConstraint("type_uuid", "value", name="type_value_uc"),
     )
+
+    def serialize_for_node_tree(self) -> ObservableRead:
+        return ObservableRead(**self.__dict__)

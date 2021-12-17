@@ -2,6 +2,7 @@ from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import deferred, relationship
 
+from api.models.analysis import AnalysisNodeTreeRead
 from db.schemas.node import Node
 
 
@@ -29,3 +30,6 @@ class Analysis(Node):
     summary = Column(String)
 
     __mapper_args__ = {"polymorphic_identity": "analysis", "polymorphic_load": "inline"}
+
+    def serialize_for_node_tree(self) -> AnalysisNodeTreeRead:
+        return AnalysisNodeTreeRead(**self.__dict__)
