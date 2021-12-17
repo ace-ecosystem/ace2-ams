@@ -82,8 +82,8 @@ class NodeUpdate(NodeBase):
     # The version is optional when updating a Node since certain actions in the GUI do not need to care
     # about the version. However, if the version is given, the update will be rejected if it does not match.
     version: Optional[UUID4] = Field(
-        description="""A version string that automatically changes every time the node is modified. The version
-            must match when updating.""",
+        description="""A version string that automatically changes every time the node is modified. If supplied,
+        the version must match when updating.""",
     )
 
 
