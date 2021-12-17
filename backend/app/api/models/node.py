@@ -50,6 +50,8 @@ class NodeRead(NodeBase):
 
     directives: List[NodeDirectiveRead] = Field(description="A list of directives added to the node")
 
+    node_type: type_str = Field(description="The type of the Node")
+
     parent_tree_uuid: Optional[UUID4] = Field(
         description="The node's parent leaf UUID if the node is inside a NodeTree"
     )
