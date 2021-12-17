@@ -28,6 +28,7 @@ const mockAPIAlert: alertRead = {
   insertTime: new Date(0),
   instructions: null,
   name: "Test Alert",
+  nodeType: "alert",
   owner: null,
   queue: { value: "Default", description: "queue", uuid: "uuid1" },
   tags: [],
