@@ -39,9 +39,7 @@ from tests import helpers
     ],
 )
 def test_update_invalid_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(
-        f"/api/analysis/{uuid.uuid4()}", json={key: value, "version": str(uuid.uuid4())}
-    )
+    update = client_valid_access_token.patch(f"/api/analysis/{uuid.uuid4()}", json={key: value})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert len(update.json()["detail"]) == 1
     assert key in update.json()["detail"][0]["loc"]
@@ -52,16 +50,14 @@ def test_update_invalid_fields(client_valid_access_token, key, value):
     INVALID_UPDATE_FIELDS,
 )
 def test_update_invalid_node_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(
-        f"/api/analysis/{uuid.uuid4()}", json={"version": str(uuid.uuid4()), key: value}
-    )
+    update = client_valid_access_token.patch(f"/api/analysis/{uuid.uuid4()}", json={key: value})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert len(update.json()["detail"]) == 1
     assert key in update.json()["detail"][0]["loc"]
 
 
 def test_update_invalid_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch("/api/analysis/1", json={"version": str(uuid.uuid4())})
+    update = client_valid_access_token.patch("/api/analysis/1", json={})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -69,7 +65,8 @@ def test_update_invalid_version(client_valid_access_token, db):
     # Create an analysis
     analysis = helpers.create_analysis(db=db)
 
-    # Make sure you cannot update it using an invalid version
+    # Make sure you cannot update it using an invalid version. The version is
+    # optional, but if given, it must match.
     update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={"version": str(uuid.uuid4())})
     assert update.status_code == status.HTTP_409_CONFLICT
 
@@ -81,7 +78,7 @@ def test_update_nonexistent_analysis_module_type(client_valid_access_token, db):
     # Make sure you cannot update it to use a nonexistent analysis module type
     update = client_valid_access_token.patch(
         f"/api/analysis/{analysis.uuid}",
-        json={"analysis_module_type": str(uuid.uuid4()), "version": str(analysis.version)},
+        json={"analysis_module_type": str(uuid.uuid4())},
     )
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
@@ -95,14 +92,12 @@ def test_update_nonexistent_node_fields(client_valid_access_token, db, key, valu
     analysis = helpers.create_analysis(db=db)
 
     # Make sure you cannot update it to use a nonexistent node field value
-    update = client_valid_access_token.patch(
-        f"/api/analysis/{analysis.uuid}", json={key: value, "version": str(analysis.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={key: value})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_update_nonexistent_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch(f"/api/analysis/{uuid.uuid4()}", json={"version": str(uuid.uuid4())})
+    update = client_valid_access_token.patch(f"/api/analysis/{uuid.uuid4()}", json={})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -122,7 +117,7 @@ def test_update_analysis_module_type(client_valid_access_token, db):
     # Update the analysis module type
     update = client_valid_access_token.patch(
         f"/api/analysis/{analysis.uuid}",
-        json={"analysis_module_type": str(analysis_module_type.uuid), "version": str(analysis.version)},
+        json={"analysis_module_type": str(analysis_module_type.uuid)},
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert analysis.analysis_module_type == analysis_module_type
@@ -143,9 +138,7 @@ def test_update_valid_node_directives(client_valid_access_token, db, values):
         helpers.create_node_directive(value=value, db=db)
 
     # Update the analysis
-    update = client_valid_access_token.patch(
-        f"/api/analysis/{analysis.uuid}", json={"directives": values, "version": str(analysis.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={"directives": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(analysis.directives) == len(set(values))
     assert analysis.version != initial_analysis_version
@@ -165,9 +158,7 @@ def test_update_valid_node_tags(client_valid_access_token, db, values):
         helpers.create_node_tag(value=value, db=db)
 
     # Update the node
-    update = client_valid_access_token.patch(
-        f"/api/analysis/{analysis.uuid}", json={"tags": values, "version": str(analysis.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={"tags": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(analysis.tags) == len(set(values))
     assert analysis.version != initial_analysis_version
@@ -187,9 +178,7 @@ def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
         helpers.create_node_threat_actor(value=value, db=db)
 
     # Update the node
-    update = client_valid_access_token.patch(
-        f"/api/analysis/{analysis.uuid}", json={"threat_actor": value, "version": str(analysis.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={"threat_actor": value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     if value:
@@ -214,9 +203,7 @@ def test_update_valid_node_threats(client_valid_access_token, db, values):
         helpers.create_node_threat(value=value, types=["test_type"], db=db)
 
     # Update the node
-    update = client_valid_access_token.patch(
-        f"/api/analysis/{analysis.uuid}", json={"threats": values, "version": str(analysis.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={"threats": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(analysis.threats) == len(set(values))
     assert analysis.version != initial_analysis_version
@@ -244,9 +231,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     setattr(analysis, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(
-        f"/api/analysis/{analysis.uuid}", json={"version": str(analysis.version), key: updated_value}
-    )
+    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     if key == "details":

@@ -48,9 +48,7 @@ from tests import helpers
     ],
 )
 def test_update_invalid_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(
-        f"/api/observable/{uuid.uuid4()}", json={key: value, "version": str(uuid.uuid4())}
-    )
+    update = client_valid_access_token.patch(f"/api/observable/{uuid.uuid4()}", json={key: value})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert len(update.json()["detail"]) == 1
     assert key in update.json()["detail"][0]["loc"]
@@ -63,10 +61,7 @@ def test_update_invalid_fields(client_valid_access_token, key, value):
 def test_update_invalid_node_fields(client_valid_access_token, key, value):
     update = client_valid_access_token.patch(
         f"/api/observable/{uuid.uuid4()}",
-        json={
-            "version": str(uuid.uuid4()),
-            key: value,
-        },
+        json={key: value},
     )
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert len(update.json()["detail"]) == 1
@@ -74,9 +69,7 @@ def test_update_invalid_node_fields(client_valid_access_token, key, value):
 
 
 def test_update_invalid_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch(
-        "/api/observable/1", json={"types": ["test_type"], "value": "test", "version": str(uuid.uuid4())}
-    )
+    update = client_valid_access_token.patch("/api/observable/1", json={"types": ["test_type"], "value": "test"})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -84,7 +77,8 @@ def test_update_invalid_version(client_valid_access_token, db):
     # Create an observable
     obj = helpers.create_observable(type="test_type", value="test", db=db)
 
-    # Make sure you cannot update it using an invalid version
+    # Make sure you cannot update it using an invalid version. The version is
+    # optional, but if given, it must match.
     update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"version": str(uuid.uuid4())})
     assert update.status_code == status.HTTP_409_CONFLICT
 
@@ -95,9 +89,7 @@ def test_update_duplicate_type_value(client_valid_access_token, db):
     obj2 = helpers.create_observable(type="test_type", value="test2", db=db)
 
     # Ensure you cannot update an observable to have a duplicate type+value combination
-    update = client_valid_access_token.patch(
-        f"/api/observable/{obj2.uuid}", json={"value": obj1.value, "version": str(obj2.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/observable/{obj2.uuid}", json={"value": obj1.value})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
@@ -108,7 +100,7 @@ def test_update_nonexistent_redirection_uuid(client_valid_access_token, db):
     # Make sure you cannot update it to use a nonexistent redirection UUID
     update = client_valid_access_token.patch(
         f"/api/observable/{obj.uuid}",
-        json={"redirection_uuid": str(uuid.uuid4()), "version": str(obj.version)},
+        json={"redirection_uuid": str(uuid.uuid4())},
     )
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
@@ -122,15 +114,13 @@ def test_update_nonexistent_node_fields(client_valid_access_token, db, key, valu
     obj = helpers.create_observable(type="test_type", value="test", db=db)
 
     # Make sure you cannot update it to use a nonexistent node field value
-    update = client_valid_access_token.patch(
-        f"/api/observable/{obj.uuid}", json={key: value, "version": str(obj.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={key: value})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_update_nonexistent_uuid(client_valid_access_token):
     update = client_valid_access_token.patch(
-        f"/api/observable/{uuid.uuid4()}", json={"type": "test_type", "value": "test", "version": str(uuid.uuid4())}
+        f"/api/observable/{uuid.uuid4()}", json={"type": "test_type", "value": "test"}
     )
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
@@ -149,9 +139,7 @@ def test_update_type(client_valid_access_token, db):
     helpers.create_observable_type(value="test_type2", db=db)
 
     # Update it
-    update = client_valid_access_token.patch(
-        f"/api/observable/{obj.uuid}", json={"type": "test_type2", "version": str(obj.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"type": "test_type2"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.type.value == "test_type2"
 
@@ -166,9 +154,7 @@ def test_update_redirection_uuid(client_valid_access_token, db):
     obj2 = helpers.create_observable(type="test_type", value="test2", db=db)
 
     # Update the redirection UUID
-    update = client_valid_access_token.patch(
-        f"/api/observable/{obj1.uuid}", json={"redirection_uuid": str(obj2.uuid), "version": str(obj1.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/observable/{obj1.uuid}", json={"redirection_uuid": str(obj2.uuid)})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj1.redirection_uuid == obj2.uuid
     assert obj1.version != initial_observable_version
@@ -189,9 +175,7 @@ def test_update_valid_node_directives(client_valid_access_token, db, values):
         helpers.create_node_directive(value=value, db=db)
 
     # Update the node
-    update = client_valid_access_token.patch(
-        f"/api/observable/{obj.uuid}", json={"directives": values, "version": str(obj.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"directives": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(obj.directives) == len(set(values))
     assert obj.version != initial_observable_version
@@ -212,9 +196,7 @@ def test_update_valid_node_tags(client_valid_access_token, db, values):
         helpers.create_node_tag(value=value, db=db)
 
     # Update the node
-    update = client_valid_access_token.patch(
-        f"/api/observable/{obj.uuid}", json={"tags": values, "version": str(obj.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"tags": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(obj.tags) == len(set(values))
     assert obj.version != initial_observable_version
@@ -235,9 +217,7 @@ def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
         helpers.create_node_threat_actor(value=value, db=db)
 
     # Update the node
-    update = client_valid_access_token.patch(
-        f"/api/observable/{obj.uuid}", json={"threat_actor": value, "version": str(obj.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"threat_actor": value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     if value:
@@ -263,9 +243,7 @@ def test_update_valid_node_threats(client_valid_access_token, db, values):
         helpers.create_node_threat(value=value, types=["test_type"], db=db)
 
     # Update the node
-    update = client_valid_access_token.patch(
-        f"/api/observable/{obj.uuid}", json={"threats": values, "version": str(obj.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"threats": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(obj.threats) == len(set(values))
     assert obj.version != initial_observable_version
@@ -306,9 +284,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
         setattr(obj, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(
-        f"/api/observable/{obj.uuid}", json={key: updated_value, "version": str(obj.version)}
-    )
+    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     # If the test is for expires_on, make sure that the retrieved value matches the proper UTC timestamp

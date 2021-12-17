@@ -52,7 +52,7 @@ def update_node(node_update: NodeUpdate, uuid: UUID, db_table: DeclarativeMeta, 
     update_data = node_update.dict(exclude_unset=True)
 
     # Return an exception if the passed in version does not match the Node's current version
-    if update_data["version"] != db_node.version:
+    if "version" in update_data and update_data["version"] != db_node.version:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Unable to update Node due to version mismatch"
         )
