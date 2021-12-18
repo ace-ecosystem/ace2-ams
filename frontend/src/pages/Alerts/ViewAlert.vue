@@ -4,14 +4,14 @@
   <Card>
     <template #content>
       <div class="p-tree p-component p-tree-wrapper" style="border: none">
-        <AlertTree v-if="alertStore.openAlert":items="alertStore.openAlert.tree" />
+        <AlertTree v-if="alertStore.openAlert" :items="alertTree" />
       </div>
     </template>
   </Card>
 </template>
 
 <script setup>
-  import { computed, onBeforeMount, onUnmounted, provide } from "vue";
+  import { computed, onBeforeMount, onUnmounted, provide, toRef } from "vue";
   import Card from "primevue/card";
   import { useRoute } from "vue-router";
 
@@ -25,18 +25,25 @@
   provide("filterType", "alerts");
 
   onBeforeMount(async () => {
-    console.log('onbeforemount')
-    console.log(useRoute())
-    // selectedAlertStore.unselectAll();
-    // selectedAlertStore.select(useRoute().params.alertID);
-    // alertStore.$reset();
-    // await alertStore.read(useRoute().params.alertID);
+    selectedAlertStore.unselectAll();
+    selectedAlertStore.select(useRoute().params.alertID);
+    alertStore.$reset();
+    await alertStore.read(useRoute().params.alertID);
   });
 
   onUnmounted(() => {
     selectedAlertStore.unselectAll();
   });
-  
+
+  const alertTree = computed(() => {
+    const tree = alertStore.openAlert.tree;
+    if (tree) {
+      traverseTree({ uuid: "root", children: tree });
+      return tree;
+    }
+    return [];
+  });
+
   // https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
   function traverseTree(root) {
     let uniqueIds = [];
@@ -54,9 +61,9 @@
           current.firstAppearance = true;
           uniqueIds.push(current.uuid);
         }
-        for (let i = current.children.length - 1; i >= 0; i--) {
-          nodes.push(current.children[i]);
-        }
+          for (let i = current.children.length - 1; i >= 0; i--) {
+            nodes.push(current.children[i]);
+          }
       }
     }
   }
