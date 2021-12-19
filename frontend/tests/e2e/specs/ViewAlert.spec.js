@@ -41,7 +41,11 @@ describe("ViewAlert.vue", () => {
     cy.get('[data-cy="fqdn: evil.com"]').first().should("be.visible");
 
     // First 'fqdn: evil.com' toggle icon
-    cy.get('[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon').first().should("have.class", "pi-chevron-down");
+    cy.get(
+      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
+    )
+      .first()
+      .should("have.class", "pi-chevron-down");
 
     // First appearance of 'Test Analysis', child analysis of 'evil.com'
     cy.get('[data-cy="Test Analysis"]').should("be.visible");
@@ -50,7 +54,11 @@ describe("ViewAlert.vue", () => {
     cy.get('[data-cy="fqdn: evil.com"]').last().should("be.visible");
 
     // Second 'fqdn: evil.com' toggle icon
-    cy.get('[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon').last().should("have.class", "pi-chevron-right");
+    cy.get(
+      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
+    )
+      .last()
+      .should("have.class", "pi-chevron-right");
 
     // Second appearance of child analysis of 'evil.com'
     cy.get('[data-cy="Test Analysis"]').eq(1).should("not.exist");

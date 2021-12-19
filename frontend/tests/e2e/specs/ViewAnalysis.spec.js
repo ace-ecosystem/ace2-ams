@@ -37,17 +37,20 @@ describe("ViewAnalysis.vue", () => {
   });
 
   it("Will route to home (Manage Alerts) when home breadcrumb is clicked", () => {
-    cy.get(".p-breadcrumb-home > .p-menuitem-link").click()
+    cy.get(".p-breadcrumb-home > .p-menuitem-link").click();
     cy.url().should("contain", "/manage_alerts");
   });
 
   it("Will route to parent alert when alert breadcrumb is clicked", () => {
-    cy.get(".p-menuitem-link").contains('"Small Alert"').click()
-    cy.url().should("not.contain", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a/");
+    cy.get(".p-menuitem-link").contains('"Small Alert"').click();
+    cy.url().should(
+      "not.contain",
+      "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a/",
+    );
     cy.url().should("contain", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a");
   });
   it("should not route anywhere when analysis breadcrumb is clicked", () => {
-    cy.get(".p-menuitem-link").contains('"Test Analysis"').click()
+    cy.get(".p-menuitem-link").contains('"Test Analysis"').click();
     cy.url().should("contain", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a/");
   });
 });
