@@ -22,9 +22,14 @@
             </button>
           </span>
           <span v-if="isObservable(i)">{{ treeItemName(i) }}</span>
-          <router-link v-else :to="getAnalysisLink(i)">{{
-            treeItemName(i)
-          }}</router-link>
+
+          <span
+            v-else
+            style="cursor: pointer"
+            @click="router.push(viewAnalysisRoute(i))"
+            >{{ treeItemName(i) }}</span
+          >
+
           <span v-if="hasTags(i)">
             <NodeTagVue
               v-for="tag in i.tags"
@@ -47,7 +52,10 @@
 
 <script setup>
   import NodeTagVue from "../Node/NodeTag.vue";
-  import { defineProps, ref } from "vue";
+  import { onBeforeMount, defineProps, ref } from "vue";
+  import { useAlertStore } from "@/stores/alert";
+  const alertStore = useAlertStore();
+  const openAlertId = ref(alertStore.openAlert.alert.uuid);
 
   const props = defineProps({
     items: { type: Array, required: true },
@@ -55,33 +63,23 @@
 
   const itemsExpandedStatus = ref({});
 
-  props.items.forEach((item, index) => {
-    itemsExpandedStatus.value[index] = item.firstAppearance ? true : false;
+  onBeforeMount(() => {
+    itemsExpandedStatus.value = generateExpandedStatus(props.items);
   });
 
+  function generateExpandedStatus(items) {
+    const expandedStatus = [];
+    items.forEach((item, index) => {
+      expandedStatus[index] = item.firstAppearance;
+    });
+    return expandedStatus;
+  }
   function nodeExpanded(index) {
     return itemsExpandedStatus.value[index];
   }
-
   function toggleNodeExpanded(index) {
     itemsExpandedStatus.value[index] = !itemsExpandedStatus.value[index];
   }
-
-  function containerClass(item) {
-    return ["p-treenode", { "p-treenode-leaf": !item.children.length }];
-  }
-
-  function getAnalysisLink(item) {
-    return "/analysis/" + item.uuid;
-  }
-
-  function isAnalysis(item) {
-    return item.nodeType === "analysis";
-  }
-  function isObservable(item) {
-    return item.nodeType === "observable";
-  }
-
   function toggleIcon(index) {
     return [
       "p-tree-toggler-icon pi pi-fw",
@@ -92,14 +90,31 @@
     ];
   }
 
+  import { useRouter } from "vue-router";
+  const router = useRouter();
+  function viewAnalysisRoute(item) {
+    return {
+      name: "View Analysis",
+      params: { alertId: openAlertId.value, analysisID: item.uuid },
+    };
+  }
+
   function treeItemName(item) {
     if (isAnalysis(item)) {
       return item.analysisModuleType.value;
-    }
-
-    if (isObservable(item)) {
+    } else {
       return item.type.value + ": " + item.value;
     }
+  }
+  function isAnalysis(item) {
+    return item.nodeType === "analysis";
+  }
+  function isObservable(item) {
+    return item.nodeType === "observable";
+  }
+
+  function containerClass(item) {
+    return ["p-treenode", { "p-treenode-leaf": !item.children.length }];
   }
 
   function hasTags(item) {

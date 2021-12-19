@@ -17,7 +17,7 @@
   import { useFilterStore } from "@/stores/filter";
   const filterStore = useFilterStore();
   const filterType = inject("filterType");
-  const filterByTag = () => {
+  function filterByTag() {
     filterStore.setFilter({
       filterType: filterType,
       filterName: "tags",

@@ -4,6 +4,7 @@ import {
   analysisModuleTypeNodeTreeRead,
   analysisModuleTypeRead,
 } from "./analysisModuleType";
+import { observableTreeRead } from "./observable";
 
 export interface analysisCreate extends nodeCreate {
   alertUuid: UUID;
@@ -17,7 +18,7 @@ export interface analysisCreate extends nodeCreate {
 }
 
 export interface analysisRead extends nodeRead {
-  alertUuid: UUID;
+  alertUuid?: UUID;
   analysisModuleType: analysisModuleTypeRead;
   details: Record<string, unknown> | null;
   errorMessage: string | null;
@@ -27,6 +28,9 @@ export interface analysisRead extends nodeRead {
 
 export interface analysisTreeRead {
   analysisModuleType: analysisModuleTypeNodeTreeRead;
+  children: observableTreeRead[];
+    firstAppearance?: boolean;
+    nodeType: string
   parentTreeUuid: UUID | null;
   treeUuid: UUID;
   uuid: UUID;

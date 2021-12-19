@@ -11,7 +11,7 @@
 </template>
 
 <script setup>
-  import { computed, onBeforeMount, onUnmounted, provide, toRef } from "vue";
+  import { computed, onBeforeMount, onUnmounted, provide } from "vue";
   import Card from "primevue/card";
   import { useRoute } from "vue-router";
 
@@ -25,27 +25,31 @@
   provide("filterType", "alerts");
 
   onBeforeMount(async () => {
-    selectedAlertStore.unselectAll();
-    selectedAlertStore.select(useRoute().params.alertID);
-    alertStore.$reset();
-    await alertStore.read(useRoute().params.alertID);
+    await initPage(useRoute().params.alertID);
   });
 
   onUnmounted(() => {
     selectedAlertStore.unselectAll();
   });
 
+  async function initPage(alertID) {
+    selectedAlertStore.unselectAll();
+    selectedAlertStore.select(alertID);
+    alertStore.$reset();
+    await alertStore.read(alertID);
+  }
+
   const alertTree = computed(() => {
-    const tree = alertStore.openAlert.tree;
-    if (tree) {
-      traverseTree({ uuid: "root", children: tree });
+    if (alertStore.openAlert) {
+      let tree = alertStore.openAlert.tree;
+      markFirstAppearances({ uuid: "root", children: tree });
       return tree;
     }
     return [];
   });
 
   // https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
-  function traverseTree(root) {
+  function markFirstAppearances(root) {
     let uniqueIds = [];
     let nodes = [];
 
@@ -54,16 +58,14 @@
     while (nodes.length != 0) {
       let current = nodes.pop();
 
-      if (current != null) {
-        if (uniqueIds.includes(current.uuid)) {
-          current.firstAppearance = false;
-        } else {
-          current.firstAppearance = true;
-          uniqueIds.push(current.uuid);
-        }
-          for (let i = current.children.length - 1; i >= 0; i--) {
-            nodes.push(current.children[i]);
-          }
+      if (uniqueIds.includes(current.uuid)) {
+        current.firstAppearance = false;
+      } else {
+        current.firstAppearance = true;
+        uniqueIds.push(current.uuid);
+      }
+      for (let i = current.children.length - 1; i >= 0; i--) {
+        nodes.push(current.children[i]);
       }
     }
   }

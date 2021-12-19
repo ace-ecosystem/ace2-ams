@@ -1,11 +1,9 @@
 import NodeTag from "../../../../../src/components/Node/NodeTag.vue";
 import { mount, VueWrapper } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
-import { createRouterMock, getRouter, injectRouterMock } from "vue-router-mock";
+import { createRouterMock, injectRouterMock } from "vue-router-mock";
 
 import { useFilterStore } from "@/stores/filter";
-import Chip from "primevue/chip";
-import { RouterLink } from "vue-router";
 
 const tagStub = { value: "my_tag" };
 
@@ -21,8 +19,8 @@ describe("NodeTag.vue", () => {
         tag: tagStub,
       },
       global: {
+        plugins: [createTestingPinia({ stubActions: false })],
         provide: {
-          plugins: [createTestingPinia()],
           filterType: "alerts",
         },
       },

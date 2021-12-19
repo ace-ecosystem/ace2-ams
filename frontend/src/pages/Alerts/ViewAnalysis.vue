@@ -18,15 +18,22 @@
 
   import Card from "primevue/card";
   import { useAlertStore } from "@/stores/alert";
-  const alertStore = useAlertStore();
+  let alertStore = useAlertStore();
 
   import { Analysis } from "@/services/api/analysis";
 
   let analysis = ref();
 
   onMounted(async () => {
-    analysis.value = await Analysis.read(useRoute().params.analysisID);
+    await initPage(useRoute().params.analysisID, useRoute().params.alertID);
   });
+
+  async function initPage(analysisID, alertID) {
+    analysis.value = await Analysis.read(analysisID);
+    if (!alertStore.openAlert) {
+      await alertStore.read(alertID);
+    }
+  }
 
   const alertName = computed(() => {
     if (alertStore.openAlert) {
@@ -40,10 +47,9 @@
     }
     return "Unknown Analysis";
   });
-
   const home = { icon: "pi pi-home", to: "/" };
   const items = [
-    { label: alertName, to: `/alert/${alertStore.openAlert.alert.uuid}` },
+    { label: alertName, to: `/alert/${useRoute().params.alertID}` },
     { label: analysisName },
   ];
   const analysisDetails = computed(() => {
