@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.10.2",
-    "axios": "^0.21.4",
+    "axios": "^0.24.0",
     "camelcase-keys": "^7.0.0",
     "core-js": "^3.18.1",
     "moment-timezone": "^0.5.33",
