@@ -29,8 +29,8 @@ export interface analysisRead extends nodeRead {
 export interface analysisTreeRead {
   analysisModuleType: analysisModuleTypeNodeTreeRead;
   children: observableTreeRead[];
-    firstAppearance?: boolean;
-    nodeType: string
+  firstAppearance?: boolean;
+  nodeType: string;
   parentTreeUuid: UUID | null;
   treeUuid: UUID;
   uuid: UUID;

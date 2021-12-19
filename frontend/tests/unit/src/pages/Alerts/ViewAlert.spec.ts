@@ -61,7 +61,7 @@ describe("ViewAlert.vue", () => {
     const selectedAlertStore = useSelectedAlertStore();
     await wrapper.vm.initPage("uuid1");
     expect(selectedAlertStore.selected).toEqual(["uuid1"]);
-    wrapper.unmount()
+    wrapper.unmount();
     expect(selectedAlertStore.selected).toEqual([]);
   });
 });

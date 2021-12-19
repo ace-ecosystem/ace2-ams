@@ -23,5 +23,5 @@
       filterName: "tags",
       filterValue: props.tag,
     });
-  };
+  }
 </script>

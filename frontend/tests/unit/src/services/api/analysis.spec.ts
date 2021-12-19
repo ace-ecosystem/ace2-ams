@@ -1,9 +1,8 @@
 import { Analysis } from "@/services/api/analysis";
 import myNock from "@unit/services/api/nock";
-import {mockAnalysisRead} from "../../../../mockData/alert"
+import { mockAnalysisRead } from "../../../../mockData/alert";
 
 describe("Analysis API calls", () => {
-
   it("will make a get request to /alert/queue/{uuid} when getSingle is called", async () => {
     myNock.get("/analysis/uuid2").reply(200, mockAnalysisRead);
 
