@@ -89,6 +89,9 @@ jobs:
       - name: Run environment
         run: docker-compose up -d
 
+      - name: Add mock alert data
+        run: docker exec -e SQL_ECHO=no ace2-ams-api python insert-alerts.py backend/app/tests/alerts/small.json
+
       - name: E2E tests
         run: docker exec ace2-ams-gui npx cypress run --headless --config video=false,screenshotOnRunFailure=false
 

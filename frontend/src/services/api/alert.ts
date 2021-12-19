@@ -16,7 +16,8 @@ export const Alert = {
   createAndRead: async (data: alertCreate): Promise<alertTreeRead> =>
     await api.create(endpoint, data, true),
 
-  read: (uuid: UUID): Promise<alertTreeRead> => api.read(`${endpoint}${uuid}`),
+  read: async (uuid: UUID): Promise<alertTreeRead> =>
+    await api.read(`${endpoint}${uuid}`),
 
   readPage: (params?: alertFilterParams): Promise<alertReadPage> => {
     if (params) {
