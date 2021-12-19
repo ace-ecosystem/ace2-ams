@@ -4,7 +4,7 @@
   <Card>
     <template #content>
       <div class="p-tree p-component p-tree-wrapper" style="border: none">
-        <AlertTree v-if="alertStore.openAlert" :items="alertTree" />
+        <AlertTree v-if="alertStore.openAlert" :items="alertTree" id="alert-tree"/>
       </div>
     </template>
   </Card>

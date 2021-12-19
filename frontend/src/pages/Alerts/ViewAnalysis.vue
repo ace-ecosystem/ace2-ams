@@ -1,7 +1,7 @@
 <!-- ViewAnalysis.vue -->
 
 <template>
-  <Card>
+  <Card id="view-analysis">
     <template #header>
       <Breadcrumb :home="home" :model="items"></Breadcrumb>
     </template>

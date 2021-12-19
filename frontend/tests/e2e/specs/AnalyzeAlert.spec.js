@@ -77,7 +77,7 @@ describe("AnalyzeAlert.vue", () => {
     cy.get("div[name='observable-type']").click();
     cy.get("div[name='observable-input']")
       .get(".p-dropdown-item", { timeout: 5_000 })
-      .should("have.length", 2)
+      .should("have.length", 9)
       .contains("ipv4")
       .click();
     // Check that input switched to text input

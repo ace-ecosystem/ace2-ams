@@ -6,6 +6,7 @@
         :id="`ID-${i.treeUuid}`"
         :key="i.treeUuid"
         :class="containerClass(i)"
+        :data-cy="treeItemName(i)"
       >
         <span class="p-treenode-content">
           <span v-if="!i.children.length">

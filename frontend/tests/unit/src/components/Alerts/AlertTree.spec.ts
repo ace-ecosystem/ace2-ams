@@ -8,7 +8,6 @@ import {
 } from "../../../../mockData/alert";
 import { useAlertStore } from "@/stores/alert";
 import router from "@/router";
-import exp from "constants";
 
 describe("AlertTree.vue", () => {
   const pinia = createTestingPinia({ stubActions: false });
