@@ -8,7 +8,7 @@ from tests.api.node import (
     NONEXISTENT_FIELDS,
     VALID_DIRECTIVES,
     VALID_TAGS,
-    VALID_THREAT_ACTOR,
+    VALID_THREAT_ACTORS,
     VALID_THREATS,
 )
 from tests import helpers
@@ -442,12 +442,12 @@ def test_create_valid_node_tags(client_valid_access_token, db, values):
 
 
 @pytest.mark.parametrize(
-    "value",
-    VALID_THREAT_ACTOR,
+    "values",
+    VALID_THREAT_ACTORS,
 )
-def test_create_valid_node_threat_actor(client_valid_access_token, db, value):
+def test_create_valid_node_threat_actors(client_valid_access_token, db, values):
     # Create the threat actor
-    if value:
+    for value in values:
         helpers.create_node_threat_actor(value=value, db=db)
 
     # Create an event status
@@ -455,16 +455,13 @@ def test_create_valid_node_threat_actor(client_valid_access_token, db, value):
 
     # Create the node
     create = client_valid_access_token.post(
-        "/api/event/", json={"threat_actor": value, "name": "test", "status": "OPEN"}
+        "/api/event/", json={"threat_actors": values, "name": "test", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    if value:
-        assert get.json()["threat_actor"]["value"] == value
-    else:
-        assert get.json()["threat_actor"] is None
+    assert len(get.json()["threat_actors"]) == len(set(values))
 
 
 @pytest.mark.parametrize(

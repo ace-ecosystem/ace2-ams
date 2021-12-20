@@ -13,8 +13,13 @@ INVALID_CREATE_FIELDS = [
     ("tags", [None]),
     ("tags", [""]),
     ("tags", ["abc", 123]),
-    ("threat_actor", 123),
-    ("threat_actor", ""),
+    ("threat_actors", 123),
+    ("threat_actors", ""),
+    ("threat_actors", "abc"),
+    ("threat_actors", [123]),
+    ("threat_actors", [None]),
+    ("threat_actors", [""]),
+    ("threat_actors", ["abc", 123]),
     ("threats", 123),
     ("threats", ""),
     ("threats", "abc"),
@@ -40,8 +45,13 @@ INVALID_UPDATE_FIELDS = [
     ("tags", [None]),
     ("tags", [""]),
     ("tags", ["abc", 123]),
-    ("threat_actor", 123),
-    ("threat_actor", ""),
+    ("threat_actors", 123),
+    ("threat_actors", ""),
+    ("threat_actors", "abc"),
+    ("threat_actors", [123]),
+    ("threat_actors", [None]),
+    ("threat_actors", [""]),
+    ("threat_actors", ["abc", 123]),
     ("threats", 123),
     ("threats", ""),
     ("threats", "abc"),
@@ -55,7 +65,7 @@ INVALID_UPDATE_FIELDS = [
 NONEXISTENT_FIELDS = [
     ("directives", ["abc"]),
     ("tags", ["abc"]),
-    ("threat_actor", "abc"),
+    ("threat_actors", ["abc"]),
     ("threats", ["abc"]),
 ]
 
@@ -76,9 +86,11 @@ VALID_TAGS = [
 ]
 
 
-VALID_THREAT_ACTOR = [
-    (None),
-    ("test"),
+VALID_THREAT_ACTORS = [
+    ([]),
+    (["test"]),
+    (["test1", "test2"]),
+    (["test", "test"]),
 ]
 
 

@@ -433,22 +433,22 @@ def test_get_filter_tags(client_valid_access_token, db):
     assert get.json()["total"] == 3
 
 
-def test_get_filter_threat_actor(client_valid_access_token, db):
+def test_get_filter_threat_actors(client_valid_access_token, db):
     # Create some alerts
     helpers.create_alert(db)
-    helpers.create_alert(db, threat_actor="test_actor")
+    helpers.create_alert(db, threat_actors=["test_actor"])
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
     assert get.json()["total"] == 2
 
     # There should only be 1 alert when we filter by a single threat
-    get = client_valid_access_token.get("/api/alert/?threat_actor=test_actor")
+    get = client_valid_access_token.get("/api/alert/?threat_actors=test_actor")
     assert get.json()["total"] == 1
-    assert get.json()["items"][0]["threat_actor"]["value"] == "test_actor"
+    assert get.json()["items"][0]["threat_actors"][0]["value"] == "test_actor"
 
     # All the alerts should be returned if you don't specify anything for the filter
-    get = client_valid_access_token.get("/api/alert/?threat_actor=")
+    get = client_valid_access_token.get("/api/alert/?threat_actors=")
     assert get.json()["total"] == 2
 
 

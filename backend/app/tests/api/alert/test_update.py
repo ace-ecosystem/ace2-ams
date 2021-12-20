@@ -9,7 +9,7 @@ from tests.api.node import (
     NONEXISTENT_FIELDS,
     VALID_DIRECTIVES,
     VALID_TAGS,
-    VALID_THREAT_ACTOR,
+    VALID_THREAT_ACTORS,
     VALID_THREATS,
 )
 from tests import helpers
@@ -227,27 +227,22 @@ def test_update_valid_node_tags(client_valid_access_token, db, values):
 
 
 @pytest.mark.parametrize(
-    "value",
-    VALID_THREAT_ACTOR,
+    "values",
+    VALID_THREAT_ACTORS,
 )
-def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
+def test_update_valid_node_threat_actors(client_valid_access_token, db, values):
     # Create an alert
     alert = helpers.create_alert(db=db)
     initial_alert_version = alert.version
 
     # Create the threat actor
-    if value:
+    for value in values:
         helpers.create_node_threat_actor(value=value, db=db)
 
     # Update the alert
-    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"threat_actor": value})
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"threat_actors": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    if value:
-        assert alert.threat_actor.value == value
-    else:
-        assert alert.threat_actor is None
-
+    assert len(alert.threat_actors) == len(set(values))
     assert alert.version != initial_alert_version
 
 

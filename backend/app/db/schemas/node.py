@@ -1,10 +1,11 @@
-from sqlalchemy import func, Column, ForeignKey, String
+from sqlalchemy import func, Column, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from db.database import Base
 from db.schemas.node_directive_mapping import node_directive_mapping
 from db.schemas.node_tag_mapping import node_tag_mapping
+from db.schemas.node_threat_actor_mapping import node_threat_actor_mapping
 from db.schemas.node_threat_mapping import node_threat_mapping
 
 
@@ -22,9 +23,7 @@ class Node(Base):
 
     tags = relationship("NodeTag", secondary=node_tag_mapping)
 
-    threat_actor = relationship("NodeThreatActor")
-
-    threat_actor_uuid = Column(UUID(as_uuid=True), ForeignKey("node_threat_actor.uuid"))
+    threat_actors = relationship("NodeThreatActor", secondary=node_threat_actor_mapping)
 
     threats = relationship("NodeThreat", secondary=node_threat_mapping)
 

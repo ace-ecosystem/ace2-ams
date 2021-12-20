@@ -31,8 +31,8 @@ def create_node(
     if node_create.tags:
         db_node.tags = crud.read_by_values(values=node_create.tags, db_table=NodeTag, db=db)
 
-    if node_create.threat_actor:
-        db_node.threat_actor = crud.read_by_value(value=node_create.threat_actor, db_table=NodeThreatActor, db=db)
+    if node_create.threat_actors:
+        db_node.threat_actors = crud.read_by_values(values=node_create.threat_actors, db_table=NodeThreatActor, db=db)
 
     if node_create.threats:
         db_node.threats = crud.read_by_values(values=node_create.threats, db_table=NodeThreat, db=db)
@@ -63,8 +63,10 @@ def update_node(node_update: NodeUpdate, uuid: UUID, db_table: DeclarativeMeta, 
     if "tags" in update_data:
         db_node.tags = crud.read_by_values(values=update_data["tags"], db_table=NodeTag, db=db)
 
-    if "threat_actor" in update_data:
-        db_node.threat_actor = crud.read_by_value(value=update_data["threat_actor"], db_table=NodeThreatActor, db=db)
+    if "threat_actors" in update_data:
+        db_node.threat_actors = crud.read_by_values(
+            values=update_data["threat_actors"], db_table=NodeThreatActor, db=db
+        )
 
     if "threats" in update_data:
         db_node.threats = crud.read_by_values(values=update_data["threats"], db_table=NodeThreat, db=db)

@@ -89,6 +89,7 @@ node_joinedloads = (
     joinedload(Node.comments).options(joinedload(NodeComment.user).options(joinedload(User.roles))),
     joinedload(Node.directives),
     joinedload(Node.tags),
+    joinedload(Node.threat_actors),
     joinedload(Node.threats),
 )
 

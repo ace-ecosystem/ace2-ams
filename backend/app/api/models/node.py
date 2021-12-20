@@ -38,7 +38,9 @@ class NodeBase(BaseModel):
 
     tags: List[type_str] = Field(default_factory=list, description="A list of tags to add to the node")
 
-    threat_actor: Optional[type_str] = Field(description="The threat actor to add to the node")
+    threat_actors: List[type_str] = Field(
+        default_factory=list, description="A list of threat actors to add to the node"
+    )
 
     threats: List[type_str] = Field(default_factory=list, description="A list of threats to add to the node")
 
@@ -62,7 +64,7 @@ class NodeRead(NodeBase, NodeTreeItemRead):
 
     tags: List[NodeTagRead] = Field(description="A list of tags added to the node")
 
-    threat_actor: Optional[NodeThreatActorRead] = Field(description="The threat actor added to the node")
+    threat_actors: List[NodeThreatActorRead] = Field(description="A list of threat actors added to the node")
 
     threats: List[NodeThreatRead] = Field(description="A list of threats added to the node")
 
@@ -76,6 +78,8 @@ class NodeUpdate(NodeBase):
     directives: Optional[List[type_str]] = Field(description="A list of directives applied to the node")
 
     tags: Optional[List[type_str]] = Field(description="A list of tags to add to the node")
+
+    threat_actors: Optional[List[type_str]] = Field(description="A list of threat actors to add to the node")
 
     threats: Optional[List[type_str]] = Field(description="A list of threats to add to the node")
 
