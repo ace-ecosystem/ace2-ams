@@ -80,11 +80,7 @@ def auth(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), d
     user.refresh_token = refresh_token
     crud.commit(db)
 
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-    }
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer", "user": user}
 
 
 helpers.api_route_auth(
@@ -144,6 +140,7 @@ def auth_refresh(response: Response, new_tokens: dict = Depends(refresh_token)):
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
+        "user": new_tokens["user"],
     }
 
 

@@ -54,8 +54,8 @@ export const useAlertTableStore = defineStore({
     async readPage(params: alertFilterParams) {
       await Alert.readPage(params)
         .then((page) => {
-          this.$state.visibleQueriedAlerts = page.items;
-          this.$state.totalAlerts = page.total;
+          this.visibleQueriedAlerts = page.items;
+          this.totalAlerts = page.total;
         })
         .catch((error) => {
           throw error;

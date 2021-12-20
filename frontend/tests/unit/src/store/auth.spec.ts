@@ -1,7 +1,6 @@
 import { createTestingPinia } from "@pinia/testing";
 import { useAuthStore } from "@/stores/auth";
 import { userRead } from "@/models/user";
-import myNock from "@unit/services/api/nock";
 
 createTestingPinia();
 
@@ -28,49 +27,8 @@ describe("auth Getters", () => {
   });
 
   it("will return isAuthenticated state when logged in", () => {
-    store.authenticated = true;
-
-    expect(store.isAuthenticated).toStrictEqual(true);
-  });
-
-  it("will return displayName when not logged in", () => {
-    expect(store.displayName).toStrictEqual("Unauthenticated User");
-  });
-
-  it("will return displayName when logged in", () => {
-    store.authenticated = true;
     store.user = mockUser;
 
-    expect(store.displayName).toStrictEqual("Test Analyst");
-  });
-});
-
-describe("auth Actions", () => {
-  beforeEach(() => {
-    store.$reset();
-  });
-
-  it("will set authenticated state when the refreshTokens call fails", async () => {
-    myNock.get("/auth/refresh").reply(403);
-
-    await store.refreshTokens();
-    expect(store.authenticated).toStrictEqual(false);
-  });
-
-  it("will set authenticated state when the refreshTokens call succeeds", async () => {
-    myNock.get("/auth/refresh").reply(200);
-
-    await store.refreshTokens();
-    expect(store.authenticated).toStrictEqual(true);
-  });
-
-  it("will set authenticated state when setAuthenticated is called with false", () => {
-    store.setAuthenticated(false);
-    expect(store.authenticated).toStrictEqual(false);
-  });
-
-  it("will set authenticated state when setAuthenticated is called with true", () => {
-    store.setAuthenticated(true);
-    expect(store.authenticated).toStrictEqual(true);
+    expect(store.isAuthenticated).toStrictEqual(true);
   });
 });

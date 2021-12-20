@@ -1,5 +1,7 @@
 import { AxiosRequestConfig } from "axios";
+import camelcaseKeys from "camelcase-keys";
 
+import { useAuthStore } from "@/stores/auth";
 import instance, { axiosRefresh } from "@/services/api/axios";
 
 export default {
@@ -8,6 +10,8 @@ export default {
     username: string;
     password: string;
   }): Promise<void> {
+    const authStore = useAuthStore();
+
     const config: AxiosRequestConfig = {
       url: "/auth",
       method: "POST",
@@ -22,9 +26,12 @@ export default {
       "content-type": "application/x-www-form-urlencoded",
     };
 
-    await instance.request(config).catch((error) => {
+    const response = await instance.request(config).catch((error) => {
+      authStore.$reset();
       throw error;
     });
+
+    authStore.user = camelcaseKeys(response.data.user, { deep: true });
   },
 
   // REFRESH AUTH
@@ -35,6 +42,8 @@ export default {
 
   // VALIDATE
   async validate(): Promise<void> {
+    const authStore = useAuthStore();
+
     const config: AxiosRequestConfig = {
       url: "/auth/validate",
       method: "GET",
@@ -43,17 +52,22 @@ export default {
 
     await instance.request(config).catch((error) => {
       console.debug("refresh token not present or expired");
+      authStore.$reset();
       throw error;
     });
   },
 
   // LOGOUT
   async logout(): Promise<void> {
+    const authStore = useAuthStore();
+
     const config: AxiosRequestConfig = {
       url: "/auth/logout",
       method: "GET",
       withCredentials: true,
     };
+
+    authStore.$reset();
 
     await instance.request(config).catch((error) => {
       throw error;

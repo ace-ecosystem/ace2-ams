@@ -187,7 +187,11 @@ def refresh_token(db: Session = Depends(get_db), refresh_token: str = Depends(oa
             user.refresh_token = new_refresh_token
             db.commit()
 
-            return {"access_token": create_access_token(claims["sub"]), "refresh_token": new_refresh_token}
+            return {
+                "access_token": create_access_token(claims["sub"]),
+                "refresh_token": new_refresh_token,
+                "user": user,
+            }
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
