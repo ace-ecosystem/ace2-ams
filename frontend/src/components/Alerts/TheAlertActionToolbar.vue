@@ -77,10 +77,28 @@
   import DispositionModal from "@/components/Modals/DispositionModal";
 
   import { useModalStore } from "@/stores/modal";
+  import { useAlertStore } from "@/stores/alert";
+  import { useSelectedAlertStore } from "@/stores/selectedAlert";
+
+  const alertStore = useAlertStore();
+  const selectedAlertStore = useSelectedAlertStore();
 
   const store = useModalStore();
 
   const open = (name) => {
     store.open(name);
   };
+
+  async function takeOwnership () {
+    if (selectedAlertStore.multipleSelected) {
+      await alertStore.updateMultiple(selectedAlertStore.selected, {
+        owner: "analyst",
+      });
+    } else {
+      await alertStore.update(selectedAlertStore.selected[0], {
+        owner: "analyst",
+      });
+    }
+  };
+
 </script>
