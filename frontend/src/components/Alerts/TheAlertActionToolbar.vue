@@ -42,7 +42,7 @@
         label="Tag"
         @click="open('TagModal')"
       />
-      <TagModal />
+      <TagModal name="TagModal" />
       <!--      REMEDIATE MODAL -->
       <Button
         class="p-m-1 p-button-sm"

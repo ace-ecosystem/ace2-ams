@@ -93,7 +93,7 @@
           <br />
           <span>
             <Tag v-for="tag in data.tags" :key="tag" class="p-mr-2" rounded>{{
-              tag
+              tag.value
             }}</Tag>
           </span>
         </div>

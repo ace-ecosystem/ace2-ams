@@ -48,6 +48,11 @@ export const useAlertTableStore = defineStore({
     visibleQueriedAlertsUuids(): UUID[] {
       return this.visibleQueriedAlerts.map((x) => x.uuid);
     },
+
+    visibleQueriedAlertById: (state) => {
+      return (alertUuid: UUID) =>
+        state.visibleQueriedAlerts.find((alert) => alert.uuid === alertUuid);
+    },
   },
 
   actions: {

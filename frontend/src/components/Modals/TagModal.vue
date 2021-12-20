@@ -6,8 +6,8 @@
     <span class="p-fluid">
       <Chips v-model="newTags" />
       <Dropdown
-        :options="tags"
-        option-label="label"
+        :options="nodeTagStore.allItems"
+        option-label="value"
         :filter="true"
         placeholder="Select from existing tags"
         filter-placeholder="Search tags"
@@ -21,50 +21,101 @@
         class="p-button-text"
         @click="close"
       />
-      <Button label="Add" icon="pi pi-check" @click="close" />
+      <Button label="Add" icon="pi pi-check" @click="addTags" />
     </template>
   </BaseModal>
 </template>
 
-<script>
+<script setup>
+  import { defineProps, onMounted, ref } from "vue";
+
   import Button from "primevue/button";
   import Chips from "primevue/chips";
   import Dropdown from "primevue/dropdown";
 
   import BaseModal from "@/components/Modals/BaseModal";
 
-  export default {
-    name: "TagModal",
-    components: { BaseModal, Button, Chips, Dropdown },
+  import { useAlertStore } from "@/stores/alert";
+  import { useAlertTableStore } from "@/stores/alertTable";
+  import { useModalStore } from "@/stores/modal";
+  import { useNodeTagStore } from "@/stores/nodeTag";
+  import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
-    data() {
-      return {
-        newTags: [],
+  const alertStore = useAlertStore();
+  const alertTableStore = useAlertTableStore();
 
-        tags: [
-          { label: "oh_no", id: 1 },
-          { label: "bad", id: 2 },
-          { label: "malware", id: 3 },
-        ],
-      };
-    },
+  const modalStore = useModalStore();
+  const nodeTagStore = useNodeTagStore();
+  const selectedAlertStore = useSelectedAlertStore();
 
-    computed: {
-      name() {
-        return this.$options.name;
-      },
-    },
+  import { NodeTag } from "@/services/api/nodeTag";
 
-    methods: {
-      addExistingTag(event) {
-        // Add an existing tag to the list of tags to be added
-        this.newTags.push(event.value.label);
-      },
+  const props = defineProps({
+    name: { type: String, required: true },
+  });
 
-      close() {
-        this.newTags = [];
-        this.$store.dispatch("modals/close", this.name);
-      },
-    },
-  };
+  const error = ref(null);
+  const isLoading = ref(false);
+  const newTags = ref([]);
+  const storeTagValues = ref([]);
+
+  onMounted(async () => {
+    await loadTags();
+  });
+
+  async function loadTags() {
+    await nodeTagStore.readAll();
+    storeTagValues.value = tagValues(nodeTagStore.allItems);
+  }
+
+  async function addTags() {
+    isLoading.value = true;
+    try {
+      await createTags(newTags.value);
+      for (const uuid of selectedAlertStore.selected) {
+        const alert = alertTableStore.visibleQueriedAlertById(uuid);
+        await alertStore.update(uuid, {
+          tags: tagValues(alert.tags).concat(newTags.value),
+        });
+      }
+    } catch (err) {
+      error.value = err.message || "Something went wrong!";
+    }
+
+    isLoading.value = false;
+    if (!error.value) {
+      close();
+    }
+  }
+
+  async function createTags(tags) {
+    for (const tag of tags) {
+      if (!tagExists(tag)) {
+        await NodeTag.create({ value: tag });
+        await loadTags();
+      }
+    }
+  }
+
+  function tagExists(tagValue) {
+    return storeTagValues.value.includes(tagValue);
+  }
+
+  function tagValues(tags) {
+    let values = [];
+    for (const tag of tags) {
+      values.push(tag.value);
+    }
+    return values;
+  }
+
+  function addExistingTag(event) {
+    // Add an existing tag to the list of tags to be added
+    newTags.value.push(event.value.value);
+  }
+  
+  function close() {
+    newTags.value = [];
+    modalStore.close(props.name);
+  }
 </script>
