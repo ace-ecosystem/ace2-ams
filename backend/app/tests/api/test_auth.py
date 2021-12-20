@@ -178,6 +178,7 @@ def test_auth_success(client, db):
     refresh_token = auth.json()["refresh_token"]
     assert auth.status_code == status.HTTP_200_OK
     assert auth.json()["token_type"] == "bearer"
+    assert auth.json()["user"]["username"] == "johndoe"
     assert access_token
     assert refresh_token
     assert auth.cookies.get("access_token")
