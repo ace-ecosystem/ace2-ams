@@ -9,7 +9,22 @@ from api.models.alert_queue import AlertQueueRead
 from api.models.alert_tool import AlertToolRead
 from api.models.alert_tool_instance import AlertToolInstanceRead
 from api.models.alert_type import AlertTypeRead
-from api.models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
+from api.models.node import (
+    NodeBase,
+    NodeCreateTags,
+    NodeCreateThreatActors,
+    NodeBaseThreats,
+    NodeCreate,
+    NodeRead,
+    NodeReadComments,
+    NodeReadTags,
+    NodeReadThreatActors,
+    NodeReadThreats,
+    NodeUpdate,
+    NodeUpdateTags,
+    NodeUpdateThreatActors,
+    NodeUpdateThreats,
+)
 from api.models.observable import ObservableCreateWithAlert
 from api.models.user import UserRead
 
@@ -36,7 +51,7 @@ class AlertBase(NodeBase):
     owner: Optional[type_str] = Field(description="The username of the user who has taken ownership of this alert")
 
 
-class AlertCreate(NodeCreate, AlertBase):
+class AlertCreate(NodeCreate, AlertBase, NodeCreateTags, NodeCreateThreatActors, NodeBaseThreats):
     name: type_str = Field(description="""The name of the alert""")
 
     tool: Optional[type_str] = Field(description="The tool that created this alert")
@@ -52,7 +67,7 @@ class AlertCreate(NodeCreate, AlertBase):
     )
 
 
-class AlertRead(NodeRead, AlertBase):
+class AlertRead(NodeRead, AlertBase, NodeReadComments, NodeReadTags, NodeReadThreatActors, NodeReadThreats):
     disposition: Optional[AlertDispositionRead] = Field(description="The disposition assigned to this alert")
 
     disposition_time: Optional[datetime] = Field(description="The time this alert was most recently dispositioned")
@@ -81,7 +96,7 @@ class AlertRead(NodeRead, AlertBase):
         orm_mode = True
 
 
-class AlertUpdate(NodeUpdate, AlertBase):
+class AlertUpdate(NodeUpdate, AlertBase, NodeUpdateTags, NodeUpdateThreatActors, NodeUpdateThreats):
     disposition: Optional[type_str] = Field(description="The disposition assigned to this alert")
 
     # TODO: This should not be editable. When we have authentication in place, the user will be inferred from the token.
