@@ -52,14 +52,6 @@
         @click="open('RemediationModal')"
       />
       <RemediationModal />
-      <!--      DELETE ALERT -->
-      <Button
-        class="p-m-1 p-button-sm p-button-danger"
-        icon="pi pi-trash"
-        label="Delete"
-        @click="open('DeleteModal')"
-      />
-      <DeleteModal name="DeleteModal" />
     </template>
     <template #right>
       <Button icon="pi pi-link" class="p-button-rounded" label="Link" />
@@ -75,7 +67,6 @@
   import CommentModal from "@/components/Modals/CommentModal";
   import TagModal from "@/components/Modals/TagModal";
   import RemediationModal from "@/components/Modals/RemediateModal";
-  import DeleteModal from "@/components/Modals/DeleteModal";
   import DispositionModal from "@/components/Modals/DispositionModal";
 
   import { useModalStore } from "@/stores/modal";
