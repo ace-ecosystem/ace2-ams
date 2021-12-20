@@ -2,24 +2,24 @@
 <!-- 'Tag' action modal, agnostic to what is being tagged -->
 
 <template>
-  <BaseModal :name="this.name" header="Add Tags">
+  <BaseModal :name="name" header="Add Tags">
     <span class="p-fluid">
       <Chips v-model="newTags" />
       <Dropdown
-        @change="addExistingTag"
         :options="tags"
-        optionLabel="label"
+        option-label="label"
         :filter="true"
         placeholder="Select from existing tags"
-        filterPlaceholder="Search tags"
+        filter-placeholder="Search tags"
+        @change="addExistingTag"
       />
     </span>
     <template #footer>
       <Button
         label="Nevermind"
         icon="pi pi-times"
-        @click="close"
         class="p-button-text"
+        @click="close"
       />
       <Button label="Add" icon="pi pi-check" @click="close" />
     </template>
@@ -37,12 +37,6 @@
     name: "TagModal",
     components: { BaseModal, Button, Chips, Dropdown },
 
-    computed: {
-      name() {
-        return this.$options.name;
-      },
-    },
-
     data() {
       return {
         newTags: [],
@@ -53,6 +47,12 @@
           { label: "malware", id: 3 },
         ],
       };
+    },
+
+    computed: {
+      name() {
+        return this.$options.name;
+      },
     },
 
     methods: {
