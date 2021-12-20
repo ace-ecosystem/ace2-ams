@@ -68,7 +68,7 @@
     isLoading.value = true;
     try {
       for (const uuid of selectedAlertStore.selected) {
-        NodeComment.create({ ...commentData.value, nodeUuid: uuid });
+        await NodeComment.create({ ...commentData.value, nodeUuid: uuid });
       }
     } catch (err) {
       error.value = err.message || "Something went wrong!";

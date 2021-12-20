@@ -5,19 +5,13 @@
   <BaseModal :name="name" header="Set Disposition">
     <div class="p-m-1 p-grid p-fluid p-formgrid p-grid">
       <div class="p-field p-col">
-        <div
-          v-for="disposition of dispositions"
-          :key="disposition"
-          class="p-field-radiobutton p-inputgroup"
-        >
-          <RadioButton
-            :id="disposition"
-            v-model="newDisposition"
-            name="disposition"
-            :value="disposition"
-          />
-          <label :for="disposition">{{ disposition }}</label>
-        </div>
+        <Listbox
+          v-model="newDisposition"
+          :options="alertDispositionStore.allItems"
+          option-label="value"
+          list-style="max-height:250px"
+          style="width: 20rem"
+        />
       </div>
       <div class="p-field p-col">
         <Textarea
@@ -35,8 +29,9 @@
         />
       </div>
     </div>
+
     <template #footer>
-      <Button label="Save" class="p-button-outlined" @click="close" />
+      <Button label="Save" class="p-button-outlined" @click="setDisposition" />
       <Button
         v-if="showAddToEventButton"
         label="Save to Event"
@@ -57,33 +52,70 @@
 
   import Button from "primevue/button";
   import Dropdown from "primevue/dropdown";
-  import RadioButton from "primevue/radiobutton";
+  import Listbox from "primevue/listbox";
   import Textarea from "primevue/textarea";
 
   import BaseModal from "@/components/Modals/BaseModal";
   import SaveToEventModal from "@/components/Modals/SaveToEventModal";
 
-  import { useModalStore } from "@/stores/modal";
+  import { NodeComment } from "@/services/api/nodeComment";
 
+  import { useModalStore } from "@/stores/modal";
+  import { useAlertDispositionStore } from "@/stores/alertDisposition";
+
+  const alertDispositionStore = useAlertDispositionStore();
   const modalStore = useModalStore();
+
+  import { useAlertStore } from "@/stores/alert";
+  import { useSelectedAlertStore } from "@/stores/selectedAlert";
+
+  const alertStore = useAlertStore();
+  const selectedAlertStore = useSelectedAlertStore();
 
   const props = defineProps({
     name: { type: String, required: true },
   });
 
+  const error = ref(null);
+
+  const isLoading = ref(false);
   const newDisposition = ref(null);
-  const dispositions = ref([
-    "FALSE_POSITIVE",
-    "WEAPONIZATION",
-    "COMMAND_AND_CONTROL",
-  ]);
   const dispositionComment = ref(null);
-  const elevated_dispositions = ref(["COMMAND_AND_CONTROL"]);
   const suggestedComments = ref(["this is an old comment", "and another"]);
 
   const showAddToEventButton = computed(() => {
     // Only show add to event button if selected disposition is an 'elevated' disposition
-    return elevated_dispositions.value.includes(newDisposition.value);
+    if (newDisposition.value) {
+      return newDisposition.value.rank > 1;
+    }
+    return false;
+  });
+
+  const setDisposition = async () => {
+    isLoading.value = true;
+
+    try {
+      for (const uuid of selectedAlertStore.selected) {
+        await alertStore.update(uuid, {
+          disposition: newDisposition.value.value,
+        });
+        if (dispositionComment.value) {
+          await NodeComment.create({ ...commentData.value, nodeUuid: uuid });
+        }
+      }
+      close();
+    } catch (err) {
+      error.value = err.message || "Something went wrong!";
+    }
+
+    isLoading.value = false;
+  };
+
+  const commentData = computed(() => {
+    return {
+      user: "analyst",
+      value: dispositionComment.value,
+    };
   });
 
   const close = () => {
