@@ -21,8 +21,6 @@ class NodeTreeItemRead(BaseModel):
 class NodeBase(BaseModel):
     """Represents an individual node."""
 
-    directives: List[type_str] = Field(default_factory=list, description="A list of directives to add to the node")
-
     # TODO: Add a node_links_mapping table
     # links: Optional[List[UUID]] = Field(
     #     default_factory=list,
@@ -36,14 +34,6 @@ class NodeBase(BaseModel):
     #         relationship. The value for each key is a list of one or more node UUIDs related in this way."""
     # )
 
-    tags: List[type_str] = Field(default_factory=list, description="A list of tags to add to the node")
-
-    threat_actors: List[type_str] = Field(
-        default_factory=list, description="A list of threat actors to add to the node"
-    )
-
-    threats: List[type_str] = Field(default_factory=list, description="A list of threats to add to the node")
-
     version: UUID4 = Field(
         default_factory=uuid4,
         description="""A version string that automatically changes every time the node is modified. The version
@@ -51,22 +41,39 @@ class NodeBase(BaseModel):
     )
 
 
+class NodeCreateDirectives(BaseModel):
+    """Represents a Node that has directives."""
+
+    directives: List[type_str] = Field(default_factory=list, description="A list of directives to add to the node")
+
+
+class NodeCreateTags(BaseModel):
+    """Represents a Node that has tags."""
+
+    tags: List[type_str] = Field(default_factory=list, description="A list of tags to add to the node")
+
+
+class NodeCreateThreatActors(BaseModel):
+    """Represents a Node that has threat actors."""
+
+    threat_actors: List[type_str] = Field(
+        default_factory=list, description="A list of threat actors to add to the node"
+    )
+
+
+class NodeBaseThreats(BaseModel):
+    """Represents a Node that has threats."""
+
+    threats: List[type_str] = Field(default_factory=list, description="A list of threats to add to the node")
+
+
 class NodeCreate(NodeBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the node")
 
 
 class NodeRead(NodeBase, NodeTreeItemRead):
-    comments: List[NodeCommentRead] = Field(description="A list of comments added to the node")
-
-    directives: List[NodeDirectiveRead] = Field(description="A list of directives added to the node")
 
     node_type: type_str = Field(description="The type of the Node")
-
-    tags: List[NodeTagRead] = Field(description="A list of tags added to the node")
-
-    threat_actors: List[NodeThreatActorRead] = Field(description="A list of threat actors added to the node")
-
-    threats: List[NodeThreatRead] = Field(description="A list of threats added to the node")
 
     uuid: UUID4 = Field(description="The UUID of the node")
 
@@ -74,21 +81,64 @@ class NodeRead(NodeBase, NodeTreeItemRead):
         orm_mode = True
 
 
+class NodeReadComments(BaseModel):
+    comments: List[NodeCommentRead] = Field(description="A list of comments added to the node")
+
+    class Config:
+        orm_mode = True
+
+
+class NodeReadDirectives(BaseModel):
+    directives: List[NodeDirectiveRead] = Field(description="A list of directives added to the node")
+
+    class Config:
+        orm_mode = True
+
+
+class NodeReadTags(BaseModel):
+    tags: List[NodeTagRead] = Field(description="A list of tags added to the node")
+
+    class Config:
+        orm_mode = True
+
+
+class NodeReadThreatActors(BaseModel):
+    threat_actors: List[NodeThreatActorRead] = Field(description="A list of threat actors added to the node")
+
+    class Config:
+        orm_mode = True
+
+
+class NodeReadThreats(BaseModel):
+    threats: List[NodeThreatRead] = Field(description="A list of threats added to the node")
+
+    class Config:
+        orm_mode = True
+
+
 class NodeUpdate(NodeBase):
-    directives: Optional[List[type_str]] = Field(description="A list of directives applied to the node")
-
-    tags: Optional[List[type_str]] = Field(description="A list of tags to add to the node")
-
-    threat_actors: Optional[List[type_str]] = Field(description="A list of threat actors to add to the node")
-
-    threats: Optional[List[type_str]] = Field(description="A list of threats to add to the node")
-
     # The version is optional when updating a Node since certain actions in the GUI do not need to care
     # about the version. However, if the version is given, the update will be rejected if it does not match.
     version: Optional[UUID4] = Field(
         description="""A version string that automatically changes every time the node is modified. If supplied,
         the version must match when updating.""",
     )
+
+
+class NodeUpdateDirectives(BaseModel):
+    directives: Optional[List[type_str]] = Field(description="A list of directives applied to the node")
+
+
+class NodeUpdateTags(BaseModel):
+    tags: Optional[List[type_str]] = Field(description="A list of tags to add to the node")
+
+
+class NodeUpdateThreatActors(BaseModel):
+    threat_actors: Optional[List[type_str]] = Field(description="A list of threat actors to add to the node")
+
+
+class NodeUpdateThreats(BaseModel):
+    threats: Optional[List[type_str]] = Field(description="A list of threats to add to the node")
 
 
 class NodeTreeBase(BaseModel):
