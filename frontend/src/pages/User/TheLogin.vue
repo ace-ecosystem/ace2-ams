@@ -43,58 +43,41 @@
   </div>
 </template>
 
-<script>
-  import { mapActions } from "pinia";
+<script setup>
+  import { computed, ref } from "vue";
+  import { useRouter } from "vue-router";
+
   import Button from "primevue/button";
   import InputText from "primevue/inputtext";
 
   import { populateCommonStores } from "@/etc/helpers";
   import authApi from "@/services/api/auth";
-  import { useAuthStore } from "@/stores/auth";
 
-  export default {
-    components: {
-      Button,
-      InputText,
-    },
-    data() {
-      return {
-        username: null,
-        password: null,
-      };
-    },
-    computed: {
-      loginData() {
-        return { username: this.username, password: this.password };
-      },
-    },
-    methods: {
-      ...mapActions(useAuthStore, ["setAuthenticated"]),
+  const router = useRouter();
 
-      async login() {
-        await authApi
-          .authenticate(this.loginData)
-          .then(async () => {
-            // If the API request to login succeeded, set the authenticated state
-            this.setAuthenticated(true);
+  const username = ref(null);
+  const password = ref(null);
 
-            // And then populate some of the stores with items from the API that
-            // will be used throughout the application.
-            await populateCommonStores();
-          })
-          .catch(() => {
-            // TODO: Add a proper message saying the login failed
-            console.error("Invalid username or password");
-            this.setAuthenticated(false);
-          });
+  const loginData = computed(() => {
+    return { username: username.value, password: password.value };
+  });
 
-        this.resetData();
-        this.$router.replace({ name: "Manage Alerts" });
-      },
+  const login = async () => {
+    await authApi
+      .authenticate(loginData.value)
+      .then(async () => {
+        // And then populate some of the stores with items from the API that
+        // will be used throughout the application.
+        await populateCommonStores();
+      })
+      .catch((error) => {
+        // TODO: Add a proper message saying the login failed
+        console.error("Invalid username or password");
+        throw error;
+      });
 
-      resetData() {
-        (this.username = null), (this.password = null);
-      },
-    },
+    username.value = null;
+    password.value = null;
+    router.replace({ name: "Manage Alerts" });
   };
 </script>
