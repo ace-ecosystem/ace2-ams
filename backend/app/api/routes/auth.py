@@ -140,6 +140,7 @@ def auth_refresh(response: Response, new_tokens: dict = Depends(refresh_token)):
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer",
+        "user": new_tokens["user"],
     }
 
 
