@@ -5,7 +5,7 @@ import PrimeVue from "primevue/config";
 import Tooltip from "primevue/tooltip";
 
 import router from "@/router";
-import { useAuthStore } from "./stores/auth";
+import { axiosRefresh } from "@/services/api/axios";
 
 import "primeflex/primeflex.css";
 import "primeicons/primeicons.css";
@@ -18,8 +18,9 @@ import "snakecase-keys";
 (async () => {
   const app = createApp(App).use(createPinia());
 
-  const authStore = useAuthStore();
-  await authStore.refreshTokens();
+  await axiosRefresh().catch(() => {
+    console.error("Must reauthenticate");
+  });
 
   app.use(router).use(PrimeVue);
 
