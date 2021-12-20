@@ -1,6 +1,10 @@
+import { createTestingPinia } from "@pinia/testing";
+
 import auth from "@/services/api/auth";
 import { User } from "@/services/api/user";
 import myNock from "@unit/services/api/nock";
+
+createTestingPinia();
 
 describe("Axios interceptor functionality", () => {
   it("will reject the request if it the response was not a 401", async () => {
