@@ -25,6 +25,7 @@
         class="p-m-1 p-button-sm"
         icon="pi pi-briefcase"
         label="Take Ownership"
+        @click="takeOwnership"
       />
       <!--      ASSIGN -->
       <Button
@@ -47,6 +48,7 @@
         class="p-m-1 p-button-sm"
         icon="pi pi-times-circle"
         label="Remediate"
+        disabled
         @click="open('RemediationModal')"
       />
       <RemediationModal />
