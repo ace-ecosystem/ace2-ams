@@ -69,6 +69,9 @@
   import RemediationModal from "@/components/Modals/RemediateModal";
   import DispositionModal from "@/components/Modals/DispositionModal";
 
+  import { useAuthStore } from "@/stores/auth";
+  const authStore = useAuthStore();
+
   import { useModalStore } from "@/stores/modal";
   import { useAlertStore } from "@/stores/alert";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
@@ -82,16 +85,11 @@
     store.open(name);
   };
 
-  async function takeOwnership () {
-    if (selectedAlertStore.multipleSelected) {
-      await alertStore.updateMultiple(selectedAlertStore.selected, {
-        owner: "analyst",
-      });
-    } else {
-      await alertStore.update(selectedAlertStore.selected[0], {
-        owner: "analyst",
+  async function takeOwnership() {
+    for (const uuid of selectedAlertStore.selected) {
+      await alertStore.update(uuid, {
+        owner: authStore.user.username,
       });
     }
-  };
-
+  }
 </script>

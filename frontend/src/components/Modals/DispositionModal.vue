@@ -65,6 +65,8 @@
 
   const alertDispositionStore = useAlertDispositionStore();
   const modalStore = useModalStore();
+  import { useAuthStore } from "@/stores/auth";
+  const authStore = useAuthStore();
 
   import { useAlertStore } from "@/stores/alert";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
@@ -117,7 +119,7 @@
 
   const commentData = computed(() => {
     return {
-      user: "analyst",
+      user: authStore.user.username,
       value: dispositionComment.value,
     };
   });

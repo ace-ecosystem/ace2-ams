@@ -52,6 +52,9 @@
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
+    import { useAuthStore } from "@/stores/auth";
+  const authStore = useAuthStore();
+
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
 
@@ -82,7 +85,7 @@
 
   const commentData = computed(() => {
     return {
-      user: "analyst",
+      user: authStore.user.username,
       value: newComment.value,
     };
   });
