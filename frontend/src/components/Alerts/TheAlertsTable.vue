@@ -92,10 +92,13 @@
           >
           <br />
           <span>
-            <Tag v-for="tag in data.tags" :key="tag" class="p-mr-2" rounded>{{
+            <Tag v-for="tag in data.tags" :key="tag.uuid" class="p-mr-2" rounded>{{
               tag.value
             }}</Tag>
           </span>
+              <span v-if="data.comments">
+                <pre v-for="comment in data.comments" :key="comment.uuid" class="p-mr-2" >({{comment.user.displayName}}) {{comment.value}}</pre>
+              </span>
         </div>
         <span v-else-if="col.field.includes('Time')">
           {{ formatDateTime(data[col.field]) }}</span
