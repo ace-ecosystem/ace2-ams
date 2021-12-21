@@ -72,6 +72,9 @@
   const alertStore = useAlertStore();
   const selectedAlertStore = useSelectedAlertStore();
 
+    import { useAlertTableStore } from "@/stores/alertTable";
+  const alertTableStore = useAlertTableStore();
+
   const props = defineProps({
     name: { type: String, required: true },
   });
@@ -104,6 +107,7 @@
         }
       }
       close();
+      alertTableStore.readPage();
     } catch (err) {
       error.value = err.message || "Something went wrong!";
     }
