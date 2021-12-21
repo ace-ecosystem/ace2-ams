@@ -1,10 +1,15 @@
 from datetime import datetime
 from pydantic import Field, StrictBool, UUID4
-from typing import Optional
+from typing import List, Optional
 from uuid import uuid4
 
 from api.models import type_str, validators
 from api.models.node import NodeBase, NodeCreate, NodeRead, NodeTreeCreateWithNode, NodeUpdate
+from api.models.node_comment import NodeCommentRead
+from api.models.node_directive import NodeDirectiveRead
+from api.models.node_tag import NodeTagRead
+from api.models.node_threat import NodeThreatRead
+from api.models.node_threat_actor import NodeThreatActorRead
 from api.models.observable_type import ObservableTypeRead
 
 
@@ -46,10 +51,32 @@ class ObservableCreateWithAlert(ObservableCreateBase):
 
 
 class ObservableCreate(ObservableCreateBase):
+    directives: List[type_str] = Field(
+        default_factory=list, description="A list of directives to add to the observable"
+    )
+
     node_tree: NodeTreeCreateWithNode = Field(description="This defines where in a Node Tree this observable fits")
+
+    tags: List[type_str] = Field(default_factory=list, description="A list of tags to add to the observable")
+
+    threat_actors: List[type_str] = Field(
+        default_factory=list, description="A list of threat actors to add to the observable"
+    )
+
+    threats: List[type_str] = Field(default_factory=list, description="A list of threats to add to the observable")
 
 
 class ObservableRead(NodeRead, ObservableBase):
+    comments: List[NodeCommentRead] = Field(description="A list of comments added to the observable")
+
+    directives: List[NodeDirectiveRead] = Field(description="A list of directives added to the observable")
+
+    tags: List[NodeTagRead] = Field(description="A list of tags added to the observable")
+
+    threat_actors: List[NodeThreatActorRead] = Field(description="A list of threat actors added to the observable")
+
+    threats: List[NodeThreatRead] = Field(description="A list of threats added to the observable")
+
     type: ObservableTypeRead = Field(description="The type of the observable")
 
     uuid: UUID4 = Field(description="The UUID of the observable")
@@ -59,9 +86,17 @@ class ObservableRead(NodeRead, ObservableBase):
 
 
 class ObservableUpdate(NodeUpdate, ObservableBase):
+    directives: Optional[List[type_str]] = Field(description="A list of directives to add to the observable")
+
     for_detection: Optional[StrictBool] = Field(
         description="Whether or not this observable should be included in the observable detection exports"
     )
+
+    tags: Optional[List[type_str]] = Field(description="A list of tags to add to the observable")
+
+    threat_actors: Optional[List[type_str]] = Field(description="A list of threat actors to add to the observable")
+
+    threats: Optional[List[type_str]] = Field(description="A list of threats to add to the observable")
 
     time: Optional[datetime] = Field(description="The time this observable was observed")
 
@@ -69,4 +104,6 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
 
     value: Optional[type_str] = Field(description="The value of the observable")
 
-    _prevent_none: classmethod = validators.prevent_none("for_detection", "time", "type", "value")
+    _prevent_none: classmethod = validators.prevent_none(
+        "directives", "for_detection", "tags", "threat_actors", "threats", "time", "type", "value"
+    )

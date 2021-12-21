@@ -3,11 +3,6 @@ from typing import List, Optional
 from uuid import uuid4
 
 from api.models import type_str
-from api.models.node_comment import NodeCommentRead
-from api.models.node_directive import NodeDirectiveRead
-from api.models.node_tag import NodeTagRead
-from api.models.node_threat import NodeThreatRead
-from api.models.node_threat_actor import NodeThreatActorRead
 
 
 class NodeTreeItemRead(BaseModel):
@@ -41,32 +36,6 @@ class NodeBase(BaseModel):
     )
 
 
-class NodeCreateDirectives(BaseModel):
-    """Represents a Node that has directives."""
-
-    directives: List[type_str] = Field(default_factory=list, description="A list of directives to add to the node")
-
-
-class NodeCreateTags(BaseModel):
-    """Represents a Node that has tags."""
-
-    tags: List[type_str] = Field(default_factory=list, description="A list of tags to add to the node")
-
-
-class NodeCreateThreatActors(BaseModel):
-    """Represents a Node that has threat actors."""
-
-    threat_actors: List[type_str] = Field(
-        default_factory=list, description="A list of threat actors to add to the node"
-    )
-
-
-class NodeBaseThreats(BaseModel):
-    """Represents a Node that has threats."""
-
-    threats: List[type_str] = Field(default_factory=list, description="A list of threats to add to the node")
-
-
 class NodeCreate(NodeBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the node")
 
@@ -81,41 +50,6 @@ class NodeRead(NodeBase, NodeTreeItemRead):
         orm_mode = True
 
 
-class NodeReadComments(BaseModel):
-    comments: List[NodeCommentRead] = Field(description="A list of comments added to the node")
-
-    class Config:
-        orm_mode = True
-
-
-class NodeReadDirectives(BaseModel):
-    directives: List[NodeDirectiveRead] = Field(description="A list of directives added to the node")
-
-    class Config:
-        orm_mode = True
-
-
-class NodeReadTags(BaseModel):
-    tags: List[NodeTagRead] = Field(description="A list of tags added to the node")
-
-    class Config:
-        orm_mode = True
-
-
-class NodeReadThreatActors(BaseModel):
-    threat_actors: List[NodeThreatActorRead] = Field(description="A list of threat actors added to the node")
-
-    class Config:
-        orm_mode = True
-
-
-class NodeReadThreats(BaseModel):
-    threats: List[NodeThreatRead] = Field(description="A list of threats added to the node")
-
-    class Config:
-        orm_mode = True
-
-
 class NodeUpdate(NodeBase):
     # The version is optional when updating a Node since certain actions in the GUI do not need to care
     # about the version. However, if the version is given, the update will be rejected if it does not match.
@@ -123,22 +57,6 @@ class NodeUpdate(NodeBase):
         description="""A version string that automatically changes every time the node is modified. If supplied,
         the version must match when updating.""",
     )
-
-
-class NodeUpdateDirectives(BaseModel):
-    directives: Optional[List[type_str]] = Field(description="A list of directives applied to the node")
-
-
-class NodeUpdateTags(BaseModel):
-    tags: Optional[List[type_str]] = Field(description="A list of tags to add to the node")
-
-
-class NodeUpdateThreatActors(BaseModel):
-    threat_actors: Optional[List[type_str]] = Field(description="A list of threat actors to add to the node")
-
-
-class NodeUpdateThreats(BaseModel):
-    threats: Optional[List[type_str]] = Field(description="A list of threats to add to the node")
 
 
 class NodeTreeBase(BaseModel):

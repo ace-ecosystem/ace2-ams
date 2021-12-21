@@ -25,16 +25,16 @@ def create_node(
 
     db_node: Node = db_node_type(**node_create.dict(exclude=exclude))
 
-    if node_create.directives:
+    if hasattr(node_create, "directives") and node_create.directives:
         db_node.directives = crud.read_by_values(values=node_create.directives, db_table=NodeDirective, db=db)
 
-    if node_create.tags:
+    if hasattr(node_create, "tags") and node_create.tags:
         db_node.tags = crud.read_by_values(values=node_create.tags, db_table=NodeTag, db=db)
 
-    if node_create.threat_actors:
+    if hasattr(node_create, "threat_actors") and node_create.threat_actors:
         db_node.threat_actors = crud.read_by_values(values=node_create.threat_actors, db_table=NodeThreatActor, db=db)
 
-    if node_create.threats:
+    if hasattr(node_create, "threats") and node_create.threats:
         db_node.threats = crud.read_by_values(values=node_create.threats, db_table=NodeThreat, db=db)
 
     return db_node

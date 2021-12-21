@@ -4,14 +4,7 @@ import uuid
 from dateutil.parser import parse
 from fastapi import status
 
-from tests.api.node import (
-    INVALID_UPDATE_FIELDS,
-    NONEXISTENT_FIELDS,
-    VALID_DIRECTIVES,
-    VALID_TAGS,
-    VALID_THREAT_ACTORS,
-    VALID_THREATS,
-)
+from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import helpers
 
 
@@ -50,13 +43,18 @@ def test_update_invalid_fields(client_valid_access_token, key, value):
 
 
 @pytest.mark.parametrize(
-    "key,value",
-    INVALID_UPDATE_FIELDS,
+    "key,values",
+    [
+        ("tags", INVALID_LIST_STRING_VALUES),
+        ("threat_actors", INVALID_LIST_STRING_VALUES),
+        ("threats", INVALID_LIST_STRING_VALUES),
+    ],
 )
-def test_update_invalid_node_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(f"/api/alert/{uuid.uuid4()}", json={key: value})
-    assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert key in update.text
+def test_update_invalid_node_fields(client_valid_access_token, key, values):
+    for value in values:
+        update = client_valid_access_token.patch(f"/api/alert/{uuid.uuid4()}", json={key: value})
+        assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert key in update.json()["detail"][0]["loc"]
 
 
 def test_update_invalid_uuid(client_valid_access_token):
@@ -93,16 +91,17 @@ def test_update_nonexistent_fields(client_valid_access_token, db, key, value):
 
 
 @pytest.mark.parametrize(
-    "key,value",
-    NONEXISTENT_FIELDS,
+    "key",
+    [("tags"), ("threat_actors"), ("threats")],
 )
-def test_update_nonexistent_node_fields(client_valid_access_token, db, key, value):
+def test_update_nonexistent_node_fields(client_valid_access_token, db, key):
     # Create an alert
     alert = helpers.create_alert(db=db)
 
     # Make sure you cannot update it to use a nonexistent node field value
-    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={key: value})
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={key: ["abc"]})
     assert update.status_code == status.HTTP_404_NOT_FOUND
+    assert "abc" in update.text
 
 
 def test_update_nonexistent_uuid(client_valid_access_token):
@@ -187,83 +186,31 @@ def test_update_queue(client_valid_access_token, db):
 
 
 @pytest.mark.parametrize(
-    "values",
-    VALID_DIRECTIVES,
+    "key,value_lists,helper_create_func",
+    [
+        ("tags", VALID_LIST_STRING_VALUES, helpers.create_node_tag),
+        ("threat_actors", VALID_LIST_STRING_VALUES, helpers.create_node_threat_actor),
+        ("threats", VALID_LIST_STRING_VALUES, helpers.create_node_threat),
+    ],
 )
-def test_update_valid_node_directives(client_valid_access_token, db, values):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-    initial_alert_version = alert.version
+def test_update_valid_node_fields(client_valid_access_token, db, key, value_lists, helper_create_func):
+    for value_list in value_lists:
+        # Create an alert
+        alert = helpers.create_alert(db=db)
+        initial_alert_version = alert.version
 
-    # Create the directives
-    for value in values:
-        helpers.create_node_directive(value=value, db=db)
+        for value in value_list:
+            helper_create_func(value=value, db=db)
 
-    # Update the alert
-    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"directives": values})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert len(alert.directives) == len(set(values))
-    assert alert.version != initial_alert_version
+        helpers.create_alert_queue(value="test_queue", db=db)
+        helpers.create_alert_type(value="test_type", db=db)
+        helpers.create_observable_type(value="o_type", db=db)
 
-
-@pytest.mark.parametrize(
-    "values",
-    VALID_TAGS,
-)
-def test_update_valid_node_tags(client_valid_access_token, db, values):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-    initial_alert_version = alert.version
-
-    # Create the tags
-    for value in values:
-        helpers.create_node_tag(value=value, db=db)
-
-    # Update the alert
-    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"tags": values})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert len(alert.tags) == len(set(values))
-    assert alert.version != initial_alert_version
-
-
-@pytest.mark.parametrize(
-    "values",
-    VALID_THREAT_ACTORS,
-)
-def test_update_valid_node_threat_actors(client_valid_access_token, db, values):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-    initial_alert_version = alert.version
-
-    # Create the threat actor
-    for value in values:
-        helpers.create_node_threat_actor(value=value, db=db)
-
-    # Update the alert
-    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"threat_actors": values})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert len(alert.threat_actors) == len(set(values))
-    assert alert.version != initial_alert_version
-
-
-@pytest.mark.parametrize(
-    "values",
-    VALID_THREATS,
-)
-def test_update_valid_node_threats(client_valid_access_token, db, values):
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-    initial_alert_version = alert.version
-
-    # Create the threats
-    for value in values:
-        helpers.create_node_threat(value=value, types=["test_type"], db=db)
-
-    # Update the alert
-    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"threats": values})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert len(alert.threats) == len(set(values))
-    assert alert.version != initial_alert_version
+        # Update the alert
+        update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={key: value_list})
+        assert update.status_code == status.HTTP_204_NO_CONTENT
+        assert len(getattr(alert, key)) == len(set(value_list))
+        assert alert.version != initial_alert_version
 
 
 @pytest.mark.parametrize(
