@@ -69,31 +69,33 @@
   import RemediationModal from "@/components/Modals/RemediateModal";
   import DispositionModal from "@/components/Modals/DispositionModal";
 
-  import { useAlertTableStore } from "@/stores/alertTable";
-  const alertTableStore = useAlertTableStore();
-
-  import { useAuthStore } from "@/stores/auth";
-  const authStore = useAuthStore();
-
-  import { useModalStore } from "@/stores/modal";
   import { useAlertStore } from "@/stores/alert";
+  import { useAlertTableStore } from "@/stores/alertTable";
+  import { useAuthStore } from "@/stores/auth";
+  import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
   const alertStore = useAlertStore();
+  const alertTableStore = useAlertTableStore();
+  const authStore = useAuthStore();
+  const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
 
-  const store = useModalStore();
-
   const open = (name) => {
-    store.open(name);
+    modalStore.open(name);
   };
 
   async function takeOwnership() {
-    for (const uuid of selectedAlertStore.selected) {
-      await alertStore.update(uuid, {
-        owner: authStore.user.username,
-      });
-      alertTableStore.requestReload = true;
+    try {
+      for (const uuid of selectedAlertStore.selected) {
+        await alertStore.update(uuid, {
+          owner: authStore.user.username,
+        });
+      }
+    } catch (err) {
+      console.log(err);
     }
+
+    alertTableStore.requestReload = true;
   }
 </script>
