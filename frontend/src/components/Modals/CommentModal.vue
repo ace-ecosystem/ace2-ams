@@ -54,6 +54,8 @@
 
     import { useAuthStore } from "@/stores/auth";
   const authStore = useAuthStore();
+    import { useAlertTableStore } from "@/stores/alertTable";
+  const alertTableStore = useAlertTableStore();
 
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
@@ -80,6 +82,7 @@
     isLoading.value = false;
     if (!error.value) {
       close();
+      alertTableStore.requestReload = true;
     }
   }
 

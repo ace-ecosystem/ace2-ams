@@ -85,6 +85,7 @@
     isLoading.value = false;
     if (!error.value) {
       close();
+      alertTableStore.requestReload = true;
     }
   }
 
@@ -113,7 +114,7 @@
     // Add an existing tag to the list of tags to be added
     newTags.value.push(event.value.value);
   }
-  
+
   function close() {
     newTags.value = [];
     modalStore.close(props.name);

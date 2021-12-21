@@ -57,6 +57,8 @@
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
   const userStore = useUserStore();
+  import { useAlertTableStore } from "@/stores/alertTable";
+  const alertTableStore = useAlertTableStore();
 
   const error = ref(null);
   const isLoading = ref(false);
@@ -69,36 +71,19 @@
   const assignUserClicked = async () => {
     isLoading.value = true;
 
-    if (selectedAlertStore.multipleSelected) {
-      await assignUserToMultiple();
-    } else {
-      await assignUser();
+    try {
+      for (const uuid of selectedAlertStore.selected) {
+        await alertStore.update(uuid, {
+          owner: selectedUser.value.username,
+        });
+      }
+    } catch (err) {
+      error.value = err.message || "Something went wrong!";
     }
-
     isLoading.value = false;
-  };
-
-  const assignUser = async () => {
-    try {
-      await alertStore.update(selectedAlertStore.selected[0], {
-        owner: selectedUser.value.username,
-      });
-
+    if (!error.value) {
       close();
-    } catch (err) {
-      error.value = err.message || "Something went wrong!";
-    }
-  };
-
-  const assignUserToMultiple = async () => {
-    try {
-      await alertStore.updateMultiple(selectedAlertStore.selected, {
-        owner: selectedUser.value.username,
-      });
-
-      close();
-    } catch (err) {
-      error.value = err.message || "Something went wrong!";
+      alertTableStore.requestReload = true;
     }
   };
 

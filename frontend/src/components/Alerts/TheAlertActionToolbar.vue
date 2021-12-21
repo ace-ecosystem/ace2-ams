@@ -69,6 +69,9 @@
   import RemediationModal from "@/components/Modals/RemediateModal";
   import DispositionModal from "@/components/Modals/DispositionModal";
 
+  import { useAlertTableStore } from "@/stores/alertTable";
+  const alertTableStore = useAlertTableStore();
+
   import { useAuthStore } from "@/stores/auth";
   const authStore = useAuthStore();
 
@@ -90,6 +93,8 @@
       await alertStore.update(uuid, {
         owner: authStore.user.username,
       });
+            alertTableStore.requestReload = true;
+
     }
   }
 </script>

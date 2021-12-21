@@ -74,7 +74,7 @@
   const alertStore = useAlertStore();
   const selectedAlertStore = useSelectedAlertStore();
 
-    import { useAlertTableStore } from "@/stores/alertTable";
+  import { useAlertTableStore } from "@/stores/alertTable";
   const alertTableStore = useAlertTableStore();
 
   const props = defineProps({
@@ -108,13 +108,16 @@
           await NodeComment.create({ ...commentData.value, nodeUuid: uuid });
         }
       }
-      close();
-      alertTableStore.readPage();
     } catch (err) {
       error.value = err.message || "Something went wrong!";
     }
 
     isLoading.value = false;
+
+    if (!error.value) {
+      close();
+      alertTableStore.requestReload = true;
+    }
   };
 
   const commentData = computed(() => {

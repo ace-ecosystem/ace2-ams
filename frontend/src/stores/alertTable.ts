@@ -40,10 +40,7 @@ export const useAlertTableStore = defineStore({
     totalAlerts: 0,
 
     // whether the alert table should be reloaded
-    alertTableReloadRequested: false,
-
-    // add default params here
-    lastCalledParams: {} as alertFilterParams,
+    requestReload: false,
   }),
 
   getters: {
@@ -63,11 +60,6 @@ export const useAlertTableStore = defineStore({
 
   actions: {
     async readPage(params: alertFilterParams) {
-      if (!params) {
-        params = this.$state.lastCalledParams;
-      } else {
-        this.$state.lastCalledParams = params;
-      }
       await Alert.readPage(params)
         .then((page) => {
           this.visibleQueriedAlerts = page.items;
