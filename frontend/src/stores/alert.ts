@@ -15,7 +15,7 @@ export const useAlertStore = defineStore({
     async create(newAlert: alertCreate) {
       await Alert.createAndRead(newAlert)
         .then((alert) => {
-          this.$state.openAlert = alert;
+          this.openAlert = alert;
         })
         .catch((error) => {
           throw error;
@@ -25,7 +25,7 @@ export const useAlertStore = defineStore({
     async read(uuid: UUID) {
       await Alert.read(uuid)
         .then((alert) => {
-          this.$state.openAlert = alert;
+          this.openAlert = alert;
         })
         .catch((error) => {
           throw error;

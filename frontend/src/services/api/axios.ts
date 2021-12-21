@@ -1,5 +1,8 @@
 // create instance
 import axios, { AxiosRequestConfig } from "axios";
+import camelcaseKeys from "camelcase-keys";
+
+import { useAuthStore } from "@/stores/auth";
 
 const instance = axios.create({
   baseURL: `${process.env.VUE_APP_BACKEND_URL}`,
@@ -52,17 +55,21 @@ instance.interceptors.response.use(
 );
 
 export async function axiosRefresh(): Promise<void> {
+  const authStore = useAuthStore();
+
   const config: AxiosRequestConfig = {
     url: "/auth/refresh",
     method: "GET",
     withCredentials: true,
   };
 
-  await instance.request(config).catch((error) => {
+  const response = await instance.request(config).catch((error) => {
     console.debug("need to authenticate");
+    authStore.$reset();
     throw error;
   });
 
+  authStore.user = camelcaseKeys(response.data.user, { deep: true });
   console.debug("successfully refreshed tokens");
 }
 
