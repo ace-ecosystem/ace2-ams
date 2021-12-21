@@ -93,8 +93,7 @@
       await alertStore.update(uuid, {
         owner: authStore.user.username,
       });
-            alertTableStore.requestReload = true;
-
+      alertTableStore.requestReload = true;
     }
   }
 </script>

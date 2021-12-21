@@ -52,9 +52,9 @@
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
-    import { useAuthStore } from "@/stores/auth";
+  import { useAuthStore } from "@/stores/auth";
   const authStore = useAuthStore();
-    import { useAlertTableStore } from "@/stores/alertTable";
+  import { useAlertTableStore } from "@/stores/alertTable";
   const alertTableStore = useAlertTableStore();
 
   const modalStore = useModalStore();
