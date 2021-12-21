@@ -17,12 +17,6 @@
           cols="30"
           placeholder="Add a comment..."
         />
-        <Dropdown
-          v-model="newComment"
-          :options="suggestedComments"
-          :show-clear="true"
-          placeholder="Select from a past comment"
-        />
       </div>
     </div>
     <template #footer>
@@ -41,7 +35,6 @@
   import { computed, defineProps, ref } from "vue";
 
   import Button from "primevue/button";
-  import Dropdown from "primevue/dropdown";
   import Message from "primevue/message";
 
   import Textarea from "primevue/textarea";
@@ -63,7 +56,6 @@
   const error = ref(null);
   const isLoading = ref(false);
   const newComment = ref(null);
-  const suggestedComments = ref(["this is an old comment", "and another"]);
 
   const props = defineProps({
     name: { type: String, required: true },

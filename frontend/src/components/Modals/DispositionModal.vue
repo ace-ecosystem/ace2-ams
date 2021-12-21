@@ -21,12 +21,6 @@
           cols="30"
           placeholder="Add a comment..."
         />
-        <Dropdown
-          v-model="dispositionComment"
-          :options="suggestedComments"
-          :show-clear="true"
-          placeholder="Select from a past comment"
-        />
       </div>
     </div>
 
@@ -51,7 +45,6 @@
   import { computed, defineProps, ref } from "vue";
 
   import Button from "primevue/button";
-  import Dropdown from "primevue/dropdown";
   import Listbox from "primevue/listbox";
   import Textarea from "primevue/textarea";
 
@@ -86,7 +79,6 @@
   const isLoading = ref(false);
   const newDisposition = ref(null);
   const dispositionComment = ref(null);
-  const suggestedComments = ref(["this is an old comment", "and another"]);
 
   const showAddToEventButton = computed(() => {
     // Only show add to event button if selected disposition is an 'elevated' disposition
