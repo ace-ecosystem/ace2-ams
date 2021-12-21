@@ -196,6 +196,15 @@
     { deep: true },
   );
 
+  alertTableStore.$subscribe(async (_, state) => {
+    if (state.requestReload) {
+      selectedRows.value = [];
+      selectedAlertStore.unselectAll();
+      alertTableStore.requestReload = false;
+      await loadAlerts();
+    }
+  });
+
   onMounted(async () => {
     initAlertTable();
     await loadAlerts();
