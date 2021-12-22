@@ -38,7 +38,6 @@ const mockAlert = {
   type: "Manual",
   uuid: "uuid1",
 };
-
 describe("alert Actions", () => {
   beforeEach(() => {
     store.$reset();

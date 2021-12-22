@@ -4,14 +4,7 @@ import uuid
 from fastapi import status
 from db.schemas.observable import Observable
 
-from tests.api.node import (
-    INVALID_CREATE_FIELDS,
-    NONEXISTENT_FIELDS,
-    VALID_DIRECTIVES,
-    VALID_TAGS,
-    VALID_THREAT_ACTOR,
-    VALID_THREATS,
-)
+from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import helpers
 
 
@@ -65,21 +58,29 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
 
 
 @pytest.mark.parametrize(
-    "key,value",
-    INVALID_CREATE_FIELDS,
+    "key,values",
+    [
+        ("directives", INVALID_LIST_STRING_VALUES),
+        ("tags", INVALID_LIST_STRING_VALUES),
+        ("threat_actors", INVALID_LIST_STRING_VALUES),
+        ("threats", INVALID_LIST_STRING_VALUES),
+    ],
 )
-def test_create_invalid_node_fields(client_valid_access_token, key, value):
-    create_json = {
-        key: value,
-        "node_tree": {"root_node_uuid": str(uuid.uuid4())},
-        "type": "test_type",
-        "value": "test",
-    }
-    create_json[key] = value
-    create = client_valid_access_token.post("/api/observable/", json=[create_json])
-    assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert len(create.json()["detail"]) == 1
-    assert key in create.json()["detail"][0]["loc"]
+def test_create_invalid_node_fields(client_valid_access_token, key, values):
+    for value in values:
+        create = client_valid_access_token.post(
+            "/api/observable/",
+            json=[
+                {
+                    key: value,
+                    "node_tree": {"root_node_uuid": str(uuid.uuid4())},
+                    "type": "test_type",
+                    "value": "test",
+                }
+            ],
+        )
+        assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert key in create.json()["detail"][0]["loc"]
 
 
 @pytest.mark.parametrize(
@@ -161,25 +162,29 @@ def test_create_nonexistent_alert(client_valid_access_token, db):
 
 
 @pytest.mark.parametrize(
-    "key,value",
-    NONEXISTENT_FIELDS,
+    "key",
+    [("directives"), ("tags"), ("threat_actors"), ("threats")],
 )
-def test_create_nonexistent_node_fields(client_valid_access_token, db, key, value):
+def test_create_nonexistent_node_fields(client_valid_access_token, db, key):
     # Create an alert
     alert = helpers.create_alert(db=db)
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
 
-    # Ensure you cannot create an observable instance with a nonexistent type
-    create_json = {
-        "node_tree": {"root_node_uuid": str(alert.uuid)},
-        "type": "test_type",
-        "value": "test",
-    }
-    create_json[key] = value
-    create = client_valid_access_token.post("/api/observable/", json=[create_json])
+    create = client_valid_access_token.post(
+        "/api/observable/",
+        json=[
+            {
+                key: ["abc"],
+                "node_tree": {"root_node_uuid": str(alert.uuid)},
+                "type": "test_type",
+                "value": "test",
+            }
+        ],
+    )
     assert create.status_code == status.HTTP_404_NOT_FOUND
+    assert "abc" in create.text
 
 
 def test_create_nonexistent_redirection(client_valid_access_token, db):
@@ -349,124 +354,38 @@ def test_create_valid_required_fields(client_valid_access_token, db):
 
 
 @pytest.mark.parametrize(
-    "values",
-    VALID_DIRECTIVES,
+    "key,value_lists,helper_create_func",
+    [
+        ("directives", VALID_LIST_STRING_VALUES, helpers.create_node_directive),
+        ("tags", VALID_LIST_STRING_VALUES, helpers.create_node_tag),
+        ("threat_actors", VALID_LIST_STRING_VALUES, helpers.create_node_threat_actor),
+        ("threats", VALID_LIST_STRING_VALUES, helpers.create_node_threat),
+    ],
 )
-def test_create_valid_node_directives(client_valid_access_token, db, values):
-    # Create the directives
-    for value in values:
-        helpers.create_node_directive(value=value, db=db)
+def test_create_valid_node_fields(client_valid_access_token, db, key, value_lists, helper_create_func):
+    for value_list in value_lists:
+        for value in value_list:
+            helper_create_func(value=value, db=db)
 
-    # Create an alert
-    alert = helpers.create_alert(db=db)
+        # Create an alert
+        alert = helpers.create_alert(db=db)
 
-    # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
+        # Create an observable type
+        helpers.create_observable_type(value="test_type", db=db)
 
-    # Create an observable instance
-    create_json = {
-        "node_tree": {"root_node_uuid": str(alert.uuid)},
-        "type": "test_type",
-        "value": "test",
-        "directives": values,
-    }
-    create = client_valid_access_token.post("/api/observable/", json=[create_json])
-    assert create.status_code == status.HTTP_201_CREATED
+        create = client_valid_access_token.post(
+            "/api/observable/",
+            json=[
+                {
+                    key: value_list,
+                    "node_tree": {"root_node_uuid": str(alert.uuid)},
+                    "type": "test_type",
+                    "value": f"{key}{value_list}",
+                }
+            ],
+        )
+        assert create.status_code == status.HTTP_201_CREATED
 
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["directives"]) == len(set(values))
-
-
-@pytest.mark.parametrize(
-    "values",
-    VALID_TAGS,
-)
-def test_create_valid_node_tags(client_valid_access_token, db, values):
-    # Create the tags
-    for value in values:
-        helpers.create_node_tag(value=value, db=db)
-
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
-    # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
-
-    # Create an observable instance
-    create_json = {
-        "node_tree": {"root_node_uuid": str(alert.uuid)},
-        "type": "test_type",
-        "value": "test",
-        "tags": values,
-    }
-    create = client_valid_access_token.post("/api/observable/", json=[create_json])
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["tags"]) == len(list(set(values)))
-
-
-@pytest.mark.parametrize(
-    "value",
-    VALID_THREAT_ACTOR,
-)
-def test_create_valid_node_threat_actor(client_valid_access_token, db, value):
-    # Create the threat actor
-    if value:
-        helpers.create_node_threat_actor(value=value, db=db)
-
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
-    # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
-
-    # Create an observable instance
-    create_json = {
-        "node_tree": {"root_node_uuid": str(alert.uuid)},
-        "type": "test_type",
-        "value": "test",
-        "threat_actor": value,
-    }
-    create = client_valid_access_token.post("/api/observable/", json=[create_json])
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    if value:
-        assert get.json()["threat_actor"]["value"] == value
-    else:
-        assert get.json()["threat_actor"] is None
-
-
-@pytest.mark.parametrize(
-    "values",
-    VALID_THREATS,
-)
-def test_create_valid_node_threats(client_valid_access_token, db, values):
-    # Create the threats
-    for value in values:
-        helpers.create_node_threat(value=value, db=db)
-
-    # Create an alert
-    alert = helpers.create_alert(db=db)
-
-    # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
-
-    # Create an observable instance
-    create_json = {
-        "node_tree": {"root_node_uuid": str(alert.uuid)},
-        "type": "test_type",
-        "value": "test",
-        "threats": values,
-    }
-    create = client_valid_access_token.post("/api/observable/", json=[create_json])
-    print(create.text)
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert len(get.json()["threats"]) == len(set(values))
+        # Read it back
+        get = client_valid_access_token.get(create.headers["Content-Location"])
+        assert len(get.json()[key]) == len(list(set(value_list)))

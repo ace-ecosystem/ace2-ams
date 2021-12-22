@@ -43,8 +43,6 @@ class AnalysisNodeTreeRead(NodeTreeItemRead):
         description="The analysis module type that was used to perform this analysis"
     )
 
-    node_type: type_str = Field(description="The type of the Node")
-
     uuid: UUID4 = Field(description="The UUID of the analysis")
 
     class Config:

@@ -5,14 +5,7 @@ from datetime import datetime
 from dateutil.parser import parse
 from fastapi import status
 
-from tests.api.node import (
-    INVALID_UPDATE_FIELDS,
-    NONEXISTENT_FIELDS,
-    VALID_DIRECTIVES,
-    VALID_TAGS,
-    VALID_THREAT_ACTOR,
-    VALID_THREATS,
-)
+from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import helpers
 
 
@@ -55,17 +48,22 @@ def test_update_invalid_fields(client_valid_access_token, key, value):
 
 
 @pytest.mark.parametrize(
-    "key,value",
-    INVALID_UPDATE_FIELDS,
+    "key,values",
+    [
+        ("directives", INVALID_LIST_STRING_VALUES),
+        ("tags", INVALID_LIST_STRING_VALUES),
+        ("threat_actors", INVALID_LIST_STRING_VALUES),
+        ("threats", INVALID_LIST_STRING_VALUES),
+    ],
 )
-def test_update_invalid_node_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(
-        f"/api/observable/{uuid.uuid4()}",
-        json={key: value},
-    )
-    assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert len(update.json()["detail"]) == 1
-    assert key in update.json()["detail"][0]["loc"]
+def test_update_invalid_node_fields(client_valid_access_token, key, values):
+    for value in values:
+        update = client_valid_access_token.patch(
+            f"/api/observable/{uuid.uuid4()}",
+            json={key: value},
+        )
+        assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert key in update.json()["detail"][0]["loc"]
 
 
 def test_update_invalid_uuid(client_valid_access_token):
@@ -106,16 +104,17 @@ def test_update_nonexistent_redirection_uuid(client_valid_access_token, db):
 
 
 @pytest.mark.parametrize(
-    "key,value",
-    NONEXISTENT_FIELDS,
+    "key",
+    [("directives"), ("tags"), ("threat_actors"), ("threats")],
 )
-def test_update_nonexistent_node_fields(client_valid_access_token, db, key, value):
+def test_update_nonexistent_node_fields(client_valid_access_token, db, key):
     # Create an observable
     obj = helpers.create_observable(type="test_type", value="test", db=db)
 
     # Make sure you cannot update it to use a nonexistent node field value
-    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={key: value})
+    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={key: ["abc"]})
     assert update.status_code == status.HTTP_404_NOT_FOUND
+    assert "abc" in update.text
 
 
 def test_update_nonexistent_uuid(client_valid_access_token):
@@ -161,92 +160,28 @@ def test_update_redirection_uuid(client_valid_access_token, db):
 
 
 @pytest.mark.parametrize(
-    "values",
-    VALID_DIRECTIVES,
+    "key,value_lists,helper_create_func",
+    [
+        ("directives", VALID_LIST_STRING_VALUES, helpers.create_node_directive),
+        ("tags", VALID_LIST_STRING_VALUES, helpers.create_node_tag),
+        ("threat_actors", VALID_LIST_STRING_VALUES, helpers.create_node_threat_actor),
+        ("threats", VALID_LIST_STRING_VALUES, helpers.create_node_threat),
+    ],
 )
-def test_update_valid_node_directives(client_valid_access_token, db, values):
-    # Create an observable
-    obj = helpers.create_observable(type="test_type", value="test", db=db)
-    initial_observable_version = obj.version
-    assert obj.directives == []
+def test_update_valid_node_fields(client_valid_access_token, db, key, value_lists, helper_create_func):
+    for value_list in value_lists:
+        # Create an observable
+        obj = helpers.create_observable(type="test_type", value="test", db=db)
+        initial_observable_version = obj.version
 
-    # Create the directives
-    for value in values:
-        helpers.create_node_directive(value=value, db=db)
+        for value in value_list:
+            helper_create_func(value=value, db=db)
 
-    # Update the node
-    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"directives": values})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert len(obj.directives) == len(set(values))
-    assert obj.version != initial_observable_version
-
-
-@pytest.mark.parametrize(
-    "values",
-    VALID_TAGS,
-)
-def test_update_valid_node_tags(client_valid_access_token, db, values):
-    # Create an observable
-    obj = helpers.create_observable(type="test_type", value="test", db=db)
-    initial_observable_version = obj.version
-    assert obj.tags == []
-
-    # Create the tags
-    for value in values:
-        helpers.create_node_tag(value=value, db=db)
-
-    # Update the node
-    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"tags": values})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert len(obj.tags) == len(set(values))
-    assert obj.version != initial_observable_version
-
-
-@pytest.mark.parametrize(
-    "value",
-    VALID_THREAT_ACTOR,
-)
-def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
-    # Create an observable
-    obj = helpers.create_observable(type="test_type", value="test", db=db)
-    initial_observable_version = obj.version
-    assert obj.threat_actor is None
-
-    # Create the threat actor
-    if value:
-        helpers.create_node_threat_actor(value=value, db=db)
-
-    # Update the node
-    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"threat_actor": value})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    if value:
-        assert obj.threat_actor.value == value
-    else:
-        assert obj.threat_actor is None
-
-    assert obj.version != initial_observable_version
-
-
-@pytest.mark.parametrize(
-    "values",
-    VALID_THREATS,
-)
-def test_update_valid_node_threats(client_valid_access_token, db, values):
-    # Create an observable
-    obj = helpers.create_observable(type="test_type", value="test", db=db)
-    initial_observable_version = obj.version
-    assert obj.threats == []
-
-    # Create the threats
-    for value in values:
-        helpers.create_node_threat(value=value, types=["test_type"], db=db)
-
-    # Update the node
-    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"threats": values})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert len(obj.threats) == len(set(values))
-    assert obj.version != initial_observable_version
+        # Update the observable
+        update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={key: value_list})
+        assert update.status_code == status.HTTP_204_NO_CONTENT
+        assert len(getattr(obj, key)) == len(set(value_list))
+        assert obj.version != initial_observable_version
 
 
 @pytest.mark.parametrize(

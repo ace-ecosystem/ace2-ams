@@ -141,7 +141,7 @@ def get_all_alerts(
         ")$",
     ),  # Example: event_time|desc,
     tags: Optional[str] = None,
-    threat_actor: Optional[str] = None,
+    threat_actors: Optional[str] = None,
     threats: Optional[str] = None,
     tool: Optional[str] = None,
     tool_instance: Optional[str] = None,
@@ -254,8 +254,12 @@ def get_all_alerts(
 
         query = _join_as_subquery(query, tags_query)
 
-    if threat_actor:
-        threat_actor_query = select(Alert).join(NodeThreatActor).where(NodeThreatActor.value == threat_actor)
+    if threat_actors:
+        threat_actor_filters = []
+        for threat_actor in threat_actors.split(","):
+            threat_actor_filters.append(Alert.threat_actors.any(NodeThreatActor.value == threat_actor))
+        threat_actor_query = select(Alert).where(and_(*threat_actor_filters))
+
         query = _join_as_subquery(query, threat_actor_query)
 
     if threats:

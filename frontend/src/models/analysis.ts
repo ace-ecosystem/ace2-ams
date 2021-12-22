@@ -7,7 +7,6 @@ import {
 import { observableTreeRead } from "./observable";
 
 export interface analysisCreate extends nodeCreate {
-  alertUuid: UUID;
   analysisModuleType?: UUID;
   details?: Record<string, unknown>;
   errorMessage?: string;
@@ -18,7 +17,6 @@ export interface analysisCreate extends nodeCreate {
 }
 
 export interface analysisRead extends nodeRead {
-  alertUuid?: UUID;
   analysisModuleType: analysisModuleTypeRead;
   details: Record<string, unknown> | null;
   errorMessage: string | null;
@@ -26,14 +24,12 @@ export interface analysisRead extends nodeRead {
   summary: string | null;
 }
 
-export interface analysisTreeRead {
+export interface analysisTreeRead extends nodeRead {
   analysisModuleType: analysisModuleTypeNodeTreeRead;
   children: observableTreeRead[];
   firstAppearance?: boolean;
-  nodeType: string;
   parentTreeUuid: UUID | null;
   treeUuid: UUID;
-  uuid: UUID;
 }
 
 export interface analysisUpdate extends nodeUpdate {

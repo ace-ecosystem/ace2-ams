@@ -7,6 +7,10 @@ import { eventStatusRead } from "./eventStatus";
 import { eventTypeRead } from "./eventType";
 import { eventVectorRead } from "./eventVector";
 import { nodeCreate, nodeRead, nodeReadPage, nodeUpdate } from "./node";
+import { nodeCommentRead } from "./nodeComment";
+import { nodeTagRead } from "./nodeTag";
+import { nodeThreatRead } from "./nodeThreat";
+import { nodeThreatActorRead } from "./nodeThreatActor";
 import { userRead } from "./user";
 
 export interface eventCreate extends nodeCreate {
@@ -22,6 +26,9 @@ export interface eventCreate extends nodeCreate {
   riskLevel?: string;
   source?: string;
   status?: string;
+  tags?: string[];
+  threatActors?: string[];
+  threats?: string[];
   type?: string;
   vectors?: string[];
   [key: string]: unknown;
@@ -30,6 +37,7 @@ export interface eventCreate extends nodeCreate {
 export interface eventRead extends nodeRead {
   alertTime: Date | null;
   alertUuids: UUID[];
+  comments: nodeCommentRead[];
   containTime: Date | null;
   creationTime: Date;
   dispositionTime: Date | null;
@@ -43,6 +51,9 @@ export interface eventRead extends nodeRead {
   riskLevel: eventRiskLevelRead | null;
   source: eventSourceRead | null;
   status: eventStatusRead | null;
+  tags: nodeTagRead[];
+  threatActors: nodeThreatActorRead[];
+  threats: nodeThreatRead[];
   type: eventTypeRead | null;
   vectors: eventVectorRead[];
 }
@@ -64,6 +75,9 @@ export interface eventUpdate extends nodeUpdate {
   riskLevel?: string | null;
   source?: string | null;
   status?: string | null;
+  tags?: string[];
+  threatActors?: string[];
+  threats?: string[];
   type?: string | null;
   vectors?: string[];
   [key: string]: unknown;
