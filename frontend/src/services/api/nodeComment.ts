@@ -16,8 +16,6 @@ export const NodeComment = {
   read: (uuid: UUID): Promise<nodeCommentRead> =>
     api.read(`${endpoint}${uuid}`),
 
-  readAll: (): Promise<nodeCommentRead[]> => api.readAll(endpoint),
-
   update: (uuid: UUID, data: nodeCommentUpdate): Promise<void> =>
     api.update(`${endpoint}${uuid}`, data),
 };
