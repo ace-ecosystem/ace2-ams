@@ -7,7 +7,7 @@
       <Message severity="error" @close="handleError">{{ error }}</Message>
     </div>
   </div>
-  <Toolbar id="AlertActionToolbar" style="overflow-x: auto" >
+  <Toolbar id="AlertActionToolbar" style="overflow-x: auto">
     <template #left>
       <!--      DISPOSITION -->
       <Button

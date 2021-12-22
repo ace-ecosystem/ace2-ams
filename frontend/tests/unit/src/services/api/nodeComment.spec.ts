@@ -17,12 +17,12 @@ describe("NodeComment API calls", () => {
     description: "This is an alert queue",
     value: "Test",
   };
-//   const mockObjectRead: nodeCommentRead = {
-//     nodeUuid: "uuid1",
-//     user: {username: "Alice"},
-//     uuid: "1",
-//     value: "Test",
-//   };
+  //   const mockObjectRead: nodeCommentRead = {
+  //     nodeUuid: "uuid1",
+  //     user: {username: "Alice"},
+  //     uuid: "1",
+  //     value: "Test",
+  //   };
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock

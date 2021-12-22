@@ -70,8 +70,16 @@ describe("TheAlertActionToolbar.vue", () => {
   });
 
   it("updates ownership of alert to current user and requests alertTable reload when clicked", async () => {
-    myNock.options("/alert/uuid1").reply(200).patch("/alert/uuid1", {owner: "testingUser"}).reply(204);
-    myNock.options("/alert/uuid2").reply(200).patch("/alert/uuid2", {owner: "testingUser"}).reply(204);
+    myNock
+      .options("/alert/uuid1")
+      .reply(200)
+      .patch("/alert/uuid1", { owner: "testingUser" })
+      .reply(204);
+    myNock
+      .options("/alert/uuid2")
+      .reply(200)
+      .patch("/alert/uuid2", { owner: "testingUser" })
+      .reply(204);
     wrapper.vm.authStore.user = { username: "testingUser" };
     wrapper.vm.selectedAlertStore.selected = ["uuid1", "uuid2"];
     await wrapper.vm.takeOwnership();

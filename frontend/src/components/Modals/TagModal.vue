@@ -63,8 +63,8 @@
   });
 
   async function loadTags() {
-      await nodeTagStore.readAll();
-      storeTagValues.value = tagValues(nodeTagStore.allItems);
+    await nodeTagStore.readAll();
+    storeTagValues.value = tagValues(nodeTagStore.allItems);
   }
 
   async function addTags() {
