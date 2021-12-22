@@ -10,6 +10,10 @@ from api.models.alert_tool import AlertToolRead
 from api.models.alert_tool_instance import AlertToolInstanceRead
 from api.models.alert_type import AlertTypeRead
 from api.models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
+from api.models.node_comment import NodeCommentRead
+from api.models.node_tag import NodeTagRead
+from api.models.node_threat import NodeThreatRead
+from api.models.node_threat_actor import NodeThreatActorRead
 from api.models.observable import ObservableCreateWithAlert
 from api.models.user import UserRead
 
@@ -51,8 +55,18 @@ class AlertCreate(NodeCreate, AlertBase):
         description="A list of observables that should be added to the alert"
     )
 
+    tags: List[type_str] = Field(default_factory=list, description="A list of tags to add to the alert")
+
+    threat_actors: List[type_str] = Field(
+        default_factory=list, description="A list of threat actors to add to the alert"
+    )
+
+    threats: List[type_str] = Field(default_factory=list, description="A list of threats to add to the alert")
+
 
 class AlertRead(NodeRead, AlertBase):
+    comments: List[NodeCommentRead] = Field(description="A list of comments added to the alert")
+
     disposition: Optional[AlertDispositionRead] = Field(description="The disposition assigned to this alert")
 
     disposition_time: Optional[datetime] = Field(description="The time this alert was most recently dispositioned")
@@ -66,6 +80,12 @@ class AlertRead(NodeRead, AlertBase):
     owner: Optional[UserRead] = Field(description="The user who has taken ownership of this alert")
 
     queue: AlertQueueRead = Field(description="The alert queue containing this alert")
+
+    tags: List[NodeTagRead] = Field(description="A list of tags added to the alert")
+
+    threat_actors: List[NodeThreatActorRead] = Field(description="A list of threat actors added to the alert")
+
+    threats: List[NodeThreatRead] = Field(description="A list of threats added to the alert")
 
     tool: Optional[AlertToolRead] = Field(description="The tool that created this alert")
 
@@ -93,7 +113,13 @@ class AlertUpdate(NodeUpdate, AlertBase):
 
     queue: Optional[type_str] = Field(description="The alert queue containing this alert")
 
-    _prevent_none: classmethod = validators.prevent_none("queue")
+    tags: Optional[List[type_str]] = Field(description="A list of tags to add to the alert")
+
+    threat_actors: Optional[List[type_str]] = Field(description="A list of threat actors to add to the alert")
+
+    threats: Optional[List[type_str]] = Field(description="A list of threats to add to the alert")
+
+    _prevent_none: classmethod = validators.prevent_none("queue", "tags", "threat_actors", "threats")
 
 
 class AlertTreeRead(BaseModel):

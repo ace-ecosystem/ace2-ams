@@ -47,16 +47,6 @@ describe("ViewAlert.vue", () => {
       mockAlertReadDateStringsFirstAppearances,
     );
   });
-  it("correctly computes alertTree with marked first appearances", async () => {
-    const alertStore = useAlertStore();
-    alertStore.openAlert = mockAlertRead;
-    expect(wrapper.vm.alertTree).toEqual(mockAlertTree);
-  });
-  it("markFirstAppearances correctly adds firstAppearance prop to all nodes in a given tree", async () => {
-    const tree = mockAlertRead.tree;
-    wrapper.vm.markFirstAppearances({ uuid: "root", children: tree });
-    expect(tree).toEqual(mockAlertTreeFirstAppearances);
-  });
   it("unselects all selected alerts when umounted", async () => {
     const selectedAlertStore = useSelectedAlertStore();
     await wrapper.vm.initPage("uuid1");

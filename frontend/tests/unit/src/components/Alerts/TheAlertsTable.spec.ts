@@ -19,7 +19,6 @@ import { alertRead } from "@/models/alert";
 const mockAPIAlert: alertRead = {
   comments: [],
   description: "",
-  directives: [],
   disposition: null,
   dispositionTime: null,
   dispositionUser: null,
@@ -32,7 +31,7 @@ const mockAPIAlert: alertRead = {
   owner: null,
   queue: { value: "Default", description: "queue", uuid: "uuid1" },
   tags: [],
-  threatActor: null,
+  threatActors: [],
   threats: [],
   tool: null,
   toolInstance: null,

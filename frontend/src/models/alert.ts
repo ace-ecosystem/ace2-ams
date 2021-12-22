@@ -23,6 +23,9 @@ export interface alertCreate extends nodeCreate {
   observables: { type: string; value: string }[];
   owner?: string;
   queue: string;
+  tags?: string[];
+  threatActors?: string[];
+  threats?: string[];
   tool?: string;
   toolInstance?: string;
   type: string;
@@ -30,6 +33,7 @@ export interface alertCreate extends nodeCreate {
 }
 
 export interface alertRead extends nodeRead {
+  comments: nodeCommentRead[];
   description: string | null;
   disposition: alertDispositionRead | null;
   dispositionTime: Date | null;
@@ -41,6 +45,9 @@ export interface alertRead extends nodeRead {
   name: string;
   owner: userRead | null;
   queue: alertQueueRead;
+  tags: nodeTagRead[];
+  threatActors: nodeThreatActorRead[];
+  threats: nodeThreatRead[];
   tool: alertToolRead | null;
   toolInstance: alertToolInstanceRead | null;
   type: alertTypeRead;
@@ -82,6 +89,9 @@ export interface alertUpdate extends nodeUpdate {
   instructions?: string | null;
   owner?: string;
   queue?: string;
+  tags?: string[];
+  threatActors?: string[];
+  threats?: string[];
   [key: string]: unknown;
 }
 

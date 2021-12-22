@@ -67,7 +67,6 @@ const mockComment: nodeCommentRead = {
 const mockAPIAlert: alertRead = {
   comments: [],
   description: "",
-  directives: [],
   disposition: null,
   dispositionTime: null,
   dispositionUser: null,
@@ -80,7 +79,7 @@ const mockAPIAlert: alertRead = {
   owner: null,
   queue: { value: "Default", description: "queue", uuid: "uuid1" },
   tags: [],
-  threatActor: null,
+  threatActors: [],
   threats: [],
   tool: null,
   toolInstance: null,
@@ -92,7 +91,6 @@ const mockAPIAlert: alertRead = {
 const mockAPIAlertOptionalProperties: alertRead = {
   comments: [mockComment],
   description: "A test alert",
-  directives: [],
   disposition: {
     value: "False Positive",
     description: "fp",
@@ -110,7 +108,7 @@ const mockAPIAlertOptionalProperties: alertRead = {
   owner: mockUser,
   queue: { value: "Default", description: "queue", uuid: "uuid1" },
   tags: [{ value: "a tag", description: "tag", uuid: "uuid1" }],
-  threatActor: null,
+  threatActors: [],
   threats: [],
   tool: { value: "GUI", description: null, uuid: "uuid1" },
   toolInstance: null,

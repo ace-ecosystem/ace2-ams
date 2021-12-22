@@ -4,14 +4,6 @@ import uuid
 
 from fastapi import status
 
-from tests.api.node import (
-    INVALID_UPDATE_FIELDS,
-    NONEXISTENT_FIELDS,
-    VALID_DIRECTIVES,
-    VALID_TAGS,
-    VALID_THREAT_ACTOR,
-    VALID_THREATS,
-)
 from tests import helpers
 
 
@@ -45,17 +37,6 @@ def test_update_invalid_fields(client_valid_access_token, key, value):
     assert key in update.json()["detail"][0]["loc"]
 
 
-@pytest.mark.parametrize(
-    "key,value",
-    INVALID_UPDATE_FIELDS,
-)
-def test_update_invalid_node_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(f"/api/analysis/{uuid.uuid4()}", json={key: value})
-    assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert len(update.json()["detail"]) == 1
-    assert key in update.json()["detail"][0]["loc"]
-
-
 def test_update_invalid_uuid(client_valid_access_token):
     update = client_valid_access_token.patch("/api/analysis/1", json={})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -80,19 +61,6 @@ def test_update_nonexistent_analysis_module_type(client_valid_access_token, db):
         f"/api/analysis/{analysis.uuid}",
         json={"analysis_module_type": str(uuid.uuid4())},
     )
-    assert update.status_code == status.HTTP_404_NOT_FOUND
-
-
-@pytest.mark.parametrize(
-    "key,value",
-    NONEXISTENT_FIELDS,
-)
-def test_update_nonexistent_node_fields(client_valid_access_token, db, key, value):
-    # Create an analysis
-    analysis = helpers.create_analysis(db=db)
-
-    # Make sure you cannot update it to use a nonexistent node field value
-    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={key: value})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -121,91 +89,6 @@ def test_update_analysis_module_type(client_valid_access_token, db):
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert analysis.analysis_module_type == analysis_module_type
-    assert analysis.version != initial_analysis_version
-
-
-@pytest.mark.parametrize(
-    "values",
-    VALID_DIRECTIVES,
-)
-def test_update_valid_node_directives(client_valid_access_token, db, values):
-    # Create an analysis
-    analysis = helpers.create_analysis(db=db)
-    initial_analysis_version = analysis.version
-
-    # Create the directives
-    for value in values:
-        helpers.create_node_directive(value=value, db=db)
-
-    # Update the analysis
-    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={"directives": values})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert len(analysis.directives) == len(set(values))
-    assert analysis.version != initial_analysis_version
-
-
-@pytest.mark.parametrize(
-    "values",
-    VALID_TAGS,
-)
-def test_update_valid_node_tags(client_valid_access_token, db, values):
-    # Create an analysis
-    analysis = helpers.create_analysis(db=db)
-    initial_analysis_version = analysis.version
-
-    # Create the tags
-    for value in values:
-        helpers.create_node_tag(value=value, db=db)
-
-    # Update the node
-    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={"tags": values})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert len(analysis.tags) == len(set(values))
-    assert analysis.version != initial_analysis_version
-
-
-@pytest.mark.parametrize(
-    "value",
-    VALID_THREAT_ACTOR,
-)
-def test_update_valid_node_threat_actor(client_valid_access_token, db, value):
-    # Create an analysis
-    analysis = helpers.create_analysis(db=db)
-    initial_analysis_version = analysis.version
-
-    # Create the threat actor
-    if value:
-        helpers.create_node_threat_actor(value=value, db=db)
-
-    # Update the node
-    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={"threat_actor": value})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-
-    if value:
-        assert analysis.threat_actor.value == value
-    else:
-        assert analysis.threat_actor is None
-
-    assert analysis.version != initial_analysis_version
-
-
-@pytest.mark.parametrize(
-    "values",
-    VALID_THREATS,
-)
-def test_update_valid_node_threats(client_valid_access_token, db, values):
-    # Create an analysis
-    analysis = helpers.create_analysis(db=db)
-    initial_analysis_version = analysis.version
-
-    # Create the threats
-    for value in values:
-        helpers.create_node_threat(value=value, types=["test_type"], db=db)
-
-    # Update the node
-    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={"threats": values})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert len(analysis.threats) == len(set(values))
     assert analysis.version != initial_analysis_version
 
 
