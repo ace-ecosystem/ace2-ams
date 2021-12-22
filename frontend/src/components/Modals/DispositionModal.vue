@@ -3,6 +3,11 @@
 
 <template>
   <BaseModal :name="name" header="Set Disposition">
+    <div>
+      <div v-if="error" class="p-col">
+        <Message severity="error" @close="handleError">{{ error }}</Message>
+      </div>
+    </div>
     <div class="p-m-1 p-grid p-fluid p-formgrid p-grid">
       <div class="p-field p-col">
         <Listbox
@@ -45,6 +50,7 @@
   import { computed, defineProps, ref } from "vue";
 
   import Button from "primevue/button";
+  import Message from "primevue/message";
   import Listbox from "primevue/listbox";
   import Textarea from "primevue/textarea";
 

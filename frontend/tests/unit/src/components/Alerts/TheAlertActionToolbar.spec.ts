@@ -35,6 +35,14 @@ describe("TheAlertActionToolbar.vue", () => {
     expect(toolbar.exists()).toBe(true);
   });
 
+  it("will clear the 'error' property when handleError is called", async () => {
+    wrapper.vm.error = "Call failed";
+
+    expect(wrapper.vm.error).toEqual("Call failed");
+    wrapper.vm.handleError();
+    expect(wrapper.vm.error).toBeNull();
+  });
+
   it("contains expected components", () => {
     expect(wrapper.findComponent(AssignModal).exists()).toBe(true);
     expect(wrapper.findComponent(CommentModal).exists()).toBe(true);

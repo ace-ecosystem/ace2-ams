@@ -2,6 +2,11 @@
 <!-- Toolbar containing all alert-related actions, such as Disposition, Assign, Comment, etc. -->
 
 <template>
+    <div>
+      <div v-if="error" class="p-col">
+      <Message severity="error" @close="handleError">{{ error }}</Message>
+      </div>
+    </div>
   <Toolbar style="overflow-x: auto">
     <template #left>
       <!--      DISPOSITION -->
@@ -60,7 +65,10 @@
 </template>
 
 <script setup>
+  import { ref } from "vue";
+
   import Button from "primevue/button";
+  import Message from "primevue/message";
   import Toolbar from "primevue/toolbar";
 
   import AssignModal from "@/components/Modals/AssignModal";
@@ -81,6 +89,8 @@
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
 
+  const error = ref(null);
+
   const open = (name) => {
     modalStore.open(name);
   };
@@ -98,4 +108,8 @@
 
     alertTableStore.requestReload = true;
   }
+
+  const handleError = () => {
+    error.value = null;
+  };
 </script>
