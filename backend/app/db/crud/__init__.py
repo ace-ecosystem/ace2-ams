@@ -10,7 +10,7 @@ from sqlalchemy.sql.expression import join
 from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
-from api.models.node import NodeTreeItemRead
+from api.models.node import NodeRead
 from core.auth import verify_password
 from db.schemas.analysis import Analysis
 from db.schemas.node import Node
@@ -256,7 +256,7 @@ def read_node_tree(root_node_uuid: UUID, db: Session) -> List[Dict]:
     return unflatten_node_tree(node_tree_nodes)
 
 
-def unflatten_node_tree(node_tree_nodes: List[NodeTreeItemRead]) -> List[Dict]:
+def unflatten_node_tree(node_tree_nodes: List[NodeRead]) -> List[Dict]:
     """Takes a flat list of nodes from a NodeTree after they've been serialized into
     their Pydantic models and converts it into a nested structure.
 
@@ -275,7 +275,12 @@ def unflatten_node_tree(node_tree_nodes: List[NodeTreeItemRead]) -> List[Dict]:
         # Add the node's data to the item in the lookup table. Remember the nodes in the
         # list are Pydantic model objects, so to update the dictionary in the lookup table,
         # we have to work with the Pydantic object's dictionary as well.
-        lookup[node.tree_uuid].update(node.dict())
+        #
+        # Also, exclude_unset is used because the Node objects out of the database do not
+        # actually have a "children" field, and since its Pydantic model uses an empty list
+        # as the default_factory, updating the item in the lookup table would overwrite
+        # the children key with an empty list.
+        lookup[node.tree_uuid].update(node.dict(exclude_unset=True))
 
         # If the node does not have a parent, add it as a root node
         if not node.parent_tree_uuid:
@@ -287,6 +292,26 @@ def unflatten_node_tree(node_tree_nodes: List[NodeTreeItemRead]) -> List[Dict]:
 
             # Add the node to its parent
             lookup[node.parent_tree_uuid]["children"].append(lookup[node.tree_uuid])
+
+    # Now that the tree is unflattened, we need to walk it to mark which of the Nodes have
+    # already appeared in the tree. This is useful for when you might not want to display or
+    # process a Node in the tree if it is a duplicate.
+    #
+    # Adapted from: https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
+    unique_uuids = []
+    unvisited = [{"uuid": "root", "children": root_nodes}]
+
+    while unvisited:
+        current = unvisited.pop(0)
+
+        if current["uuid"] in unique_uuids:
+            current["first_appearance"] = False
+        else:
+            current["first_appearance"] = True
+            unique_uuids.append(current["uuid"])
+
+        for idx in range(len(current["children"]) - 1, -1, -1):
+            unvisited.insert(0, current["children"][idx])
 
     return root_nodes
 
