@@ -1,5 +1,5 @@
 import TheAlertsTable from "@/components/Alerts/TheAlertsTable.vue";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount, VueWrapper } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
 import myNock from "@unit/services/api/nock";
 import router from "@/router";
@@ -43,7 +43,7 @@ const mockAPIAlert: alertRead = {
 
 // DATA/CREATION
 describe("TheAlertsTable data/creation", () => {
-  const wrapper = mount(TheAlertsTable, {
+  const wrapper: VueWrapper<any> = mount(TheAlertsTable, {
     global: {
       plugins: [createTestingPinia({ stubActions: false }), PrimeVue, router],
     },
@@ -136,7 +136,7 @@ describe("TheAlertsTable data/creation", () => {
 
 // METHODS (SUCCESS)
 describe("TheAlertsTable methods success", () => {
-  const wrapper = mount(TheAlertsTable, {
+  const wrapper: VueWrapper<any> = mount(TheAlertsTable, {
     global: {
       plugins: [createTestingPinia({ stubActions: false }), PrimeVue, router],
     },
@@ -184,6 +184,24 @@ describe("TheAlertsTable methods success", () => {
       global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
   });
+  it("will export the alerts table to CSV on exportCSV", async () => {
+    // we cant actually export the CSV in test so mock one of the dependency functions
+    window.URL.createObjectURL = jest.fn().mockReturnValueOnce("fakeURL");
+    wrapper.vm.exportCSV();
+  });
+
+  it("will correctly set selectedColumns when onColumnToggle", async () => {
+    expect(wrapper.vm.selectedColumns).toStrictEqual([
+      { field: "eventTime", header: "Event Time" },
+      { field: "name", header: "Name" },
+      { field: "owner", header: "Owner" },
+      { field: "disposition", header: "Disposition" },
+    ]);
+    await wrapper.vm.onColumnToggle([wrapper.vm.columns[0]]);
+    expect(wrapper.vm.selectedColumns).toStrictEqual([
+      { field: "dispositionTime", header: "Dispositioned Time" },
+    ]);
+  });
   it("will reload the alerts with new pagination settings on 'onPage'", async () => {
     const mockRequest = myNock
       .get("/alert/?sort=event_time%7Cdesc&limit=1&offset=1")
@@ -209,11 +227,25 @@ describe("TheAlertsTable methods success", () => {
     expect(wrapper.vm.sortOrder).toEqual("asc");
     expect(mockRequestSort.isDone()).toEqual(true);
   });
+  it("will reset sort settings if sort called without sortField", async () => {
+    await wrapper.vm.sort({});
+    expect(wrapper.vm.sortField).toBeNull();
+    expect(wrapper.vm.sortOrder).toBeNull();
+  });
+  it("will reload and clear selected alerts, and clear requestReload on reloadTable", async () => {
+    wrapper.vm.selectedAlertStore.selectAll(["uuid1", "uuid2", "uuid3"]);
+    wrapper.vm.selectedRows = ["uuid1", "uuid2", "uuid3"];
+    wrapper.vm.alertTableStore.requestReload = true;
+    await wrapper.vm.reloadTable();
+    expect(wrapper.vm.selectedRows).toEqual([]);
+    expect(wrapper.vm.selectedAlertStore.selected).toEqual([]);
+    expect(wrapper.vm.alertTableStore.requestReload).toBeFalsy();
+  });
 });
 
 // METHODS (FAILED)
 describe("TheAlertsTable methods failed", () => {
-  const wrapper = mount(TheAlertsTable, {
+  const wrapper: VueWrapper<any> = mount(TheAlertsTable, {
     global: {
       plugins: [createTestingPinia({ stubActions: false }), PrimeVue, router],
     },

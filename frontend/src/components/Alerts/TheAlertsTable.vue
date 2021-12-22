@@ -92,13 +92,23 @@
           >
           <br />
           <span>
-            <Tag v-for="tag in data.tags" :key="tag.uuid" class="p-mr-2" rounded>{{
-              tag.value
-            }}</Tag>
+            <Tag
+              v-for="tag in data.tags"
+              :key="tag.uuid"
+              class="p-mr-2"
+              rounded
+              >{{ tag.value }}</Tag
+            >
           </span>
-              <span v-if="data.comments">
-                <pre v-for="comment in data.comments" :key="comment.uuid" class="p-mr-2" >({{comment.user.displayName}}) {{comment.value}}</pre>
-              </span>
+          <span v-if="data.comments">
+            <pre
+              v-for="comment in data.comments"
+              :key="comment.uuid"
+              class="p-mr-2"
+            >
+({{ comment.user.displayName }}) {{ comment.value }}</pre
+            >
+          </span>
         </div>
         <span v-else-if="col.field.includes('Time')">
           {{ formatDateTime(data[col.field]) }}</span
@@ -201,12 +211,16 @@
 
   alertTableStore.$subscribe(async (_, state) => {
     if (state.requestReload) {
-      selectedRows.value = [];
-      selectedAlertStore.unselectAll();
-      alertTableStore.requestReload = false;
-      await loadAlerts();
+      await reloadTable();
     }
   });
+
+  const reloadTable = async () => {
+    selectedRows.value = [];
+    selectedAlertStore.unselectAll();
+    alertTableStore.requestReload = false;
+    await loadAlerts();
+  };
 
   onMounted(async () => {
     initAlertTable();
