@@ -100,7 +100,7 @@
     }
   };
 
-    const showAddToEventButton = computed(() => {
+  const showAddToEventButton = computed(() => {
     // Only show add to event button if selected disposition is an 'elevated' disposition
     if (newDisposition.value) {
       return newDisposition.value.rank > 1;
@@ -115,7 +115,7 @@
     };
   });
 
-    const handleError = () => {
+  const handleError = () => {
     error.value = null;
     close();
   };

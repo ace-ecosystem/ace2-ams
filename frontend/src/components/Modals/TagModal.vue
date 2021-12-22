@@ -77,7 +77,7 @@
         });
       }
     } catch (err) {
-      error.value = err.message || "Something went wrong!";
+      error.value = err.message;
     }
 
     isLoading.value = false;

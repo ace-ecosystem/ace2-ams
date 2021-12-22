@@ -74,9 +74,9 @@ describe("AssignModal.vue", () => {
 
     // Mock the update alert API call
     myNock.options("/alert/1").reply(200, "Success");
-    myNock.patch("/alert/1").reply(200, "Success");
+    myNock.patch("/alert/1", '{"owner":"Alice"}').reply(200, "Success");
     myNock.options("/alert/2").reply(200, "Success");
-    myNock.patch("/alert/2").reply(200, "Success");
+    myNock.patch("/alert/2", '{"owner":"Alice"}').reply(200, "Success");
 
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
     wrapper.vm.modalStore.open("AssignModal");
@@ -100,7 +100,7 @@ describe("AssignModal.vue", () => {
     const updateAlert = myNock
       .options("/alert/1")
       .reply(200, "Success")
-      .patch("/alert/1")
+      .patch("/alert/1", '{"owner":"Alice"}')
       .reply(403, "Unauthorized");
 
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);

@@ -136,9 +136,11 @@ describe("TagModal.vue", () => {
 
     const res1 = wrapper.vm.newAlertTags("uuid1", ["tag2", "tag3"]);
     const res2 = wrapper.vm.newAlertTags("uuid2", ["tag2", "tag3"]);
+    const res3 = wrapper.vm.newAlertTags("uuid3", ["tag2", "tag3"]);
 
     expect(res1).toEqual(["tag2", "tag3"]);
     expect(res2).toEqual(["tag1", "tag2", "tag3"]);
+    expect(res3).toEqual(["tag2", "tag3"]);
   });
 
   it("will close the modal when addTags has successfully finished", async () => {

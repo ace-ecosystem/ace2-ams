@@ -134,7 +134,7 @@ describe("DispositionModal.vue", () => {
     myNock
       .patch("/alert/2", '{"disposition":"low dispostion"}')
       .reply(200, "Success");
-    const comment = myNock
+    myNock
       .post("/node/comment/", {
         user: "Alice",
         value: "test comment",
@@ -148,6 +148,40 @@ describe("DispositionModal.vue", () => {
         node_uuid: "2",
       })
       .reply(201, "Success");
+
+    expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
+    wrapper.vm.modalStore.open("DispositionModal");
+    expect(wrapper.vm.modalStore.openModals).toStrictEqual([
+      "DispositionModal",
+    ]);
+    await wrapper.vm.setDisposition();
+    expect(wrapper.vm.newDisposition).toBeNull();
+    expect(wrapper.vm.dispositionComment).toBeNull();
+    expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
+    expect(wrapper.vm.alertTableStore.requestReload).toBeTruthy();
+  });
+
+  it("will close the modal when setDisposition has successfully finished (no dispositionComment)", async () => {
+    const { wrapper } = factory({ stubActions: false });
+
+    // Set the selected alert
+    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+
+    // Set the selected user
+    wrapper.vm.authStore.user = { username: "Alice" };
+
+    // Set the new disposition / comment values
+    wrapper.vm.newDisposition = { value: "low dispostion", rank: 1 };
+
+    // Mock the update alert API calls
+    myNock.options("/alert/1").reply(200, "Success");
+    myNock
+      .patch("/alert/1", '{"disposition":"low dispostion"}')
+      .reply(200, "Success");
+    myNock.options("/alert/2").reply(200, "Success");
+    myNock
+      .patch("/alert/2", '{"disposition":"low dispostion"}')
+      .reply(200, "Success");
 
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
     wrapper.vm.modalStore.open("DispositionModal");
