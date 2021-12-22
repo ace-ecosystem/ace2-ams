@@ -219,7 +219,7 @@ describe("TheAlertsTable methods success", () => {
     const mockRequestSort = myNock
       .get("/alert/?sort=name%7Casc&limit=1&offset=1")
       .reply(200, {
-        items: [{ uuid: "alert_2" }],
+        items: [mockAPIAlert],
         total: 2,
       });
     await wrapper.vm.sort({ sortField: "name", sortOrder: 1 });

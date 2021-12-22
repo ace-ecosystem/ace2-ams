@@ -2,12 +2,12 @@
 <!-- Toolbar containing all alert-related actions, such as Disposition, Assign, Comment, etc. -->
 
 <template>
-    <div>
-      <div v-if="error" class="p-col">
+  <div>
+    <div v-if="error" class="p-col">
       <Message severity="error" @close="handleError">{{ error }}</Message>
-      </div>
     </div>
-  <Toolbar style="overflow-x: auto">
+  </div>
+  <Toolbar id="AlertActionToolbar" style="overflow-x: auto" >
     <template #left>
       <!--      DISPOSITION -->
       <Button
@@ -105,7 +105,7 @@
     } catch (err) {
       console.log(err);
     }
-
+    selectedAlertStore.unselectAll();
     alertTableStore.requestReload = true;
   }
 

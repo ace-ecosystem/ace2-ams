@@ -104,7 +104,7 @@
             <pre
               v-for="comment in data.comments"
               :key="comment.uuid"
-              class="p-mr-2"
+              class="p-mr-2 comment"
             >
 ({{ comment.user.displayName }}) {{ comment.value }}</pre
             >
