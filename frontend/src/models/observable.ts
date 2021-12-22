@@ -1,14 +1,23 @@
 import { analysisTreeRead } from "./analysis";
 import { UUID } from "./base";
 import { nodeCreate, nodeRead, nodeTreeCreate, nodeUpdate } from "./node";
+import { nodeCommentRead } from "./nodeComment";
+import { nodeDirectiveRead } from "./nodeDirective";
+import { nodeTagRead } from "./nodeTag";
+import { nodeThreatRead } from "./nodeThreat";
+import { nodeThreatActorRead } from "./nodeThreatActor";
 import { observableTypeRead } from "./observableType";
 
 export interface observableCreate extends nodeCreate {
   context?: string;
+  directives?: string[];
   expiresOn?: Date;
   forDetection?: boolean;
   nodeTree: nodeTreeCreate;
   redirectionUuid?: UUID;
+  tags?: string[];
+  threatActors?: string[];
+  threats?: string[];
   time?: Date;
   type: string;
   value: string;
@@ -16,10 +25,15 @@ export interface observableCreate extends nodeCreate {
 }
 
 export interface observableRead extends nodeRead {
+  comments: nodeCommentRead[];
   context: string | null;
+  directives: nodeDirectiveRead[];
   expiresOn: Date | null;
   forDetection: boolean;
   redirectionUuid: UUID | null;
+  tags: nodeTagRead[];
+  threatActors: nodeThreatActorRead[];
+  threats: nodeThreatRead[];
   time: Date;
   type: observableTypeRead;
   value: string;
@@ -41,9 +55,13 @@ export interface observableTreeRead extends observableRead {
 
 export interface observableUpdate extends nodeUpdate {
   context?: string;
+  directives?: string[];
   expiresOn?: Date;
   forDetection?: boolean;
   redirectionUuid?: UUID;
+  tags?: string[];
+  threatActors?: string[];
+  threats?: string[];
   time?: Date;
   type?: string;
   value?: string;

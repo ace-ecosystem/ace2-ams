@@ -4,7 +4,7 @@ from typing import List, Optional
 from uuid import uuid4
 
 from api.models import type_str, validators
-from api.models.node import NodeBase, NodeCreate, NodeRead, NodeTreeCreateWithNode, NodeUpdate
+from api.models.node import NodeBase, NodeCreate, NodeRead, NodeTreeCreateWithNode, NodeTreeItemRead, NodeUpdate
 from api.models.node_comment import NodeCommentRead
 from api.models.node_directive import NodeDirectiveRead
 from api.models.node_tag import NodeTagRead
@@ -80,6 +80,13 @@ class ObservableRead(NodeRead, ObservableBase):
     type: ObservableTypeRead = Field(description="The type of the observable")
 
     uuid: UUID4 = Field(description="The UUID of the observable")
+
+    class Config:
+        orm_mode = True
+
+
+class ObservableNodeTreeRead(ObservableRead, NodeTreeItemRead):
+    """Model used to control which information for an Observable is displayed when getting an alert tree"""
 
     class Config:
         orm_mode = True

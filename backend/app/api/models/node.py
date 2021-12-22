@@ -1,16 +1,8 @@
 from pydantic import BaseModel, Field, UUID4
-from typing import List, Optional
+from typing import Dict, List, Optional
 from uuid import uuid4
 
 from api.models import type_str
-
-
-class NodeTreeItemRead(BaseModel):
-    parent_tree_uuid: Optional[UUID4] = Field(
-        description="The node's parent leaf UUID if the node is inside a NodeTree"
-    )
-
-    tree_uuid: Optional[UUID4] = Field(description="The UUID of the leaf if this Node is inside a NodeTree")
 
 
 class NodeBase(BaseModel):
@@ -40,7 +32,7 @@ class NodeCreate(NodeBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the node")
 
 
-class NodeRead(NodeBase, NodeTreeItemRead):
+class NodeRead(NodeBase):
 
     node_type: type_str = Field(description="The type of the Node")
 
@@ -82,6 +74,18 @@ class NodeTreeCreateWithNode(BaseModel):
     )
 
     parent_tree_uuid: Optional[UUID4] = Field(description="The UUID of the leaf in the tree that should be the parent")
+
+
+class NodeTreeItemRead(NodeRead):
+    children: List[Dict] = Field(default_factory=list, description="A list of this Node's child Nodes")
+
+    first_appearance: bool = Field("Whether or not this is the first time the Node appears in the tree")
+
+    parent_tree_uuid: Optional[UUID4] = Field(
+        description="The node's parent leaf UUID if the node is inside a NodeTree"
+    )
+
+    tree_uuid: UUID4 = Field(description="The UUID of the leaf if this Node is inside a NodeTree")
 
 
 class NodeTreeRead(BaseModel):
