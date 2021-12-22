@@ -4,22 +4,9 @@ import { alertFilterParams, alertRead } from "@/models/alert";
 import { parseAlertSummary, useAlertTableStore } from "@/stores/alertTable";
 import { createTestingPinia } from "@pinia/testing";
 import { mockAlert } from "../../../mockData/alert";
-import { userRead } from "@/models/user";
-import { nodeCommentRead } from "@/models/nodeComment";
 
 createTestingPinia();
 const store = useAlertTableStore();
-
-const mockUser: userRead = {
-  defaultAlertQueue: { value: "testQueue", description: null, uuid: "1" },
-  displayName: "",
-  email: "",
-  enabled: false,
-  roles: [],
-  timezone: "",
-  username: "",
-  uuid: "",
-};
 
 const mockAlertReadA = Object.assign({}, mockAlert, { uuid: "uuid1" });
 const mockAlertReadB = Object.assign({}, mockAlert, { uuid: "uuid2" });
@@ -44,13 +31,12 @@ const mockAlertReadC: alertRead = {
   toolInstance: null,
   type: { value: "testType", description: null, uuid: "1" },
   comments: [],
-  directives: [],
   nodeType: "",
   tags: [],
-  threatActor: null,
   threats: [],
   uuid: "uuid3",
   version: "",
+  threatActors: [],
 };
 
 const mockAlertReadASummary = {
