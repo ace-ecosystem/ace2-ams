@@ -36,20 +36,19 @@
 
   import Button from "primevue/button";
   import Message from "primevue/message";
-
   import Textarea from "primevue/textarea";
 
   import BaseModal from "@/components/Modals/BaseModal";
 
   import { NodeComment } from "@/services/api/nodeComment";
+
+  import { useAlertTableStore } from "@/stores/alertTable";
+  import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
-  import { useAuthStore } from "@/stores/auth";
-  const authStore = useAuthStore();
-  import { useAlertTableStore } from "@/stores/alertTable";
   const alertTableStore = useAlertTableStore();
-
+  const authStore = useAuthStore();
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
 
@@ -68,7 +67,7 @@
         await NodeComment.create({ ...commentData.value, nodeUuid: uuid });
       }
     } catch (err) {
-      error.value = err.message || "Something went wrong!";
+      error.value = err.message;
     }
 
     isLoading.value = false;
@@ -80,7 +79,7 @@
 
   const commentData = computed(() => {
     return {
-      user: authStore.user.username,
+      user: authStore.user ? authStore.user.username : null,
       value: newComment.value,
     };
   });
