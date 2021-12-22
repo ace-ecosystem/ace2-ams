@@ -53,40 +53,28 @@
 
   import { NodeComment } from "@/services/api/nodeComment";
 
-  import { useModalStore } from "@/stores/modal";
   import { useAlertDispositionStore } from "@/stores/alertDisposition";
-
-  const alertDispositionStore = useAlertDispositionStore();
-  const modalStore = useModalStore();
-  import { useAuthStore } from "@/stores/auth";
-  const authStore = useAuthStore();
-
   import { useAlertStore } from "@/stores/alert";
+  import { useAlertTableStore } from "@/stores/alertTable";
+  import { useAuthStore } from "@/stores/auth";
+  import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
+  const alertDispositionStore = useAlertDispositionStore();
   const alertStore = useAlertStore();
-  const selectedAlertStore = useSelectedAlertStore();
-
-  import { useAlertTableStore } from "@/stores/alertTable";
   const alertTableStore = useAlertTableStore();
+  const authStore = useAuthStore();
+  const modalStore = useModalStore();
+  const selectedAlertStore = useSelectedAlertStore();
 
   const props = defineProps({
     name: { type: String, required: true },
   });
 
-  const error = ref(null);
-
-  const isLoading = ref(false);
   const newDisposition = ref(null);
   const dispositionComment = ref(null);
-
-  const showAddToEventButton = computed(() => {
-    // Only show add to event button if selected disposition is an 'elevated' disposition
-    if (newDisposition.value) {
-      return newDisposition.value.rank > 1;
-    }
-    return false;
-  });
+  const isLoading = ref(false);
+  const error = ref(null);
 
   const setDisposition = async () => {
     isLoading.value = true;
@@ -101,7 +89,7 @@
         }
       }
     } catch (err) {
-      error.value = err.message || "Something went wrong!";
+      error.value = err.message;
     }
 
     isLoading.value = false;
@@ -112,14 +100,29 @@
     }
   };
 
+    const showAddToEventButton = computed(() => {
+    // Only show add to event button if selected disposition is an 'elevated' disposition
+    if (newDisposition.value) {
+      return newDisposition.value.rank > 1;
+    }
+    return false;
+  });
+
   const commentData = computed(() => {
     return {
-      user: authStore.user.username,
+      user: authStore.user ? authStore.user.username : null,
       value: dispositionComment.value,
     };
   });
 
+    const handleError = () => {
+    error.value = null;
+    close();
+  };
+
   const close = () => {
+    newDisposition.value = null;
+    dispositionComment.value = null;
     modalStore.close(props.name);
   };
 
