@@ -35,6 +35,8 @@
 
   import BaseModal from "@/components/Modals/BaseModal";
 
+  import { NodeTag } from "@/services/api/nodeTag";
+
   import { useAlertStore } from "@/stores/alert";
   import { useAlertTableStore } from "@/stores/alertTable";
   import { useModalStore } from "@/stores/modal";
@@ -43,29 +45,26 @@
 
   const alertStore = useAlertStore();
   const alertTableStore = useAlertTableStore();
-
   const modalStore = useModalStore();
   const nodeTagStore = useNodeTagStore();
   const selectedAlertStore = useSelectedAlertStore();
-
-  import { NodeTag } from "@/services/api/nodeTag";
 
   const props = defineProps({
     name: { type: String, required: true },
   });
 
-  const error = ref(null);
-  const isLoading = ref(false);
   const newTags = ref([]);
   const storeTagValues = ref([]);
+  const error = ref(null);
+  const isLoading = ref(false);
 
   onMounted(async () => {
     await loadTags();
   });
 
   async function loadTags() {
-    await nodeTagStore.readAll();
-    storeTagValues.value = tagValues(nodeTagStore.allItems);
+      await nodeTagStore.readAll();
+      storeTagValues.value = tagValues(nodeTagStore.allItems);
   }
 
   async function addTags() {
@@ -73,9 +72,8 @@
     try {
       await createTags(newTags.value);
       for (const uuid of selectedAlertStore.selected) {
-        const alert = alertTableStore.visibleQueriedAlertById(uuid);
         await alertStore.update(uuid, {
-          tags: tagValues(alert.tags).concat(newTags.value),
+          tags: newAlertTags(uuid, newTags.value),
         });
       }
     } catch (err) {
@@ -87,6 +85,12 @@
       close();
       alertTableStore.requestReload = true;
     }
+  }
+
+  function newAlertTags(uuid, tags) {
+    const alert = alertTableStore.visibleQueriedAlertById(uuid);
+    const alertTags = alert ? alert.tags : [];
+    return tagValues(alertTags).concat(tags);
   }
 
   async function createTags(tags) {
@@ -110,10 +114,15 @@
     return values;
   }
 
-  function addExistingTag(event) {
+  function addExistingTag(tagEvent) {
     // Add an existing tag to the list of tags to be added
-    newTags.value.push(event.value.value);
+    newTags.value.push(tagEvent.value.value);
   }
+
+  const handleError = () => {
+    error.value = null;
+    close();
+  };
 
   function close() {
     newTags.value = [];
