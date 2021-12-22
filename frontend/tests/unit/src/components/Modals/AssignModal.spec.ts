@@ -51,78 +51,28 @@ describe("AssignModal.vue", () => {
     expect(wrapper.vm.error).toBeNull();
   });
 
-  // NOTE: This test should use jest.spyOn, but we can't when using Composition functions
-  // https://stackoverflow.com/questions/64544061/cannot-spyon-functions-inside-of-vue-3-setup
-  // https://forum.vuejs.org/t/vue3-jest-is-there-a-technique-for-testing-composition-functions/106004
-  it("will call assignUser when assignUserClicked called and one alert is selected", async () => {
+  it("will remove the AssignModal from open modals store and clear selectedUser on close", async () => {
     const { wrapper } = factory({ stubActions: false });
 
-    // Set the selected alert
-    wrapper.vm.selectedAlertStore.selected = ["1"];
-
-    // Set the selected user
     wrapper.vm.selectedUser = { username: "Alice" };
+    wrapper.vm.modalStore.open("AssignModal");
 
-    // Mock the update alert API call
-    myNock.options("/alert/1").reply(200, "Success");
-    const updateAlert = myNock.patch("/alert/1").reply(200, "Success");
+    wrapper.vm.close();
 
-    await wrapper.vm.assignUserClicked();
-    expect(updateAlert.isDone()).toBe(true);
-  });
-
-  // NOTE: This test should use jest.spyOn, but we can't when using Composition functions
-  // https://stackoverflow.com/questions/64544061/cannot-spyon-functions-inside-of-vue-3-setup
-  // https://forum.vuejs.org/t/vue3-jest-is-there-a-technique-for-testing-composition-functions/106004
-  it("will call assignUserMultiple when assignUserClicked called and multiple alerts are selected", async () => {
-    const { wrapper } = factory({ stubActions: false });
-
-    // Set the selected alerts
-    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
-
-    // Set the selected user
-    wrapper.vm.selectedUser = { username: "Alice" };
-
-    // Mock the update alert API calls
-    myNock.options("/alert/1").reply(200, "Success");
-    const updateAlert1 = myNock.patch("/alert/1").reply(200, "Success");
-    myNock.options("/alert/2").reply(200, "Success");
-    const updateAlert2 = myNock.patch("/alert/2").reply(200, "Success");
-
-    await wrapper.vm.assignUserClicked();
-    expect(updateAlert1.isDone()).toBe(true);
-    expect(updateAlert2.isDone()).toBe(true);
+    expect(wrapper.vm.selectedUser).toBeNull();
+    expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
   });
 
   it("will close the modal when assignUser has successfully finished", async () => {
     const { wrapper } = factory({ stubActions: false });
 
     // Set the selected alert
-    wrapper.vm.selectedAlertStore.selected = ["1"];
-
-    // Set the selected user
-    wrapper.vm.selectedUser = { username: "Alice" };
-
-    // Mock the update alert API call
-    myNock.options("/alert/1").reply(200, "Success");
-    myNock.patch("/alert/1").reply(200, "Success");
-
-    expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
-    wrapper.vm.modalStore.open("AssignModal");
-    expect(wrapper.vm.modalStore.openModals).toStrictEqual(["AssignModal"]);
-    await wrapper.vm.assignUser();
-    expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
-  });
-  it("will close the modal when assignUserToMultiple has successfully finished", async () => {
-    const { wrapper } = factory({ stubActions: false });
-
-    // Set the selected alerts
     wrapper.vm.selectedAlertStore.selected = ["1", "2"];
 
     // Set the selected user
     wrapper.vm.selectedUser = { username: "Alice" };
 
-    // Mock the update alert API calls
+    // Mock the update alert API call
     myNock.options("/alert/1").reply(200, "Success");
     myNock.patch("/alert/1").reply(200, "Success");
     myNock.options("/alert/2").reply(200, "Success");
@@ -131,8 +81,10 @@ describe("AssignModal.vue", () => {
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
     wrapper.vm.modalStore.open("AssignModal");
     expect(wrapper.vm.modalStore.openModals).toStrictEqual(["AssignModal"]);
-    await wrapper.vm.assignUserToMultiple();
+    await wrapper.vm.assignUser();
+    expect(wrapper.vm.selectedUser).toBeNull();
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
+    expect(wrapper.vm.alertTableStore.requestReload).toBeTruthy();
   });
 
   it("will not close the modal and will set the 'error' property when assignUser fails", async () => {
@@ -145,36 +97,20 @@ describe("AssignModal.vue", () => {
     wrapper.vm.selectedUser = { username: "Alice" };
 
     // Mock the update alert API call
-    const updateAlert = myNock.options("/alert/1").reply(403, "Unauthorized");
+    const updateAlert = myNock
+      .options("/alert/1")
+      .reply(200, "Success")
+      .patch("/alert/1")
+      .reply(403, "Unauthorized");
 
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
     wrapper.vm.modalStore.open("AssignModal");
     expect(wrapper.vm.modalStore.openModals).toStrictEqual(["AssignModal"]);
     await wrapper.vm.assignUser();
     expect(updateAlert.isDone()).toBe(true);
-    expect(wrapper.vm.error).toEqual("Network Error");
+    expect(wrapper.vm.error).toEqual("Request failed with status code 403");
+    expect(wrapper.vm.selectedUser).toEqual({ username: "Alice" });
     expect(wrapper.vm.modalStore.openModals).toStrictEqual(["AssignModal"]);
-  });
-
-  // TODO: Figure out how best to do the tests that check the failure conditions
-  it("will not close the modal and will set the 'error' property when assignUserToMultiple fails", async () => {
-    const { wrapper } = factory({ stubActions: false });
-
-    // Set the selected alerts
-    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
-
-    // Set the selected user
-    wrapper.vm.selectedUser = { username: "Alice" };
-
-    // Mock the update alert API calls
-    myNock.options("/alert/1").reply(403, "Unauthorized");
-    myNock.options("/alert/2").reply(403, "Unauthorized");
-
-    expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
-    wrapper.vm.modalStore.open("AssignModal");
-    expect(wrapper.vm.modalStore.openModals).toStrictEqual(["AssignModal"]);
-    await wrapper.vm.assignUserToMultiple();
-    expect(wrapper.vm.error).toEqual("Network Error");
-    expect(wrapper.vm.modalStore.openModals).toStrictEqual(["AssignModal"]);
+    expect(wrapper.vm.alertTableStore.requestReload).toBeFalsy();
   });
 });

@@ -32,7 +32,7 @@
         label="Assign"
         icon="pi pi-check"
         :disabled="!selectedAlertStore.anySelected"
-        @click="assignUserClicked()"
+        @click="assignUser()"
       />
     </template>
   </BaseModal>
@@ -68,7 +68,7 @@
     name: { type: String, required: true },
   });
 
-  const assignUserClicked = async () => {
+  const assignUser = async () => {
     isLoading.value = true;
 
     try {
