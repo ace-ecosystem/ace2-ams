@@ -26,13 +26,18 @@
         class="p-button-text"
         @click="close"
       />
-      <Button label="Add" icon="pi pi-check" @click="addComment" />
+      <Button
+        label="Add"
+        icon="pi pi-check"
+        :disabled="!allowSubmit"
+        @click="addComment"
+      />
     </template>
   </BaseModal>
 </template>
 
 <script setup>
-  import { computed, defineProps, ref } from "vue";
+  import { computed, defineEmits, defineProps, ref } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -42,19 +47,19 @@
 
   import { NodeComment } from "@/services/api/nodeComment";
 
-  import { useAlertTableStore } from "@/stores/alertTable";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
-  const alertTableStore = useAlertTableStore();
   const authStore = useAuthStore();
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
 
   const error = ref(null);
   const isLoading = ref(false);
-  const newComment = ref(null);
+  const newComment = ref("");
+
+  const emit = defineEmits(["requestReload"]);
 
   const props = defineProps({
     name: { type: String, required: true },
@@ -73,7 +78,7 @@
     isLoading.value = false;
     if (!error.value) {
       close();
-      alertTableStore.requestReload = true;
+      emit("requestReload");
     }
   }
 
@@ -84,13 +89,17 @@
     };
   });
 
+  const allowSubmit = computed(() => {
+    return selectedAlertStore.anySelected && newComment.value.length;
+  });
+
   const handleError = () => {
     error.value = null;
     close();
   };
 
   const close = () => {
-    newComment.value = null;
+    newComment.value = "";
     modalStore.close(props.name);
   };
 </script>

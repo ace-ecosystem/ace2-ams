@@ -16,7 +16,10 @@
         label="Disposition"
         @click="open('DispositionModal')"
       />
-      <DispositionModal name="DispositionModal" />
+      <DispositionModal
+        name="DispositionModal"
+        @requestReload="requestReload"
+      />
       <!--      COMMENT -->
       <Button
         class="p-m-1 p-button-sm"
@@ -24,12 +27,13 @@
         label="Comment"
         @click="open('CommentModal')"
       />
-      <CommentModal name="CommentModal" />
+      <CommentModal name="CommentModal" @requestReload="requestReload" />
       <!--      TAKE OWNERSHIP -- NO MODAL -->
       <Button
         class="p-m-1 p-button-sm"
         icon="pi pi-briefcase"
         label="Take Ownership"
+        :disabled="!selectedAlertStore.anySelected"
         @click="takeOwnership"
       />
       <!--      ASSIGN -->
@@ -39,15 +43,16 @@
         label="Assign"
         @click="open('AssignModal')"
       />
-      <AssignModal name="AssignModal" />
+      <AssignModal name="AssignModal" @requestReload="requestReload" />
       <!--      TAG MODAL -->
       <Button
         class="p-m-1 p-button-sm"
         icon="pi pi-tags"
         label="Tag"
         @click="open('TagModal')"
+        @requestReload="requestReload"
       />
-      <TagModal name="TagModal" />
+      <TagModal name="TagModal" @requestReload="requestReload" />
       <!--      REMEDIATE MODAL -->
       <Button
         class="p-m-1 p-button-sm"
@@ -66,6 +71,7 @@
 
 <script setup>
   import { ref } from "vue";
+  import { useRoute } from "vue-router";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -89,6 +95,7 @@
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
 
+  const route = useRoute();
   const error = ref(null);
 
   const open = (name) => {
@@ -103,10 +110,17 @@
         });
       }
     } catch (err) {
-      console.log(err);
+      error.value = err.message;
     }
-    selectedAlertStore.unselectAll();
-    alertTableStore.requestReload = true;
+    requestReload();
+  }
+
+  function requestReload() {
+    if (route.name == "Manage Alerts") {
+      alertTableStore.requestReload = true;
+    } else if (route.name == "View Alert") {
+      alertStore.requestReload = true;
+    }
   }
 
   const handleError = () => {

@@ -30,7 +30,12 @@
     </div>
 
     <template #footer>
-      <Button label="Save" class="p-button-outlined" @click="setDisposition" />
+      <Button
+        label="Save"
+        class="p-button-outlined"
+        :disabled="!allowSubmit"
+        @click="setDisposition"
+      />
       <Button
         v-if="showAddToEventButton"
         label="Save to Event"
@@ -47,7 +52,7 @@
 </template>
 
 <script setup>
-  import { computed, defineProps, ref } from "vue";
+  import { computed, defineEmits, defineProps, ref } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -61,17 +66,17 @@
 
   import { useAlertDispositionStore } from "@/stores/alertDisposition";
   import { useAlertStore } from "@/stores/alert";
-  import { useAlertTableStore } from "@/stores/alertTable";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
   const alertDispositionStore = useAlertDispositionStore();
   const alertStore = useAlertStore();
-  const alertTableStore = useAlertTableStore();
   const authStore = useAuthStore();
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
+
+  const emit = defineEmits(["requestReload"]);
 
   const props = defineProps({
     name: { type: String, required: true },
@@ -102,7 +107,7 @@
 
     if (!error.value) {
       close();
-      alertTableStore.requestReload = true;
+      emit("requestReload");
     }
   };
 
@@ -125,6 +130,10 @@
     error.value = null;
     close();
   };
+
+  const allowSubmit = computed(() => {
+    return selectedAlertStore.anySelected && newDisposition.value;
+  });
 
   const close = () => {
     newDisposition.value = null;

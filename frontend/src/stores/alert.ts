@@ -9,6 +9,9 @@ export const useAlertStore = defineStore({
 
   state: () => ({
     openAlert: null as unknown as alertTreeRead,
+
+    // whether the alert should be reloaded
+    requestReload: false,
   }),
 
   actions: {

@@ -1,13 +1,14 @@
 <!-- ViewAlert.vue -->
 
 <template>
+  <TheAlertActionToolbar id="AlertActionToolbar" />
   <Card>
     <template #content>
       <div class="p-tree p-component p-tree-wrapper" style="border: none">
         <AlertTree
           v-if="alertStore.openAlert"
-          :items="alertStore.openAlert.tree"
           id="alert-tree"
+          :items="alertStore.openAlert.tree"
         />
       </div>
     </template>
@@ -19,21 +20,29 @@
   import Card from "primevue/card";
   import { useRoute } from "vue-router";
 
+  import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar";
   import AlertTree from "@/components/Alerts/AlertTree";
   import { useAlertStore } from "@/stores/alert";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
+  const route = useRoute();
   const alertStore = useAlertStore();
   const selectedAlertStore = useSelectedAlertStore();
 
   provide("filterType", "alerts");
 
   onBeforeMount(async () => {
-    await initPage(useRoute().params.alertID);
+    await initPage(route.params.alertID);
   });
 
   onUnmounted(() => {
     selectedAlertStore.unselectAll();
+  });
+
+  alertStore.$subscribe(async (_, state) => {
+    if (state.requestReload) {
+      await alertStore.read(route.params.alertID);
+    }
   });
 
   async function initPage(alertID) {
