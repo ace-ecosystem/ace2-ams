@@ -1,16 +1,24 @@
-from fastapi import status
+from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from uuid import UUID, uuid4
 
-from api.models.node import NodeCreate, NodeUpdate
+from api.models.node import NodeCreate, NodeUpdate, NodeVersion
+from api.routes import helpers
 from db import crud
+from db.database import get_db
 from db.schemas.node import Node
 from db.schemas.node_directive import NodeDirective
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
+
+
+router = APIRouter(
+    prefix="/node",
+    tags=["Node"],
+)
 
 
 def create_node(
@@ -75,3 +83,15 @@ def update_node(node_update: NodeUpdate, uuid: UUID, db_table: DeclarativeMeta, 
     db_node.version = uuid4()
 
     return db_node
+
+
+#
+# READ
+#
+
+
+def get_node_version(uuid: UUID, db: Session = Depends(get_db)):
+    return crud.read(uuid=uuid, db_table=Node, db=db)
+
+
+helpers.api_route_read(router, get_node_version, NodeVersion, path="/{uuid}/version")
