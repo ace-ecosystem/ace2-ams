@@ -79,7 +79,6 @@ describe("DispositionModal.vue", () => {
     expect(wrapper.vm.allowSubmit).toBeTruthy();
   });
 
-
   it("correctly computes showAddToEventButton", () => {
     const { wrapper } = factory();
 

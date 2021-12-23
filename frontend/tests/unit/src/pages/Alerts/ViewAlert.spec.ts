@@ -13,7 +13,7 @@ import {
 import nock from "nock";
 
 describe("ViewAlert.vue", () => {
-  myNock.get("/alert/uuid1").reply(200, mockAlertRead)
+  myNock.get("/alert/uuid1").reply(200, mockAlertRead);
   const router = createRouterMock({
     initialLocation: "/alert/uuid1",
   });
@@ -37,7 +37,7 @@ describe("ViewAlert.vue", () => {
     expect(wrapper.exists()).toBe(true);
   });
   it("reloads open alert on reloadPage", async () => {
-    const reload = myNock.get("/alert/uuid1").reply(200, mockAlertRead)
+    const reload = myNock.get("/alert/uuid1").reply(200, mockAlertRead);
     const selectedAlertStore = useSelectedAlertStore();
     const alertStore = useAlertStore();
     await wrapper.vm.reloadPage();
@@ -48,7 +48,7 @@ describe("ViewAlert.vue", () => {
     expect(reload.isDone()).toBe(true);
   });
   it("selects open alert and fetches given alertID on initPage", async () => {
-    myNock.get("/alert/uuid1").reply(200, mockAlertRead)
+    myNock.get("/alert/uuid1").reply(200, mockAlertRead);
     const selectedAlertStore = useSelectedAlertStore();
     const alertStore = useAlertStore();
     await wrapper.vm.initPage("uuid1");
@@ -58,7 +58,7 @@ describe("ViewAlert.vue", () => {
     );
   });
   it("unselects all selected alerts when umounted", async () => {
-    const reload = myNock.get("/alert/uuid1").reply(200, mockAlertRead)
+    const reload = myNock.get("/alert/uuid1").reply(200, mockAlertRead);
     const selectedAlertStore = useSelectedAlertStore();
     await wrapper.vm.initPage("uuid1");
     expect(selectedAlertStore.selected).toEqual(["uuid1"]);
