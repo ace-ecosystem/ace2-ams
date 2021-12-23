@@ -41,9 +41,14 @@
 
   alertStore.$subscribe(async (_, state) => {
     if (state.requestReload) {
-      await alertStore.read(route.params.alertID);
+      await reloadPage(route.params.alertID);
     }
   });
+
+  async function reloadPage() {
+    alertStore.$reset();
+    await alertStore.read(route.params.alertID);
+  }
 
   async function initPage(alertID) {
     selectedAlertStore.unselectAll();

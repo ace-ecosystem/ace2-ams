@@ -7,10 +7,8 @@ import myNock from "@unit/services/api/nock";
 import { createRouterMock, getRouter, injectRouterMock } from "vue-router-mock";
 
 import {
-  mockAlertTree,
   mockAlertRead,
   mockAlertReadDateStringsFirstAppearances,
-  mockAlertTreeFirstAppearances,
 } from "../../../../mockData/alert";
 import nock from "nock";
 
