@@ -11,7 +11,7 @@ class Analysis(Node):
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
 
-    analysis_module_type = relationship("AnalysisModuleType")
+    analysis_module_type = relationship("AnalysisModuleType", lazy="selectin")
 
     analysis_module_type_uuid = Column(UUID(as_uuid=True), ForeignKey("analysis_module_type.uuid"), nullable=True)
 

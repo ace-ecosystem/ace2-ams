@@ -156,17 +156,17 @@ describe("alertTable actions", () => {
 
     expect(mockRequest.isDone()).toEqual(true);
     expect(store.visibleQueriedAlerts).toEqual([
-      Object.assign({}, mockAlertReadA, {
+      Object.assign({}, JSON.parse(JSON.stringify(mockAlertReadA)), {
         eventTime: "2021-12-18T00:59:43.570Z",
         insertTime: "2021-12-18T00:59:43.570Z",
         uuid: "uuid1",
       }),
-      Object.assign({}, mockAlertReadB, {
+      Object.assign({}, JSON.parse(JSON.stringify(mockAlertReadB)), {
         eventTime: "2021-12-18T00:59:43.570Z",
         insertTime: "2021-12-18T00:59:43.570Z",
         uuid: "uuid2",
       }),
-      Object.assign({}, mockAlertReadC, {
+      Object.assign({}, JSON.parse(JSON.stringify(mockAlertReadC)), {
         eventTime: "2021-12-18T00:59:43.570Z",
         insertTime: "2021-12-18T00:59:43.570Z",
         dispositionTime: "2021-12-18T00:59:43.570Z",

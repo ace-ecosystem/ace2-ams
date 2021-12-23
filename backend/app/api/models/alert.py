@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, Field, UUID4
+from pydantic import Field, UUID4
 from typing import List, Optional
 from uuid import uuid4
 
@@ -9,7 +9,7 @@ from api.models.alert_queue import AlertQueueRead
 from api.models.alert_tool import AlertToolRead
 from api.models.alert_tool_instance import AlertToolInstanceRead
 from api.models.alert_type import AlertTypeRead
-from api.models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
+from api.models.node import NodeBase, NodeCreate, NodeRead, NodeTreeItemRead, NodeUpdate
 from api.models.node_comment import NodeCommentRead
 from api.models.node_tag import NodeTagRead
 from api.models.node_threat import NodeThreatRead
@@ -122,10 +122,6 @@ class AlertUpdate(NodeUpdate, AlertBase):
     _prevent_none: classmethod = validators.prevent_none("queue", "tags", "threat_actors", "threats")
 
 
-class AlertTreeRead(BaseModel):
-    alert: AlertRead = Field(description="The alert's metadata")
-
-    tree: List = Field(description="A list of the Node objects in the alert tree")
-
+class AlertTreeRead(AlertRead, NodeTreeItemRead):
     class Config:
         orm_mode = True

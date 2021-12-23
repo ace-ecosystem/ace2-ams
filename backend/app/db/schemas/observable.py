@@ -34,7 +34,7 @@ class Observable(Node):
 
     time = Column(DateTime(timezone=True), server_default=utcnow(), nullable=False)
 
-    type = relationship("ObservableType")
+    type = relationship("ObservableType", lazy="selectin")
 
     type_uuid = Column(UUID(as_uuid=True), ForeignKey("observable_type.uuid"), nullable=False)
 

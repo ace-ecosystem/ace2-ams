@@ -1,14 +1,13 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, Query, Request, Response
-from fastapi.exceptions import HTTPException
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy import and_, func, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 from typing import Optional
 from uuid import UUID, uuid4
 
 
-from api.models.alert import AlertCreate, AlertRead, AlertTreeRead, AlertUpdate
+from api.models.alert import AlertCreate, AlertRead, AlertUpdate
 from api.routes import helpers
 from api.routes.node import create_node, update_node
 from api.routes.observable import _create_observable
@@ -81,11 +80,15 @@ def create_alert(
         db.add(db_observable)
         observable.uuid = db_observable.uuid
 
+    # Create a NodeTree with the alert as the root and link the observables to it
+    node_tree = crud.create_node_tree_leaf(root_node_uuid=new_alert.uuid, node_uuid=new_alert.uuid, db=db)
+
     crud.commit(db)
 
-    # Then link them to a Node Tree
     for observable in alert.observables:
-        crud.create_node_tree_leaf(root_node_uuid=new_alert.uuid, node_uuid=observable.uuid, db=db)
+        crud.create_node_tree_leaf(
+            root_node_uuid=new_alert.uuid, node_uuid=observable.uuid, parent_tree_uuid=node_tree.uuid, db=db
+        )
 
     crud.commit(db)
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=new_alert.uuid)
@@ -358,34 +361,11 @@ def get_all_alerts(
 
 
 def get_alert(uuid: UUID, db: Session = Depends(get_db)):
-    alert: Alert = (
-        db.execute(
-            select(Alert)
-            .where(Alert.uuid == uuid)
-            .options(
-                *crud.node_joinedloads,
-                joinedload(Alert.disposition),
-                joinedload(Alert.disposition_user).options(joinedload(User.roles)),
-                joinedload(Alert.owner).options(joinedload(User.roles)),
-                joinedload(Alert.queue),
-                joinedload(Alert.tool),
-                joinedload(Alert.tool_instance),
-                joinedload(Alert.type),
-            )
-        )
-        .unique()
-        .scalars()
-        .one_or_none()
-    )
-
-    if not alert:
-        raise HTTPException(status_code=404, detail=f"Alert {uuid} does not exist.")
-
-    return AlertTreeRead(alert=alert, tree=crud.read_node_tree(root_node_uuid=uuid, db=db))
+    return crud.read_node_tree(root_node_uuid=uuid, db=db)
 
 
 helpers.api_route_read_all(router, get_all_alerts, AlertRead)
-helpers.api_route_read(router, get_alert, AlertTreeRead)
+helpers.api_route_read(router, get_alert, dict)
 
 
 #

@@ -588,7 +588,9 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
         owner=owner,
     )
 
+    node_tree = crud.create_node_tree_leaf(root_node_uuid=alert.uuid, node_uuid=alert.uuid, db=db)
+
     for observable in data["observables"]:
-        _create_observable(o=observable, root_node=alert, parent_tree=None)
+        _create_observable(o=observable, root_node=alert, parent_tree=node_tree)
 
     return alert

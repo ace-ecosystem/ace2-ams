@@ -56,7 +56,7 @@
   import { onBeforeMount, defineProps, ref } from "vue";
   import { useAlertStore } from "@/stores/alert";
   const alertStore = useAlertStore();
-  const openAlertId = ref(alertStore.openAlert.alert.uuid);
+  const openAlertId = ref(alertStore.openAlert.uuid);
 
   const props = defineProps({
     items: { type: Array, required: true },
