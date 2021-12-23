@@ -67,11 +67,11 @@ describe("TagModal.vue", () => {
 
     // No alerts selected and no value set
     wrapper.vm.selectedAlertStore.selected = [];
-    wrapper.vm.newTags = null;
+    wrapper.vm.newTags = [];
     expect(wrapper.vm.allowSubmit).toBeFalsy();
     // Alerts selected and no value set
     wrapper.vm.selectedAlertStore.selected = ["1", "2"];
-    wrapper.vm.newTags = null;
+    wrapper.vm.newTags = [];
     expect(wrapper.vm.allowSubmit).toBeFalsy();
     // No alerts selected and value set
     wrapper.vm.selectedAlertStore.selected = [];
