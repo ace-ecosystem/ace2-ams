@@ -12,7 +12,7 @@
       <div v-if="!isLoading" class="p-field p-col">
         <Dropdown
           v-model="selectedUser"
-          :options="userOptions"
+          :options="userStore.allItems"
           option-label="displayName"
           placeholder="Select a user"
         />
@@ -86,10 +86,6 @@
       emit("requestReload");
     }
   };
-
-  const userOptions = computed(() => {
-    return [{ displayName: "None", username: null }, ...userStore.allItems];
-  });
 
   const allowSubmit = computed(() => {
     return selectedAlertStore.anySelected && selectedUser.value;
