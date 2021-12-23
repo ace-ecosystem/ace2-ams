@@ -1,16 +1,11 @@
 import { defineStore } from "pinia";
-import {
-  alertFilterParams,
-  alertRead,
-  alertSummary,
-  alertUpdate,
-} from "@/models/alert";
+import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
 import { UUID } from "@/models/base";
 import { Alert } from "@/services/api/alert";
 
 export function parseAlertSummary(alert: alertRead): alertSummary {
   return {
-    comments: alert.comments ? alert.comments : [],
+    comments: alert.comments,
     description: alert.description ? alert.description : "",
     disposition: alert.disposition ? alert.disposition.value : "OPEN",
     dispositionTime: alert.dispositionTime ? alert.dispositionTime : null,
@@ -21,10 +16,10 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
     insertTime: alert.insertTime,
     name: alert.name,
     owner: alert.owner ? alert.owner.displayName : "None",
-    queue: alert.queue ? alert.queue.value : "None",
-    tags: alert.tags ? alert.tags : [],
+    queue: alert.queue.value,
+    tags: alert.tags,
     tool: alert.tool ? alert.tool.value : "None",
-    type: alert.type ? alert.type.value : "None",
+    type: alert.type.value,
     uuid: alert.uuid,
   };
 }
@@ -38,6 +33,9 @@ export const useAlertTableStore = defineStore({
 
     // total number of alerts from all pages
     totalAlerts: 0,
+
+    // whether the alert table should be reloaded
+    requestReload: false,
   }),
 
   getters: {
@@ -47,6 +45,11 @@ export const useAlertTableStore = defineStore({
 
     visibleQueriedAlertsUuids(): UUID[] {
       return this.visibleQueriedAlerts.map((x) => x.uuid);
+    },
+
+    visibleQueriedAlertById: (state) => {
+      return (alertUuid: UUID) =>
+        state.visibleQueriedAlerts.find((alert) => alert.uuid === alertUuid);
     },
   },
 
@@ -60,29 +63,6 @@ export const useAlertTableStore = defineStore({
         .catch((error) => {
           throw error;
         });
-    },
-
-    async update(uuid: UUID, data: alertUpdate) {
-      // once we get around to updating alerts, we will need to update the base api service to have a
-      // 'getAfterUpdate' option like there is for 'create'
-      // then we can reset the open/queried alert(s)
-      await Alert.update(uuid, data).catch((error) => {
-        throw error;
-      });
-    },
-
-    async updateMultiple(uuids: UUID[], data: alertUpdate) {
-      const promises = [];
-      for (let i = 0; i < uuids.length; i++) {
-        promises.push(Alert.update(uuids[i], data));
-      }
-
-      // and then all of those requests are resolved here
-      await Promise.all(promises).catch((error) => {
-        throw error;
-      });
-
-      // reason enough to have an updateMultiple in api?
     },
   },
 });

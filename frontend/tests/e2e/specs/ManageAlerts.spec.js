@@ -3,10 +3,6 @@ describe("ManageAlerts.vue", () => {
     cy.log("logging in");
     cy.login();
   });
-  after(() => {
-    cy.log("logging out");
-    cy.logout();
-  });
 
   beforeEach(() => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
@@ -225,6 +221,14 @@ describe("ManageAlerts.vue", () => {
       "",
     );
   });
+});
+
+describe("Manage Alerts Filter Modal", () => {
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
+    cy.visit("/manage_alerts");
+    cy.url().should("contain", "/manage_alerts");
+  });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
     cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
@@ -379,5 +383,167 @@ describe("ManageAlerts.vue", () => {
 
     // Exit modal for end of test
     cy.get(".p-dialog-header-close-icon").click();
+  });
+});
+
+// Comment will not change sort
+describe("Manage Alerts Comment", () => {
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
+    cy.visit("/manage_alerts");
+    cy.url().should("contain", "/manage_alerts");
+    cy.wait(2000);
+  });
+
+  it("will add a given comment to an alert via the comment modal", () => {
+    // Get first visible alert checkbox
+    cy.get(".p-checkbox-box").eq(1).click();
+    // Open the comment modal
+    cy.get(
+      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(2)",
+    ).click();
+    cy.get(".p-dialog-content").should("be.visible");
+    // Set Comment
+    cy.get(".p-inputtextarea").click().type("Test comment");
+    // Enter & close modal
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
+    cy.get(".p-dialog-content").should("not.exist");
+    // Check for comment after adding
+    cy.get(".comment").first().should("have.text", "(Analyst) Test comment");
+  });
+});
+
+// Tags will not change sort
+describe("Manage Alerts Tags", () => {
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
+    cy.visit("/manage_alerts");
+    cy.url().should("contain", "/manage_alerts");
+    cy.wait(2000);
+  });
+
+  it("will add given tags to an alert via the tag modal", () => {
+    // Get first visible alert checkbox
+    cy.get(".p-checkbox-box").eq(1).click();
+    // Open the tag modal
+    cy.get(
+      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(5)",
+    ).click();
+    cy.get(".p-dialog-content").should("be.visible");
+    // Type a tag
+    cy.get(".p-chips > .p-inputtext").click().type("TestTag").type("{enter}");
+    // Select a tag from the dropdown
+    cy.get(".p-fluid > .p-dropdown > .p-dropdown-label").click();
+    cy.get('[aria-label="scan_me"]').click();
+    // Enter & close modal
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
+    cy.get(".p-dialog-content").should("not.exist");
+    // Check for comment after adding
+    cy.get(".p-tag").first().should("have.text", "scan_me");
+    cy.get(".p-tag").last().should("have.text", "TestTag");
+  });
+});
+
+// Changing owner will change sort
+describe("Manage Alerts Take Ownership", () => {
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
+    cy.visit("/manage_alerts");
+    cy.url().should("contain", "/manage_alerts");
+    cy.wait(2000);
+  });
+
+  it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
+    // Check first visible alert current owner, should be "None"
+    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span").should(
+      "have.text",
+      "None",
+    );
+    // Get first visible alert checkbox
+    cy.get(" .p-checkbox-box").eq(1).click();
+    // Click Take Ownership button
+    cy.get(
+      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(3)",
+    ).click();
+    // Check owner name after taking ownership
+    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span").should(
+      "have.text",
+      "Analyst",
+    );
+  });
+});
+
+// Changing owner will change sort
+describe("Manage Alerts Assign", () => {
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
+    cy.visit("/manage_alerts");
+    cy.url().should("contain", "/manage_alerts");
+    cy.wait(2000);
+  });
+
+  it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
+    // Check SECOND (first is already assigned) visible alert current owner, should be "None"
+    cy.get(".p-datatable-tbody > :nth-child(2) > :nth-child(5) > span").should(
+      "have.text",
+      "None",
+    );
+    // Get SECOND visible alert checkbox
+    cy.get(" .p-checkbox-box").eq(2).click();
+    // Open assign owner modal
+    cy.get(
+      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(4)",
+    ).click();
+    cy.get(".p-dialog-content").should("be.visible");
+    // Select first option from the dropdown
+    cy.get(".p-field > .p-dropdown > .p-dropdown-trigger").click();
+    cy.get(".p-dropdown-items > :nth-child(1)").click();
+    // Submit and close modal
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
+    cy.get(".p-dialog-content").should("not.exist");
+    // Check owner name after assigning -- checking first in the table bc it will be moved to the top
+    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span").should(
+      "have.text",
+      "Analyst",
+    );
+  });
+});
+
+// Changing disposition will change sort
+describe("Manage Alerts Disposition", () => {
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
+    cy.visit("/manage_alerts");
+    cy.url().should("contain", "/manage_alerts");
+    cy.wait(2000);
+  });
+
+  it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
+    // Check first visible alert current disposition, should be "OPEN"
+    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(6) > span").should(
+      "have.text",
+      "OPEN",
+    );
+    // Get first visible alert checkbox
+    cy.get(" .p-checkbox-box").eq(1).click();
+    // Open disposition modal
+    cy.get(".p-button-normal").click();
+    cy.get(".p-dialog-content").should("be.visible");
+    // Select disposition option
+    cy.get('[aria-label="FALSE_POSITIVE"]').click();
+    // Add disposition comment
+    cy.get(".p-inputtextarea").click().type("Test disposition comment");
+    // Submit and close
+    cy.get(".p-dialog-footer > .p-button").click();
+    cy.get(".p-dialog-content").should("not.exist");
+    // Check disposition
+    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(6) > span").should(
+      "have.text",
+      "FALSE_POSITIVE",
+    );
+    // Check for disposition comment
+    cy.get(".comment")
+      .first()
+      .should("have.text", "(Analyst) Test disposition comment");
   });
 });

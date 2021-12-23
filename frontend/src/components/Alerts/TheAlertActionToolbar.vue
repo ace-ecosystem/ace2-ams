@@ -2,7 +2,12 @@
 <!-- Toolbar containing all alert-related actions, such as Disposition, Assign, Comment, etc. -->
 
 <template>
-  <Toolbar style="overflow-x: auto">
+  <div>
+    <div v-if="error" class="p-col">
+      <Message severity="error" @close="handleError">{{ error }}</Message>
+    </div>
+  </div>
+  <Toolbar id="AlertActionToolbar" style="overflow-x: auto">
     <template #left>
       <!--      DISPOSITION -->
       <Button
@@ -25,6 +30,7 @@
         class="p-m-1 p-button-sm"
         icon="pi pi-briefcase"
         label="Take Ownership"
+        @click="takeOwnership"
       />
       <!--      ASSIGN -->
       <Button
@@ -41,23 +47,16 @@
         label="Tag"
         @click="open('TagModal')"
       />
-      <TagModal />
+      <TagModal name="TagModal" />
       <!--      REMEDIATE MODAL -->
       <Button
         class="p-m-1 p-button-sm"
         icon="pi pi-times-circle"
         label="Remediate"
+        disabled
         @click="open('RemediationModal')"
       />
       <RemediationModal />
-      <!--      DELETE ALERT -->
-      <Button
-        class="p-m-1 p-button-sm p-button-danger"
-        icon="pi pi-trash"
-        label="Delete"
-        @click="open('DeleteModal')"
-      />
-      <DeleteModal name="DeleteModal" />
     </template>
     <template #right>
       <Button icon="pi pi-link" class="p-button-rounded" label="Link" />
@@ -66,21 +65,51 @@
 </template>
 
 <script setup>
+  import { ref } from "vue";
+
   import Button from "primevue/button";
+  import Message from "primevue/message";
   import Toolbar from "primevue/toolbar";
 
   import AssignModal from "@/components/Modals/AssignModal";
   import CommentModal from "@/components/Modals/CommentModal";
   import TagModal from "@/components/Modals/TagModal";
   import RemediationModal from "@/components/Modals/RemediateModal";
-  import DeleteModal from "@/components/Modals/DeleteModal";
   import DispositionModal from "@/components/Modals/DispositionModal";
 
+  import { useAlertStore } from "@/stores/alert";
+  import { useAlertTableStore } from "@/stores/alertTable";
+  import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
+  import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
-  const store = useModalStore();
+  const alertStore = useAlertStore();
+  const alertTableStore = useAlertTableStore();
+  const authStore = useAuthStore();
+  const modalStore = useModalStore();
+  const selectedAlertStore = useSelectedAlertStore();
+
+  const error = ref(null);
 
   const open = (name) => {
-    store.open(name);
+    modalStore.open(name);
+  };
+
+  async function takeOwnership() {
+    try {
+      for (const uuid of selectedAlertStore.selected) {
+        await alertStore.update(uuid, {
+          owner: authStore.user.username,
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+    selectedAlertStore.unselectAll();
+    alertTableStore.requestReload = true;
+  }
+
+  const handleError = () => {
+    error.value = null;
   };
 </script>

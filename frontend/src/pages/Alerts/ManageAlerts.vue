@@ -2,7 +2,7 @@
 
 <template>
   <br />
-  <TheAlertActionToolbar id="AlertActionToolbar" />
+  <TheAlertActionToolbar />
   <br />
   <TheFilterToolbar id="FilterToolbar" />
   <br />

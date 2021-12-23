@@ -2,69 +2,130 @@
 <!-- 'Tag' action modal, agnostic to what is being tagged -->
 
 <template>
-  <BaseModal :name="this.name" header="Add Tags">
+  <BaseModal :name="name" header="Add Tags">
     <span class="p-fluid">
       <Chips v-model="newTags" />
       <Dropdown
-        @change="addExistingTag"
-        :options="tags"
-        optionLabel="label"
+        :options="nodeTagStore.allItems"
+        option-label="value"
         :filter="true"
         placeholder="Select from existing tags"
-        filterPlaceholder="Search tags"
+        filter-placeholder="Search tags"
+        @change="addExistingTag"
       />
     </span>
     <template #footer>
       <Button
         label="Nevermind"
         icon="pi pi-times"
-        @click="close"
         class="p-button-text"
+        @click="close"
       />
-      <Button label="Add" icon="pi pi-check" @click="close" />
+      <Button label="Add" icon="pi pi-check" @click="addTags" />
     </template>
   </BaseModal>
 </template>
 
-<script>
+<script setup>
+  import { defineProps, onMounted, ref } from "vue";
+
   import Button from "primevue/button";
   import Chips from "primevue/chips";
   import Dropdown from "primevue/dropdown";
 
   import BaseModal from "@/components/Modals/BaseModal";
 
-  export default {
-    name: "TagModal",
-    components: { BaseModal, Button, Chips, Dropdown },
+  import { NodeTag } from "@/services/api/nodeTag";
 
-    computed: {
-      name() {
-        return this.$options.name;
-      },
-    },
+  import { useAlertStore } from "@/stores/alert";
+  import { useAlertTableStore } from "@/stores/alertTable";
+  import { useModalStore } from "@/stores/modal";
+  import { useNodeTagStore } from "@/stores/nodeTag";
+  import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
-    data() {
-      return {
-        newTags: [],
+  const alertStore = useAlertStore();
+  const alertTableStore = useAlertTableStore();
+  const modalStore = useModalStore();
+  const nodeTagStore = useNodeTagStore();
+  const selectedAlertStore = useSelectedAlertStore();
 
-        tags: [
-          { label: "oh_no", id: 1 },
-          { label: "bad", id: 2 },
-          { label: "malware", id: 3 },
-        ],
-      };
-    },
+  const props = defineProps({
+    name: { type: String, required: true },
+  });
 
-    methods: {
-      addExistingTag(event) {
-        // Add an existing tag to the list of tags to be added
-        this.newTags.push(event.value.label);
-      },
+  const newTags = ref([]);
+  const storeTagValues = ref([]);
+  const error = ref(null);
+  const isLoading = ref(false);
 
-      close() {
-        this.newTags = [];
-        this.$store.dispatch("modals/close", this.name);
-      },
-    },
+  onMounted(async () => {
+    await loadTags();
+  });
+
+  async function loadTags() {
+    await nodeTagStore.readAll();
+    storeTagValues.value = tagValues(nodeTagStore.allItems);
+  }
+
+  async function addTags() {
+    isLoading.value = true;
+    try {
+      await createTags(newTags.value);
+      for (const uuid of selectedAlertStore.selected) {
+        await alertStore.update(uuid, {
+          tags: newAlertTags(uuid, newTags.value),
+        });
+      }
+    } catch (err) {
+      error.value = err.message;
+    }
+
+    isLoading.value = false;
+    if (!error.value) {
+      close();
+      alertTableStore.requestReload = true;
+    }
+  }
+
+  function newAlertTags(uuid, tags) {
+    const alert = alertTableStore.visibleQueriedAlertById(uuid);
+    const alertTags = alert ? alert.tags : [];
+    return tagValues(alertTags).concat(tags);
+  }
+
+  async function createTags(tags) {
+    for (const tag of tags) {
+      if (!tagExists(tag)) {
+        await NodeTag.create({ value: tag });
+        await loadTags();
+      }
+    }
+  }
+
+  function tagExists(tagValue) {
+    return storeTagValues.value.includes(tagValue);
+  }
+
+  function tagValues(tags) {
+    let values = [];
+    for (const tag of tags) {
+      values.push(tag.value);
+    }
+    return values;
+  }
+
+  function addExistingTag(tagEvent) {
+    // Add an existing tag to the list of tags to be added
+    newTags.value.push(tagEvent.value.value);
+  }
+
+  const handleError = () => {
+    error.value = null;
+    close();
   };
+
+  function close() {
+    newTags.value = [];
+    modalStore.close(props.name);
+  }
 </script>

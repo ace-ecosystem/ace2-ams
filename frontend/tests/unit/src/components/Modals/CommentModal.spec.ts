@@ -1,4 +1,4 @@
-import AssignModal from "@/components/Modals/AssignModal.vue";
+import CommentModal from "@/components/Modals/CommentModal.vue";
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
 import { mount } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
@@ -10,12 +10,12 @@ import { useSelectedAlertStore } from "@/stores/selectedAlert";
 import { useUserStore } from "@/stores/user";
 
 function factory(options?: TestingOptions) {
-  const wrapper = mount(AssignModal, {
+  const wrapper = mount(CommentModal, {
     attachTo: document.body,
     global: {
       plugins: [createTestingPinia(options), PrimeVue],
     },
-    props: { name: "AssignModal" },
+    props: { name: "CommentModal" },
   });
 
   const modalStore = useModalStore();
@@ -25,7 +25,7 @@ function factory(options?: TestingOptions) {
   return { wrapper, modalStore, selectedAlertStore, userStore };
 }
 
-describe("AssignModal.vue", () => {
+describe("CommentModal.vue", () => {
   afterEach(() => {
     nock.cleanAll();
   });
@@ -35,10 +35,24 @@ describe("AssignModal.vue", () => {
 
     expect(wrapper.exists()).toBe(true);
   });
-  it("has the correctly assigned name 'AssignModal'", () => {
+  it("correctly computes commentData", () => {
     const { wrapper } = factory();
 
-    expect(wrapper.vm.name).toEqual("AssignModal");
+    // Set the selected user
+    wrapper.vm.authStore.user = { username: "Alice" };
+
+    // Set the new comment value
+    wrapper.vm.newComment = "test comment";
+
+    expect(wrapper.vm.commentData).toEqual({
+      user: "Alice",
+      value: "test comment",
+    });
+  });
+  it("has the correctly assigned name 'CommentModal'", () => {
+    const { wrapper } = factory();
+
+    expect(wrapper.vm.name).toEqual("CommentModal");
   });
 
   it("will clear the 'error' property when handleError is called", async () => {
@@ -51,38 +65,51 @@ describe("AssignModal.vue", () => {
     expect(wrapper.vm.error).toBeNull();
   });
 
-  it("will remove the AssignModal from open modals store and clear selectedUser on close", async () => {
+  it("will remove the CommentModal from open modals store and clear newComment on close", async () => {
     const { wrapper } = factory({ stubActions: false });
 
-    wrapper.vm.selectedUser = { username: "Alice" };
-    wrapper.vm.modalStore.open("AssignModal");
+    wrapper.vm.newComment = "test comment";
+    wrapper.vm.modalStore.open("CommentModal");
 
     wrapper.vm.close();
 
-    expect(wrapper.vm.selectedUser).toBeNull();
+    expect(wrapper.vm.newComment).toBeNull();
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
   });
 
-  it("will close the modal when assignUser has successfully finished", async () => {
+  it("will close the modal when addComment has successfully finished", async () => {
     const { wrapper } = factory({ stubActions: false });
 
     // Set the selected alert
     wrapper.vm.selectedAlertStore.selected = ["1", "2"];
 
     // Set the selected user
-    wrapper.vm.selectedUser = { username: "Alice" };
+    wrapper.vm.authStore.user = { username: "Alice" };
+
+    // Set the new comment value
+    wrapper.vm.newComment = "test comment";
 
     // Mock the update alert API call
-    myNock.options("/alert/1").reply(200, "Success");
-    myNock.patch("/alert/1", '{"owner":"Alice"}').reply(200, "Success");
-    myNock.options("/alert/2").reply(200, "Success");
-    myNock.patch("/alert/2", '{"owner":"Alice"}').reply(200, "Success");
+    myNock
+      .post("/node/comment/", {
+        user: "Alice",
+        value: "test comment",
+        node_uuid: "1",
+      })
+      .reply(201, "Success");
+    myNock
+      .post("/node/comment/", {
+        user: "Alice",
+        value: "test comment",
+        node_uuid: "2",
+      })
+      .reply(201, "Success");
 
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
-    wrapper.vm.modalStore.open("AssignModal");
-    expect(wrapper.vm.modalStore.openModals).toStrictEqual(["AssignModal"]);
-    await wrapper.vm.assignUser();
-    expect(wrapper.vm.selectedUser).toBeNull();
+    wrapper.vm.modalStore.open("CommentModal");
+    expect(wrapper.vm.modalStore.openModals).toStrictEqual(["CommentModal"]);
+    await wrapper.vm.addComment();
+    expect(wrapper.vm.newComment).toBeNull();
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
     expect(wrapper.vm.alertTableStore.requestReload).toBeTruthy();
   });
@@ -91,26 +118,30 @@ describe("AssignModal.vue", () => {
     const { wrapper } = factory({ stubActions: false });
 
     // Set the selected alert
-    wrapper.vm.selectedAlertStore.selected = ["1"];
+    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
 
     // Set the selected user
-    wrapper.vm.selectedUser = { username: "Alice" };
+    wrapper.vm.authStore.user = { username: "Alice" };
 
+    // Set the new comment value
+    wrapper.vm.newComment = "test comment";
     // Mock the update alert API call
     const updateAlert = myNock
-      .options("/alert/1")
-      .reply(200, "Success")
-      .patch("/alert/1", '{"owner":"Alice"}')
-      .reply(403, "Unauthorized");
+      .post("/node/comment/", {
+        user: "Alice",
+        value: "test comment",
+        node_uuid: "1",
+      })
+      .reply(403, "Failed");
 
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
-    wrapper.vm.modalStore.open("AssignModal");
-    expect(wrapper.vm.modalStore.openModals).toStrictEqual(["AssignModal"]);
-    await wrapper.vm.assignUser();
+    wrapper.vm.modalStore.open("CommentModal");
+    expect(wrapper.vm.modalStore.openModals).toStrictEqual(["CommentModal"]);
+    await wrapper.vm.addComment();
     expect(updateAlert.isDone()).toBe(true);
     expect(wrapper.vm.error).toEqual("Request failed with status code 403");
-    expect(wrapper.vm.selectedUser).toEqual({ username: "Alice" });
-    expect(wrapper.vm.modalStore.openModals).toStrictEqual(["AssignModal"]);
+    expect(wrapper.vm.newComment).toEqual("test comment");
+    expect(wrapper.vm.modalStore.openModals).toStrictEqual(["CommentModal"]);
     expect(wrapper.vm.alertTableStore.requestReload).toBeFalsy();
   });
 });
