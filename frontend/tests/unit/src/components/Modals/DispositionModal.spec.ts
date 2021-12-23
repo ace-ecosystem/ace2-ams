@@ -58,6 +58,28 @@ describe("DispositionModal.vue", () => {
     expect(wrapper.vm.modalStore.openModals).toStrictEqual(["modal1"]);
   });
 
+  it("correctly computes in allowSubmit whether the submit button should be enabled'", () => {
+    const { wrapper } = factory();
+
+    // No alerts selected and no value set
+    wrapper.vm.selectedAlertStore.selected = [];
+    wrapper.vm.newDisposition = null;
+    expect(wrapper.vm.allowSubmit).toBeFalsy();
+    // Alerts selected and no value set
+    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.newDisposition = null;
+    expect(wrapper.vm.allowSubmit).toBeFalsy();
+    // No alerts selected and value set
+    wrapper.vm.selectedAlertStore.selected = [];
+    wrapper.vm.newDisposition = { value: "low dispostion", rank: 1 };
+    expect(wrapper.vm.allowSubmit).toBeFalsy();
+    // Alerts selected and value set
+    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.newDisposition = { value: "low dispostion", rank: 1 };
+    expect(wrapper.vm.allowSubmit).toBeTruthy();
+  });
+
+
   it("correctly computes showAddToEventButton", () => {
     const { wrapper } = factory();
 
@@ -158,7 +180,7 @@ describe("DispositionModal.vue", () => {
     expect(wrapper.vm.newDisposition).toBeNull();
     expect(wrapper.vm.dispositionComment).toBeNull();
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
-    expect(wrapper.vm.alertTableStore.requestReload).toBeTruthy();
+    expect(wrapper.emitted("requestReload")).toBeTruthy();
   });
 
   it("will close the modal when setDisposition has successfully finished (no dispositionComment)", async () => {
@@ -192,7 +214,7 @@ describe("DispositionModal.vue", () => {
     expect(wrapper.vm.newDisposition).toBeNull();
     expect(wrapper.vm.dispositionComment).toBeNull();
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
-    expect(wrapper.vm.alertTableStore.requestReload).toBeTruthy();
+    expect(wrapper.emitted("requestReload")).toBeTruthy();
   });
 
   it("will not close the modal and will set the 'error' property when setDisposition fails", async () => {
@@ -230,6 +252,6 @@ describe("DispositionModal.vue", () => {
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([
       "DispositionModal",
     ]);
-    expect(wrapper.vm.alertTableStore.requestReload).toBeFalsy();
+    expect(wrapper.emitted("requestReload")).toBeFalsy();
   });
 });
