@@ -37,7 +37,7 @@
 
   const alertName = computed(() => {
     if (alertStore.openAlert) {
-      return alertStore.openAlert.alert.name;
+      return alertStore.openAlert.name;
     }
     return "Unknown Alert";
   });

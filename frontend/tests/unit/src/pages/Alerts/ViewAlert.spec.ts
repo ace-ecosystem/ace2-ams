@@ -7,13 +7,13 @@ import myNock from "@unit/services/api/nock";
 import { createRouterMock, getRouter, injectRouterMock } from "vue-router-mock";
 
 import {
-  mockAlertRead,
-  mockAlertReadDateStringsFirstAppearances,
+  mockAlert,
+  mockAlertReadDateStrings,
 } from "../../../../mockData/alert";
 import nock from "nock";
 
 describe("ViewAlert.vue", () => {
-  myNock.get("/alert/uuid1").reply(200, mockAlertRead);
+  myNock.get("/alert/uuid1").reply(200, mockAlert).persist();
   const router = createRouterMock({
     initialLocation: "/alert/uuid1",
   });
@@ -37,28 +37,24 @@ describe("ViewAlert.vue", () => {
     expect(wrapper.exists()).toBe(true);
   });
   it("reloads open alert on reloadPage", async () => {
-    const reload = myNock.get("/alert/uuid1").reply(200, mockAlertRead);
+    const reload = myNock.get("/alert/uuid1").reply(200, mockAlert);
     const selectedAlertStore = useSelectedAlertStore();
     const alertStore = useAlertStore();
     await wrapper.vm.reloadPage();
     expect(selectedAlertStore.selected).toEqual(["uuid1"]);
-    expect(alertStore.openAlert).toEqual(
-      mockAlertReadDateStringsFirstAppearances,
-    );
+    expect(alertStore.openAlert).toEqual(mockAlertReadDateStrings);
     expect(reload.isDone()).toBe(true);
   });
   it("selects open alert and fetches given alertID on initPage", async () => {
-    myNock.get("/alert/uuid1").reply(200, mockAlertRead);
+    myNock.get("/alert/uuid1").reply(200, mockAlert);
     const selectedAlertStore = useSelectedAlertStore();
     const alertStore = useAlertStore();
     await wrapper.vm.initPage("uuid1");
     expect(selectedAlertStore.selected).toEqual(["uuid1"]);
-    expect(alertStore.openAlert).toEqual(
-      mockAlertReadDateStringsFirstAppearances,
-    );
+    expect(alertStore.openAlert).toEqual(mockAlertReadDateStrings);
   });
   it("unselects all selected alerts when umounted", async () => {
-    const reload = myNock.get("/alert/uuid1").reply(200, mockAlertRead);
+    const reload = myNock.get("/alert/uuid1").reply(200, mockAlert);
     const selectedAlertStore = useSelectedAlertStore();
     await wrapper.vm.initPage("uuid1");
     expect(selectedAlertStore.selected).toEqual(["uuid1"]);

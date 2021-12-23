@@ -710,6 +710,6 @@ def test_get_alert_tree(client_valid_access_token, db):
 
     # The small.json alert has 14 observables and 8 analyses. However, it only has two root observables.
     get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
-    assert str(get.json()["tree"]).count("'observable'") == 14
-    assert str(get.json()["tree"]).count("'analysis'") == 8
-    assert len(get.json()["tree"]) == 2
+    assert str(get.json()["children"]).count("'observable'") == 14
+    assert str(get.json()["children"]).count("'analysis'") == 8
+    assert len(get.json()["children"]) == 2

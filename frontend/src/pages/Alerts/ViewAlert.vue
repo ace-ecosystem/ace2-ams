@@ -8,7 +8,7 @@
         <AlertTree
           v-if="alertStore.openAlert"
           id="alert-tree"
-          :items="alertStore.openAlert.tree"
+          :items="alertStore.openAlert.children"
         />
       </div>
     </template>
