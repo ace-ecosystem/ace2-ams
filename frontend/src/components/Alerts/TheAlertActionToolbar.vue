@@ -70,8 +70,7 @@
 </template>
 
 <script setup>
-  import { ref } from "vue";
-  import { useRoute } from "vue-router";
+  import { ref, defineProps } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -95,7 +94,10 @@
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
 
-  const route = useRoute();
+  const props = defineProps({
+    page: { type: String, required: true },
+  });
+
   const error = ref(null);
 
   const open = (name) => {
@@ -112,13 +114,15 @@
     } catch (err) {
       error.value = err.message;
     }
-    requestReload();
+    if (!error.value) {
+      requestReload();
+    }
   }
 
   function requestReload() {
-    if (route.name == "Manage Alerts") {
+    if (props.page == "Manage Alerts") {
       alertTableStore.requestReload = true;
-    } else if (route.name == "View Alert") {
+    } else if (props.page == "View Alert") {
       alertStore.requestReload = true;
     }
   }
