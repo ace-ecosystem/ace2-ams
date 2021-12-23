@@ -17,6 +17,7 @@ from api.routes.event_source import router as event_source_router
 from api.routes.event_status import router as event_status_router
 from api.routes.event_type import router as event_type_router
 from api.routes.event_vector import router as event_vector_router
+from api.routes.node import router as node_router
 from api.routes.node_comment import router as node_comment_router
 from api.routes.node_directive import router as node_directive_router
 from api.routes.node_history_action import router as node_history_action_router
@@ -50,6 +51,7 @@ router.include_router(event_source_router)
 router.include_router(event_status_router)
 router.include_router(event_type_router)
 router.include_router(event_vector_router)
+router.include_router(node_router)
 router.include_router(node_comment_router)
 router.include_router(node_directive_router)
 router.include_router(node_history_action_router)

@@ -104,3 +104,10 @@ class NodeTreeUpdate(NodeTreeBase):
     )
 
     node_uuid: Optional[UUID4] = Field(description="The UUID of the Node represented by the leaf")
+
+
+class NodeVersion(BaseModel):
+    version: UUID4 = Field(description="The current version of the Node")
+
+    class Config:
+        orm_mode = True
