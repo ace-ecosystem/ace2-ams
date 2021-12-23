@@ -21,7 +21,7 @@ describe("ViewAlert.vue", () => {
 
   it("Renders the expected number of nodes", () => {
     // Total number of nodes
-    cy.get(".pi").should("have.length", 25);
+    cy.get(".pi").should("have.length", 32);
 
     // Number of expandable nodes
     cy.get(".p-tree-toggler-icon").should("have.length", 14);
@@ -128,5 +128,124 @@ describe("ViewAlert.vue", () => {
 
     //  Not perfect, but url should now be a child route of the test alert
     cy.url().should("contain", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a/");
+  });
+
+  // Alert Action Toolbar tests
+
+  // Disposition
+  it.only("should make a request to update and get updated alert when disposition is set", () => {
+    cy.intercept("PATCH", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "updateAlert",
+    );
+    cy.intercept("POST", "/api/node/comment").as("createComment");
+    cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "getAlert",
+    );
+
+    // Open disposition modal
+    cy.get(".p-button-normal").click();
+    cy.get(".p-dialog-content").should("be.visible");
+    // Select first option
+    cy.get('[aria-label="FALSE_POSITIVE"]').click();
+    // Add a comment
+    cy.get(".p-inputtextarea").click().type("test disposition comment!");
+    // Submit
+    cy.get(".p-dialog-footer > .p-button").click();
+    cy.get(".p-dialog-content").should("not.exist");
+
+    cy.intercept("PATCH", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "updateAlert",
+    );
+
+    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@createComment").its("state").should("eq", "Complete");
+    cy.wait("@getAlert").its("state").should("eq", "Complete");
+  });
+
+  // Comment
+  it("should make a request to add comment and get updated alert when comment is added", () => {
+    cy.intercept({
+      path: "/api/node/comment/",
+      method: "POST",
+    }).as("createComment");
+    cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "getAlert",
+    );
+
+    // Open comment modal
+    cy.get(".p-toolbar-group-left > :nth-child(2)").click();
+    cy.get(".p-dialog-content").should("be.visible");
+    // Add a comment
+    cy.get(".p-inputtextarea").click().type("testing regular comment!");
+    // Submit
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
+    cy.get(".p-dialog-content").should("not.exist");
+
+    cy.wait("@createComment").its("state").should("eq", "Complete");
+    cy.wait("@getAlert").its("state").should("eq", "Complete");
+  });
+
+  // Take Ownership
+  it("should make a request to update and get updated alert take ownership is clicked", () => {
+    cy.intercept("PATCH", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "updateAlert",
+    );
+    cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "getAlert",
+    );
+
+    // Click button
+
+    cy.get(".p-toolbar-group-left > :nth-child(3)").click();
+    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@getAlert").its("state").should("eq", "Complete");
+  });
+
+  // Assign
+  it("should make a request to update owner and get updated alert when owner is set", () => {
+    cy.intercept("PATCH", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "updateAlert",
+    );
+    cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "getAlert",
+    );
+    // Open assign modal
+    cy.get(".p-toolbar-group-left > :nth-child(4)").click();
+    cy.get(".p-dialog-content").should("be.visible");
+    // Select first option
+    cy.get(".p-dropdown-label").click();
+    cy.get('[aria-label="Analyst Alice"]').click();
+    // Submit
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
+    cy.get(".p-dialog-content").should("not.exist");
+
+    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@getAlert").its("state").should("eq", "Complete");
+  });
+
+  // Tag
+  it("should make a request to update tags and get updated alert when owner is set", () => {
+    cy.intercept("PATCH", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "updateAlert",
+    );
+    cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "getAlert",
+    );
+
+    // Open tag modal
+    cy.get(".p-toolbar-group-left > :nth-child(5)").click();
+    cy.get(".p-dialog-content").should("be.visible");
+    // Type a tag
+    cy.get(".p-chips > .p-inputtext").click().type("TestTag").type("{enter}");
+    // Select a tag from the dropdown
+    cy.get(".p-fluid > .p-dropdown > .p-dropdown-label").click();
+    cy.get('[aria-label="scan_me"]').click();
+    // Submit
+    cy.get(".p-dialog-footer > :nth-child(2)").should("be.visible");
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
+    cy.get(".p-dialog-content").should("not.exist");
+
+    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@getAlert").its("state").should("eq", "Complete");
   });
 });

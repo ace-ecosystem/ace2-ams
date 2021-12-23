@@ -504,7 +504,7 @@ describe("Manage Alerts Assign", () => {
     // Check owner name after assigning -- checking first in the table bc it will be moved to the top
     cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span").should(
       "have.text",
-      "Analyst",
+      "Analyst Alice",
     );
   });
 });
