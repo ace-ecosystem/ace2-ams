@@ -7,15 +7,13 @@ import myNock from "@unit/services/api/nock";
 import { createRouterMock, getRouter, injectRouterMock } from "vue-router-mock";
 
 import {
-  mockAlertTree,
-  mockAlertRead,
-  mockAlertReadDateStringsFirstAppearances,
-  mockAlertTreeFirstAppearances,
+  mockAlert,
+  mockAlertReadDateStrings,
 } from "../../../../mockData/alert";
 import nock from "nock";
 
 describe("ViewAlert.vue", () => {
-  myNock.get("/alert/uuid1").reply(200, mockAlertRead).persist();
+  myNock.get("/alert/uuid1").reply(200, mockAlert).persist();
   const router = createRouterMock({
     initialLocation: "/alert/uuid1",
   });
@@ -43,9 +41,7 @@ describe("ViewAlert.vue", () => {
     const alertStore = useAlertStore();
     await wrapper.vm.initPage("uuid1");
     expect(selectedAlertStore.selected).toEqual(["uuid1"]);
-    expect(alertStore.openAlert).toEqual(
-      mockAlertReadDateStringsFirstAppearances,
-    );
+    expect(alertStore.openAlert).toEqual(mockAlertReadDateStrings);
   });
   it("unselects all selected alerts when umounted", async () => {
     const selectedAlertStore = useSelectedAlertStore();

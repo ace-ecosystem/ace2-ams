@@ -6,7 +6,7 @@
       <div class="p-tree p-component p-tree-wrapper" style="border: none">
         <AlertTree
           v-if="alertStore.openAlert"
-          :items="alertStore.openAlert.tree"
+          :items="alertStore.openAlert.children"
           id="alert-tree"
         />
       </div>

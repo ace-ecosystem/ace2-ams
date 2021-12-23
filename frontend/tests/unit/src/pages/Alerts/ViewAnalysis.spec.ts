@@ -5,14 +5,14 @@ import { useAlertStore } from "@/stores/alert";
 import myNock from "@unit/services/api/nock";
 import { createRouterMock, getRouter, injectRouterMock } from "vue-router-mock";
 import {
-  mockAlertRead,
+  mockAlert,
   mockAnalysisRead,
   mockAlertReadDateStrings,
 } from "../../../../mockData/alert";
 import nock from "nock";
 
 describe("ViewAnalysis.vue", () => {
-  myNock.get("/alert/uuid1").reply(200, mockAlertRead).persist();
+  myNock.get("/alert/uuid1").reply(200, mockAlert).persist();
   myNock.get("/analysis/uuid2").reply(200, mockAnalysisRead).persist();
 
   const router = createRouterMock({

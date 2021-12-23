@@ -1,22 +1,18 @@
 import AlertTree from "../../../../../src/components/Alerts/AlertTree.vue";
 import { mount, VueWrapper } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
-import {
-  mockAlertReadFirstAppearances,
-  mockAlertTreeFirstAppearances,
-  mockAnalysisRead,
-} from "../../../../mockData/alert";
+import { mockAlert, mockAnalysisRead } from "../../../../mockData/alert";
 import { useAlertStore } from "@/stores/alert";
 import router from "@/router";
 
 describe("AlertTree.vue", () => {
   const pinia = createTestingPinia({ stubActions: false });
   const alertStore = useAlertStore();
-  alertStore.openAlert = mockAlertReadFirstAppearances;
+  alertStore.openAlert = mockAlert;
 
   const wrapper: VueWrapper<any> = mount(AlertTree, {
     props: {
-      items: mockAlertTreeFirstAppearances,
+      items: mockAlert.children,
     },
     global: {
       plugins: [router, pinia],

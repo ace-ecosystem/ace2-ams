@@ -71,9 +71,11 @@ export interface alertSummary {
   uuid: UUID;
 }
 
-export interface alertTreeRead {
-  alert: alertRead;
-  tree: (analysisTreeRead | observableTreeRead)[];
+export interface alertTreeRead extends alertRead {
+  children: (analysisTreeRead | observableTreeRead)[];
+  firstAppearance?: boolean;
+  parentTreeUuid: UUID | null;
+  treeUuid: UUID;
 }
 
 export interface alertReadPage extends nodeReadPage {
