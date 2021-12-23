@@ -15,17 +15,17 @@ class Node(Base):
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
 
-    comments = relationship("NodeComment")
+    comments = relationship("NodeComment", lazy="selectin")
 
-    directives = relationship("NodeDirective", secondary=node_directive_mapping)
+    directives = relationship("NodeDirective", secondary=node_directive_mapping, lazy="selectin")
 
     node_type = Column(String)
 
-    tags = relationship("NodeTag", secondary=node_tag_mapping)
+    tags = relationship("NodeTag", secondary=node_tag_mapping, lazy="selectin")
 
-    threat_actors = relationship("NodeThreatActor", secondary=node_threat_actor_mapping)
+    threat_actors = relationship("NodeThreatActor", secondary=node_threat_actor_mapping, lazy="selectin")
 
-    threats = relationship("NodeThreat", secondary=node_threat_mapping)
+    threats = relationship("NodeThreat", secondary=node_threat_mapping, lazy="selectin")
 
     version = Column(UUID(as_uuid=True), nullable=False)
 
