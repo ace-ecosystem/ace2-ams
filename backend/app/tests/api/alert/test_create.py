@@ -303,9 +303,9 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
 
     # If the test is for event_time, make sure that the retrieved value matches the proper UTC timestamp
     if key == "event_time" and value:
-        assert get.json()["alert"][key] == "2022-01-01T00:00:00+00:00"
+        assert get.json()[key] == "2022-01-01T00:00:00+00:00"
     else:
-        assert get.json()["alert"][key] == value
+        assert get.json()[key] == value
 
 
 def test_create_valid_owner(client_valid_access_token, db):
@@ -331,7 +331,7 @@ def test_create_valid_owner(client_valid_access_token, db):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["alert"]["owner"]["username"] == "johndoe"
+    assert get.json()["owner"]["username"] == "johndoe"
 
 
 def test_create_valid_tool(client_valid_access_token, db):
@@ -357,7 +357,7 @@ def test_create_valid_tool(client_valid_access_token, db):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["alert"]["tool"]["value"] == "test_tool"
+    assert get.json()["tool"]["value"] == "test_tool"
 
 
 def test_create_valid_tool_instance(client_valid_access_token, db):
@@ -383,7 +383,7 @@ def test_create_valid_tool_instance(client_valid_access_token, db):
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["alert"]["tool_instance"]["value"] == "test_tool_instance"
+    assert get.json()["tool_instance"]["value"] == "test_tool_instance"
 
 
 def test_create_valid_required_fields(client_valid_access_token, db):
@@ -406,14 +406,16 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
     assert get.status_code == 200
-    assert get.json()["alert"]["queue"]["value"] == "test_queue"
-    assert get.json()["alert"]["type"]["value"] == "test_type"
+    assert get.json()["queue"]["value"] == "test_queue"
+    assert get.json()["type"]["value"] == "test_type"
 
-    # There should also be 1 observable instance associated with the alert
+    # There should also be 1 observable plus the alert in the tree
     node_tree = db.query(NodeTree).all()
-    assert len(node_tree) == 1
-    assert str(node_tree[0].root_node_uuid) == get.json()["alert"]["uuid"]
-    observable = db.query(Observable).where(Observable.uuid == node_tree[0].node_uuid).one()
+    assert len(node_tree) == 2
+    node_tree_observable = next(n for n in node_tree if str(n.node_uuid) != get.json()["uuid"])
+    assert str(node_tree_observable.root_node_uuid) == get.json()["uuid"]
+
+    observable = db.query(Observable).where(Observable.uuid == node_tree_observable.node_uuid).one()
     assert observable.type.value == "o_type"
     assert observable.value == "o_value"
 
@@ -449,4 +451,4 @@ def test_create_valid_node_fields(client_valid_access_token, db, key, value_list
 
         # Read it back
         get = client_valid_access_token.get(create.headers["Content-Location"])
-        assert len(get.json()["alert"][key]) == len(list(set(value_list)))
+        assert len(get.json()[key]) == len(list(set(value_list)))

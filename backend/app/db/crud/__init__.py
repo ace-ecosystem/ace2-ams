@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from pydantic.types import UUID4
 from sqlalchemy import delete as sql_delete, select, update as sql_update
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import joinedload, undefer, Session
+from sqlalchemy.orm import undefer, Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import join
@@ -12,9 +12,7 @@ from uuid import UUID, uuid4
 
 from api.models.node import NodeRead
 from core.auth import verify_password
-from db.schemas.analysis import Analysis
 from db.schemas.node import Node
-from db.schemas.node_comment import NodeComment
 from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
@@ -82,16 +80,6 @@ def create_node_tree_leaf(
 #
 # READ
 #
-
-
-# Common Node joinedload parameters used in several database queries
-node_joinedloads = (
-    joinedload(Node.comments).options(joinedload(NodeComment.user).options(joinedload(User.roles))),
-    joinedload(Node.directives),
-    joinedload(Node.tags),
-    joinedload(Node.threat_actors),
-    joinedload(Node.threats),
-)
 
 
 def read_all(db_table: DeclarativeMeta, db: Session) -> List:
@@ -211,7 +199,7 @@ def read_by_values(values: List[str], db_table: DeclarativeMeta, db: Session):
     return resources
 
 
-def read_node_tree(root_node_uuid: UUID, db: Session) -> List[Dict]:
+def read_node_tree(root_node_uuid: UUID, db: Session) -> dict:
     """Returns a list of Node objects that comprise a Node Tree. The returned objects
     are manually serialized into their Pydantic models since Pydantic cannot handle
     returning a list of multiple types of objects in this case."""
@@ -233,16 +221,13 @@ def read_node_tree(root_node_uuid: UUID, db: Session) -> List[Dict]:
             select([NodeTree, Node])
             .select_from(join(NodeTree, Node, NodeTree.node_uuid == Node.uuid))
             .where(NodeTree.root_node_uuid == root_node_uuid)
-            .options(
-                *node_joinedloads,
-                joinedload(Analysis.analysis_module_type),
-                joinedload(Observable.redirection),
-                joinedload(Observable.type),
-            )
         )
         .unique()
         .fetchall()
     )
+
+    if not node_tree_and_nodes:
+        raise HTTPException(status_code=404, detail=f"Tree for {root_node_uuid} does not exist.")
 
     node_tree_nodes = []
     for leaf, node in node_tree_and_nodes:
@@ -256,13 +241,13 @@ def read_node_tree(root_node_uuid: UUID, db: Session) -> List[Dict]:
     return unflatten_node_tree(node_tree_nodes)
 
 
-def unflatten_node_tree(node_tree_nodes: List[NodeRead]) -> List[Dict]:
+def unflatten_node_tree(node_tree_nodes: List[NodeRead]) -> dict:
     """Takes a flat list of nodes from a NodeTree after they've been serialized into
     their Pydantic models and converts it into a nested structure.
 
     Adapted from: https://www.npmjs.com/package/performant-array-to-tree"""
 
-    root_nodes = []
+    root_node = {}
 
     # Used to store the already processed nodes where the node's UUID is the key
     lookup: Dict[UUID4, dict] = {}
@@ -282,9 +267,9 @@ def unflatten_node_tree(node_tree_nodes: List[NodeRead]) -> List[Dict]:
         # the children key with an empty list.
         lookup[node.tree_uuid].update(node.dict(exclude_unset=True))
 
-        # If the node does not have a parent, add it as a root node
+        # If the node does not have a parent, add it as the root node
         if not node.parent_tree_uuid:
-            root_nodes.append(lookup[node.tree_uuid])
+            root_node = lookup[node.tree_uuid]
         else:
             # If the parent is not already in the lookup table, add a preliminary item for it
             if node.parent_tree_uuid not in lookup:
@@ -299,7 +284,7 @@ def unflatten_node_tree(node_tree_nodes: List[NodeRead]) -> List[Dict]:
     #
     # Adapted from: https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
     unique_uuids = []
-    unvisited = [{"uuid": "root", "children": root_nodes}]
+    unvisited = [{"uuid": "root", "children": [root_node]}]
 
     while unvisited:
         current = unvisited.pop(0)
@@ -313,7 +298,7 @@ def unflatten_node_tree(node_tree_nodes: List[NodeRead]) -> List[Dict]:
         for idx in range(len(current["children"]) - 1, -1, -1):
             unvisited.insert(0, current["children"][idx])
 
-    return root_nodes
+    return root_node
 
 
 #
