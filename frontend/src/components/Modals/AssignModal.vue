@@ -31,7 +31,7 @@
       <Button
         label="Assign"
         icon="pi pi-check"
-        :disabled="!selectedAlertStore.anySelected"
+        :disabled="!allowSubmit"
         @click="assignUser()"
       />
     </template>
@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-  import { defineProps, ref } from "vue";
+  import { computed, defineProps, ref, defineEmits } from "vue";
 
   import Button from "primevue/button";
   import Dropdown from "primevue/dropdown";
@@ -57,12 +57,12 @@
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
   const userStore = useUserStore();
-  import { useAlertTableStore } from "@/stores/alertTable";
-  const alertTableStore = useAlertTableStore();
 
   const error = ref(null);
   const isLoading = ref(false);
   const selectedUser = ref(null);
+
+  const emit = defineEmits(["requestReload"]);
 
   const props = defineProps({
     name: { type: String, required: true },
@@ -83,9 +83,13 @@
     isLoading.value = false;
     if (!error.value) {
       close();
-      alertTableStore.requestReload = true;
+      emit("requestReload");
     }
   };
+
+  const allowSubmit = computed(() => {
+    return selectedAlertStore.anySelected && selectedUser.value;
+  });
 
   const handleError = () => {
     error.value = null;

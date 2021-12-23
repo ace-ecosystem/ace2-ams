@@ -62,6 +62,27 @@ describe("TagModal.vue", () => {
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
   });
 
+  it("correctly computes in allowSubmit whether the submit button should be enabled'", () => {
+    const { wrapper } = factory();
+
+    // No alerts selected and no value set
+    wrapper.vm.selectedAlertStore.selected = [];
+    wrapper.vm.newTags = [];
+    expect(wrapper.vm.allowSubmit).toBeFalsy();
+    // Alerts selected and no value set
+    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.newTags = [];
+    expect(wrapper.vm.allowSubmit).toBeFalsy();
+    // No alerts selected and value set
+    wrapper.vm.selectedAlertStore.selected = [];
+    wrapper.vm.newTags = ["tag1", "tag2"];
+    expect(wrapper.vm.allowSubmit).toBeFalsy();
+    // Alerts selected and value set
+    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.newTags = ["tag1", "tag2"];
+    expect(wrapper.vm.allowSubmit).toBeTruthy();
+  });
+
   it("will readAll available tags and add their values to storeTagValues on loadTags", async () => {
     myNock
       .get("/node/tag/?offset=0")
@@ -183,7 +204,7 @@ describe("TagModal.vue", () => {
     await wrapper.vm.addTags();
     expect(wrapper.vm.newTags).toEqual([]);
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
-    expect(wrapper.vm.alertTableStore.requestReload).toBeTruthy();
+    expect(wrapper.emitted("requestReload")).toBeTruthy();
   });
 
   it("will not close the modal and will set the 'error' property when assignUser fails", async () => {
@@ -222,6 +243,6 @@ describe("TagModal.vue", () => {
     expect(wrapper.vm.error).toEqual("Request failed with status code 403");
     expect(wrapper.vm.newTags).toEqual(["tag1", "tag2"]);
     expect(wrapper.vm.modalStore.openModals).toStrictEqual(["TagModal"]);
-    expect(wrapper.vm.alertTableStore.requestReload).toBeFalsy();
+    expect(wrapper.emitted("requestReload")).toBeFalsy();
   });
 });

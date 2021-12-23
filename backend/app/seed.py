@@ -143,6 +143,26 @@ if not crud.read_all(db_table=User, db=db):
             username="analyst",
         )
     )
+    db.add(
+        User(
+            default_alert_queue=crud.read_by_value(value="default", db_table=AlertQueue, db=db),
+            display_name="Analyst Alice",
+            email="alice@alice.com",
+            password=hash_password("analyst"),
+            roles=crud.read_by_values(values=["admin"], db_table=UserRole, db=db),
+            username="alice",
+        )
+    )
+    db.add(
+        User(
+            default_alert_queue=crud.read_by_value(value="default", db_table=AlertQueue, db=db),
+            display_name="Analyst Bob",
+            email="bob@bob.com",
+            password=hash_password("analyst"),
+            roles=crud.read_by_values(values=["admin"], db_table=UserRole, db=db),
+            username="bob",
+        )
+    )
     print("Adding user: analyst")
 
 # Commit all of the changes
