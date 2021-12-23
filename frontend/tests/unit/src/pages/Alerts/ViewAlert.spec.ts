@@ -13,7 +13,7 @@ import {
 import nock from "nock";
 
 describe("ViewAlert.vue", () => {
-  myNock.get("/alert/uuid1").reply(200, mockAlert).persist();
+  myNock.get("/alert/uuid1").reply(200, mockAlert);
   const router = createRouterMock({
     initialLocation: "/alert/uuid1",
   });
@@ -54,7 +54,7 @@ describe("ViewAlert.vue", () => {
     expect(alertStore.openAlert).toEqual(mockAlertReadDateStrings);
   });
   it("unselects all selected alerts when umounted", async () => {
-    const reload = myNock.get("/alert/uuid1").reply(200, mockAlert);
+    myNock.get("/alert/uuid1").reply(200, mockAlert);
     const selectedAlertStore = useSelectedAlertStore();
     await wrapper.vm.initPage("uuid1");
     expect(selectedAlertStore.selected).toEqual(["uuid1"]);
