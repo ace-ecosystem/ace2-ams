@@ -164,6 +164,11 @@ def test_update_owner(client_valid_access_token, db):
     assert event.owner.username == "johndoe"
     assert event.version != initial_event_version
 
+    # Set it back to None
+    update = client_valid_access_token.patch(f"/api/event/{event.uuid}", json={"owner": None})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert event.owner is None
+
 
 def test_update_prevention_tools(client_valid_access_token, db):
     # Create an event
@@ -179,6 +184,11 @@ def test_update_prevention_tools(client_valid_access_token, db):
     assert len(event.prevention_tools) == 1
     assert event.prevention_tools[0].value == "test"
     assert event.version != initial_event_version
+
+    # Set it back to None
+    update = client_valid_access_token.patch(f"/api/event/{event.uuid}", json={"prevention_tools": []})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert event.prevention_tools == []
 
 
 def test_update_remediations(client_valid_access_token, db):
@@ -196,6 +206,11 @@ def test_update_remediations(client_valid_access_token, db):
     assert event.remediations[0].value == "test"
     assert event.version != initial_event_version
 
+    # Set it back to None
+    update = client_valid_access_token.patch(f"/api/event/{event.uuid}", json={"remediations": []})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert event.remediations == []
+
 
 def test_update_risk_level(client_valid_access_token, db):
     # Create an event
@@ -211,6 +226,11 @@ def test_update_risk_level(client_valid_access_token, db):
     assert event.risk_level.value == "test"
     assert event.version != initial_event_version
 
+    # Set it back to None
+    update = client_valid_access_token.patch(f"/api/event/{event.uuid}", json={"risk_level": None})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert event.risk_level is None
+
 
 def test_update_source(client_valid_access_token, db):
     # Create an event
@@ -225,6 +245,11 @@ def test_update_source(client_valid_access_token, db):
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert event.source.value == "test"
     assert event.version != initial_event_version
+
+    # Set it back to None
+    update = client_valid_access_token.patch(f"/api/event/{event.uuid}", json={"source": None})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert event.source is None
 
 
 def test_update_status(client_valid_access_token, db):
@@ -256,6 +281,11 @@ def test_update_type(client_valid_access_token, db):
     assert event.type.value == "test"
     assert event.version != initial_event_version
 
+    # Set it back to None
+    update = client_valid_access_token.patch(f"/api/event/{event.uuid}", json={"type": None})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert event.type is None
+
 
 def test_update_vectors(client_valid_access_token, db):
     # Create an event
@@ -271,6 +301,11 @@ def test_update_vectors(client_valid_access_token, db):
     assert len(event.vectors) == 1
     assert event.vectors[0].value == "test"
     assert event.version != initial_event_version
+
+    # Set it back to None
+    update = client_valid_access_token.patch(f"/api/event/{event.uuid}", json={"vectors": []})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert event.vectors == []
 
 
 @pytest.mark.parametrize(
