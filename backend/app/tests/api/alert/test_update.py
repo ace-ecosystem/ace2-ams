@@ -131,6 +131,11 @@ def test_update_disposition(client_valid_access_token, db):
     assert alert.disposition.value == "test"
     assert alert.version != initial_version
 
+    # Set it back to None
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"disposition": None})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert alert.disposition is None
+
 
 def test_update_event_uuid(client_valid_access_token, db):
     # Create an alert
@@ -154,6 +159,11 @@ def test_update_event_uuid(client_valid_access_token, db):
     # Additionally, adding the alert to the event should trigger the event to have a new version.
     assert event.version != initial_event_version
 
+    # Set it back to None
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"event_uuid": None})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert alert.event is None
+
 
 def test_update_owner(client_valid_access_token, db):
     # Create an alert
@@ -168,6 +178,11 @@ def test_update_owner(client_valid_access_token, db):
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert.owner.username == "johndoe"
     assert alert.version != initial_alert_version
+
+    # Set it back to None
+    update = client_valid_access_token.patch(f"/api/alert/{alert.uuid}", json={"owner": None})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert alert.owner is None
 
 
 def test_update_queue(client_valid_access_token, db):

@@ -396,10 +396,13 @@ def update_alert(
         db_alert.disposition_user = crud.read_user_by_username(username=username, db=db)
 
     if "event_uuid" in update_data:
-        db_alert.event = crud.read(uuid=update_data["event_uuid"], db_table=Event, db=db)
+        if update_data["event_uuid"]:
+            db_alert.event = crud.read(uuid=update_data["event_uuid"], db_table=Event, db=db)
 
-        # This counts as editing the event, so it should receive a new version.
-        db_alert.event.version = uuid4()
+            # This counts as editing the event, so it should receive a new version.
+            db_alert.event.version = uuid4()
+        else:
+            db_alert.event = None
 
     if "event_time" in update_data:
         db_alert.event_time = update_data["event_time"]
