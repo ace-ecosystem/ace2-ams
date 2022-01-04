@@ -49,6 +49,26 @@ describe("CommentModal.vue", () => {
       value: "test comment",
     });
   });
+  it("correctly computes in allowSubmit whether the submit button should be enabled'", () => {
+    const { wrapper } = factory();
+
+    // No alerts selected and no value set
+    wrapper.vm.selectedAlertStore.selected = [];
+    wrapper.vm.newComment = "";
+    expect(wrapper.vm.allowSubmit).toBeFalsy();
+    // Alerts selected and no value set
+    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.newComment = "";
+    expect(wrapper.vm.allowSubmit).toBeFalsy();
+    // No alerts selected and value set
+    wrapper.vm.selectedAlertStore.selected = [];
+    wrapper.vm.newComment = "test comment";
+    expect(wrapper.vm.allowSubmit).toBeFalsy();
+    // Alerts selected and value set
+    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.newComment = "test comment";
+    expect(wrapper.vm.allowSubmit).toBeTruthy();
+  });
   it("has the correctly assigned name 'CommentModal'", () => {
     const { wrapper } = factory();
 
@@ -73,7 +93,7 @@ describe("CommentModal.vue", () => {
 
     wrapper.vm.close();
 
-    expect(wrapper.vm.newComment).toBeNull();
+    expect(wrapper.vm.newComment).toEqual("");
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
   });
 
@@ -109,9 +129,9 @@ describe("CommentModal.vue", () => {
     wrapper.vm.modalStore.open("CommentModal");
     expect(wrapper.vm.modalStore.openModals).toStrictEqual(["CommentModal"]);
     await wrapper.vm.addComment();
-    expect(wrapper.vm.newComment).toBeNull();
+    expect(wrapper.vm.newComment).toEqual("");
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
-    expect(wrapper.vm.alertTableStore.requestReload).toBeTruthy();
+    expect(wrapper.emitted("requestReload")).toBeTruthy();
   });
 
   it("will not close the modal and will set the 'error' property when assignUser fails", async () => {
@@ -142,6 +162,6 @@ describe("CommentModal.vue", () => {
     expect(wrapper.vm.error).toEqual("Request failed with status code 403");
     expect(wrapper.vm.newComment).toEqual("test comment");
     expect(wrapper.vm.modalStore.openModals).toStrictEqual(["CommentModal"]);
-    expect(wrapper.vm.alertTableStore.requestReload).toBeFalsy();
+    expect(wrapper.emitted("requestReload")).toBeFalsy();
   });
 });

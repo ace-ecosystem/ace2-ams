@@ -1,5 +1,6 @@
 import { createTestingPinia } from "@pinia/testing";
 import { mount, VueWrapper } from "@vue/test-utils";
+
 import AssignModal from "@/components/Modals/AssignModal.vue";
 import Button from "primevue/button";
 import CommentModal from "@/components/Modals/CommentModal.vue";
@@ -12,6 +13,9 @@ import Toolbar from "primevue/toolbar";
 
 describe("TheAlertActionToolbar.vue", () => {
   const wrapper: VueWrapper<any> = mount(TheAlertActionToolbar, {
+    props: {
+      page: "Manage Alerts",
+    },
     global: {
       plugins: [createTestingPinia({ stubActions: false })],
       stubs: {
@@ -69,7 +73,30 @@ describe("TheAlertActionToolbar.vue", () => {
     expect(wrapper.vm.modalStore.openModals).toStrictEqual(["modal1"]);
   });
 
-  it("updates ownership of alert to current user and requests alertTable reload when clicked", async () => {
+  it("opens sets requestReload for the current page's correct store", async () => {
+    wrapper.vm.alertTableStore.$reset();
+    wrapper.vm.alertStore.$reset();
+    wrapper.vm.requestReload();
+    expect(wrapper.vm.alertTableStore.requestReload).toBeTruthy();
+    expect(wrapper.vm.alertStore.requestReload).toBeFalsy();
+
+    wrapper.vm.alertTableStore.$reset();
+    wrapper.vm.alertStore.$reset();
+    await wrapper.setProps({ page: "View Alert" });
+    wrapper.vm.requestReload();
+    expect(wrapper.vm.alertTableStore.requestReload).toBeFalsy();
+    expect(wrapper.vm.alertStore.requestReload).toBeTruthy();
+
+    wrapper.vm.alertTableStore.$reset();
+    wrapper.vm.alertStore.$reset();
+    await wrapper.setProps({ page: "Unknown" });
+    wrapper.vm.requestReload();
+    expect(wrapper.vm.alertTableStore.requestReload).toBeFalsy();
+    expect(wrapper.vm.alertStore.requestReload).toBeFalsy();
+  });
+
+  it("updates ownership of alert to current user and requests alertTable reload when Take Ownership clicked", async () => {
+    await wrapper.setProps({ page: "Manage Alerts" });
     myNock
       .options("/alert/uuid1")
       .reply(200)
@@ -83,6 +110,24 @@ describe("TheAlertActionToolbar.vue", () => {
     wrapper.vm.authStore.user = { username: "testingUser" };
     wrapper.vm.selectedAlertStore.selected = ["uuid1", "uuid2"];
     await wrapper.vm.takeOwnership();
+    // this will still be truthy bc it's in the same component as requestReload()
     expect(wrapper.vm.alertTableStore.requestReload).toBeTruthy();
+  });
+
+  it("sets the error and does not request reload if takeOwnership fails", async () => {
+    wrapper.vm.alertTableStore.$reset();
+    wrapper.vm.alertStore.$reset();
+    await wrapper.setProps({ page: "Manage Alerts" });
+    myNock
+      .options("/alert/uuid1")
+      .reply(200)
+      .patch("/alert/uuid1", { owner: "testingUser" })
+      .reply(403);
+    wrapper.vm.authStore.user = { username: "testingUser" };
+    wrapper.vm.selectedAlertStore.selected = ["uuid1", "uuid2"];
+    await wrapper.vm.takeOwnership();
+    expect(wrapper.vm.error).toEqual("Request failed with status code 403");
+    // this will still be truthy bc it's in the same component as requestReload()
+    expect(wrapper.vm.alertTableStore.requestReload).toBeFalsy();
   });
 });

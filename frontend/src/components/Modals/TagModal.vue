@@ -3,6 +3,11 @@
 
 <template>
   <BaseModal :name="name" header="Add Tags">
+    <div>
+      <div v-if="error" class="p-col">
+        <Message severity="error" @close="handleError">{{ error }}</Message>
+      </div>
+    </div>
     <span class="p-fluid">
       <Chips v-model="newTags" />
       <Dropdown
@@ -21,15 +26,21 @@
         class="p-button-text"
         @click="close"
       />
-      <Button label="Add" icon="pi pi-check" @click="addTags" />
+      <Button
+        label="Add"
+        icon="pi pi-check"
+        :disabled="!allowSubmit"
+        @click="addTags"
+      />
     </template>
   </BaseModal>
 </template>
 
 <script setup>
-  import { defineProps, onMounted, ref } from "vue";
+  import { computed, defineEmits, defineProps, onMounted, ref } from "vue";
 
   import Button from "primevue/button";
+  import Message from "primevue/message";
   import Chips from "primevue/chips";
   import Dropdown from "primevue/dropdown";
 
@@ -48,6 +59,8 @@
   const modalStore = useModalStore();
   const nodeTagStore = useNodeTagStore();
   const selectedAlertStore = useSelectedAlertStore();
+
+  const emit = defineEmits(["requestReload"]);
 
   const props = defineProps({
     name: { type: String, required: true },
@@ -83,7 +96,7 @@
     isLoading.value = false;
     if (!error.value) {
       close();
-      alertTableStore.requestReload = true;
+      emit("requestReload");
     }
   }
 
@@ -118,6 +131,10 @@
     // Add an existing tag to the list of tags to be added
     newTags.value.push(tagEvent.value.value);
   }
+
+  const allowSubmit = computed(() => {
+    return selectedAlertStore.anySelected && newTags.value.length;
+  });
 
   const handleError = () => {
     error.value = null;

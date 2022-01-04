@@ -35,10 +35,32 @@ describe("AssignModal.vue", () => {
 
     expect(wrapper.exists()).toBe(true);
   });
+
   it("has the correctly assigned name 'AssignModal'", () => {
     const { wrapper } = factory();
 
     expect(wrapper.vm.name).toEqual("AssignModal");
+  });
+
+  it("correctly computes in allowSubmit whether the submit button should be enabled'", () => {
+    const { wrapper } = factory();
+
+    // No alerts selected and no value set
+    wrapper.vm.selectedAlertStore.selected = [];
+    wrapper.vm.selectedUser = null;
+    expect(wrapper.vm.allowSubmit).toBeFalsy();
+    // Alerts selected and no value set
+    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.selectedUser = null;
+    expect(wrapper.vm.allowSubmit).toBeFalsy();
+    // No alerts selected and value set
+    wrapper.vm.selectedAlertStore.selected = [];
+    wrapper.vm.selectedUser = { username: "Alice" };
+    expect(wrapper.vm.allowSubmit).toBeFalsy();
+    // Alerts selected and value set
+    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.selectedUser = { username: "Alice" };
+    expect(wrapper.vm.allowSubmit).toBeTruthy();
   });
 
   it("will clear the 'error' property when handleError is called", async () => {
@@ -84,7 +106,7 @@ describe("AssignModal.vue", () => {
     await wrapper.vm.assignUser();
     expect(wrapper.vm.selectedUser).toBeNull();
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
-    expect(wrapper.vm.alertTableStore.requestReload).toBeTruthy();
+    expect(wrapper.emitted("requestReload")).toBeTruthy();
   });
 
   it("will not close the modal and will set the 'error' property when assignUser fails", async () => {
@@ -111,6 +133,6 @@ describe("AssignModal.vue", () => {
     expect(wrapper.vm.error).toEqual("Request failed with status code 403");
     expect(wrapper.vm.selectedUser).toEqual({ username: "Alice" });
     expect(wrapper.vm.modalStore.openModals).toStrictEqual(["AssignModal"]);
-    expect(wrapper.vm.alertTableStore.requestReload).toBeFalsy();
+    expect(wrapper.emitted("requestReload")).toBeFalsy();
   });
 });
