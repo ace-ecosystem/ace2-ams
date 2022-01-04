@@ -98,12 +98,6 @@ def update_analysis(
     # Get the data that was given in the request and use it to update the database object
     update_data = analysis.dict(exclude_unset=True)
 
-    if "analysis_module_type" in update_data:
-        db_analysis_module_type = crud.read(
-            uuid=update_data["analysis_module_type"], db_table=AnalysisModuleType, db=db
-        )
-        db_analysis.analysis_module_type = db_analysis_module_type
-
     if "details" in update_data:
         db_analysis.details = update_data["details"]
 

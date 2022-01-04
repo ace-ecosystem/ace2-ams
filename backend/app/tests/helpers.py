@@ -212,7 +212,7 @@ def create_analysis_in_tree(
 
 def create_analysis(
     db: Session,
-    amt_value: Optional[str] = None,
+    amt_value: str = "test_module",
     amt_description: Optional[str] = None,
     amt_extended_version: Optional[dict] = None,
     amt_manual: bool = False,

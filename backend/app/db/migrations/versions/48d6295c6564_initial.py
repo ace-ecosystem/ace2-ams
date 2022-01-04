@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 4289e361a8cd
+Revision ID: 48d6295c6564
 Revises: 
-Create Date: 2021-12-20 14:17:42.352905
+Create Date: 2022-01-04 13:37:08.314424
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '4289e361a8cd'
+revision = '48d6295c6564'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -179,7 +179,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_user_role_value'), 'user_role', ['value'], unique=True)
     op.create_table('analysis',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('details', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('error_message', sa.String(), nullable=True),
     sa.Column('stack_trace', sa.String(), nullable=True),
