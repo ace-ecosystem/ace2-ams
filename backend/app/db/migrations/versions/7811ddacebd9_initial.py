@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 68f7a66124ff
+Revision ID: 7811ddacebd9
 Revises: 
-Create Date: 2022-01-04 14:10:57.329021
+Create Date: 2022-01-04 14:23:58.299293
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '68f7a66124ff'
+revision = '7811ddacebd9'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -318,7 +318,7 @@ def upgrade() -> None:
     sa.Column('remediation_time', sa.DateTime(timezone=True), nullable=True),
     sa.Column('risk_level_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('source_uuid', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('status_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('status_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.ForeignKeyConstraint(['owner_uuid'], ['user.uuid'], ),
     sa.ForeignKeyConstraint(['risk_level_uuid'], ['event_risk_level.uuid'], ),
