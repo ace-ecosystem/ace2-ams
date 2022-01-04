@@ -3,7 +3,7 @@
 
 <template>
   <Toolbar style="overflow-x: auto">
-    <template #left>
+    <template #start>
       <!--      DATE PICKERS  -->
       <DateRangePicker />
       <!--      EDIT FILTERS -->
@@ -18,7 +18,7 @@
       <EditFilterModal name="EditFilterModal" />
     </template>
     <!--    TODO: SHOW APPLIED FILTERS -->
-    <template #right>
+    <template #end>
       <!--      CLEAR FILTERS-->
       <Button
         type="button"

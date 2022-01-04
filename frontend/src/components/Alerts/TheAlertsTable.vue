@@ -29,7 +29,7 @@
     <!--        ALERT TABLE TOOLBAR-->
     <template #header>
       <Toolbar style="border: none">
-        <template #left>
+        <template #start>
           <MultiSelect
             :model-value="selectedColumns"
             :options="columns"
@@ -38,7 +38,7 @@
             @update:modelValue="onColumnToggle"
           />
         </template>
-        <template #right>
+        <template #end>
           <span class="p-input-icon-left p-m-1">
             <i class="pi pi-search" />
             <InputText
