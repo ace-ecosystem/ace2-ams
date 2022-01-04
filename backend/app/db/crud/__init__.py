@@ -141,9 +141,12 @@ def read_observable(type: str, value: str, db: Session) -> Union[Observable, Non
     )
 
 
-def read_user_by_username(username: str, db: Session, err_on_not_found: bool = True) -> User:
+def read_user_by_username(username: str, db: Session, err_on_not_found: bool = True) -> Optional[User]:
     """Returns the User with the given username if it exists. Designed to be called only
     by the API since it raises an HTTPException."""
+
+    if not username:
+        return None
 
     try:
         return db.execute(select(User).where(User.username == username)).scalars().one()
@@ -212,7 +215,7 @@ def read_node_tree(root_node_uuid: UUID, db: Session) -> dict:
     #
     # It's not an ideal solution, but the only way I've found around this is to query the database for all the Node
     # objects and then manually check their types to serialize them into their correct Pydantic models. Then the
-    # response model for this API endpoint is simply a "list" without specifying the type of objects in the list.
+    # response model for this API endpoint is simply a "dict" instead of a more specific type.
     #
     # Source: https://github.com/samuelcolvin/pydantic/issues/514#issuecomment-491298181
 

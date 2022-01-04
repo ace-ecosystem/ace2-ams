@@ -53,13 +53,21 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
 )
 def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     alert = helpers.create_alert(db=db)
+    analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Create an object
-    create1_json = {"uuid": str(uuid.uuid4()), "node_tree": {"root_node_uuid": str(alert.uuid)}}
+    create1_json = {
+        "uuid": str(uuid.uuid4()),
+        "analysis_module_type": str(analysis_module_type.uuid),
+        "node_tree": {"root_node_uuid": str(alert.uuid)},
+    }
     client_valid_access_token.post("/api/analysis/", json=create1_json)
 
     # Ensure you cannot create another object with the same unique field value
-    create2_json = {"node_tree": {"root_node_uuid": str(alert.uuid)}}
+    create2_json = {
+        "analysis_module_type": str(analysis_module_type.uuid),
+        "node_tree": {"root_node_uuid": str(alert.uuid)},
+    }
     create2_json[key] = create1_json[key]
     create2 = client_valid_access_token.post("/api/analysis/", json=create2_json)
     assert create2.status_code == status.HTTP_409_CONFLICT
@@ -97,10 +105,16 @@ def test_create_nonexistent_analysis_module_type(client_valid_access_token, db):
 )
 def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
     alert = helpers.create_alert(db=db)
+    analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Create the object
     create = client_valid_access_token.post(
-        "/api/analysis/", json={"node_tree": {"root_node_uuid": str(alert.uuid)}, key: value}
+        "/api/analysis/",
+        json={
+            "analysis_module_type": str(analysis_module_type.uuid),
+            "node_tree": {"root_node_uuid": str(alert.uuid)},
+            key: value,
+        },
     )
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -114,27 +128,15 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
         assert get.json()[key] == value
 
 
-def test_create_valid_analysis_module_type(client_valid_access_token, db):
+def test_create_valid_required_fields(client_valid_access_token, db):
     alert = helpers.create_alert(db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
-    # Use the analysis module type to create a new analysis
+    # Create the object
     create = client_valid_access_token.post(
         "/api/analysis/",
-        json={"node_tree": {"root_node_uuid": str(alert.uuid)}, "analysis_module_type": str(analysis_module_type.uuid)},
+        json={"analysis_module_type": str(analysis_module_type.uuid), "node_tree": {"root_node_uuid": str(alert.uuid)}},
     )
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["analysis_module_type"]["uuid"] == str(analysis_module_type.uuid)
-
-
-def test_create_valid_required_fields(client_valid_access_token, db):
-    alert = helpers.create_alert(db=db)
-
-    # Create the object
-    create = client_valid_access_token.post("/api/analysis/", json={"node_tree": {"root_node_uuid": str(alert.uuid)}})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back, but since there are no required fields to create the analysis, there is nothing to verify.

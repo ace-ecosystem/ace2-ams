@@ -15,9 +15,6 @@ from tests import helpers
 @pytest.mark.parametrize(
     "key,value",
     [
-        ("analysis_module_type", 123),
-        ("analysis_module_type", ""),
-        ("analysis_module_type", "abc"),
         ("details", 123),
         ("details", ""),
         ("details", "abc"),
@@ -52,18 +49,6 @@ def test_update_invalid_version(client_valid_access_token, db):
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
-def test_update_nonexistent_analysis_module_type(client_valid_access_token, db):
-    # Create an analysis
-    analysis = helpers.create_analysis(db=db)
-
-    # Make sure you cannot update it to use a nonexistent analysis module type
-    update = client_valid_access_token.patch(
-        f"/api/analysis/{analysis.uuid}",
-        json={"analysis_module_type": str(uuid.uuid4())},
-    )
-    assert update.status_code == status.HTTP_404_NOT_FOUND
-
-
 def test_update_nonexistent_uuid(client_valid_access_token):
     update = client_valid_access_token.patch(f"/api/analysis/{uuid.uuid4()}", json={})
     assert update.status_code == status.HTTP_404_NOT_FOUND
@@ -74,34 +59,20 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_update_analysis_module_type(client_valid_access_token, db):
-    # Create an analysis
-    analysis = helpers.create_analysis(db=db)
-    initial_analysis_version = analysis.version
-
-    # Create a new analysis module type
-    analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
-
-    # Update the analysis module type
-    update = client_valid_access_token.patch(
-        f"/api/analysis/{analysis.uuid}",
-        json={"analysis_module_type": str(analysis_module_type.uuid)},
-    )
-    assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert analysis.analysis_module_type == analysis_module_type
-    assert analysis.version != initial_analysis_version
-
-
 @pytest.mark.parametrize(
     "key,initial_value,updated_value",
     [
         ("details", None, '{"foo": "bar"}'),
+        ("details", '{"foo": "bar"}', None),
         ("details", '{"foo": "bar"}', '{"foo": "bar"}'),
         ("error_message", None, "test"),
+        ("error_message", "test", None),
         ("error_message", "test", "test"),
         ("stack_trace", None, "test"),
+        ("stack_trace", "test", None),
         ("stack_trace", "test", "test"),
         ("summary", None, "test"),
+        ("summary", "test", None),
         ("summary", "test", "test"),
     ],
 )
@@ -117,7 +88,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
-    if key == "details":
+    if key == "details" and updated_value:
         assert analysis.details == json.loads(updated_value)
     else:
         assert getattr(analysis, key) == updated_value

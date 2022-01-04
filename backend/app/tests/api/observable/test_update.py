@@ -158,6 +158,11 @@ def test_update_redirection_uuid(client_valid_access_token, db):
     assert obj1.redirection_uuid == obj2.uuid
     assert obj1.version != initial_observable_version
 
+    # Set it back to None
+    update = client_valid_access_token.patch(f"/api/observable/{obj1.uuid}", json={"redirection_uuid": None})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert obj1.redirection is None
+
 
 @pytest.mark.parametrize(
     "key,value_lists,helper_create_func",

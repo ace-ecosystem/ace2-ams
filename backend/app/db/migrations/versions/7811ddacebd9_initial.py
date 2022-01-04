@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 4289e361a8cd
+Revision ID: 7811ddacebd9
 Revises: 
-Create Date: 2021-12-20 14:17:42.352905
+Create Date: 2022-01-04 14:23:58.299293
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '4289e361a8cd'
+revision = '7811ddacebd9'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -179,7 +179,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_user_role_value'), 'user_role', ['value'], unique=True)
     op.create_table('analysis',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('details', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('error_message', sa.String(), nullable=True),
     sa.Column('stack_trace', sa.String(), nullable=True),
@@ -312,13 +312,13 @@ def upgrade() -> None:
     sa.Column('creation_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
     sa.Column('disposition_time', sa.DateTime(timezone=True), nullable=True),
     sa.Column('event_time', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('name', sa.String(), nullable=False),
     sa.Column('owner_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('ownership_time', sa.DateTime(timezone=True), nullable=True),
     sa.Column('remediation_time', sa.DateTime(timezone=True), nullable=True),
     sa.Column('risk_level_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('source_uuid', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('status_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('status_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.ForeignKeyConstraint(['owner_uuid'], ['user.uuid'], ),
     sa.ForeignKeyConstraint(['risk_level_uuid'], ['event_risk_level.uuid'], ),

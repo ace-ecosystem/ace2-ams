@@ -137,11 +137,18 @@ def update_observable(
         db_observable.for_detection = update_data["for_detection"]
 
     if "redirection_uuid" in update_data:
-        db_observable.redirection = crud.read(uuid=update_data["redirection_uuid"], db_table=Observable, db=db)
+        if update_data["redirection_uuid"]:
+            db_observable.redirection = crud.read(uuid=update_data["redirection_uuid"], db_table=Observable, db=db)
 
-        # TODO: Figure out why setting the redirection field above does not set the redirection_uuid
-        # the same way it does in the create endpoint.
-        db_observable.redirection_uuid = update_data["redirection_uuid"]
+            # TODO: Figure out why setting the redirection field above does not set the redirection_uuid
+            # the same way it does in the create endpoint.
+            db_observable.redirection_uuid = update_data["redirection_uuid"]
+        else:
+            # At this point we want to set the redirection back to None. If there actually is
+            # a redirection observable set, then set both observables' redirection_uuid to None.
+            if db_observable.redirection:
+                db_observable.redirection.redirection_uuid = None
+                db_observable.redirection_uuid = None
 
     if "time" in update_data:
         db_observable.time = update_data["time"]

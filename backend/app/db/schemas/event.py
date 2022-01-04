@@ -30,7 +30,7 @@ class Event(Node):
 
     event_time = Column(DateTime(timezone=True))
 
-    name = Column(String)
+    name = Column(String, nullable=False)
 
     owner_uuid = Column(UUID(as_uuid=True), ForeignKey("user.uuid"), nullable=True)
 
@@ -54,7 +54,7 @@ class Event(Node):
 
     status = relationship("EventStatus")
 
-    status_uuid = Column(UUID(as_uuid=True), ForeignKey("event_status.uuid"))
+    status_uuid = Column(UUID(as_uuid=True), ForeignKey("event_status.uuid"), nullable=False)
 
     type = relationship("EventType")
 
