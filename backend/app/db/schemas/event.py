@@ -30,7 +30,7 @@ class Event(Node):
 
     event_time = Column(DateTime(timezone=True))
 
-    name = Column(String)
+    name = Column(String, nullable=False)
 
     owner_uuid = Column(UUID(as_uuid=True), ForeignKey("user.uuid"), nullable=True)
 
