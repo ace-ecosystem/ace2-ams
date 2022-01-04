@@ -183,7 +183,6 @@
   const expandedRows = ref([]);
   const isLoading = ref(false);
   const selectedColumns = ref([]);
-  const selectedRows = ref([]);
   const sortField = ref("eventTime");
   const sortOrder = ref("desc");
   const numRows = ref(10);
@@ -215,8 +214,13 @@
     }
   });
 
+  const selectedRows = computed(() => {
+    return alertTableStore.visibleQueriedAlerts.filter((alert) =>
+      selectedAlertStore.selected.includes(alert.uuid),
+    );
+  });
+
   const reloadTable = async () => {
-    selectedRows.value = [];
     selectedAlertStore.unselectAll();
     alertTableStore.requestReload = false;
     await loadAlerts();
@@ -277,7 +281,7 @@
   };
 
   const onPage = async (event) => {
-    selectedRows.value = [];
+    selectedAlertStore.unselectAll();
     numRows.value = event.rows;
     page.value = event.page;
     await loadAlerts();
