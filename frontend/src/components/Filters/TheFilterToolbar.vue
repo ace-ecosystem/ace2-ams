@@ -35,7 +35,7 @@
         class="p-button-outlined p-m-1"
         @click="reset"
       />
-      <Button icon="pi pi-link" class="p-button-rounded" @click="viewLink"/>
+      <Button icon="pi pi-link" class="p-button-rounded" @click="viewLink" />
     </template>
   </Toolbar>
 </template>
@@ -58,17 +58,21 @@
   import { useModalStore } from "@/stores/modal";
   import { copyToClipboard } from "@/etc/helpers";
 
+  import { formatForAPI } from "@/services/api/alert";
+
   const filterType = inject("filterType");
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
 
   function viewLink() {
-    let st =  new URLSearchParams()
-    const link = `${window.location.origin}/manage_alerts?${st.toString()}`
-    console.log(link)
-
-  };
+    let link = `${window.location.origin}/manage_alerts`;
+    if (filterStore[filterType]) {
+      let st = new URLSearchParams(formatForAPI(filterStore[filterType]));
+      link = `${window.location.origin}/manage_alerts?${st.toString()}`;
+    }
+    copyToClipboard(link);
+  }
   const clear = () => {
     filterStore.clearAll({ filterType: filterType });
   };
