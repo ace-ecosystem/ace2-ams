@@ -67,7 +67,23 @@ class NodeTreeBase(BaseModel):
         orm_mode = True
 
 
+class NodeTreeMetadataDisplay(BaseModel):
+    type: Optional[type_str] = Field(description="An optional type override to use when displaying the Node in the GUI")
+
+    value: Optional[type_str] = Field(
+        description="An optional value override to use when displaying the Node in the GUI"
+    )
+
+
+class NodeTreeMetadata(BaseModel):
+    display: Optional[NodeTreeMetadataDisplay] = Field(
+        description="Optional attributes to include that will override how the Node is displayed in the GUI"
+    )
+
+
 class NodeTreeCreateWithNode(BaseModel):
+    node_metadata: Optional[NodeTreeMetadata] = Field(description="Optional metadata included with the Node")
+
     root_node_uuid: UUID4 = Field(
         description="""The node UUID that contains the tree.
             For example, an alert UUID that contains a tree of analyses and observables."""
@@ -81,29 +97,13 @@ class NodeTreeItemRead(NodeRead):
 
     first_appearance: bool = Field("Whether or not this is the first time the Node appears in the tree")
 
+    node_metadata: Optional[NodeTreeMetadata] = Field(description="Optional metadata included with the Node")
+
     parent_tree_uuid: Optional[UUID4] = Field(
         description="The node's parent leaf UUID if the node is inside a NodeTree"
     )
 
     tree_uuid: UUID4 = Field(description="The UUID of the leaf if this Node is inside a NodeTree")
-
-
-class NodeTreeRead(BaseModel):
-    root_node: NodeRead = Field(description="The root node of the tree. For example, this will often be an Alert.")
-
-    leaves: List[NodeTreeBase] = Field(description="A list of the leaves that make up the tree")
-
-    class Config:
-        orm_mode = True
-
-
-class NodeTreeUpdate(NodeTreeBase):
-    root_node_uuid: Optional[UUID4] = Field(
-        description="""The node UUID that contains the tree.
-            For example, an alert UUID that contains a tree of analyses and observables."""
-    )
-
-    node_uuid: Optional[UUID4] = Field(description="The UUID of the Node represented by the leaf")
 
 
 class NodeVersion(BaseModel):
