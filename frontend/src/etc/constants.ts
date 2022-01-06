@@ -76,6 +76,7 @@ export const alertFilters: readonly filterOption[] = [
     type: filterTypes.SELECT,
     store: useUserStore,
     optionLabel: "displayName",
+    valueProperty: "username",
     formatForAPI: (filter: userRead) => {
       return filter.username;
     },
@@ -100,6 +101,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.EVENT_TIME_AFTER_FILTER,
     label: "Event Time After",
     type: filterTypes.DATE,
+    
   },
   {
     name: alertFilterNames.EVENT_TIME_BEFORE_FILTER,
@@ -129,6 +131,10 @@ export const alertFilters: readonly filterOption[] = [
     formatForAPI: (filter: { category: observableTypeRead; value: string }) => {
       return `${filter.category.value}|${filter.value}`;
     },
+    formatForGUI: (filterString: string) => {
+      const [category, value] = filterString.split("|");
+      return { category: category, value: value };
+    },
   },
   {
     name: alertFilterNames.OBSERVABLE_TYPES_FILTER,
@@ -142,6 +148,9 @@ export const alertFilters: readonly filterOption[] = [
         })
         .join();
     },
+    formatForGUI: (filterString: string) => {
+      return filterString.split(",");
+    },
   },
   {
     name: alertFilterNames.OBSERVABLE_VALUE_FILTER,
@@ -154,6 +163,7 @@ export const alertFilters: readonly filterOption[] = [
     type: filterTypes.SELECT,
     store: useUserStore,
     optionLabel: "displayName",
+    valueProperty: "username",
     formatForAPI: (filter: userRead) => {
       return filter.username;
     },
@@ -175,9 +185,12 @@ export const alertFilters: readonly filterOption[] = [
     formatForAPI: (filter: nodeTagRead[]) => {
       return filter
         .map(function (elem) {
-          return elem.value;
+          return elem;
         })
         .join();
+    },
+    formatForGUI: (filterString: string) => {
+      return filterString.split(",");
     },
   },
   {
@@ -200,6 +213,9 @@ export const alertFilters: readonly filterOption[] = [
           return elem.value;
         })
         .join();
+    },
+    formatForGUI: (filterString: string) => {
+      return filterString.split(",");
     },
   },
   {
