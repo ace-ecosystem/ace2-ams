@@ -63,9 +63,6 @@
       />
       <RemediationModal />
     </template>
-    <template #end>
-      <Button icon="pi pi-link" class="p-button-rounded" label="Link" />
-    </template>
   </Toolbar>
 </template>
 

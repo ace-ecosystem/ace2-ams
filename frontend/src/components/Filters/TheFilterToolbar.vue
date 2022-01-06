@@ -35,6 +35,7 @@
         class="p-button-outlined p-m-1"
         @click="reset"
       />
+      <Button icon="pi pi-link" class="p-button-rounded" @click="viewLink"/>
     </template>
   </Toolbar>
 </template>
