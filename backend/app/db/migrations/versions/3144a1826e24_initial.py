@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 7811ddacebd9
+Revision ID: 3144a1826e24
 Revises: 
-Create Date: 2022-01-04 14:23:58.299293
+Create Date: 2022-01-04 19:17:21.526530
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '7811ddacebd9'
+revision = '3144a1826e24'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -262,6 +262,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_node_threat_node_threat_type_mapping_node_threat_uuid'), 'node_threat_node_threat_type_mapping', ['node_threat_uuid'], unique=False)
     op.create_table('node_tree',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('node_metadata', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('root_node_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('parent_tree_uuid', postgresql.UUID(as_uuid=True), nullable=True),
