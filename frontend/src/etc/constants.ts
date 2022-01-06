@@ -85,6 +85,9 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.DISPOSITIONED_AFTER_FILTER,
     label: "Dispositioned After",
     type: filterTypes.DATE,
+    formatForGUI: (filterString: string) => {
+      return new Date(filterString);
+    },
   },
   {
     name: alertFilterNames.DISPOSITIONED_BEFORE_FILTER,
