@@ -169,7 +169,6 @@ def create_alert(
                 type=observable["type"],
                 value=observable["value"],
                 parent_tree=node_tree,
-                root_node=alert,
                 db=db,
             )
 
@@ -178,50 +177,9 @@ def create_alert(
     return node_tree
 
 
-def create_analysis_in_tree(
-    db: Session,
-    root_node: Node,
-    node_metadata: Optional[Dict[str, object]] = None,
-    parent_tree: Optional[NodeTree] = None,
-    amt_value: Optional[str] = None,
-    amt_description: Optional[str] = None,
-    amt_extended_version: Optional[dict] = None,
-    amt_manual: bool = False,
-    amt_observable_types: List[str] = None,
-    amt_required_directives: List[str] = None,
-    amt_required_tags: List[str] = None,
-    amt_version: str = "1.0.0",
-) -> NodeTree:
-    analysis = create_analysis(
-        db=db,
-        amt_value=amt_value,
-        amt_description=amt_description,
-        amt_extended_version=amt_extended_version,
-        amt_manual=amt_manual,
-        amt_observable_types=amt_observable_types,
-        amt_required_directives=amt_required_directives,
-        amt_required_tags=amt_required_tags,
-        amt_version=amt_version,
-    )
-
-    parent_tree_uuid = None
-    if parent_tree:
-        parent_tree_uuid = parent_tree.uuid
-
-    tree = crud.create_node_tree_leaf(
-        node_metadata=node_metadata,
-        root_node_uuid=root_node.uuid,
-        parent_tree_uuid=parent_tree_uuid,
-        node_uuid=analysis.uuid,
-        db=db,
-    )
-
-    crud.commit(db)
-    return tree
-
-
 def create_analysis(
     db: Session,
+    parent_tree: NodeTree,
     amt_value: str = "test_module",
     amt_description: Optional[str] = None,
     amt_extended_version: Optional[dict] = None,
@@ -230,7 +188,8 @@ def create_analysis(
     amt_required_directives: List[str] = None,
     amt_required_tags: List[str] = None,
     amt_version: str = "1.0.0",
-) -> Analysis:
+    node_metadata: Optional[Dict[str, object]] = None,
+) -> NodeTree:
     if amt_value:
         analysis_module_type = create_analysis_module_type(
             value=amt_value,
@@ -255,7 +214,17 @@ def create_analysis(
     db.add(obj)
     crud.commit(db)
 
-    return obj
+    node_tree = crud.create_node_tree_leaf(
+        node_metadata=node_metadata,
+        root_node_uuid=parent_tree.root_node_uuid,
+        node_uuid=obj.uuid,
+        parent_tree_uuid=parent_tree.uuid,
+        db=db,
+    )
+
+    crud.commit(db)
+
+    return node_tree
 
 
 def create_analysis_module_type(
@@ -387,61 +356,19 @@ def create_node_threat_type(value: str, db: Session) -> NodeThreatType:
     return _create_basic_object(db_table=NodeThreatType, value=value, db=db)
 
 
-def create_observable_in_tree(
+def create_observable(
     type: str,
     value: str,
-    root_node: Node,
+    parent_tree: NodeTree,
     db: Session,
     context: Optional[str] = None,
     expires_on: Optional[datetime] = None,
     for_detection: bool = False,
     node_metadata: Optional[Dict[str, object]] = None,
-    parent_tree: Optional[NodeTree] = None,
     redirection: Optional[Observable] = None,
     tags: Optional[List[str]] = None,
     time: Optional[datetime] = None,
 ) -> NodeTree:
-    observable = create_observable(
-        db=db,
-        type=type,
-        value=value,
-        context=context,
-        expires_on=expires_on,
-        for_detection=for_detection,
-        redirection=redirection,
-        tags=tags,
-        time=time,
-    )
-
-    parent_tree_uuid = None
-    if parent_tree:
-        parent_tree_uuid = parent_tree.uuid
-
-    leaf = crud.create_node_tree_leaf(
-        node_metadata=node_metadata,
-        root_node_uuid=root_node.uuid,
-        parent_tree_uuid=parent_tree_uuid,
-        node_uuid=observable.uuid,
-        db=db,
-    )
-
-    crud.commit(db)
-    return leaf
-
-
-def create_observable(
-    type: str,
-    value: str,
-    db: Session,
-    context: Optional[str] = None,
-    expires_on: Optional[datetime] = None,
-    for_detection: bool = False,
-    parent_tree: NodeTree = None,
-    redirection: Optional[Observable] = None,
-    root_node: Node = None,
-    tags: Optional[List[str]] = None,
-    time: Optional[datetime] = None,
-) -> Observable:
     if time is None:
         time = datetime.utcnow()
 
@@ -467,13 +394,17 @@ def create_observable(
         db.add(obj)
         crud.commit(db)
 
-        crud.create_node_tree_leaf(
-            root_node_uuid=root_node.uuid, node_uuid=obj.uuid, parent_tree_uuid=parent_tree.uuid, db=db
-        )
+    node_tree = crud.create_node_tree_leaf(
+        node_metadata=node_metadata,
+        root_node_uuid=parent_tree.root_node_uuid,
+        node_uuid=obj.uuid,
+        parent_tree_uuid=parent_tree.uuid,
+        db=db,
+    )
 
-        crud.commit(db)
+    crud.commit(db)
 
-    return obj
+    return node_tree
 
 
 def create_observable_type(value: str, db: Session) -> ObservableType:
@@ -519,8 +450,8 @@ def create_user_role(value: str, db: Session) -> UserRole:
     return _create_basic_object(db_table=UserRole, value=value, db=db)
 
 
-def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
-    def _create_analysis(a, root_node: Node, parent_tree: NodeTree):
+def create_alert_from_json_file(db: Session, json_path: str) -> NodeTree:
+    def _create_analysis(a, parent_tree: NodeTree):
         observable_types = None
         if "observable_types" in a:
             observable_types = a["observable_types"]
@@ -537,10 +468,9 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
         if "required_tags" in a:
             required_tags = a["required_tags"]
 
-        leaf = create_analysis_in_tree(
+        leaf = create_analysis(
             db=db,
             node_metadata=node_metadata,
-            root_node=root_node,
             parent_tree=parent_tree,
             amt_value=a["type"],
             amt_observable_types=observable_types,
@@ -550,9 +480,9 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
 
         if "observables" in a:
             for observable in a["observables"]:
-                _create_observable(o=observable, root_node=root_node, parent_tree=leaf)
+                _create_observable(o=observable, parent_tree=leaf)
 
-    def _create_observable(o, root_node: Node, parent_tree: Optional[NodeTree] = None):
+    def _create_observable(o, parent_tree: NodeTree):
         node_metadata = None
         if "node_metadata" in o:
             node_metadata = o["node_metadata"]
@@ -561,10 +491,9 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
         if "tags" in o:
             tags = o["tags"]
 
-        leaf = create_observable_in_tree(
+        leaf = create_observable(
             db=db,
             node_metadata=node_metadata,
-            root_node=root_node,
             parent_tree=parent_tree,
             type=o["type"],
             value=o["value"],
@@ -573,7 +502,7 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
 
         if "analyses" in o:
             for analysis in o["analyses"]:
-                _create_analysis(a=analysis, root_node=root_node, parent_tree=leaf)
+                _create_analysis(a=analysis, parent_tree=leaf)
 
     def _replace_tokens(text: str, token: str, num_words: int = 1) -> str:
         num_tokens = text.count(token)
@@ -618,7 +547,7 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
     if "owner" in data:
         owner = data["owner"]
 
-    alert = create_alert(
+    node_tree = create_alert(
         db=db,
         alert_uuid=alert_uuid,
         disposition_user=disposition_user,
@@ -626,9 +555,7 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
         owner=owner,
     )
 
-    node_tree = crud.create_node_tree_leaf(root_node_uuid=alert.uuid, node_uuid=alert.uuid, db=db)
-
     for observable in data["observables"]:
-        _create_observable(o=observable, root_node=alert, parent_tree=node_tree)
+        _create_observable(o=observable, parent_tree=node_tree)
 
-    return alert
+    return node_tree

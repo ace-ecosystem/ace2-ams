@@ -40,12 +40,14 @@ def test_update_invalid_uuid(client_valid_access_token):
 
 
 def test_update_invalid_version(client_valid_access_token, db):
-    # Create an analysis
-    analysis = helpers.create_analysis(db=db)
+    alert_tree = helpers.create_alert(db=db)
+    analysis_tree = helpers.create_analysis(parent_tree=alert_tree, db=db)
 
     # Make sure you cannot update it using an invalid version. The version is
     # optional, but if given, it must match.
-    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={"version": str(uuid.uuid4())})
+    update = client_valid_access_token.patch(
+        f"/api/analysis/{analysis_tree.node.uuid}", json={"version": str(uuid.uuid4())}
+    )
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
@@ -77,20 +79,20 @@ def test_update_nonexistent_uuid(client_valid_access_token):
     ],
 )
 def test_update(client_valid_access_token, db, key, initial_value, updated_value):
-    # Create an analysis
-    analysis = helpers.create_analysis(db=db)
-    initial_analysis_version = analysis.version
+    alert_tree = helpers.create_alert(db=db)
+    analysis_tree = helpers.create_analysis(parent_tree=alert_tree, db=db)
+    initial_analysis_version = analysis_tree.node.version
 
     # Set the initial value
-    setattr(analysis, key, initial_value)
+    setattr(analysis_tree.node, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(f"/api/analysis/{analysis.uuid}", json={key: updated_value})
+    update = client_valid_access_token.patch(f"/api/analysis/{analysis_tree.node.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     if key == "details" and updated_value:
-        assert analysis.details == json.loads(updated_value)
+        assert analysis_tree.node.details == json.loads(updated_value)
     else:
-        assert getattr(analysis, key) == updated_value
+        assert getattr(analysis_tree.node, key) == updated_value
 
-    assert analysis.version != initial_analysis_version
+    assert analysis_tree.node.version != initial_analysis_version
