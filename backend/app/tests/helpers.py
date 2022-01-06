@@ -5,7 +5,7 @@ from datetime import datetime
 from faker import Faker
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
-from typing import List, Optional, Union
+from typing import Dict, List, Optional, Union
 from uuid import UUID
 
 from core.auth import hash_password
@@ -104,7 +104,7 @@ def create_alert(
     threats: Optional[List[str]] = None,
     tool: str = "test_tool",
     tool_instance: str = "test_tool_instance",
-) -> Alert:
+) -> NodeTree:
     if alert_uuid is None:
         alert_uuid = uuid.uuid4()
 
@@ -146,15 +146,6 @@ def create_alert(
     if insert_time:
         alert.insert_time = insert_time
 
-    if observables:
-        for observable in observables:
-            create_observable(
-                type=observable["type"],
-                value=observable["value"],
-                root_node=alert,
-                db=db,
-            )
-
     if owner:
         alert.owner = create_user(email=f"{owner}@{owner}.com", username=owner, db=db, alert_queue=alert_queue)
 
@@ -170,12 +161,27 @@ def create_alert(
     db.add(alert)
     crud.commit(db)
 
-    return alert
+    node_tree = crud.create_node_tree_leaf(root_node_uuid=alert.uuid, node_uuid=alert.uuid, db=db)
+
+    if observables:
+        for observable in observables:
+            create_observable(
+                type=observable["type"],
+                value=observable["value"],
+                parent_tree=node_tree,
+                root_node=alert,
+                db=db,
+            )
+
+    crud.commit(db)
+
+    return node_tree
 
 
 def create_analysis_in_tree(
     db: Session,
     root_node: Node,
+    node_metadata: Optional[Dict[str, object]] = None,
     parent_tree: Optional[NodeTree] = None,
     amt_value: Optional[str] = None,
     amt_description: Optional[str] = None,
@@ -203,7 +209,11 @@ def create_analysis_in_tree(
         parent_tree_uuid = parent_tree.uuid
 
     tree = crud.create_node_tree_leaf(
-        root_node_uuid=root_node.uuid, parent_tree_uuid=parent_tree_uuid, node_uuid=analysis.uuid, db=db
+        node_metadata=node_metadata,
+        root_node_uuid=root_node.uuid,
+        parent_tree_uuid=parent_tree_uuid,
+        node_uuid=analysis.uuid,
+        db=db,
     )
 
     crud.commit(db)
@@ -385,6 +395,7 @@ def create_observable_in_tree(
     context: Optional[str] = None,
     expires_on: Optional[datetime] = None,
     for_detection: bool = False,
+    node_metadata: Optional[Dict[str, object]] = None,
     parent_tree: Optional[NodeTree] = None,
     redirection: Optional[Observable] = None,
     tags: Optional[List[str]] = None,
@@ -407,7 +418,11 @@ def create_observable_in_tree(
         parent_tree_uuid = parent_tree.uuid
 
     leaf = crud.create_node_tree_leaf(
-        root_node_uuid=root_node.uuid, parent_tree_uuid=parent_tree_uuid, node_uuid=observable.uuid, db=db
+        node_metadata=node_metadata,
+        root_node_uuid=root_node.uuid,
+        parent_tree_uuid=parent_tree_uuid,
+        node_uuid=observable.uuid,
+        db=db,
     )
 
     crud.commit(db)
@@ -421,7 +436,9 @@ def create_observable(
     context: Optional[str] = None,
     expires_on: Optional[datetime] = None,
     for_detection: bool = False,
+    parent_tree: NodeTree = None,
     redirection: Optional[Observable] = None,
+    root_node: Node = None,
     tags: Optional[List[str]] = None,
     time: Optional[datetime] = None,
 ) -> Observable:
@@ -448,6 +465,12 @@ def create_observable(
             version=uuid.uuid4(),
         )
         db.add(obj)
+        crud.commit(db)
+
+        crud.create_node_tree_leaf(
+            root_node_uuid=root_node.uuid, node_uuid=obj.uuid, parent_tree_uuid=parent_tree.uuid, db=db
+        )
+
         crud.commit(db)
 
     return obj
@@ -502,6 +525,10 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
         if "observable_types" in a:
             observable_types = a["observable_types"]
 
+        node_metadata = None
+        if "node_metadata" in a:
+            node_metadata = a["node_metadata"]
+
         required_directives = None
         if "required_directives" in a:
             required_directives = a["required_directives"]
@@ -512,6 +539,7 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
 
         leaf = create_analysis_in_tree(
             db=db,
+            node_metadata=node_metadata,
             root_node=root_node,
             parent_tree=parent_tree,
             amt_value=a["type"],
@@ -525,12 +553,22 @@ def create_alert_from_json_file(db: Session, json_path: str) -> Alert:
                 _create_observable(o=observable, root_node=root_node, parent_tree=leaf)
 
     def _create_observable(o, root_node: Node, parent_tree: Optional[NodeTree] = None):
+        node_metadata = None
+        if "node_metadata" in o:
+            node_metadata = o["node_metadata"]
+
         tags = None
         if "tags" in o:
             tags = o["tags"]
 
         leaf = create_observable_in_tree(
-            db=db, root_node=root_node, parent_tree=parent_tree, type=o["type"], value=o["value"], tags=tags
+            db=db,
+            node_metadata=node_metadata,
+            root_node=root_node,
+            parent_tree=parent_tree,
+            type=o["type"],
+            value=o["value"],
+            tags=tags,
         )
 
         if "analyses" in o:
