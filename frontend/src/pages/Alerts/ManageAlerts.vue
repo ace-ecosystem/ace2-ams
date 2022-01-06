@@ -114,6 +114,7 @@
           break;
 
         case filterTypes.DATE:
+          // Date string, handled in formatForGUI
           filterValueParsed = filterValueUnparsed;
           break;
 

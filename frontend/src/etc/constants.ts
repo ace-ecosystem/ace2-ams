@@ -90,33 +90,51 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.DISPOSITIONED_BEFORE_FILTER,
     label: "Dispositioned Before",
     type: filterTypes.DATE,
+    formatForGUI: (filterString: string) => {
+      return new Date(filterString);
+    },
   },
   {
     name: alertFilterNames.EVENT_UUID_FILTER,
     label: "Event",
     type: filterTypes.SELECT,
     store: useEventStore,
+    formatForGUI: (filterString: string) => {
+      return new Date(filterString);
+    },
   },
   {
     name: alertFilterNames.EVENT_TIME_AFTER_FILTER,
     label: "Event Time After",
     type: filterTypes.DATE,
+    formatForGUI: (filterString: string) => {
+      return new Date(filterString);
+    },
     
   },
   {
     name: alertFilterNames.EVENT_TIME_BEFORE_FILTER,
     label: "Event Time Before",
     type: filterTypes.DATE,
+    formatForGUI: (filterString: string) => {
+      return new Date(filterString);
+    },
   },
   {
     name: alertFilterNames.INSERT_TIME_AFTER_FILTER,
     label: "Insert Time After",
     type: filterTypes.DATE,
+    formatForGUI: (filterString: string) => {
+      return new Date(filterString);
+    },
   },
   {
     name: alertFilterNames.INSERT_TIME_BEFORE_FILTER,
     label: "Insert Time Before",
     type: filterTypes.DATE,
+    formatForGUI: (filterString: string) => {
+      return new Date(filterString);
+    },
   },
   {
     name: alertFilterNames.NAME_FILTER,
