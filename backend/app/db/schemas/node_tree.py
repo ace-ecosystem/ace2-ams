@@ -1,5 +1,5 @@
 from sqlalchemy import Column, ForeignKey, func, Index
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from db.database import Base
@@ -9,6 +9,8 @@ class NodeTree(Base):
     __tablename__ = "node_tree"
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+
+    node_metadata = Column(JSONB)
 
     root_node_uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), nullable=False, index=True)
 

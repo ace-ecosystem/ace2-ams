@@ -1,5 +1,11 @@
 import { UUID } from "./base";
-import { nodeCreate, nodeRead, nodeTreeCreate, nodeUpdate } from "./node";
+import {
+  nodeCreate,
+  nodeMetadata,
+  nodeRead,
+  nodeTreeCreate,
+  nodeUpdate,
+} from "./node";
 import {
   analysisModuleTypeNodeTreeRead,
   analysisModuleTypeRead,
@@ -28,6 +34,7 @@ export interface analysisTreeRead extends nodeRead {
   analysisModuleType: analysisModuleTypeNodeTreeRead;
   children: observableTreeRead[];
   firstAppearance?: boolean;
+  nodeMetadata?: nodeMetadata;
   parentTreeUuid: UUID | null;
   treeUuid: UUID;
 }

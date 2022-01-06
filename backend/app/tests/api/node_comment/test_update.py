@@ -37,11 +37,11 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 
 def test_update_duplicate_node_uuid_value(client_valid_access_token, db):
     # Create a node
-    node = helpers.create_alert(db=db)
+    node_tree = helpers.create_alert(db=db)
 
     # Create some comments
-    comment1 = helpers.create_node_comment(node=node, username="johndoe", value="test", db=db)
-    comment2 = helpers.create_node_comment(node=node, username="johndoe", value="test2", db=db)
+    comment1 = helpers.create_node_comment(node=node_tree.node, username="johndoe", value="test", db=db)
+    comment2 = helpers.create_node_comment(node=node_tree.node, username="johndoe", value="test2", db=db)
 
     # Make sure you cannot update a comment on a node to one that already exists
     update = client_valid_access_token.patch(f"/api/node/comment/{comment2.uuid}", json={"value": comment1.value})
@@ -55,13 +55,13 @@ def test_update_duplicate_node_uuid_value(client_valid_access_token, db):
 
 def test_update(client_valid_access_token, db):
     # Create a node
-    node = helpers.create_alert(db=db)
+    node_tree = helpers.create_alert(db=db)
 
     # Create a comment
-    comment = helpers.create_node_comment(node=node, username="johndoe", value="test", db=db)
-    assert node.comments[0].value == "test"
+    comment = helpers.create_node_comment(node=node_tree.node, username="johndoe", value="test", db=db)
+    assert node_tree.node.comments[0].value == "test"
 
     # Update it
     update = client_valid_access_token.patch(f"/api/node/comment/{comment.uuid}", json={"value": "updated"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert node.comments[0].value == "updated"
+    assert node_tree.node.comments[0].value == "updated"

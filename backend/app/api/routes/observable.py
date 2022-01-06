@@ -78,6 +78,7 @@ def create_observables(
     # Then link them to a Node Tree
     for observable in observables:
         crud.create_node_tree_leaf(
+            node_metadata=observable.node_tree.node_metadata,
             root_node_uuid=observable.node_tree.root_node_uuid,
             parent_tree_uuid=observable.node_tree.parent_tree_uuid,
             node_uuid=observable.uuid,

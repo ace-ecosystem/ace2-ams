@@ -5,6 +5,15 @@ export interface nodeCreate {
   version?: UUID;
 }
 
+interface nodeMetadataDisplay {
+  type?: string;
+  value?: string;
+}
+
+export interface nodeMetadata {
+  display?: nodeMetadataDisplay;
+}
+
 export interface nodeRead {
   nodeType: string;
   uuid: UUID;

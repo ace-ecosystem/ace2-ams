@@ -26,8 +26,9 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 
 
 def test_get(client_valid_access_token, db):
-    analysis = helpers.create_analysis(db=db)
+    alert_tree = helpers.create_alert(db=db)
+    analysis_tree = helpers.create_analysis(parent_tree=alert_tree, db=db)
 
-    get = client_valid_access_token.get(f"/api/analysis/{analysis.uuid}")
+    get = client_valid_access_token.get(f"/api/analysis/{analysis_tree.node.uuid}")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["node_type"] == "analysis"

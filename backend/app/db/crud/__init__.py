@@ -10,7 +10,7 @@ from sqlalchemy.sql.expression import join
 from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
-from api.models.node import NodeRead
+from api.models.node import NodeRead, NodeTreeMetadata
 from core.auth import verify_password
 from db.schemas.node import Node
 from db.schemas.node_tree import NodeTree
@@ -51,7 +51,11 @@ def create(obj: BaseModel, db_table: DeclarativeMeta, db: Session) -> UUID:
 
 
 def create_node_tree_leaf(
-    root_node_uuid: UUID, node_uuid: UUID, db: Session, parent_tree_uuid: Optional[UUID] = None
+    root_node_uuid: UUID,
+    node_uuid: UUID,
+    db: Session,
+    node_metadata: Optional[Union[NodeTreeMetadata, Dict[str, object]]] = None,
+    parent_tree_uuid: Optional[UUID] = None,
 ) -> NodeTree:
     """Creates an entry in the NodeTree table."""
 
@@ -60,6 +64,11 @@ def create_node_tree_leaf(
     leaf = NodeTree()
     leaf.root_node_uuid = root_node.uuid
     leaf.node_uuid = node_uuid
+
+    if isinstance(node_metadata, NodeTreeMetadata):
+        node_metadata = node_metadata.dict()
+
+    leaf.node_metadata = node_metadata
 
     if parent_tree_uuid:
         parent_tree: NodeTree = read(uuid=parent_tree_uuid, db_table=NodeTree, db=db)
@@ -235,6 +244,7 @@ def read_node_tree(root_node_uuid: UUID, db: Session) -> dict:
     node_tree_nodes = []
     for leaf, node in node_tree_and_nodes:
         # Inject the tree information into the Node
+        node.node_metadata = leaf.node_metadata
         node.tree_uuid = leaf.uuid
         node.parent_tree_uuid = leaf.parent_tree_uuid
 

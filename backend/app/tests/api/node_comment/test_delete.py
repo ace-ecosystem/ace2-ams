@@ -33,11 +33,11 @@ def test_delete_nonexistent_uuid(client_valid_access_token):
 
 def test_delete(client_valid_access_token, db):
     # Create a node
-    node = helpers.create_alert(db=db)
+    node_tree = helpers.create_alert(db=db)
 
     # Create a comment
-    comment = helpers.create_node_comment(node=node, username="johndoe", value="test", db=db)
-    assert len(node.comments) == 1
+    comment = helpers.create_node_comment(node=node_tree.node, username="johndoe", value="test", db=db)
+    assert len(node_tree.node.comments) == 1
 
     # Delete it
     delete = client_valid_access_token.delete(f"/api/node/comment/{comment.uuid}")
@@ -48,4 +48,4 @@ def test_delete(client_valid_access_token, db):
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
     # And make sure the node no longer shows the comment
-    assert len(node.comments) == 0
+    assert len(node_tree.node.comments) == 0
