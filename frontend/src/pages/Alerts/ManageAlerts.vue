@@ -89,14 +89,18 @@
           // look up each array item in store, add to filter value
           filterValueParsed = [];
           if (store) {
-            for (const value in filterValueUnparsed) {
-              filterValueParsed.push(
-                store.allItems.find((element) => {
-                  return element[filterValueProperty] === value;
-                }),
-              );
+            for (const value of filterValueUnparsed) {
+              const valueObject = store.allItems.find((element) => {
+                return element[filterValueProperty] === value;
+              });
+              if (valueObject) {
+                filterValueParsed.push(valueObject);
+              }
             }
           }
+          filterValueParsed = filterValueParsed.length
+            ? filterValueParsed
+            : null;
           break;
 
         case filterTypes.CHIPS:
