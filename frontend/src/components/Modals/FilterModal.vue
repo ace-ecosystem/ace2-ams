@@ -84,7 +84,7 @@
 
   const submit = () => {
     if (!submitFilters.value.length) {
-      filterStore.clearAll({filterType: filterType})
+      filterStore.clearAll({ filterType: filterType });
     }
     filterStore.bulkSetFilters({
       filterType: filterType,

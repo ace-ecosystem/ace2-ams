@@ -67,9 +67,12 @@
 
   function viewLink() {
     let link = `${window.location.origin}/manage_alerts`;
+    // If there are filters set, build the link for it
     if (filterStore[filterType]) {
-      let st = new URLSearchParams(formatForAPI(filterStore[filterType]));
-      link = `${window.location.origin}/manage_alerts?${st.toString()}`;
+      let urlParams = new URLSearchParams(
+        formatForAPI(filterStore[filterType]),
+      );
+      link = `${window.location.origin}/manage_alerts?${urlParams.toString()}`;
     }
     copyToClipboard(link);
   }
