@@ -1,6 +1,12 @@
 import { analysisTreeRead } from "./analysis";
 import { UUID } from "./base";
-import { nodeCreate, nodeRead, nodeTreeCreate, nodeUpdate } from "./node";
+import {
+  nodeCreate,
+  nodeMetadata,
+  nodeRead,
+  nodeTreeCreate,
+  nodeUpdate,
+} from "./node";
 import { nodeCommentRead } from "./nodeComment";
 import { nodeDirectiveRead } from "./nodeDirective";
 import { nodeTagRead } from "./nodeTag";
@@ -49,6 +55,7 @@ export interface observableReadPage {
 export interface observableTreeRead extends observableRead {
   children: analysisTreeRead[];
   firstAppearance?: boolean;
+  nodeMetadata?: nodeMetadata;
   parentTreeUuid: UUID | null;
   treeUuid: UUID;
 }

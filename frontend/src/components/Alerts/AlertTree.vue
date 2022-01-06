@@ -104,7 +104,30 @@
     if (isAnalysis(item)) {
       return item.analysisModuleType.value;
     } else {
-      return item.type.value + ": " + item.value;
+      let type = null;
+      let value = null;
+
+      try {
+        if (item.nodeMetadata.display) {
+          if (item.nodeMetadata.display.type) {
+            type =
+              item.nodeMetadata.display.type + " (" + item.type.value + ")";
+          } else {
+            type = item.type.value;
+          }
+
+          if (item.nodeMetadata.display.value) {
+            value = item.nodeMetadata.display.value;
+          } else {
+            value = item.value;
+          }
+        }
+      } catch (error) {
+        type = item.type.value;
+        value = item.value;
+      }
+
+      return type + ": " + value;
     }
   }
   function isAnalysis(item) {
