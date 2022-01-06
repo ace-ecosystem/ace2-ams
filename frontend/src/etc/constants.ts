@@ -110,7 +110,6 @@ export const alertFilters: readonly filterOption[] = [
     formatForGUI: (filterString: string) => {
       return new Date(filterString);
     },
-    
   },
   {
     name: alertFilterNames.EVENT_TIME_BEFORE_FILTER,
