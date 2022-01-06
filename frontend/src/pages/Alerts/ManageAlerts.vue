@@ -18,6 +18,8 @@
   import TheFilterToolbar from "@/components/Filters/TheFilterToolbar";
   import TheAlertsTable from "@/components/Alerts/TheAlertsTable";
 
+  import { useFilterStore } from "@/stores/filter";
+
   export default {
     components: { TheAlertsTable, TheFilterToolbar, TheAlertActionToolbar },
     provide() {
@@ -26,6 +28,13 @@
         filterType: "alerts",
         rangeFilters: alertRangeFilters,
       };
+    },
+    created() {
+      const filterStore = useFilterStore();
+
+      const params = {};
+      console.log(this.$router.currentRoute.value);
+      console.log(this.$router.currentRoute.value.query);
     },
   };
 </script>

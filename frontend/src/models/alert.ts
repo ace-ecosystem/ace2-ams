@@ -120,6 +120,7 @@ export interface alertFilterParams extends pageOptionParams {
   tool?: alertToolRead;
   toolInstance?: alertToolInstanceRead;
   type?: alertTypeRead;
+  [key: string]: any;
 }
 
 export type alertFilterNameTypes = Extract<keyof alertFilterParams, string>;

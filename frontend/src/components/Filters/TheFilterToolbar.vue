@@ -56,12 +56,19 @@
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
+  import { copyToClipboard } from "@/etc/helpers";
 
   const filterType = inject("filterType");
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
 
+  function viewLink() {
+    let st =  new URLSearchParams()
+    const link = `${window.location.origin}/manage_alerts?${st.toString()}`
+    console.log(link)
+
+  };
   const clear = () => {
     filterStore.clearAll({ filterType: filterType });
   };
