@@ -48,6 +48,7 @@ def create_analysis(
 
     # Link the analysis to a Node Tree
     crud.create_node_tree_leaf(
+        node_metadata=analysis.node_tree.node_metadata,
         root_node_uuid=analysis.node_tree.root_node_uuid,
         parent_tree_uuid=analysis.node_tree.parent_tree_uuid,
         node_uuid=new_analysis.uuid,
