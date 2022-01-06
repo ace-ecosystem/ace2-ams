@@ -1,5 +1,7 @@
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
 import { useAlertQueueStore } from "@/stores/alertQueue";
+import { useAlertToolStore } from "@/stores/alertTool";
+import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";
 import { useNodeDirectiveStore } from "@/stores/nodeDirective";
 import { useObservableTypeStore } from "@/stores/observableType";
@@ -12,6 +14,8 @@ export async function populateCommonStores(): Promise<void> {
   const alertDispositionStore = useAlertDispositionStore();
   const alertQueueStore = useAlertQueueStore();
   const alertTypeStore = useAlertTypeStore();
+  const alertToolStore = useAlertToolStore();
+  const alertToolInstanceStore = useAlertToolInstanceStore();
   const nodeDirectiveStore = useNodeDirectiveStore();
   const observableTypeStore = useObservableTypeStore();
   const userStore = useUserStore();
@@ -20,6 +24,8 @@ export async function populateCommonStores(): Promise<void> {
     alertDispositionStore.readAll(),
     alertQueueStore.readAll(),
     alertTypeStore.readAll(),
+    alertToolStore.readAll(),
+    alertToolInstanceStore.readAll(),
     nodeDirectiveStore.readAll(),
     observableTypeStore.readAll(),
     userStore.readAll(),
