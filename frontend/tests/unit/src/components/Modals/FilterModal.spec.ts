@@ -35,6 +35,7 @@ describe("FilterModal setup", () => {
 
     expect(wrapper.vm.formFilters).toEqual([]);
   });
+
 });
 
 describe("FilterModal computed properties", () => {
@@ -89,7 +90,7 @@ describe("FilterModal watchers", () => {
 });
 
 describe("FilterModal methods", () => {
-  it("executes submit as expected", () => {
+  it("executes submit as expected when there are new filters", () => {
     const { wrapper } = factory({ stubActions: false });
 
     // Test submitting new filters
@@ -105,8 +106,10 @@ describe("FilterModal methods", () => {
     expect(wrapper.vm.filterStore.$state[wrapper.vm.filterType]).toEqual({
       name: "hello world",
     });
+  });
+  it("executes submit as expected when there no filters (cleared)", () => {
+    const { wrapper } = factory({ stubActions: false });
 
-    // Test submitting with no new filters (cleared filters)
     wrapper.vm.formFilters = [];
     wrapper.vm.submit();
     expect(wrapper.vm.filterStore.$state[wrapper.vm.filterType]).toEqual({});
@@ -226,6 +229,9 @@ describe("FilterModal methods", () => {
     ];
     wrapper.vm.close();
     expect(wrapper.vm.modalStore.openModals).toEqual([]);
-    expect(wrapper.vm.formFilters).toEqual([ { filterName: "name" , filterValue: "hello world"}, {filterName: "owner", filterValue: "test analyst"}]);
+    expect(wrapper.vm.formFilters).toEqual([
+      { filterName: "name", filterValue: "hello world" },
+      { filterName: "owner", filterValue: "test analyst" },
+    ]);
   });
 });

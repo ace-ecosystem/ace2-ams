@@ -2,8 +2,8 @@ import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
 import { shallowMount, VueWrapper } from "@vue/test-utils";
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
 import * as helpers from "@/etc/helpers";
-
 import { useFilterStore } from "@/stores/filter";
+import { useModalStore } from "@/stores/modal";
 
 describe("TheFilterToolbar.vue", () => {
   function factory(options?: TestingOptions) {
@@ -16,9 +16,10 @@ describe("TheFilterToolbar.vue", () => {
       },
     });
 
-    const store = useFilterStore();
+    const filterStore = useFilterStore();
+    const modalStore = useModalStore();
 
-    return { wrapper, store };
+    return { wrapper, filterStore, modalStore };
   }
 
   it("renders", () => {
@@ -26,31 +27,37 @@ describe("TheFilterToolbar.vue", () => {
 
     expect(wrapper.exists()).toBe(true);
   });
+  it("correctly opens given modal when modal open called", () => {
+    const { wrapper, modalStore } = factory({ stubActions: false });
+    wrapper.vm.open("EditFilterModal");
+
+    expect(modalStore.openModals).toContain("EditFilterModal");
+  });
   it("correctly receives injected data", () => {
     const { wrapper } = factory();
 
     expect(wrapper.vm.filterType).toEqual("alerts");
   });
   it("correctly calls Pinia action", () => {
-    const { wrapper, store } = factory();
+    const { wrapper, filterStore } = factory();
 
     wrapper.vm.clear();
-    expect(store.clearAll).toHaveBeenCalled();
+    expect(filterStore.clearAll).toHaveBeenCalled();
   });
   it("calls clearAll Pinia action on clear and reset", () => {
-    const { wrapper, store } = factory();
+    const { wrapper, filterStore } = factory();
 
     wrapper.vm.clear();
-    expect(store.clearAll).toHaveBeenLastCalledWith({
+    expect(filterStore.clearAll).toHaveBeenLastCalledWith({
       filterType: "alerts",
     });
 
     wrapper.vm.reset();
-    expect(store.clearAll).toHaveBeenLastCalledWith({
+    expect(filterStore.clearAll).toHaveBeenLastCalledWith({
       filterType: "alerts",
     });
 
-    expect(store.clearAll).toHaveBeenCalledTimes(2);
+    expect(filterStore.clearAll).toHaveBeenCalledTimes(2);
   });
   it("correctly generates link to filtered view based on currently set filters", () => {
     const { wrapper } = factory({ stubActions: false });

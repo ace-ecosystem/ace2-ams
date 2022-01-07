@@ -68,7 +68,13 @@ describe("Alert calls", () => {
     expect(res).toEqual("Read successful");
   });
 
-  it("will make a get request to the /alert/ endpoint when 'readPage' is called properly formatted params", async () => {
+  it("will make a get request to the /alert/ endpoint when 'readPage' is called with no params, if none given", async () => {
+    myNock.get("/alert/").reply(200, "Read successful");
+    const res = await api.readPage();
+    expect(res).toEqual("Read successful");
+  });
+
+  it("will make a get request to the /alert/ endpoint when 'readPage' is called with properly formatted params", async () => {
     myNock
       .get(
         "/alert/?limit=10&offset=10&name=Test+Name&observable_types=testA,testB&tags=tagA,tagB&threats=threatA,threatB&observable=test%7Cexample",

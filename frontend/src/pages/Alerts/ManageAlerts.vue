@@ -144,6 +144,9 @@
 
         // Unsupported filter types will be ignored
         default:
+          console.log(
+            `Unsupported filter type found: ${filterNameObject.type}`,
+          );
           continue;
       }
 

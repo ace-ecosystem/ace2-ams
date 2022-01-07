@@ -26,9 +26,7 @@ export function formatForAPI(
 
     // if so, check if the param's value needs to be formatted, and replace with the newly formatted val
     if (filterType && filterType.formatForAPI) {
-      if (filterType.formatForAPI) {
-        paramValue = filterType.formatForAPI(paramValue) as never;
-      }
+      paramValue = filterType.formatForAPI(paramValue) as never;
     }
 
     formattedParams[param] = paramValue;

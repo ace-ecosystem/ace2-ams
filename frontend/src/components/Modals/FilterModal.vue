@@ -83,7 +83,7 @@
   });
 
   const submit = () => {
-    if (!submitFilters.value.length) {
+    if (!Object.keys(submitFilters.value).length) {
       filterStore.clearAll({ filterType: filterType });
     }
     filterStore.bulkSetFilters({
