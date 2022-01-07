@@ -52,21 +52,21 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
     ],
 )
 def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
-    alert = helpers.create_alert(db=db)
+    node_tree = helpers.create_alert(db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Create an object
     create1_json = {
         "uuid": str(uuid.uuid4()),
         "analysis_module_type": str(analysis_module_type.uuid),
-        "node_tree": {"root_node_uuid": str(alert.uuid)},
+        "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
     }
     client_valid_access_token.post("/api/analysis/", json=create1_json)
 
     # Ensure you cannot create another object with the same unique field value
     create2_json = {
         "analysis_module_type": str(analysis_module_type.uuid),
-        "node_tree": {"root_node_uuid": str(alert.uuid)},
+        "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
     }
     create2_json[key] = create1_json[key]
     create2 = client_valid_access_token.post("/api/analysis/", json=create2_json)
@@ -74,11 +74,14 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
 
 
 def test_create_nonexistent_analysis_module_type(client_valid_access_token, db):
-    alert = helpers.create_alert(db=db)
+    node_tree = helpers.create_alert(db=db)
 
     create = client_valid_access_token.post(
         "/api/analysis/",
-        json={"node_tree": {"root_node_uuid": str(alert.uuid)}, "analysis_module_type": str(uuid.uuid4())},
+        json={
+            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+            "analysis_module_type": str(uuid.uuid4()),
+        },
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
@@ -86,6 +89,31 @@ def test_create_nonexistent_analysis_module_type(client_valid_access_token, db):
 #
 # VALID TESTS
 #
+
+
+def test_create_node_metadata(client_valid_access_token, db):
+    node_tree = helpers.create_alert(db=db)
+    analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
+
+    # Create the object
+    create = client_valid_access_token.post(
+        "/api/analysis/",
+        json={
+            "analysis_module_type": str(analysis_module_type.uuid),
+            "node_tree": {
+                "node_metadata": {"display": {"type": "override_type", "value": "override_value"}},
+                "parent_tree_uuid": str(node_tree.uuid),
+                "root_node_uuid": str(node_tree.root_node_uuid),
+            },
+        },
+    )
+    assert create.status_code == status.HTTP_201_CREATED
+
+    # Read the alert back to get its tree structure that contains the analysis to verify its node_metadata
+    get = client_valid_access_token.get(f"http://testserver/api/alert/{node_tree.root_node_uuid}")
+    assert get.json()["children"][0]["node_metadata"] == {
+        "display": {"type": "override_type", "value": "override_value"}
+    }
 
 
 @pytest.mark.parametrize(
@@ -104,7 +132,7 @@ def test_create_nonexistent_analysis_module_type(client_valid_access_token, db):
     ],
 )
 def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
-    alert = helpers.create_alert(db=db)
+    node_tree = helpers.create_alert(db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Create the object
@@ -112,7 +140,7 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
         "/api/analysis/",
         json={
             "analysis_module_type": str(analysis_module_type.uuid),
-            "node_tree": {"root_node_uuid": str(alert.uuid)},
+            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
             key: value,
         },
     )
@@ -129,13 +157,16 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
 
 
 def test_create_valid_required_fields(client_valid_access_token, db):
-    alert = helpers.create_alert(db=db)
+    node_tree = helpers.create_alert(db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Create the object
     create = client_valid_access_token.post(
         "/api/analysis/",
-        json={"analysis_module_type": str(analysis_module_type.uuid), "node_tree": {"root_node_uuid": str(alert.uuid)}},
+        json={
+            "analysis_module_type": str(analysis_module_type.uuid),
+            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+        },
     )
     assert create.status_code == status.HTTP_201_CREATED
 

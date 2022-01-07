@@ -66,7 +66,6 @@ def test_get_all_empty(client_valid_access_token):
 
 
 def test_get_filter_disposition(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db)
     helpers.create_alert(db, disposition="FALSE_POSITIVE")
 
@@ -81,7 +80,6 @@ def test_get_filter_disposition(client_valid_access_token, db):
 
 
 def test_get_filter_disposition_user(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db)
     helpers.create_alert(db, disposition_user="analyst")
 
@@ -96,9 +94,8 @@ def test_get_filter_disposition_user(client_valid_access_token, db):
 
 
 def test_get_filter_dispositioned_after(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db)
-    alert = helpers.create_alert(db, disposition_time=datetime.utcnow())
+    alert_tree2 = helpers.create_alert(db, disposition_time=datetime.utcnow())
     helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(seconds=5))
 
     # There should be 3 total alerts
@@ -108,16 +105,15 @@ def test_get_filter_dispositioned_after(client_valid_access_token, db):
     # There should only be 1 alert when we filter by dispositioned_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"dispositioned_after": alert.disposition_time}
+    params = {"dispositioned_after": alert_tree2.node.disposition_time}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
 def test_get_filter_dispositioned_before(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db)
     helpers.create_alert(db, disposition_time=datetime.utcnow() - timedelta(seconds=5))
-    alert = helpers.create_alert(db, disposition_time=datetime.utcnow())
+    alert_tree3 = helpers.create_alert(db, disposition_time=datetime.utcnow())
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -126,16 +122,15 @@ def test_get_filter_dispositioned_before(client_valid_access_token, db):
     # There should only be 1 alert when we filter by dispositioned_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"dispositioned_before": alert.disposition_time}
+    params = {"dispositioned_before": alert_tree3.node.disposition_time}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
 def test_get_filter_dispositioned_after_and_before(client_valid_access_token, db):
-    # Create some alerts
-    alert1 = helpers.create_alert(db, disposition_time=datetime.utcnow() - timedelta(days=1))
+    alert_tree1 = helpers.create_alert(db, disposition_time=datetime.utcnow() - timedelta(days=1))
     helpers.create_alert(db, disposition_time=datetime.utcnow())
-    alert3 = helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(days=1))
+    alert_tree3 = helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(days=1))
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -144,14 +139,16 @@ def test_get_filter_dispositioned_after_and_before(client_valid_access_token, db
     # There should only be 1 alert when we filter by dispositioned_after and dispositioned_before.
     # But the timestamp has a timezone specified, which uses the + symbol that needs to be
     # urlencoded since it is a reserved URL character.
-    params = {"dispositioned_after": alert1.disposition_time, "dispositioned_before": alert3.disposition_time}
+    params = {
+        "dispositioned_after": alert_tree1.node.disposition_time,
+        "dispositioned_before": alert_tree3.node.disposition_time,
+    }
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
 def test_get_filter_event_time_after(client_valid_access_token, db):
-    # Create some alerts
-    alert = helpers.create_alert(db, event_time=datetime.utcnow())
+    alert_tree1 = helpers.create_alert(db, event_time=datetime.utcnow())
     helpers.create_alert(db, event_time=datetime.utcnow() + timedelta(seconds=5))
 
     # There should be 2 total alerts
@@ -161,15 +158,14 @@ def test_get_filter_event_time_after(client_valid_access_token, db):
     # There should only be 1 alert when we filter by event_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"event_time_after": alert.event_time}
+    params = {"event_time_after": alert_tree1.node.event_time}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
 def test_get_filter_event_time_before(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db, event_time=datetime.utcnow())
-    alert = helpers.create_alert(db, event_time=datetime.utcnow() + timedelta(seconds=5))
+    alert_tree2 = helpers.create_alert(db, event_time=datetime.utcnow() + timedelta(seconds=5))
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -178,7 +174,7 @@ def test_get_filter_event_time_before(client_valid_access_token, db):
     # There should only be 1 alert when we filter by event_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"event_time_before": alert.event_time}
+    params = {"event_time_before": alert_tree2.node.event_time}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
@@ -189,10 +185,10 @@ def test_get_filter_event_uuid(client_valid_access_token, db):
 
     # Create some alerts
     helpers.create_alert(db)
-    alert = helpers.create_alert(db)
+    alert_tree2 = helpers.create_alert(db)
 
     # Add one alert to the event
-    alert.event_uuid = event.uuid
+    alert_tree2.node.event_uuid = event.uuid
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -205,8 +201,7 @@ def test_get_filter_event_uuid(client_valid_access_token, db):
 
 
 def test_get_filter_insert_time_after(client_valid_access_token, db):
-    # Create some alerts
-    alert = helpers.create_alert(db, insert_time=datetime.utcnow())
+    alert_tree1 = helpers.create_alert(db, insert_time=datetime.utcnow())
     helpers.create_alert(db, insert_time=datetime.utcnow() + timedelta(seconds=5))
 
     # There should be 2 total alerts
@@ -216,15 +211,14 @@ def test_get_filter_insert_time_after(client_valid_access_token, db):
     # There should only be 1 alert when we filter by insert_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"insert_time_after": alert.insert_time}
+    params = {"insert_time_after": alert_tree1.node.insert_time}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
 def test_get_filter_insert_time_before(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db, insert_time=datetime.utcnow() - timedelta(seconds=5))
-    alert = helpers.create_alert(db, insert_time=datetime.utcnow())
+    alert_tree2 = helpers.create_alert(db, insert_time=datetime.utcnow())
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -233,13 +227,12 @@ def test_get_filter_insert_time_before(client_valid_access_token, db):
     # There should only be 1 alert when we filter by insert_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"insert_time_before": alert.insert_time}
+    params = {"insert_time_before": alert_tree2.node.insert_time}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
 def test_get_filter_name(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db, name="Test Alert")
     helpers.create_alert(db, name="Some Other Alert")
 
@@ -258,17 +251,17 @@ def test_get_filter_observable(client_valid_access_token, db):
     helpers.create_alert(db=db)
 
     # Create some alerts with one observable
-    alert1 = helpers.create_alert(db=db)
-    helpers.create_observable_in_tree(root_node=alert1, type="test_type1", value="test_value1", db=db)
+    alert_tree1 = helpers.create_alert(db=db)
+    helpers.create_observable(parent_tree=alert_tree1, type="test_type1", value="test_value1", db=db)
 
-    alert2 = helpers.create_alert(db=db)
-    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value2", db=db)
+    alert_tree2 = helpers.create_alert(db=db)
+    helpers.create_observable(parent_tree=alert_tree2, type="test_type2", value="test_value2", db=db)
 
     # Create an alert with multiple observables
-    alert3 = helpers.create_alert(db=db)
-    helpers.create_observable_in_tree(root_node=alert3, type="test_type1", value="test_value_asdf", db=db)
-    helpers.create_observable_in_tree(root_node=alert3, type="test_type2", value="test_value1", db=db)
-    helpers.create_observable_in_tree(root_node=alert3, type="test_type2", value="test_value2", db=db)
+    alert_tree3 = helpers.create_alert(db=db)
+    helpers.create_observable(parent_tree=alert_tree3, type="test_type1", value="test_value_asdf", db=db)
+    helpers.create_observable(parent_tree=alert_tree3, type="test_type2", value="test_value1", db=db)
+    helpers.create_observable(parent_tree=alert_tree3, type="test_type2", value="test_value2", db=db)
 
     # There should be 4 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -277,28 +270,28 @@ def test_get_filter_observable(client_valid_access_token, db):
     # There should only be 1 alert when we filter by the test_type1/test_value1 observable
     get = client_valid_access_token.get("/api/alert/?observable=test_type1|test_value1")
     assert get.json()["total"] == 1
-    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
 
     # There should be 2 alerts when we filter by the test_type2/test_value2 observable
     get = client_valid_access_token.get("/api/alert/?observable=test_type2|test_value2")
     assert get.json()["total"] == 2
-    assert any(a["uuid"] == str(alert2.uuid) for a in get.json()["items"])
-    assert any(a["uuid"] == str(alert3.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(alert_tree2.node_uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(alert_tree3.node_uuid) for a in get.json()["items"])
 
 
 def test_get_filter_observable_types(client_valid_access_token, db):
     # Create an empty alert
     helpers.create_alert(db=db)
 
-    # Create some alerts with one observable
-    alert1 = helpers.create_alert(db=db)
-    helpers.create_observable_in_tree(root_node=alert1, type="test_type1", value="test_value1", db=db)
+    # Create an alert with one observable
+    alert_tree1 = helpers.create_alert(db=db)
+    helpers.create_observable(parent_tree=alert_tree1, type="test_type1", value="test_value1", db=db)
 
     # Create an alert with multiple observables
-    alert2 = helpers.create_alert(db=db)
-    helpers.create_observable_in_tree(root_node=alert2, type="test_type1", value="test_value_asdf", db=db)
-    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value1", db=db)
-    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value2", db=db)
+    alert_tree2 = helpers.create_alert(db=db)
+    helpers.create_observable(parent_tree=alert_tree2, type="test_type1", value="test_value_asdf", db=db)
+    helpers.create_observable(parent_tree=alert_tree2, type="test_type2", value="test_value1", db=db)
+    helpers.create_observable(parent_tree=alert_tree2, type="test_type2", value="test_value2", db=db)
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -307,13 +300,13 @@ def test_get_filter_observable_types(client_valid_access_token, db):
     # There should be 2 alerts when we filter by just test_type1
     get = client_valid_access_token.get("/api/alert/?observable_types=test_type1")
     assert get.json()["total"] == 2
-    assert any(a["uuid"] == str(alert1.uuid) for a in get.json()["items"])
-    assert any(a["uuid"] == str(alert2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(alert_tree1.node_uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(alert_tree2.node_uuid) for a in get.json()["items"])
 
     # There should only be 1 alert when we filter by the test_type1 and test_type2
     get = client_valid_access_token.get("/api/alert/?observable_types=test_type1,test_type2")
     assert get.json()["total"] == 1
-    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree2.node_uuid)
 
 
 def test_get_filter_observable_value(client_valid_access_token, db):
@@ -321,17 +314,17 @@ def test_get_filter_observable_value(client_valid_access_token, db):
     helpers.create_alert(db=db)
 
     # Create some alerts with one observable
-    alert1 = helpers.create_alert(db=db)
-    helpers.create_observable_in_tree(root_node=alert1, type="test_type1", value="test_value1", db=db)
+    alert_tree1 = helpers.create_alert(db=db)
+    helpers.create_observable(parent_tree=alert_tree1, type="test_type1", value="test_value1", db=db)
 
-    alert2 = helpers.create_alert(db=db)
-    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value2", db=db)
+    alert_tree2 = helpers.create_alert(db=db)
+    helpers.create_observable(parent_tree=alert_tree2, type="test_type2", value="test_value2", db=db)
 
     # Create an alert with multiple observables
-    alert3 = helpers.create_alert(db=db)
-    helpers.create_observable_in_tree(root_node=alert3, type="test_type1", value="test_value_asdf", db=db)
-    helpers.create_observable_in_tree(root_node=alert3, type="test_type2", value="test_value1", db=db)
-    helpers.create_observable_in_tree(root_node=alert3, type="test_type2", value="test_value2", db=db)
+    alert_tree3 = helpers.create_alert(db=db)
+    helpers.create_observable(parent_tree=alert_tree3, type="test_type1", value="test_value_asdf", db=db)
+    helpers.create_observable(parent_tree=alert_tree3, type="test_type2", value="test_value1", db=db)
+    helpers.create_observable(parent_tree=alert_tree3, type="test_type2", value="test_value2", db=db)
 
     # There should be 4 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -340,13 +333,13 @@ def test_get_filter_observable_value(client_valid_access_token, db):
     # There should only be 1 alert when we filter by the test_value_asdf observable value
     get = client_valid_access_token.get("/api/alert/?observable_value=test_value_asdf")
     assert get.json()["total"] == 1
-    assert get.json()["items"][0]["uuid"] == str(alert3.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree3.node_uuid)
 
     # There should be 2 alerts when we filter by the test_value1 observable value
     get = client_valid_access_token.get("/api/alert/?observable_value=test_value1")
     assert get.json()["total"] == 2
-    assert any(a["uuid"] == str(alert1.uuid) for a in get.json()["items"])
-    assert any(a["uuid"] == str(alert3.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(alert_tree1.node_uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(alert_tree3.node_uuid) for a in get.json()["items"])
 
 
 def test_get_filter_observable_and_observable_types(client_valid_access_token, db):
@@ -354,13 +347,13 @@ def test_get_filter_observable_and_observable_types(client_valid_access_token, d
     helpers.create_alert(db=db)
 
     # Create an alert with multiple observables
-    alert2 = helpers.create_alert(db=db)
-    helpers.create_observable_in_tree(root_node=alert2, type="test_type1", value="test_value1", db=db)
-    helpers.create_observable_in_tree(root_node=alert2, type="test_type2", value="test_value2", db=db)
+    alert_tree2 = helpers.create_alert(db=db)
+    helpers.create_observable(parent_tree=alert_tree2, type="test_type1", value="test_value1", db=db)
+    helpers.create_observable(parent_tree=alert_tree2, type="test_type2", value="test_value2", db=db)
 
     # Create an alert with one observable
-    alert3 = helpers.create_alert(db=db)
-    helpers.create_observable_in_tree(root_node=alert3, type="test_type1", value="test_value1", db=db)
+    alert_tree3 = helpers.create_alert(db=db)
+    helpers.create_observable(parent_tree=alert_tree3, type="test_type1", value="test_value1", db=db)
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -369,14 +362,11 @@ def test_get_filter_observable_and_observable_types(client_valid_access_token, d
     # There should only be 1 alert when we filter by observable and observable_types
     get = client_valid_access_token.get("/api/alert/?observable_types=test_type1&observable=test_type2|test_value2")
     assert get.json()["total"] == 1
-    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree2.node_uuid)
 
 
 def test_get_filter_owner(client_valid_access_token, db):
-    # Create an analyst user
     helpers.create_user(username="analyst", db=db)
-
-    # Create some alerts
     helpers.create_alert(db)
     helpers.create_alert(db, owner="analyst")
 
@@ -391,7 +381,6 @@ def test_get_filter_owner(client_valid_access_token, db):
 
 
 def test_get_filter_queue(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db, alert_queue="test_queue1")
     helpers.create_alert(db, alert_queue="test_queue2")
 
@@ -406,7 +395,6 @@ def test_get_filter_queue(client_valid_access_token, db):
 
 
 def test_get_filter_tags(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db)
     helpers.create_alert(db, tags=["tag1"])
     helpers.create_alert(db, tags=["tag2", "tag3", "tag4"])
@@ -434,7 +422,6 @@ def test_get_filter_tags(client_valid_access_token, db):
 
 
 def test_get_filter_threat_actors(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db)
     helpers.create_alert(db, threat_actors=["test_actor"])
 
@@ -453,7 +440,6 @@ def test_get_filter_threat_actors(client_valid_access_token, db):
 
 
 def test_get_filter_threats(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db)
     helpers.create_alert(db, threats=["threat1"])
     helpers.create_alert(db, threats=["threat2", "threat3", "threat4"])
@@ -481,7 +467,6 @@ def test_get_filter_threats(client_valid_access_token, db):
 
 
 def test_get_filter_tool(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db, tool="test_tool1")
     helpers.create_alert(db, tool="test_tool2")
 
@@ -496,7 +481,6 @@ def test_get_filter_tool(client_valid_access_token, db):
 
 
 def test_get_filter_tool_instance(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db, tool_instance="test_tool_instance1")
     helpers.create_alert(db, tool_instance="test_tool_instance2")
 
@@ -511,7 +495,6 @@ def test_get_filter_tool_instance(client_valid_access_token, db):
 
 
 def test_get_filter_type(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db, alert_type="test_type")
     helpers.create_alert(db, alert_type="test_type2")
 
@@ -526,7 +509,6 @@ def test_get_filter_type(client_valid_access_token, db):
 
 
 def test_get_multiple_filters(client_valid_access_token, db):
-    # Create some alerts
     helpers.create_alert(db, alert_type="test_type1")
     helpers.create_alert(db, alert_type="test_type1", disposition="FALSE_POSITIVE")
     helpers.create_alert(db, alert_type="test_type2", disposition="FALSE_POSITIVE")
@@ -543,173 +525,172 @@ def test_get_multiple_filters(client_valid_access_token, db):
 
 
 def test_get_sort_by_disposition(client_valid_access_token, db):
-    # Create some alerts
-    alert1 = helpers.create_alert(db, disposition="DELIVERY")
-    alert2 = helpers.create_alert(db, disposition="FALSE_POSITIVE")
+    alert_tree1 = helpers.create_alert(db, disposition="DELIVERY")
+    alert_tree2 = helpers.create_alert(db, disposition="FALSE_POSITIVE")
+    alert_tree3 = helpers.create_alert(db)
 
-    # If you sort descending, the FALSE_POSITIVE alert (alert2) should appear first
+    # If you sort descending: null disposition, FALSE_POSITIVE, DELIVERY
     get = client_valid_access_token.get("/api/alert/?sort=disposition|desc")
-    assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["uuid"] == str(alert_tree3.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][2]["uuid"] == str(alert_tree1.node_uuid)
 
-    # If you sort ascending, the DELIVERY alert (alert1) should appear first
+    # If you sort ascending: DELIVERY, FALSE_POSITIVE, null disposition
     get = client_valid_access_token.get("/api/alert/?sort=disposition|asc")
-    assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][2]["uuid"] == str(alert_tree3.node_uuid)
 
 
 def test_get_sort_by_disposition_time(client_valid_access_token, db):
-    # Create some alerts
-    alert1 = helpers.create_alert(db, disposition_time=datetime.utcnow())
-    alert2 = helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(seconds=5))
+    alert_tree1 = helpers.create_alert(db, disposition_time=datetime.utcnow())
+    alert_tree2 = helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(seconds=5))
 
     # If you sort descending, the newest alert (alert2) should appear first
     get = client_valid_access_token.get("/api/alert/?sort=disposition_time|desc")
     assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree1.node_uuid)
 
     # If you sort ascending, the oldest alert (alert1) should appear first
     get = client_valid_access_token.get("/api/alert/?sort=disposition_time|asc")
     assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
 
 
 def test_get_sort_by_disposition_user(client_valid_access_token, db):
-    # Create some alerts
-    alert1 = helpers.create_alert(db, disposition_user="alice")
-    alert2 = helpers.create_alert(db, disposition_user="bob")
+    alert_tree1 = helpers.create_alert(db, disposition_user="alice")
+    alert_tree2 = helpers.create_alert(db, disposition_user="bob")
+    alert_tree3 = helpers.create_alert(db)
 
-    # If you sort descending, bob's alert (alert2) should appear first
+    # If you sort descending: null user, bob, alice
     get = client_valid_access_token.get("/api/alert/?sort=disposition_user|desc")
-    assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["uuid"] == str(alert_tree3.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][2]["uuid"] == str(alert_tree1.node_uuid)
 
-    # If you sort ascending, alice's alert (alert1) should appear first
+    # If you sort ascending: alice, bob, null user
     get = client_valid_access_token.get("/api/alert/?sort=disposition_user|asc")
-    assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][2]["uuid"] == str(alert_tree3.node_uuid)
 
 
 def test_get_sort_by_event_time(client_valid_access_token, db):
-    # Create some alerts
-    alert1 = helpers.create_alert(db, event_time=datetime.utcnow())
-    alert2 = helpers.create_alert(db, event_time=datetime.utcnow() + timedelta(seconds=5))
+    alert_tree1 = helpers.create_alert(db, event_time=datetime.utcnow())
+    alert_tree2 = helpers.create_alert(db, event_time=datetime.utcnow() + timedelta(seconds=5))
 
     # If you sort descending, the newest alert (alert2) should appear first
     get = client_valid_access_token.get("/api/alert/?sort=event_time|desc")
     assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree1.node_uuid)
 
     # If you sort ascending, the oldest alert (alert1) should appear first
     get = client_valid_access_token.get("/api/alert/?sort=event_time|asc")
     assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
 
 
 def test_get_sort_by_insert_time(client_valid_access_token, db):
-    # Create some alerts
-    alert1 = helpers.create_alert(db, insert_time=datetime.utcnow())
-    alert2 = helpers.create_alert(db, insert_time=datetime.utcnow() + timedelta(seconds=5))
+    alert_tree1 = helpers.create_alert(db, insert_time=datetime.utcnow())
+    alert_tree2 = helpers.create_alert(db, insert_time=datetime.utcnow() + timedelta(seconds=5))
 
     # If you sort descending, the newest alert (alert2) should appear first
     get = client_valid_access_token.get("/api/alert/?sort=insert_time|desc")
     assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree1.node_uuid)
 
     # If you sort ascending, the oldest alert (alert1) should appear first
     get = client_valid_access_token.get("/api/alert/?sort=insert_time|asc")
     assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
 
 
 def test_get_sort_by_name(client_valid_access_token, db):
-    # Create some alerts
-    alert1 = helpers.create_alert(db, name="alert1")
-    alert2 = helpers.create_alert(db, name="alert2")
+    alert_tree1 = helpers.create_alert(db, name="alert1")
+    alert_tree2 = helpers.create_alert(db, name="alert2")
 
     # If you sort descending, alert2 should appear first
     get = client_valid_access_token.get("/api/alert/?sort=name|desc")
     assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree1.node_uuid)
 
     # If you sort ascending, alert1 should appear first
     get = client_valid_access_token.get("/api/alert/?sort=name|asc")
     assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
 
 
 def test_get_sort_by_owner(client_valid_access_token, db):
-    # Create some alerts
-    alert1 = helpers.create_alert(db, owner="alice")
-    alert2 = helpers.create_alert(db, owner="bob")
+    alert_tree1 = helpers.create_alert(db, owner="alice")
+    alert_tree2 = helpers.create_alert(db, owner="bob")
+    alert_tree3 = helpers.create_alert(db)
 
-    # If you sort descending, bob's alert (alert2) should appear first
+    # If you sort descending: null owner, bob, alice
     get = client_valid_access_token.get("/api/alert/?sort=owner|desc")
-    assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["uuid"] == str(alert_tree3.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][2]["uuid"] == str(alert_tree1.node_uuid)
 
-    # If you sort ascending, alice's alert (alert1) should appear first
+    # If you sort ascending: alice, bob, null owner
     get = client_valid_access_token.get("/api/alert/?sort=owner|asc")
-    assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][2]["uuid"] == str(alert_tree3.node_uuid)
 
 
 def test_get_sort_by_queue(client_valid_access_token, db):
-    # Create some alerts
-    alert1 = helpers.create_alert(db, alert_queue="detect")
-    alert2 = helpers.create_alert(db, alert_queue="intel")
+    alert_tree1 = helpers.create_alert(db, alert_queue="detect")
+    alert_tree2 = helpers.create_alert(db, alert_queue="intel")
 
     # If you sort descending, alert2 should appear first
     get = client_valid_access_token.get("/api/alert/?sort=queue|desc")
     assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree1.node_uuid)
 
     # If you sort ascending, alert1 should appear first
     get = client_valid_access_token.get("/api/alert/?sort=queue|asc")
     assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
 
 
 def test_get_sort_by_type(client_valid_access_token, db):
-    # Create some alerts
-    alert1 = helpers.create_alert(db, alert_type="type1")
-    alert2 = helpers.create_alert(db, alert_type="type2")
+    alert_tree1 = helpers.create_alert(db, alert_type="type1")
+    alert_tree2 = helpers.create_alert(db, alert_type="type2")
 
     # If you sort descending, alert2 should appear first
     get = client_valid_access_token.get("/api/alert/?sort=type|desc")
     assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree1.node_uuid)
 
     # If you sort ascending, alert1 should appear first
     get = client_valid_access_token.get("/api/alert/?sort=type|asc")
     assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
 
 
 def test_get_alert_tree(client_valid_access_token, db):
-    # Create an alert with a tree of analyses and observable instances
-    alert = helpers.create_alert_from_json_file(db=db, json_path="/app/tests/alerts/small.json")
+    alert_tree = helpers.create_alert_from_json_file(db=db, json_path="/app/tests/alerts/small.json")
 
     # The small.json alert has 14 observables and 8 analyses. However, it only has two root observables.
-    get = client_valid_access_token.get(f"/api/alert/{alert.uuid}")
+    get = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}")
     assert str(get.json()["children"]).count("'observable'") == 14
     assert str(get.json()["children"]).count("'analysis'") == 8
     assert len(get.json()["children"]) == 2

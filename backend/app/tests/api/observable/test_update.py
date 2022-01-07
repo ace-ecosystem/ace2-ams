@@ -72,32 +72,36 @@ def test_update_invalid_uuid(client_valid_access_token):
 
 
 def test_update_invalid_version(client_valid_access_token, db):
-    # Create an observable
-    obj = helpers.create_observable(type="test_type", value="test", db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="test_type", value="test", parent_tree=alert_tree, db=db)
 
     # Make sure you cannot update it using an invalid version. The version is
     # optional, but if given, it must match.
-    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"version": str(uuid.uuid4())})
+    update = client_valid_access_token.patch(
+        f"/api/observable/{observable_tree.node.uuid}", json={"version": str(uuid.uuid4())}
+    )
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
 def test_update_duplicate_type_value(client_valid_access_token, db):
-    # Create some observables
-    obj1 = helpers.create_observable(type="test_type", value="test", db=db)
-    obj2 = helpers.create_observable(type="test_type", value="test2", db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree1 = helpers.create_observable(type="test_type", value="test", parent_tree=alert_tree, db=db)
+    observable_tree2 = helpers.create_observable(type="test_type", value="test2", parent_tree=alert_tree, db=db)
 
     # Ensure you cannot update an observable to have a duplicate type+value combination
-    update = client_valid_access_token.patch(f"/api/observable/{obj2.uuid}", json={"value": obj1.value})
+    update = client_valid_access_token.patch(
+        f"/api/observable/{observable_tree2.node.uuid}", json={"value": observable_tree1.node.value}
+    )
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
 def test_update_nonexistent_redirection_uuid(client_valid_access_token, db):
-    # Create an observable
-    obj = helpers.create_observable(type="test_type", value="test", db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="test_type", value="test", parent_tree=alert_tree, db=db)
 
     # Make sure you cannot update it to use a nonexistent redirection UUID
     update = client_valid_access_token.patch(
-        f"/api/observable/{obj.uuid}",
+        f"/api/observable/{observable_tree.node.uuid}",
         json={"redirection_uuid": str(uuid.uuid4())},
     )
     assert update.status_code == status.HTTP_404_NOT_FOUND
@@ -108,11 +112,11 @@ def test_update_nonexistent_redirection_uuid(client_valid_access_token, db):
     [("directives"), ("tags"), ("threat_actors"), ("threats")],
 )
 def test_update_nonexistent_node_fields(client_valid_access_token, db, key):
-    # Create an observable
-    obj = helpers.create_observable(type="test_type", value="test", db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="test_type", value="test", parent_tree=alert_tree, db=db)
 
     # Make sure you cannot update it to use a nonexistent node field value
-    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={key: ["abc"]})
+    update = client_valid_access_token.patch(f"/api/observable/{observable_tree.node.uuid}", json={key: ["abc"]})
     assert update.status_code == status.HTTP_404_NOT_FOUND
     assert "abc" in update.text
 
@@ -130,38 +134,44 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 
 
 def test_update_type(client_valid_access_token, db):
-    # Create the object
-    obj = helpers.create_observable(type="test_type", value="test", db=db)
-    assert obj.type.value == "test_type"
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="test_type", value="test", parent_tree=alert_tree, db=db)
+    assert observable_tree.node.type.value == "test_type"
 
     # Create a new observable type
     helpers.create_observable_type(value="test_type2", db=db)
 
     # Update it
-    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={"type": "test_type2"})
+    update = client_valid_access_token.patch(
+        f"/api/observable/{observable_tree.node.uuid}", json={"type": "test_type2"}
+    )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert obj.type.value == "test_type2"
+    assert observable_tree.node.type.value == "test_type2"
 
 
 def test_update_redirection_uuid(client_valid_access_token, db):
-    # Create an observable
-    obj1 = helpers.create_observable(type="test_type", value="test", db=db)
-    initial_observable_version = obj1.version
-    assert obj1.redirection is None
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree1 = helpers.create_observable(type="test_type", value="test", parent_tree=alert_tree, db=db)
+    initial_observable_version = observable_tree1.node.version
+    assert observable_tree1.node.redirection is None
 
     # Create a second observable to use for redirection
-    obj2 = helpers.create_observable(type="test_type", value="test2", db=db)
+    observable_tree2 = helpers.create_observable(type="test_type", value="test2", parent_tree=alert_tree, db=db)
 
     # Update the redirection UUID
-    update = client_valid_access_token.patch(f"/api/observable/{obj1.uuid}", json={"redirection_uuid": str(obj2.uuid)})
+    update = client_valid_access_token.patch(
+        f"/api/observable/{observable_tree1.node.uuid}", json={"redirection_uuid": str(observable_tree2.node.uuid)}
+    )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert obj1.redirection_uuid == obj2.uuid
-    assert obj1.version != initial_observable_version
+    assert observable_tree1.node.redirection_uuid == observable_tree2.node.uuid
+    assert observable_tree1.node.version != initial_observable_version
 
     # Set it back to None
-    update = client_valid_access_token.patch(f"/api/observable/{obj1.uuid}", json={"redirection_uuid": None})
+    update = client_valid_access_token.patch(
+        f"/api/observable/{observable_tree1.node.uuid}", json={"redirection_uuid": None}
+    )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert obj1.redirection is None
+    assert observable_tree1.node.redirection is None
 
 
 @pytest.mark.parametrize(
@@ -175,18 +185,18 @@ def test_update_redirection_uuid(client_valid_access_token, db):
 )
 def test_update_valid_node_fields(client_valid_access_token, db, key, value_lists, helper_create_func):
     for value_list in value_lists:
-        # Create an observable
-        obj = helpers.create_observable(type="test_type", value="test", db=db)
-        initial_observable_version = obj.version
+        alert_tree = helpers.create_alert(db=db)
+        observable_tree = helpers.create_observable(type="test_type", value="test", parent_tree=alert_tree, db=db)
+        initial_observable_version = observable_tree.node.version
 
         for value in value_list:
             helper_create_func(value=value, db=db)
 
         # Update the observable
-        update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={key: value_list})
+        update = client_valid_access_token.patch(f"/api/observable/{observable_tree.node.uuid}", json={key: value_list})
         assert update.status_code == status.HTTP_204_NO_CONTENT
-        assert len(getattr(obj, key)) == len(set(value_list))
-        assert obj.version != initial_observable_version
+        assert len(getattr(observable_tree.node, key)) == len(set(value_list))
+        assert observable_tree.node.version != initial_observable_version
 
 
 @pytest.mark.parametrize(
@@ -214,23 +224,23 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
     ],
 )
 def test_update(client_valid_access_token, db, key, initial_value, updated_value):
-    # Create the object
-    obj = helpers.create_observable(type="test_type", value="test", db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="test_type", value="test", parent_tree=alert_tree, db=db)
 
     # Set the initial value
     if key == "expires_on" and initial_value:
-        setattr(obj, key, datetime.utcfromtimestamp(initial_value))
+        setattr(observable_tree.node, key, datetime.utcfromtimestamp(initial_value))
     else:
-        setattr(obj, key, initial_value)
+        setattr(observable_tree.node, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(f"/api/observable/{obj.uuid}", json={key: updated_value})
+    update = client_valid_access_token.patch(f"/api/observable/{observable_tree.node_uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     # If the test is for expires_on, make sure that the retrieved value matches the proper UTC timestamp
     if key == "expires_on" and updated_value:
-        assert obj.expires_on == parse("2022-01-01T00:00:00+00:00")
+        assert observable_tree.node.expires_on == parse("2022-01-01T00:00:00+00:00")
     elif key == "time" and updated_value:
-        assert obj.time == parse("2022-01-01T00:00:00+00:00")
+        assert observable_tree.node.time == parse("2022-01-01T00:00:00+00:00")
     else:
-        assert getattr(obj, key) == updated_value
+        assert getattr(observable_tree.node, key) == updated_value
