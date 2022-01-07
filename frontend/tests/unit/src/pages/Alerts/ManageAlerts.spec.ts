@@ -10,7 +10,6 @@ import { createRouterMock, injectRouterMock } from "vue-router-mock";
 import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
 import * as helpers from "@/etc/helpers";
-import * as constants from "@/etc/constants";
 
 function factory(
   initialLocation = "/manage_alerts",
@@ -25,7 +24,7 @@ function factory(
     global: {
       plugins: [createTestingPinia(piniaOptions)],
       directives: { tooltip: Tooltip },
-      stubs: ["TheAlertsTable"],
+      stubs: ["TheAlertsTable", "TagModal"],
     },
   });
 
@@ -74,7 +73,7 @@ describe("ManageAlerts.vue", () => {
     });
   });
 
-  it("will attempt to load common stores if url parameters are provided", () => {
+  it("will attempt to load common stores if url parameters are provided", async () => {
     const spy = jest
       .spyOn(helpers, "populateCommonStores")
       .mockImplementationOnce(() => Promise.resolve());
