@@ -119,7 +119,12 @@
 
         case filterTypes.DATE:
           // Date string, handled in formatForGUI
-          filterValueParsed = filterValueUnparsed;
+          try {
+            filterValueParsed = filterValueUnparsed;
+          } catch (err) {
+            console.error(err);
+            filterValueParsed = null;
+          }
           break;
 
         case filterTypes.INPUT_TEXT:
