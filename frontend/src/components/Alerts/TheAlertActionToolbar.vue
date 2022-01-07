@@ -8,7 +8,7 @@
     </div>
   </div>
   <Toolbar id="AlertActionToolbar" style="overflow-x: auto">
-    <template #left>
+    <template #start>
       <!--      DISPOSITION -->
       <Button
         class="p-m-1 p-button-normal p-button-success"
@@ -62,9 +62,6 @@
         @click="open('RemediationModal')"
       />
       <RemediationModal />
-    </template>
-    <template #right>
-      <Button icon="pi pi-link" class="p-button-rounded" label="Link" />
     </template>
   </Toolbar>
 </template>

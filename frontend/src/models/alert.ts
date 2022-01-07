@@ -115,12 +115,13 @@ export interface alertFilterParams extends pageOptionParams {
   owner?: userRead;
   queue?: alertQueueRead;
   sort?: string;
-  tags?: nodeTagRead[];
+  tags?: string[];
   threatActor?: nodeThreatActorRead;
   threats?: nodeThreatRead[];
   tool?: alertToolRead;
   toolInstance?: alertToolInstanceRead;
   type?: alertTypeRead;
+  [key: string]: any;
 }
 
 export type alertFilterNameTypes = Extract<keyof alertFilterParams, string>;
