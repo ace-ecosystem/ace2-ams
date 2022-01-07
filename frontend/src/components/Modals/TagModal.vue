@@ -84,11 +84,13 @@
     isLoading.value = true;
     try {
       await createTags(newTags.value);
-      for (const uuid of selectedAlertStore.selected) {
-        await alertStore.update(uuid, {
-          tags: newAlertTags(uuid, newTags.value),
-        });
-      }
+
+      const updateData = selectedAlertStore.selected.map((uuid) => ({
+        uuid: uuid,
+        tags: newAlertTags(uuid, newTags.value),
+      }));
+
+      await alertStore.update(updateData);
     } catch (err) {
       error.value = err.message;
     }

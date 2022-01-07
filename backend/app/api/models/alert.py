@@ -36,7 +36,6 @@ class AlertBase(NodeBase):
 
     queue: type_str = Field(description="The alert queue containing this alert")
 
-    # TODO: When we have authentication, creating a manual alert will infer the owner from the token.
     owner: Optional[type_str] = Field(description="The username of the user who has taken ownership of this alert")
 
 
@@ -104,11 +103,6 @@ class AlertRead(NodeRead, AlertBase):
 class AlertUpdate(NodeUpdate, AlertBase):
     disposition: Optional[type_str] = Field(description="The disposition assigned to this alert")
 
-    # TODO: This should not be editable. When we have authentication in place, the user will be inferred from the token.
-    # disposition_user: Optional[type_str] = Field(
-    #     description="The username of the user who most recently dispositioned this alert"
-    # )
-
     event_uuid: Optional[UUID4] = Field(description="The UUID of the event containing this alert")
 
     queue: Optional[type_str] = Field(description="The alert queue containing this alert")
@@ -120,6 +114,10 @@ class AlertUpdate(NodeUpdate, AlertBase):
     threats: Optional[List[type_str]] = Field(description="A list of threats to add to the alert")
 
     _prevent_none: classmethod = validators.prevent_none("queue", "tags", "threat_actors", "threats")
+
+
+class AlertUpdateMultiple(AlertUpdate):
+    uuid: UUID4 = Field(description="The UUID of the alert")
 
 
 class AlertTreeRead(AlertRead, NodeTreeItemRead):

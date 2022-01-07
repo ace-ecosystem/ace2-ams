@@ -98,14 +98,12 @@ describe("TheAlertActionToolbar.vue", () => {
   it("updates ownership of alert to current user and requests alertTable reload when Take Ownership clicked", async () => {
     await wrapper.setProps({ page: "Manage Alerts" });
     myNock
-      .options("/alert/uuid1")
+      .options("/alert/")
       .reply(200)
-      .patch("/alert/uuid1", { owner: "testingUser" })
-      .reply(204);
-    myNock
-      .options("/alert/uuid2")
-      .reply(200)
-      .patch("/alert/uuid2", { owner: "testingUser" })
+      .patch("/alert/", [
+        { uuid: "uuid1", owner: "testingUser" },
+        { uuid: "uuid2", owner: "testingUser" },
+      ])
       .reply(204);
     wrapper.vm.authStore.user = { username: "testingUser" };
     wrapper.vm.selectedAlertStore.selected = ["uuid1", "uuid2"];
@@ -118,11 +116,7 @@ describe("TheAlertActionToolbar.vue", () => {
     wrapper.vm.alertTableStore.$reset();
     wrapper.vm.alertStore.$reset();
     await wrapper.setProps({ page: "Manage Alerts" });
-    myNock
-      .options("/alert/uuid1")
-      .reply(200)
-      .patch("/alert/uuid1", { owner: "testingUser" })
-      .reply(403);
+    myNock.options("/alert/").reply(200).patch("/alert/").reply(403);
     wrapper.vm.authStore.user = { username: "testingUser" };
     wrapper.vm.selectedAlertStore.selected = ["uuid1", "uuid2"];
     await wrapper.vm.takeOwnership();

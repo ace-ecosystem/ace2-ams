@@ -64,23 +64,8 @@ describe("alert Actions", () => {
   });
 
   it("will make a request to update an alert given the UUID and update data upon the updateAlert action", async () => {
-    const mockRequest = myNock.patch("/alert/uuid1").reply(200);
-    await store.update("uuid1", { disposition: "test", version: "1" });
-
-    expect(mockRequest.isDone()).toEqual(true);
-    // None of these should be changed
-    expect(store.openAlert).toBeNull();
-  });
-
-  it("will make multiple reqs to update multiple alerts given a list of UUIDS and update data upon the updateAlerts action", async () => {
-    const mockRequest = myNock
-      .patch(/\/alert\/uuid\d/)
-      .twice()
-      .reply(200);
-    await store.updateMultiple(["uuid1", "uuid2"], {
-      disposition: "test",
-      version: "1",
-    });
+    const mockRequest = myNock.patch("/alert/").reply(200);
+    await store.update([{ uuid: "uuid1", disposition: "test" }]);
 
     expect(mockRequest.isDone()).toEqual(true);
     // None of these should be changed
@@ -106,14 +91,7 @@ describe("alert Actions", () => {
     );
 
     await expect(
-      store.update("uuid1", { disposition: "test", version: "1" }),
-    ).rejects.toEqual(new Error("Request failed with status code 403"));
-
-    await expect(
-      store.updateMultiple(["uuid1", "uuid2"], {
-        disposition: "test",
-        version: "1",
-      }),
+      store.update([{ uuid: "uuid1", disposition: "test" }]),
     ).rejects.toEqual(new Error("Request failed with status code 403"));
 
     mockRequest.persist(false); // cleanup persisted nock request

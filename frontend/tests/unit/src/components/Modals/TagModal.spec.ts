@@ -176,13 +176,12 @@ describe("TagModal.vue", () => {
         items: [{ value: "tag1" }, { value: "tag2" }, { value: "tag3" }],
       });
     myNock.post("/node/tag/", { value: "tag2" }).reply(200);
-    myNock.options("/alert/uuid1").reply(200, "Success");
+    myNock.options("/alert/").reply(200, "Success");
     myNock
-      .patch("/alert/uuid1", '{"tags":["tag1","tag2"]}')
-      .reply(200, "Success");
-    myNock.options("/alert/uuid2").reply(200, "Success");
-    myNock
-      .patch("/alert/uuid2", '{"tags":["tag1","tag1","tag2"]}')
+      .patch("/alert/", [
+        { uuid: "uuid1", tags: ["tag1", "tag2"] },
+        { uuid: "uuid2", tags: ["tag1", "tag1", "tag2"] },
+      ])
       .reply(200, "Success");
 
     const { wrapper } = factory({ stubActions: false });
@@ -207,7 +206,7 @@ describe("TagModal.vue", () => {
     expect(wrapper.emitted("requestReload")).toBeTruthy();
   });
 
-  it("will not close the modal and will set the 'error' property when assignUser fails", async () => {
+  it("will not close the modal and will set the 'error' property when addTags fails", async () => {
     myNock
       .get("/node/tag/?offset=0")
       .once()
@@ -220,9 +219,9 @@ describe("TagModal.vue", () => {
       });
     myNock.post("/node/tag/", { value: "tag2" }).reply(200);
     const updateAlert = myNock
-      .options("/alert/uuid1")
+      .options("/alert/")
       .reply(200, "Success")
-      .patch("/alert/uuid1")
+      .patch("/alert/")
       .reply(403, "Unauthorized");
 
     const { wrapper } = factory({ stubActions: false });

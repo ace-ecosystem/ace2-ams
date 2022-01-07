@@ -3,11 +3,11 @@ from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy import and_, func, select
 from sqlalchemy.orm import Session
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID, uuid4
 
 
-from api.models.alert import AlertCreate, AlertRead, AlertUpdate
+from api.models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
 from api.routes import helpers
 from api.routes.node import create_node, update_node
 from api.routes.observable import _create_observable
@@ -373,55 +373,57 @@ helpers.api_route_read(router, get_alert, dict)
 #
 
 
-def update_alert(
-    uuid: UUID,
-    alert: AlertUpdate,
+def update_alerts(
+    alerts: List[AlertUpdateMultiple],
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
     username: str = Depends(validate_access_token),
 ):
-    # Update the Node attributes
-    db_alert: Alert = update_node(node_update=alert, uuid=uuid, db_table=Alert, db=db)
+    for alert in alerts:
+        # Update the Node attributes
+        db_alert: Alert = update_node(node_update=alert, uuid=alert.uuid, db_table=Alert, db=db)
 
-    # Get the data that was given in the request and use it to update the database object
-    update_data = alert.dict(exclude_unset=True)
+        # Get the data that was given in the request and use it to update the database object
+        update_data = alert.dict(exclude_unset=True)
 
-    if "description" in update_data:
-        db_alert.description = update_data["description"]
+        if "description" in update_data:
+            db_alert.description = update_data["description"]
 
-    if "disposition" in update_data:
-        db_alert.disposition = crud.read_by_value(value=update_data["disposition"], db_table=AlertDisposition, db=db)
-        db_alert.disposition_time = datetime.utcnow()
-        db_alert.disposition_user = crud.read_user_by_username(username=username, db=db)
+        if "disposition" in update_data:
+            db_alert.disposition = crud.read_by_value(
+                value=update_data["disposition"], db_table=AlertDisposition, db=db
+            )
+            db_alert.disposition_time = datetime.utcnow()
+            db_alert.disposition_user = crud.read_user_by_username(username=username, db=db)
 
-    if "event_uuid" in update_data:
-        if update_data["event_uuid"]:
-            db_alert.event = crud.read(uuid=update_data["event_uuid"], db_table=Event, db=db)
+        if "event_uuid" in update_data:
+            if update_data["event_uuid"]:
+                db_alert.event = crud.read(uuid=update_data["event_uuid"], db_table=Event, db=db)
 
-            # This counts as editing the event, so it should receive a new version.
-            db_alert.event.version = uuid4()
-        else:
-            db_alert.event = None
+                # This counts as editing the event, so it should receive a new version.
+                db_alert.event.version = uuid4()
+            else:
+                db_alert.event = None
 
-    if "event_time" in update_data:
-        db_alert.event_time = update_data["event_time"]
+        if "event_time" in update_data:
+            db_alert.event_time = update_data["event_time"]
 
-    if "instructions" in update_data:
-        db_alert.instructions = update_data["instructions"]
+        if "instructions" in update_data:
+            db_alert.instructions = update_data["instructions"]
 
-    if "owner" in update_data:
-        db_alert.owner = crud.read_user_by_username(username=update_data["owner"], db=db)
+        if "owner" in update_data:
+            db_alert.owner = crud.read_user_by_username(username=update_data["owner"], db=db)
 
-    if "queue" in update_data:
-        db_alert.queue = crud.read_by_value(value=update_data["queue"], db_table=AlertQueue, db=db)
+        if "queue" in update_data:
+            db_alert.queue = crud.read_by_value(value=update_data["queue"], db_table=AlertQueue, db=db)
 
-    crud.commit(db)
+        crud.commit(db)
 
-    response.headers["Content-Location"] = request.url_for("get_alert", uuid=uuid)
+        response.headers["Content-Location"] = request.url_for("get_alert", uuid=alert.uuid)
 
 
-helpers.api_route_update(router, update_alert)
+helpers.api_route_update(router, update_alerts, path="/")
 
 
 #

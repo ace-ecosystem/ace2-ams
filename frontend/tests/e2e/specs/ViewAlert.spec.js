@@ -134,9 +134,7 @@ describe("ViewAlert.vue", () => {
 
   // Disposition
   it.only("should make a request to update and get updated alert when disposition is set", () => {
-    cy.intercept("PATCH", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "updateAlert",
-    );
+    cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("POST", "/api/node/comment").as("createComment");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
       "getAlert",
@@ -153,9 +151,7 @@ describe("ViewAlert.vue", () => {
     cy.get(".p-dialog-footer > .p-button").click();
     cy.get(".p-dialog-content").should("not.exist");
 
-    cy.intercept("PATCH", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "updateAlert",
-    );
+    cy.intercept("PATCH", "/api/alert/").as("updateAlert");
 
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
     cy.wait("@createComment").its("state").should("eq", "Complete");
@@ -187,9 +183,7 @@ describe("ViewAlert.vue", () => {
 
   // Take Ownership
   it("should make a request to update and get updated alert take ownership is clicked", () => {
-    cy.intercept("PATCH", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "updateAlert",
-    );
+    cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
       "getAlert",
     );
@@ -203,9 +197,7 @@ describe("ViewAlert.vue", () => {
 
   // Assign
   it("should make a request to update owner and get updated alert when owner is set", () => {
-    cy.intercept("PATCH", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "updateAlert",
-    );
+    cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
       "getAlert",
     );
@@ -225,9 +217,7 @@ describe("ViewAlert.vue", () => {
 
   // Tag
   it("should make a request to update tags and get updated alert when owner is set", () => {
-    cy.intercept("PATCH", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "updateAlert",
-    );
+    cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
       "getAlert",
     );

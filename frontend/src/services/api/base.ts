@@ -28,7 +28,7 @@ export class BaseApi {
     url: string,
     method: Method,
     options?: {
-      data?: Record<string, unknown>;
+      data?: Record<string, unknown> | Record<string, unknown>[];
       params?: Record<string, unknown>;
     },
     getAfterCreate = false,
@@ -41,7 +41,11 @@ export class BaseApi {
 
     if (options) {
       if (options.data) {
-        config["data"] = this.formatOutgoingData(options.data);
+        if (Array.isArray(options.data)) {
+          config["data"] = options.data.map((x) => this.formatOutgoingData(x));
+        } else {
+          config["data"] = this.formatOutgoingData(options.data);
+        }
       }
 
       if (options.params) {
@@ -106,7 +110,10 @@ export class BaseApi {
     return results;
   }
 
-  async update(url: string, data?: Record<string, unknown>): Promise<any> {
+  async update(
+    url: string,
+    data?: Record<string, unknown> | Record<string, unknown>[],
+  ): Promise<any> {
     return await this.baseRequest(url, "PATCH", { data: data });
   }
 }
