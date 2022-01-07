@@ -57,14 +57,13 @@ describe("TheAlertActionToolbar.vue", () => {
 
   it("contains buttons to open each component", () => {
     const buttonsWrapper: VueWrapper<any>[] = wrapper.findAllComponents(Button);
-    expect(buttonsWrapper.length).toBe(7);
+    expect(buttonsWrapper.length).toBe(6);
     expect(buttonsWrapper[0].vm.label).toBe("Disposition");
     expect(buttonsWrapper[1].vm.label).toBe("Comment");
     expect(buttonsWrapper[2].vm.label).toBe("Take Ownership");
     expect(buttonsWrapper[3].vm.label).toBe("Assign");
     expect(buttonsWrapper[4].vm.label).toBe("Tag");
     expect(buttonsWrapper[5].vm.label).toBe("Remediate");
-    expect(buttonsWrapper[6].vm.label).toBe("Link");
   });
 
   it("opens a modal when the open function is called", () => {

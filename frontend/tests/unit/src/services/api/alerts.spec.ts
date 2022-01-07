@@ -21,10 +21,7 @@ const MOCK_PARAMS: alertFilterParams = {
     { value: "testA", description: null, uuid: "1" },
     { value: "testB", description: null, uuid: "2" },
   ],
-  tags: [
-    { value: "tagA", description: null, uuid: "1" },
-    { value: "tagB", description: null, uuid: "2" },
-  ],
+  tags: ["tagA", "tagB"],
   threats: [
     { value: "threatA", description: null, types: [], uuid: "1" },
     { value: "threatB", description: null, types: [], uuid: "2" },
