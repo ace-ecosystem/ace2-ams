@@ -527,18 +527,21 @@ def test_get_multiple_filters(client_valid_access_token, db):
 def test_get_sort_by_disposition(client_valid_access_token, db):
     alert_tree1 = helpers.create_alert(db, disposition="DELIVERY")
     alert_tree2 = helpers.create_alert(db, disposition="FALSE_POSITIVE")
+    alert_tree3 = helpers.create_alert(db)
 
-    # If you sort descending, the FALSE_POSITIVE alert (alert2) should appear first
+    # If you sort descending: null disposition, FALSE_POSITIVE, DELIVERY
     get = client_valid_access_token.get("/api/alert/?sort=disposition|desc")
-    assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert_tree2.node_uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["uuid"] == str(alert_tree3.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][2]["uuid"] == str(alert_tree1.node_uuid)
 
-    # If you sort ascending, the DELIVERY alert (alert1) should appear first
+    # If you sort ascending: DELIVERY, FALSE_POSITIVE, null disposition
     get = client_valid_access_token.get("/api/alert/?sort=disposition|asc")
-    assert get.json()["total"] == 2
+    assert get.json()["total"] == 3
     assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
     assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][2]["uuid"] == str(alert_tree3.node_uuid)
 
 
 def test_get_sort_by_disposition_time(client_valid_access_token, db):
@@ -561,18 +564,21 @@ def test_get_sort_by_disposition_time(client_valid_access_token, db):
 def test_get_sort_by_disposition_user(client_valid_access_token, db):
     alert_tree1 = helpers.create_alert(db, disposition_user="alice")
     alert_tree2 = helpers.create_alert(db, disposition_user="bob")
+    alert_tree3 = helpers.create_alert(db)
 
-    # If you sort descending, bob's alert (alert2) should appear first
+    # If you sort descending: null user, bob, alice
     get = client_valid_access_token.get("/api/alert/?sort=disposition_user|desc")
-    assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert_tree2.node_uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["uuid"] == str(alert_tree3.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][2]["uuid"] == str(alert_tree1.node_uuid)
 
-    # If you sort ascending, alice's alert (alert1) should appear first
+    # If you sort ascending: alice, bob, null user
     get = client_valid_access_token.get("/api/alert/?sort=disposition_user|asc")
-    assert get.json()["total"] == 2
+    assert get.json()["total"] == 3
     assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
     assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][2]["uuid"] == str(alert_tree3.node_uuid)
 
 
 def test_get_sort_by_event_time(client_valid_access_token, db):
@@ -629,18 +635,21 @@ def test_get_sort_by_name(client_valid_access_token, db):
 def test_get_sort_by_owner(client_valid_access_token, db):
     alert_tree1 = helpers.create_alert(db, owner="alice")
     alert_tree2 = helpers.create_alert(db, owner="bob")
+    alert_tree3 = helpers.create_alert(db)
 
-    # If you sort descending, bob's alert (alert2) should appear first
+    # If you sort descending: null owner, bob, alice
     get = client_valid_access_token.get("/api/alert/?sort=owner|desc")
-    assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert_tree2.node_uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["uuid"] == str(alert_tree3.node_uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][2]["uuid"] == str(alert_tree1.node_uuid)
 
-    # If you sort ascending, alice's alert (alert1) should appear first
+    # If you sort ascending: alice, bob, null owner
     get = client_valid_access_token.get("/api/alert/?sort=owner|asc")
-    assert get.json()["total"] == 2
+    assert get.json()["total"] == 3
     assert get.json()["items"][0]["uuid"] == str(alert_tree1.node_uuid)
     assert get.json()["items"][1]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["items"][2]["uuid"] == str(alert_tree3.node_uuid)
 
 
 def test_get_sort_by_queue(client_valid_access_token, db):
