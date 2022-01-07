@@ -46,5 +46,5 @@ export interface filterOption {
   readonly valueProperty?: string;
   readonly store?: StoreDefinition;
   readonly formatForAPI?: (filter: any) => string;
-  readonly formatForGUI?: (filter: string) => any;
+  readonly parseFormattedFilterString?: (filter: string) => any;
 }

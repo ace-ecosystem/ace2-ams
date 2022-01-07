@@ -65,8 +65,8 @@
 
       let filterValueUnparsed = route.query[filterName]; // the filter value from URL
       // format filterValueUnparsed for GUI if method available
-      if (filterNameObject.formatForGUI) {
-        filterValueUnparsed = filterNameObject.formatForGUI(
+      if (filterNameObject.parseFormattedFilterString) {
+        filterValueUnparsed = filterNameObject.parseFormattedFilterString(
           route.query[filterName],
         );
       }
@@ -104,7 +104,7 @@
           break;
 
         case filterTypes.CHIPS:
-          // array of strings, handled in formatForGUI
+          // array of strings, handled in parseFormattedFilterString
           filterValueParsed = filterValueUnparsed;
           break;
 
@@ -118,7 +118,7 @@
           break;
 
         case filterTypes.DATE:
-          // Date string, handled in formatForGUI
+          // Date string, handled in parseFormattedFilterString
           filterValueParsed = isValidDate(filterValueUnparsed)
             ? filterValueUnparsed
             : null;

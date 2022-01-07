@@ -85,7 +85,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.DISPOSITIONED_AFTER_FILTER,
     label: "Dispositioned After",
     type: filterTypes.DATE,
-    formatForGUI: (filterString: string) => {
+    parseFormattedFilterString: (filterString: string) => {
       return new Date(filterString);
     },
   },
@@ -93,7 +93,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.DISPOSITIONED_BEFORE_FILTER,
     label: "Dispositioned Before",
     type: filterTypes.DATE,
-    formatForGUI: (filterString: string) => {
+    parseFormattedFilterString: (filterString: string) => {
       return new Date(filterString);
     },
   },
@@ -102,7 +102,7 @@ export const alertFilters: readonly filterOption[] = [
     label: "Event",
     type: filterTypes.SELECT,
     store: useEventStore,
-    formatForGUI: (filterString: string) => {
+    parseFormattedFilterString: (filterString: string) => {
       return new Date(filterString);
     },
   },
@@ -110,7 +110,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.EVENT_TIME_AFTER_FILTER,
     label: "Event Time After",
     type: filterTypes.DATE,
-    formatForGUI: (filterString: string) => {
+    parseFormattedFilterString: (filterString: string) => {
       return new Date(filterString);
     },
   },
@@ -118,7 +118,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.EVENT_TIME_BEFORE_FILTER,
     label: "Event Time Before",
     type: filterTypes.DATE,
-    formatForGUI: (filterString: string) => {
+    parseFormattedFilterString: (filterString: string) => {
       return new Date(filterString);
     },
   },
@@ -126,7 +126,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.INSERT_TIME_AFTER_FILTER,
     label: "Insert Time After",
     type: filterTypes.DATE,
-    formatForGUI: (filterString: string) => {
+    parseFormattedFilterString: (filterString: string) => {
       return new Date(filterString);
     },
   },
@@ -134,7 +134,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.INSERT_TIME_BEFORE_FILTER,
     label: "Insert Time Before",
     type: filterTypes.DATE,
-    formatForGUI: (filterString: string) => {
+    parseFormattedFilterString: (filterString: string) => {
       return new Date(filterString);
     },
   },
@@ -151,7 +151,7 @@ export const alertFilters: readonly filterOption[] = [
     formatForAPI: (filter: { category: observableTypeRead; value: string }) => {
       return `${filter.category.value}|${filter.value}`;
     },
-    formatForGUI: (filterString: string) => {
+    parseFormattedFilterString: (filterString: string) => {
       const [category, value] = filterString.split("|");
       return { category: category, value: value };
     },
@@ -168,7 +168,7 @@ export const alertFilters: readonly filterOption[] = [
         })
         .join();
     },
-    formatForGUI: (filterString: string) => {
+    parseFormattedFilterString: (filterString: string) => {
       return filterString.split(",");
     },
   },
@@ -209,7 +209,7 @@ export const alertFilters: readonly filterOption[] = [
         })
         .join();
     },
-    formatForGUI: (filterString: string) => {
+    parseFormattedFilterString: (filterString: string) => {
       return filterString.split(",");
     },
   },
@@ -234,7 +234,7 @@ export const alertFilters: readonly filterOption[] = [
         })
         .join();
     },
-    formatForGUI: (filterString: string) => {
+    parseFormattedFilterString: (filterString: string) => {
       return filterString.split(",");
     },
   },
