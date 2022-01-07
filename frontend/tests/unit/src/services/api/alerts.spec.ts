@@ -12,7 +12,7 @@ const MOCK_ALERT_CREATE: alertCreate = {
   type: "test",
   observables: [],
 };
-const MOCK_ALERT_UPDATE: alertUpdate = { version: "test" };
+const MOCK_ALERT_UPDATE: alertUpdate = { uuid: "uuid" };
 const MOCK_PARAMS: alertFilterParams = {
   limit: 10,
   offset: 10,
@@ -66,9 +66,9 @@ describe("Alert calls", () => {
     expect(res).toEqual("Read successful");
   });
 
-  it("will make a patch request to the /alert/{uuid} endpoint when 'update' is called with a given UUID and update data", async () => {
-    myNock.patch("/alert/uuid").reply(200, "Update successful");
-    const res = await api.update("uuid", MOCK_ALERT_UPDATE);
+  it("will make a patch request to the /alert/ endpoint when 'update' is called with an array of update data", async () => {
+    myNock.patch("/alert/").reply(200, "Update successful");
+    const res = await api.update([MOCK_ALERT_UPDATE]);
     expect(res).toEqual("Update successful");
   });
 });

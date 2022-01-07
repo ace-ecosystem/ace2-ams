@@ -35,20 +35,11 @@ export const useAlertStore = defineStore({
         });
     },
 
-    async update(uuid: UUID, data: alertUpdate) {
+    async update(data: alertUpdate[]) {
       // once we get around to updating alerts, we will need to update the base api service to have a
       // 'getAfterUpdate' option like there is for 'create'
       // then we can reset the open/queried alert(s)
-      await Alert.update(uuid, data).catch((error) => {
-        throw error;
-      });
-    },
-
-    // reason enough to have an updateMultiple in api?
-    async updateMultiple(uuids: UUID[], data: alertUpdate) {
-      const promises = uuids.map((u) => Alert.update(u, data));
-
-      await Promise.all(promises).catch((error) => {
+      await Alert.update(data).catch((error) => {
         throw error;
       });
     },
