@@ -549,13 +549,11 @@ describe("Manage Alerts Disposition", () => {
 });
 
 describe("Manage Alerts URL Param Filters", () => {
-  before(() => {
-    cy.visit("/manage_alerts");
-    cy.url().should("contain", "/manage_alerts");
-  });
-
   beforeEach(() => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
+        cy.visit("/manage_alerts");
+    cy.url().should("contain", "/manage_alerts");
+    cy.wait(2000);
   });
 
   // Can't test at the moment, no way to check clipboard data in insecure context
