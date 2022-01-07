@@ -35,7 +35,6 @@ describe("FilterModal setup", () => {
 
     expect(wrapper.vm.formFilters).toEqual([]);
   });
-
 });
 
 describe("FilterModal computed properties", () => {
