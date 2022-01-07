@@ -35,7 +35,7 @@
         class="p-button-outlined p-m-1"
         @click="reset"
       />
-      <Button icon="pi pi-link" class="p-button-rounded" @click="viewLink" />
+      <Button icon="pi pi-link" class="p-button-rounded" @click="copyLink" />
     </template>
   </Toolbar>
 </template>
@@ -65,15 +65,19 @@
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
 
-  function viewLink() {
+  function generateLink() {
     let link = `${window.location.origin}/manage_alerts`;
     // If there are filters set, build the link for it
-    if (filterStore[filterType]) {
+    if (Object.keys(filterStore[filterType]).length) {
       let urlParams = new URLSearchParams(
         formatForAPI(filterStore[filterType]),
       );
       link = `${window.location.origin}/manage_alerts?${urlParams.toString()}`;
     }
+    return link;
+  }
+  function copyLink() {
+    const link = generateLink();
     copyToClipboard(link);
   }
   const clear = () => {

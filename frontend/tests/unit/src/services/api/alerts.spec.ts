@@ -3,7 +3,7 @@
  */
 
 import { alertCreate, alertFilterParams, alertUpdate } from "@/models/alert";
-import { Alert } from "@/services/api/alert";
+import { Alert, formatForAPI } from "@/services/api/alert";
 import myNock from "@unit/services/api/nock";
 
 const MOCK_ALERT_CREATE: alertCreate = {
@@ -31,6 +31,21 @@ const MOCK_PARAMS: alertFilterParams = {
     value: "example",
   },
 };
+
+describe("Alert helpers", () => {
+  it("will correctly format an object of filters for API (as defined in constants file)", async () => {
+    const formattedFilters = formatForAPI(MOCK_PARAMS);
+    expect(formattedFilters).toEqual({
+      limit: 10,
+      offset: 10,
+      name: "Test Name",
+      threats: "threatA,threatB",
+      observableTypes: "testA,testB",
+      tags: "tagA,tagB",
+      observable: "test|example",
+    });
+  });
+});
 
 describe("Alert calls", () => {
   const api = Alert;

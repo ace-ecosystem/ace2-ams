@@ -34,12 +34,8 @@ export async function populateCommonStores(): Promise<void> {
   });
 }
 
+// https://stackoverflow.com/a/33928558
 export function copyToClipboard(text: string) {
-  // if (window.clipboardData && window.clipboardData.setData) {
-  //     // Internet Explorer-specific code path to prevent textarea being shown while dialog is visible.
-  //     return window.clipboardData.setData("Text", text);
-
-  // }
   if (
     document.queryCommandSupported &&
     document.queryCommandSupported("copy")
