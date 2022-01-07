@@ -26,7 +26,7 @@
   import { useRoute, useRouter } from "vue-router";
 
   import { useFilterStore } from "@/stores/filter";
-  import { populateCommonStores } from "@/etc/helpers";
+  import { populateCommonStores, isValidDate } from "@/etc/helpers";
 
   const route = useRoute();
   const router = useRouter();
@@ -119,12 +119,9 @@
 
         case filterTypes.DATE:
           // Date string, handled in formatForGUI
-          try {
-            filterValueParsed = filterValueUnparsed;
-          } catch (err) {
-            console.error(err);
-            filterValueParsed = null;
-          }
+          filterValueParsed = isValidDate(filterValueUnparsed)
+            ? filterValueUnparsed
+            : null;
           break;
 
         case filterTypes.INPUT_TEXT:

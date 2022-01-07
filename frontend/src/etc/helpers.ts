@@ -55,3 +55,8 @@ export function copyToClipboard(text: string) {
     }
   }
 }
+
+// https://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
+export function isValidDate(d: any) {
+  return d instanceof Date && !isNaN(d.getTime());
+}

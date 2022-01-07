@@ -168,6 +168,22 @@ describe("ManageAlerts.vue", () => {
     });
   });
 
+  it("will skip any date filters that fail to parse", async () => {
+    const spy = jest
+      .spyOn(helpers, "populateCommonStores")
+      .mockImplementationOnce(() => Promise.resolve());
+    const { wrapper, filterStore } = factory(
+      "/manage_alerts?eventTimeBefore=Bad+Date",
+      {
+        stubActions: false,
+      },
+    );
+
+    await wrapper.vm.$nextTick();
+
+    expect(filterStore.alerts).toEqual({});
+  });
+
   it("will correctly parse and add any input text filters", async () => {
     const spy = jest
       .spyOn(helpers, "populateCommonStores")
