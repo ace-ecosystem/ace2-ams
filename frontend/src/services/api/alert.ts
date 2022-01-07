@@ -50,6 +50,6 @@ export const Alert = {
     return api.read(`${endpoint}`, formattedParams);
   },
 
-  update: (uuid: UUID, data: alertUpdate): Promise<void> =>
-    api.update(`${endpoint}${uuid}`, data),
+  update: (data: alertUpdate[]): Promise<void> =>
+    api.update(`${endpoint}`, data),
 };

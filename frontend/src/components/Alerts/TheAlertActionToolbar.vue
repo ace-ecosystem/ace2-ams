@@ -103,11 +103,12 @@
 
   async function takeOwnership() {
     try {
-      for (const uuid of selectedAlertStore.selected) {
-        await alertStore.update(uuid, {
-          owner: authStore.user.username,
-        });
-      }
+      const updateData = selectedAlertStore.selected.map((uuid) => ({
+        uuid: uuid,
+        owner: authStore.user.username,
+      }));
+
+      await alertStore.update(updateData);
     } catch (err) {
       error.value = err.message;
     }

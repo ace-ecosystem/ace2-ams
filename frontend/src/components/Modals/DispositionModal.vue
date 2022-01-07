@@ -91,10 +91,14 @@
     isLoading.value = true;
 
     try {
+      const updateData = selectedAlertStore.selected.map((uuid) => ({
+        uuid: uuid,
+        disposition: newDisposition.value.value,
+      }));
+
+      await alertStore.update(updateData);
+
       for (const uuid of selectedAlertStore.selected) {
-        await alertStore.update(uuid, {
-          disposition: newDisposition.value.value,
-        });
         if (dispositionComment.value) {
           await NodeComment.create({ ...commentData.value, nodeUuid: uuid });
         }

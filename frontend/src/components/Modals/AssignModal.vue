@@ -72,11 +72,12 @@
     isLoading.value = true;
 
     try {
-      for (const uuid of selectedAlertStore.selected) {
-        await alertStore.update(uuid, {
-          owner: selectedUser.value.username,
-        });
-      }
+      const updateData = selectedAlertStore.selected.map((uuid) => ({
+        uuid: uuid,
+        owner: selectedUser.value.username,
+      }));
+
+      await alertStore.update(updateData);
     } catch (err) {
       error.value = err.message;
     }

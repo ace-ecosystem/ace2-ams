@@ -94,6 +94,7 @@ export interface alertUpdate extends nodeUpdate {
   tags?: string[];
   threatActors?: string[];
   threats?: string[];
+  uuid: UUID;
   [key: string]: unknown;
 }
 
