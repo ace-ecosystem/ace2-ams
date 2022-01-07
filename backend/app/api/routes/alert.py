@@ -293,9 +293,9 @@ def get_all_alerts(
         # Only sort by disposition if we are not also filtering by disposition
         if sort_by.lower() == "disposition" and not disposition:
             if order == "asc":
-                query = query.join(AlertDisposition).order_by(AlertDisposition.value.asc())
+                query = query.outerjoin(AlertDisposition).order_by(AlertDisposition.value.asc())
             else:
-                query = query.join(AlertDisposition).order_by(AlertDisposition.value.desc())
+                query = query.outerjoin(AlertDisposition).order_by(AlertDisposition.value.desc())
 
         elif sort_by.lower() == "disposition_time":
             if order == "asc":
@@ -305,7 +305,7 @@ def get_all_alerts(
 
         # Only sort by disposition_user if we are not also filtering by disposition_user
         elif sort_by.lower() == "disposition_user" and not disposition_user:
-            query = query.join(User, onclause=Alert.disposition_user_uuid == User.uuid).group_by(
+            query = query.outerjoin(User, onclause=Alert.disposition_user_uuid == User.uuid).group_by(
                 Alert.uuid, Node.uuid, User.username
             )
             if order == "asc":
@@ -333,7 +333,7 @@ def get_all_alerts(
 
         # Only sort by owner if we are not also filtering by owner
         elif sort_by.lower() == "owner" and not owner:
-            query = query.join(User, onclause=Alert.owner_uuid == User.uuid).group_by(
+            query = query.outerjoin(User, onclause=Alert.owner_uuid == User.uuid).group_by(
                 Alert.uuid, Node.uuid, User.username
             )
             if order == "asc":
