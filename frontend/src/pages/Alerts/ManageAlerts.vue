@@ -38,7 +38,7 @@
   const filterStore = useFilterStore();
 
   onMounted(async () => {
-    if (route.query) {
+    if (Object.keys(route.query).length) {
       // Will need to load common stores in order to find filter values
       await populateCommonStores();
       loadFilters();
