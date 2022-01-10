@@ -46,6 +46,9 @@ from tests import helpers
         ("timezone", None),
         ("timezone", ""),
         ("timezone", "Mars/Jezero"),
+        ("training", 123),
+        ("training", None),
+        ("training", "True"),
         ("username", 123),
         ("username", None),
         ("username", ""),
@@ -146,7 +149,7 @@ def test_create_missing_required_fields(client_valid_access_token, key):
 
 @pytest.mark.parametrize(
     "key,value",
-    [("enabled", False), ("timezone", "America/New_York"), ("uuid", str(uuid.uuid4()))],
+    [("enabled", False), ("timezone", "America/New_York"), ("training", False), ("uuid", str(uuid.uuid4()))],
 )
 def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
     helpers.create_alert_queue(value="test_queue", db=db)
@@ -201,4 +204,5 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     assert len(get.json()["roles"]) == 1
     assert get.json()["roles"][0]["value"] == "test_role"
     assert get.json()["timezone"] == "UTC"
+    assert get.json()["training"] is True
     assert get.json()["username"] == "johndoe"

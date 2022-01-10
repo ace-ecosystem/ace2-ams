@@ -11,6 +11,7 @@ export interface userCreate {
   enabled?: boolean;
   roles: string[];
   timezone?: string;
+  training?: boolean;
   username: string;
   password: string;
   uuid?: UUID;
@@ -25,6 +26,7 @@ export interface userRead {
   enabled: boolean;
   roles: userRoleRead[];
   timezone: string;
+  training: boolean;
   username: string;
   uuid: UUID;
   [key: string]: unknown;
@@ -45,6 +47,7 @@ export interface userUpdate {
   enabled?: boolean;
   roles?: string[];
   timezone?: string;
+  training?: boolean;
   username?: string;
   password?: string;
   [key: string]: unknown;
