@@ -18,7 +18,7 @@ class Event(Node):
 
     alert_time = Column(DateTime(timezone=True))
 
-    alerts = relationship("Alert", primaryjoin="Alert.event_uuid == Event.uuid")
+    alerts = relationship("Alert", primaryjoin="Alert.event_uuid == Event.uuid", lazy="selectin")
 
     alert_uuids = association_proxy("alerts", "uuid")
 
@@ -34,33 +34,37 @@ class Event(Node):
 
     owner_uuid = Column(UUID(as_uuid=True), ForeignKey("user.uuid"), nullable=True)
 
-    owner = relationship("User", foreign_keys=[owner_uuid])
+    owner = relationship("User", foreign_keys=[owner_uuid], lazy="selectin")
 
     ownership_time = Column(DateTime(timezone=True))
 
-    prevention_tools = relationship("EventPreventionTool", secondary=event_prevention_tool_mapping)
+    prevention_tools = relationship("EventPreventionTool", secondary=event_prevention_tool_mapping, lazy="selectin")
+
+    queue = relationship("EventQueue", lazy="selectin")
+
+    queue_uuid = Column(UUID(as_uuid=True), ForeignKey("event_queue.uuid"), nullable=False, index=True)
 
     remediation_time = Column(DateTime(timezone=True))
 
-    remediations = relationship("EventRemediation", secondary=event_remediation_mapping)
+    remediations = relationship("EventRemediation", secondary=event_remediation_mapping, lazy="selectin")
 
-    risk_level = relationship("EventRiskLevel")
+    risk_level = relationship("EventRiskLevel", lazy="selectin")
 
     risk_level_uuid = Column(UUID(as_uuid=True), ForeignKey("event_risk_level.uuid"))
 
-    source = relationship("EventSource")
+    source = relationship("EventSource", lazy="selectin")
 
     source_uuid = Column(UUID(as_uuid=True), ForeignKey("event_source.uuid"))
 
-    status = relationship("EventStatus")
+    status = relationship("EventStatus", lazy="selectin")
 
     status_uuid = Column(UUID(as_uuid=True), ForeignKey("event_status.uuid"), nullable=False)
 
-    type = relationship("EventType")
+    type = relationship("EventType", lazy="selectin")
 
     type_uuid = Column(UUID(as_uuid=True), ForeignKey("event_type.uuid"))
 
-    vectors = relationship("EventVector", secondary=event_vector_mapping)
+    vectors = relationship("EventVector", secondary=event_vector_mapping, lazy="selectin")
 
     __mapper_args__ = {"polymorphic_identity": "event", "polymorphic_load": "inline"}
 

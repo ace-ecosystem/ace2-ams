@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 3144a1826e24
+Revision ID: c58efb53f5c5
 Revises: 
-Create Date: 2022-01-04 19:17:21.526530
+Create Date: 2022-01-10 15:25:31.707636
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '3144a1826e24'
+revision = 'c58efb53f5c5'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -73,6 +73,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_event_prevention_tool_value'), 'event_prevention_tool', ['value'], unique=True)
+    op.create_table('event_queue',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_event_queue_value'), 'event_queue', ['value'], unique=True)
     op.create_table('event_remediation',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -294,6 +301,7 @@ def upgrade() -> None:
     op.create_table('user',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('default_alert_queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('default_event_queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('display_name', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('enabled', sa.Boolean(), nullable=False),
@@ -302,6 +310,7 @@ def upgrade() -> None:
     sa.Column('username', sa.String(), nullable=False),
     sa.Column('refresh_token', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['default_alert_queue_uuid'], ['alert_queue.uuid'], ),
+    sa.ForeignKeyConstraint(['default_event_queue_uuid'], ['event_queue.uuid'], ),
     sa.PrimaryKeyConstraint('uuid'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
@@ -316,12 +325,14 @@ def upgrade() -> None:
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('owner_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('ownership_time', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('remediation_time', sa.DateTime(timezone=True), nullable=True),
     sa.Column('risk_level_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('source_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('status_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.ForeignKeyConstraint(['owner_uuid'], ['user.uuid'], ),
+    sa.ForeignKeyConstraint(['queue_uuid'], ['event_queue.uuid'], ),
     sa.ForeignKeyConstraint(['risk_level_uuid'], ['event_risk_level.uuid'], ),
     sa.ForeignKeyConstraint(['source_uuid'], ['event_source.uuid'], ),
     sa.ForeignKeyConstraint(['status_uuid'], ['event_status.uuid'], ),
@@ -329,6 +340,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
     sa.PrimaryKeyConstraint('uuid')
     )
+    op.create_index(op.f('ix_event_queue_uuid'), 'event', ['queue_uuid'], unique=False)
     op.create_table('node_comment',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('insert_time', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
@@ -463,6 +475,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_node_comment_node_uuid'), table_name='node_comment')
     op.drop_index('comment_value_trgm', table_name='node_comment', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_table('node_comment')
+    op.drop_index(op.f('ix_event_queue_uuid'), table_name='event')
     op.drop_table('event')
     op.drop_table('user')
     op.drop_index('type_value', table_name='observable')
@@ -526,6 +539,8 @@ def downgrade() -> None:
     op.drop_table('event_risk_level')
     op.drop_index(op.f('ix_event_remediation_value'), table_name='event_remediation')
     op.drop_table('event_remediation')
+    op.drop_index(op.f('ix_event_queue_value'), table_name='event_queue')
+    op.drop_table('event_queue')
     op.drop_index(op.f('ix_event_prevention_tool_value'), table_name='event_prevention_tool')
     op.drop_table('event_prevention_tool')
     op.drop_index(op.f('ix_analysis_module_type_version'), table_name='analysis_module_type')
