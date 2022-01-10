@@ -48,6 +48,7 @@ const FILTERS_STUB = [
 const USERS_STUB: userRead[] = [
   {
     defaultAlertQueue: { description: null, uuid: "1", value: "default" },
+    defaultEventQueue: { description: null, uuid: "1", value: "default" },
     displayName: "Test Analyst",
     email: "analyst@test.com",
     enabled: true,
@@ -58,6 +59,7 @@ const USERS_STUB: userRead[] = [
   },
   {
     defaultAlertQueue: { description: null, uuid: "1", value: "default" },
+    defaultEventQueue: { description: null, uuid: "1", value: "default" },
     displayName: "Test Analyst2",
     email: "analyst2@test.com",
     enabled: true,
