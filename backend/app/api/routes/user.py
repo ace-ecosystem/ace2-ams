@@ -14,6 +14,7 @@ from core.auth import hash_password
 from db import crud
 from db.database import get_db
 from db.schemas.alert_queue import AlertQueue
+from db.schemas.event_queue import EventQueue
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
 
@@ -38,8 +39,9 @@ def create_user(
     # Create the new user using the data from the request
     new_user = User(**user.dict())
 
-    # Get the alert queue from the database to associate with the new user
+    # Get the queues from the database to associate with the new user
     new_user.default_alert_queue = crud.read_by_value(user.default_alert_queue, db_table=AlertQueue, db=db)
+    new_user.default_event_queue = crud.read_by_value(user.default_event_queue, db_table=EventQueue, db=db)
 
     # Get the user roles from the database to associate with the new user
     new_user.roles = crud.read_by_values(user.roles, db_table=UserRole, db=db)
@@ -96,6 +98,11 @@ def update_user(
     if "default_alert_queue" in update_data:
         db_user.default_alert_queue = crud.read_by_value(
             value=update_data["default_alert_queue"], db_table=AlertQueue, db=db
+        )
+
+    if "default_event_queue" in update_data:
+        db_user.default_event_queue = crud.read_by_value(
+            value=update_data["default_event_queue"], db_table=EventQueue, db=db
         )
 
     if "display_name" in update_data:
