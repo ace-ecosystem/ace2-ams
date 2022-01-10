@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-  import { onMounted, provide } from "vue";
+  import { onMounted, provide, watch } from "vue";
 
   import {
     alertFilters,
@@ -41,11 +41,22 @@
     if (Object.keys(route.query).length) {
       // Will need to load common stores in order to find filter values
       await populateCommonStores();
-      loadFilters();
-      // Reload page to clear URL params
-      router.push("/manage_alerts");
+      loadRouteQuery();
     }
   });
+
+  watch(route, () => {
+    if (Object.keys(route.query).length) {
+      loadRouteQuery();
+    }
+  });
+
+  function loadRouteQuery() {
+    // load filters given in route
+    loadFilters();
+    // Reload page to clear URL params
+    router.push("/manage_alerts");
+  }
 
   function loadFilters() {
     const parsedFilters = {};

@@ -439,8 +439,8 @@ describe("Manage Alerts Tags", () => {
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(".p-dialog-content").should("not.exist");
     // Check for comment after adding
-    cy.get(".p-tag").first().should("have.text", "scan_me");
-    cy.get(".p-tag").last().should("have.text", "TestTag");
+    cy.get(".p-chip-text").first().should("have.text", "scan_me");
+    cy.get(".p-chip-text").last().should("have.text", "TestTag");
   });
 });
 
@@ -588,7 +588,6 @@ describe("Manage Alerts URL Param Filters", () => {
     // hmm..
   });
 
-  // Can't test at the moment, no way to check clipboard data in insecure context
   it("will load filters from URL and reroute to /manage_alerts if URL params are provided", () => {
     cy.visit("/manage_alerts?name=Small+Alert&owner=bob");
 
@@ -622,5 +621,22 @@ describe("Manage Alerts URL Param Filters", () => {
       "contain.text",
       "Analyst Bob",
     );
+  });
+
+  it("will filter by a given tag when clicked", () => {
+    cy.visit("/manage_alerts");
+
+    // Find the TestTag tag and click
+    cy.get(".p-chip-text").contains("TestTag").click();
+
+    // Check which alerts are visible (should be 2, 1 header + 1 alert that has the TestTag tag)
+    cy.get(".p-checkbox-box").should("have.length", 2);
+
+    // Verify it is the correct alert and the filtered tag is there
+    cy.get(".p-datatable-tbody > tr > :nth-child(4) > div").should(
+      "contain.text",
+      "Manual Alert 4.3.2.1",
+    );
+    cy.get(".p-chip-text").contains("TestTag").should("exist");
   });
 });
