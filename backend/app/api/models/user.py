@@ -33,6 +33,8 @@ class UserBase(BaseModel):
         default="UTC", description="The timezone that will be used when the user views timestamps in the application"
     )
 
+    training: StrictBool = Field(default=True, description="Whether or not the user is in training mode")
+
     username: type_str = Field(description="The username used to sign into the application")
 
     _validate_timezone: classmethod = validators.timezone("timezone")
@@ -86,6 +88,8 @@ class UserUpdate(UserBase):
         description="The timezone that will be used when the user views timestamps in the application"
     )
 
+    training: Optional[StrictBool] = Field(description="Whether or not the user is in training mode")
+
     username: Optional[type_str] = Field(description="The username used to sign into the application")
 
     _prevent_none: classmethod = validators.prevent_none(
@@ -96,5 +100,6 @@ class UserUpdate(UserBase):
         "enabled",
         "password",
         "roles",
+        "training",
         "username",
     )
