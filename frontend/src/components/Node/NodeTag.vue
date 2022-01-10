@@ -21,7 +21,9 @@
   function filterByTags() {
     // Determine what page to route to, right now only option is alerts - Manage Alerts
     const route = filterType == "alerts" ? "/manage_alerts" : null;
-    // Route to given page with query for filtering by this tag's value
-    router.replace({ path: route, query: { tags: props.tag.value } });
+    if (route) {
+      // Route to given page with query for filtering by this tag's value
+      router.replace({ path: route, query: { tags: props.tag.value } });
+    }
   }
 </script>
