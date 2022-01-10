@@ -239,7 +239,7 @@ describe("ViewAlert.vue", () => {
     cy.wait("@getAlert").its("state").should("eq", "Complete");
   });
 
-  it("will reroute to the Manage Alerts page with tag filter applied when filter clicked", () => {
+  it("will reroute to the Manage Alerts page with tag filter applied when tag clicked", () => {
     // Find the recipient tag and click
     cy.get(".p-chip-text").contains("recipient").click();
 
@@ -257,6 +257,35 @@ describe("ViewAlert.vue", () => {
     );
     cy.get(".p-chips-token").should("exist");
     cy.get(".p-chips-token").should("have.text", "recipient");
+
+    // Close the modal to finish
+    cy.get(".p-dialog-header-icon").click();
+  });
+
+  it("will reroute to the Manage Alerts page with observable filter applied when observable clicked", () => {
+    // Find the email subject observable and click
+    cy.get(
+      '[data-cy="email_subject: Hello"] > .p-treenode-content > .treenode-text',
+    ).click();
+
+    // Should have been rerouted
+    cy.url().should("contain", "/manage_alerts");
+
+    // Check which alerts are visible (should be none (1 checkbox visible for the header row))
+    cy.get(".p-checkbox-box").should("have.length", 1);
+
+    // Verify in the filter modal that the correct filter is set
+    cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
+    cy.get(
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-label",
+    ).should("have.text", "Observable");
+    cy.get(
+      ".col > :nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-label",
+    ).should("have.text", "email_subject");
+    cy.get(".col > :nth-child(1) > :nth-child(2) > input").should(
+      "have.value",
+      "Hello",
+    );
 
     // Close the modal to finish
     cy.get(".p-dialog-header-icon").click();
