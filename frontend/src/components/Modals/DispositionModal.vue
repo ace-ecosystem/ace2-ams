@@ -98,10 +98,13 @@
 
       await alertStore.update(updateData);
 
-      for (const uuid of selectedAlertStore.selected) {
-        if (dispositionComment.value) {
-          await NodeComment.create({ ...commentData.value, nodeUuid: uuid });
-        }
+      if (dispositionComment.value) {
+        await NodeComment.create(
+          selectedAlertStore.selected.map((uuid) => ({
+            nodeUuid: uuid,
+            ...commentData.value,
+          })),
+        );
       }
     } catch (err) {
       error.value = err.message;

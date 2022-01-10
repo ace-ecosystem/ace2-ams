@@ -10,7 +10,7 @@ const api = new BaseApi();
 const endpoint = "/node/comment/";
 
 export const NodeComment = {
-  create: (data: nodeCommentCreate, getAfterCreate = false): Promise<void> =>
+  create: (data: nodeCommentCreate[], getAfterCreate = false): Promise<void> =>
     api.create(endpoint, data, getAfterCreate),
 
   read: (uuid: UUID): Promise<nodeCommentRead> =>
