@@ -254,6 +254,28 @@ def read_node_tree(root_node_uuid: UUID, db: Session) -> dict:
     return unflatten_node_tree(node_tree_nodes)
 
 
+def read_node_tree_nodes(node_type: str, root_node_uuids: list[UUID], db: Session) -> list[dict]:
+    """Returns a list of Node objects of the given type that are in the given NodeTrees.
+    The returned objectsare manually serialized into their Pydantic models since Pydantic
+    cannot handle returning a list of multiple types of objects in this case."""
+
+    nodes: List[Node] = (
+        db.execute(
+            select(Node)
+            .select_from(join(NodeTree, Node, NodeTree.node_uuid == Node.uuid))
+            .where(NodeTree.root_node_uuid.in_(root_node_uuids), Node.node_type == node_type)
+        )
+        .scalars()
+        .unique()
+        .fetchall()
+    )
+
+    if not nodes:
+        raise HTTPException(status_code=404, detail=f"No Nodes of type {node_type} in trees {root_node_uuids}")
+
+    return [node.__dict__ for node in nodes]
+
+
 def unflatten_node_tree(node_tree_nodes: List[NodeRead]) -> dict:
     """Takes a flat list of nodes from a NodeTree after they've been serialized into
     their Pydantic models and converts it into a nested structure.
