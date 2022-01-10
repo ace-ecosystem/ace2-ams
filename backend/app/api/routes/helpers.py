@@ -81,12 +81,16 @@ def api_route_read(
     endpoint: Callable,
     response_model: BaseModel = BaseModel,
     path: str = "/{uuid}",
+    methods: list[str] = None,
 ):
+    if not methods:
+        methods = ["GET"]
+
     router.add_api_route(
         dependencies=[Depends(validate_access_token)],
         path=path,
         endpoint=endpoint,
-        methods=["GET"],
+        methods=methods,
         response_model=response_model,
         responses={
             status.HTTP_404_NOT_FOUND: {"description": "The UUID was not found"},
