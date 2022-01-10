@@ -6,6 +6,7 @@ from uuid import uuid4
 from api.models import type_str, validators
 from api.models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api.models.event_prevention_tool import EventPreventionToolRead
+from api.models.event_queue import EventQueueRead
 from api.models.event_remediation import EventRemediationRead
 from api.models.event_risk_level import EventRiskLevelRead
 from api.models.event_source import EventSourceRead
@@ -45,6 +46,8 @@ class EventBase(NodeBase):
     prevention_tools: List[type_str] = Field(
         default_factory=list, description="A list of prevention tools involved in the event"
     )
+
+    queue: type_str = Field(description="The event queue containing this event")
 
     remediation_time: Optional[datetime] = Field(
         description="The earliest time that any remediation was performed on the attack represented by the event"
@@ -91,6 +94,8 @@ class EventRead(NodeRead, EventBase):
         description="A list of prevention tools involved in the event"
     )
 
+    queue: EventQueueRead = Field(description="The event queue containing this event")
+
     remediations: List[EventRemediationRead] = Field(
         description="A list of remediations performed to clean up the attack represented by the event"
     )
@@ -122,6 +127,8 @@ class EventRead(NodeRead, EventBase):
 class EventUpdate(NodeUpdate, EventBase):
     name: Optional[type_str] = Field(description="The name of the event")
 
+    queue: Optional[type_str] = Field(description="The event queue containing this event")
+
     status: Optional[type_str] = Field(description="The status assigned to the event")
 
     tags: Optional[List[type_str]] = Field(description="A list of tags to add to the event")
@@ -130,4 +137,4 @@ class EventUpdate(NodeUpdate, EventBase):
 
     threats: Optional[List[type_str]] = Field(description="A list of threats to add to the event")
 
-    _prevent_none: classmethod = validators.prevent_none("name", "status", "tags", "threat_actors", "threats")
+    _prevent_none: classmethod = validators.prevent_none("name", "queue", "status", "tags", "threat_actors", "threats")

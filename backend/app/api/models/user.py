@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from api.models import type_list_str, type_str, validators
 from api.models.alert_queue import AlertQueueRead
+from api.models.event_queue import EventQueueRead
 from api.models.user_role import UserRoleRead
 
 
@@ -12,6 +13,10 @@ class UserBase(BaseModel):
 
     default_alert_queue: type_str = Field(
         description="The default alert queue the user will see on the alert management page"
+    )
+
+    default_event_queue: type_str = Field(
+        description="The default event queue the user will see on the event management page"
     )
 
     display_name: type_str = Field(description="The user's full name")
@@ -44,6 +49,10 @@ class UserRead(UserBase):
         description="The default alert queue the user will see on the alert management page"
     )
 
+    default_event_queue: EventQueueRead = Field(
+        description="The default event queue the user will see on the event management page"
+    )
+
     roles: List[UserRoleRead] = Field(description="A list of roles assigned to the user")
 
     uuid: UUID4 = Field(description="The UUID of the user")
@@ -55,6 +64,10 @@ class UserRead(UserBase):
 class UserUpdate(UserBase):
     default_alert_queue: Optional[type_str] = Field(
         description="The default alert queue the user will see on the alert management page"
+    )
+
+    default_event_queue: Optional[type_str] = Field(
+        description="The default event queue the user will see on the event management page"
     )
 
     display_name: Optional[type_str] = Field(description="The user's full name")
@@ -77,6 +90,7 @@ class UserUpdate(UserBase):
 
     _prevent_none: classmethod = validators.prevent_none(
         "default_alert_queue",
+        "default_event_queue",
         "display_name",
         "email",
         "enabled",
