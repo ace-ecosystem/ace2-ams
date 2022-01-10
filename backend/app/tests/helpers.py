@@ -20,6 +20,7 @@ from db.schemas.analysis import Analysis
 from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.event import Event
 from db.schemas.event_prevention_tool import EventPreventionTool
+from db.schemas.event_queue import EventQueue
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_risk_level import EventRiskLevel
 from db.schemas.event_source import EventSource
@@ -273,8 +274,14 @@ def create_analysis_module_type(
     return obj
 
 
-def create_event(name: str, db: Session, status: str = "OPEN") -> Event:
-    obj = Event(name=name, status=create_event_status(value=status, db=db), uuid=uuid.uuid4(), version=uuid.uuid4())
+def create_event(name: str, db: Session, queue: str = "default", status: str = "OPEN") -> Event:
+    obj = Event(
+        name=name,
+        queue=create_event_queue(value=queue, db=db),
+        status=create_event_status(value=status, db=db),
+        uuid=uuid.uuid4(),
+        version=uuid.uuid4(),
+    )
     db.add(obj)
     crud.commit(db)
     return obj
@@ -282,6 +289,10 @@ def create_event(name: str, db: Session, status: str = "OPEN") -> Event:
 
 def create_event_prevention_tool(value: str, db: Session) -> EventPreventionTool:
     return _create_basic_object(db_table=EventPreventionTool, value=value, db=db)
+
+
+def create_event_queue(value: str, db: Session) -> EventQueue:
+    return _create_basic_object(db_table=EventQueue, value=value, db=db)
 
 
 def create_event_remediation(value: str, db: Session) -> EventRemediation:
@@ -417,6 +428,7 @@ def create_user(
     alert_queue: str = "test_queue",
     display_name: str = "Analyst",
     email: Optional[str] = None,
+    event_queue: str = "test_queue",
     password: str = "asdfasdf",
     roles: List[str] = None,
 ) -> User:
@@ -434,6 +446,7 @@ def create_user(
 
     obj = User(
         default_alert_queue=create_alert_queue(value=alert_queue, db=db),
+        default_event_queue=create_event_queue(value=event_queue, db=db),
         display_name=display_name,
         email=email,
         password=hash_password(password),
