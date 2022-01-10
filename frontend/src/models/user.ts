@@ -24,6 +24,7 @@ export interface userRead {
   timezone: string;
   username: string;
   uuid: UUID;
+  [key: string]: unknown;
 }
 
 export interface userReadPage {

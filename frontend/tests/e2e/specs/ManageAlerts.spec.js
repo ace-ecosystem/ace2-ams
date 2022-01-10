@@ -547,3 +547,80 @@ describe("Manage Alerts Disposition", () => {
       .should("have.text", "(Analyst) Test disposition comment");
   });
 });
+
+describe("Manage Alerts URL Param Filters", () => {
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
+    cy.visit("/manage_alerts");
+    cy.url().should("contain", "/manage_alerts");
+    cy.wait(2000);
+  });
+
+  // Can't test at the moment, no way to check clipboard data in insecure context
+  it.skip("will generate and copy a link of currently applied filters when link button clicked", () => {
+    // Start by setting a filter
+
+    // Open the filter modal
+    cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
+    cy.get(".col > .field > .p-dropdown").should("be.visible");
+
+    // Select name filter
+    cy.get(
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+    ).click();
+    cy.get(".p-dropdown-items-wrapper").should("be.visible");
+    cy.get("[aria-label='Name']").click();
+    cy.get(".field > .p-inputtext").should("be.visible");
+
+    // Add a filter value
+    cy.get(".field > .p-inputtext").type("Small Alert");
+
+    // Submit
+    cy.get(".p-dialog-footer > :nth-child(4)").click();
+
+    // Click link button
+    cy.get(
+      "#FilterToolbar > .p-toolbar-group-right > .p-button-icon-only",
+    ).click();
+
+    // Check clipboard data
+    // hmm..
+  });
+
+  // Can't test at the moment, no way to check clipboard data in insecure context
+  it("will load filters from URL and reroute to /manage_alerts if URL params are provided", () => {
+    cy.visit("/manage_alerts?name=Small+Alert&owner=bob");
+
+    // Check current URL
+    cy.url().should("contain", "/manage_alerts");
+    cy.url().should("not.contain", "?name=Small+Alert&owner=bob");
+
+    // Open the filter modal & check filters are applied
+    cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
+    cy.get(".p-dialog-header").should("be.visible");
+    cy.get(
+      ":nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-label",
+    ).should("have.text", "Name");
+    cy.get(".field > .p-inputtext").should("have.value", "Small Alert");
+    cy.get(
+      ".flex > :nth-child(2) > :nth-child(1) > .p-dropdown > .p-dropdown-label",
+    ).should("have.text", "Owner");
+    cy.get(".col > .field > .p-dropdown > .p-dropdown-label").should(
+      "have.text",
+      "Analyst Bob",
+    );
+    cy.get(".p-dialog-header-icon").click();
+
+    // Check which alerts are visible (should be 2, 1 header + 1 alert)
+    cy.get(".p-checkbox-box").should("have.length", 2);
+    cy.get(".p-datatable-tbody > tr > :nth-child(4) > div").should(
+      "contain.text",
+      "Small Alert",
+    );
+    cy.get(".p-datatable-tbody > tr > :nth-child(5)").should(
+      "contain.text",
+      "Analyst Bob",
+    );
+  });
+});

@@ -6,7 +6,7 @@
     :name="name"
     header="Edit Filters"
     class="xl: w-5 lg:w-5 md:w-8"
-    @dialogClose="clear"
+    @dialogClose="resetFormFilters"
   >
     <div class="flex flex-wrap">
       <FilterInput
@@ -83,6 +83,9 @@
   });
 
   const submit = () => {
+    if (!Object.keys(submitFilters.value).length) {
+      filterStore.clearAll({ filterType: filterType });
+    }
     filterStore.bulkSetFilters({
       filterType: filterType,
       filters: submitFilters.value,

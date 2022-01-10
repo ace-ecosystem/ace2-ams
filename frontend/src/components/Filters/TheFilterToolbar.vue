@@ -3,7 +3,7 @@
 
 <template>
   <Toolbar style="overflow-x: auto">
-    <template #left>
+    <template #start>
       <!--      DATE PICKERS  -->
       <DateRangePicker />
       <!--      EDIT FILTERS -->
@@ -18,7 +18,7 @@
       <EditFilterModal name="EditFilterModal" />
     </template>
     <!--    TODO: SHOW APPLIED FILTERS -->
-    <template #right>
+    <template #end>
       <!--      CLEAR FILTERS-->
       <Button
         type="button"
@@ -35,6 +35,7 @@
         class="p-button-outlined p-m-1"
         @click="reset"
       />
+      <Button icon="pi pi-link" class="p-button-rounded" @click="copyLink" />
     </template>
   </Toolbar>
 </template>
@@ -55,12 +56,30 @@
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
+  import { copyToClipboard } from "@/etc/helpers";
+
+  import { formatForAPI } from "@/services/api/alert";
 
   const filterType = inject("filterType");
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
 
+  function generateLink() {
+    let link = `${window.location.origin}/manage_alerts`;
+    // If there are filters set, build the link for it
+    if (Object.keys(filterStore[filterType]).length) {
+      let urlParams = new URLSearchParams(
+        formatForAPI(filterStore[filterType]),
+      );
+      link = `${window.location.origin}/manage_alerts?${urlParams.toString()}`;
+    }
+    return link;
+  }
+  function copyLink() {
+    const link = generateLink();
+    copyToClipboard(link);
+  }
   const clear = () => {
     filterStore.clearAll({ filterType: filterType });
   };
