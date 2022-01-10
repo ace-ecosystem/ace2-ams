@@ -70,7 +70,7 @@
     <Column
       id="alert-select"
       header-style="width: 3em"
-      selectionMode="multiple"
+      selection-mode="multiple"
     />
 
     <!-- DATA COLUMN -->
@@ -92,13 +92,11 @@
           >
           <br />
           <span>
-            <Tag
+            <NodeTagVue
               v-for="tag in data.tags"
               :key="tag.uuid"
-              class="p-mr-2"
-              rounded
-              >{{ tag.value }}</Tag
-            >
+              :tag="tag"
+            ></NodeTagVue>
           </span>
           <span v-if="data.comments">
             <pre
@@ -149,7 +147,7 @@
   import { FilterMatchMode } from "primevue/api";
   import InputText from "primevue/inputtext";
   import MultiSelect from "primevue/multiselect";
-  import Tag from "primevue/tag";
+  import NodeTagVue from "../Node/NodeTag.vue";
   import Toolbar from "primevue/toolbar";
   import Paginator from "primevue/paginator";
 
