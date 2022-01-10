@@ -31,6 +31,8 @@ event_prevention_tool:
   - proxy
   - response team
   - user
+event_queue:
+  - default
 event_remediation:
   - cleaned manually
   - cleaned with antivirus

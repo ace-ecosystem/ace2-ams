@@ -17,6 +17,9 @@ from tests import helpers
         ("default_alert_queue", 123),
         ("default_alert_queue", None),
         ("default_alert_queue", ""),
+        ("default_event_queue", 123),
+        ("default_event_queue", None),
+        ("default_event_queue", ""),
         ("display_name", 123),
         ("display_name", None),
         ("display_name", ""),
@@ -55,6 +58,7 @@ from tests import helpers
 def test_create_invalid_fields(client_valid_access_token, key, value):
     create_json = {
         "default_alert_queue": "test_queue",
+        "default_event_queue": "test_queue",
         "display_name": "John Doe",
         "email": "johndoe@test.com",
         "password": "abcd1234",
@@ -75,15 +79,14 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
     ],
 )
 def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
-    # Create an alert queue
     helpers.create_alert_queue(value="test_queue", db=db)
-
-    # Create a user role
+    helpers.create_event_queue(value="test_queue", db=db)
     helpers.create_user_role(value="test_role", db=db)
 
     # Create an object
     create1_json = {
         "default_alert_queue": "test_queue",
+        "default_event_queue": "test_queue",
         "display_name": "John Doe",
         "email": "john@test.com",
         "password": "abcd1234",
@@ -96,6 +99,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     # Ensure you cannot create another object with the same unique field value
     create2_json = {
         "default_alert_queue": "test_queue",
+        "default_event_queue": "test_queue",
         "display_name": "Jane Doe",
         "email": "jane@test.com",
         "password": "wxyz6789",
@@ -112,6 +116,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     "key",
     [
         ("default_alert_queue"),
+        ("default_event_queue"),
         ("display_name"),
         ("email"),
         ("password"),
@@ -122,6 +127,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
 def test_create_missing_required_fields(client_valid_access_token, key):
     create_json = {
         "default_alert_queue": "test_queue",
+        "default_event_queue": "test_queue",
         "display_name": "John Doe",
         "email": "john@test.com",
         "password": "abcd1234",
@@ -143,15 +149,14 @@ def test_create_missing_required_fields(client_valid_access_token, key):
     [("enabled", False), ("timezone", "America/New_York"), ("uuid", str(uuid.uuid4()))],
 )
 def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
-    # Create an alert queue
     helpers.create_alert_queue(value="test_queue", db=db)
-
-    # Create a user role
+    helpers.create_event_queue(value="test_queue", db=db)
     helpers.create_user_role(value="test_role", db=db)
 
     # Create the object
     create_json = {
         "default_alert_queue": "test_queue",
+        "default_event_queue": "test_queue",
         "display_name": "John Doe",
         "email": "john@test.com",
         "password": "abcd1234",
@@ -168,15 +173,14 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
 
 
 def test_create_valid_required_fields(client_valid_access_token, db):
-    # Create an alert queue
     helpers.create_alert_queue(value="test_queue", db=db)
-
-    # Create a user role
+    helpers.create_event_queue(value="test_queue", db=db)
     helpers.create_user_role(value="test_role", db=db)
 
     # Create the object
     create_json = {
         "default_alert_queue": "test_queue",
+        "default_event_queue": "test_queue",
         "display_name": "John Doe",
         "email": "john@test.com",
         "password": "abcd1234",
@@ -189,6 +193,7 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
     assert get.json()["default_alert_queue"]["value"] == "test_queue"
+    assert get.json()["default_event_queue"]["value"] == "test_queue"
     assert get.json()["display_name"] == "John Doe"
     assert get.json()["email"] == "john@test.com"
     assert get.json()["enabled"] is True

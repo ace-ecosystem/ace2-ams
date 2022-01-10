@@ -445,6 +445,11 @@ export const mockAlert: alertTreeRead = {
       value: "test_queue",
       uuid: "a7adcd83-5c0e-4185-874a-c548fe8116e9",
     },
+    defaultEventQueue: {
+      description: null,
+      value: "test_queue",
+      uuid: "167b7210-f7d2-46eb-8c7a-61ce6c7e9ece",
+    },
     displayName: "Analyst",
     email: "bob@bob.com",
     enabled: true,
@@ -469,6 +474,11 @@ export const mockAlert: alertTreeRead = {
       description: null,
       value: "test_queue",
       uuid: "a7adcd83-5c0e-4185-874a-c548fe8116e9",
+    },
+    defaultEventQueue: {
+      description: null,
+      value: "test_queue",
+      uuid: "167b7210-f7d2-46eb-8c7a-61ce6c7e9ece",
     },
     displayName: "Analyst",
     email: "alice@alice.com",

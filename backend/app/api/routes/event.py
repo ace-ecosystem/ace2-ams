@@ -9,6 +9,7 @@ from db import crud
 from db.database import get_db
 from db.schemas.event import Event
 from db.schemas.event_prevention_tool import EventPreventionTool
+from db.schemas.event_queue import EventQueue
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_risk_level import EventRiskLevel
 from db.schemas.event_source import EventSource
@@ -38,6 +39,7 @@ def create_event(
     new_event: Event = create_node(node_create=event, db_node_type=Event, db=db, exclude={"alert_uuids"})
 
     # Set the required event properties
+    new_event.queue = crud.read_by_value(value=event.queue, db_table=EventQueue, db=db)
     new_event.status = crud.read_by_value(value=event.status, db_table=EventStatus, db=db)
 
     # Set the various optional event properties if they were given in the request.
@@ -139,6 +141,9 @@ def update_event(
             db_table=EventPreventionTool,
             db=db,
         )
+
+    if "queue" in update_data:
+        db_event.queue = crud.read_by_value(value=update_data["queue"], db_table=EventQueue, db=db)
 
     if "remediation_time" in update_data:
         db_event.remediation_time = update_data["remediation_time"]

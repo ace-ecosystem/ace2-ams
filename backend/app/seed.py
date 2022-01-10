@@ -11,6 +11,7 @@ from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.alert_queue import AlertQueue
 from db.schemas.alert_type import AlertType
 from db.schemas.event_prevention_tool import EventPreventionTool
+from db.schemas.event_queue import EventQueue
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_risk_level import EventRiskLevel
 from db.schemas.event_source import EventSource
@@ -63,6 +64,20 @@ if not crud.read_all(db_table=AlertQueue, db=db):
         # Make sure there is always a "default" queue
         db.add(AlertQueue(value="default"))
         print("Adding alert queue: default")
+
+if not crud.read_all(db_table=EventQueue, db=db):
+    if "event_queue" in data:
+        # Make sure there is always a "default" queue
+        if "default" not in data["event_queue"]:
+            data["event_queue"].append("default")
+
+        for value in data["event_queue"]:
+            db.add(EventQueue(value=value))
+            print(f"Adding event queue: {value}")
+    else:
+        # Make sure there is always a "default" queue
+        db.add(EventQueue(value="default"))
+        print("Adding event queue: default")
 
 if "alert_type" in data and not crud.read_all(db_table=AlertType, db=db):
     for value in data["alert_type"]:
@@ -136,6 +151,7 @@ if not crud.read_all(db_table=User, db=db):
     db.add(
         User(
             default_alert_queue=crud.read_by_value(value="default", db_table=AlertQueue, db=db),
+            default_event_queue=crud.read_by_value(value="default", db_table=EventQueue, db=db),
             display_name="Analyst",
             email="analyst@fake.com",
             password=hash_password("analyst"),
@@ -146,6 +162,7 @@ if not crud.read_all(db_table=User, db=db):
     db.add(
         User(
             default_alert_queue=crud.read_by_value(value="default", db_table=AlertQueue, db=db),
+            default_event_queue=crud.read_by_value(value="default", db_table=EventQueue, db=db),
             display_name="Analyst Alice",
             email="alice@alice.com",
             password=hash_password("analyst"),
@@ -156,6 +173,7 @@ if not crud.read_all(db_table=User, db=db):
     db.add(
         User(
             default_alert_queue=crud.read_by_value(value="default", db_table=AlertQueue, db=db),
+            default_event_queue=crud.read_by_value(value="default", db_table=EventQueue, db=db),
             display_name="Analyst Bob",
             email="bob@bob.com",
             password=hash_password("analyst"),

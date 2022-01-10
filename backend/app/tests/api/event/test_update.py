@@ -42,6 +42,9 @@ from tests import helpers
         ("prevention_tools", [None]),
         ("prevention_tools", [""]),
         ("prevention_tools", ["abc", 123]),
+        ("queue", 123),
+        ("queue", None),
+        ("queue", ""),
         ("remediation_time", ""),
         ("remediation_time", "Monday"),
         ("remediation_time", "2022-01-01"),
@@ -109,6 +112,7 @@ def test_update_invalid_version(client_valid_access_token, db):
     [
         ("owner", "johndoe"),
         ("prevention_tools", ["abc"]),
+        ("queue", "abc"),
         ("remediations", ["abc"]),
         ("risk_level", "abc"),
         ("source", "abc"),
@@ -189,6 +193,22 @@ def test_update_prevention_tools(client_valid_access_token, db):
     update = client_valid_access_token.patch(f"/api/event/{event.uuid}", json={"prevention_tools": []})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert event.prevention_tools == []
+
+
+def test_update_queue(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test", db=db)
+    initial_event_version = event.version
+    assert event.queue.value == "default"
+
+    # Create an event queue
+    helpers.create_event_queue(value="updated_queue", db=db)
+
+    # Update the event
+    update = client_valid_access_token.patch(f"/api/event/{event.uuid}", json={"queue": "updated_queue"})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert event.queue.value == "updated_queue"
+    assert event.version != initial_event_version
 
 
 def test_update_remediations(client_valid_access_token, db):
