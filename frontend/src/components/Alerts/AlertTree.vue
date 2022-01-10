@@ -133,6 +133,8 @@
           } else {
             value = item.value;
           }
+        } else {
+          throw new Error("No observable display metadata given");
         }
       } catch (error) {
         type = item.type.value;
