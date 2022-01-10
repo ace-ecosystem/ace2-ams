@@ -72,7 +72,7 @@ export class BaseApi {
 
   async create(
     url: string,
-    data: Record<string, unknown>,
+    data: Record<string, unknown> | Record<string, unknown>[],
     getAfterCreate: boolean,
   ): Promise<any> {
     return await this.baseRequest(url, "POST", { data: data }, getAfterCreate);

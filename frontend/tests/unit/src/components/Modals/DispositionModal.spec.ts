@@ -155,18 +155,18 @@ describe("DispositionModal.vue", () => {
       ])
       .reply(200, "Success");
     myNock
-      .post("/node/comment/", {
-        user: "Alice",
-        value: "test comment",
-        node_uuid: "1",
-      })
-      .reply(201, "Success");
-    myNock
-      .post("/node/comment/", {
-        user: "Alice",
-        value: "test comment",
-        node_uuid: "2",
-      })
+      .post("/node/comment/", [
+        {
+          user: "Alice",
+          value: "test comment",
+          node_uuid: "1",
+        },
+        {
+          user: "Alice",
+          value: "test comment",
+          node_uuid: "2",
+        },
+      ])
       .reply(201, "Success");
 
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);

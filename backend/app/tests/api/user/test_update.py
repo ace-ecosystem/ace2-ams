@@ -20,6 +20,9 @@ from tests import helpers
         ("default_alert_queue", 123),
         ("default_alert_queue", None),
         ("default_alert_queue", ""),
+        ("default_event_queue", 123),
+        ("default_event_queue", None),
+        ("default_event_queue", ""),
         ("display_name", 123),
         ("display_name", None),
         ("display_name", ""),
@@ -100,6 +103,20 @@ def test_update_valid_alert_queue(client_valid_access_token, db):
     update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={"default_alert_queue": "test_queue2"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.default_alert_queue.value == "test_queue2"
+
+
+def test_update_valid_event_queue(client_valid_access_token, db):
+    # Create a user
+    obj = helpers.create_user(username="johndoe", event_queue="test_queue", db=db)
+    assert obj.default_event_queue.value == "test_queue"
+
+    # Create the new event queue
+    helpers.create_event_queue(value="test_queue2", db=db)
+
+    # Update it
+    update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={"default_event_queue": "test_queue2"})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert obj.default_event_queue.value == "test_queue2"
 
 
 @pytest.mark.parametrize(

@@ -8,6 +8,7 @@ const store = useAuthStore();
 
 const mockUser: userRead = {
   defaultAlertQueue: { description: null, uuid: "1", value: "default" },
+  defaultEventQueue: { description: null, uuid: "1", value: "default" },
   displayName: "Test Analyst",
   email: "analyst@test.com",
   enabled: true,

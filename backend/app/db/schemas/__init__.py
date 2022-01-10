@@ -12,6 +12,7 @@ from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.event import Event
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_prevention_tool_mapping import event_prevention_tool_mapping
+from db.schemas.event_queue import EventQueue
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_remediation_mapping import event_remediation_mapping
 from db.schemas.event_risk_level import EventRiskLevel

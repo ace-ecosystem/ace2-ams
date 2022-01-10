@@ -11,12 +11,14 @@ describe("NodeComment API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: nodeCommentCreate = {
-    nodeUuid: "uuid1",
-    user: "Alice",
-    description: "This is an alert queue",
-    value: "Test",
-  };
+  const mockObjectCreate: nodeCommentCreate[] = [
+    {
+      nodeUuid: "uuid1",
+      user: "Alice",
+      description: "This is a comment",
+      value: "Test",
+    },
+  ];
   //   const mockObjectRead: nodeCommentRead = {
   //     nodeUuid: "uuid1",
   //     user: {username: "Alice"},

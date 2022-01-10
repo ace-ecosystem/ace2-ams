@@ -11,9 +11,13 @@ class User(Base):
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
 
-    default_alert_queue = relationship("AlertQueue")
+    default_alert_queue = relationship("AlertQueue", lazy="selectin")
 
     default_alert_queue_uuid = Column(UUID(as_uuid=True), ForeignKey("alert_queue.uuid"), nullable=False)
+
+    default_event_queue = relationship("EventQueue", lazy="selectin")
+
+    default_event_queue_uuid = Column(UUID(as_uuid=True), ForeignKey("event_queue.uuid"), nullable=False)
 
     display_name = Column(String, nullable=False)
 
@@ -23,7 +27,7 @@ class User(Base):
 
     password = Column(String, nullable=False)
 
-    roles = relationship("UserRole", secondary=user_role_mapping, passive_deletes=True)
+    roles = relationship("UserRole", secondary=user_role_mapping, passive_deletes=True, lazy="selectin")
 
     timezone = Column(String, default="UTC", nullable=False)
 

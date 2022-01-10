@@ -31,7 +31,7 @@ from tests import helpers
     ],
 )
 def test_create_invalid_fields(client_valid_access_token, key, value):
-    create = client_valid_access_token.post("/api/node/comment/", json={key: value})
+    create = client_valid_access_token.post("/api/node/comment/", json=[{key: value}])
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -46,7 +46,7 @@ def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
-    create = client_valid_access_token.post("/api/node/comment/", json=create_json)
+    create = client_valid_access_token.post("/api/node/comment/", json=[create_json])
     assert create.status_code == status.HTTP_201_CREATED
 
     # Make sure you cannot add the same comment value to a node
@@ -56,7 +56,7 @@ def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
-    create = client_valid_access_token.post("/api/node/comment/", json=create_json)
+    create = client_valid_access_token.post("/api/node/comment/", json=[create_json])
     assert create.status_code == status.HTTP_409_CONFLICT
 
 
@@ -77,7 +77,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
-    client_valid_access_token.post("/api/node/comment/", json=create1_json)
+    client_valid_access_token.post("/api/node/comment/", json=[create1_json])
 
     # Ensure you cannot create another comment with the same unique field value
     create2_json = {
@@ -87,7 +87,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "value": "test2",
     }
     create2_json[key] = create1_json[key]
-    create2 = client_valid_access_token.post("/api/node/comment/", json=create2_json)
+    create2 = client_valid_access_token.post("/api/node/comment/", json=[create2_json])
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
@@ -101,7 +101,7 @@ def test_create_nonexistent_node_uuid(client_valid_access_token, db):
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
-    create = client_valid_access_token.post("/api/node/comment/", json=create_json)
+    create = client_valid_access_token.post("/api/node/comment/", json=[create_json])
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -115,13 +115,51 @@ def test_create_nonexistent_user(client_valid_access_token, db):
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
-    create = client_valid_access_token.post("/api/node/comment/", json=create_json)
+    create = client_valid_access_token.post("/api/node/comment/", json=[create_json])
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
 #
 # VALID TESTS
 #
+
+
+def test_create_multiple(client_valid_access_token, db):
+    helpers.create_user(username="johndoe", db=db)
+
+    alert_tree1 = helpers.create_alert(db=db)
+    initial_alert1_version = alert_tree1.node.version
+
+    alert_tree2 = helpers.create_alert(db=db)
+    initial_alert2_version = alert_tree2.node.version
+
+    alert_tree3 = helpers.create_alert(db=db)
+    initial_alert3_version = alert_tree3.node.version
+
+    assert alert_tree1.node.comments == []
+    assert alert_tree2.node.comments == []
+    assert alert_tree3.node.comments == []
+
+    # Add a comment to each node at once
+    create_json = [
+        {"node_uuid": str(alert_tree1.node_uuid), "user": "johndoe", "value": "test1"},
+        {"node_uuid": str(alert_tree2.node_uuid), "user": "johndoe", "value": "test2"},
+        {"node_uuid": str(alert_tree3.node_uuid), "user": "johndoe", "value": "test3"},
+    ]
+    create = client_valid_access_token.post("/api/node/comment/", json=create_json)
+    assert create.status_code == status.HTTP_201_CREATED
+
+    assert len(alert_tree1.node.comments) == 1
+    assert alert_tree1.node.comments[0].value == "test1"
+    assert alert_tree1.node.version != initial_alert1_version
+
+    assert len(alert_tree2.node.comments) == 1
+    assert alert_tree2.node.comments[0].value == "test2"
+    assert alert_tree2.node.version != initial_alert2_version
+
+    assert len(alert_tree3.node.comments) == 1
+    assert alert_tree3.node.comments[0].value == "test3"
+    assert alert_tree3.node.version != initial_alert3_version
 
 
 def test_create_valid_required_fields(client_valid_access_token, db):
@@ -136,7 +174,7 @@ def test_create_valid_required_fields(client_valid_access_token, db):
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
-    create = client_valid_access_token.post("/api/node/comment/", json=create_json)
+    create = client_valid_access_token.post("/api/node/comment/", json=[create_json])
     assert create.status_code == status.HTTP_201_CREATED
     assert len(alert_tree.node.comments) == 1
     assert alert_tree.node.comments[0].value == "test"
