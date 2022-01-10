@@ -21,7 +21,7 @@ describe("ViewAlert.vue", () => {
 
   it("Renders the expected number of nodes", () => {
     // Total number of nodes
-    cy.get(".pi").should("have.length", 32);
+    cy.get(".pi").should("have.length", 31);
 
     // Number of expandable nodes
     cy.get(".p-tree-toggler-icon").should("have.length", 14);
@@ -133,7 +133,7 @@ describe("ViewAlert.vue", () => {
   // Alert Action Toolbar tests
 
   // Disposition
-  it.only("should make a request to update and get updated alert when disposition is set", () => {
+  it("should make a request to update and get updated alert when disposition is set", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("POST", "/api/node/comment").as("createComment");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
@@ -237,5 +237,28 @@ describe("ViewAlert.vue", () => {
 
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
+  });
+
+  it("will reroute to the Manage Alerts page with tag filter applied when filter clicked", () => {
+    // Find the recipient tag and click
+    cy.get(".p-chip-text").contains("recipient").click();
+
+    // Should have been rerouted
+    cy.url().should("contain", "/manage_alerts");
+
+    // Check which alerts are visible (should be none (1 checkbox visible for the header row))
+    cy.get(".p-checkbox-box").should("have.length", 1);
+
+    // Verify in the filter modal that the correct filter is set
+    cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
+    cy.get(":nth-child(1) > .p-dropdown > .p-dropdown-label").should(
+      "have.text",
+      "Tags",
+    );
+    cy.get(".p-chips-token").should("exist");
+    cy.get(".p-chips-token").should("have.text", "recipient");
+
+    // Close the modal to finish
+    cy.get(".p-dialog-header-icon").click();
   });
 });
