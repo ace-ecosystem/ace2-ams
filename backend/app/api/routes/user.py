@@ -123,6 +123,9 @@ def update_user(
     if "timezone" in update_data:
         db_user.timezone = update_data["timezone"]
 
+    if "training" in update_data:
+        db_user.training = update_data["training"]
+
     if "username" in update_data:
         db_user.username = update_data["username"]
 
