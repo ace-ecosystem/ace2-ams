@@ -22,11 +22,16 @@
               <span :class="toggleIcon(index)"></span>
             </button>
           </span>
-          <span v-if="isObservable(i)">{{ treeItemName(i) }}</span>
+          <span
+            v-if="isObservable(i)"
+            class="treenode-text"
+            @click="filterByObservable(i)"
+            >{{ treeItemName(i) }}</span
+          >
 
           <span
             v-else
-            style="cursor: pointer"
+            class="treenode-text"
             @click="router.push(viewAnalysisRoute(i))"
             >{{ treeItemName(i) }}</span
           >
@@ -100,6 +105,13 @@
     };
   }
 
+  function filterByObservable(obs) {
+    router.replace({
+      path: "/manage_alerts",
+      query: { observable: `${obs.type.value}|${obs.value}` },
+    });
+  }
+
   function treeItemName(item) {
     if (isAnalysis(item)) {
       return item.analysisModuleType.value;
@@ -170,5 +182,10 @@
   .p-treenode-content {
     display: flex;
     align-items: center;
+  }
+  .treenode-text:hover {
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: bold;
   }
 </style>
