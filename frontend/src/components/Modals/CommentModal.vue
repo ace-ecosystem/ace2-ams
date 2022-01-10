@@ -68,9 +68,12 @@
   async function addComment() {
     isLoading.value = true;
     try {
-      for (const uuid of selectedAlertStore.selected) {
-        await NodeComment.create({ ...commentData.value, nodeUuid: uuid });
-      }
+      await NodeComment.create(
+        selectedAlertStore.selected.map((uuid) => ({
+          nodeUuid: uuid,
+          ...commentData.value,
+        })),
+      );
     } catch (err) {
       error.value = err.message;
     }

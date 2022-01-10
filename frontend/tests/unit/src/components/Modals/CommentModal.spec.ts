@@ -111,18 +111,18 @@ describe("CommentModal.vue", () => {
 
     // Mock the update alert API call
     myNock
-      .post("/node/comment/", {
-        user: "Alice",
-        value: "test comment",
-        node_uuid: "1",
-      })
-      .reply(201, "Success");
-    myNock
-      .post("/node/comment/", {
-        user: "Alice",
-        value: "test comment",
-        node_uuid: "2",
-      })
+      .post("/node/comment/", [
+        {
+          user: "Alice",
+          value: "test comment",
+          node_uuid: "1",
+        },
+        {
+          user: "Alice",
+          value: "test comment",
+          node_uuid: "2",
+        },
+      ])
       .reply(201, "Success");
 
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
@@ -146,13 +146,7 @@ describe("CommentModal.vue", () => {
     // Set the new comment value
     wrapper.vm.newComment = "test comment";
     // Mock the update alert API call
-    const updateAlert = myNock
-      .post("/node/comment/", {
-        user: "Alice",
-        value: "test comment",
-        node_uuid: "1",
-      })
-      .reply(403, "Failed");
+    const updateAlert = myNock.post("/node/comment/").reply(403, "Failed");
 
     expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
     wrapper.vm.modalStore.open("CommentModal");
