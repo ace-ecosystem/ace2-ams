@@ -1,5 +1,6 @@
 import { UUID } from "./base";
 import { eventPreventionToolRead } from "./eventPreventionTool";
+import { eventQueueRead } from "./eventQueue";
 import { eventRemediationRead } from "./eventRemediation";
 import { eventRiskLevelRead } from "./eventRiskLevel";
 import { eventSourceRead } from "./eventSource";
@@ -22,6 +23,7 @@ export interface eventCreate extends nodeCreate {
   owner?: string;
   ownershipTime?: Date;
   preventionTools?: string[];
+  queue: string;
   remediationTime?: Date;
   riskLevel?: string;
   source?: string;
@@ -46,6 +48,7 @@ export interface eventRead extends nodeRead {
   owner: userRead | null;
   ownershipTime: Date | null;
   preventionTools: eventPreventionToolRead[];
+  queue: eventQueueRead;
   remediations: eventRemediationRead[];
   remediationTime: Date | null;
   riskLevel: eventRiskLevelRead | null;
@@ -71,6 +74,7 @@ export interface eventUpdate extends nodeUpdate {
   owner?: string | null;
   ownershipTime?: Date | null;
   preventionTools?: string[];
+  queue?: string;
   remediationTime?: Date | null;
   riskLevel?: string | null;
   source?: string | null;

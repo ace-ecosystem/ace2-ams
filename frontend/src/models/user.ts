@@ -1,9 +1,11 @@
 import { UUID } from "./base";
 import { alertQueueRead } from "./alertQueue";
+import { eventQueueRead } from "./eventQueue";
 import { userRoleRead } from "./userRole";
 
 export interface userCreate {
   defaultAlertQueue: string;
+  defaultEventQueue: string;
   displayName: string;
   email: string;
   enabled?: boolean;
@@ -17,6 +19,7 @@ export interface userCreate {
 
 export interface userRead {
   defaultAlertQueue: alertQueueRead;
+  defaultEventQueue: eventQueueRead;
   displayName: string;
   email: string;
   enabled: boolean;
@@ -36,6 +39,7 @@ export interface userReadPage {
 
 export interface userUpdate {
   defaultAlertQueue?: string;
+  defaultEventQueue?: string;
   displayName?: string;
   email?: string;
   enabled?: boolean;
