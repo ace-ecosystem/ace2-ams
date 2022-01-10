@@ -14,6 +14,7 @@ const mockUser: userRead = {
   enabled: true,
   roles: [],
   timezone: "UTC",
+  training: false,
   username: "test analyst",
   uuid: "1",
 };
