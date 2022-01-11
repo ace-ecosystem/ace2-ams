@@ -141,27 +141,6 @@ describe("TheAlertsTable.vue", () => {
     });
   });
 
-  it("shows observable dropdown when arrow is clicked", () => {
-    // There should be this many to start with
-    cy.get(".p-row-toggler-icon").should("have.length", 7);
-    // The observable dropdown should not be showing to start
-    cy.get(".p-datatable-row-expansion > td").should("not.exist");
-    // Click the chevron
-    cy.get(":nth-child(1) > :nth-child(1) > .p-row-toggler")
-      .should("be.visible")
-      .click();
-    // Now the observable dropdown should be visible
-    cy.get(".p-datatable-row-expansion > td")
-      .should("be.visible")
-      .contains("Observables:");
-    // Click the chevron again
-    cy.get(":nth-child(1) > :nth-child(1) > .p-row-toggler")
-      .should("be.visible")
-      .click();
-    // And the dropdown should be gone again
-    cy.get(".p-datatable-row-expansion > td").should("not.exist");
-  });
-
   it("lazy pagination works correctly when page size or number is changed", () => {
     cy.intercept(
       "GET",
@@ -263,4 +242,61 @@ describe("TheAlertsTable.vue", () => {
   //   // Based on created alerts, there should only be 4 now (+1 for header row)
   //   cy.get("tr").should("have.length", 3);
   // });
+
+  it("correctly fetches and displays observables when alert row is expanded and hides when collapsed", () => {
+    // Find the toggle button to expand and click (on the Small Alert alert)
+    cy.get(":nth-child(7) > :nth-child(1) > .p-row-toggler").click();
+    // List of observables should now exist
+    cy.get("td > ul").should("exist").should("be.visible");
+    // Check the first observable to make sure it's the expected one (aka sorting and formatting worked)
+    cy.get(":nth-child(1) > .link-text").should(
+      "have.text",
+      "email_address : badguy@evil.com",
+    );
+    // Also check that the tag is there for that observable
+    cy.get(":nth-child(1) > .p-chip > .p-chip-text").should(
+      "have.text",
+      "from_address",
+    );
+    // Click the toggle button again to close
+    cy.get(":nth-child(7) > :nth-child(1) > .p-row-toggler").click();
+    // List of observables should no longer exist or be visible
+    cy.get("td > ul").should("not.exist");
+  });
+  it("correctly filters by observable when an observable in the dropdown is clicked", () => {
+    cy.intercept({
+      method: "GET",
+      path: "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&observable=email_address%7Cbadguy%40evil.com",
+    }).as("filterURL");
+    // Find the toggle button to expand and click (on the Small Alert alert)
+    cy.get(":nth-child(7) > :nth-child(1) > .p-row-toggler").click();
+    // List of observables should now exist
+    cy.get("td > ul").should("exist").should("be.visible");
+    // Find and click the first observable in list
+    cy.get(":nth-child(1) > .link-text")
+      .should("have.text", "email_address : badguy@evil.com")
+      .click();
+    // Wait for the filtered view to be requested
+    cy.wait("@filterURL");
+    // Check which alerts checkboxes are visible (should be 2, 1 header + 1 alert that has the email_address observable)
+    cy.get(".p-checkbox-box").should("have.length", 2);
+  });
+  it("correctly filters by tag when an observable tag in the dropdown is clicked", () => {
+    cy.intercept({
+      method: "GET",
+      path: "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=from_address",
+    }).as("filterURL");
+    // Find the toggle button to expand and click (on the Small Alert alert)
+    cy.get(":nth-child(7) > :nth-child(1) > .p-row-toggler").click();
+    // List of observables should now exist
+    cy.get("td > ul").should("exist").should("be.visible");
+    // Find and click the first observable tag in list
+    cy.get(":nth-child(1) > .p-chip > .p-chip-text")
+      .should("have.text", "from_address")
+      .click();
+    // Wait for the filtered view to be requested
+    cy.wait("@filterURL");
+    // Check which alerts checkboxes are visible (should be only 1 for the header, no alerts with that tag)
+    cy.get(".p-checkbox-box").should("have.length", 1);
+  });
 });

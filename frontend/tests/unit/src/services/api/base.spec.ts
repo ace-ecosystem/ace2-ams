@@ -67,6 +67,17 @@ describe("BaseAPI calls", () => {
     expect(res).toEqual("Create successful");
   });
 
+  it("will not change format of outgoing data if its an array of strings", async () => {
+    myNock.post("/create", ["A", "B"]).reply(200, "Create successful");
+    const res = await api.baseRequest(
+      "/create",
+      "POST",
+      { data: ["A", "B"] },
+      false,
+    );
+    expect(res).toEqual("Create successful");
+  });
+
   it("will format incoming data into camelCase keys", async () => {
     myNock.post("/create").reply(200, { first_key: "A", second_key: 2 });
     const res = await api.create("/create", {}, false);
