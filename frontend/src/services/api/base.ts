@@ -24,11 +24,11 @@ export class BaseApi {
     DELETE: "delete",
   };
 
-  protected async baseRequest(
+  async baseRequest(
     url: string,
     method: Method,
     options?: {
-      data?: Record<string, unknown> | Record<string, unknown>[];
+      data?: Record<string, unknown> | Record<string, unknown>[] | string[];
       params?: Record<string, unknown>;
     },
     getAfterCreate = false,
@@ -42,7 +42,13 @@ export class BaseApi {
     if (options) {
       if (options.data) {
         if (Array.isArray(options.data)) {
-          config["data"] = options.data.map((x) => this.formatOutgoingData(x));
+          config["data"] = options.data.map((x) => {
+            if (typeof x === "string") {
+              return x;
+            } else {
+              return this.formatOutgoingData(x);
+            }
+          });
         } else {
           config["data"] = this.formatOutgoingData(options.data);
         }
