@@ -1,4 +1,3 @@
-import { nodeRead } from "@/models/node";
 import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
 
@@ -9,6 +8,6 @@ export const NodeTree = {
   readNodesOfNodeTree: (
     uuids: Array<UUID>,
     nodeType: string,
-  ): Promise<Array<nodeRead>> =>
+  ): Promise<Record<string, unknown>[]> =>
     api.baseRequest(`${endpoint}${nodeType}`, "POST", { data: uuids }),
 };
