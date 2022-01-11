@@ -161,7 +161,6 @@
   import { useAlertTableStore } from "@/stores/alertTable";
   import { useFilterStore } from "@/stores/filter";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
-  import NodeTag from "../Node/NodeTag.vue";
 
   const alertTableStore = useAlertTableStore();
   const filterStore = useFilterStore();
