@@ -94,11 +94,7 @@
           >
           <br />
           <span>
-            <NodeTagVue
-              v-for="tag in data.tags"
-              :key="tag.uuid"
-              :tag="tag"
-            ></NodeTagVue>
+            <NodeTagVue v-for="tag in data.tags" :key="tag.uuid" :tag="tag" />
           </span>
           <span v-if="data.comments">
             <pre
@@ -119,13 +115,16 @@
 
     <!--      ALERT ROW DROPDOWN -->
     <template #expansion="slotProps">
-      <h5>Observables:</h5>
       <ul>
         <li
           v-for="obs of expandedRowsData[slotProps.data.uuid]"
           :key="obs.value"
         >
-          {{ obs.type.value }} : {{ obs.value}}
+          <span class="link-text" @click="filterByObservable(obs)"
+            >{{ obs.type.value }} : {{ obs.value }}</span
+          >
+
+          <NodeTagVue v-for="tag of obs.tags" :key="tag.value" :tag="tag" />
         </li>
       </ul>
     </template>
@@ -162,6 +161,7 @@
   import { useAlertTableStore } from "@/stores/alertTable";
   import { useFilterStore } from "@/stores/filter";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
+  import NodeTag from "../Node/NodeTag.vue";
 
   const alertTableStore = useAlertTableStore();
   const filterStore = useFilterStore();
@@ -237,11 +237,26 @@
       [uuid],
       "observable",
     );
-    expandedRowsData.value[uuid] = observables;
+    expandedRowsData.value[uuid] = observables.sort((a, b) =>
+      a.type.value < b.type.value ? -1 : a.type.value > b.type.value ? 1 : 0,
+    );
   };
 
-  const rowCollapse = async (uuid) => {
+  const rowCollapse = (uuid) => {
     delete expandedRowsData.value[uuid];
+  };
+
+  const filterByObservable = (observable) => {
+    expandedRows.value = [];
+    filterStore.bulkSetFilters({
+      filterType: "alerts",
+      filters: {
+        observable: {
+          category: observable.type,
+          value: observable.value,
+        },
+      },
+    });
   };
 
   onMounted(async () => {
@@ -321,3 +336,11 @@
     }
   };
 </script>
+
+<style>
+  .link-text:hover {
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: bold;
+  }
+</style>
