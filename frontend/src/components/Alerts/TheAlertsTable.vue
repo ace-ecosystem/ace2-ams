@@ -250,8 +250,10 @@
   const getAllTags = (alert) => {
     const allTags = alert.tags.concat(alert.childTags);
 
-    // Return a deduplicated list of the tags based on the tag UUID. Does not preserve tag ordering.
-    return [...new Map(allTags.map((v) => [v.uuid, v])).values()];
+    // Return a sorted and deduplicated list of the tags based on the tag UUID.
+    return [...new Map(allTags.map((v) => [v.uuid, v])).values()].sort((a, b) =>
+      a.value > b.value ? 1 : -1,
+    );
   };
 
   const initAlertTable = () => {
