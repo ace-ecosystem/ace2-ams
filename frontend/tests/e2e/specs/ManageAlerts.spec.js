@@ -438,9 +438,13 @@ describe("Manage Alerts Tags", () => {
     // Enter & close modal
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(".p-dialog-content").should("not.exist");
-    // Check for comment after adding
-    cy.get(".p-chip-text").first().should("have.text", "scan_me");
-    cy.get(".p-chip-text").last().should("have.text", "TestTag");
+    // Check for the tags after adding
+    cy.get("[data-cy='tags']")
+      .eq(0)
+      .within(() => {
+        cy.get(".p-chip-text").first().should("have.text", "TestTag");
+        cy.get(".p-chip-text").last().should("have.text", "scan_me");
+      });
   });
 });
 
