@@ -1,7 +1,7 @@
 from datetime import datetime
 from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi_pagination.ext.sqlalchemy_future import paginate
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from uuid import UUID, uuid4
@@ -252,9 +252,9 @@ def get_all_alerts(
     if tags:
         tag_filters = []
         for tag in tags.split(","):
-            tag_filters.append(Alert.tags.any(NodeTag.value == tag))
-        tags_query = select(Alert).where(and_(*tag_filters))
+            tag_filters.append(or_(Alert.tags.any(NodeTag.value == tag), Alert.child_tags.any(NodeTag.value == tag)))
 
+        tags_query = select(Alert).where(and_(*tag_filters))
         query = _join_as_subquery(query, tags_query)
 
     if threat_actors:
