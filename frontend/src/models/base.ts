@@ -42,9 +42,9 @@ export interface filterOption {
   readonly name: string;
   readonly label: string;
   readonly type: string;
-  readonly optionLabel?: string;
+  readonly optionProperty?: string;
   readonly valueProperty?: string;
   readonly store?: StoreDefinition;
-  readonly formatForAPI?: (filter: any) => string;
-  readonly parseFormattedFilterString?: (filter: string) => any;
+  readonly stringRepr?: (filter: any) => string;
+  readonly parseStringRepr?: (filter: string) => any;
 }

@@ -19,7 +19,7 @@ const FILTERS_STUB = [
     label: "Owner",
     type: filterTypes.SELECT,
     store: useUserStore,
-    optionLabel: "displayName",
+    optionProperty: "displayName",
     optionValue: "username",
   },
   {
@@ -161,7 +161,7 @@ describe("FilterInput computed properties w/o set filter", () => {
     const { wrapper } = factory({ filterName: null, filterValue: null });
 
     expect(wrapper.vm.filterOptions).toBeNull();
-    expect(wrapper.vm.filterOptionLabel).toEqual("value");
+    expect(wrapper.vm.filteroptionProperty).toEqual("value");
     expect(wrapper.vm.isDate).toBeFalsy();
     expect(wrapper.vm.isCategorizedValue).toBeFalsy();
     expect(wrapper.vm.isChips).toBeFalsy();
@@ -180,7 +180,7 @@ describe("FilterInput computed properties w/ set filter", () => {
     userStore.items = USERS_STUB;
 
     expect(wrapper.vm.filterOptions).toEqual(USERS_STUB);
-    expect(wrapper.vm.filterOptionLabel).toEqual("displayName");
+    expect(wrapper.vm.filteroptionProperty).toEqual("displayName");
     expect(wrapper.vm.isDate).toBeFalsy();
     expect(wrapper.vm.isCategorizedValue).toBeFalsy();
     expect(wrapper.vm.isChips).toBeFalsy();
@@ -200,7 +200,7 @@ describe("FilterInput computed properties w/ set filter", () => {
     wrapper.vm.filterValue = { category: null, value: null };
 
     expect(wrapper.vm.filterOptions).toEqual(OBSERVABLE_TYPES_STUB);
-    expect(wrapper.vm.filterOptionLabel).toEqual("value");
+    expect(wrapper.vm.filteroptionProperty).toEqual("value");
     expect(wrapper.vm.isDate).toBeFalsy();
     expect(wrapper.vm.isCategorizedValue).toBeTruthy();
     expect(wrapper.vm.isChips).toBeFalsy();
@@ -217,7 +217,7 @@ describe("FilterInput computed properties w/ set filter", () => {
     wrapper.vm.filterValue = null;
 
     expect(wrapper.vm.filterOptions).toBeNull();
-    expect(wrapper.vm.filterOptionLabel).toEqual("value");
+    expect(wrapper.vm.filteroptionProperty).toEqual("value");
     expect(wrapper.vm.isDate).toBeFalsy();
     expect(wrapper.vm.isCategorizedValue).toBeFalsy();
     expect(wrapper.vm.isChips).toBeTruthy();
@@ -234,7 +234,7 @@ describe("FilterInput computed properties w/ set filter", () => {
     wrapper.vm.filterValue = null;
 
     expect(wrapper.vm.filterOptions).toBeNull();
-    expect(wrapper.vm.filterOptionLabel).toEqual("value");
+    expect(wrapper.vm.filteroptionProperty).toEqual("value");
     expect(wrapper.vm.isDate).toBeFalsy();
     expect(wrapper.vm.isCategorizedValue).toBeFalsy();
     expect(wrapper.vm.isChips).toBeFalsy();
@@ -250,7 +250,7 @@ describe("FilterInput computed properties w/ set filter", () => {
     wrapper.vm.filterValue = null;
 
     expect(wrapper.vm.filterOptions).toBeNull();
-    expect(wrapper.vm.filterOptionLabel).toEqual("value");
+    expect(wrapper.vm.filteroptionProperty).toEqual("value");
     expect(wrapper.vm.isDate).toBeTruthy();
     expect(wrapper.vm.isCategorizedValue).toBeFalsy();
     expect(wrapper.vm.isChips).toBeFalsy();
