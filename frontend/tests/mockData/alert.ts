@@ -426,6 +426,28 @@ export const mockAlert: alertTreeRead = {
   firstAppearance: true,
   parentTreeUuid: null,
   treeUuid: "7222dc2b-40a4-459b-81d1-7a831f7458dc",
+  childTags: [
+    {
+      description: null,
+      value: "recipient",
+      uuid: "c5d3321d-883c-4772-b511-489273e13fde",
+    },
+    {
+      description: null,
+      value: "from_address",
+      uuid: "f9081b70-c2bf-4a7d-ba90-a675e8a929d2",
+    },
+    {
+      description: null,
+      value: "contacted_host",
+      uuid: "3c1ca637-48d1-4d47-aeee-0962bc32d96d",
+    },
+    {
+      description: null,
+      value: "c2",
+      uuid: "a0b2d514-c544-4a8f-a059-b6151b9f1dd6",
+    },
+  ],
   tags: [],
   threatActors: [],
   threats: [],
