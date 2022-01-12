@@ -19,6 +19,8 @@
     responsive-layout="scroll"
     :sort-field="sortField"
     @sort="sort"
+    @row-expand="rowExpand($event.data.uuid)"
+    @row-collapse="rowCollapse($event.data.uuid)"
     @rowSelect="selectedAlertStore.select($event.data.uuid)"
     @rowUnselect="selectedAlertStore.unselect($event.data.uuid)"
     @rowSelect-all="
@@ -117,10 +119,16 @@
 
     <!--      ALERT ROW DROPDOWN -->
     <template #expansion="slotProps">
-      <h5>Observables:</h5>
       <ul>
-        <li v-for="obs of slotProps.data.observables" :key="obs.value">
-          {{ obs }}
+        <li
+          v-for="obs of expandedRowsData[slotProps.data.uuid]"
+          :key="obs.value"
+        >
+          <span class="link-text" @click="filterByObservable(obs)"
+            >{{ obs.type.value }} : {{ obs.value }}</span
+          >
+
+          <NodeTagVue v-for="tag of obs.tags" :key="tag.value" :tag="tag" />
         </li>
       </ul>
     </template>
@@ -152,6 +160,8 @@
   import Paginator from "primevue/paginator";
 
   import { camelToSnakeCase } from "@/etc/helpers";
+  import { NodeTree } from "@/services/api/nodeTree";
+
   import { useAlertTableStore } from "@/stores/alertTable";
   import { useFilterStore } from "@/stores/filter";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
@@ -179,6 +189,7 @@
   const dt = ref(null);
   const error = ref(null);
   const expandedRows = ref([]);
+  const expandedRowsData = ref({});
   const isLoading = ref(false);
   const selectedColumns = ref([]);
   const sortField = ref("eventTime");
@@ -222,6 +233,33 @@
     selectedAlertStore.unselectAll();
     alertTableStore.requestReload = false;
     await loadAlerts();
+  };
+
+  const rowExpand = async (uuid) => {
+    const observables = await NodeTree.readNodesOfNodeTree(
+      [uuid],
+      "observable",
+    );
+    expandedRowsData.value[uuid] = observables.sort((a, b) =>
+      a.type.value < b.type.value ? -1 : a.type.value > b.type.value ? 1 : 0,
+    );
+  };
+
+  const rowCollapse = (uuid) => {
+    delete expandedRowsData.value[uuid];
+  };
+
+  const filterByObservable = (observable) => {
+    expandedRows.value = [];
+    filterStore.bulkSetFilters({
+      filterType: "alerts",
+      filters: {
+        observable: {
+          category: observable.type,
+          value: observable.value,
+        },
+      },
+    });
   };
 
   onMounted(async () => {
@@ -310,3 +348,11 @@
     }
   };
 </script>
+
+<style>
+  .link-text:hover {
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: bold;
+  }
+</style>

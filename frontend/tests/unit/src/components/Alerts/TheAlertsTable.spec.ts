@@ -2,9 +2,8 @@ import TheAlertsTable from "@/components/Alerts/TheAlertsTable.vue";
 import { mount, VueWrapper } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
 import myNock from "@unit/services/api/nock";
-import router from "@/router";
 import { FilterMatchMode } from "primevue/api";
-import { createTestingPinia } from "@pinia/testing";
+import { createTestingPinia, TestingOptions } from "@pinia/testing";
 
 import InputText from "primevue/inputtext";
 import MultiSelect from "primevue/multiselect";
@@ -13,8 +12,9 @@ import DataTable from "primevue/datatable";
 import Button from "primevue/button";
 import Column from "primevue/column";
 import Paginator from "primevue/paginator";
-import nock from "nock";
 import { alertRead } from "@/models/alert";
+import { useFilterStore } from "@/stores/filter";
+import { createRouterMock, injectRouterMock } from "vue-router-mock";
 
 const mockAPIAlert: alertRead = {
   childTags: [],
@@ -41,39 +41,31 @@ const mockAPIAlert: alertRead = {
   version: "uuid2",
 };
 
-// DATA/CREATION
-describe("TheAlertsTable data/creation", () => {
+function factory(options?: TestingOptions) {
+  const router = createRouterMock();
+  injectRouterMock(router);
+
   const wrapper: VueWrapper<any> = mount(TheAlertsTable, {
     global: {
-      plugins: [createTestingPinia({ stubActions: false }), PrimeVue, router],
+      plugins: [createTestingPinia(options), PrimeVue],
     },
   });
 
-  beforeAll(async () => {
-    nock.cleanAll();
-    myNock
-      .get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0")
-      .reply(200, {
-        items: [mockAPIAlert, mockAPIAlert],
-        total: 2,
-      })
-      .persist();
-  });
+  const filterStore = useFilterStore();
 
-  beforeEach(async () => {
-    await wrapper.vm.reset();
-    await wrapper.vm.loadAlerts();
-  });
+  return { wrapper, filterStore };
+}
 
-  afterAll(() => {
-    nock.cleanAll();
-  });
-
+// DATA/CREATION
+describe.only("TheAlertsTable data/creation", () => {
   it("renders", async () => {
+    const { wrapper } = factory();
     expect(wrapper.exists()).toBe(true);
   });
 
-  it("contains expected components upon creation", async () => {
+  it("contains expected components upon creation", () => {
+    const { wrapper } = factory();
+
     expect(wrapper.findComponent(Button).exists()).toBe(true);
     expect(wrapper.findComponent(Column).exists()).toBe(true);
     expect(wrapper.findComponent(DataTable).exists()).toBe(true);
@@ -83,7 +75,9 @@ describe("TheAlertsTable data/creation", () => {
     expect(wrapper.findComponent(Paginator).exists()).toBe(true);
   });
 
-  it("initializes data as expected", async () => {
+  it("initializes data as expected", () => {
+    const { wrapper } = factory();
+
     expect(wrapper.vm.alertTableFilter).toStrictEqual({
       global: { matchMode: "contains", value: null },
     });
@@ -112,18 +106,21 @@ describe("TheAlertsTable data/creation", () => {
       "owner",
       "disposition",
     ]);
-    expect(wrapper.vm.isLoading).toEqual(false);
+    expect(wrapper.vm.isLoading).toEqual(true);
     expect(wrapper.vm.error).toBeNull();
     expect(
       wrapper.vm.alertTableStore.visibleQueriedAlertSummaries,
-    ).toHaveLength(2);
-    expect(wrapper.vm.alertTableStore.totalAlerts).toEqual(2);
+    ).toHaveLength(0);
+    expect(wrapper.vm.alertTableStore.totalAlerts).toEqual(0);
     expect(wrapper.vm.sortField).toEqual("eventTime");
     expect(wrapper.vm.sortOrder).toEqual("desc");
     expect(wrapper.vm.numRows).toEqual(10);
     expect(wrapper.vm.page).toEqual(0);
   });
-  it("computes computed properties correctly", async () => {
+
+  it("computes computed properties correctly", () => {
+    const { wrapper } = factory();
+
     expect(wrapper.vm.pageOptions).toStrictEqual({
       limit: 10,
       offset: 0,
@@ -132,37 +129,66 @@ describe("TheAlertsTable data/creation", () => {
     wrapper.vm.sortField = null;
     expect(wrapper.vm.sortFilter).toBeNull();
   });
-});
 
-// METHODS (SUCCESS)
-describe("TheAlertsTable methods success", () => {
-  const wrapper: VueWrapper<any> = mount(TheAlertsTable, {
-    global: {
-      plugins: [createTestingPinia({ stubActions: false }), PrimeVue, router],
-    },
+  it("will fetch an alert's observables and set the sorted array in expandedRowsData on rowExpand", async () => {
+    const { wrapper } = factory();
+
+    myNock.post("/node/tree/observable", '["uuid1"]').reply(200, [
+      { type: { value: "type_B" }, value: "value_B" },
+      { type: { value: "type_A" }, value: "value_A" },
+    ]);
+    await wrapper.vm.rowExpand("uuid1");
+    expect(wrapper.vm.expandedRowsData).toStrictEqual({
+      uuid1: [
+        { type: { value: "type_A" }, value: "value_A" },
+        { type: { value: "type_B" }, value: "value_B" },
+      ],
+    });
   });
 
-  beforeAll(async () => {
-    nock.cleanAll();
+  it("will remove the given property (an alert UUID) from expandedRowsData on rowCollapse", () => {
+    const { wrapper } = factory();
+
+    wrapper.vm.expandedRowsData = {
+      uuid1: [
+        { type: { value: "type_A" }, value: "value_A" },
+        { type: { value: "type_B" }, value: "value_B" },
+      ],
+    };
+    wrapper.vm.rowCollapse("uuid1");
+    expect(wrapper.vm.expandedRowsData).toStrictEqual({});
+  });
+
+  it("will set filters to the given observable and clear expandedRows on filterByObservable", async () => {
+    myNock.get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0").reply(200, {
+      items: [mockAPIAlert, mockAPIAlert],
+      total: 2,
+    });
     myNock
-      .get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0")
+      .get(
+        "/alert/?sort=event_time%7Cdesc&limit=10&offset=0&observable=type_A%7Cvalue_A",
+      )
       .reply(200, {
-        items: [mockAPIAlert, mockAPIAlert],
-        total: 2,
-      })
-      .persist();
-  });
+        items: [],
+        total: 0,
+      });
+    const { wrapper, filterStore } = factory({ stubActions: false });
 
-  beforeEach(async () => {
-    await wrapper.vm.reset();
-    await wrapper.vm.loadAlerts();
-  });
+    wrapper.vm.expandedRows = ["uuid1"];
+    wrapper.vm.filterByObservable({
+      type: { value: "type_A" },
+      value: "value_A",
+    });
 
-  afterAll(() => {
-    nock.cleanAll();
+    expect(wrapper.vm.expandedRows).toEqual([]);
+    expect(filterStore.alerts).toStrictEqual({
+      observable: { category: { value: "type_A" }, value: "value_A" },
+    });
   });
 
   it("will reset Alert table to defaults upon reset()", async () => {
+    const { wrapper } = factory();
+
     wrapper.vm.alertTableFilter = [];
     wrapper.vm.selectedColumns = [];
     wrapper.vm.reset();
@@ -178,6 +204,8 @@ describe("TheAlertsTable methods success", () => {
   });
 
   it("will init Alert table to defaults upon initAlertTable()", async () => {
+    const { wrapper } = factory();
+
     wrapper.vm.alertTableFilter = [];
     wrapper.vm.initAlertTable();
     expect(wrapper.vm.alertTableFilter).toStrictEqual({
@@ -185,12 +213,16 @@ describe("TheAlertsTable methods success", () => {
     });
   });
   it("will export the alerts table to CSV on exportCSV", async () => {
+    const { wrapper } = factory();
+
     // we cant actually export the CSV in test so mock one of the dependency functions
     window.URL.createObjectURL = jest.fn().mockReturnValueOnce("fakeURL");
     wrapper.vm.exportCSV();
   });
 
   it("will correctly set selectedColumns when onColumnToggle", async () => {
+    const { wrapper } = factory();
+
     expect(wrapper.vm.selectedColumns).toStrictEqual([
       { field: "eventTime", header: "Event Time" },
       { field: "name", header: "Name" },
@@ -203,9 +235,14 @@ describe("TheAlertsTable methods success", () => {
     ]);
   });
   it("will reload the alerts with new pagination settings on 'onPage'", async () => {
+    myNock.get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0").reply(200, {
+      items: [mockAPIAlert, mockAPIAlert],
+      total: 2,
+    });
+    const { wrapper } = factory({ stubActions: false });
+
     const mockRequest = myNock
       .get("/alert/?sort=event_time%7Cdesc&limit=1&offset=1")
-      .thrice()
       .reply(200, {
         items: [mockAPIAlert],
         total: 2,
@@ -216,8 +253,14 @@ describe("TheAlertsTable methods success", () => {
     expect(mockRequest.isDone()).toEqual(true);
   });
   it("will reload the alerts with new sort settings on 'sort'", async () => {
+    myNock.get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0").reply(200, {
+      items: [mockAPIAlert, mockAPIAlert],
+      total: 2,
+    });
+    const { wrapper } = factory({ stubActions: false });
+
     const mockRequestSort = myNock
-      .get("/alert/?sort=name%7Casc&limit=1&offset=1")
+      .get("/alert/?sort=name%7Casc&limit=10&offset=0")
       .reply(200, {
         items: [mockAPIAlert],
         total: 2,
@@ -228,11 +271,15 @@ describe("TheAlertsTable methods success", () => {
     expect(mockRequestSort.isDone()).toEqual(true);
   });
   it("will reset sort settings if sort called without sortField", async () => {
+    const { wrapper } = factory();
+
     await wrapper.vm.sort({});
     expect(wrapper.vm.sortField).toBeNull();
     expect(wrapper.vm.sortOrder).toBeNull();
   });
   it("will reload and clear selected alerts, and clear requestReload on reloadTable", async () => {
+    const { wrapper } = factory();
+
     wrapper.vm.selectedAlertStore.selectAll(["uuid1", "uuid2", "uuid3"]);
     wrapper.vm.selectedRows = ["uuid1", "uuid2", "uuid3"];
     wrapper.vm.alertTableStore.requestReload = true;
@@ -241,28 +288,16 @@ describe("TheAlertsTable methods success", () => {
     expect(wrapper.vm.selectedAlertStore.selected).toEqual([]);
     expect(wrapper.vm.alertTableStore.requestReload).toBeFalsy();
   });
-});
-
-// METHODS (FAILED)
-describe("TheAlertsTable methods failed", () => {
-  const wrapper: VueWrapper<any> = mount(TheAlertsTable, {
-    global: {
-      plugins: [createTestingPinia({ stubActions: false }), PrimeVue, router],
-    },
-  });
-
-  beforeAll(() => {
-    nock.cleanAll();
-  });
-
-  afterAll(() => {
-    nock.cleanAll();
-  });
 
   it("will set the error data property to the given error if getAllAlerts fails within loadAlerts", async () => {
+    myNock.get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0").reply(200, {
+      items: [mockAPIAlert, mockAPIAlert],
+      total: 2,
+    });
+    const { wrapper } = factory({ stubActions: false });
+
     const mockRequest = myNock
       .get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0")
-      .twice()
       .reply(403, "Request Failed");
 
     expect(wrapper.vm.error).toBeNull();
