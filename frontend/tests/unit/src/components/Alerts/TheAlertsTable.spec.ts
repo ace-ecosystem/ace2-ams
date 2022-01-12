@@ -1,5 +1,5 @@
 import TheAlertsTable from "@/components/Alerts/TheAlertsTable.vue";
-import { flushPromises, mount, VueWrapper } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
 import myNock from "@unit/services/api/nock";
 import router from "@/router";
@@ -17,6 +17,7 @@ import nock from "nock";
 import { alertRead } from "@/models/alert";
 
 const mockAPIAlert: alertRead = {
+  childTags: [],
   comments: [],
   description: "",
   disposition: null,
