@@ -93,7 +93,7 @@
           <br />
           <span>
             <NodeTagVue
-              v-for="tag in data.tags"
+              v-for="tag in getAllTags(data)"
               :key="tag.uuid"
               :tag="tag"
             ></NodeTagVue>
@@ -245,6 +245,13 @@
 
   const getAlertLink = (uuid) => {
     return "/alert/" + uuid;
+  };
+
+  const getAllTags = (alert) => {
+    const allTags = alert.tags.concat(alert.childTags);
+
+    // Return a deduplicated list of the tags based on the tag UUID. Does not preserve tag ordering.
+    return [...new Map(allTags.map((v) => [v.uuid, v])).values()];
   };
 
   const initAlertTable = () => {

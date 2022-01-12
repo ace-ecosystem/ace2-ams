@@ -5,6 +5,7 @@ import { Alert } from "@/services/api/alert";
 
 export function parseAlertSummary(alert: alertRead): alertSummary {
   return {
+    childTags: alert.childTags,
     comments: alert.comments,
     description: alert.description ? alert.description : "",
     disposition: alert.disposition ? alert.disposition.value : "OPEN",
