@@ -284,7 +284,7 @@ describe("TheAlertsTable.vue", () => {
       .click();
     // Wait for the filtered view to be requested
     cy.wait("@filterURL");
-    // Check which alerts checkboxes are visible (should be only 1 for the header, no alerts with that tag)
-    cy.get(".p-checkbox-box").should("have.length", 1);
+    // Check which alerts checkboxes are visible (should be only 1 for the header, and 1 alert with that tag)
+    cy.get(".p-checkbox-box").should("have.length", 2);
   });
 });
