@@ -256,7 +256,7 @@ def read_node_tree(root_node_uuid: UUID, db: Session) -> dict:
 
 def read_node_tree_nodes(node_type: str, root_node_uuids: list[UUID], db: Session) -> list[dict]:
     """Returns a list of Node objects of the given type that are in the given NodeTrees.
-    The returned objectsare manually serialized into their Pydantic models since Pydantic
+    The returned objects are manually serialized into their Pydantic models since Pydantic
     cannot handle returning a list of multiple types of objects in this case."""
 
     nodes: List[Node] = (

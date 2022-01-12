@@ -17,6 +17,7 @@ import { useFilterStore } from "@/stores/filter";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
 
 const mockAPIAlert: alertRead = {
+  childTags: [],
   comments: [],
   description: "",
   disposition: null,
