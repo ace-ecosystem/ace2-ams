@@ -64,6 +64,8 @@ class AlertCreate(NodeCreate, AlertBase):
 
 
 class AlertRead(NodeRead, AlertBase):
+    child_tags: List[NodeTagRead] = Field(description="A list of tags added to child Nodes in the alert's tree")
+
     comments: List[NodeCommentRead] = Field(description="A list of comments added to the alert")
 
     disposition: Optional[AlertDispositionRead] = Field(description="The disposition assigned to this alert")
