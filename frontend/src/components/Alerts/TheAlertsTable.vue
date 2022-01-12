@@ -240,9 +240,14 @@
       [uuid],
       "observable",
     );
-    expandedRowsData.value[uuid] = observables.sort((a, b) =>
-      a.type.value < b.type.value ? -1 : a.type.value > b.type.value ? 1 : 0,
-    );
+
+    expandedRowsData.value[uuid] = observables.sort((a, b) => {
+      if (a.type.value === b.type.value) {
+        return a.value < b.value ? -1 : 1;
+      } else {
+        return a.type.value < b.type.value ? -1 : 1;
+      }
+    });
   };
 
   const rowCollapse = (uuid) => {
