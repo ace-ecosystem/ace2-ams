@@ -85,13 +85,13 @@
       <template #body="{ data }">
         <!-- NAME COLUMN - INCL. TAGS AND TODO: ALERT ICONS-->
         <div v-if="col.field === 'name'">
-          <span class="p-m-1">
+          <span class="p-m-1" data-cy="alertName">
             <router-link :to="getAlertLink(data.uuid)">{{
               data.name
             }}</router-link></span
           >
           <br />
-          <span>
+          <span data-cy="tags">
             <NodeTagVue
               v-for="tag in getAllTags(data)"
               :key="tag.uuid"
