@@ -1,13 +1,15 @@
 <template>
-  <Chip
-    ><span class="p-chip-text" style="cursor: pointer" @click="filterByTags">{{
-      tag.value
-    }}</span></Chip
-  >
+  <span class="tag">
+    <Tag rounded
+      ><span class="tag" style="cursor: pointer" @click="filterByTags">{{
+        tag.value
+      }}</span></Tag
+    >
+  </span>
 </template>
 
 <script setup>
-  import Chip from "primevue/chip";
+  import Tag from "primevue/tag";
 
   import { defineProps, inject } from "vue";
   import { useRouter } from "vue-router";
@@ -27,3 +29,8 @@
     }
   }
 </script>
+<style>
+  .tag {
+    padding: 2px;
+  }
+</style>
