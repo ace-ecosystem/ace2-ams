@@ -25,13 +25,10 @@
   import { alertFilters } from "@/etc/constants";
   import { isObject } from "@/etc/helpers";
   import Chip from "primevue/chip";
-  import OverlayPanel from "primevue/overlaypanel";
-  import Dropdown from "primevue/dropdown";
 
-  import { inject, computed, defineProps, ref } from "vue";
+  import { inject, computed, defineProps } from "vue";
 
   import { useFilterStore } from "@/stores/filter";
-  import FilterInput from "../UserInterface/FilterInput.vue";
   const filterStore = useFilterStore();
   const filterType = inject("filterType");
 
