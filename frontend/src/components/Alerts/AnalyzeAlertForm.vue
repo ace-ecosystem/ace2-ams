@@ -261,7 +261,7 @@
 
   const addingObservables = ref(false);
   const alertCreateLoading = ref(false);
-  const alertDate = ref(Date());
+  const alertDate = ref(new Date());
   const alertDescription = ref("Manual Alert");
   const alertDescriptionAppendString = ref("");
   const alertQueue = ref("default");

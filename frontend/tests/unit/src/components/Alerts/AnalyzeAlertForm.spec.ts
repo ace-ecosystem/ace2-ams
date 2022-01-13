@@ -10,7 +10,7 @@ import Message from "primevue/message";
 import MultiSelect from "primevue/multiselect";
 import TabPanel from "primevue/tabpanel";
 import TabView from "primevue/tabview";
-import { mount } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
 import moment from "moment-timezone";
 import myNock from "@unit/services/api/nock";
@@ -21,7 +21,7 @@ import { createTestingPinia, TestingOptions } from "@pinia/testing";
 import snakecaseKeys from "snakecase-keys";
 
 function factory(options?: TestingOptions) {
-  const wrapper = mount(AnalyzeAlertForm, {
+  const wrapper: VueWrapper<any> = mount(AnalyzeAlertForm, {
     global: {
       plugins: [createTestingPinia(options), PrimeVue, router],
     },

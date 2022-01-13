@@ -4,7 +4,7 @@
   <br />
   <TheAlertActionToolbar page="Manage Alerts" />
   <br />
-  <TheFilterToolbar id="FilterToolbar" />
+  <div id="FilterToolbar"><TheFilterToolbar /></div>
   <br />
   <div id="AlertsTable" class="card">
     <TheAlertsTable />
