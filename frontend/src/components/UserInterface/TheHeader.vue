@@ -11,7 +11,7 @@
       <router-link class="p-m-1" to="/manage_alerts"
         ><Button label="Alerts" class="p-button-raised"
       /></router-link>
-      <router-link class="p-m-1" to="/"
+      <router-link class="p-m-1" to="/manage_events"
         ><Button label="Events" class="p-button-raised"
       /></router-link>
     </template>
