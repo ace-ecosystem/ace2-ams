@@ -12,7 +12,11 @@
       >
         {{ formatValue(filterValue) }}</span
       >
-      <i class="pi pi-times-circle" style="cursor: pointer;" @click="unsetFilter"/>
+      <i
+        class="pi pi-times-circle"
+        style="cursor: pointer"
+        @click="unsetFilter"
+      />
     </Chip>
   </span>
 </template>
@@ -31,7 +35,6 @@
   const filterStore = useFilterStore();
   const filterType = inject("filterType");
 
-
   const props = defineProps({
     filterName: { type: String, required: true },
     filterValue: { type: Object, required: true },
@@ -49,7 +52,10 @@
   });
 
   function unsetFilter() {
-      filterStore.unsetFilter({filterType: filterType, filterName: props.filterName})
+    filterStore.unsetFilter({
+      filterType: filterType,
+      filterName: props.filterName,
+    });
   }
 
   function formatValue(value) {
