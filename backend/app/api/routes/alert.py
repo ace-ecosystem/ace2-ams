@@ -260,7 +260,12 @@ def get_all_alerts(
     if threat_actors:
         threat_actor_filters = []
         for threat_actor in threat_actors.split(","):
-            threat_actor_filters.append(Alert.threat_actors.any(NodeThreatActor.value == threat_actor))
+            threat_actor_filters.append(
+                or_(
+                    Alert.threat_actors.any(NodeThreatActor.value == threat_actor),
+                    Alert.child_threat_actors.any(NodeThreatActor.value == threat_actor),
+                )
+            )
         threat_actor_query = select(Alert).where(and_(*threat_actor_filters))
 
         query = _join_as_subquery(query, threat_actor_query)
@@ -268,7 +273,9 @@ def get_all_alerts(
     if threats:
         threat_filters = []
         for threat in threats.split(","):
-            threat_filters.append(Alert.threats.any(NodeThreat.value == threat))
+            threat_filters.append(
+                or_(Alert.threats.any(NodeThreat.value == threat), Alert.child_threats.any(NodeThreat.value == threat))
+            )
         threats_query = select(Alert).where(and_(*threat_filters))
 
         query = _join_as_subquery(query, threats_query)
