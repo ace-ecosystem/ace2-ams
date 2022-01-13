@@ -384,6 +384,41 @@ describe("Manage Alerts Filter Modal", () => {
     // Exit modal for end of test
     cy.get(".p-dialog-header-close-icon").click();
   });
+
+  it("will load any currently set filters from localStorage and add them in the form", () => {
+    // Open the modal
+    cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
+    cy.get(".col > .field > .p-dropdown").should("be.visible");
+
+    // Select name filter
+    cy.get(
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+    ).click();
+    cy.get(".p-dropdown-items-wrapper").should("be.visible");
+    cy.get("[aria-label='Name']").click();
+    cy.get(".field > .p-inputtext").should("be.visible");
+
+    // Add a filter value
+    cy.get(".field > .p-inputtext").type("hello world");
+
+    // Submit
+    cy.get(".p-dialog-footer > :nth-child(4)").click();
+
+    // Refresh the page
+    cy.reload();
+
+    // Reopen the modal
+    cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
+
+    // Verify the form data
+    cy.get(".flex").children().should("have.length", 1);
+    cy.get(":nth-child(1) > .p-dropdown").should("have.text", "Name");
+    cy.get(".inputfield").should("have.value", "hello world");
+
+    // Exit modal for end of test
+    cy.get(".p-dialog-header-close-icon").click();
+  });
 });
 
 // Comment will not change sort
