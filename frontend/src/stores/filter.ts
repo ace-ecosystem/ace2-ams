@@ -4,10 +4,14 @@ import {
   alertFilterValues,
   alertFilterNameTypes,
 } from "@/models/alert";
+import { isValidDate } from "@/etc/helpers";
 
 export function isEmpty(value: unknown): boolean {
   if (value === null) {
     return true;
+  }
+  if (isValidDate(value)) {
+    return false;
   }
   if (Array.isArray(value)) {
     return value.length === 0;

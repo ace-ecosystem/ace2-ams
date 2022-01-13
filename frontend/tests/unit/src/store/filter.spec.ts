@@ -15,6 +15,7 @@ describe("filters helpers", () => {
     expect(isEmpty(true)).toBeFalsy();
     expect(isEmpty("")).toBeTruthy();
     expect(isEmpty("test")).toBeFalsy();
+    expect(isEmpty(new Date())).toBeFalsy();
   });
 });
 
