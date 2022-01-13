@@ -13,17 +13,38 @@
         {{ formatValue(filterValue) }}</span
       >
       <i
+        class="pi pi-pencil"
+        style="cursor: pointer"
+        @click="toggleOptionsMenu"
+      />
+      <i
         class="pi pi-times-circle"
         style="cursor: pointer"
         @click="unsetFilter"
       />
     </Chip>
+    <OverlayPanel ref="op"  tabindex="1" @keypress.enter="updateFilter">
+      <FilterInput
+      tabindex="1" 
+        v-model="filterModel"
+        :fixed-filter-name="true"
+        :allow-delete="false"
+      >
+      </FilterInput>
+      <Button
+        name="update-filter"
+        icon="pi pi-check"
+        tabindex="1" 
+        @click="updateFilter"
+      />
+    </OverlayPanel>
   </span>
 </template>
 
 <script setup>
   import { alertFilters } from "@/etc/constants";
   import { isObject } from "@/etc/helpers";
+  import Button from "primevue/button";
   import Chip from "primevue/chip";
   import OverlayPanel from "primevue/overlaypanel";
   import Dropdown from "primevue/dropdown";
@@ -31,9 +52,16 @@
   import { inject, computed, defineProps, ref } from "vue";
 
   import { useFilterStore } from "@/stores/filter";
-  import FilterInput from "../UserInterface/FilterInput.vue";
+  import FilterInput from "./FilterInput.vue";
+import { reset } from "mockdate";
   const filterStore = useFilterStore();
   const filterType = inject("filterType");
+
+  const op = ref(null);
+  const toggleOptionsMenu = (event) => {
+    op.value.toggle(event);
+    resetFilterModel();
+  };
 
   const props = defineProps({
     filterName: { type: String, required: true },
@@ -47,9 +75,30 @@
     return filterNameObject ? filterNameObject : null;
   });
 
+  const filterModel = ref({
+    filterName: props.filterName,
+    filterValue: props.filterValue,
+  });
+
   const filterLabel = computed(() => {
     return filterNameObject.value.label;
   });
+
+  function resetFilterModel() {
+    filterModel.value = {
+    filterName: props.filterName,
+    filterValue: props.filterValue,
+  };
+  }
+
+  function updateFilter() {
+    filterStore.setFilter({
+      filterType: filterType,
+      filterName: props.filterName,
+      filterValue: filterModel.value.filterValue,
+    });
+    toggleOptionsMenu();
+  }
 
   function unsetFilter() {
     filterStore.unsetFilter({

@@ -1,6 +1,6 @@
 <template>
   <div class="formgrid grid">
-    <div class="field col-fixed">
+    <div v-if="!fixedFilterName" class="field col-fixed">
       <Dropdown
         v-model="filterName"
         :options="availableFilters"
@@ -101,7 +101,7 @@
         </div>
       </div>
     </div>
-    <div class="field col-fixed">
+    <div v-if="allowDelete" class="field col-fixed">
       <Button
         name="delete-filter"
         icon="pi pi-times"
@@ -137,7 +137,7 @@
 
     inject: ["availableFilters", "filterType"],
 
-    props: ["modelValue"],
+    props: ["modelValue", "fixedFilterName", "allowDelete"],
     emits: ["update:modelValue", "deleteFormFilter"],
 
     data() {

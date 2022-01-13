@@ -32,11 +32,18 @@
       <Button icon="pi pi-link" class="p-button-rounded" @click="copyLink" />
     </template>
   </Toolbar>
-  <Toolbar
-    v-if="Object.keys(filterStore[filterType]).length"
-    class="transparent-toolbar"
-  >
+  <Toolbar class="transparent-toolbar">
     <template #start>
+      <Button icon="pi pi-plus" class="p-m-1" @click="toggleOverlay" />
+      <OverlayPanel ref="op" tabindex="1" @keypress.enter="updateFilter">
+        <FilterInput v-model="filterModel" :allow-delete="false"> </FilterInput>
+        <Button
+          name="update-filter"
+          icon="pi pi-check"
+          tabindex="1"
+          @click="addFilter"
+        />
+      </OverlayPanel>
       <FilterChipContainer></FilterChipContainer>
     </template>
 
@@ -51,12 +58,14 @@
 </script>
 
 <script setup>
-  import { inject } from "vue";
+  import { inject, ref } from "vue";
 
   import Button from "primevue/button";
   import DateRangePicker from "@/components/UserInterface/DateRangePicker";
   import EditFilterModal from "@/components/Modals/FilterModal";
   import Toolbar from "primevue/toolbar";
+  import OverlayPanel from "primevue/overlaypanel";
+  import FilterInput from "./FilterInput.vue";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
@@ -95,6 +104,29 @@
 
   const reset = () => {
     filterStore.clearAll({ filterType: filterType });
+  };
+
+  const filterModel = ref({
+    filterName: null,
+    filterValue: null,
+  });
+
+  const addFilter = () => {
+    filterStore.setFilter({
+      filterType: filterType,
+      filterName: filterModel.value.filterName,
+      filterValue: filterModel.value.filterValue,
+    });
+    toggleOverlay();
+    filterModel.value = {
+      filterName: null,
+      filterValue: null,
+    };
+  };
+
+  const op = ref(null);
+  const toggleOverlay = (event) => {
+    op.value.toggle(event);
   };
 </script>
 
