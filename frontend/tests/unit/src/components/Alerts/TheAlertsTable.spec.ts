@@ -18,6 +18,8 @@ import { createRouterMock, injectRouterMock } from "vue-router-mock";
 
 const mockAPIAlert: alertRead = {
   childTags: [],
+  childThreatActors: [],
+  childThreats: [],
   comments: [],
   description: "",
   disposition: null,

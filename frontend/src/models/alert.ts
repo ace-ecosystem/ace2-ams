@@ -34,6 +34,8 @@ export interface alertCreate extends nodeCreate {
 
 export interface alertRead extends nodeRead {
   childTags: nodeTagRead[];
+  childThreatActors: nodeThreatActorRead[];
+  childThreats: nodeThreatRead[];
   comments: nodeCommentRead[];
   description: string | null;
   disposition: alertDispositionRead | null;
