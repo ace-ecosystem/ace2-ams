@@ -1,6 +1,6 @@
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
 
-import FilterInput from "@/components/UserInterface/FilterInput.vue";
+import FilterInput from "@/components/Filters/FilterInput.vue";
 import { mount } from "@vue/test-utils";
 import { filterTypes } from "@/etc/constants";
 import { useObservableTypeStore } from "@/stores/observableType";
