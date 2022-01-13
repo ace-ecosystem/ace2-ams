@@ -38,6 +38,7 @@ export const useFilterStore = defineStore({
         Object.entries(payload.filters).filter(([_, v]) => !isEmpty(v)),
       );
       this.$state[payload.filterType] = nonEmptyFilters;
+      localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
 
     setFilter(payload: {
@@ -48,6 +49,7 @@ export const useFilterStore = defineStore({
       if (!isEmpty(payload.filterValue)) {
         this.$state[payload.filterType][payload.filterName] =
           payload.filterValue;
+      localStorage.setItem("aceFilters", JSON.stringify(this.$state));
       }
     },
 
@@ -56,10 +58,12 @@ export const useFilterStore = defineStore({
       filterName: alertFilterNameTypes;
     }) {
       delete this.$state[payload.filterType][payload.filterName];
+      localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
 
     clearAll(payload: { filterType: "alerts" }) {
       this.$state[payload.filterType] = {};
+      localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
   },
 });
