@@ -448,6 +448,8 @@ export const mockAlert: alertTreeRead = {
       uuid: "a0b2d514-c544-4a8f-a059-b6151b9f1dd6",
     },
   ],
+  childThreatActors: [],
+  childThreats: [],
   tags: [],
   threatActors: [],
   threats: [],

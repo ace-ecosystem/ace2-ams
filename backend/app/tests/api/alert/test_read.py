@@ -430,17 +430,23 @@ def test_get_filter_tags(client_valid_access_token, db):
 
 
 def test_get_filter_threat_actors(client_valid_access_token, db):
-    helpers.create_alert(db)
+    alert_tree1 = helpers.create_alert(db)
+    helpers.create_observable(type="fqdn", value="bad.com", parent_tree=alert_tree1, db=db, threat_actors=["bad_guys"])
     helpers.create_alert(db, threat_actors=["test_actor"])
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
     assert get.json()["total"] == 2
 
-    # There should only be 1 alert when we filter by a single threat
+    # There should be 1 alert when we filter test_actor
     get = client_valid_access_token.get("/api/alert/?threat_actors=test_actor")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["threat_actors"][0]["value"] == "test_actor"
+
+    # There should be 1 alert when we filter by the child observable threat_actor
+    get = client_valid_access_token.get("/api/alert/?threat_actors=bad_guys")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["child_threat_actors"][0]["value"] == "bad_guys"
 
     # All the alerts should be returned if you don't specify anything for the filter
     get = client_valid_access_token.get("/api/alert/?threat_actors=")
@@ -448,7 +454,8 @@ def test_get_filter_threat_actors(client_valid_access_token, db):
 
 
 def test_get_filter_threats(client_valid_access_token, db):
-    helpers.create_alert(db)
+    alert_tree1 = helpers.create_alert(db)
+    helpers.create_observable(type="fqdn", value="bad.com", parent_tree=alert_tree1, db=db, threats=["malz"])
     helpers.create_alert(db, threats=["threat1"])
     helpers.create_alert(db, threats=["threat2", "threat3", "threat4"])
 
@@ -456,18 +463,23 @@ def test_get_filter_threats(client_valid_access_token, db):
     get = client_valid_access_token.get("/api/alert/")
     assert get.json()["total"] == 3
 
-    # There should only be 1 alert when we filter by a single threat
+    # There should be 1 alert when we filter by threat1
     get = client_valid_access_token.get("/api/alert/?threats=threat1")
     assert get.json()["total"] == 1
     assert len(get.json()["items"][0]["threats"]) == 1
     assert get.json()["items"][0]["threats"][0]["value"] == "threat1"
 
-    # There should only be 1 alert when we filter by multiple threats
+    # There should be 1 alert when we filter by threat2 AND threat3
     get = client_valid_access_token.get("/api/alert/?threats=threat2,threat3")
     assert get.json()["total"] == 1
     assert len(get.json()["items"][0]["threats"]) == 3
     assert any(t["value"] == "threat2" for t in get.json()["items"][0]["threats"])
     assert any(t["value"] == "threat3" for t in get.json()["items"][0]["threats"])
+
+    # There should be 1 alert when we filter by the child observable threat
+    get = client_valid_access_token.get("/api/alert/?threats=malz")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["child_threats"][0]["value"] == "malz"
 
     # All the alerts should be returned if you don't specify any threats for the filter
     get = client_valid_access_token.get("/api/alert/?threats=")

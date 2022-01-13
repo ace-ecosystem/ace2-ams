@@ -12,6 +12,8 @@ const mockAlertReadA = Object.assign({}, mockAlert, { uuid: "uuid1" });
 const mockAlertReadB = Object.assign({}, mockAlert, { uuid: "uuid2" });
 const mockAlertReadC: alertRead = {
   childTags: [],
+  childThreatActors: [],
+  childThreats: [],
   description: "test description",
   disposition: {
     value: "FALSE_POSITIVE",
