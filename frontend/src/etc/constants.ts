@@ -70,9 +70,6 @@ export const alertFilters: readonly filterOption[] = [
     store: useUserStore,
     optionProperty: "displayName",
     valueProperty: "username",
-    stringRepr: (filter: userRead) => {
-      return filter.username;
-    },
   },
   {
     name: alertFilterNames.DISPOSITIONED_AFTER_FILTER,

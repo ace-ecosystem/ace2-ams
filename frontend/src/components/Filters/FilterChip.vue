@@ -1,6 +1,6 @@
 <!-- FilterTag.vue -->
 <!-- A tag that shows a currently applied filter (by type, ex. 'queue' or 'owner' -->
-<!-- Contains actions to remove/edit/add a filter through click actions or a dropdown menu-->
+<!-- Contains actions to remove (and eventually edit/add) a filter through click actions -->
 <template>
   <span style="padding: 2px">
     <Chip>
@@ -22,30 +22,31 @@
 </template>
 
 <script setup>
+  import { inject, computed, defineProps } from "vue";
+
+  import { useFilterStore } from "@/stores/filter";
+
   import { alertFilters } from "@/etc/constants";
   import { isObject } from "@/etc/helpers";
   import Chip from "primevue/chip";
 
-  import { inject, computed, defineProps } from "vue";
-
-  import { useFilterStore } from "@/stores/filter";
-  const filterStore = useFilterStore();
-  const filterType = inject("filterType");
-
   const props = defineProps({
     filterName: { type: String, required: true },
-    filterValue: { type: Object, required: true },
+    filterValue: { type: [String, Object, Array, Date], required: true },
   });
 
-  const filterNameObject = computed(() => {
-    let filterNameObject = alertFilters.find((filter) => {
-      return filter.name === props.filterName;
-    });
-    return filterNameObject ? filterNameObject : null;
+  const filterStore = useFilterStore();
+  const filterType = inject("filterType");
+  const filterOptions = filterType === "alerts" ? alertFilters : [];
+  const filterNameObject = filterOptions.find((filter) => {
+    return filter.name === props.filterName;
   });
 
   const filterLabel = computed(() => {
-    return filterNameObject.value.label;
+    if (filterNameObject) {
+      return filterNameObject.label;
+    }
+    return "";
   });
 
   function unsetFilter() {
@@ -56,11 +57,12 @@
   }
 
   function formatValue(value) {
-    console.log(filterNameObject.value.formatForAPI);
-    if (filterNameObject.value.stringRepr) {
-      return filterNameObject.value.stringRepr(value);
-    } else if (filterNameObject.value.optionProperty && isObject(value)) {
-      return value[filterNameObject.value.optionProperty];
+    if (filterNameObject) {
+      if (filterNameObject.stringRepr) {
+        return filterNameObject.stringRepr(value);
+      } else if (filterNameObject.optionProperty && isObject(value)) {
+        return value[filterNameObject.optionProperty];
+      }
     }
 
     return value;
