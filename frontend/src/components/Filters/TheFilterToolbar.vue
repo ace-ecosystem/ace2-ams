@@ -4,30 +4,14 @@
 <template>
   <Toolbar style="overflow-x: auto">
     <template #start>
-      <!--      DATE PICKERS  -->
-      <DateRangePicker />
-      <!--      EDIT FILTERS -->
       <Button
         type="button"
         icon="pi pi-filter"
         label="Edit"
         class="p-button-outlined p-m-1"
-        style="float: right"
         @click="open('EditFilterModal')"
       />
       <EditFilterModal name="EditFilterModal" />
-    </template>
-    <!--    TODO: SHOW APPLIED FILTERS -->
-    <template #end>
-      <!--      CLEAR FILTERS-->
-      <Button
-        type="button"
-        icon="pi pi-filter-slash"
-        label="Clear"
-        class="p-button-outlined p-m-1"
-        @click="clear"
-      />
-      <!--      RESET FILTERS-->
       <Button
         type="button"
         icon="pi pi-refresh"
@@ -35,8 +19,28 @@
         class="p-button-outlined p-m-1"
         @click="reset"
       />
+      <Button
+        type="button"
+        icon="pi pi-filter-slash"
+        label="Clear"
+        class="p-button-outlined p-m-1"
+        @click="clear"
+      />
+    </template>
+    <template #end>
+      <DateRangePicker />
       <Button icon="pi pi-link" class="p-button-rounded" @click="copyLink" />
     </template>
+  </Toolbar>
+  <Toolbar
+    v-if="Object.keys(filterStore[filterType]).length"
+    class="transparent-toolbar"
+  >
+    <template #start>
+      <FilterChipContainer></FilterChipContainer>
+    </template>
+
+    <template #end> </template>
   </Toolbar>
 </template>
 
@@ -59,6 +63,7 @@
   import { copyToClipboard } from "@/etc/helpers";
 
   import { formatForAPI } from "@/services/api/alert";
+  import FilterChipContainer from "./FilterChipContainer.vue";
 
   const filterType = inject("filterType");
 
@@ -92,3 +97,11 @@
     filterStore.clearAll({ filterType: filterType });
   };
 </script>
+
+<style>
+  .transparent-toolbar {
+    background: none;
+    border: none;
+    padding-bottom: 0;
+  }
+</style>

@@ -1,13 +1,7 @@
 import { alertFilterNameTypes } from "@/models/alert";
 import { filterOption } from "@/models/base";
-import { alertDispositionRead } from "@/models/alertDisposition";
-import { alertQueueRead } from "@/models/alertQueue";
-import { alertToolRead } from "@/models/alertTool";
-import { alertToolInstanceRead } from "@/models/alertToolInstance";
-import { alertTypeRead } from "@/models/alertType";
 import { nodeTagRead } from "@/models/nodeTag";
 import { nodeThreatRead } from "@/models/nodeThreat";
-import { nodeThreatActorRead } from "@/models/nodeThreatActor";
 import { observableTypeRead } from "@/models/observableType";
 import { userRead } from "@/models/user";
 
@@ -84,6 +78,9 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.DISPOSITIONED_AFTER_FILTER,
     label: "Dispositioned After",
     type: filterTypes.DATE,
+    stringRepr: (filter: Date) => {
+      return filter.toISOString();
+    },
     parseStringRepr: (filterString: string) => {
       return new Date(filterString);
     },
@@ -92,6 +89,9 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.DISPOSITIONED_BEFORE_FILTER,
     label: "Dispositioned Before",
     type: filterTypes.DATE,
+    stringRepr: (filter: Date) => {
+      return filter.toISOString();
+    },
     parseStringRepr: (filterString: string) => {
       return new Date(filterString);
     },
@@ -109,6 +109,9 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.EVENT_TIME_AFTER_FILTER,
     label: "Event Time After",
     type: filterTypes.DATE,
+    stringRepr: (filter: Date) => {
+      return filter.toISOString();
+    },
     parseStringRepr: (filterString: string) => {
       return new Date(filterString);
     },
@@ -117,6 +120,9 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.EVENT_TIME_BEFORE_FILTER,
     label: "Event Time Before",
     type: filterTypes.DATE,
+    stringRepr: (filter: Date) => {
+      return filter.toISOString();
+    },
     parseStringRepr: (filterString: string) => {
       return new Date(filterString);
     },
@@ -125,6 +131,9 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.INSERT_TIME_AFTER_FILTER,
     label: "Insert Time After",
     type: filterTypes.DATE,
+    stringRepr: (filter: Date) => {
+      return filter.toISOString();
+    },
     parseStringRepr: (filterString: string) => {
       return new Date(filterString);
     },
@@ -133,6 +142,9 @@ export const alertFilters: readonly filterOption[] = [
     name: alertFilterNames.INSERT_TIME_BEFORE_FILTER,
     label: "Insert Time Before",
     type: filterTypes.DATE,
+    stringRepr: (filter: Date) => {
+      return filter.toISOString();
+    },
     parseStringRepr: (filterString: string) => {
       return new Date(filterString);
     },
