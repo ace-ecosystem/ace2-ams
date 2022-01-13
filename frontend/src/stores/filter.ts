@@ -5,6 +5,13 @@ import {
   alertFilterNameTypes,
 } from "@/models/alert";
 
+function isEmpty(value: unknown) {
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+  return !value;
+}
+
 export const useFilterStore = defineStore({
   id: "filterStore",
 
@@ -17,7 +24,10 @@ export const useFilterStore = defineStore({
       filterType: "alerts";
       filters: alertFilterParams;
     }) {
-      this.$state[payload.filterType] = payload.filters;
+      const nonEmptyFilters = Object.fromEntries(
+        Object.entries(payload.filters).filter(([_, v]) => v),
+      );
+      this.$state[payload.filterType] = nonEmptyFilters;
     },
 
     setFilter(payload: {
@@ -25,7 +35,10 @@ export const useFilterStore = defineStore({
       filterName: alertFilterNameTypes;
       filterValue: alertFilterValues;
     }) {
-      this.$state[payload.filterType][payload.filterName] = payload.filterValue;
+      if (!isEmpty(payload.filterValue)) {
+        this.$state[payload.filterType][payload.filterName] =
+          payload.filterValue;
+      }
     },
 
     unsetFilter(payload: {
