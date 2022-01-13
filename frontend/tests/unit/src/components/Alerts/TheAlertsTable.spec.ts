@@ -18,6 +18,9 @@ import { createRouterMock, injectRouterMock } from "vue-router-mock";
 import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
 const mockAPIAlert: alertRead = {
+  childTags: [],
+  childThreatActors: [],
+  childThreats: [],
   comments: [],
   description: "",
   disposition: null,
