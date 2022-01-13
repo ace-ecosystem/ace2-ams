@@ -2,6 +2,7 @@
 <!-- A toolbar containing buttons/inputs to display/change applied filters for a given set of items (ex. alerts or events) -->
 
 <template>
+  <!-- Filter Action Toolbar -->
   <Toolbar style="overflow-x: auto">
     <template #start>
       <Button
@@ -32,10 +33,9 @@
       <Button icon="pi pi-link" class="p-button-rounded" @click="copyLink" />
     </template>
   </Toolbar>
-  <Toolbar
-    v-if="Object.keys(filterStore[filterType]).length"
-    class="transparent-toolbar"
-  >
+
+  <!-- Filter Chips "Toolbar" -->
+  <Toolbar v-if="!filtersAreEmpty" class="transparent-toolbar">
     <template #start>
       <FilterChipContainer></FilterChipContainer>
     </template>
@@ -51,24 +51,28 @@
 </script>
 
 <script setup>
-  import { inject } from "vue";
+  import { computed, inject } from "vue";
 
   import Button from "primevue/button";
+  import FilterChipContainer from "./FilterChipContainer.vue";
   import DateRangePicker from "@/components/UserInterface/DateRangePicker";
   import EditFilterModal from "@/components/Modals/FilterModal";
   import Toolbar from "primevue/toolbar";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
-  import { copyToClipboard } from "@/etc/helpers";
-
-  import { formatForAPI } from "@/services/api/alert";
-  import FilterChipContainer from "./FilterChipContainer.vue";
-
-  const filterType = inject("filterType");
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
+
+  import { formatForAPI } from "@/services/api/alert";
+  import { copyToClipboard } from "@/etc/helpers";
+
+  const filterType = inject("filterType");
+
+  const filtersAreEmpty = computed(() => {
+    return Object.keys(filterStore[filterType]).length === 0;
+  });
 
   function generateLink() {
     let link = `${window.location.origin}/manage_alerts`;
@@ -81,10 +85,12 @@
     }
     return link;
   }
+
   function copyLink() {
     const link = generateLink();
     copyToClipboard(link);
   }
+
   const clear = () => {
     filterStore.clearAll({ filterType: filterType });
   };

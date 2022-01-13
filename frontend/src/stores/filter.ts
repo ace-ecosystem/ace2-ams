@@ -5,11 +5,17 @@ import {
   alertFilterNameTypes,
 } from "@/models/alert";
 
-function isEmpty(value: unknown) {
+export function isEmpty(value: unknown): boolean {
+  if (value === null) {
+    return true;
+  }
   if (Array.isArray(value)) {
     return value.length === 0;
   }
-  return !value;
+  if (typeof value === "object") {
+    return Object.keys(value).length == 0;
+  }
+  return Boolean(!value);
 }
 
 export const useFilterStore = defineStore({
@@ -25,7 +31,7 @@ export const useFilterStore = defineStore({
       filters: alertFilterParams;
     }) {
       const nonEmptyFilters = Object.fromEntries(
-        Object.entries(payload.filters).filter(([_, v]) => v),
+        Object.entries(payload.filters).filter(([_, v]) => !isEmpty(v)),
       );
       this.$state[payload.filterType] = nonEmptyFilters;
     },
