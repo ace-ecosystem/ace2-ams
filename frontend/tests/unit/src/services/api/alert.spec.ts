@@ -12,11 +12,18 @@ const MOCK_ALERT_CREATE: alertCreate = {
   type: "test",
   observables: [],
 };
+
 const MOCK_ALERT_UPDATE: alertUpdate = { uuid: "uuid" };
 const MOCK_PARAMS: alertFilterParams = {
   limit: 10,
   offset: 10,
   name: "Test Name",
+  disposition: {
+    rank: 0,
+    description: null,
+    uuid: "1",
+    value: "FALSE_POSITIVE",
+  },
   observableTypes: [
     { value: "testA", description: null, uuid: "1" },
     { value: "testB", description: null, uuid: "2" },
@@ -38,6 +45,7 @@ describe("Alert helpers", () => {
     expect(formattedFilters).toEqual({
       limit: 10,
       offset: 10,
+      disposition: "FALSE_POSITIVE",
       name: "Test Name",
       threats: "threatA,threatB",
       observableTypes: "testA,testB",
@@ -77,7 +85,7 @@ describe("Alert calls", () => {
   it("will make a get request to the /alert/ endpoint when 'readPage' is called with properly formatted params", async () => {
     myNock
       .get(
-        "/alert/?limit=10&offset=10&name=Test+Name&observable_types=testA,testB&tags=tagA,tagB&threats=threatA,threatB&observable=test%7Cexample",
+        "/alert/?limit=10&offset=10&name=Test+Name&disposition=FALSE_POSITIVE&observable_types=testA,testB&tags=tagA,tagB&threats=threatA,threatB&observable=test%7Cexample",
       )
       .reply(200, "Read successful");
     const res = await api.readPage(MOCK_PARAMS);

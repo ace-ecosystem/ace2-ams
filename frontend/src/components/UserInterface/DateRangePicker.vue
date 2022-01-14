@@ -1,6 +1,10 @@
 <template>
   <!--      DATE PICKER OPTIONS  -->
-  <Button icon="pi pi-calendar" @click="toggleOptionsMenu" />
+  <Button
+    icon="pi pi-calendar"
+    data-cy="date-range-picker-options"
+    @click="toggleOptionsMenu"
+  />
   <OverlayPanel ref="op">
     <div class="p-d-flex">
       <Dropdown v-model="currentRangeFilter" :options="rangeFilterOptions" />
@@ -59,6 +63,7 @@
     v-model="startDate"
     mode="dateTime"
     is24hr
+    data-cy="date-range-picker-start"
     @update:model-value="dateSelect($event, startFilter)"
     @update:model-value.delete="dateSelect(null)"
   >
@@ -87,6 +92,7 @@
     v-model="endDate"
     mode="dateTime"
     is24hr
+    data-cy="date-range-picker-end"
     @update:model-value="dateSelect($event, endFilter)"
     @update:model-value.delete="dateSelect(null)"
   >

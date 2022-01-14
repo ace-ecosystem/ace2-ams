@@ -33,7 +33,7 @@ describe("ViewAlert.vue", () => {
   });
 
   it("Renders the expected number of tags", () => {
-    cy.get(".p-chip").should("have.length", 4);
+    cy.get(".p-tag").should("have.length", 4);
   });
 
   it("should automatically collapse repeated observable analysis", () => {
@@ -216,7 +216,7 @@ describe("ViewAlert.vue", () => {
   });
 
   // Tag
-  it("should make a request to update tags and get updated alert when owner is set", () => {
+  it.only("should make a request to update tags and get updated alert when owner is set", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
       "getAlert",
@@ -241,7 +241,11 @@ describe("ViewAlert.vue", () => {
 
   it("will reroute to the Manage Alerts page with tag filter applied when tag clicked", () => {
     // Find the recipient tag and click
-    cy.get(".p-chip-text").contains("recipient").click();
+    cy.get(
+      '[data-cy="email_address: goodguy@company.com"] > :nth-child(1) > :nth-child(3) > :nth-child(1) > .p-tag',
+    )
+      .contains("recipient")
+      .click();
 
     // Should have been rerouted
     cy.url().should("contain", "/manage_alerts");
@@ -250,7 +254,7 @@ describe("ViewAlert.vue", () => {
     cy.get(".p-checkbox-box").should("have.length", 1);
 
     // Verify in the filter modal that the correct filter is set
-    cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
+    cy.get("[data-cy=edit-filters]").click();
     cy.get(":nth-child(1) > .p-dropdown > .p-dropdown-label").should(
       "have.text",
       "Tags",
@@ -275,7 +279,7 @@ describe("ViewAlert.vue", () => {
     cy.get(".p-checkbox-box").should("have.length", 1);
 
     // Verify in the filter modal that the correct filter is set
-    cy.get("#FilterToolbar > .p-toolbar-group-left > .p-m-1").click();
+    cy.get("[data-cy=edit-filters]").click();
     cy.get(
       ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-label",
     ).should("have.text", "Observable");

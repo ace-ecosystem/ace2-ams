@@ -2,41 +2,48 @@
 <!-- A toolbar containing buttons/inputs to display/change applied filters for a given set of items (ex. alerts or events) -->
 
 <template>
+  <!-- Filter Action Toolbar -->
   <Toolbar style="overflow-x: auto">
     <template #start>
-      <!--      DATE PICKERS  -->
-      <DateRangePicker />
-      <!--      EDIT FILTERS -->
       <Button
         type="button"
         icon="pi pi-filter"
         label="Edit"
         class="p-button-outlined p-m-1"
-        style="float: right"
+        data-cy="edit-filters"
         @click="open('EditFilterModal')"
       />
       <EditFilterModal name="EditFilterModal" />
-    </template>
-    <!--    TODO: SHOW APPLIED FILTERS -->
-    <template #end>
-      <!--      CLEAR FILTERS-->
-      <Button
-        type="button"
-        icon="pi pi-filter-slash"
-        label="Clear"
-        class="p-button-outlined p-m-1"
-        @click="clear"
-      />
-      <!--      RESET FILTERS-->
       <Button
         type="button"
         icon="pi pi-refresh"
         label="Reset"
         class="p-button-outlined p-m-1"
+        data-cy="reset-filters"
         @click="reset"
       />
+      <Button
+        type="button"
+        icon="pi pi-filter-slash"
+        label="Clear"
+        class="p-button-outlined p-m-1"
+        data-cy="clear-filters"
+        @click="clear"
+      />
+    </template>
+    <template #end>
+      <DateRangePicker />
       <Button icon="pi pi-link" class="p-button-rounded" @click="copyLink" />
     </template>
+  </Toolbar>
+
+  <!-- Filter Chips "Toolbar" -->
+  <Toolbar v-if="!filtersAreEmpty" class="transparent-toolbar">
+    <template #start>
+      <FilterChipContainer></FilterChipContainer>
+    </template>
+
+    <template #end> </template>
   </Toolbar>
 </template>
 
@@ -47,23 +54,28 @@
 </script>
 
 <script setup>
-  import { inject } from "vue";
+  import { computed, inject } from "vue";
 
   import Button from "primevue/button";
+  import FilterChipContainer from "./FilterChipContainer.vue";
   import DateRangePicker from "@/components/UserInterface/DateRangePicker";
   import EditFilterModal from "@/components/Modals/FilterModal";
   import Toolbar from "primevue/toolbar";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
-  import { copyToClipboard } from "@/etc/helpers";
-
-  import { formatForAPI } from "@/services/api/alert";
-
-  const filterType = inject("filterType");
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
+
+  import { formatForAPI } from "@/services/api/alert";
+  import { copyToClipboard } from "@/etc/helpers";
+
+  const filterType = inject("filterType");
+
+  const filtersAreEmpty = computed(() => {
+    return Object.keys(filterStore[filterType]).length === 0;
+  });
 
   function generateLink() {
     let link = `${window.location.origin}/manage_alerts`;
@@ -76,10 +88,12 @@
     }
     return link;
   }
+
   function copyLink() {
     const link = generateLink();
     copyToClipboard(link);
   }
+
   const clear = () => {
     filterStore.clearAll({ filterType: filterType });
   };
@@ -92,3 +106,11 @@
     filterStore.clearAll({ filterType: filterType });
   };
 </script>
+
+<style>
+  .transparent-toolbar {
+    background: none;
+    border: none;
+    padding-bottom: 0;
+  }
+</style>
