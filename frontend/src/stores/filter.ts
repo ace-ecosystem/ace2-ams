@@ -49,7 +49,7 @@ export const useFilterStore = defineStore({
       if (!isEmpty(payload.filterValue)) {
         this.$state[payload.filterType][payload.filterName] =
           payload.filterValue;
-      localStorage.setItem("aceFilters", JSON.stringify(this.$state));
+        localStorage.setItem("aceFilters", JSON.stringify(this.$state));
       }
     },
 
