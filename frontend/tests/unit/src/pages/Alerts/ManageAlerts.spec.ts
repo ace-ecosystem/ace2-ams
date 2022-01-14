@@ -24,7 +24,7 @@ function factory(
     global: {
       plugins: [createTestingPinia(piniaOptions)],
       directives: { tooltip: Tooltip },
-      stubs: ["TheAlertsTable", "TagModal"],
+      stubs: ["TheAlertsTable", "TagModal", "FilterChipContainer"],
     },
   });
 

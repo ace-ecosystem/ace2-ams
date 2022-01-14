@@ -15,6 +15,7 @@ import Paginator from "primevue/paginator";
 import { alertRead } from "@/models/alert";
 import { useFilterStore } from "@/stores/filter";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
+import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
 const mockAPIAlert: alertRead = {
   childTags: [],
@@ -54,12 +55,13 @@ function factory(options?: TestingOptions) {
   });
 
   const filterStore = useFilterStore();
+  const selectedAlertStore = useSelectedAlertStore();
 
-  return { wrapper, filterStore };
+  return { wrapper, filterStore, selectedAlertStore };
 }
 
 // DATA/CREATION
-describe.only("TheAlertsTable data/creation", () => {
+describe("TheAlertsTable data/creation", () => {
   it("renders", async () => {
     const { wrapper } = factory();
     expect(wrapper.exists()).toBe(true);
@@ -214,7 +216,8 @@ describe.only("TheAlertsTable data/creation", () => {
       global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
   });
-  it("will export the alerts table to CSV on exportCSV", async () => {
+  // Skip this test for now since the CSV export needs to be reworked & this test currently gives a warning
+  it.skip("will export the alerts table to CSV on exportCSV", async () => {
     const { wrapper } = factory();
 
     // we cant actually export the CSV in test so mock one of the dependency functions
@@ -280,10 +283,16 @@ describe.only("TheAlertsTable data/creation", () => {
     expect(wrapper.vm.sortOrder).toBeNull();
   });
   it("will reload and clear selected alerts, and clear requestReload on reloadTable", async () => {
-    const { wrapper } = factory();
+    myNock
+      .get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0")
+      .twice()
+      .reply(200, {
+        items: [mockAPIAlert, mockAPIAlert],
+        total: 2,
+      });
+    const { wrapper, selectedAlertStore } = factory({ stubActions: false });
 
-    wrapper.vm.selectedAlertStore.selectAll(["uuid1", "uuid2", "uuid3"]);
-    wrapper.vm.selectedRows = ["uuid1", "uuid2", "uuid3"];
+    selectedAlertStore.selected = ["uuid1", "uuid2", "uuid3"];
     wrapper.vm.alertTableStore.requestReload = true;
     await wrapper.vm.reloadTable();
     expect(wrapper.vm.selectedRows).toEqual([]);

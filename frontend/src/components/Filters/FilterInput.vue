@@ -27,7 +27,7 @@
           v-model="filterValue"
           class="inputfield w-16rem"
           :options="filterOptions"
-          :option-label="filterOptionLabel"
+          :option-label="filterOptionProperty"
           type="text"
           @change="updateValue('filterValue', $event.value)"
         ></Dropdown>
@@ -37,7 +37,7 @@
           v-model="filterValue"
           class="inputfield w-16rem"
           :options="filterOptions"
-          :option-label="filterOptionLabel"
+          :option-label="filterOptionProperty"
           type="text"
           @change="updateValue('filterValue', $event.value)"
         ></Multiselect>
@@ -75,7 +75,7 @@
           <Dropdown
             v-model="filterValue.category"
             :options="filterOptions"
-            :option-label="filterOptionLabel"
+            :option-label="filterOptionProperty"
             class="w-16rem"
             type="text"
             @change="
@@ -155,9 +155,9 @@
         }
         return null;
       },
-      filterOptionLabel() {
-        return this.filterName.optionLabel
-          ? this.filterName.optionLabel
+      filterOptionProperty() {
+        return this.filterName.optionProperty
+          ? this.filterName.optionProperty
           : "value";
       },
       isDate() {

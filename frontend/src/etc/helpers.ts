@@ -78,3 +78,7 @@ export function copyToClipboard(text: string) {
 export function isValidDate(d: unknown): boolean {
   return d instanceof Date && !isNaN(d.getTime());
 }
+
+export function isObject(o: unknown): boolean {
+  return typeof o === "object" && o !== null;
+}
