@@ -11,7 +11,6 @@ import { useAlertQueueStore } from "@/stores/alertQueue";
 import { useAlertToolStore } from "@/stores/alertTool";
 import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";
-import { useEventStore } from "@/stores/event";
 import { useEventPreventionToolStore } from "@/stores/eventPreventionTool";
 import { useEventQueueStore } from "@/stores/eventQueue";
 import { useEventRiskLevelStore } from "@/stores/eventRiskLevel";
@@ -96,15 +95,6 @@ export const alertFilters: readonly filterOption[] = [
     stringRepr: (filter: Date) => {
       return filter.toISOString();
     },
-    parseStringRepr: (filterString: string) => {
-      return new Date(filterString);
-    },
-  },
-  {
-    name: alertFilterNames.EVENT_UUID_FILTER,
-    label: "Event",
-    type: filterTypes.SELECT,
-    store: useEventStore,
     parseStringRepr: (filterString: string) => {
       return new Date(filterString);
     },
@@ -295,6 +285,7 @@ export const eventFilterNames: Record<string, eventFilterNameTypes> = {
   CREATED_AFTER_FILTER: "createdAfter",
   CREATED_BEFORE_FILTER: "createdBefore",
   DISPOSITION_FILTER: "disposition",
+  NAME_FILTER: "name",
   OBSERVABLE_TYPES_FILTER: "observableTypes",
   OBSERVABLE_VALUE_FILTER: "observableValue",
   OWNER_FILTER: "owner",
@@ -339,6 +330,11 @@ export const eventFilters: readonly filterOption[] = [
     store: useAlertDispositionStore,
     optionProperty: "value",
     valueProperty: "value",
+  },
+  {
+    name: eventFilterNames.NAME_FILTER,
+    label: "Name",
+    type: filterTypes.INPUT_TEXT,
   },
   {
     name: eventFilterNames.OBSERVABLE_FILTER,
