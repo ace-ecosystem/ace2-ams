@@ -41,9 +41,9 @@ describe("TheFilterToolbar.vue", () => {
   it("correctly computes whether given filterType filters are empty", () => {
     const { wrapper, filterStore } = factory();
 
-    filterStore.alerts = {test: "test_value"}
+    filterStore.alerts = { test: "test_value" };
     expect(wrapper.vm.filtersAreEmpty).toBeFalsy();
-    filterStore.alerts = {}
+    filterStore.alerts = {};
     expect(wrapper.vm.filtersAreEmpty).toBeTruthy();
   });
   it("correctly calls Pinia action", () => {

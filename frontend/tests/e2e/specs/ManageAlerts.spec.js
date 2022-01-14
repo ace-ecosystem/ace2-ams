@@ -23,7 +23,9 @@ describe("ManageAlerts.vue", () => {
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_after=*",
     ).as("getAlerts");
     // Click the first available day in the date picker for 'start' input
-    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext").click();
+    cy.get(
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+    ).click();
     cy.get(".vc-popover-content").should("be.visible");
     cy.get(".in-month > .vc-day-content").first().click({ force: true });
     // Alerts should reload
@@ -36,7 +38,10 @@ describe("ManageAlerts.vue", () => {
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_after=2021-03-02T*",
     ).as("getAlerts");
     // Type the date into the 'start' input
-    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext").click().clear().type("03/02/2021 13:00");
+    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext")
+      .click()
+      .clear()
+      .type("03/02/2021 13:00");
     // Alerts should reload
     cy.wait("@getAlerts").its("state").should("eq", "Complete");
   });
@@ -47,7 +52,9 @@ describe("ManageAlerts.vue", () => {
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_before=*",
     ).as("getAlerts");
     // Click the first available day in the date picker for 'end' input
-    cy.get("[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext").click();
+    cy.get(
+      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext",
+    ).click();
     cy.get(".vc-popover-content").should("be.visible");
     cy.get(".in-month > .vc-day-content").first().click({ force: true });
     cy.wait("@getAlerts").its("state").should("eq", "Complete");
@@ -59,7 +66,10 @@ describe("ManageAlerts.vue", () => {
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_before=2021-03-02T*",
     ).as("getAlerts");
     // Type the date into the 'end' input
-    cy.get("[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext").click().clear().type("03/02/2021 13:00");
+    cy.get("[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext")
+      .click()
+      .clear()
+      .type("03/02/2021 13:00");
     // Alerts should reload
 
     cy.wait("@getAlerts").its("state").should("eq", "Complete");
@@ -83,8 +93,12 @@ describe("ManageAlerts.vue", () => {
       timeout: 10000,
     }).click();
     // Make sure the ranges were correctly set
-    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext").should("have.value", todayStartString);
-    cy.get("[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext").should("have.value", todayEndString);
+    cy.get(
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+    ).should("have.value", todayStartString);
+    cy.get(
+      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext",
+    ).should("have.value", todayEndString);
   });
   it("will clear a time filter when its 'delete' button is clicked", () => {
     // Set the date range to 'today' using the date options dropdown
@@ -97,12 +111,16 @@ describe("ManageAlerts.vue", () => {
     // Click the 'start' input delete button
     cy.get(":nth-child(2) > .p-inputgroup > .p-button").click();
     // Should now be empty
-    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext").should("have.value", "");
+    cy.get(
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+    ).should("have.value", "");
 
     // Click the 'end' input delete button
     cy.get(":nth-child(4) > .p-inputgroup > .p-button").click();
     // Should now be empty
-    cy.get("[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext").should("have.value", "");
+    cy.get(
+      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext",
+    ).should("have.value", "");
   });
   it("will clear both time filters when either the filter 'Clear' or 'Reset' buttons are clicked", () => {
     // Set the date range to 'today' using the date options dropdown
@@ -115,8 +133,12 @@ describe("ManageAlerts.vue", () => {
     // Click the 'clear' button
     cy.get("[data-cy=clear-filters]").click();
     // Both inputs should now be empty
-    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext").should("have.value", "");
-    cy.get("[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext").should("have.value", "");
+    cy.get(
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+    ).should("have.value", "");
+    cy.get(
+      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext",
+    ).should("have.value", "");
 
     // Set the date range to 'today' using the date options dropdown (again)
     cy.get('[data-cy="date-range-picker-options"]').click();
@@ -128,8 +150,12 @@ describe("ManageAlerts.vue", () => {
     // Click the 'reset' button
     cy.get("[data-cy=reset-filters]").click();
     // Both inputs should now be empty
-    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext").should("have.value", "");
-    cy.get("[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext").should("have.value", "");
+    cy.get(
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+    ).should("have.value", "");
+    cy.get(
+      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext",
+    ).should("have.value", "");
   });
   it("will use the set time filter will be used for requests ", () => {
     cy.intercept(
@@ -146,7 +172,10 @@ describe("ManageAlerts.vue", () => {
     cy.get('[aria-label="Insert Time"]').click();
 
     // Manually type the given time
-    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext").click().clear().type("03/02/2021 13:00");
+    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext")
+      .click()
+      .clear()
+      .type("03/02/2021 13:00");
 
     // Check that the right request is made
     cy.wait("@getAlerts", {
@@ -157,9 +186,14 @@ describe("ManageAlerts.vue", () => {
   });
   it("will clear the set filters when default time filter changed", () => {
     // Manually type the given time
-    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext").click().clear().type("03/02/2021 13:00");
+    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext")
+      .click()
+      .clear()
+      .type("03/02/2021 13:00");
     // Just verifying that right  time was entered
-    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext").should("have.value", "03/02/2021 13:00");
+    cy.get(
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+    ).should("have.value", "03/02/2021 13:00");
 
     cy.intercept(
       "GET",
@@ -177,7 +211,9 @@ describe("ManageAlerts.vue", () => {
     cy.wait("@getAlertsNoFilters").its("state").should("eq", "Complete");
 
     // And the input should be cleared
-    cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext").should("have.value", "");
+    cy.get(
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+    ).should("have.value", "");
   });
 });
 
@@ -436,7 +472,7 @@ describe("Manage Alerts Tags", () => {
       .eq(0)
       .within(() => {
         cy.get(".p-tag").contains("TestTag").should("have.text", "TestTag");
-         cy.get(".p-tag").contains("scan_me").should("have.text", "scan_me");
+        cy.get(".p-tag").contains("scan_me").should("have.text", "scan_me");
       });
   });
 });
@@ -635,5 +671,51 @@ describe("Manage Alerts URL Param Filters", () => {
       "Manual Alert 4.3.2.1",
     );
     cy.get("[data-cy=tags]").contains("TestTag").should("exist");
+  });
+});
+
+describe("Manage Alerts Filters Chips", () => {
+  before(() => {
+    cy.log("logging in");
+    cy.login();
+  });
+
+  beforeEach(() => {
+    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
+    cy.visit("/manage_alerts");
+    cy.url().should("contain", "/manage_alerts");
+    cy.wait(2000);
+  });
+
+  it("will display a set filter as chip in chips toolbar", () => {
+    // Find the TestTag tag and click to set filter
+    cy.get("[data-cy=tags]").contains("TestTag").click();
+
+    // Check that the filter chip container is visible
+    cy.get(".transparent-toolbar").should("exist");
+    // Check that the filter chip is visible and has right text
+    cy.get(".p-chip").should("exist");
+    cy.get(".p-chip > .filter-name-text").should("have.text", "Tags:");
+    cy.get(".p-chip > .link-text").should("have.text", "TestTag");
+  });
+
+  it("will delete a filter and remove chip when it's value in the filter chip is clicked", () => {
+    // Find the TestTag tag and click to set filter
+    cy.get("[data-cy=tags]").contains("TestTag").click();
+
+    // Click the filter value
+    cy.get(".p-chip > .link-text").click();
+    cy.get(".transparent-toolbar").should("not.exist");
+    cy.get(".p-chip").should("not.exist");
+  });
+
+  it("will delete a filter and remove chip when the close icon in the filter chip is clicked", () => {
+    // Find the TestTag tag and click to set filter
+    cy.get("[data-cy=tags]").contains("TestTag").click();
+
+    // Click the close icon
+    cy.get(".p-chip > .pi").click();
+    cy.get(".transparent-toolbar").should("not.exist");
+    cy.get(".p-chip").should("not.exist");
   });
 });
