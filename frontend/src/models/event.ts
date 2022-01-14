@@ -110,6 +110,7 @@ export interface eventFilterParams extends pageOptionParams {
   createdAfter?: Date;
   createdBefore?: Date;
   disposition?: alertDispositionRead;
+  name?: string;
   observable?: { category: observableTypeRead; value: string };
   observableTypes?: observableTypeRead[];
   observableValue?: string;
