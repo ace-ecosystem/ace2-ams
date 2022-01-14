@@ -159,7 +159,14 @@
   const filterStore = useFilterStore();
   const selectedEventStore = useSelectedEventStore();
 
-  const defaultColumns = ["date", "name", "owner", "disposition"];
+  const defaultColumns = [
+    "date",
+    "name",
+    "type",
+    "vectors",
+    "owner",
+    "disposition",
+  ];
 
   const eventTableFilter = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
