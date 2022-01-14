@@ -66,13 +66,15 @@
   const modalStore = useModalStore();
 
   function generateLink() {
-    let link = `${window.location.origin}/manage_alerts`;
+    let link = `${window.location.origin}/manage_${filterType}`;
     // If there are filters set, build the link for it
     if (Object.keys(filterStore[filterType]).length) {
       let urlParams = new URLSearchParams(
         formatForAPI(filterStore[filterType]),
       );
-      link = `${window.location.origin}/manage_alerts?${urlParams.toString()}`;
+      link = `${
+        window.location.origin
+      }/manage_${filterType}?${urlParams.toString()}`;
     }
     return link;
   }
