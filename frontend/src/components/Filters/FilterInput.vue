@@ -140,7 +140,10 @@
   });
 
   onMounted(() => {
-    updateValue("filterName", null, filterName.value);
+    if (isDropdown.value) {
+      filterValue.value = filterOptions.value[0];
+    }
+    updateValue("filterName", filterName.value);
   });
 
   const getFilterNameObject = (filterName) => {
@@ -222,6 +225,8 @@
   const clearFilterValue = () => {
     if (isCategorizedValue.value) {
       filterValue.value = { category: filterOptions.value[0], value: null };
+    } else if (isDropdown.value) {
+      filterValue.value = filterOptions.value[0];
     } else {
       filterValue.value = null;
     }
