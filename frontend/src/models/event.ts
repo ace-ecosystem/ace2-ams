@@ -1,4 +1,5 @@
-import { UUID } from "./base";
+import { pageOptionParams, UUID } from "./base";
+import { alertDispositionRead } from "./alertDisposition";
 import { eventPreventionToolRead } from "./eventPreventionTool";
 import { eventQueueRead } from "./eventQueue";
 import { eventRemediationRead } from "./eventRemediation";
@@ -12,7 +13,24 @@ import { nodeCommentRead } from "./nodeComment";
 import { nodeTagRead } from "./nodeTag";
 import { nodeThreatRead } from "./nodeThreat";
 import { nodeThreatActorRead } from "./nodeThreatActor";
+import { observableTypeRead } from "./observableType";
 import { userRead } from "./user";
+
+// High-level event data that will be displayed in Manage Events
+export interface eventSummary {
+  date: Date;
+  // disposition: string;
+  name: string;
+  owner: string;
+  preventionTools: string[];
+  riskLevel: string;
+  status: string;
+  threatActors?: string[];
+  threats?: string[];
+  type: string;
+  uuid: UUID;
+  vectors: string[];
+}
 
 export interface eventCreate extends nodeCreate {
   alertTime?: Date;
@@ -83,6 +101,51 @@ export interface eventUpdate extends nodeUpdate {
   threatActors?: string[];
   threats?: string[];
   type?: string | null;
+  uuid: UUID;
   vectors?: string[];
   [key: string]: unknown;
 }
+
+export interface eventFilterParams extends pageOptionParams {
+  createdAfter?: Date;
+  createdBefore?: Date;
+  disposition?: alertDispositionRead;
+  observable?: { category: observableTypeRead; value: string };
+  observableTypes?: observableTypeRead[];
+  observableValue?: string;
+  owner?: userRead;
+  preventionTool?: eventPreventionToolRead;
+  queue?: eventQueueRead;
+  riskLevel?: eventRiskLevelRead;
+  status?: eventStatusRead;
+  tags?: string[];
+  threatActor?: nodeThreatActorRead;
+  threats?: nodeThreatRead[];
+  type?: eventTypeRead;
+  vector?: eventVectorRead;
+  [key: string]: any;
+}
+
+export type eventFilterNameTypes = Extract<keyof eventFilterParams, string>;
+
+export type eventFilterValues =
+  | (
+      | alertDispositionRead
+      | Date
+      | eventPreventionToolRead
+      | eventQueueRead
+      | eventRiskLevelRead
+      | eventStatusRead
+      | eventTypeRead
+      | eventVectorRead
+      | nodeThreatActorRead
+      | nodeThreatRead
+      | observableTypeRead
+      | string
+      | userRead
+      | {
+          category: observableTypeRead;
+          value: string;
+        }
+    )
+  | undefined;
