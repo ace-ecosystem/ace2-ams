@@ -1,8 +1,11 @@
 from fastapi import APIRouter, Depends, Request, Response
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import select
+from typing import List
 from uuid import UUID
 
-from api.models.event import EventCreate, EventRead, EventUpdate
+from api.models.event import EventCreate, EventRead, EventUpdateMultiple
 from api.routes import helpers
 from api.routes.node import create_node, update_node
 from db import crud
@@ -83,8 +86,10 @@ helpers.api_route_create(router, create_event)
 #
 
 
-# def get_all_events(db: Session = Depends(get_db)):
-#     return crud.read_all(db_table=Event, db=db)
+def get_all_events(db: Session = Depends(get_db)):
+    query = select(Event)
+
+    return paginate(db, query)
 
 
 def get_event(uuid: UUID, db: Session = Depends(get_db)):
@@ -101,81 +106,81 @@ helpers.api_route_read(router, get_event, EventRead)
 #
 
 
-def update_event(
-    uuid: UUID,
-    event: EventUpdate,
+def update_events(
+    events: List[EventUpdateMultiple],
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    # Update the Node attributes
-    db_event: Event = update_node(node_update=event, uuid=uuid, db_table=Event, db=db)
+    for event in events:
+        # Update the Node attributes
+        db_event: Event = update_node(node_update=event, uuid=event.uuid, db_table=Event, db=db)
 
-    # Get the data that was given in the request and use it to update the database object
-    update_data = event.dict(exclude_unset=True)
+        # Get the data that was given in the request and use it to update the database object
+        update_data = event.dict(exclude_unset=True)
 
-    if "alert_time" in update_data:
-        db_event.alert_time = update_data["alert_time"]
+        if "alert_time" in update_data:
+            db_event.alert_time = update_data["alert_time"]
 
-    if "contain_time" in update_data:
-        db_event.contain_time = update_data["contain_time"]
+        if "contain_time" in update_data:
+            db_event.contain_time = update_data["contain_time"]
 
-    if "disposition_time" in update_data:
-        db_event.disposition_time = update_data["disposition_time"]
+        if "disposition_time" in update_data:
+            db_event.disposition_time = update_data["disposition_time"]
 
-    if "event_time" in update_data:
-        db_event.event_time = update_data["event_time"]
+        if "event_time" in update_data:
+            db_event.event_time = update_data["event_time"]
 
-    if "name" in update_data:
-        db_event.name = update_data["name"]
+        if "name" in update_data:
+            db_event.name = update_data["name"]
 
-    if "owner" in update_data:
-        db_event.owner = crud.read_user_by_username(username=update_data["owner"], db=db)
+        if "owner" in update_data:
+            db_event.owner = crud.read_user_by_username(username=update_data["owner"], db=db)
 
-    if "ownership_time" in update_data:
-        db_event.ownership_time = update_data["ownership_time"]
+        if "ownership_time" in update_data:
+            db_event.ownership_time = update_data["ownership_time"]
 
-    if "prevention_tools" in update_data:
-        db_event.prevention_tools = crud.read_by_values(
-            values=update_data["prevention_tools"],
-            db_table=EventPreventionTool,
-            db=db,
-        )
+        if "prevention_tools" in update_data:
+            db_event.prevention_tools = crud.read_by_values(
+                values=update_data["prevention_tools"],
+                db_table=EventPreventionTool,
+                db=db,
+            )
 
-    if "queue" in update_data:
-        db_event.queue = crud.read_by_value(value=update_data["queue"], db_table=EventQueue, db=db)
+        if "queue" in update_data:
+            db_event.queue = crud.read_by_value(value=update_data["queue"], db_table=EventQueue, db=db)
 
-    if "remediation_time" in update_data:
-        db_event.remediation_time = update_data["remediation_time"]
+        if "remediation_time" in update_data:
+            db_event.remediation_time = update_data["remediation_time"]
 
-    if "remediations" in update_data:
-        db_event.remediations = crud.read_by_values(
-            values=update_data["remediations"],
-            db_table=EventRemediation,
-            db=db,
-        )
+        if "remediations" in update_data:
+            db_event.remediations = crud.read_by_values(
+                values=update_data["remediations"],
+                db_table=EventRemediation,
+                db=db,
+            )
 
-    if "risk_level" in update_data:
-        db_event.risk_level = crud.read_by_value(value=update_data["risk_level"], db_table=EventRiskLevel, db=db)
+        if "risk_level" in update_data:
+            db_event.risk_level = crud.read_by_value(value=update_data["risk_level"], db_table=EventRiskLevel, db=db)
 
-    if "source" in update_data:
-        db_event.source = crud.read_by_value(value=update_data["source"], db_table=EventSource, db=db)
+        if "source" in update_data:
+            db_event.source = crud.read_by_value(value=update_data["source"], db_table=EventSource, db=db)
 
-    if "status" in update_data:
-        db_event.status = crud.read_by_value(value=update_data["status"], db_table=EventStatus, db=db)
+        if "status" in update_data:
+            db_event.status = crud.read_by_value(value=update_data["status"], db_table=EventStatus, db=db)
 
-    if "type" in update_data:
-        db_event.type = crud.read_by_value(value=update_data["type"], db_table=EventType, db=db)
+        if "type" in update_data:
+            db_event.type = crud.read_by_value(value=update_data["type"], db_table=EventType, db=db)
 
-    if "vectors" in update_data:
-        db_event.vectors = crud.read_by_values(values=update_data["vectors"], db_table=EventVector, db=db)
+        if "vectors" in update_data:
+            db_event.vectors = crud.read_by_values(values=update_data["vectors"], db_table=EventVector, db=db)
 
-    crud.commit(db)
+        crud.commit(db)
 
-    response.headers["Content-Location"] = request.url_for("get_event", uuid=uuid)
+        response.headers["Content-Location"] = request.url_for("get_event", uuid=event.uuid)
 
 
-helpers.api_route_update(router, update_event)
+helpers.api_route_update(router, update_events, path="/")
 
 
 #
