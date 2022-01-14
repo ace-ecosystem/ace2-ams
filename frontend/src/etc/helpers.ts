@@ -64,3 +64,20 @@ export function isValidDate(d: unknown): boolean {
 export function isObject(o: unknown): boolean {
   return typeof o === "object" && o !== null;
 }
+
+export function dateParser(key: string, value: unknown) : Date | unknown {
+  const reISO =
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
+  const reMsAjax = /^\/Date\((d|-|.*)\)[/|\\]$/;
+
+  if (typeof value === "string") {
+    let a = reISO.exec(value);
+    if (a) return new Date(value);
+    a = reMsAjax.exec(value);
+    if (a) {
+      const b = a[1].split(/[-+,.]/);
+      return new Date(b[0] ? +b[0] : 0 - +b[1]);
+    }
+  }
+  return value;
+}
