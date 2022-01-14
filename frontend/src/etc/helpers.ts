@@ -65,7 +65,8 @@ export function isObject(o: unknown): boolean {
   return typeof o === "object" && o !== null;
 }
 
-export function dateParser(key: string, value: unknown) : Date | unknown {
+// https://weblog.west-wind.com/posts/2014/jan/06/javascript-json-date-parsing-and-real-dates
+export function dateParser(key: string, value: unknown): Date | unknown {
   const reISO =
     /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
   const reMsAjax = /^\/Date\((d|-|.*)\)[/|\\]$/;
