@@ -3,6 +3,12 @@ import { useAlertQueueStore } from "@/stores/alertQueue";
 import { useAlertToolStore } from "@/stores/alertTool";
 import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";
+import { useEventPreventionToolStore } from "@/stores/eventPreventionTool";
+import { useEventQueueStore } from "@/stores/eventQueue";
+import { useEventRiskLevelStore } from "@/stores/eventRiskLevel";
+import { useEventStatusStore } from "@/stores/eventStatus";
+import { useEventTypeStore } from "@/stores/eventType";
+import { useEventVectorStore } from "@/stores/eventVector";
 import { useNodeDirectiveStore } from "@/stores/nodeDirective";
 import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
@@ -16,6 +22,12 @@ export async function populateCommonStores(): Promise<void> {
   const alertTypeStore = useAlertTypeStore();
   const alertToolStore = useAlertToolStore();
   const alertToolInstanceStore = useAlertToolInstanceStore();
+  const eventPreventionToolStore = useEventPreventionToolStore();
+  const eventQueueStore = useEventQueueStore();
+  const eventRiskLevelStore = useEventRiskLevelStore();
+  const eventStatusStore = useEventStatusStore();
+  const eventTypeStore = useEventTypeStore();
+  const eventVectorStore = useEventVectorStore();
   const nodeDirectiveStore = useNodeDirectiveStore();
   const observableTypeStore = useObservableTypeStore();
   const userStore = useUserStore();
@@ -26,6 +38,12 @@ export async function populateCommonStores(): Promise<void> {
     alertTypeStore.readAll(),
     alertToolStore.readAll(),
     alertToolInstanceStore.readAll(),
+    eventPreventionToolStore.readAll(),
+    eventQueueStore.readAll(),
+    eventRiskLevelStore.readAll(),
+    eventStatusStore.readAll(),
+    eventTypeStore.readAll(),
+    eventVectorStore.readAll(),
     nodeDirectiveStore.readAll(),
     observableTypeStore.readAll(),
     userStore.readAll(),
@@ -57,6 +75,6 @@ export function copyToClipboard(text: string) {
 }
 
 // https://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
-export function isValidDate(d: any) {
+export function isValidDate(d: unknown): boolean {
   return d instanceof Date && !isNaN(d.getTime());
 }
