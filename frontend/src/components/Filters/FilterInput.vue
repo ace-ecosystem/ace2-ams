@@ -112,138 +112,132 @@
   </div>
 </template>
 
-<script>
-  import InputText from "primevue/inputtext";
+<script setup>
+  import {
+    computed,
+    defineEmits,
+    defineProps,
+    inject,
+    onMounted,
+    ref,
+    watch,
+  } from "vue";
 
   import Button from "primevue/button";
+  import Chips from "primevue/chips";
   import Dropdown from "primevue/dropdown";
+  import InputText from "primevue/inputtext";
+  import Multiselect from "primevue/multiselect";
 
   import { DatePicker } from "v-calendar";
 
-  import Chips from "primevue/chips";
+  const availableFilters = inject("availableFilters");
+  const emit = defineEmits(["update:modelValue", "deleteFormFilter"]);
+  const props = defineProps({
+    modelValue: { type: Object, required: true },
+    fixedFilterName: { type: Boolean, required: false },
+    allowDelete: { type: Boolean, required: false },
+  });
 
-  import Multiselect from "primevue/multiselect";
+  onMounted(() => {
+    updateValue("filterName", null, filterName.value);
+  });
 
-  export default {
-    name: "FilterInput",
-    components: {
-      Button,
-      Dropdown,
-      InputText,
-      Multiselect,
-      Chips,
-      DatePicker,
-    },
+  const getFilterNameObject = (filterName) => {
+    if (!filterName) {
+      return availableFilters[0];
+    }
+    let filter = availableFilters.find((filter) => {
+      return filter.name === filterName;
+    });
+    filter = filter ? filter : null;
+    return filter;
+  };
+  const filterName = ref(getFilterNameObject(props.modelValue.filterName));
+  const filterValue = ref(props.modelValue.filterValue);
 
-    inject: ["availableFilters", "filterType"],
+  const filterOptions = computed(() => {
+    if (filterName.value.store) {
+      const store = filterName.value.store();
+      return store.allItems;
+    }
+    return null;
+  });
 
-    props: ["modelValue", "fixedFilterName", "allowDelete"],
-    emits: ["update:modelValue", "deleteFormFilter"],
+  const filterOptionProperty = computed(() => {
+    return filterName.value.optionProperty
+      ? filterName.value.optionProperty
+      : "value";
+  });
 
-    data() {
-      return {
-        filterName: this.getFilterNameObject(this.modelValue.filterName),
-        filterValue: this.modelValue.filterValue,
-      };
-    },
+  const isDate = computed(() => {
+    return inputType.value == "date";
+  });
+  const isCategorizedValue = computed(() => {
+    return inputType.value == "categorizedValue";
+  });
+  const isChips = computed(() => {
+    return inputType.value == "chips";
+  });
 
-    computed: {
-      filterOptions() {
-        if (this.filterName.store) {
-          const store = this.filterName.store();
-          return store.allItems;
-        }
-        return null;
-      },
-      filterOptionProperty() {
-        return this.filterName.optionProperty
-          ? this.filterName.optionProperty
-          : "value";
-      },
-      isDate() {
-        return this.inputType == "date";
-      },
-      isCategorizedValue() {
-        return this.inputType == "categorizedValue";
-      },
-      isChips() {
-        return this.inputType == "chips";
-      },
-      isInputText() {
-        return this.inputType == "inputText";
-      },
-      isDropdown() {
-        return this.inputType == "select";
-      },
-      isMultiSelect() {
-        return this.inputType == "multiselect";
-      },
-      inputType() {
-        return this.filterName ? this.filterName.type : null;
-      },
-    },
+  const isInputText = computed(() => {
+    return inputType.value == "inputText";
+  });
 
-    watch: {
-      filterName: {
-        handler: async function () {
-          if (this.filterName.store) {
-            const store = this.filterName.store();
-            await store.readAll();
-          }
-        },
-      },
-    },
+  const isDropdown = computed(() => {
+    return inputType.value == "select";
+  });
 
-    mounted() {
-      this.updateValue("filterName", null, this.filterName);
-    },
+  const isMultiSelect = computed(() => {
+    return inputType.value == "multiselect";
+  });
 
-    methods: {
-      updatedCategorizedValueObject(attr, event) {
-        let category = null;
-        let value = null;
-        if (attr == "category") {
-          category = event;
-          value = this.filterValue.value;
-        } else {
-          category = this.filterValue.category;
-          value = event;
-        }
-        return {
-          category: category,
-          value: value,
-        };
-      },
-      clearFilterValue() {
-        if (this.isCategorizedValue) {
-          this.filterValue = { category: this.filterOptions[0], value: null };
-        } else {
-          this.filterValue = null;
-        }
-      },
-      getFilterNameObject(filterName) {
-        if (!filterName) {
-          return this.availableFilters[0];
-        }
-        let filter = this.availableFilters.find((filter) => {
-          return filter.name === filterName;
-        });
-        filter = filter ? filter : null;
-        return filter;
-      },
-      updateValue(attribute, newValue) {
-        if (attribute === "filterName") {
-          this.$emit("update:modelValue", {
-            filterName: newValue ? newValue.name : this.filterName.name,
-            filterValue: this.filterValue,
-          });
-        } else if (attribute === "filterValue") {
-          this.$emit("update:modelValue", {
-            filterName: this.filterName.name,
-            filterValue: newValue,
-          });
-        }
-      },
-    },
+  const inputType = computed(() => {
+    return filterName.value ? filterName.value.type : null;
+  });
+
+  watch(filterName, async () => {
+    if (filterName.value.store) {
+      const store = filterName.value.store();
+      await store.readAll();
+    }
+  });
+
+  const updatedCategorizedValueObject = (attr, event) => {
+    let category = null;
+    let value = null;
+    if (attr == "category") {
+      category = event;
+      value = filterValue.value.value;
+    } else {
+      category = filterValue.value.category;
+      value = event;
+    }
+    return {
+      category: category,
+      value: value,
+    };
+  };
+
+  const clearFilterValue = () => {
+    if (isCategorizedValue.value) {
+      filterValue.value = { category: filterOptions.value[0], value: null };
+    } else {
+      filterValue.value = null;
+    }
+  };
+
+  const updateValue = (attribute, newValue) => {
+    if (attribute === "filterName") {
+      emit("update:modelValue", {
+        filterName: newValue ? newValue.name : filterName.value.name,
+        filterValue: filterValue.value,
+      });
+    } else if (attribute === "filterValue") {
+      emit("update:modelValue", {
+        filterName: filterName.value.name,
+        filterValue: newValue,
+      });
+    }
   };
 </script>
