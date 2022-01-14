@@ -675,7 +675,7 @@ describe("Manage Alerts URL Param Filters", () => {
 });
 
 describe("Manage Alerts Filters Chips", () => {
- beforeEach(() => {
+  beforeEach(() => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
