@@ -242,7 +242,7 @@ describe("TheAlertsTable.vue", () => {
       "email_address : badguy@evil.com",
     );
     // Also check that the tag is there for that observable
-    cy.get(":nth-child(1) > .p-chip > .p-chip-text").should(
+    cy.get('[data-cy=tags] > :nth-child(3) > .p-tag > .tag').should(
       "have.text",
       "from_address",
     );
@@ -279,7 +279,7 @@ describe("TheAlertsTable.vue", () => {
     // List of observables should now exist
     cy.get("td > ul").should("exist").should("be.visible");
     // Find and click the first observable tag in list
-    cy.get(":nth-child(1) > .p-chip > .p-chip-text")
+    cy.get('[data-cy=tags] > :nth-child(3) > .p-tag > .tag')
       .should("have.text", "from_address")
       .click();
     // Wait for the filtered view to be requested

@@ -10,6 +10,7 @@
         icon="pi pi-filter"
         label="Edit"
         class="p-button-outlined p-m-1"
+        data-cy="edit-filters"
         @click="open('EditFilterModal')"
       />
       <EditFilterModal name="EditFilterModal" />
@@ -18,6 +19,7 @@
         icon="pi pi-refresh"
         label="Reset"
         class="p-button-outlined p-m-1"
+        data-cy="reset-filters"
         @click="reset"
       />
       <Button
@@ -25,6 +27,7 @@
         icon="pi pi-filter-slash"
         label="Clear"
         class="p-button-outlined p-m-1"
+        data-cy="clear-filters"
         @click="clear"
       />
     </template>
