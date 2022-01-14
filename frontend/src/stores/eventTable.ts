@@ -5,7 +5,7 @@ import { eventFilterParams, eventRead, eventSummary } from "@/models/event";
 
 export function parseEventSummary(event: eventRead): eventSummary {
   return {
-    date: event.creationTime,
+    createdTime: event.creationTime,
     // disposition: event.disposition,  // Need to edit the API so that it adds disposition into the Event response
     name: event.name,
     owner: event.owner ? event.owner.displayName : "None",

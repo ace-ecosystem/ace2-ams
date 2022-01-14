@@ -18,7 +18,7 @@ import { userRead } from "./user";
 
 // High-level event data that will be displayed in Manage Events
 export interface eventSummary {
-  date: Date;
+  createdTime: Date;
   // disposition: string;
   name: string;
   owner: string;

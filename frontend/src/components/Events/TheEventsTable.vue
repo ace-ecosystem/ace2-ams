@@ -106,6 +106,9 @@
         <span v-else-if="col.field.includes('Time')">
           {{ formatDateTime(data[col.field]) }}</span
         >
+        <span v-else-if="Array.isArray(data[col.field])">
+          {{ joinStringArray(data[col.field]) }}
+        </span>
         <span v-else> {{ data[col.field] }}</span>
       </template>
     </Column>
@@ -160,7 +163,7 @@
   const selectedEventStore = useSelectedEventStore();
 
   const defaultColumns = [
-    "date",
+    "createdTime",
     "name",
     "type",
     "vectors",
@@ -173,7 +176,7 @@
   });
 
   const columns = ref([
-    { field: "date", header: "Date" },
+    { field: "createdTime", header: "Created" },
     { field: "name", header: "Name" },
     { field: "owner", header: "Owner" },
     { field: "status", header: "Status" },
@@ -326,6 +329,10 @@
       sortField.value = null;
       sortOrder.value = null;
     }
+  };
+
+  const joinStringArray = (arr) => {
+    return arr.join(", ");
   };
 </script>
 
