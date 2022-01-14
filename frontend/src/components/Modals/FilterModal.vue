@@ -6,7 +6,7 @@
     :name="name"
     header="Edit Filters"
     class="xl: w-5 lg:w-5 md:w-8"
-    @dialogClose="resetFormFilters"
+    @dialogClose="loadFormFilters"
   >
     <div class="flex flex-wrap">
       <FilterInput
@@ -45,7 +45,7 @@
 </template>
 
 <script setup>
-  import { computed, defineProps, inject, ref } from "vue";
+  import { computed, defineProps, inject, onMounted, ref } from "vue";
 
   import Button from "primevue/button";
 
@@ -58,6 +58,10 @@
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
 
+  onMounted(() => {
+    loadFormFilters();
+  });
+
   const props = defineProps({
     name: { type: String, required: true },
   });
@@ -66,7 +70,7 @@
 
   filterStore.$subscribe(
     () => {
-      resetFormFilters();
+      loadFormFilters();
     },
     { deep: true },
   );
@@ -105,7 +109,7 @@
     formFilters.value.push({ filterName: null, filterValue: null });
   };
 
-  const resetFormFilters = () => {
+  const loadFormFilters = () => {
     formFilters.value = [];
     for (const filter in filterStore.$state[filterType]) {
       formFilters.value.push({
@@ -116,7 +120,7 @@
   };
 
   const close = () => {
-    resetFormFilters();
+    loadFormFilters();
     modalStore.close(props.name);
   };
 </script>

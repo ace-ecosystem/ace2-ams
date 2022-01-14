@@ -201,27 +201,18 @@ describe("TheAlertsTable.vue", () => {
     // check api call
     cy.wait("@nameSortDesc").its("state").should("eq", "Complete");
     // check first alerts name
-    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(4)").should(
-      "have.text",
-      "Small Alert",
-    );
+    cy.get('[data-cy="alertName"]').eq(0).should("have.text", "Small Alert");
     // sort by name again, this time it will remove all sorts
     cy.get(".p-datatable-thead > tr > :nth-child(4)").click();
     // there shouldn't be an API call this time
     // check first alerts name (will be the same)
-    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(4)").should(
-      "have.text",
-      "Small Alert",
-    );
+    cy.get('[data-cy="alertName"]').eq(0).should("have.text", "Small Alert");
     // sort by event time again, will default to ascending
     cy.get(".p-datatable-thead > tr > :nth-child(3)").click();
     // check api call
     cy.wait("@eventTimeSortAsc").its("state").should("eq", "Complete");
     // check first alerts name
-    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(4)").should(
-      "have.text",
-      "Small Alert",
-    );
+    cy.get('[data-cy="alertName"]').eq(0).should("have.text", "Small Alert");
     // click the reset table button
     cy.get(
       ".p-datatable-header > .p-toolbar > .p-toolbar-group-right > :nth-child(2)",
@@ -229,10 +220,7 @@ describe("TheAlertsTable.vue", () => {
     // check api call
     cy.wait("@defaultSort").its("state").should("eq", "Complete");
     // check first alerts name
-    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(4)").should(
-      "have.text",
-      "Small Alert",
-    );
+    cy.get('[data-cy="alertName"]').eq(0).should("have.text", "Small Alert");
   });
 
   // This test broken by pagination changes
@@ -254,7 +242,7 @@ describe("TheAlertsTable.vue", () => {
       "email_address : badguy@evil.com",
     );
     // Also check that the tag is there for that observable
-    cy.get(":nth-child(1) > .p-chip > .p-chip-text").should(
+    cy.get("[data-cy=tags] > :nth-child(3) > .p-tag > .tag").should(
       "have.text",
       "from_address",
     );
@@ -291,12 +279,12 @@ describe("TheAlertsTable.vue", () => {
     // List of observables should now exist
     cy.get("td > ul").should("exist").should("be.visible");
     // Find and click the first observable tag in list
-    cy.get(":nth-child(1) > .p-chip > .p-chip-text")
+    cy.get("[data-cy=tags] > :nth-child(3) > .p-tag > .tag")
       .should("have.text", "from_address")
       .click();
     // Wait for the filtered view to be requested
     cy.wait("@filterURL");
-    // Check which alerts checkboxes are visible (should be only 1 for the header, no alerts with that tag)
-    cy.get(".p-checkbox-box").should("have.length", 1);
+    // Check which alerts checkboxes are visible (should be only 1 for the header, and 1 alert with that tag)
+    cy.get(".p-checkbox-box").should("have.length", 2);
   });
 });

@@ -1,6 +1,6 @@
 <!-- FilterTag.vue -->
 <!-- A tag that shows a currently applied filter (by type, ex. 'queue' or 'owner' -->
-<!-- Contains actions to remove/edit/add a filter through click actions or a dropdown menu-->
+<!-- Contains actions to remove (and eventually edit/add) a filter through click actions -->
 <template>
   <span style="padding: 2px">
     <Chip>
@@ -23,10 +23,10 @@
         @click="unsetFilter"
       />
     </Chip>
-    <OverlayPanel ref="op"  tabindex="1" @keypress.enter="updateFilter">
+    <OverlayPanel ref="op" tabindex="1" @keypress.enter="updateFilter">
       <FilterInput
-      tabindex="1" 
         v-model="filterModel"
+        tabindex="1"
         :fixed-filter-name="true"
         :allow-delete="false"
       >
@@ -34,7 +34,7 @@
       <Button
         name="update-filter"
         icon="pi pi-check"
-        tabindex="1" 
+        tabindex="1"
         @click="updateFilter"
       />
     </OverlayPanel>
@@ -42,6 +42,10 @@
 </template>
 
 <script setup>
+  import { inject, computed, defineProps, ref } from "vue";
+
+  import { useFilterStore } from "@/stores/filter";
+
   import { alertFilters } from "@/etc/constants";
   import { isObject } from "@/etc/helpers";
   import Button from "primevue/button";
@@ -49,11 +53,8 @@
   import OverlayPanel from "primevue/overlaypanel";
   import Dropdown from "primevue/dropdown";
 
-  import { inject, computed, defineProps, ref } from "vue";
-
-  import { useFilterStore } from "@/stores/filter";
   import FilterInput from "./FilterInput.vue";
-import { reset } from "mockdate";
+  import { reset } from "mockdate";
   const filterStore = useFilterStore();
   const filterType = inject("filterType");
 
@@ -65,14 +66,12 @@ import { reset } from "mockdate";
 
   const props = defineProps({
     filterName: { type: String, required: true },
-    filterValue: { type: Object, required: true },
+    filterValue: { type: [String, Object, Array, Date], required: true },
   });
 
-  const filterNameObject = computed(() => {
-    let filterNameObject = alertFilters.find((filter) => {
-      return filter.name === props.filterName;
-    });
-    return filterNameObject ? filterNameObject : null;
+  const filterOptions = filterType === "alerts" ? alertFilters : [];
+  const filterNameObject = filterOptions.find((filter) => {
+    return filter.name === props.filterName;
   });
 
   const filterModel = ref({
@@ -81,14 +80,17 @@ import { reset } from "mockdate";
   });
 
   const filterLabel = computed(() => {
-    return filterNameObject.value.label;
+    if (filterNameObject) {
+      return filterNameObject.label;
+    }
+    return "";
   });
 
   function resetFilterModel() {
     filterModel.value = {
-    filterName: props.filterName,
-    filterValue: props.filterValue,
-  };
+      filterName: props.filterName,
+      filterValue: props.filterValue,
+    };
   }
 
   function updateFilter() {
@@ -108,11 +110,12 @@ import { reset } from "mockdate";
   }
 
   function formatValue(value) {
-    console.log(filterNameObject.value.formatForAPI);
-    if (filterNameObject.value.stringRepr) {
-      return filterNameObject.value.stringRepr(value);
-    } else if (filterNameObject.value.optionProperty && isObject(value)) {
-      return value[filterNameObject.value.optionProperty];
+    if (filterNameObject) {
+      if (filterNameObject.stringRepr) {
+        return filterNameObject.stringRepr(value);
+      } else if (filterNameObject.optionProperty && isObject(value)) {
+        return value[filterNameObject.optionProperty];
+      }
     }
 
     return value;

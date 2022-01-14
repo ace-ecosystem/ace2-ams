@@ -378,15 +378,12 @@ def create_observable(
     node_metadata: Optional[Dict[str, object]] = None,
     redirection: Optional[Observable] = None,
     tags: Optional[List[str]] = None,
+    threat_actors: Optional[List[str]] = None,
+    threats: Optional[List[str]] = None,
     time: Optional[datetime] = None,
 ) -> NodeTree:
     if time is None:
         time = datetime.utcnow()
-
-    if tags:
-        tags = [create_node_tag(value=t, db=db) for t in tags]
-    else:
-        tags = []
 
     obj = crud.read_observable(type=type, value=value, db=db)
     if not obj:
@@ -395,13 +392,22 @@ def create_observable(
             expires_on=expires_on,
             for_detection=for_detection,
             redirection=redirection,
-            tags=tags,
             time=time,
             type=create_observable_type(value=type, db=db),
             uuid=uuid.uuid4(),
             value=value,
             version=uuid.uuid4(),
         )
+
+        if tags:
+            obj.tags = [create_node_tag(value=t, db=db) for t in tags]
+
+        if threat_actors:
+            obj.threat_actors = [create_node_threat_actor(value=threat_actor, db=db) for threat_actor in threat_actors]
+
+        if threats:
+            obj.threats = [create_node_threat(value=threat, db=db) for threat in threats]
+
         db.add(obj)
         crud.commit(db)
 

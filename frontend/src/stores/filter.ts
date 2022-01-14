@@ -4,12 +4,22 @@ import {
   alertFilterValues,
   alertFilterNameTypes,
 } from "@/models/alert";
+import { isValidDate } from "@/etc/helpers";
 
-function isEmpty(value: unknown) {
+export function isEmpty(value: unknown): boolean {
+  if (value === null) {
+    return true;
+  }
+  if (isValidDate(value)) {
+    return false;
+  }
   if (Array.isArray(value)) {
     return value.length === 0;
   }
-  return !value;
+  if (typeof value === "object") {
+    return Object.keys(value).length == 0;
+  }
+  return Boolean(!value);
 }
 
 export const useFilterStore = defineStore({
@@ -25,9 +35,10 @@ export const useFilterStore = defineStore({
       filters: alertFilterParams;
     }) {
       const nonEmptyFilters = Object.fromEntries(
-        Object.entries(payload.filters).filter(([_, v]) => v),
+        Object.entries(payload.filters).filter(([_, v]) => !isEmpty(v)),
       );
       this.$state[payload.filterType] = nonEmptyFilters;
+      localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
 
     setFilter(payload: {
@@ -35,10 +46,10 @@ export const useFilterStore = defineStore({
       filterName: alertFilterNameTypes;
       filterValue: alertFilterValues;
     }) {
-      console.log(payload.filterValue);
       if (!isEmpty(payload.filterValue)) {
         this.$state[payload.filterType][payload.filterName] =
           payload.filterValue;
+        localStorage.setItem("aceFilters", JSON.stringify(this.$state));
       }
     },
 
@@ -47,10 +58,12 @@ export const useFilterStore = defineStore({
       filterName: alertFilterNameTypes;
     }) {
       delete this.$state[payload.filterType][payload.filterName];
+      localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
 
     clearAll(payload: { filterType: "alerts" }) {
       this.$state[payload.filterType] = {};
+      localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
   },
 });

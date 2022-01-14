@@ -64,6 +64,16 @@ class AlertCreate(NodeCreate, AlertBase):
 
 
 class AlertRead(NodeRead, AlertBase):
+    child_tags: List[NodeTagRead] = Field(description="A list of tags added to child Nodes in the alert's tree")
+
+    child_threat_actors: List[NodeThreatActorRead] = Field(
+        description="A list of threat actors added to child Nodes in the alert's tree"
+    )
+
+    child_threats: List[NodeThreatRead] = Field(
+        description="A list of threats added to child Nodes in the alert's tree"
+    )
+
     comments: List[NodeCommentRead] = Field(description="A list of comments added to the alert")
 
     disposition: Optional[AlertDispositionRead] = Field(description="The disposition assigned to this alert")

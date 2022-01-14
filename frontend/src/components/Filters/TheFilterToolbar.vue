@@ -2,6 +2,7 @@
 <!-- A toolbar containing buttons/inputs to display/change applied filters for a given set of items (ex. alerts or events) -->
 
 <template>
+  <!-- Filter Action Toolbar -->
   <Toolbar style="overflow-x: auto">
     <template #start>
       <Button
@@ -9,6 +10,7 @@
         icon="pi pi-filter"
         label="Edit"
         class="p-button-outlined p-m-1"
+        data-cy="edit-filters"
         @click="open('EditFilterModal')"
       />
       <EditFilterModal name="EditFilterModal" />
@@ -17,6 +19,7 @@
         icon="pi pi-refresh"
         label="Reset"
         class="p-button-outlined p-m-1"
+        data-cy="reset-filters"
         @click="reset"
       />
       <Button
@@ -24,6 +27,7 @@
         icon="pi pi-filter-slash"
         label="Clear"
         class="p-button-outlined p-m-1"
+        data-cy="clear-filters"
         @click="clear"
       />
     </template>
@@ -58,9 +62,10 @@
 </script>
 
 <script setup>
-  import { inject, ref } from "vue";
+  import { inject, ref, computed } from "vue";
 
   import Button from "primevue/button";
+  import FilterChipContainer from "./FilterChipContainer.vue";
   import DateRangePicker from "@/components/UserInterface/DateRangePicker";
   import EditFilterModal from "@/components/Modals/FilterModal";
   import Toolbar from "primevue/toolbar";
@@ -69,15 +74,18 @@
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
-  import { copyToClipboard } from "@/etc/helpers";
-
-  import { formatForAPI } from "@/services/api/alert";
-  import FilterChipContainer from "./FilterChipContainer.vue";
-
-  const filterType = inject("filterType");
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
+
+  import { formatForAPI } from "@/services/api/alert";
+  import { copyToClipboard } from "@/etc/helpers";
+
+  const filterType = inject("filterType");
+
+  const filtersAreEmpty = computed(() => {
+    return Object.keys(filterStore[filterType]).length === 0;
+  });
 
   function generateLink() {
     let link = `${window.location.origin}/manage_alerts`;
@@ -90,10 +98,12 @@
     }
     return link;
   }
+
   function copyLink() {
     const link = generateLink();
     copyToClipboard(link);
   }
+
   const clear = () => {
     filterStore.clearAll({ filterType: filterType });
   };

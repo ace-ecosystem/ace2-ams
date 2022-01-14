@@ -87,14 +87,18 @@
       <template #body="{ data }">
         <!-- NAME COLUMN - INCL. TAGS AND TODO: ALERT ICONS-->
         <div v-if="col.field === 'name'">
-          <span class="p-m-1">
+          <span class="p-m-1" data-cy="alertName">
             <router-link :to="getAlertLink(data.uuid)">{{
               data.name
             }}</router-link></span
           >
           <br />
-          <span>
-            <NodeTagVue v-for="tag in data.tags" :key="tag.uuid" :tag="tag" />
+          <span data-cy="tags">
+            <NodeTagVue
+              v-for="tag in getAllTags(data)"
+              :key="tag.uuid"
+              :tag="tag"
+            ></NodeTagVue>
           </span>
           <span v-if="data.comments">
             <pre
@@ -236,9 +240,14 @@
       [uuid],
       "observable",
     );
-    expandedRowsData.value[uuid] = observables.sort((a, b) =>
-      a.type.value < b.type.value ? -1 : a.type.value > b.type.value ? 1 : 0,
-    );
+
+    expandedRowsData.value[uuid] = observables.sort((a, b) => {
+      if (a.type.value === b.type.value) {
+        return a.value < b.value ? -1 : 1;
+      } else {
+        return a.type.value < b.type.value ? -1 : 1;
+      }
+    });
   };
 
   const rowCollapse = (uuid) => {
@@ -279,6 +288,15 @@
 
   const getAlertLink = (uuid) => {
     return "/alert/" + uuid;
+  };
+
+  const getAllTags = (alert) => {
+    const allTags = alert.tags.concat(alert.childTags);
+
+    // Return a sorted and deduplicated list of the tags based on the tag UUID.
+    return [...new Map(allTags.map((v) => [v.uuid, v])).values()].sort((a, b) =>
+      a.value > b.value ? 1 : -1,
+    );
   };
 
   const initAlertTable = () => {
