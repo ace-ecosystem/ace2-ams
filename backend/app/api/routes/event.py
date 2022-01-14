@@ -96,8 +96,7 @@ def get_event(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=Event, db=db)
 
 
-# It does not make sense to have a get_all_events route at this point (and certainly not without pagination).
-# helpers.api_route_read_all(router, get_all_events, List[EventRead])
+helpers.api_route_read_all(router, get_all_events, EventRead)
 helpers.api_route_read(router, get_event, EventRead)
 
 
