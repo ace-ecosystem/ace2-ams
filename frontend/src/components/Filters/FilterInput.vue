@@ -73,30 +73,20 @@
       <div v-else-if="isCategorizedValue">
         <div class="field">
           <Dropdown
-            v-model="filterValue.category"
+            v-model="categorizedValueCategory"
             :options="filterOptions"
             :option-label="filterOptionProperty"
             class="w-16rem"
             type="text"
-            @change="
-              updateValue(
-                'filterValue',
-                updatedCategorizedValueObject('category', $event.value),
-              )
-            "
+            @change="updateValue('filterValue', categorizedValueObject)"
           ></Dropdown>
         </div>
         <div class="field">
           <InputText
-            v-model="filterValue.value"
+            v-model="categorizedValueValue"
             class="w-16rem"
             type="text"
-            @input="
-              updateValue(
-                'filterValue',
-                updatedCategorizedValueObject('value', $event.target.value),
-              )
-            "
+            @input="updateValue('filterValue', categorizedValueObject)"
           ></InputText>
         </div>
       </div>
@@ -118,6 +108,7 @@
     defineEmits,
     defineProps,
     inject,
+    onBeforeMount,
     onMounted,
     ref,
     watch,
@@ -139,13 +130,6 @@
     allowDelete: { type: Boolean, required: false },
   });
 
-  onMounted(() => {
-    if (isDropdown.value) {
-      filterValue.value = filterOptions.value[0];
-    }
-    updateValue("filterName", filterName.value);
-  });
-
   const getFilterNameObject = (filterName) => {
     if (!filterName) {
       return availableFilters[0];
@@ -159,12 +143,40 @@
   const filterName = ref(getFilterNameObject(props.modelValue.filterName));
   const filterValue = ref(props.modelValue.filterValue);
 
+  // The categorizedValue filter is a bit tricky
+  // We need to copy the values and use those as the model
+  // Otherwise, they will directly modify the filterStore state :/
+  const categorizedValueCategory = ref();
+  const categorizedValueValue = ref();
+
   const filterOptions = computed(() => {
     if (filterName.value.store) {
       const store = filterName.value.store();
       return store.allItems;
     }
     return null;
+  });
+
+  onBeforeMount(() => {
+    // If the current filter uses a dropdown, auto-select the first option
+    // if no option is already selected
+    if (isDropdown.value) {
+      if (!filterValue.value) {
+        filterValue.value = filterOptions.value[0];
+      }
+    } else if (isCategorizedValue.value) {
+      if (!filterValue.value.category) {
+        categorizedValueCategory.value = filterOptions.value[0];
+      } else {
+        categorizedValueCategory.value = filterValue.value.category;
+      }
+      categorizedValueValue.value = filterValue.value.value;
+    }
+  });
+
+  onMounted(() => {
+    // This will update the filter to the default if one wasn't provided
+    updateValue("filterName", filterName.value);
   });
 
   const filterOptionProperty = computed(() => {
@@ -178,6 +190,12 @@
   });
   const isCategorizedValue = computed(() => {
     return inputType.value == "categorizedValue";
+  });
+  const categorizedValueObject = computed(() => {
+    return {
+      category: categorizedValueCategory.value,
+      value: categorizedValueValue.value,
+    };
   });
   const isChips = computed(() => {
     return inputType.value == "chips";
@@ -206,25 +224,11 @@
     }
   });
 
-  const updatedCategorizedValueObject = (attr, event) => {
-    let category = null;
-    let value = null;
-    if (attr == "category") {
-      category = event;
-      value = filterValue.value.value;
-    } else {
-      category = filterValue.value.category;
-      value = event;
-    }
-    return {
-      category: category,
-      value: value,
-    };
-  };
-
   const clearFilterValue = () => {
     if (isCategorizedValue.value) {
       filterValue.value = { category: filterOptions.value[0], value: null };
+      categorizedValueCategory.value = filterOptions.value[0];
+      categorizedValueValue.value = null;
     } else if (isDropdown.value) {
       filterValue.value = filterOptions.value[0];
     } else {
