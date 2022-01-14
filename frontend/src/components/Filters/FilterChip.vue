@@ -26,7 +26,7 @@
 
   import { useFilterStore } from "@/stores/filter";
 
-  import { alertFilters } from "@/etc/constants";
+  import { alertFilters, eventFilters } from "@/etc/constants";
   import { isObject } from "@/etc/helpers";
   import Chip from "primevue/chip";
 
@@ -37,7 +37,9 @@
 
   const filterStore = useFilterStore();
   const filterType = inject("filterType");
-  const filterOptions = filterType === "alerts" ? alertFilters : [];
+
+  const availableFilters = { alerts: alertFilters, events: eventFilters };
+  const filterOptions = availableFilters[filterType];
   const filterNameObject = filterOptions.find((filter) => {
     return filter.name === props.filterName;
   });
