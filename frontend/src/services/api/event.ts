@@ -27,7 +27,7 @@ export const Event = {
     return api.read(`${endpoint}`, params);
   },
 
-  update: (uuid: UUID, data: eventUpdate): Promise<void> => {
-    return api.update(`${endpoint}${uuid}`, data);
+  update: (data: eventUpdate[]): Promise<void> => {
+    return api.update(`${endpoint}`, data);
   },
 };
