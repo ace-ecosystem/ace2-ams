@@ -38,6 +38,7 @@ describe("filters Actions", () => {
       alerts: {
         testFilterName: "testFilterValue",
       },
+      events: {},
     };
 
     expect(store.$state).toEqual(expectedState);
@@ -63,6 +64,7 @@ describe("filters Actions", () => {
       alerts: {
         testFilterName4: "testFilterValue",
       },
+      events: {},
     });
   });
 
@@ -80,6 +82,7 @@ describe("filters Actions", () => {
       alerts: {
         testFilterName: "testFilterValue",
       },
+      events: {},
     };
 
     expect(store.$state).toEqual(expectedState);
@@ -99,6 +102,7 @@ describe("filters Actions", () => {
 
     expect(store.$state).toEqual({
       alerts: {},
+      events: {},
     });
 
     store.setFilter({
@@ -109,19 +113,20 @@ describe("filters Actions", () => {
 
     expect(store.$state).toEqual({
       alerts: {},
+      events: {},
     });
   });
 
   it("will delete a given property for a given filter object upon the unsetFilter action", () => {
-    store.$state = { alerts: { name: "test" } };
+    store.$state = { alerts: { name: "test" }, events: {} };
     localStorage.setItem(
       "aceFilters",
-      JSON.stringify({ alerts: { name: "test" } }),
+      JSON.stringify({ alerts: { name: "test" }, events: {} }),
     );
 
     expect(store.alerts).toStrictEqual({ name: "test" });
     expect(localStorage.getItem("aceFilters")).toStrictEqual(
-      JSON.stringify({ alerts: { name: "test" } }),
+      JSON.stringify({ alerts: { name: "test" }, events: {} }),
     );
 
     store.unsetFilter({
@@ -131,23 +136,33 @@ describe("filters Actions", () => {
 
     expect(store.$state).toEqual({
       alerts: {},
+      events: {},
     });
 
     expect(localStorage.getItem("aceFilters")).toStrictEqual(
-      JSON.stringify({ alerts: {} }),
+      JSON.stringify({ alerts: {}, events: {} }),
     );
   });
 
   it("will delete all properties from a given filter object upon the clearAll action", () => {
-    store.$state = { alerts: { name: "test", description: "test" } };
+    store.$state = {
+      alerts: { name: "test", description: "test" },
+      events: {},
+    };
     localStorage.setItem(
       "aceFilters",
-      JSON.stringify({ alerts: { name: "test", description: "test" } }),
+      JSON.stringify({
+        alerts: { name: "test", description: "test" },
+        events: {},
+      }),
     );
 
     expect(store.alerts).toStrictEqual({ name: "test", description: "test" });
     expect(localStorage.getItem("aceFilters")).toStrictEqual(
-      JSON.stringify({ alerts: { name: "test", description: "test" } }),
+      JSON.stringify({
+        alerts: { name: "test", description: "test" },
+        events: {},
+      }),
     );
 
     store.clearAll({
@@ -156,10 +171,11 @@ describe("filters Actions", () => {
 
     expect(store.$state).toEqual({
       alerts: {},
+      events: {},
     });
 
     expect(localStorage.getItem("aceFilters")).toStrictEqual(
-      JSON.stringify({ alerts: {} }),
+      JSON.stringify({ alerts: {}, events: {} }),
     );
   });
 });
