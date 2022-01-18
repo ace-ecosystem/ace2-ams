@@ -15,10 +15,7 @@
       </OverlayPanel>
       <DateRangePicker />
     </template>
-    <template #end>
-      <Button icon="pi pi-link" class="p-button-rounded" @click="copyLink" />
-    </template>
-  </Toolbar>
+  </Toolbar> -->
   <Toolbar class="transparent-toolbar">
     <template #start>
       <SplitButton
@@ -91,6 +88,11 @@
     {
       label: "Clear All",
       icon: "pi pi-filter-slash",
+      command: clear,
+    },
+    {
+      label: "Copy Link",
+      icon: "pi pi-link",
       command: clear,
     },
   ];
