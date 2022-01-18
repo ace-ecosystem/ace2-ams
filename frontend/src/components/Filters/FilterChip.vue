@@ -39,7 +39,8 @@
   const filterType = inject("filterType");
 
   const availableFilters = { alerts: alertFilters, events: eventFilters };
-  const filterOptions = availableFilters[filterType];
+  const filterOptions =
+    filterType in availableFilters ? availableFilters[filterType] : [];
   const filterNameObject = filterOptions.find((filter) => {
     return filter.name === props.filterName;
   });
