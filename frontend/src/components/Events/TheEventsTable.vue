@@ -81,7 +81,7 @@
       :key="col.field + '_' + index"
       :field="col.field"
       :header="col.header"
-      :sortable="true"
+      :sortable="col.sortable"
     >
       <!-- DATA COLUMN BODY-->
       <template #body="{ data }">
@@ -176,16 +176,16 @@
   });
 
   const columns = ref([
-    { field: "createdTime", header: "Created" },
-    { field: "name", header: "Name" },
-    { field: "owner", header: "Owner" },
-    { field: "status", header: "Status" },
-    { field: "type", header: "Type" },
-    { field: "vectors", header: "Vectors" },
-    { field: "threatActors", header: "Threat Actors" },
-    { field: "threats", header: "Threats" },
-    { field: "preventionTools", header: "Prevention Tools" },
-    { field: "riskLevel", header: "Risk Level" },
+    { field: "createdTime", header: "Created", sortable: true },
+    { field: "name", header: "Name", sortable: true },
+    { field: "owner", header: "Owner", sortable: true },
+    { field: "status", header: "Status", sortable: true },
+    { field: "type", header: "Type", sortable: true },
+    { field: "vectors", header: "Vectors", sortable: false },
+    { field: "threatActors", header: "Threat Actors", sortable: false },
+    { field: "threats", header: "Threats", sortable: false },
+    { field: "preventionTools", header: "Prevention Tools", sortable: false },
+    { field: "riskLevel", header: "Risk Level", sortable: true },
   ]);
   const dt = ref(null);
   const error = ref(null);
@@ -193,7 +193,7 @@
   const expandedRowsData = ref({});
   const isLoading = ref(false);
   const selectedColumns = ref([]);
-  const sortField = ref("date");
+  const sortField = ref("createdTime");
   const sortOrder = ref("desc");
   const numRows = ref(10);
   const page = ref(0);
