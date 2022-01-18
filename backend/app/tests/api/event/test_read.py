@@ -700,3 +700,131 @@ def test_get_filter_vectors(client_valid_access_token, db):
     # All the events should be returned if you don't specify any value for the filter
     get = client_valid_access_token.get("/api/event/?vectors=")
     assert get.json()["total"] == 3
+
+
+def test_get_multiple_filters(client_valid_access_token, db):
+    event1 = helpers.create_event(name="event1", db=db, type="test_type1")
+    helpers.create_alert(db=db, event=event1)
+
+    event2 = helpers.create_event(name="event2", db=db, type="test_type1", prevention_tools=["tool1"])
+    helpers.create_alert(db=db, event=event2)
+
+    event2 = helpers.create_event(name="event2", db=db, type="test_type2")
+    helpers.create_alert(db=db, event=event2)
+
+    # There should be 3 total events
+    get = client_valid_access_token.get("/api/event/")
+    assert get.json()["total"] == 3
+
+    # There should only be 1 event when we filter by the type and prevention_tools
+    get = client_valid_access_token.get("/api/event/?type=test_type1&prevention_tools=tool1")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["name"] == "event2"
+
+
+def test_get_sort_by_created_time(client_valid_access_token, db):
+    helpers.create_event(name="event1", db=db, created_time=datetime.utcnow())
+    helpers.create_event(name="event2", db=db, created_time=datetime.utcnow() + timedelta(seconds=5))
+
+    # If you sort descending, the newest event (event2) should appear first
+    get = client_valid_access_token.get("/api/event/?sort=created_time|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["name"] == "event2"
+    assert get.json()["items"][1]["name"] == "event1"
+
+    # If you sort ascending, the oldest event (event1) should appear first
+    get = client_valid_access_token.get("/api/event/?sort=created_time|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["name"] == "event1"
+    assert get.json()["items"][1]["name"] == "event2"
+
+
+def test_get_sort_by_name(client_valid_access_token, db):
+    helpers.create_event(name="event1", db=db)
+    helpers.create_event(name="event2", db=db)
+
+    # If you sort descending: event2, event1
+    get = client_valid_access_token.get("/api/event/?sort=name|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["name"] == "event2"
+    assert get.json()["items"][1]["name"] == "event1"
+
+    # If you sort ascending: event1, event2
+    get = client_valid_access_token.get("/api/event/?sort=name|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["name"] == "event1"
+    assert get.json()["items"][1]["name"] == "event2"
+
+
+def test_get_sort_by_owner(client_valid_access_token, db):
+    helpers.create_event(name="event1", db=db, owner="alice")
+    helpers.create_event(name="event2", db=db, owner="bob")
+
+    # If you sort descending: event2, event1
+    get = client_valid_access_token.get("/api/event/?sort=owner|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["name"] == "event2"
+    assert get.json()["items"][1]["name"] == "event1"
+
+    # If you sort ascending: event1, event2
+    get = client_valid_access_token.get("/api/event/?sort=owner|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["name"] == "event1"
+    assert get.json()["items"][1]["name"] == "event2"
+
+
+def test_get_sort_by_risk_level(client_valid_access_token, db):
+    helpers.create_event(name="event1", db=db)
+    helpers.create_event(name="event2", db=db, risk_level="value1")
+    helpers.create_event(name="event3", db=db, risk_level="value2")
+
+    # If you sort descending: event1, event3, event2
+    get = client_valid_access_token.get("/api/event/?sort=risk_level|desc")
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["name"] == "event1"
+    assert get.json()["items"][1]["name"] == "event3"
+    assert get.json()["items"][2]["name"] == "event2"
+
+    # If you sort ascending: event2, event3, event1
+    get = client_valid_access_token.get("/api/event/?sort=risk_level|asc")
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["name"] == "event2"
+    assert get.json()["items"][1]["name"] == "event3"
+    assert get.json()["items"][2]["name"] == "event1"
+
+
+def test_get_sort_by_status(client_valid_access_token, db):
+    helpers.create_event(name="event1", db=db, status="value1")
+    helpers.create_event(name="event2", db=db, status="value2")
+
+    # If you sort descending: event2, event1
+    get = client_valid_access_token.get("/api/event/?sort=status|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["name"] == "event2"
+    assert get.json()["items"][1]["name"] == "event1"
+
+    # If you sort ascending: event1, event2
+    get = client_valid_access_token.get("/api/event/?sort=status|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["name"] == "event1"
+    assert get.json()["items"][1]["name"] == "event2"
+
+
+def test_get_sort_by_type(client_valid_access_token, db):
+    helpers.create_event(name="event1", db=db)
+    helpers.create_event(name="event2", db=db, type="value1")
+    helpers.create_event(name="event3", db=db, type="value2")
+
+    # If you sort descending: event1, event3, event2
+    get = client_valid_access_token.get("/api/event/?sort=type|desc")
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["name"] == "event1"
+    assert get.json()["items"][1]["name"] == "event3"
+    assert get.json()["items"][2]["name"] == "event2"
+
+    # If you sort ascending: event2, event3, event1
+    get = client_valid_access_token.get("/api/event/?sort=type|asc")
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["name"] == "event2"
+    assert get.json()["items"][1]["name"] == "event3"
+    assert get.json()["items"][2]["name"] == "event1"

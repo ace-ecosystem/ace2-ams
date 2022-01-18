@@ -128,6 +128,22 @@ def get_all_events(
     remediation_time_before: Optional[datetime] = None,
     remediations: Optional[str] = None,
     risk_level: Optional[str] = None,
+    sort: Optional[str] = Query(
+        None,
+        regex=""
+        "^("
+        "(created_time)|"
+        "(name)|"
+        "(owner)|"
+        "(risk_level)|"
+        "(status)|"
+        "(type)|"
+        ")\|"
+        "("
+        "(asc)|"
+        "(desc)"
+        ")$",
+    ),  # Example: created_time|desc,
     source: Optional[str] = None,
     status: Optional[str] = None,
     tags: Optional[str] = None,
@@ -353,6 +369,63 @@ def get_all_events(
 
         vectors_query = select(Event).where(and_(*vector_filters))
         query = _join_as_subquery(query, vectors_query)
+
+    if sort:
+        sort_split = sort.split("|")
+        sort_by = sort_split[0]
+        order = sort_split[1]
+
+        if sort_by.lower() == "created_time":
+            if order == "asc":
+                query = query.order_by(Event.creation_time.asc())
+            else:
+                query = query.order_by(Event.creation_time.desc())
+
+        elif sort_by.lower() == "name":
+            if order == "asc":
+                query = query.order_by(Event.name.asc())
+            else:
+                query = query.order_by(Event.name.desc())
+
+        # Only sort by owner if we are not also filtering by owner
+        elif sort_by.lower() == "owner" and not owner:
+            query = query.outerjoin(User, onclause=Event.owner_uuid == User.uuid).group_by(
+                Event.uuid, Node.uuid, User.username
+            )
+            if order == "asc":
+                query = query.order_by(User.username.asc())
+            else:
+                query = query.order_by(User.username.desc())
+
+        # Only sort by risk_level if we are not also filtering by risk_level
+        elif sort_by.lower() == "risk_level" and not risk_level:
+            query = query.outerjoin(EventRiskLevel, onclause=EventRiskLevel.uuid == Event.risk_level_uuid).group_by(
+                Event.uuid, Node.uuid, EventRiskLevel.value
+            )
+            if order == "asc":
+                query = query.order_by(EventRiskLevel.value.asc())
+            else:
+                query = query.order_by(EventRiskLevel.value.desc())
+
+        # Only sort by status if we are not also filtering by status
+        elif sort_by.lower() == "status" and not status:
+            query = query.join(EventStatus, onclause=EventStatus.uuid == Event.status_uuid).group_by(
+                Event.uuid, Node.uuid, EventStatus.value
+            )
+            if order == "asc":
+                query = query.order_by(EventStatus.value.asc())
+            else:
+                query = query.order_by(EventStatus.value.desc())
+
+        # Only sort by type if we are not also filtering by type
+        elif sort_by.lower() == "type" and not type:
+            query = query.outerjoin(EventType, onclause=EventType.uuid == Event.type_uuid).group_by(
+                Event.uuid, Node.uuid, EventType.value
+            )
+            if order == "asc":
+                query = query.order_by(EventType.value.asc())
+            else:
+                query = query.order_by(EventType.value.desc())
 
     return paginate(db, query)
 
