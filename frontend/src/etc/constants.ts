@@ -2,8 +2,10 @@ import { alertFilterNameTypes } from "@/models/alert";
 import { filterOption } from "@/models/base";
 import { eventFilterNameTypes } from "@/models/event";
 import { eventPreventionToolRead } from "@/models/eventPreventionTool";
+import { eventVectorRead } from "@/models/eventVector";
 import { nodeTagRead } from "@/models/nodeTag";
 import { nodeThreatRead } from "@/models/nodeThreat";
+import { nodeThreatActorRead } from "@/models/nodeThreatActor";
 import { observableTypeRead } from "@/models/observableType";
 
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
@@ -14,6 +16,7 @@ import { useAlertTypeStore } from "@/stores/alertType";
 import { useEventPreventionToolStore } from "@/stores/eventPreventionTool";
 import { useEventQueueStore } from "@/stores/eventQueue";
 import { useEventRiskLevelStore } from "@/stores/eventRiskLevel";
+import { useEventSourceStore } from "@/stores/eventSource";
 import { useEventStatusStore } from "@/stores/eventStatus";
 import { useEventTypeStore } from "@/stores/eventType";
 import { useEventVectorStore } from "@/stores/eventVector";
@@ -203,7 +206,7 @@ export const alertFilters: readonly filterOption[] = [
     label: "Tags",
     type: filterTypes.CHIPS,
     store: useNodeTagStore,
-    stringRepr: (filter: nodeTagRead[]) => {
+    stringRepr: (filter: string[]) => {
       return filter
         .map(function (elem) {
           return elem;
@@ -292,12 +295,13 @@ export const eventFilterNames: Record<string, eventFilterNameTypes> = {
   PREVENTION_TOOLS_FILTER: "preventionTools",
   QUEUE_FILTER: "queue",
   RISK_LEVEL_FILTER: "riskLevel",
+  SOURCE_FILTER: "source",
   STATUS_FILTER: "status",
   TAGS_FILTER: "tags",
-  THREAT_ACTOR_FILTER: "threatActor",
+  THREAT_ACTORS_FILTER: "threatActors",
   THREATS_FILTER: "threats",
   TYPE_FILTER: "type",
-  VECTOR_FILTER: "vector",
+  VECTORS_FILTER: "vectors",
 };
 
 export const eventFilters: readonly filterOption[] = [
@@ -411,6 +415,14 @@ export const eventFilters: readonly filterOption[] = [
     valueProperty: "value",
   },
   {
+    name: eventFilterNames.SOURCE_FILTER,
+    label: "Source",
+    type: filterTypes.SELECT,
+    store: useEventSourceStore,
+    optionProperty: "value",
+    valueProperty: "value",
+  },
+  {
     name: eventFilterNames.STATUS_FILTER,
     label: "Status",
     type: filterTypes.SELECT,
@@ -423,7 +435,23 @@ export const eventFilters: readonly filterOption[] = [
     label: "Tags",
     type: filterTypes.CHIPS,
     store: useNodeTagStore,
-    stringRepr: (filter: nodeTagRead[]) => {
+    stringRepr: (filter: string[]) => {
+      return filter
+        .map(function (elem) {
+          return elem;
+        })
+        .join();
+    },
+    parseStringRepr: (filterString: string) => {
+      return filterString.split(",");
+    },
+  },
+  {
+    name: eventFilterNames.THREAT_ACTORS_FILTER,
+    label: "Threat Actors",
+    type: filterTypes.MULTISELECT,
+    store: useNodeThreatActorStore,
+    stringRepr: (filter: nodeThreatActorRead[]) => {
       return filter
         .map(function (elem) {
           return elem.value;
@@ -433,14 +461,6 @@ export const eventFilters: readonly filterOption[] = [
     parseStringRepr: (filterString: string) => {
       return filterString.split(",");
     },
-  },
-  {
-    name: eventFilterNames.THREAT_ACTOR_FILTER,
-    label: "Threat Actor",
-    type: filterTypes.SELECT,
-    store: useNodeThreatActorStore,
-    optionProperty: "value",
-    valueProperty: "value",
   },
   {
     name: eventFilterNames.THREATS_FILTER,
@@ -467,12 +487,20 @@ export const eventFilters: readonly filterOption[] = [
     valueProperty: "value",
   },
   {
-    name: eventFilterNames.VECTOR_FILTER,
-    label: "Vector",
-    type: filterTypes.SELECT,
+    name: eventFilterNames.VECTORS_FILTER,
+    label: "Vectors",
+    type: filterTypes.MULTISELECT,
     store: useEventVectorStore,
-    optionProperty: "value",
-    valueProperty: "value",
+    stringRepr: (filter: eventVectorRead[]) => {
+      return filter
+        .map(function (elem) {
+          return elem.value;
+        })
+        .join();
+    },
+    parseStringRepr: (filterString: string) => {
+      return filterString.split(",");
+    },
   },
 ] as const;
 
