@@ -4,39 +4,35 @@
 <template>
   <span style="padding: 2px">
     <Chip>
-      <span class="p-chip-text filter-name-text">{{ filterLabel }}:</span>
+      <span class="p-chip-text filter-name-text chip-content"
+        >{{ filterLabel }}:</span
+      >
       <span
-        class="link-text p-chip-text"
+        class="link-text p-chip-text chip-content"
         style="padding-left: 2px; padding-right: 2px; font-weight: bold"
         @click="unsetFilter"
       >
         {{ formatValue(filterValue) }}</span
       >
       <i
-        class="pi pi-pencil"
+        class="pi pi-pencil icon-button chip-content"
         style="cursor: pointer"
-        @click="toggleOptionsMenu"
+        @click="toggleQuickEditMenu"
       />
       <i
-        class="pi pi-times-circle"
+        class="pi pi-times-circle icon-button chip-content"
         style="cursor: pointer"
         @click="unsetFilter"
       />
     </Chip>
-    <OverlayPanel ref="op" tabindex="1" @keypress.enter="updateFilter">
+    <OverlayPanel ref="op" style="padding: 1rem" @keypress.enter="updateFilter">
       <FilterInput
         v-model="filterModel"
-        tabindex="1"
         :fixed-filter-name="true"
         :allow-delete="false"
       >
       </FilterInput>
-      <Button
-        name="update-filter"
-        icon="pi pi-check"
-        tabindex="1"
-        @click="updateFilter"
-      />
+      <Button name="update-filter" icon="pi pi-check" @click="updateFilter" />
     </OverlayPanel>
   </span>
 </template>
@@ -51,15 +47,13 @@
   import Button from "primevue/button";
   import Chip from "primevue/chip";
   import OverlayPanel from "primevue/overlaypanel";
-  import Dropdown from "primevue/dropdown";
 
   import FilterInput from "./FilterInput.vue";
-  import { reset } from "mockdate";
   const filterStore = useFilterStore();
   const filterType = inject("filterType");
 
   const op = ref(null);
-  const toggleOptionsMenu = (event) => {
+  const toggleQuickEditMenu = (event) => {
     op.value.toggle(event);
     resetFilterModel();
   };
@@ -99,7 +93,7 @@
       filterName: props.filterName,
       filterValue: filterModel.value.filterValue,
     });
-    toggleOptionsMenu();
+    toggleQuickEditMenu();
   }
 
   function unsetFilter() {
@@ -126,8 +120,15 @@
   .filter-name-text {
     font-weight: bold;
   }
+  .chip-content {
+    margin-left: 2px;
+    margin-right: 2px;
+  }
   .chip-text {
     font-weight: bold;
     line-height: 1.5;
+  }
+  .icon-button:hover {
+    font-weight: bold;
   }
 </style>
