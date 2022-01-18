@@ -70,7 +70,10 @@ describe("App setup", () => {
       filters: { alerts: { tags: ["tag1"] } },
     });
 
-    expect(filterStore.$state).toEqual({ alerts: { tags: ["tag1"] } });
+    expect(filterStore.$state).toEqual({
+      alerts: { tags: ["tag1"] },
+      events: {},
+    });
   });
 
   it("will not hydrate the filter store from localStorage if the user is not authenticated", () => {
@@ -79,6 +82,6 @@ describe("App setup", () => {
       filters: { alerts: { tags: ["tag1"] } },
     });
 
-    expect(filterStore.$state).toEqual({ alerts: {} });
+    expect(filterStore.$state).toEqual({ alerts: {}, events: {} });
   });
 });

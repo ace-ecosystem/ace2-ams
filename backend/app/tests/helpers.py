@@ -95,6 +95,7 @@ def create_alert(
     disposition: Optional[str] = None,
     disposition_time: Optional[datetime] = None,
     disposition_user: Optional[str] = None,
+    event: Optional[Event] = None,
     event_time: datetime = None,
     insert_time: datetime = None,
     name: str = "Test Alert",
@@ -140,6 +141,9 @@ def create_alert(
             db=db,
             alert_queue=alert_queue,
         )
+
+    if event:
+        alert.event = event
 
     if event_time:
         alert.event_time = event_time
@@ -274,7 +278,27 @@ def create_analysis_module_type(
     return obj
 
 
-def create_event(name: str, db: Session, queue: str = "default", status: str = "OPEN") -> Event:
+def create_event(
+    name: str,
+    db: Session,
+    alert_time: Optional[datetime] = None,
+    contain_time: Optional[datetime] = None,
+    created_time: Optional[datetime] = None,
+    disposition_time: Optional[datetime] = None,
+    owner: Optional[str] = None,
+    prevention_tools: Optional[List[str]] = None,
+    queue: str = "default",
+    remediation_time: Optional[datetime] = None,
+    remediations: Optional[List[str]] = None,
+    risk_level: Optional[str] = None,
+    source: Optional[str] = None,
+    status: str = "OPEN",
+    tags: Optional[List[str]] = None,
+    threat_actors: Optional[List[str]] = None,
+    threats: Optional[List[str]] = None,
+    type: Optional[str] = None,
+    vectors: Optional[List[str]] = None,
+) -> Event:
     obj = Event(
         name=name,
         queue=create_event_queue(value=queue, db=db),
@@ -282,6 +306,52 @@ def create_event(name: str, db: Session, queue: str = "default", status: str = "
         uuid=uuid.uuid4(),
         version=uuid.uuid4(),
     )
+
+    if alert_time:
+        obj.alert_time = alert_time
+
+    if contain_time:
+        obj.contain_time = contain_time
+
+    if created_time:
+        obj.creation_time = created_time
+
+    if disposition_time:
+        obj.disposition_time = disposition_time
+
+    if owner:
+        obj.owner = create_user(email=f"{owner}@{owner}.com", username=owner, db=db, event_queue=queue)
+
+    if prevention_tools:
+        obj.prevention_tools = [create_event_prevention_tool(value=p, db=db) for p in prevention_tools]
+
+    if remediation_time:
+        obj.remediation_time = remediation_time
+
+    if remediations:
+        obj.remediations = [create_event_remediation(value=r, db=db) for r in remediations]
+
+    if risk_level:
+        obj.risk_level = create_event_risk_level(value=risk_level, db=db)
+
+    if source:
+        obj.source = create_event_source(value=source, db=db)
+
+    if tags:
+        obj.tags = [create_node_tag(value=tag, db=db) for tag in tags]
+
+    if threat_actors:
+        obj.threat_actors = [create_node_threat_actor(value=threat_actor, db=db) for threat_actor in threat_actors]
+
+    if threats:
+        obj.threats = [create_node_threat(value=threat, db=db) for threat in threats]
+
+    if type:
+        obj.type = create_event_type(value=type, db=db)
+
+    if vectors:
+        obj.vectors = [create_event_vector(value=v, db=db) for v in vectors]
+
     db.add(obj)
     crud.commit(db)
     return obj

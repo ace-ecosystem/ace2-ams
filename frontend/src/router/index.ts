@@ -3,6 +3,7 @@ import AnalyzeAlert from "@/pages/Alerts/AnalyzeAlert.vue";
 import ViewAlert from "@/pages/Alerts/ViewAlert.vue";
 import ViewAnalysis from "@/pages/Alerts/ViewAnalysis.vue";
 import ManageAlerts from "@/pages/Alerts/ManageAlerts.vue";
+import ManageEvents from "@/pages/Events/ManageEvents.vue";
 import TheLogin from "@/pages/User/TheLogin.vue";
 import { useAuthStore } from "@/stores/auth";
 
@@ -16,6 +17,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/manage_alerts",
     name: "Manage Alerts",
     component: ManageAlerts,
+  },
+  {
+    path: "/manage_events",
+    name: "Manage Events",
+    component: ManageEvents,
   },
   {
     path: "/analyze",

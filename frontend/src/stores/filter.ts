@@ -4,6 +4,11 @@ import {
   alertFilterValues,
   alertFilterNameTypes,
 } from "@/models/alert";
+import {
+  eventFilterNameTypes,
+  eventFilterParams,
+  eventFilterValues,
+} from "@/models/event";
 import { isValidDate } from "@/etc/helpers";
 
 export function isEmpty(value: unknown): boolean {
@@ -27,12 +32,13 @@ export const useFilterStore = defineStore({
 
   state: () => ({
     alerts: {} as alertFilterParams,
+    events: {} as eventFilterParams,
   }),
 
   actions: {
     bulkSetFilters(payload: {
-      filterType: "alerts";
-      filters: alertFilterParams;
+      filterType: "alerts" | "events";
+      filters: alertFilterParams | eventFilterParams;
     }) {
       const nonEmptyFilters = Object.fromEntries(
         Object.entries(payload.filters).filter(([_, v]) => !isEmpty(v)),
@@ -42,9 +48,9 @@ export const useFilterStore = defineStore({
     },
 
     setFilter(payload: {
-      filterType: "alerts";
-      filterName: alertFilterNameTypes;
-      filterValue: alertFilterValues;
+      filterType: "alerts" | "events";
+      filterName: alertFilterNameTypes | eventFilterNameTypes;
+      filterValue: alertFilterValues | eventFilterValues;
     }) {
       if (!isEmpty(payload.filterValue)) {
         this.$state[payload.filterType][payload.filterName] =
@@ -54,14 +60,14 @@ export const useFilterStore = defineStore({
     },
 
     unsetFilter(payload: {
-      filterType: "alerts";
-      filterName: alertFilterNameTypes;
+      filterType: "alerts" | "events";
+      filterName: alertFilterNameTypes | eventFilterNameTypes;
     }) {
       delete this.$state[payload.filterType][payload.filterName];
       localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
 
-    clearAll(payload: { filterType: "alerts" }) {
+    clearAll(payload: { filterType: "alerts" | "events" }) {
       this.$state[payload.filterType] = {};
       localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
