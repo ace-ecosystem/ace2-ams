@@ -25,8 +25,11 @@ from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
 from db.schemas.node import Node
 from db.schemas.node_tag import NodeTag
+from db.schemas.node_tag_mapping import node_tag_mapping
 from db.schemas.node_threat import NodeThreat
+from db.schemas.node_threat_mapping import node_threat_mapping
 from db.schemas.node_threat_actor import NodeThreatActor
+from db.schemas.node_threat_actor_mapping import node_threat_actor_mapping
 from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
@@ -139,7 +142,7 @@ def get_all_events(
         alert_time_after_query = (
             select(Event)
             .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-            .where(Alert.insert_time > alert_time_after)
+            .where(or_(Event.alert_time > alert_time_after, Alert.insert_time > alert_time_after))
         )
         query = _join_as_subquery(query, alert_time_after_query)
 
@@ -281,48 +284,63 @@ def get_all_events(
         query = _join_as_subquery(query, status_query)
 
     if tags:
-        tag_filters = []
-        for tag in tags.split(","):
-            tag_filters.append(
-                or_(
-                    Event.tags.any(NodeTag.value == tag),
-                    Alert.tags.any(NodeTag.value == tag),
-                    Alert.child_tags.any(NodeTag.value == tag),
-                )
+        tag_filters = [func.count(1).filter(NodeTag.value == t) > 0 for t in tags.split(",")]
+        tags_query = (
+            select(Event)
+            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
+            .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
+            .join(
+                node_tag_mapping,
+                onclause=or_(
+                    node_tag_mapping.c.node_uuid == Event.uuid, node_tag_mapping.c.node_uuid == NodeTree.node_uuid
+                ),
             )
+            .join(NodeTag, onclause=NodeTag.uuid == node_tag_mapping.c.tag_uuid)
+            .having(and_(*tag_filters))
+            .group_by(Event.uuid, Node.uuid)
+        )
 
-        tags_query = select(Event).join(Alert, onclause=Alert.event_uuid == Event.uuid).where(and_(*tag_filters))
         query = _join_as_subquery(query, tags_query)
 
     if threat_actors:
-        threat_actor_filters = []
-        for threat_actor in threat_actors.split(","):
-            threat_actor_filters.append(
-                or_(
-                    Event.threat_actors.any(NodeThreatActor.value == threat_actor),
-                    Alert.threat_actors.any(NodeThreatActor.value == threat_actor),
-                    Alert.child_threat_actors.any(NodeThreatActor.value == threat_actor),
-                )
-            )
+        threat_actor_filters = [func.count(1).filter(NodeThreatActor.value == t) > 0 for t in threat_actors.split(",")]
         threat_actor_query = (
-            select(Event).join(Alert, onclause=Alert.event_uuid == Event.uuid).where(and_(*threat_actor_filters))
+            select(Event)
+            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
+            .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
+            .join(
+                node_threat_actor_mapping,
+                onclause=or_(
+                    node_threat_actor_mapping.c.node_uuid == Event.uuid,
+                    node_threat_actor_mapping.c.node_uuid == NodeTree.node_uuid,
+                ),
+            )
+            .join(NodeThreatActor, onclause=NodeThreatActor.uuid == node_threat_actor_mapping.c.threat_actor_uuid)
+            .having(and_(*threat_actor_filters))
+            .group_by(Event.uuid, Node.uuid)
         )
 
         query = _join_as_subquery(query, threat_actor_query)
 
     if threats:
-        threat_filters = []
-        for threat in threats.split(","):
-            threat_filters.append(
-                or_(
-                    Event.threats.any(NodeThreat.value == threat),
-                    Alert.threats.any(NodeThreat.value == threat),
-                    Alert.child_threats.any(NodeThreat.value == threat),
-                )
+        threat_filters = [func.count(1).filter(NodeThreat.value == t) > 0 for t in threats.split(",")]
+        threat_query = (
+            select(Event)
+            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
+            .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
+            .join(
+                node_threat_mapping,
+                onclause=or_(
+                    node_threat_mapping.c.node_uuid == Event.uuid,
+                    node_threat_mapping.c.node_uuid == NodeTree.node_uuid,
+                ),
             )
-        threats_query = select(Event).join(Alert, onclause=Alert.event_uuid == Event.uuid).where(and_(*threat_filters))
+            .join(NodeThreat, onclause=NodeThreat.uuid == node_threat_mapping.c.threat_uuid)
+            .having(and_(*threat_filters))
+            .group_by(Event.uuid, Node.uuid)
+        )
 
-        query = _join_as_subquery(query, threats_query)
+        query = _join_as_subquery(query, threat_query)
 
     if type:
         type_query = select(Event).join(EventType).where(EventType.value == type)
