@@ -7,6 +7,7 @@
         option-label="label"
         type="text"
         class="w-13rem"
+        tabindex="1"
         @change="
           clearFilterValue();
           updateValue('filterName', $event.value);
