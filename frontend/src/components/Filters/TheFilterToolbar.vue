@@ -3,17 +3,9 @@
 
 <template>
   <!-- Filter Action Toolbar -->
-  <Toolbar style="overflow-x: auto">
+  <!-- <Toolbar style="overflow-x: auto">
     <template #start>
-      <OverlayPanel
-        ref="op"
-        style="padding: 1rem"
-        @keypress.enter="updateFilter"
-      >
-        <FilterInput v-model="filterModel" :allow-delete="false"> </FilterInput>
-        <Button name="update-filter" icon="pi pi-check" @click="addFilter" />
-      </OverlayPanel>
-      <DateRangePicker />
+
     </template>
   </Toolbar> -->
   <Toolbar class="transparent-toolbar">
@@ -28,7 +20,17 @@
       <FilterChipContainer></FilterChipContainer>
     </template>
 
-    <template #end> </template>
+    <template #end> 
+            <OverlayPanel
+        ref="op"
+        style="padding: 1rem"
+        @keypress.enter="updateFilter"
+      >
+        <FilterInput v-model="filterModel" :allow-delete="false"> </FilterInput>
+        <Button name="update-filter" icon="pi pi-check" @click="addFilter" />
+      </OverlayPanel>
+      <DateRangePicker />
+    </template>
   </Toolbar>
 </template>
 
