@@ -5,49 +5,29 @@
   <!-- Filter Action Toolbar -->
   <Toolbar style="overflow-x: auto">
     <template #start>
-      <Button
-        type="button"
-        icon="pi pi-filter"
-        label="Edit"
-        class="p-button-outlined p-m-1"
-        data-cy="edit-filters"
-        @click="open('EditFilterModal')"
-      />
-      <EditFilterModal name="EditFilterModal" />
-      <Button
-        type="button"
-        icon="pi pi-refresh"
-        label="Reset"
-        class="p-button-outlined p-m-1"
-        data-cy="reset-filters"
-        @click="reset"
-      />
-      <Button
-        type="button"
-        icon="pi pi-filter-slash"
-        label="Clear"
-        class="p-button-outlined p-m-1"
-        data-cy="clear-filters"
-        @click="clear"
-      />
+      <OverlayPanel
+        ref="op"
+        style="padding: 1rem"
+        @keypress.enter="updateFilter"
+      >
+        <FilterInput v-model="filterModel" :allow-delete="false"> </FilterInput>
+        <Button name="update-filter" icon="pi pi-check" @click="addFilter" />
+      </OverlayPanel>
+      <DateRangePicker />
     </template>
     <template #end>
-      <DateRangePicker />
       <Button icon="pi pi-link" class="p-button-rounded" @click="copyLink" />
     </template>
   </Toolbar>
   <Toolbar class="transparent-toolbar">
     <template #start>
-      <Button icon="pi pi-plus" class="p-m-1" @click="toggleOverlay" />
-      <OverlayPanel ref="op" tabindex="1" @keypress.enter="updateFilter">
-        <FilterInput v-model="filterModel" :allow-delete="false"> </FilterInput>
-        <Button
-          name="update-filter"
-          icon="pi pi-check"
-          tabindex="1"
-          @click="addFilter"
-        />
-      </OverlayPanel>
+      <SplitButton
+        label="Quick Add"
+        icon="pi pi-plus"
+        :model="buttons"
+        @click="toggleOverlay"
+      ></SplitButton>
+      <EditFilterModal name="EditFilterModal" />
       <FilterChipContainer></FilterChipContainer>
     </template>
 
@@ -62,7 +42,7 @@
 </script>
 
 <script setup>
-  import { inject, ref, computed } from "vue";
+  import { inject, ref } from "vue";
 
   import Button from "primevue/button";
   import FilterChipContainer from "./FilterChipContainer.vue";
@@ -70,6 +50,7 @@
   import EditFilterModal from "@/components/Modals/FilterModal";
   import Toolbar from "primevue/toolbar";
   import OverlayPanel from "primevue/overlaypanel";
+  import SplitButton from "primevue/splitbutton";
   import FilterInput from "./FilterInput.vue";
 
   import { useFilterStore } from "@/stores/filter";
@@ -83,9 +64,36 @@
 
   const filterType = inject("filterType");
 
-  const filtersAreEmpty = computed(() => {
-    return Object.keys(filterStore[filterType]).length === 0;
-  });
+
+  const clear = () => {
+    filterStore.clearAll({ filterType: filterType });
+  };
+
+  const openFilterModal = () => {
+    modalStore.open("EditFilterModal");
+  };
+
+  const reset = () => {
+    filterStore.clearAll({ filterType: filterType });
+  };
+
+  const buttons = [
+    {
+      label: "Edit",
+      icon: "pi pi-filter",
+      command: openFilterModal,
+    },
+    {
+      label: "Reset",
+      icon: "pi pi-refresh",
+      command: reset,
+    },
+    {
+      label: "Clear All",
+      icon: "pi pi-filter-slash",
+      command: clear,
+    },
+  ];
 
   function generateLink() {
     let link = `${window.location.origin}/manage_alerts`;
@@ -104,17 +112,6 @@
     copyToClipboard(link);
   }
 
-  const clear = () => {
-    filterStore.clearAll({ filterType: filterType });
-  };
-
-  const open = (name) => {
-    modalStore.open(name);
-  };
-
-  const reset = () => {
-    filterStore.clearAll({ filterType: filterType });
-  };
 
   const filterModel = ref({
     filterName: null,
