@@ -216,7 +216,6 @@
 
   watch(filterName, async () => {
     if (filterName.value.store) {
-    console.log('hi')
       const store = filterName.value.store();
       await store.readAll();
     }

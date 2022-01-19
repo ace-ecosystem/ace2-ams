@@ -42,7 +42,14 @@
         :allow-delete="false"
       >
       </FilterInput>
-      <Button name="update-filter" icon="pi pi-check" @click="updateFilter();toggleQuickEditMenu($event);" />
+      <Button
+        name="update-filter"
+        icon="pi pi-check"
+        @click="
+          updateFilter();
+          toggleQuickEditMenu($event);
+        "
+      />
     </OverlayPanel>
   </span>
 </template>
