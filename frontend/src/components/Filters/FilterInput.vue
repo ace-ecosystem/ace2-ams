@@ -109,7 +109,6 @@
     defineEmits,
     defineProps,
     inject,
-    onBeforeMount,
     onMounted,
     ref,
     watch,
@@ -141,49 +140,46 @@
     filter = filter ? filter : null;
     return filter;
   };
+
   const filterName = ref(getFilterNameObject(props.modelValue.filterName));
   const filterValue = ref(props.modelValue.filterValue);
 
   // The categorizedValue filter is a bit tricky
   // We need to copy the values and use those as the model
   // Otherwise, they will directly modify the filterStore state :/
-  const categorizedValueCategory = ref();
-  const categorizedValueValue = ref();
+  const categorizedValueCategory = ref(null);
+  const categorizedValueValue = ref(null);
 
   const filterOptions = computed(() => {
-    if (filterName.value.store) {
+    if (filterName.value && filterName.value.store) {
       const store = filterName.value.store();
       return store.allItems;
     }
     return null;
   });
 
-  onBeforeMount(() => {
-    // If the current filter uses a dropdown, auto-select the first option
-    // if no option is already selected
-    if (isDropdown.value) {
-      if (!filterValue.value) {
-        filterValue.value = filterOptions.value[0];
-      }
-    } else if (isCategorizedValue.value) {
-      if (!filterValue.value.category) {
-        categorizedValueCategory.value = filterOptions.value[0];
-      } else {
-        categorizedValueCategory.value = filterValue.value.category;
-      }
+  onMounted(() => {
+    // This will update the filter to the default if one wasn't provided
+    updateValue("filterName", filterName.value);
+    // This will udpate the filter value to the default (if available) if one wasn't provided
+    if (!filterValue.value) {
+      clearFilterValue();
+      updateValue("filterValue", filterValue.value);
+    }
+    // we need to fill in the placeholder refs (see note above) for categorized value
+    else if (isCategorizedValue.value) {
+      categorizedValueCategory.value = filterValue.value.category;
       categorizedValueValue.value = filterValue.value.value;
     }
   });
 
-  onMounted(() => {
-    // This will update the filter to the default if one wasn't provided
-    updateValue("filterName", filterName.value);
-  });
-
   const filterOptionProperty = computed(() => {
-    return filterName.value.optionProperty
-      ? filterName.value.optionProperty
-      : "value";
+    if (filterName.value) {
+      return filterName.value.optionProperty
+        ? filterName.value.optionProperty
+        : "value";
+    }
+    return null;
   });
 
   const isDate = computed(() => {
@@ -220,6 +216,7 @@
 
   watch(filterName, async () => {
     if (filterName.value.store) {
+    console.log('hi')
       const store = filterName.value.store();
       await store.readAll();
     }
@@ -240,12 +237,12 @@
   const updateValue = (attribute, newValue) => {
     if (attribute === "filterName") {
       emit("update:modelValue", {
-        filterName: newValue ? newValue.name : filterName.value.name,
+        filterName: newValue ? newValue.name : filterName.value,
         filterValue: filterValue.value,
       });
     } else if (attribute === "filterValue") {
       emit("update:modelValue", {
-        filterName: filterName.value.name,
+        filterName: filterName.value ? filterName.value.name : filterName.value,
         filterValue: newValue,
       });
     }

@@ -87,7 +87,7 @@ const OBSERVABLE_TYPES_STUB: observableTypeRead[] = [
 function factory(
   filter: {
     filterName: string | null;
-    filterValue: Record<string, string> | null;
+    filterValue: Record<string, unknown> | null;
   },
   options?: TestingOptions,
 ) {
@@ -107,23 +107,14 @@ function factory(
   return { wrapper };
 }
 
-describe("FilterInput setup w/o set filter", () => {
-  it("renders", () => {
+describe("FilterInput.vue", () => {
+  it("renders with no given filter", () => {
     const { wrapper } = factory({ filterName: null, filterValue: null });
 
     expect(wrapper.exists()).toBe(true);
   });
 
-  it("sets up data correctly", () => {
-    const { wrapper } = factory({ filterName: null, filterValue: null });
-
-    expect(wrapper.vm.filterName).toEqual(FILTERS_STUB[0]);
-    expect(wrapper.vm.filterValue).toBeNull();
-  });
-});
-
-describe("FilterInput setup w/ set filter", () => {
-  it("renders", () => {
+  it("renders with a given filter", () => {
     const { wrapper } = factory({
       filterName: "owner",
       filterValue: {
@@ -135,7 +126,33 @@ describe("FilterInput setup w/ set filter", () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  it("sets up data correctly", () => {
+  it("sets up data correctly with no given filter", () => {
+    const { wrapper } = factory({ filterName: null, filterValue: null });
+
+    expect(wrapper.vm.filterName).toEqual(FILTERS_STUB[0]);
+    expect(wrapper.vm.filterValue).toBeNull();
+  });
+
+  it("sets up data correctly with unknown filter", () => {
+    const { wrapper } = factory({ filterName: "made_up", filterValue: null });
+
+    expect(wrapper.vm.filterName).toBeNull();
+    expect(wrapper.vm.filterValue).toBeNull();
+  });
+
+  it("sets up data correctly with an uninitialized select filter", async () => {
+    const { wrapper } = factory({
+      filterName: "owner",
+      filterValue: null,
+    });
+
+    expect(wrapper.vm.filterName).toEqual(FILTERS_STUB[1]);
+    // Attempts to set to default, however I can't get the userstore to load properly
+    // so it ends up being undefined
+    expect(wrapper.vm.filterValue).toEqual(undefined);
+  });
+
+  it("sets up data correctly with an initialized select filter", () => {
     const { wrapper } = factory({
       filterName: "owner",
       filterValue: {
@@ -154,9 +171,40 @@ describe("FilterInput setup w/ set filter", () => {
       username: "test analyst",
     });
   });
-});
 
-describe("FilterInput computed properties w/o set filter", () => {
+  it("sets up data correctly with an uninitialized categorized value filter", () => {
+    const { wrapper } = factory({
+      filterName: "observable",
+      filterValue: null,
+    });
+
+    expect(wrapper.vm.filterName).toEqual(FILTERS_STUB[2]);
+    expect(wrapper.vm.filterValue).toEqual({
+      category: undefined, // Attempted to set to default, but couldn't load store
+      value: null,
+    });
+  });
+
+  it("sets up data correctly with an initialized categorized value filter", () => {
+    const { wrapper } = factory({
+      filterName: "observable",
+      filterValue: {
+        category: OBSERVABLE_TYPES_STUB[1],
+        value: "test",
+      },
+    });
+
+    const observableTypeStore = useObservableTypeStore();
+    observableTypeStore.items = OBSERVABLE_TYPES_STUB;
+
+    expect(wrapper.vm.filterName).toEqual(FILTERS_STUB[2]);
+    expect(wrapper.vm.filterOptions).toEqual(OBSERVABLE_TYPES_STUB);
+    expect(wrapper.vm.filterValue).toEqual({
+      category: OBSERVABLE_TYPES_STUB[1],
+      value: "test",
+    });
+  });
+
   it("contains expected computed data when no filters are set (default to an input filter)", () => {
     const { wrapper } = factory({ filterName: null, filterValue: null });
 
@@ -169,10 +217,14 @@ describe("FilterInput computed properties w/o set filter", () => {
     expect(wrapper.vm.isDropdown).toBeFalsy();
     expect(wrapper.vm.isMultiSelect).toBeFalsy();
     expect(wrapper.vm.inputType).toEqual(filterTypes.INPUT_TEXT);
+    expect(wrapper.vm.categorizedValueCategory).toBeNull();
+    expect(wrapper.vm.categorizedValueValue).toBeNull();
+    expect(wrapper.vm.categorizedValueObject).toEqual({
+      category: null,
+      value: null,
+    });
   });
-});
 
-describe("FilterInput computed properties w/ set filter", () => {
   it("contains expected computed data when select/dropdown filter is set", () => {
     const { wrapper } = factory({ filterName: "owner", filterValue: null });
 
@@ -188,6 +240,12 @@ describe("FilterInput computed properties w/ set filter", () => {
     expect(wrapper.vm.isDropdown).toBeTruthy();
     expect(wrapper.vm.isMultiSelect).toBeFalsy();
     expect(wrapper.vm.inputType).toEqual(filterTypes.SELECT);
+    expect(wrapper.vm.categorizedValueCategory).toBeNull();
+    expect(wrapper.vm.categorizedValueValue).toBeNull();
+    expect(wrapper.vm.categorizedValueObject).toEqual({
+      category: null,
+      value: null,
+    });
   });
 
   it("contains expected computed data when categorized value filter is set", () => {
@@ -199,6 +257,8 @@ describe("FilterInput computed properties w/ set filter", () => {
     wrapper.vm.filterName = FILTERS_STUB[2];
     wrapper.vm.filterValue = { category: null, value: null };
 
+    wrapper.vm.clearFilterValue();
+
     expect(wrapper.vm.filterOptions).toEqual(OBSERVABLE_TYPES_STUB);
     expect(wrapper.vm.filterOptionProperty).toEqual("value");
     expect(wrapper.vm.isDate).toBeFalsy();
@@ -208,6 +268,14 @@ describe("FilterInput computed properties w/ set filter", () => {
     expect(wrapper.vm.isDropdown).toBeFalsy();
     expect(wrapper.vm.isMultiSelect).toBeFalsy();
     expect(wrapper.vm.inputType).toEqual(filterTypes.CATEGORIZED_VALUE);
+    expect(wrapper.vm.categorizedValueCategory).toEqual(
+      OBSERVABLE_TYPES_STUB[0],
+    );
+    expect(wrapper.vm.categorizedValueValue).toEqual(null);
+    expect(wrapper.vm.categorizedValueObject).toEqual({
+      category: OBSERVABLE_TYPES_STUB[0],
+      value: null,
+    });
   });
 
   it("contains expected computed data when chips filter is set", () => {
@@ -225,6 +293,12 @@ describe("FilterInput computed properties w/ set filter", () => {
     expect(wrapper.vm.isDropdown).toBeFalsy();
     expect(wrapper.vm.isMultiSelect).toBeFalsy();
     expect(wrapper.vm.inputType).toEqual(filterTypes.CHIPS);
+    expect(wrapper.vm.categorizedValueCategory).toBeNull();
+    expect(wrapper.vm.categorizedValueValue).toBeNull();
+    expect(wrapper.vm.categorizedValueObject).toEqual({
+      category: null,
+      value: null,
+    });
   });
 
   it("contains expected computed data when multiselect filter is set", () => {
@@ -242,6 +316,12 @@ describe("FilterInput computed properties w/ set filter", () => {
     expect(wrapper.vm.isDropdown).toBeFalsy();
     expect(wrapper.vm.isMultiSelect).toBeTruthy();
     expect(wrapper.vm.inputType).toEqual(filterTypes.MULTISELECT);
+    expect(wrapper.vm.categorizedValueCategory).toBeNull();
+    expect(wrapper.vm.categorizedValueValue).toBeNull();
+    expect(wrapper.vm.categorizedValueObject).toEqual({
+      category: null,
+      value: null,
+    });
   });
   it("contains expected computed data when date filter is set", () => {
     const { wrapper } = factory({ filterName: "owner", filterValue: null });
@@ -258,33 +338,11 @@ describe("FilterInput computed properties w/ set filter", () => {
     expect(wrapper.vm.isDropdown).toBeFalsy();
     expect(wrapper.vm.isMultiSelect).toBeFalsy();
     expect(wrapper.vm.inputType).toEqual(filterTypes.DATE);
-  });
-});
-
-describe("FilterInput methods", () => {
-  // beforeEach(() => {
-  //   wrapper.vm.filterName = FILTERS_STUB[0];
-  //   wrapper.vm.filterValue = null;
-  // });
-
-  it("executes updatedCategorizedValueObject as expected", () => {
-    const { wrapper } = factory({ filterName: null, filterValue: null });
-
-    wrapper.vm.filterName = FILTERS_STUB[2];
-    wrapper.vm.filterValue = {
-      category: OBSERVABLE_TYPES_STUB[0],
+    expect(wrapper.vm.categorizedValueCategory).toBeNull();
+    expect(wrapper.vm.categorizedValueValue).toBeNull();
+    expect(wrapper.vm.categorizedValueObject).toEqual({
+      category: null,
       value: null,
-    };
-
-    let result = wrapper.vm.updatedCategorizedValueObject(
-      "category",
-      OBSERVABLE_TYPES_STUB[1],
-    );
-    expect(result).toEqual({ category: OBSERVABLE_TYPES_STUB[1], value: null });
-    result = wrapper.vm.updatedCategorizedValueObject("value", "0.0.0.0");
-    expect(result).toEqual({
-      category: OBSERVABLE_TYPES_STUB[0],
-      value: "0.0.0.0",
     });
   });
 
@@ -324,12 +382,18 @@ describe("FilterInput methods", () => {
 
     wrapper.vm.updateValue("filterName", FILTERS_STUB[1]);
     await wrapper.vm.$nextTick();
-    let result = wrapper.emitted()["update:modelValue"][1];
+    let result = wrapper.emitted()["update:modelValue"][2];
     expect(result).toEqual([{ filterName: "owner", filterValue: null }]);
 
     wrapper.vm.updateValue("filterValue", "hello!");
     await wrapper.vm.$nextTick();
-    result = wrapper.emitted()["update:modelValue"][2];
+    result = wrapper.emitted()["update:modelValue"][3];
     expect(result).toEqual([{ filterName: "name", filterValue: "hello!" }]);
+
+    // If an unknown attritube is sent to updateValue, it should do nothing (no more calls)
+    wrapper.vm.updateValue("blah", "hello!");
+    await wrapper.vm.$nextTick();
+    result = wrapper.emitted()["update:modelValue"].length;
+    expect(result).toEqual(4);
   });
 });
