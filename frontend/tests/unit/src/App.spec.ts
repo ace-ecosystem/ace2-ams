@@ -71,8 +71,7 @@ describe("App setup", () => {
     });
 
     expect(filterStore.$state).toEqual({
-      alerts: { tags: ["tag1"] },
-      eventTimeBefore: new Date("01/01/2022"),
+      alerts: { tags: ["tag1"], eventTimeBefore: new Date("01/01/2022"), },
       events: {},
     });
   });
