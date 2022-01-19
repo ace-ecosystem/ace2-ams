@@ -67,10 +67,10 @@ describe("App setup", () => {
   it("hydrates the filter store from localStorage if the user is authenticated", () => {
     const { filterStore } = factory({
       authenticated: true,
-      filters: { alerts: { tags: ["tag1"] } },
+      filters: { alerts: { tags: ["tag1"], eventTimeBefore: new Date("01/01/2022") } },
     });
 
-    expect(filterStore.$state).toEqual({ alerts: { tags: ["tag1"] } });
+    expect(filterStore.$state).toEqual({ alerts: { tags: ["tag1"], eventTimeBefore: new Date("01/01/2022") } });
   });
 
   it("will not hydrate the filter store from localStorage if the user is not authenticated", () => {
