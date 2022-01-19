@@ -433,8 +433,8 @@ describe("Manage Alerts Filter Actions", () => {
     // Add the default
     cy.get(".p-overlaypanel-content > .p-button").click();
     // Check text
-    cy.get(".p-chip > .filter-name-text").should("have.text", "Disposition:");
-    cy.get(".p-chip > .link-text").should("have.text", "FALSE_POSITIVE");
+    cy.get(".filter-name-text").should("have.text", "Disposition:");
+    cy.get(".link-text").should("have.text", "FALSE_POSITIVE");
 
     // Open Quick Add menu again
     cy.get(".p-splitbutton-defaultbutton > .p-button-label").click();
@@ -452,10 +452,8 @@ describe("Manage Alerts Filter Actions", () => {
     cy.get(".p-overlaypanel-content > .p-button").click();
 
     // Check value
-    cy.get(".p-chip > .filter-name-text")
-      .last()
-      .should("have.text", "Observable:");
-    cy.get(".p-chip > .link-text")
+    cy.get(".filter-name-text").last().should("have.text", "Observable:");
+    cy.get(".link-text")
       .last()
       .should("have.text", "email_subject|Test Email Subject");
   });
@@ -736,8 +734,8 @@ describe("Manage Alerts Filters Chips", () => {
 
     // Check that the filter chip is visible and has right text
     cy.get(".p-chip").should("exist");
-    cy.get(".p-chip > .filter-name-text").should("have.text", "Tags:");
-    cy.get(".p-chip > .link-text").should("have.text", "TestTag");
+    cy.get(".filter-name-text").should("have.text", "Tags:");
+    cy.get(".link-text").should("have.text", "TestTag");
   });
 
   it("will delete a filter and remove chip when it's value in the filter chip is clicked", () => {
@@ -769,7 +767,7 @@ describe("Manage Alerts Filters Chips", () => {
     cy.get(".p-dropdown-item:nth-child(5)").click();
     cy.get(".pi-check").click();
     // Verify that the filter changed
-    cy.get(".p-chip > .filter-name-text").should("have.text", "Disposition:");
-    cy.get(".p-chip > .link-text").should("have.text", "UNKNOWN");
+    cy.get(".filter-name-text").should("have.text", "Disposition:");
+    cy.get(".link-text").should("have.text", "UNKNOWN");
   });
 });
