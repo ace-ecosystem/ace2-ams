@@ -27,9 +27,9 @@ describe("TheFilterToolbar.vue", () => {
 
     expect(wrapper.exists()).toBe(true);
   });
-  it("correctly opens given modal when modal open called", () => {
+  it("correctly opens EditFilterModal modal on openFilterModal", () => {
     const { wrapper, modalStore } = factory({ stubActions: false });
-    wrapper.vm.open("EditFilterModal");
+    wrapper.vm.openFilterModal();
 
     expect(modalStore.openModals).toContain("EditFilterModal");
   });
@@ -37,14 +37,6 @@ describe("TheFilterToolbar.vue", () => {
     const { wrapper } = factory();
 
     expect(wrapper.vm.filterType).toEqual("alerts");
-  });
-  it("correctly computes whether given filterType filters are empty", () => {
-    const { wrapper, filterStore } = factory();
-
-    filterStore.alerts = { test: "test_value" };
-    expect(wrapper.vm.filtersAreEmpty).toBeFalsy();
-    filterStore.alerts = {};
-    expect(wrapper.vm.filtersAreEmpty).toBeTruthy();
   });
   it("correctly calls Pinia action", () => {
     const { wrapper, filterStore } = factory();
@@ -91,5 +83,28 @@ describe("TheFilterToolbar.vue", () => {
 
     wrapper.vm.copyLink();
     expect(spy).toHaveBeenCalledWith("http://localhost/manage_alerts");
+  });
+  it("correctly sets up filterModel on mount", () => {
+    const { wrapper } = factory();
+
+    expect(wrapper.vm.filterModel).toEqual({
+      filterName: null,
+      filterValue: null,
+    });
+  });
+  it("correctly adds a filter to store  and resets filterModel on addFilter", () => {
+    const { wrapper, filterStore } = factory({ stubActions: false });
+    wrapper.vm.filterModel = {
+      filterName: "test",
+      filterValue: "name",
+    };
+
+    wrapper.vm.addFilter();
+    expect(filterStore.alerts).toEqual({ test: "name" });
+
+    expect(wrapper.vm.filterModel).toEqual({
+      filterName: null,
+      filterValue: null,
+    });
   });
 });

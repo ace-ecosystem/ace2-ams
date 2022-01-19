@@ -14,6 +14,7 @@
         :key="filter.index"
         v-model="formFilters[index]"
         class="w-12"
+        :allow-delete="true"
         @deleteFormFilter="deleteFormFilter(index)"
       ></FilterInput>
     </div>

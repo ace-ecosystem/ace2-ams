@@ -131,7 +131,8 @@ describe("ManageAlerts.vue", () => {
     }).click();
 
     // Click the 'clear' button
-    cy.get("[data-cy=clear-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(3) > .p-menuitem-link").click();
     // Both inputs should now be empty
     cy.get(
       "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
@@ -148,7 +149,8 @@ describe("ManageAlerts.vue", () => {
     }).click();
 
     // Click the 'reset' button
-    cy.get("[data-cy=reset-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(2) > .p-menuitem-link").click();
     // Both inputs should now be empty
     cy.get(
       "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
@@ -217,7 +219,7 @@ describe("ManageAlerts.vue", () => {
   });
 });
 
-describe("Manage Alerts Filter Modal", () => {
+describe("Manage Alerts Filter Actions", () => {
   beforeEach(() => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
@@ -225,12 +227,14 @@ describe("Manage Alerts Filter Modal", () => {
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-header").should("be.visible");
   });
 
   it("will add / remove / clear form filters when respective buttons are clicked", () => {
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-header").should("be.visible");
 
     // Add a single filter
@@ -253,7 +257,8 @@ describe("Manage Alerts Filter Modal", () => {
   });
 
   it("will change the input box depending on the selected filter", () => {
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(".col > .field > .p-dropdown").should("be.visible");
 
@@ -302,18 +307,21 @@ describe("Manage Alerts Filter Modal", () => {
   });
 
   it("will clear unsubmitted form filters when the Edit Filter modal is exited or cancelled", () => {
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-footer > :nth-child(2)").click();
 
     // Cancel
     cy.get(".p-dialog-footer > :nth-child(3)").click();
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".flex").children().should("have.length", 0);
 
     // Exit
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(".p-dialog-header-icon").click();
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".flex").children().should("have.length", 0);
 
     // Exit modal for end of test
@@ -327,7 +335,8 @@ describe("Manage Alerts Filter Modal", () => {
     ).as("getAlertWithFilters");
 
     // Open the modal
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(".col > .field > .p-dropdown").should("be.visible");
 
@@ -349,7 +358,8 @@ describe("Manage Alerts Filter Modal", () => {
 
   it("will load any currently set filters in the form", () => {
     // Open the modal
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(".col > .field > .p-dropdown").should("be.visible");
 
@@ -368,7 +378,8 @@ describe("Manage Alerts Filter Modal", () => {
     cy.get(".p-dialog-footer > :nth-child(4)").click();
 
     // Reopen the modal
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
 
     // Verify the form data
     cy.get(".flex").children().should("have.length", 1);
@@ -381,7 +392,8 @@ describe("Manage Alerts Filter Modal", () => {
 
   it("will load any currently set filters from localStorage and add them in the form", () => {
     // Open the modal
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(".col > .field > .p-dropdown").should("be.visible");
 
@@ -403,7 +415,8 @@ describe("Manage Alerts Filter Modal", () => {
     cy.reload();
 
     // Reopen the modal
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
 
     // Verify the form data
     cy.get(".flex").children().should("have.length", 1);
@@ -412,6 +425,37 @@ describe("Manage Alerts Filter Modal", () => {
 
     // Exit modal for end of test
     cy.get(".p-dialog-header-close-icon").click();
+  });
+
+  it("will add new filters through the quick add menu", () => {
+    // Open Quick Add menu
+    cy.get(".p-splitbutton-defaultbutton > .p-button-label").click();
+    // Add the default
+    cy.get(".p-overlaypanel-content > .p-button").click();
+    // Check text
+    cy.get(".filter-name-text").should("have.text", "Disposition:");
+    cy.get(".link-text").should("have.text", "FALSE_POSITIVE");
+
+    // Open Quick Add menu again
+    cy.get(".p-splitbutton-defaultbutton > .p-button-label").click();
+    // Select "observable" type filter from the dropdown
+    cy.get(".col-fixed > .p-dropdown > .p-dropdown-trigger").click();
+    cy.get(".p-dropdown-item:nth-child(10)").click();
+    // Select 'email_subject' type
+    cy.get(
+      ".col > :nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+    ).click();
+    cy.get(".p-dropdown-item:nth-child(2)").contains("email_subject").click();
+    // Type in observable value and submit
+    cy.get(".field > .p-inputtext").click();
+    cy.get(":nth-child(2) > .p-inputtext").type("Test Email Subject");
+    cy.get(".p-overlaypanel-content > .p-button").click();
+
+    // Check value
+    cy.get(".filter-name-text").last().should("have.text", "Observable:");
+    cy.get(".link-text")
+      .last()
+      .should("have.text", "email_subject|Test Email Subject");
   });
 });
 
@@ -594,7 +638,8 @@ describe("Manage Alerts URL Param Filters", () => {
     // Start by setting a filter
 
     // Open the filter modal
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(".col > .field > .p-dropdown").should("be.visible");
 
@@ -629,7 +674,8 @@ describe("Manage Alerts URL Param Filters", () => {
     cy.url().should("not.contain", "?name=Small+Alert&owner=bob");
 
     // Open the filter modal & check filters are applied
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-header").should("be.visible");
     cy.get(
       ":nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-label",
@@ -686,12 +732,10 @@ describe("Manage Alerts Filters Chips", () => {
     // Find the TestTag tag and click to set filter
     cy.get("[data-cy=tags]").contains("TestTag").click();
 
-    // Check that the filter chip container is visible
-    cy.get(".transparent-toolbar").should("exist");
     // Check that the filter chip is visible and has right text
     cy.get(".p-chip").should("exist");
-    cy.get(".p-chip > .filter-name-text").should("have.text", "Tags:");
-    cy.get(".p-chip > .link-text").should("have.text", "TestTag");
+    cy.get(".filter-name-text").should("have.text", "Tags:");
+    cy.get(".link-text").should("have.text", "TestTag");
   });
 
   it("will delete a filter and remove chip when it's value in the filter chip is clicked", () => {
@@ -700,7 +744,6 @@ describe("Manage Alerts Filters Chips", () => {
 
     // Click the filter value
     cy.get(".p-chip > .link-text").click();
-    cy.get(".transparent-toolbar").should("not.exist");
     cy.get(".p-chip").should("not.exist");
   });
 
@@ -709,8 +752,22 @@ describe("Manage Alerts Filters Chips", () => {
     cy.get("[data-cy=tags]").contains("TestTag").click();
 
     // Click the close icon
-    cy.get(".p-chip > .pi").click();
+    cy.get(".p-chip > .pi-times-circle").click();
     cy.get(".transparent-toolbar").should("not.exist");
     cy.get(".p-chip").should("not.exist");
+  });
+  it("will update filters when a given filter is edited through its filter chip", () => {
+    // Set the filter using the quick add default
+    cy.get(".p-splitbutton-defaultbutton").click();
+    cy.get(".pi-check").click();
+    // Open the filter edit menu
+    cy.get(".pi-pencil").click();
+    // Select a different disposition and submit
+    cy.get(".field > .p-dropdown > .p-dropdown-trigger").click();
+    cy.get(".p-dropdown-item:nth-child(5)").click();
+    cy.get(".pi-check").click();
+    // Verify that the filter changed
+    cy.get(".filter-name-text").should("have.text", "Disposition:");
+    cy.get(".link-text").should("have.text", "UNKNOWN");
   });
 });

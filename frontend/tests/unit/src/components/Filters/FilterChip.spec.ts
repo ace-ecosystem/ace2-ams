@@ -127,4 +127,25 @@ describe("FilterChip.vue", () => {
       "invalidFilterValue",
     );
   });
+  it("correctly sets filterModel on mount", () => {
+    const { wrapper } = factory();
+    expect(wrapper.vm.filterModel).toEqual({
+      filterName: "name",
+      filterValue: "test",
+    });
+  });
+  it("correctly resets filterModel on resetFilterModel", () => {
+    const { wrapper } = factory();
+    wrapper.vm.filterModel = undefined;
+    wrapper.vm.resetFilterModel();
+    expect(wrapper.vm.filterModel).toEqual({
+      filterName: "name",
+      filterValue: "test",
+    });
+  });
+  it("updates the filterStore with set filterModel on updateFilter", () => {
+    const { wrapper, filterStore } = factory({ stubActions: false });
+    wrapper.vm.updateFilter();
+    expect(filterStore.alerts).toEqual({ name: "test" });
+  });
 });

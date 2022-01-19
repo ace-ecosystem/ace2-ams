@@ -1,12 +1,13 @@
 <template>
   <div class="formgrid grid">
-    <div class="field col-fixed">
+    <div v-if="!fixedFilterName" class="field col-fixed">
       <Dropdown
         v-model="filterName"
         :options="availableFilters"
         option-label="label"
         type="text"
         class="w-13rem"
+        tabindex="1"
         @change="
           clearFilterValue();
           updateValue('filterName', $event.value);
@@ -73,35 +74,25 @@
       <div v-else-if="isCategorizedValue">
         <div class="field">
           <Dropdown
-            v-model="filterValue.category"
+            v-model="categorizedValueCategory"
             :options="filterOptions"
             :option-label="filterOptionProperty"
             class="w-16rem"
             type="text"
-            @change="
-              updateValue(
-                'filterValue',
-                updatedCategorizedValueObject('category', $event.value),
-              )
-            "
+            @change="updateValue('filterValue', categorizedValueObject)"
           ></Dropdown>
         </div>
         <div class="field">
           <InputText
-            v-model="filterValue.value"
+            v-model="categorizedValueValue"
             class="w-16rem"
             type="text"
-            @input="
-              updateValue(
-                'filterValue',
-                updatedCategorizedValueObject('value', $event.target.value),
-              )
-            "
+            @input="updateValue('filterValue', categorizedValueObject)"
           ></InputText>
         </div>
       </div>
     </div>
-    <div class="field col-fixed">
+    <div v-if="allowDelete" class="field col-fixed">
       <Button
         name="delete-filter"
         icon="pi pi-times"
@@ -112,138 +103,147 @@
   </div>
 </template>
 
-<script>
-  import InputText from "primevue/inputtext";
+<script setup>
+  import {
+    computed,
+    defineEmits,
+    defineProps,
+    inject,
+    onMounted,
+    ref,
+    watch,
+  } from "vue";
 
   import Button from "primevue/button";
+  import Chips from "primevue/chips";
   import Dropdown from "primevue/dropdown";
+  import InputText from "primevue/inputtext";
+  import Multiselect from "primevue/multiselect";
 
   import { DatePicker } from "v-calendar";
 
-  import Chips from "primevue/chips";
+  const availableFilters = inject("availableFilters");
+  const emit = defineEmits(["update:modelValue", "deleteFormFilter"]);
+  const props = defineProps({
+    modelValue: { type: Object, required: true },
+    fixedFilterName: { type: Boolean, required: false },
+    allowDelete: { type: Boolean, required: false },
+  });
 
-  import Multiselect from "primevue/multiselect";
+  const getFilterNameObject = (filterName) => {
+    if (!filterName) {
+      return availableFilters[0];
+    }
+    let filter = availableFilters.find((filter) => {
+      return filter.name === filterName;
+    });
+    filter = filter ? filter : null;
+    return filter;
+  };
 
-  export default {
-    name: "FilterInput",
-    components: {
-      Button,
-      Dropdown,
-      InputText,
-      Multiselect,
-      Chips,
-      DatePicker,
-    },
+  const filterName = ref(getFilterNameObject(props.modelValue.filterName));
+  const filterValue = ref(props.modelValue.filterValue);
 
-    inject: ["availableFilters", "filterType"],
+  // The categorizedValue filter is a bit tricky
+  // We need to copy the values and use those as the model
+  // Otherwise, they will directly modify the filterStore state :/
+  const categorizedValueCategory = ref(null);
+  const categorizedValueValue = ref(null);
 
-    props: ["modelValue"],
-    emits: ["update:modelValue", "deleteFormFilter"],
+  const filterOptions = computed(() => {
+    if (filterName.value && filterName.value.store) {
+      const store = filterName.value.store();
+      return store.allItems;
+    }
+    return null;
+  });
 
-    data() {
-      return {
-        filterName: this.getFilterNameObject(this.modelValue.filterName),
-        filterValue: this.modelValue.filterValue,
-      };
-    },
+  onMounted(() => {
+    // This will update the filter to the default if one wasn't provided
+    updateValue("filterName", filterName.value);
+    // This will udpate the filter value to the default (if available) if one wasn't provided
+    if (!filterValue.value) {
+      clearFilterValue();
+      updateValue("filterValue", filterValue.value);
+    }
+    // we need to fill in the placeholder refs (see note above) for categorized value
+    else if (isCategorizedValue.value) {
+      categorizedValueCategory.value = filterValue.value.category;
+      categorizedValueValue.value = filterValue.value.value;
+    }
+  });
 
-    computed: {
-      filterOptions() {
-        if (this.filterName.store) {
-          const store = this.filterName.store();
-          return store.allItems;
-        }
-        return null;
-      },
-      filterOptionProperty() {
-        return this.filterName.optionProperty
-          ? this.filterName.optionProperty
-          : "value";
-      },
-      isDate() {
-        return this.inputType == "date";
-      },
-      isCategorizedValue() {
-        return this.inputType == "categorizedValue";
-      },
-      isChips() {
-        return this.inputType == "chips";
-      },
-      isInputText() {
-        return this.inputType == "inputText";
-      },
-      isDropdown() {
-        return this.inputType == "select";
-      },
-      isMultiSelect() {
-        return this.inputType == "multiselect";
-      },
-      inputType() {
-        return this.filterName ? this.filterName.type : null;
-      },
-    },
+  const filterOptionProperty = computed(() => {
+    if (filterName.value) {
+      return filterName.value.optionProperty
+        ? filterName.value.optionProperty
+        : "value";
+    }
+    return null;
+  });
 
-    watch: {
-      filterName: {
-        handler: async function () {
-          if (this.filterName.store) {
-            const store = this.filterName.store();
-            await store.readAll();
-          }
-        },
-      },
-    },
+  const isDate = computed(() => {
+    return inputType.value == "date";
+  });
+  const isCategorizedValue = computed(() => {
+    return inputType.value == "categorizedValue";
+  });
+  const categorizedValueObject = computed(() => {
+    return {
+      category: categorizedValueCategory.value,
+      value: categorizedValueValue.value,
+    };
+  });
+  const isChips = computed(() => {
+    return inputType.value == "chips";
+  });
 
-    mounted() {
-      this.updateValue("filterName", null, this.filterName);
-    },
+  const isInputText = computed(() => {
+    return inputType.value == "inputText";
+  });
 
-    methods: {
-      updatedCategorizedValueObject(attr, event) {
-        let category = null;
-        let value = null;
-        if (attr == "category") {
-          category = event;
-          value = this.filterValue.value;
-        } else {
-          category = this.filterValue.category;
-          value = event;
-        }
-        return {
-          category: category,
-          value: value,
-        };
-      },
-      clearFilterValue() {
-        if (this.isCategorizedValue) {
-          this.filterValue = { category: this.filterOptions[0], value: null };
-        } else {
-          this.filterValue = null;
-        }
-      },
-      getFilterNameObject(filterName) {
-        if (!filterName) {
-          return this.availableFilters[0];
-        }
-        let filter = this.availableFilters.find((filter) => {
-          return filter.name === filterName;
-        });
-        filter = filter ? filter : null;
-        return filter;
-      },
-      updateValue(attribute, newValue) {
-        if (attribute === "filterName") {
-          this.$emit("update:modelValue", {
-            filterName: newValue ? newValue.name : this.filterName.name,
-            filterValue: this.filterValue,
-          });
-        } else if (attribute === "filterValue") {
-          this.$emit("update:modelValue", {
-            filterName: this.filterName.name,
-            filterValue: newValue,
-          });
-        }
-      },
-    },
+  const isDropdown = computed(() => {
+    return inputType.value == "select";
+  });
+
+  const isMultiSelect = computed(() => {
+    return inputType.value == "multiselect";
+  });
+
+  const inputType = computed(() => {
+    return filterName.value ? filterName.value.type : null;
+  });
+
+  watch(filterName, async () => {
+    if (filterName.value.store) {
+      const store = filterName.value.store();
+      await store.readAll();
+    }
+  });
+
+  const clearFilterValue = () => {
+    if (isCategorizedValue.value) {
+      filterValue.value = { category: filterOptions.value[0], value: null };
+      categorizedValueCategory.value = filterOptions.value[0];
+      categorizedValueValue.value = null;
+    } else if (isDropdown.value) {
+      filterValue.value = filterOptions.value[0];
+    } else {
+      filterValue.value = null;
+    }
+  };
+
+  const updateValue = (attribute, newValue) => {
+    if (attribute === "filterName") {
+      emit("update:modelValue", {
+        filterName: newValue ? newValue.name : filterName.value,
+        filterValue: filterValue.value,
+      });
+    } else if (attribute === "filterValue") {
+      emit("update:modelValue", {
+        filterName: filterName.value ? filterName.value.name : filterName.value,
+        filterValue: newValue,
+      });
+    }
   };
 </script>
