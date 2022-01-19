@@ -18,7 +18,7 @@
         class="pi pi-pencil icon-button chip-content"
         style="cursor: pointer"
         @click="
-          toggleQuickEditMenu();
+          toggleQuickEditMenu($event);
           resetFilterModel();
         "
       />
@@ -42,7 +42,7 @@
         :allow-delete="false"
       >
       </FilterInput>
-      <Button name="update-filter" icon="pi pi-check" @click="updateFilter" />
+      <Button name="update-filter" icon="pi pi-check" @click="updateFilter();toggleQuickEditMenu($event);" />
     </OverlayPanel>
   </span>
 </template>

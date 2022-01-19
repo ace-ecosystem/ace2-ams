@@ -2,7 +2,7 @@
 <!-- A toolbar containing buttons/inputs to display/change applied filters for a given set of items (ex. alerts or events) -->
 
 <template>
-  <Toolbar class="transparent-toolbar">
+  <Toolbar>
     <template #start>
       <SplitButton
         label="Quick Add"
@@ -21,7 +21,7 @@
           name="update-filter"
           icon="pi pi-check"
           @click="
-            toggleQuickAddPanel();
+            toggleQuickAddPanel($event);
             addFilter();
           "
         />
