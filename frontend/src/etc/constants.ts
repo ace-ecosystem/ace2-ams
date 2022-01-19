@@ -1,16 +1,25 @@
 import { alertFilterNameTypes } from "@/models/alert";
 import { filterOption } from "@/models/base";
+import { eventFilterNameTypes } from "@/models/event";
+import { eventPreventionToolRead } from "@/models/eventPreventionTool";
+import { eventVectorRead } from "@/models/eventVector";
 import { nodeTagRead } from "@/models/nodeTag";
 import { nodeThreatRead } from "@/models/nodeThreat";
+import { nodeThreatActorRead } from "@/models/nodeThreatActor";
 import { observableTypeRead } from "@/models/observableType";
-import { userRead } from "@/models/user";
 
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
 import { useAlertQueueStore } from "@/stores/alertQueue";
 import { useAlertToolStore } from "@/stores/alertTool";
 import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";
-import { useEventStore } from "@/stores/event";
+import { useEventPreventionToolStore } from "@/stores/eventPreventionTool";
+import { useEventQueueStore } from "@/stores/eventQueue";
+import { useEventRiskLevelStore } from "@/stores/eventRiskLevel";
+import { useEventSourceStore } from "@/stores/eventSource";
+import { useEventStatusStore } from "@/stores/eventStatus";
+import { useEventTypeStore } from "@/stores/eventType";
+import { useEventVectorStore } from "@/stores/eventVector";
 import { useNodeTagStore } from "@/stores/nodeTag";
 import { useNodeThreatStore } from "@/stores/nodeThreat";
 import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
@@ -89,15 +98,6 @@ export const alertFilters: readonly filterOption[] = [
     stringRepr: (filter: Date) => {
       return filter.toISOString();
     },
-    parseStringRepr: (filterString: string) => {
-      return new Date(filterString);
-    },
-  },
-  {
-    name: alertFilterNames.EVENT_UUID_FILTER,
-    label: "Event",
-    type: filterTypes.SELECT,
-    store: useEventStore,
     parseStringRepr: (filterString: string) => {
       return new Date(filterString);
     },
@@ -206,7 +206,7 @@ export const alertFilters: readonly filterOption[] = [
     label: "Tags",
     type: filterTypes.CHIPS,
     store: useNodeTagStore,
-    stringRepr: (filter: nodeTagRead[]) => {
+    stringRepr: (filter: string[]) => {
       return filter
         .map(function (elem) {
           return elem;
@@ -279,5 +279,234 @@ export const alertRangeFilters = {
   "Disposition Time": {
     start: alertFilterNames.DISPOSITIONED_AFTER_FILTER,
     end: alertFilterNames.DISPOSITIONED_BEFORE_FILTER,
+  },
+};
+
+// ** Events ** //
+
+export const eventFilterNames: Record<string, eventFilterNameTypes> = {
+  CREATED_AFTER_FILTER: "createdAfter",
+  CREATED_BEFORE_FILTER: "createdBefore",
+  DISPOSITION_FILTER: "disposition",
+  NAME_FILTER: "name",
+  OBSERVABLE_TYPES_FILTER: "observableTypes",
+  OBSERVABLE_VALUE_FILTER: "observableValue",
+  OWNER_FILTER: "owner",
+  PREVENTION_TOOLS_FILTER: "preventionTools",
+  QUEUE_FILTER: "queue",
+  RISK_LEVEL_FILTER: "riskLevel",
+  SOURCE_FILTER: "source",
+  STATUS_FILTER: "status",
+  TAGS_FILTER: "tags",
+  THREAT_ACTORS_FILTER: "threatActors",
+  THREATS_FILTER: "threats",
+  TYPE_FILTER: "type",
+  VECTORS_FILTER: "vectors",
+};
+
+export const eventFilters: readonly filterOption[] = [
+  {
+    name: eventFilterNames.CREATED_AFTER_FILTER,
+    label: "Created After",
+    type: filterTypes.DATE,
+    stringRepr: (filter: Date) => {
+      return filter.toISOString();
+    },
+    parseStringRepr: (filterString: string) => {
+      return new Date(filterString);
+    },
+  },
+  {
+    name: eventFilterNames.CREATED_BEFORE_FILTER,
+    label: "Created Before",
+    type: filterTypes.DATE,
+    stringRepr: (filter: Date) => {
+      return filter.toISOString();
+    },
+    parseStringRepr: (filterString: string) => {
+      return new Date(filterString);
+    },
+  },
+  {
+    name: eventFilterNames.DISPOSITION_FILTER,
+    label: "Disposition",
+    type: filterTypes.SELECT,
+    store: useAlertDispositionStore,
+    optionProperty: "value",
+    valueProperty: "value",
+  },
+  {
+    name: eventFilterNames.NAME_FILTER,
+    label: "Name",
+    type: filterTypes.INPUT_TEXT,
+  },
+  {
+    name: eventFilterNames.OBSERVABLE_FILTER,
+    label: "Observable",
+    type: filterTypes.CATEGORIZED_VALUE,
+    store: useObservableTypeStore,
+    stringRepr: (filter: { category: observableTypeRead; value: string }) => {
+      return `${filter.category.value}|${filter.value}`;
+    },
+    parseStringRepr: (filterString: string) => {
+      const [category, value] = filterString.split("|");
+      return { category: category, value: value };
+    },
+  },
+  {
+    name: eventFilterNames.OBSERVABLE_TYPES_FILTER,
+    label: "Observable Types",
+    type: filterTypes.MULTISELECT,
+    store: useObservableTypeStore,
+    stringRepr: (filter: observableTypeRead[]) => {
+      return filter
+        .map(function (elem) {
+          return elem.value;
+        })
+        .join();
+    },
+    parseStringRepr: (filterString: string) => {
+      return filterString.split(",");
+    },
+  },
+  {
+    name: eventFilterNames.OBSERVABLE_VALUE_FILTER,
+    label: "Observable Value",
+    type: filterTypes.INPUT_TEXT,
+  },
+  {
+    name: eventFilterNames.OWNER_FILTER,
+    label: "Owner",
+    type: filterTypes.SELECT,
+    store: useUserStore,
+    optionProperty: "displayName",
+    valueProperty: "username",
+  },
+  {
+    name: eventFilterNames.PREVENTION_TOOLS_FILTER,
+    label: "Prevention Tools",
+    type: filterTypes.MULTISELECT,
+    store: useEventPreventionToolStore,
+    stringRepr: (filter: eventPreventionToolRead[]) => {
+      return filter
+        .map(function (elem) {
+          return elem.value;
+        })
+        .join();
+    },
+    parseStringRepr: (filterString: string) => {
+      return filterString.split(",");
+    },
+  },
+  {
+    name: eventFilterNames.QUEUE_FILTER,
+    label: "Queue",
+    type: filterTypes.SELECT,
+    store: useEventQueueStore,
+    optionProperty: "value",
+    valueProperty: "value",
+  },
+  {
+    name: eventFilterNames.RISK_LEVEL_FILTER,
+    label: "Risk Level",
+    type: filterTypes.SELECT,
+    store: useEventRiskLevelStore,
+    optionProperty: "value",
+    valueProperty: "value",
+  },
+  {
+    name: eventFilterNames.SOURCE_FILTER,
+    label: "Source",
+    type: filterTypes.SELECT,
+    store: useEventSourceStore,
+    optionProperty: "value",
+    valueProperty: "value",
+  },
+  {
+    name: eventFilterNames.STATUS_FILTER,
+    label: "Status",
+    type: filterTypes.SELECT,
+    store: useEventStatusStore,
+    optionProperty: "value",
+    valueProperty: "value",
+  },
+  {
+    name: eventFilterNames.TAGS_FILTER,
+    label: "Tags",
+    type: filterTypes.CHIPS,
+    store: useNodeTagStore,
+    stringRepr: (filter: string[]) => {
+      return filter
+        .map(function (elem) {
+          return elem;
+        })
+        .join();
+    },
+    parseStringRepr: (filterString: string) => {
+      return filterString.split(",");
+    },
+  },
+  {
+    name: eventFilterNames.THREAT_ACTORS_FILTER,
+    label: "Threat Actors",
+    type: filterTypes.MULTISELECT,
+    store: useNodeThreatActorStore,
+    stringRepr: (filter: nodeThreatActorRead[]) => {
+      return filter
+        .map(function (elem) {
+          return elem.value;
+        })
+        .join();
+    },
+    parseStringRepr: (filterString: string) => {
+      return filterString.split(",");
+    },
+  },
+  {
+    name: eventFilterNames.THREATS_FILTER,
+    label: "Threats",
+    type: filterTypes.MULTISELECT,
+    store: useNodeThreatStore,
+    stringRepr: (filter: nodeThreatRead[]) => {
+      return filter
+        .map(function (elem) {
+          return elem.value;
+        })
+        .join();
+    },
+    parseStringRepr: (filterString: string) => {
+      return filterString.split(",");
+    },
+  },
+  {
+    name: eventFilterNames.TYPE_FILTER,
+    label: "Type",
+    type: filterTypes.SELECT,
+    store: useEventTypeStore,
+    optionProperty: "value",
+    valueProperty: "value",
+  },
+  {
+    name: eventFilterNames.VECTORS_FILTER,
+    label: "Vectors",
+    type: filterTypes.MULTISELECT,
+    store: useEventVectorStore,
+    stringRepr: (filter: eventVectorRead[]) => {
+      return filter
+        .map(function (elem) {
+          return elem.value;
+        })
+        .join();
+    },
+    parseStringRepr: (filterString: string) => {
+      return filterString.split(",");
+    },
+  },
+] as const;
+
+export const eventRangeFilters = {
+  "Created Time": {
+    start: eventFilterNames.CREATED_AFTER_FILTER,
+    end: eventFilterNames.CREATED_BEFORE_FILTER,
   },
 };

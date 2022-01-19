@@ -1,24 +1,36 @@
 import { defineStore } from "pinia";
-import { eventRead } from "@/models/event";
+import { eventRead, eventUpdate } from "@/models/event";
 import { Event } from "@/services/api/event";
+import { UUID } from "@/models/base";
 
 export const useEventStore = defineStore({
   id: "eventStore",
 
   state: () => ({
-    items: [] as eventRead[],
+    openEvent: null as unknown as eventRead,
+
+    // whether the event should be reloaded
+    requestReload: false,
   }),
 
-  getters: {
-    allItems(): eventRead[] {
-      return this.items;
-    },
-  },
-
   actions: {
-    async readAll() {
-      // this.items = await Event.readAll();
-      this.items = [];
+    async read(uuid: UUID) {
+      await Event.read(uuid)
+        .then((event) => {
+          this.openEvent = event;
+        })
+        .catch((error) => {
+          throw error;
+        });
+    },
+
+    async update(data: eventUpdate[]) {
+      // once we get around to updating events, we will need to update the base api service to have a
+      // 'getAfterUpdate' option like there is for 'create'
+      // then we can reset the open/queried event(s)
+      await Event.update(data).catch((error) => {
+        throw error;
+      });
     },
   },
 });

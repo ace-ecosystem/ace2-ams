@@ -52,7 +52,7 @@
 
   import { useFilterStore } from "@/stores/filter";
 
-  import { alertFilters } from "@/etc/constants";
+  import { alertFilters, eventFilters } from "@/etc/constants";
   import { isObject } from "@/etc/helpers";
   import Button from "primevue/button";
   import Chip from "primevue/chip";
@@ -72,7 +72,9 @@
     filterValue: { type: [String, Object, Array, Date], required: true },
   });
 
-  const filterOptions = filterType === "alerts" ? alertFilters : [];
+  const availableFilters = { alerts: alertFilters, events: eventFilters };
+  const filterOptions =
+    filterType in availableFilters ? availableFilters[filterType] : [];
   const filterNameObject = filterOptions.find((filter) => {
     return filter.name === props.filterName;
   });

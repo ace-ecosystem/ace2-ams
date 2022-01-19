@@ -138,3 +138,7 @@ class EventUpdate(NodeUpdate, EventBase):
     threats: Optional[List[type_str]] = Field(description="A list of threats to add to the event")
 
     _prevent_none: classmethod = validators.prevent_none("name", "queue", "status", "tags", "threat_actors", "threats")
+
+
+class EventUpdateMultiple(EventUpdate):
+    uuid: UUID4 = Field(description="The UUID of the event")
