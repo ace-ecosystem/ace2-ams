@@ -17,7 +17,10 @@
       <i
         class="pi pi-pencil icon-button chip-content"
         style="cursor: pointer"
-        @click="toggleQuickEditMenu"
+        @click="
+          toggleQuickEditMenu();
+          resetFilterModel();
+        "
       />
       <i
         class="pi pi-times-circle icon-button chip-content"
@@ -25,7 +28,14 @@
         @click="unsetFilter"
       />
     </Chip>
-    <OverlayPanel ref="op" style="padding: 1rem" @keypress.enter="updateFilter">
+    <OverlayPanel
+      ref="op"
+      style="padding: 1rem"
+      @keypress.enter="
+        updateFilter();
+        resetFilterModel();
+      "
+    >
       <FilterInput
         v-model="filterModel"
         :fixed-filter-name="true"
@@ -55,7 +65,6 @@
   const op = ref(null);
   const toggleQuickEditMenu = (event) => {
     op.value.toggle(event);
-    resetFilterModel();
   };
 
   const props = defineProps({
@@ -93,7 +102,6 @@
       filterName: props.filterName,
       filterValue: filterModel.value.filterValue,
     });
-    toggleQuickEditMenu();
   }
 
   function unsetFilter() {

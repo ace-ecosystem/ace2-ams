@@ -2,32 +2,29 @@
 <!-- A toolbar containing buttons/inputs to display/change applied filters for a given set of items (ex. alerts or events) -->
 
 <template>
-  <!-- Filter Action Toolbar -->
-  <!-- <Toolbar style="overflow-x: auto">
-    <template #start>
-
-    </template>
-  </Toolbar> -->
   <Toolbar class="transparent-toolbar">
     <template #start>
       <SplitButton
         label="Quick Add"
         icon="pi pi-plus"
         :model="buttons"
-        @click="toggleOverlay"
+        @click="toggleQuickAddPanel"
       ></SplitButton>
       <EditFilterModal name="EditFilterModal" />
       <FilterChipContainer></FilterChipContainer>
     </template>
 
-    <template #end> 
-            <OverlayPanel
-        ref="op"
-        style="padding: 1rem"
-        @keypress.enter="updateFilter"
-      >
+    <template #end>
+      <OverlayPanel ref="op" style="padding: 1rem" @keypress.enter="addFilter">
         <FilterInput v-model="filterModel" :allow-delete="false"> </FilterInput>
-        <Button name="update-filter" icon="pi pi-check" @click="addFilter" />
+        <Button
+          name="update-filter"
+          icon="pi pi-check"
+          @click="
+            toggleQuickAddPanel();
+            addFilter();
+          "
+        />
       </OverlayPanel>
       <DateRangePicker />
     </template>
@@ -63,7 +60,6 @@
 
   const filterType = inject("filterType");
 
-
   const clear = () => {
     filterStore.clearAll({ filterType: filterType });
   };
@@ -95,7 +91,7 @@
     {
       label: "Copy Link",
       icon: "pi pi-link",
-      command: clear,
+      command: copyLink,
     },
   ];
 
@@ -116,7 +112,6 @@
     copyToClipboard(link);
   }
 
-
   const filterModel = ref({
     filterName: null,
     filterValue: null,
@@ -128,7 +123,6 @@
       filterName: filterModel.value.filterName,
       filterValue: filterModel.value.filterValue,
     });
-    toggleOverlay();
     filterModel.value = {
       filterName: null,
       filterValue: null,
@@ -136,7 +130,7 @@
   };
 
   const op = ref(null);
-  const toggleOverlay = (event) => {
+  const toggleQuickAddPanel = (event) => {
     op.value.toggle(event);
   };
 </script>
