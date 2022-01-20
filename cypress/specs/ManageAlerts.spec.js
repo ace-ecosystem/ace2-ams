@@ -20,11 +20,11 @@ describe("ManageAlerts.vue", () => {
   it("will reload alerts table with 'after' filter applied when 'start' input changed by using date picker", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_after=*",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_after=*"
     ).as("getAlerts");
     // Click the first available day in the date picker for 'start' input
     cy.get(
-      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext"
     ).click();
     cy.get(".vc-popover-content").should("be.visible");
     cy.get(".in-month > .vc-day-content").first().click({ force: true });
@@ -35,7 +35,7 @@ describe("ManageAlerts.vue", () => {
   it("will reload alerts table with 'after' filter applied when 'start' input changed by typing", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_after=2021-03-02T*",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_after=2021-03-02T*"
     ).as("getAlerts");
     // Type the date into the 'start' input
     cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext")
@@ -49,11 +49,11 @@ describe("ManageAlerts.vue", () => {
   it("will reload alerts table with 'before' filter applied when 'end' input changed by using date picker", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_before=*",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_before=*"
     ).as("getAlerts");
     // Click the first available day in the date picker for 'end' input
     cy.get(
-      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext",
+      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext"
     ).click();
     cy.get(".vc-popover-content").should("be.visible");
     cy.get(".in-month > .vc-day-content").first().click({ force: true });
@@ -63,7 +63,7 @@ describe("ManageAlerts.vue", () => {
   it("will reload alerts table with 'before' filter applied when 'end' input changed by typing", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_before=2021-03-02T*",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_before=2021-03-02T*"
     ).as("getAlerts");
     // Type the date into the 'end' input
     cy.get("[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext")
@@ -94,10 +94,10 @@ describe("ManageAlerts.vue", () => {
     }).click();
     // Make sure the ranges were correctly set
     cy.get(
-      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext"
     ).should("have.value", todayStartString);
     cy.get(
-      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext",
+      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext"
     ).should("have.value", todayEndString);
   });
   it("will clear a time filter when its 'delete' button is clicked", () => {
@@ -112,14 +112,14 @@ describe("ManageAlerts.vue", () => {
     cy.get(":nth-child(2) > .p-inputgroup > .p-button").click();
     // Should now be empty
     cy.get(
-      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext"
     ).should("have.value", "");
 
     // Click the 'end' input delete button
     cy.get(":nth-child(4) > .p-inputgroup > .p-button").click();
     // Should now be empty
     cy.get(
-      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext",
+      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext"
     ).should("have.value", "");
   });
   it("will clear both time filters when either the filter 'Clear' or 'Reset' buttons are clicked", () => {
@@ -135,10 +135,10 @@ describe("ManageAlerts.vue", () => {
     cy.get(".p-menuitem:nth-child(3) > .p-menuitem-link").click();
     // Both inputs should now be empty
     cy.get(
-      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext"
     ).should("have.value", "");
     cy.get(
-      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext",
+      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext"
     ).should("have.value", "");
 
     // Set the date range to 'today' using the date options dropdown (again)
@@ -153,16 +153,16 @@ describe("ManageAlerts.vue", () => {
     cy.get(".p-menuitem:nth-child(2) > .p-menuitem-link").click();
     // Both inputs should now be empty
     cy.get(
-      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext"
     ).should("have.value", "");
     cy.get(
-      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext",
+      "[data-cy=date-range-picker-end] > .p-inputgroup > .p-inputtext"
     ).should("have.value", "");
   });
   it("will use the set time filter will be used for requests ", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&insert_time_after=2021-03-02T*",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&insert_time_after=2021-03-02T*"
     ).as("getAlerts");
 
     // Set the date range filter type to be "Insert Time"
@@ -194,12 +194,12 @@ describe("ManageAlerts.vue", () => {
       .type("03/02/2021 13:00");
     // Just verifying that right  time was entered
     cy.get(
-      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext"
     ).should("have.value", "03/02/2021 13:00");
 
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
     ).as("getAlertsNoFilters");
     // Change the date range filter type to "Insert Time"
     cy.get('[data-cy="date-range-picker-options"]').click();
@@ -214,7 +214,7 @@ describe("ManageAlerts.vue", () => {
 
     // And the input should be cleared
     cy.get(
-      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext",
+      "[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext"
     ).should("have.value", "");
   });
 });
@@ -263,7 +263,7 @@ describe("Manage Alerts Filter Actions", () => {
     cy.get(".col > .field > .p-dropdown").should("be.visible");
 
     cy.get(
-      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger"
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Dispositioned After']").click();
@@ -273,33 +273,33 @@ describe("Manage Alerts Filter Actions", () => {
       .should("contain", "Enter a date!");
 
     cy.get(
-      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger"
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Name']").click();
     cy.get(".field > .p-inputtext").should("be.visible");
 
     cy.get(
-      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger"
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Observable']").click();
     cy.get(".col > :nth-child(1) > :nth-child(1) > .p-dropdown").should(
-      "be.visible",
+      "be.visible"
     );
     cy.get(":nth-child(2) > .p-inputtext").should("be.visible");
 
     cy.get(
-      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger"
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Observable Types']").click();
     cy.get(".field > .p-multiselect > .p-multiselect-label-container").should(
-      "be.visible",
+      "be.visible"
     );
 
     cy.get(
-      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger"
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Tags']").click();
@@ -331,7 +331,7 @@ describe("Manage Alerts Filter Actions", () => {
   it("will make a request to update filters when a new filter is set", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&name=hello+world",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&name=hello+world"
     ).as("getAlertWithFilters");
 
     // Open the modal
@@ -342,7 +342,7 @@ describe("Manage Alerts Filter Actions", () => {
 
     // Select name filter
     cy.get(
-      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger"
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Name']").click();
@@ -365,7 +365,7 @@ describe("Manage Alerts Filter Actions", () => {
 
     // Select name filter
     cy.get(
-      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger"
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Name']").click();
@@ -399,7 +399,7 @@ describe("Manage Alerts Filter Actions", () => {
 
     // Select name filter
     cy.get(
-      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger"
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Name']").click();
@@ -443,7 +443,7 @@ describe("Manage Alerts Filter Actions", () => {
     cy.get(".p-dropdown-item:nth-child(10)").click();
     // Select 'email_subject' type
     cy.get(
-      ".col > :nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+      ".col > :nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-trigger"
     ).click();
     cy.get(".p-dropdown-item:nth-child(2)").contains("email_subject").click();
     // Type in observable value and submit
@@ -473,7 +473,7 @@ describe("Manage Alerts Comment", () => {
     cy.get(".p-checkbox-box").eq(1).click();
     // Open the comment modal
     cy.get(
-      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(2)",
+      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(2)"
     ).click();
     cy.get(".p-dialog-content").should("be.visible");
     // Set Comment
@@ -500,7 +500,7 @@ describe("Manage Alerts Tags", () => {
     cy.get(".p-checkbox-box").eq(1).click();
     // Open the tag modal
     cy.get(
-      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(5)",
+      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(5)"
     ).click();
     cy.get(".p-dialog-content").should("be.visible");
     // Type a tag
@@ -534,18 +534,18 @@ describe("Manage Alerts Take Ownership", () => {
     // Check first visible alert current owner, should be "None"
     cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span").should(
       "have.text",
-      "None",
+      "None"
     );
     // Get first visible alert checkbox
     cy.get(" .p-checkbox-box").eq(1).click();
     // Click Take Ownership button
     cy.get(
-      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(3)",
+      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(3)"
     ).click();
     // Check owner name after taking ownership
     cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span").should(
       "have.text",
-      "Analyst",
+      "Analyst"
     );
   });
 });
@@ -563,13 +563,13 @@ describe("Manage Alerts Assign", () => {
     // Check SECOND (first is already assigned) visible alert current owner, should be "None"
     cy.get(".p-datatable-tbody > :nth-child(2) > :nth-child(5) > span").should(
       "have.text",
-      "None",
+      "None"
     );
     // Get SECOND visible alert checkbox
     cy.get(" .p-checkbox-box").eq(2).click();
     // Open assign owner modal
     cy.get(
-      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(4)",
+      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(4)"
     ).click();
     cy.get(".p-dialog-content").should("be.visible");
     // Select first option from the dropdown
@@ -581,7 +581,7 @@ describe("Manage Alerts Assign", () => {
     // Check owner name after assigning -- checking first in the table bc it will be moved to the top
     cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span").should(
       "have.text",
-      "Analyst Alice",
+      "Analyst Alice"
     );
   });
 });
@@ -599,7 +599,7 @@ describe("Manage Alerts Disposition", () => {
     // Check first visible alert current disposition, should be "OPEN"
     cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(6) > span").should(
       "have.text",
-      "OPEN",
+      "OPEN"
     );
     // Get first visible alert checkbox
     cy.get(" .p-checkbox-box").eq(1).click();
@@ -616,7 +616,7 @@ describe("Manage Alerts Disposition", () => {
     // Check disposition
     cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(6) > span").should(
       "have.text",
-      "FALSE_POSITIVE",
+      "FALSE_POSITIVE"
     );
     // Check for disposition comment
     cy.get(".comment")
@@ -645,7 +645,7 @@ describe("Manage Alerts URL Param Filters", () => {
 
     // Select name filter
     cy.get(
-      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger"
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Name']").click();
@@ -659,7 +659,7 @@ describe("Manage Alerts URL Param Filters", () => {
 
     // Click link button
     cy.get(
-      "#FilterToolbar > .p-toolbar-group-right > .p-button-icon-only",
+      "#FilterToolbar > .p-toolbar-group-right > .p-button-icon-only"
     ).click();
 
     // Check clipboard data
@@ -678,15 +678,15 @@ describe("Manage Alerts URL Param Filters", () => {
     cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-header").should("be.visible");
     cy.get(
-      ":nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-label",
+      ":nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-label"
     ).should("have.text", "Name");
     cy.get(".field > .p-inputtext").should("have.value", "Small Alert");
     cy.get(
-      ".flex > :nth-child(2) > :nth-child(1) > .p-dropdown > .p-dropdown-label",
+      ".flex > :nth-child(2) > :nth-child(1) > .p-dropdown > .p-dropdown-label"
     ).should("have.text", "Owner");
     cy.get(".col > .field > .p-dropdown > .p-dropdown-label").should(
       "have.text",
-      "Analyst Bob",
+      "Analyst Bob"
     );
     cy.get(".p-dialog-header-icon").click();
 
@@ -694,11 +694,11 @@ describe("Manage Alerts URL Param Filters", () => {
     cy.get(".p-checkbox-box").should("have.length", 2);
     cy.get(".p-datatable-tbody > tr > :nth-child(4) > div").should(
       "contain.text",
-      "Small Alert",
+      "Small Alert"
     );
     cy.get(".p-datatable-tbody > tr > :nth-child(5)").should(
       "contain.text",
-      "Analyst Bob",
+      "Analyst Bob"
     );
   });
 
@@ -714,7 +714,7 @@ describe("Manage Alerts URL Param Filters", () => {
     // Verify it is the correct alert and the filtered tag is there
     cy.get(".p-datatable-tbody > tr > :nth-child(4) > div").should(
       "contain.text",
-      "Manual Alert 4.3.2.1",
+      "Manual Alert 4.3.2.1"
     );
     cy.get("[data-cy=tags]").contains("TestTag").should("exist");
   });
