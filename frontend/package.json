@@ -5,10 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "cypress": "npx cypress run --headless",
     "production": "vue-cli-service serve --mode production",
     "test:unit": "vue-cli-service test:unit",
-    "test:e2e": "start-server-and-test production http://localhost:8080 cypress",
     "lint": "vue-cli-service lint",
     "lint:style": "stylelint src/**/*.{css,scss,vue}"
   },
@@ -28,8 +26,6 @@
     "vue-router": "^4.0.11"
   },
   "devDependencies": {
-    "@cypress/vue": "^3.0.3",
-    "@cypress/webpack-dev-server": "^1.6.0",
     "@pinia/testing": "^0.0.8",
     "@types/jest": "^27.0.2",
     "@types/js-cookie": "^3.0.0",
@@ -47,9 +43,7 @@
     "@vue/eslint-config-typescript": "^7.0.0",
     "@vue/test-utils": "^2.0.0-rc.17",
     "circular-dependency-plugin": "^5.2.2",
-    "cypress": "^8.7.0",
     "eslint": "^7.32.0",
-    "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-prettier": "^3.4.1",
     "eslint-plugin-vue": "^7.18.0",
     "html-webpack-plugin": "^4.5.2",
