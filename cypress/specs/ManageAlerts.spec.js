@@ -8,6 +8,13 @@ describe("ManageAlerts.vue", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
+
+    // Some of the filter tests rely on the list of alert dispositions, so
+    // wait for that API call to succeed before continuing.
+    cy.intercept("GET", "/api/alert/disposition/?offset=0").as(
+      "getAlertDisposition"
+    );
+    cy.wait("@getAlertDisposition").its("state").should("eq", "Complete");
   });
 
   it("renders", () => {
@@ -429,9 +436,12 @@ describe("Manage Alerts Filter Actions", () => {
 
   it("will add new filters through the quick add menu", () => {
     // Open Quick Add menu
+    cy.wait(1000);
     cy.get(".p-splitbutton-defaultbutton > .p-button-label").click();
+    cy.wait(1000);
     // Add the default
     cy.get(".p-overlaypanel-content > .p-button").click();
+    cy.wait(1000);
     // Check text
     cy.get(".filter-name-text").should("have.text", "Disposition:");
     cy.get(".link-text").should("have.text", "FALSE_POSITIVE");
