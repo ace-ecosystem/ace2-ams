@@ -1,16 +1,5 @@
 version: "3.9"
 
 services:
-  gui:
-    command: bash -c 'while !</dev/tcp/api/80; do sleep 1; done; npm run production'
-
   cypress:
-    image: cypress/included:9.3.0
-    container_name: cypress
-    depends_on:
-      - ace2-ams
-    working_dir: /e2e
-    volumes:
-      - ./cypress/:/e2e
-    # entrypoint: bash -c 'until $(curl --output /dev/null --silent --fail "http://ace2-ams:8080/login"); do sleep 1; done; cypress run --headless --config video=false,screenshotOnRunFailure=false'
-    entrypoint: bash -c 'until $$(curl --output /dev/null --silent --fail "http://ace2-ams:8080/login"); do sleep 1; done; xvfb-run cypress run --headed --browser chrome'
+    entrypoint: bash -c 'until $$(curl --output /dev/null --silent --fail "http://ace2-ams:8080/login"); do sleep 1; done; xvfb-run cypress run --headed --browser chrome --config video=false,screenshotOnRunFailure=false'
