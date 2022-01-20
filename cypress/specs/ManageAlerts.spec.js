@@ -9,8 +9,7 @@ describe("ManageAlerts.vue", () => {
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
 
-    // Some of the filter tests rely on the list of alert dispositions, so
-    // wait for that API call to succeed before continuing.
+    // Wait for the required API call to complete before performing the tests
     cy.intercept("GET", "/api/alert/disposition/?offset=0").as(
       "getAlertDisposition"
     );
@@ -436,12 +435,9 @@ describe("Manage Alerts Filter Actions", () => {
 
   it("will add new filters through the quick add menu", () => {
     // Open Quick Add menu
-    cy.wait(1000);
     cy.get(".p-splitbutton-defaultbutton > .p-button-label").click();
-    cy.wait(1000);
     // Add the default
     cy.get(".p-overlaypanel-content > .p-button").click();
-    cy.wait(1000);
     // Check text
     cy.get(".filter-name-text").should("have.text", "Disposition:");
     cy.get(".link-text").should("have.text", "FALSE_POSITIVE");
@@ -475,7 +471,10 @@ describe("Manage Alerts Comment", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000);
+
+    // Wait for the required API call to complete before performing the tests
+    cy.intercept("GET", "/api/user/?offset=0").as("getUser");
+    cy.wait("@getUser").its("state").should("eq", "Complete");
   });
 
   it("will add a given comment to an alert via the comment modal", () => {
@@ -502,7 +501,10 @@ describe("Manage Alerts Tags", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000);
+
+    // Wait for the required API call to complete before performing the tests
+    cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTag");
+    cy.wait("@getNodeTag").its("state").should("eq", "Complete");
   });
 
   it("will add given tags to an alert via the tag modal", () => {
@@ -537,7 +539,10 @@ describe("Manage Alerts Take Ownership", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000);
+
+    // Wait for the required API call to complete before performing the tests
+    cy.intercept("GET", "/api/user/?offset=0").as("getUser");
+    cy.wait("@getUser").its("state").should("eq", "Complete");
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -566,7 +571,10 @@ describe("Manage Alerts Assign", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000);
+
+    // Wait for the required API call to complete before performing the tests
+    cy.intercept("GET", "/api/user/?offset=0").as("getUser");
+    cy.wait("@getUser").its("state").should("eq", "Complete");
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -602,7 +610,12 @@ describe("Manage Alerts Disposition", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000);
+
+    // Wait for the required API call to complete before performing the tests
+    cy.intercept("GET", "/api/alert/disposition/?offset=0").as(
+      "getAlertDisposition"
+    );
+    cy.wait("@getAlertDisposition").its("state").should("eq", "Complete");
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -640,7 +653,6 @@ describe("Manage Alerts URL Param Filters", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000);
   });
 
   // Can't test at the moment, no way to check clipboard data in insecure context
@@ -735,7 +747,10 @@ describe("Manage Alerts Filters Chips", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000);
+
+    // Wait for the required API call to complete before performing the tests
+    cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTag");
+    cy.wait("@getNodeTag").its("state").should("eq", "Complete");
   });
 
   it("will display a set filter as chip in chips toolbar", () => {
