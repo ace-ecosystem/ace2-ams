@@ -8,12 +8,7 @@ describe("ManageAlerts.vue", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-
-    // Wait for the required API call to complete before performing the tests
-    cy.intercept("GET", "/api/alert/disposition/?offset=0").as(
-      "getAlertDisposition"
-    );
-    cy.wait("@getAlertDisposition").its("state").should("eq", "Complete");
+    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
   });
 
   it("renders", () => {
@@ -471,10 +466,7 @@ describe("Manage Alerts Comment", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-
-    // Wait for the required API call to complete before performing the tests
-    cy.intercept("GET", "/api/user/?offset=0").as("getUser");
-    cy.wait("@getUser").its("state").should("eq", "Complete");
+    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
   });
 
   it("will add a given comment to an alert via the comment modal", () => {
@@ -501,10 +493,7 @@ describe("Manage Alerts Tags", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-
-    // Wait for the required API call to complete before performing the tests
-    cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTag");
-    cy.wait("@getNodeTag").its("state").should("eq", "Complete");
+    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
   });
 
   it("will add given tags to an alert via the tag modal", () => {
@@ -539,10 +528,7 @@ describe("Manage Alerts Take Ownership", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-
-    // Wait for the required API call to complete before performing the tests
-    cy.intercept("GET", "/api/user/?offset=0").as("getUser");
-    cy.wait("@getUser").its("state").should("eq", "Complete");
+    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -571,10 +557,7 @@ describe("Manage Alerts Assign", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-
-    // Wait for the required API call to complete before performing the tests
-    cy.intercept("GET", "/api/user/?offset=0").as("getUser");
-    cy.wait("@getUser").its("state").should("eq", "Complete");
+    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -610,12 +593,7 @@ describe("Manage Alerts Disposition", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-
-    // Wait for the required API call to complete before performing the tests
-    cy.intercept("GET", "/api/alert/disposition/?offset=0").as(
-      "getAlertDisposition"
-    );
-    cy.wait("@getAlertDisposition").its("state").should("eq", "Complete");
+    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -747,10 +725,7 @@ describe("Manage Alerts Filters Chips", () => {
     Cypress.Cookies.preserveOnce("access_token", "refresh_token");
     cy.visit("/manage_alerts");
     cy.url().should("contain", "/manage_alerts");
-
-    // Wait for the required API call to complete before performing the tests
-    cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTag");
-    cy.wait("@getNodeTag").its("state").should("eq", "Complete");
+    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
   });
 
   it("will display a set filter as chip in chips toolbar", () => {
