@@ -6,20 +6,20 @@
 
 <template>
   <DataTable
-    ref="dt"
+    ref="datatable"
     v-model:expandedRows="expandedRows"
     v-model:filters="nodeTableFilter"
     v-model:selection="selectedRows"
+    data-key="uuid"
     :value="tableStore.visibleQueriedItemSummaries"
     :global-filter-fields="selectedColumns.field"
     :resizable-columns="true"
     :loading="isLoading"
     column-resize-mode="expand"
-    data-key="uuid"
-    removable-sort
     responsive-layout="scroll"
     :sort-field="tableStore.sortField"
     :sort-order="sortOrder"
+    removable-sort
     @sort="sort"
     @row-expand="$emit('rowExpand', $event)"
     @row-collapse="$emit('rowCollapse', $event)"
@@ -46,7 +46,6 @@
         </template>
         <template #end>
           <!-- KEYWORD SEARCH -->
-
           <span v-if="keywordSearch" class="p-input-icon-left p-m-1">
             <i class="pi pi-search" />
             <InputText
@@ -61,7 +60,7 @@
             class="p-button-rounded p-m-1"
             @click="reset()"
           />
-          <!-- EXPORT TABLE -->
+          <!-- EXPORT TABLE TO CSV -->
           <Button
             v-if="exportCSV"
             class="p-button-rounded p-m-1"
@@ -72,7 +71,7 @@
       </Toolbar>
     </template>
 
-    <!-- DROPDOWN COLUMN-->
+    <!-- EXPANSION ARROW COLUMN-->
     <Column
       v-if="rowExpansion"
       id="node-expand"
@@ -87,7 +86,7 @@
       selection-mode="multiple"
     />
 
-    <!-- DATA COLUMN -->
+    <!-- DATA COLUMNS -->
     <Column
       v-for="(col, index) of selectedColumns"
       :key="col.field + '_' + index"
@@ -95,7 +94,7 @@
       :header="col.header"
       :sortable="true"
     >
-      <!-- DATA COLUMN BODY-->
+      <!-- DATA COLUMN CELL BODIES-->
       <template #body="{ data, field }">
         <slot name="rowCell" :data="data" :col="col" :field="field"></slot>
       </template>
@@ -123,51 +122,41 @@
 <script setup>
   import {
     computed,
-    defineProps,
     defineEmits,
+    defineProps,
+    inject,
     onMounted,
     ref,
-    inject,
   } from "vue";
 
+  import { FilterMatchMode } from "primevue/api";
   import Button from "primevue/button";
   import Column from "primevue/column";
   import DataTable from "primevue/datatable";
-  import { FilterMatchMode } from "primevue/api";
   import InputText from "primevue/inputtext";
   import MultiSelect from "primevue/multiselect";
-  import Toolbar from "primevue/toolbar";
   import Paginator from "primevue/paginator";
+  import Toolbar from "primevue/toolbar";
 
   import { useAlertTableStore } from "@/stores/alertTable";
   import { useEventTableStore } from "@/stores/eventTable";
+  import { useFilterStore } from "@/stores/filter";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
   import { useSelectedEventStore } from "@/stores/selectedEvent";
-  import { useFilterStore } from "@/stores/filter";
-
-  const filterStore = useFilterStore();
 
   const props = defineProps({
     columns: { type: Array, required: true },
+    columnSelect: { type: Boolean, required: true },
     exportCSV: { type: Boolean, required: true },
     keywordSearch: { type: Boolean, required: true },
-    columnSelect: { type: Boolean, required: true },
     resetTable: { type: Boolean, required: true },
     rowExpansion: { type: Boolean, required: true },
   });
+
   defineEmits(["rowExpand", "rowCollapse"]);
 
+  const filterStore = useFilterStore();
   const nodeType = inject("nodeType");
-
-  const columns = ref(props.columns);
-
-  const dt = ref(null);
-  const error = ref(null);
-  const expandedRows = ref([]);
-  const isLoading = ref(false);
-  const selectedColumns = ref([]);
-  const page = ref(0);
-
   const nodeTableStores = {
     alerts: useAlertTableStore,
     events: useEventTableStore,
@@ -176,13 +165,8 @@
     alerts: useSelectedAlertStore,
     events: useSelectedEventStore,
   };
-
   const tableStore = nodeTableStores[nodeType]();
   const selectedStore = nodeSelectedStores[nodeType]();
-
-  const defaultColumns = columns.value.filter((col) => {
-    return col.default;
-  });
 
   const tableToolbarRequired =
     props.exportCSV ||
@@ -190,26 +174,44 @@
     props.columnSelect ||
     props.resetTable;
 
+  const defaultColumns = props.columns.filter((col) => {
+    return col.default;
+  });
+
+  const datatable = ref(null);
+  const error = ref(null);
+  const expandedRows = ref([]);
+  const isLoading = ref(false);
+  const page = ref(0);
+  const selectedColumns = ref([]);
+
+  // Used for keyword search
   const nodeTableFilter = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
 
-  const pageOptions = computed(() => {
-    return {
-      limit: tableStore.pageSize,
-      offset: tableStore.pageSize * page.value,
-    };
+  filterStore.$subscribe(
+    async () => {
+      await loadNodes();
+    },
+    { deep: true },
+  );
+
+  tableStore.$subscribe(async (_, state) => {
+    if (state.requestReload) {
+      await reloadTable();
+    }
   });
 
   onMounted(async () => {
-    tableStore.$subscribe(async (_, state) => {
-      if (state.requestReload) {
-        await reloadTable();
-      }
-    });
-
     initNodeTable();
     await loadNodes();
+  });
+
+  const selectedRows = computed(() => {
+    return tableStore.visibleQueriedItems.filter((node) =>
+      selectedStore.selected.includes(node.uuid),
+    );
   });
 
   const sortOrder = computed(() => {
@@ -226,28 +228,16 @@
     }
   });
 
-  const selectedRows = computed(() => {
-    return tableStore.visibleQueriedItems.filter((node) =>
-      selectedStore.selected.includes(node.uuid),
-    );
+  const pageOptions = computed(() => {
+    return {
+      limit: tableStore.pageSize,
+      offset: tableStore.pageSize * page.value,
+    };
   });
-
-  const reloadTable = async () => {
-    selectedStore.unselectAll();
-    tableStore.requestReload = false;
-    await loadNodes();
-  };
-
-  filterStore.$subscribe(
-    async () => {
-      await loadNodes();
-    },
-    { deep: true },
-  );
 
   const exportCSV = () => {
     // Exports currently filtered nodes to CSV
-    dt.value.exportCSV();
+    datatable.value.exportCSV();
   };
 
   const initNodeTable = () => {
@@ -259,6 +249,12 @@
     selectedColumns.value = defaultColumns;
     //
     error.value = null;
+  };
+
+  const reloadTable = async () => {
+    selectedStore.unselectAll();
+    tableStore.requestReload = false;
+    await loadNodes();
   };
 
   const loadNodes = async () => {
@@ -278,7 +274,7 @@
   const onColumnToggle = (val) => {
     // Toggles selected columns to display
     // This method required/provided by Primevue 'ColToggle' docs
-    selectedColumns.value = columns.value.filter((col) => val.includes(col));
+    selectedColumns.value = props.columns.filter((col) => val.includes(col));
   };
 
   const onPage = async (event) => {
