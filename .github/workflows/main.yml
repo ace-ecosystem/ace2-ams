@@ -86,14 +86,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Run environment
-        run: docker-compose up -d
-
-      - name: Add mock alert data
-        run: docker exec -e SQL_ECHO=no ace2-ams-api python insert-alerts.py backend/app/tests/alerts/small.json
-
-      - name: E2E tests
-        run: docker exec ace2-ams-gui npx cypress run --headless --config video=false,screenshotOnRunFailure=false
+      - name: Setup environment and run tests
+        run: bin/test-ci-e2e.sh
 
       - name: Nginx logs
         run: docker logs ace2-ams
