@@ -12,4 +12,4 @@ services:
     working_dir: /e2e
     volumes:
       - ./cypress/:/e2e
-    entrypoint: /e2e/start-ci.sh
+    entrypoint: bash -c 'while !</dev/tcp/ace2-ams/8080; do sleep 1; done; cypress run --headless --config video=false,screenshotOnRunFailure=false'
