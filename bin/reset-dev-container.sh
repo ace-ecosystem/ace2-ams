@@ -31,7 +31,7 @@ source "$ACE2_ENV_PATH"
 set +a
 
 # Destroy the existing development environment
-docker-compose down -v
+docker-compose down -v --remove-orphans
 
 # Build the new development environment
 docker-compose build

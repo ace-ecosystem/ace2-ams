@@ -93,7 +93,10 @@ jobs:
         run: docker exec -e SQL_ECHO=no ace2-ams-api python insert-alerts.py backend/app/tests/alerts/small.json
 
       - name: E2E tests
-        run: docker exec ace2-ams-gui npx cypress run --headless --config video=false,screenshotOnRunFailure=false
+        run: docker-compose -f docker-compose.yml -f docker-compose-e2e.yml -f docker-compose-e2e-ci.yml up --exit-code-from cypress
+
+      - name: Cypress logs
+        run: docker logs cypress
 
       - name: Nginx logs
         run: docker logs ace2-ams
