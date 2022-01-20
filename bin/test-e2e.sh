@@ -13,7 +13,6 @@ set +a
 /usr/bin/env bash bin/insert-alerts.sh backend/app/tests/alerts/small.json
 
 # Start the e2e tests in the background
-# docker-compose -f docker-compose.yml -f docker-compose-e2e.yml up --exit-code-from cypress
 docker-compose -f docker-compose.yml -f docker-compose-e2e.yml up -d
 
 # Sleep while the cypress container is still running
