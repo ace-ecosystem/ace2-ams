@@ -32,7 +32,7 @@
   const router = useRouter();
 
   provide("availableFilters", eventFilters);
-  provide("filterType", "events");
+  provide("nodeType", "events");
   provide("rangeFilters", eventRangeFilters);
 
   const filterStore = useFilterStore();
@@ -171,7 +171,7 @@
 
     // Set filters in store (evemts will auto-reload)
     filterStore.bulkSetFilters({
-      filterType: "events",
+      nodeType: "events",
       filters: parsedFilters,
     });
   }

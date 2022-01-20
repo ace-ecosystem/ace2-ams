@@ -37,38 +37,38 @@ export const useFilterStore = defineStore({
 
   actions: {
     bulkSetFilters(payload: {
-      filterType: "alerts" | "events";
+      nodeType: "alerts" | "events";
       filters: alertFilterParams | eventFilterParams;
     }) {
       const nonEmptyFilters = Object.fromEntries(
         Object.entries(payload.filters).filter(([_, v]) => !isEmpty(v)),
       );
-      this.$state[payload.filterType] = nonEmptyFilters;
+      this.$state[payload.nodeType] = nonEmptyFilters;
       localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
 
     setFilter(payload: {
-      filterType: "alerts" | "events";
+      nodeType: "alerts" | "events";
       filterName: alertFilterNameTypes | eventFilterNameTypes;
       filterValue: alertFilterValues | eventFilterValues;
     }) {
       if (!isEmpty(payload.filterValue)) {
-        this.$state[payload.filterType][payload.filterName] =
+        this.$state[payload.nodeType][payload.filterName] =
           payload.filterValue;
         localStorage.setItem("aceFilters", JSON.stringify(this.$state));
       }
     },
 
     unsetFilter(payload: {
-      filterType: "alerts" | "events";
+      nodeType: "alerts" | "events";
       filterName: alertFilterNameTypes | eventFilterNameTypes;
     }) {
-      delete this.$state[payload.filterType][payload.filterName];
+      delete this.$state[payload.nodeType][payload.filterName];
       localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
 
-    clearAll(payload: { filterType: "alerts" | "events" }) {
-      this.$state[payload.filterType] = {};
+    clearAll(payload: { nodeType: "alerts" | "events" }) {
+      this.$state[payload.nodeType] = {};
       localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
   },

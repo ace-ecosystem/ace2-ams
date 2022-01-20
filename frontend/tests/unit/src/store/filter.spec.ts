@@ -25,12 +25,12 @@ describe("filters Actions", () => {
     localStorage.removeItem("aceFilters");
   });
 
-  it("will set the given filterTypes filter object to the given filter object argument upon the bulkSetFilters action", () => {
+  it("will set the given nodeTypes filter object to the given filter object argument upon the bulkSetFilters action", () => {
     expect(store.alerts).toStrictEqual({});
     expect(localStorage.getItem("aceFilters")).toStrictEqual(null);
 
     store.bulkSetFilters({
-      filterType: "alerts",
+      nodeType: "alerts",
       filters: { testFilterName: "testFilterValue" },
     });
 
@@ -51,7 +51,7 @@ describe("filters Actions", () => {
     expect(store.alerts).toStrictEqual({});
 
     store.bulkSetFilters({
-      filterType: "alerts",
+      nodeType: "alerts",
       filters: {
         testFilterName: "",
         testFilterName2: [],
@@ -73,7 +73,7 @@ describe("filters Actions", () => {
     expect(localStorage.getItem("aceFilters")).toStrictEqual(null);
 
     store.setFilter({
-      filterType: "alerts",
+      nodeType: "alerts",
       filterName: "testFilterName",
       filterValue: "testFilterValue",
     });
@@ -95,7 +95,7 @@ describe("filters Actions", () => {
     expect(store.alerts).toStrictEqual({});
 
     store.setFilter({
-      filterType: "alerts",
+      nodeType: "alerts",
       filterName: "testFilterName",
       filterValue: [],
     });
@@ -106,7 +106,7 @@ describe("filters Actions", () => {
     });
 
     store.setFilter({
-      filterType: "alerts",
+      nodeType: "alerts",
       filterName: "testFilterName",
       filterValue: "",
     });
@@ -130,7 +130,7 @@ describe("filters Actions", () => {
     );
 
     store.unsetFilter({
-      filterType: "alerts",
+      nodeType: "alerts",
       filterName: "name",
     });
 
@@ -166,7 +166,7 @@ describe("filters Actions", () => {
     );
 
     store.clearAll({
-      filterType: "alerts",
+      nodeType: "alerts",
     });
 
     expect(store.$state).toEqual({

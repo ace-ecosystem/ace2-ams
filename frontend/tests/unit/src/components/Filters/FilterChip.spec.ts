@@ -12,14 +12,14 @@ describe("FilterChip.vue", () => {
       filterName: "name",
       filterValue: "test",
     },
-    filterType = "alerts",
+    nodeType = "alerts",
   ) {
     const wrapper: VueWrapper<any> = shallowMount(FilterChip, {
       props: props,
       global: {
         plugins: [createTestingPinia(options)],
         provide: {
-          filterType: filterType,
+          nodeType: nodeType,
         },
       },
     });
@@ -43,13 +43,13 @@ describe("FilterChip.vue", () => {
   });
   it("correctly receives props", () => {
     const { wrapper } = factory();
-    expect(wrapper.vm.filterType).toEqual("alerts");
+    expect(wrapper.vm.nodeType).toEqual("alerts");
   });
-  it("correctly sets filterOptions using filterType injection when filterType is 'alerts'", () => {
+  it("correctly sets filterOptions using nodeType injection when nodeType is 'alerts'", () => {
     const { wrapper } = factory();
     expect(wrapper.vm.filterOptions).toEqual(alertFilters);
   });
-  it("correctly sets filterOptions using filterType injection when filterType is unknown", () => {
+  it("correctly sets filterOptions using nodeType injection when nodeType is unknown", () => {
     const { wrapper } = factory(undefined, undefined, "unknown");
     expect(wrapper.vm.filterOptions).toEqual([]);
   });

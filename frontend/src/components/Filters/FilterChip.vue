@@ -67,7 +67,7 @@
 
   import FilterInput from "./FilterInput.vue";
   const filterStore = useFilterStore();
-  const filterType = inject("filterType");
+  const nodeType = inject("nodeType");
 
   const op = ref(null);
   const toggleQuickEditMenu = (event) => {
@@ -81,7 +81,7 @@
 
   const availableFilters = { alerts: alertFilters, events: eventFilters };
   const filterOptions =
-    filterType in availableFilters ? availableFilters[filterType] : [];
+    nodeType in availableFilters ? availableFilters[nodeType] : [];
   const filterNameObject = filterOptions.find((filter) => {
     return filter.name === props.filterName;
   });
@@ -107,7 +107,7 @@
 
   function updateFilter() {
     filterStore.setFilter({
-      filterType: filterType,
+      nodeType: nodeType,
       filterName: props.filterName,
       filterValue: filterModel.value.filterValue,
     });
@@ -115,7 +115,7 @@
 
   function unsetFilter() {
     filterStore.unsetFilter({
-      filterType: filterType,
+      nodeType: nodeType,
       filterName: props.filterName,
     });
   }

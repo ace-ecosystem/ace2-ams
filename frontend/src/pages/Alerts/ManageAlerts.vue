@@ -32,7 +32,7 @@
   const router = useRouter();
 
   provide("availableFilters", alertFilters);
-  provide("filterType", "alerts");
+  provide("nodeType", "alerts");
   provide("rangeFilters", alertRangeFilters);
 
   const filterStore = useFilterStore();
@@ -171,7 +171,7 @@
 
     // Set filters in store (alerts will auto-reload)
     filterStore.bulkSetFilters({
-      filterType: "alerts",
+      nodeType: "alerts",
       filters: parsedFilters,
     });
   }

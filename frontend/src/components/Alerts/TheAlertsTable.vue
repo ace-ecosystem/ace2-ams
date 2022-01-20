@@ -257,7 +257,7 @@
   const filterByObservable = (observable) => {
     expandedRows.value = [];
     filterStore.bulkSetFilters({
-      filterType: "alerts",
+      nodeType: "alerts",
       filters: {
         observable: {
           category: observable.type,

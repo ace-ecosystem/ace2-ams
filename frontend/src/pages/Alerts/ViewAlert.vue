@@ -29,7 +29,7 @@
   const alertStore = useAlertStore();
   const selectedAlertStore = useSelectedAlertStore();
 
-  provide("filterType", "alerts");
+  provide("nodeType", "alerts");
 
   onBeforeMount(async () => {
     await initPage(route.params.alertID);

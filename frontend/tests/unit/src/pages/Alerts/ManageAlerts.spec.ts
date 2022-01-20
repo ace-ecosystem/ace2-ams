@@ -79,7 +79,7 @@ describe("ManageAlerts.vue", () => {
     const datepicker = wrapper.findComponent(
       DateRangePicker,
     ) as VueWrapper<any>;
-    expect(datepicker.vm.filterType).toEqual("alerts");
+    expect(datepicker.vm.nodeType).toEqual("alerts");
     expect(datepicker.vm.rangeFilterOptions).toEqual([
       "Event Time",
       "Insert Time",

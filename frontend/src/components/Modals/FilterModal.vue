@@ -66,7 +66,7 @@
     name: { type: String, required: true },
   });
 
-  const filterType = inject("filterType");
+  const nodeType = inject("nodeType");
 
   filterStore.$subscribe(
     () => {
@@ -89,10 +89,10 @@
 
   const submit = () => {
     if (!Object.keys(submitFilters.value).length) {
-      filterStore.clearAll({ filterType: filterType });
+      filterStore.clearAll({ nodeType: nodeType });
     }
     filterStore.bulkSetFilters({
-      filterType: filterType,
+      nodeType: nodeType,
       filters: submitFilters.value,
     });
   };
@@ -111,10 +111,10 @@
 
   const loadFormFilters = () => {
     formFilters.value = [];
-    for (const filter in filterStore.$state[filterType]) {
+    for (const filter in filterStore.$state[nodeType]) {
       formFilters.value.push({
         filterName: filter,
-        filterValue: filterStore.$state[filterType][filter],
+        filterValue: filterStore.$state[nodeType][filter],
       });
     }
   };
