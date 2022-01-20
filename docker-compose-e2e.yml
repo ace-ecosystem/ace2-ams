@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  gui:
+    command: bash -c 'while !</dev/tcp/api/80; do sleep 1; done; npm run production'
+
+  cypress:
+    image: cypress/included:9.3.0
+    container_name: cypress
+    depends_on:
+      - ace2-ams
+    working_dir: /e2e
+    volumes:
+      - ./cypress/:/e2e
+    entrypoint: /e2e/start.sh
