@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
 import { UUID } from "@/models/base";
 import { Alert } from "@/services/api/alert";
+import { camelToSnakeCase } from "@/etc/helpers";
 
 export function parseAlertSummary(alert: alertRead): alertSummary {
   return {
@@ -30,27 +31,43 @@ export const useAlertTableStore = defineStore({
 
   state: () => ({
     // all alerts returned from the current page using the current filters
-    visibleQueriedAlerts: [] as alertRead[],
+    visibleQueriedItems: [] as alertRead[],
 
     // total number of alerts from all pages
-    totalAlerts: 0,
+    totalItems: 0,
 
     // whether the alert table should be reloaded
     requestReload: false,
+
+    // current sort field
+    sortField: "eventTime",
+
+    // current sort oder
+    sortOrder: "desc",
+
+    // current page size
+    pageSize: 10,
   }),
 
   getters: {
-    visibleQueriedAlertSummaries(): alertSummary[] {
-      return this.visibleQueriedAlerts.map((x) => parseAlertSummary(x));
+    visibleQueriedItemSummaries(): alertSummary[] {
+      return this.visibleQueriedItems.map((x) => parseAlertSummary(x));
     },
 
-    visibleQueriedAlertsUuids(): UUID[] {
-      return this.visibleQueriedAlerts.map((x) => x.uuid);
+    visibleQueriedItemsUuids(): UUID[] {
+      return this.visibleQueriedItems.map((x) => x.uuid);
     },
 
-    visibleQueriedAlertById: (state) => {
+    visibleQueriedItemById: (state) => {
       return (alertUuid: UUID) =>
-        state.visibleQueriedAlerts.find((alert) => alert.uuid === alertUuid);
+        state.visibleQueriedItems.find((alert) => alert.uuid === alertUuid);
+    },
+
+    sortFilter: (state) => {
+      if (state.sortField && state.sortOrder) {
+        return `${camelToSnakeCase(state.sortField)}|${state.sortOrder}`;
+      }
+      return null;
     },
   },
 
@@ -58,12 +75,16 @@ export const useAlertTableStore = defineStore({
     async readPage(params: alertFilterParams) {
       await Alert.readPage(params)
         .then((page) => {
-          this.visibleQueriedAlerts = page.items;
-          this.totalAlerts = page.total;
+          this.visibleQueriedItems = page.items;
+          this.totalItems = page.total;
         })
         .catch((error) => {
           throw error;
         });
+    },
+    resetSort() {
+      this.sortField = "eventTime";
+      this.sortOrder = "desc";
     },
   },
 });
