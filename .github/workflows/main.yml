@@ -87,7 +87,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup environment and run tests
-        run: bin/test-ci-e2e.sh
+        run: |
+          chmod +x ./bin/test-ci-e2e.sh
+          ./bin/test-ci-e2e.sh
+        shell: bash
 
       - name: Nginx logs
         run: docker logs ace2-ams
