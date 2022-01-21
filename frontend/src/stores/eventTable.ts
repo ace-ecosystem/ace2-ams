@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { UUID } from "@/models/base";
 import { Event } from "@/services/api/event";
 import { eventFilterParams, eventRead, eventSummary } from "@/models/event";
+import { camelToSnakeCase } from "@/etc/helpers";
 
 export function parseEventSummary(event: eventRead): eventSummary {
   return {
@@ -32,6 +33,15 @@ export const useEventTableStore = defineStore({
 
     // whether the event table should be reloaded
     requestReload: false,
+
+    // current sort field
+    sortField: "createdTime",
+
+    // current sort oder
+    sortOrder: "desc",
+
+    // current page size
+    pageSize: 10,
   }),
 
   getters: {
@@ -47,6 +57,13 @@ export const useEventTableStore = defineStore({
       return (eventUuid: UUID) =>
         state.visibleQueriedItems.find((event) => event.uuid === eventUuid);
     },
+
+    sortFilter: (state) => {
+      if (state.sortField && state.sortOrder) {
+        return `${camelToSnakeCase(state.sortField)}|${state.sortOrder}`;
+      }
+      return null;
+    },
   },
 
   actions: {
@@ -59,6 +76,10 @@ export const useEventTableStore = defineStore({
         .catch((error) => {
           throw error;
         });
+    },
+    resetSort() {
+      this.sortField = "createdTime";
+      this.sortOrder = "desc";
     },
   },
 });
