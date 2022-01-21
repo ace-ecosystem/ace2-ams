@@ -117,7 +117,7 @@ bin/test-frontend-unit.sh
 You can execute the end-to-end tests by running:
 
 ```
-bin/test-frontend-e2e.sh
+bin/test-e2e.sh
 ```
 
 ##### Test Runner
@@ -126,26 +126,23 @@ Cypress also comes with an amazing [Test Runner](https://docs.cypress.io/guides/
 
 However, this will need to be performed on your local system ouside of the containers. To do this, you will need to have [Node.js 16](https://nodejs.org/en/download/current/) installed.
 
-**Step 1:** Install Node packages on your system (this only needs to be done one time):
+**Step 1:** Install Cypress on your host system (this only needs to be done one time):
 
 ```
-cd frontend/
-npm install
-npx cypress install
-cd ..
+npm install -g cypress@9.3.0
 ```
 
-**Step 2:** Run the application if it isn't already running:
+**Step 2:** Prep the application to run the tests in interactive mode:
 
 ```
-bin/reset-dev-container.sh
+bin/test-interactive-e2e.sh
 ```
 
-**Step 3:** Open the Test Runner:
+**Step 3:** Open the Test Runner on your host system:
 
 ```
-cd frontend/
-npx cypress open
+cd cypress/
+cypress open
 ```
 
 ![Test Runner](test-runner.png)

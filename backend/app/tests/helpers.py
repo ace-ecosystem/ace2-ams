@@ -3,6 +3,7 @@ import uuid
 
 from datetime import datetime
 from faker import Faker
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from typing import Dict, List, Optional, Union
@@ -620,7 +621,7 @@ def create_alert_from_json_file(db: Session, json_path: str) -> NodeTree:
     alert_uuid = None
     if "alert_uuid" in data:
         alert_uuid = data["alert_uuid"]
-        existing = crud.read(uuid=alert_uuid, db_table=Alert, db=db, err_on_not_found=False)
+        existing = read_node_tree_leaf(root_node_uuid=alert_uuid, node_uuid=alert_uuid, db=db)
         if existing:
             return existing
 
@@ -648,3 +649,11 @@ def create_alert_from_json_file(db: Session, json_path: str) -> NodeTree:
         _create_observable(o=observable, parent_tree=node_tree)
 
     return node_tree
+
+
+def read_node_tree_leaf(root_node_uuid: UUID, node_uuid: UUID, db: Session) -> Optional[NodeTree]:
+    return (
+        db.execute(select(NodeTree).where(NodeTree.root_node_uuid == root_node_uuid, NodeTree.node_uuid == node_uuid))
+        .scalars()
+        .one_or_none()
+    )
