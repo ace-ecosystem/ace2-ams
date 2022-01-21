@@ -55,10 +55,14 @@
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
 
-  import { formatForAPI } from "@/services/api/alert";
-  import { copyToClipboard } from "@/etc/helpers";
+  import { copyToClipboard, formatNodeFiltersForAPI } from "@/etc/helpers";
+import { alertFilters, eventFilters } from "@/etc/constants";
 
   const nodeType = inject("nodeType");
+  const filterOptions = {
+    alerts: alertFilters,
+    events: eventFilters
+  }
 
   const clear = () => {
     filterStore.clearAll({ nodeType: nodeType });
@@ -100,7 +104,7 @@
     // If there are filters set, build the link for it
     if (Object.keys(filterStore[nodeType]).length) {
       let urlParams = new URLSearchParams(
-        formatForAPI(filterStore[nodeType]),
+        formatNodeFiltersForAPI(filterOptions[nodeType], filterStore[nodeType]),
       );
       link = `${
         window.location.origin

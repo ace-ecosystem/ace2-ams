@@ -226,3 +226,32 @@ export function parseFilters(
 
   return parsedFilters;
 }
+
+export function formatNodeFiltersForAPI(
+  availableFilters: readonly filterOption[],
+  params: alertFilterParams | eventFilterParams,
+): Record<string, string> {
+  const formattedParams = {} as alertFilterParams;
+  for (const param in params) {
+    let paramValue = params[param] as any;
+
+    //  check if the given param is specific to alerts and not pageOptionParams, i.e. disposition
+    const filterType = availableFilters.find((filter) => {
+      return filter.name === param;
+    });
+
+    // if so, check if the param's value needs to be formatted, and replace with the newly formatted val
+    if (filterType) {
+      // First check if there is a method provided to get string representation
+      if (filterType.stringRepr) {
+        paramValue = filterType.stringRepr(paramValue) as never;
+        // Otherwise check if the param's value is a specific property
+      } else if (filterType.valueProperty && isObject(paramValue)) {
+        paramValue = paramValue[filterType.valueProperty];
+      }
+    }
+
+    formattedParams[param] = paramValue;
+  }
+  return formattedParams;
+}
