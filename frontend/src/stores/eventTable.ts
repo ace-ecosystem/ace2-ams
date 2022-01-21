@@ -25,27 +25,27 @@ export const useEventTableStore = defineStore({
 
   state: () => ({
     // all events returned from the current page using the current filters
-    visibleQueriedEvents: [] as eventRead[],
+    visibleQueriedItems: [] as eventRead[],
 
     // total number of events from all pages
-    totalEvents: 0,
+    totalItems: 0,
 
     // whether the event table should be reloaded
     requestReload: false,
   }),
 
   getters: {
-    visibleQueriedEventSummaries(): eventSummary[] {
-      return this.visibleQueriedEvents.map((x) => parseEventSummary(x));
+    visibleQueriedItemSummaries(): eventSummary[] {
+      return this.visibleQueriedItems.map((x) => parseEventSummary(x));
     },
 
-    visibleQueriedEventsUuids(): UUID[] {
-      return this.visibleQueriedEvents.map((x) => x.uuid);
+    visibleQueriedItemsUuids(): UUID[] {
+      return this.visibleQueriedItems.map((x) => x.uuid);
     },
 
-    visibleQueriedEventById: (state) => {
+    visibleQueriedItemById: (state) => {
       return (eventUuid: UUID) =>
-        state.visibleQueriedEvents.find((event) => event.uuid === eventUuid);
+        state.visibleQueriedItems.find((event) => event.uuid === eventUuid);
     },
   },
 
@@ -53,8 +53,8 @@ export const useEventTableStore = defineStore({
     async readPage(params: eventFilterParams) {
       await Event.readPage(params)
         .then((page) => {
-          this.visibleQueriedEvents = page.items;
-          this.totalEvents = page.total;
+          this.visibleQueriedItems = page.items;
+          this.totalItems = page.total;
         })
         .catch((error) => {
           throw error;
