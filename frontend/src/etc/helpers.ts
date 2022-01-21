@@ -1,3 +1,6 @@
+import { alertFilterParams } from "@/models/alert";
+import { filterOption } from "@/models/base";
+import { eventFilterParams } from "@/models/event";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
 import { useAlertQueueStore } from "@/stores/alertQueue";
 import { useAlertToolStore } from "@/stores/alertTool";
@@ -12,6 +15,7 @@ import { useEventVectorStore } from "@/stores/eventVector";
 import { useNodeDirectiveStore } from "@/stores/nodeDirective";
 import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
+import { filterTypes } from "./constants";
 
 export const camelToSnakeCase = (str: string): string =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
@@ -53,7 +57,7 @@ export async function populateCommonStores(): Promise<void> {
 }
 
 // https://stackoverflow.com/a/33928558
-export function copyToClipboard(text: string) {
+export function copyToClipboard(text: string): void | boolean | string | null {
   if (
     document.queryCommandSupported &&
     document.queryCommandSupported("copy")
@@ -75,11 +79,11 @@ export function copyToClipboard(text: string) {
 }
 
 // https://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
-export function isValidDate(d: unknown): boolean {
+export function isValidDate(d: unknown): d is Date {
   return d instanceof Date && !isNaN(d.getTime());
 }
 
-export function isObject(o: unknown): boolean {
+export function isObject(o: unknown): o is Record<string, unknown> {
   return typeof o === "object" && o !== null;
 }
 
@@ -99,4 +103,126 @@ export function dateParser(key: string, value: unknown): Date | unknown {
     }
   }
   return value;
+}
+
+export function parseFilters(
+  queryFilters: Record<string, string>,
+  availableFilters: filterOption[],
+): alertFilterParams | eventFilterParams {
+  const parsedFilters: Record<string, unknown> = {};
+
+  // parse each filter
+  for (const filterName in queryFilters) {
+    // first get the filter object so you can validate the filter exists and use its metadata
+    let filterNameObject = availableFilters.find((filter) => {
+      return filter.name === filterName;
+    });
+    filterNameObject = filterNameObject ? filterNameObject : undefined;
+
+    // if the filter doesn't exist, skip it
+    if (!filterNameObject) {
+      continue;
+    }
+
+    let filterValueUnparsed:
+      | string
+      | string[]
+      | Date
+      | { category: string; value: string } = queryFilters[filterName]; // the filter value from URL
+    // format filterValueUnparsed for GUI if method available
+    if (filterNameObject.parseStringRepr) {
+      filterValueUnparsed = filterNameObject.parseStringRepr(
+        queryFilters[filterName],
+      );
+    }
+
+    // use correct property for determinining equality (default is 'value')
+    const filterValueProperty = filterNameObject.valueProperty
+      ? filterNameObject.valueProperty
+      : "value";
+
+    // load the filter options store if available
+    let store = null; // store that may be used to find filter value object
+    if (filterNameObject.store) {
+      store = filterNameObject.store();
+    }
+
+    let filterValueParsed = null; // the target filter value, might be an Object, Array, Date, or string
+    // based on the filter type, parse/format the filter value
+    switch (filterNameObject.type) {
+      case filterTypes.MULTISELECT:
+        // look up each array item in store, add to filter value
+        filterValueParsed = [];
+        if (store && Array.isArray(filterValueUnparsed)) {
+          for (const value of filterValueUnparsed) {
+            const valueObject = store.allItems.find(
+              (element: Record<string, unknown>) => {
+                return element[filterValueProperty] === value;
+              },
+            );
+            if (valueObject) {
+              filterValueParsed.push(valueObject);
+            }
+          }
+        }
+        filterValueParsed = filterValueParsed.length ? filterValueParsed : null;
+        break;
+
+      case filterTypes.CHIPS:
+        // array of strings, handled in parseFormattedFilterString
+        filterValueParsed = filterValueUnparsed;
+        break;
+
+      case filterTypes.SELECT:
+        // look item up in store
+        if (store) {
+          filterValueParsed = store.allItems.find(
+            (element: Record<string, unknown>) => {
+              return element[filterValueProperty] === filterValueUnparsed;
+            },
+          );
+        }
+        break;
+
+      case filterTypes.DATE:
+        // Date string, handled in parseFormattedFilterString
+        filterValueParsed = isValidDate(filterValueUnparsed)
+          ? filterValueUnparsed
+          : null;
+        break;
+
+      case filterTypes.INPUT_TEXT:
+        // does not need parsing
+        filterValueParsed = filterValueUnparsed;
+        break;
+
+      case filterTypes.CATEGORIZED_VALUE:
+        // look up category value in store, sub-value stays untouched
+        if (store && isObject(filterValueUnparsed)) {
+          const unparsedCategory = filterValueUnparsed.category;
+          const category = store.allItems.find(
+            (element: Record<string, unknown>) => {
+              return element[filterValueProperty] === unparsedCategory;
+            },
+          );
+          filterValueParsed = {
+            category: category,
+            value: filterValueUnparsed.value,
+          };
+        }
+        break;
+
+      // Unsupported filter types will be ignored
+      default:
+        console.log(`Unsupported filter type found: ${filterNameObject.type}`);
+        continue;
+    }
+
+    // If filter value was successfully parsed add it to the new filter object
+    if (filterValueParsed) {
+      parsedFilters[filterName] = filterValueParsed;
+    }
+  }
+
+  return parsedFilters;
 }
