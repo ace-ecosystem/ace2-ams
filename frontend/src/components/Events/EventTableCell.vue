@@ -1,8 +1,5 @@
-/* eslint-disable vue/attribute-hyphenation */
-<!-- TheEventsTable.vue -->
-<!-- The table where all currently filtered events are displayed, selected to take action, or link to an individual event page -->
-
 <template>
+  <!-- Event Name -->
   <div v-if="props.field === 'name'">
     <span class="p-m-1" data-cy="eventName">
       <router-link :to="getEventLink(props.data.uuid)">{{
@@ -10,6 +7,7 @@
       }}</router-link></span
     >
     <br />
+    <!-- Any comments on the event -->
     <span v-if="props.data.comments">
       <pre
         v-for="comment in props.data.comments"
@@ -19,12 +17,15 @@
       >
     </span>
   </div>
+  <!-- Event Time fields -->
   <span v-else-if="props.field.includes('Time')">
     {{ formatDateTime(props.data[props.field]) }}</span
   >
+  <!-- Any event property that uses a list -->
   <span v-else-if="Array.isArray(props.data[props.field])">
     {{ joinStringArray(props.data[props.field]) }}
   </span>
+  <!-- All other columns -->
   <span v-else> {{ props.data[props.field] }}</span>
 </template>
 

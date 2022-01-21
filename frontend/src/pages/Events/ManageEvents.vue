@@ -4,7 +4,7 @@
   <br />
   <TheEventActionToolbar page="Manage Events" />
   <br />
-  <TheFilterToolbar id="FilterToolbar" />
+  <div id="FilterToolbar"><TheFilterToolbar /></div>
   <br />
   <div id="EventsTable" class="card">
     <TheEventsTable />
