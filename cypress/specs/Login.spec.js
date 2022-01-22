@@ -1,9 +1,3 @@
-import { createPinia } from "pinia";
-
-import { useAuthStore } from "../../frontend/src/stores/auth.ts";
-
-createPinia();
-
 describe("/login", () => {
   beforeEach(() => {
     cy.visit("/login");
@@ -41,7 +35,5 @@ describe("/login", () => {
     cy.getCookie("access_token").should("exist");
     cy.getCookie("refresh_token").should("exist");
     cy.getCookies().should("have.length", 2);
-
-    cy.wrap(useAuthStore());
   });
 });
