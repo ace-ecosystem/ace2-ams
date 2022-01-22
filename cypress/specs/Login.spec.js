@@ -29,11 +29,13 @@ describe("/login", () => {
   });
 
   it("navigates to /manage_alerts on successful login (pressing enter)", () => {
+    cy.intercept("POST", "/api/auth").as("auth");
     cy.get("#username").type("analyst");
     cy.get("#password").type("analyst{enter}");
     cy.url().should("contain", "/manage_alerts");
     cy.getCookie("access_token").should("exist");
     cy.getCookie("refresh_token").should("exist");
     cy.getCookies().should("have.length", 2);
+    cy.wait("@auth").its("state").should("eq", "Complete");
   });
 });
