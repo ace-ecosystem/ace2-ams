@@ -1,14 +1,12 @@
+import { visitUrl } from "./helpers";
+
 describe("ManageAlerts.vue", () => {
   before(() => {
-    cy.log("logging in");
     cy.login();
   });
 
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
-    cy.visit("/manage_alerts");
-    cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
+    visitUrl("/manage_alerts");
   });
 
   it("renders", () => {
@@ -222,9 +220,7 @@ describe("ManageAlerts.vue", () => {
 
 describe("Manage Alerts Filter Actions", () => {
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
-    cy.visit("/manage_alerts");
-    cy.url().should("contain", "/manage_alerts");
+    visitUrl("/manage_alerts");
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -463,10 +459,7 @@ describe("Manage Alerts Filter Actions", () => {
 // Comment will not change sort
 describe("Manage Alerts Comment", () => {
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
-    cy.visit("/manage_alerts");
-    cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
+    visitUrl("/manage_alerts");
   });
 
   it("will add a given comment to an alert via the comment modal", () => {
@@ -490,10 +483,7 @@ describe("Manage Alerts Comment", () => {
 // Tags will not change sort
 describe("Manage Alerts Tags", () => {
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
-    cy.visit("/manage_alerts");
-    cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
+    visitUrl("/manage_alerts");
   });
 
   it("will add given tags to an alert via the tag modal", () => {
@@ -525,10 +515,7 @@ describe("Manage Alerts Tags", () => {
 // Changing owner will change sort
 describe("Manage Alerts Take Ownership", () => {
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
-    cy.visit("/manage_alerts");
-    cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
+    visitUrl("/manage_alerts");
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -554,10 +541,7 @@ describe("Manage Alerts Take Ownership", () => {
 // Changing owner will change sort
 describe("Manage Alerts Assign", () => {
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
-    cy.visit("/manage_alerts");
-    cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
+    visitUrl("/manage_alerts");
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -590,10 +574,7 @@ describe("Manage Alerts Assign", () => {
 // Changing disposition will change sort
 describe("Manage Alerts Disposition", () => {
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
-    cy.visit("/manage_alerts");
-    cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
+    visitUrl("/manage_alerts");
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -628,9 +609,7 @@ describe("Manage Alerts Disposition", () => {
 
 describe("Manage Alerts URL Param Filters", () => {
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
-    cy.visit("/manage_alerts");
-    cy.url().should("contain", "/manage_alerts");
+    visitUrl("/manage_alerts");
   });
 
   // Can't test at the moment, no way to check clipboard data in insecure context
@@ -722,10 +701,7 @@ describe("Manage Alerts URL Param Filters", () => {
 
 describe("Manage Alerts Filters Chips", () => {
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
-    cy.visit("/manage_alerts");
-    cy.url().should("contain", "/manage_alerts");
-    cy.wait(2000); // TODO: Figure out what needs to be intercepted to remove this
+    visitUrl("/manage_alerts");
   });
 
   it("will display a set filter as chip in chips toolbar", () => {
