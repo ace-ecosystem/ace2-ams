@@ -2,6 +2,9 @@ export function visitUrl(url) {
   // Persist the cookies for the duration of the test
   Cypress.Cookies.preserveOnce("access_token", "refresh_token");
 
+  // Intercept the auth refresh call
+  cy.intercept("GET", "/api/auth/refresh").as("authRefresh");
+
   // Intercept all of the populateCommonStores API calls
   cy.intercept("GET", "/api/alert/disposition/?offset=0").as(
     "alertDisposition"
@@ -29,6 +32,7 @@ export function visitUrl(url) {
 
   // Wait for all of the intercepted calls to complete
   cy.wait([
+    "@authRefresh",
     "@alertDisposition",
     "@alertQueue",
     "@alertTool",
