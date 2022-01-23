@@ -1,3 +1,5 @@
+import { visitUrl } from "./helpers";
+
 const addMultipleObservables = () => {
   // Add first (single) observable
   cy.get("div[name='observable-type']").click();
@@ -35,19 +37,15 @@ const addMultipleObservables = () => {
 
 describe("AnalyzeAlert.vue", () => {
   before(() => {
-    cy.log("logging in");
     cy.login();
   });
 
   after(() => {
-    cy.log("logging out");
     cy.logout();
   });
 
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
-    cy.visit("/analyze");
-    cy.url().should("contain", "/analyze");
+    visitUrl("/analyze");
   });
 
   it("Analyze page renders", () => {
