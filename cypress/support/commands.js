@@ -17,7 +17,10 @@ Cypress.Commands.add("login", () => {
 });
 
 Cypress.Commands.add("logout", () => {
-  cy.get('[href="/login"] > .p-button').click();
+  cy.request({
+    method: "GET",
+    url: "/api/auth/logout",
+  });
 });
 
 Cypress.Commands.add("addFormObservable", () => {
