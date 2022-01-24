@@ -107,7 +107,7 @@ export function dateParser(key: string, value: unknown): Date | unknown {
 
 export function parseFilters(
   queryFilters: Record<string, string>,
-  availableFilters: filterOption[],
+  availableFilters: readonly filterOption[],
 ): alertFilterParams | eventFilterParams {
   const parsedFilters: Record<string, unknown> = {};
 

@@ -6,7 +6,6 @@ import nock from "nock";
 
 import myNock from "@unit/services/api/nock";
 import { useModalStore } from "@/stores/modal";
-import { useSelectedAlertStore } from "@/stores/selectedAlert";
 import { useUserStore } from "@/stores/user";
 
 function factory(options?: TestingOptions) {
@@ -14,15 +13,15 @@ function factory(options?: TestingOptions) {
     attachTo: document.body,
     global: {
       plugins: [createTestingPinia(options), PrimeVue],
+      provide: { nodeType: "alerts" },
     },
     props: { name: "CommentModal" },
   });
 
   const modalStore = useModalStore();
-  const selectedAlertStore = useSelectedAlertStore();
   const userStore = useUserStore();
 
-  return { wrapper, modalStore, selectedAlertStore, userStore };
+  return { wrapper, modalStore, userStore };
 }
 
 describe("CommentModal.vue", () => {
@@ -53,19 +52,19 @@ describe("CommentModal.vue", () => {
     const { wrapper } = factory();
 
     // No alerts selected and no value set
-    wrapper.vm.selectedAlertStore.selected = [];
+    wrapper.vm.selectedStore.selected = [];
     wrapper.vm.newComment = "";
     expect(wrapper.vm.allowSubmit).toBeFalsy();
     // Alerts selected and no value set
-    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.selectedStore.selected = ["1", "2"];
     wrapper.vm.newComment = "";
     expect(wrapper.vm.allowSubmit).toBeFalsy();
     // No alerts selected and value set
-    wrapper.vm.selectedAlertStore.selected = [];
+    wrapper.vm.selectedStore.selected = [];
     wrapper.vm.newComment = "test comment";
     expect(wrapper.vm.allowSubmit).toBeFalsy();
     // Alerts selected and value set
-    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.selectedStore.selected = ["1", "2"];
     wrapper.vm.newComment = "test comment";
     expect(wrapper.vm.allowSubmit).toBeTruthy();
   });
@@ -101,7 +100,7 @@ describe("CommentModal.vue", () => {
     const { wrapper } = factory({ stubActions: false });
 
     // Set the selected alert
-    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.selectedStore.selected = ["1", "2"];
 
     // Set the selected user
     wrapper.vm.authStore.user = { username: "Alice" };
@@ -138,7 +137,7 @@ describe("CommentModal.vue", () => {
     const { wrapper } = factory({ stubActions: false });
 
     // Set the selected alert
-    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.selectedStore.selected = ["1", "2"];
 
     // Set the selected user
     wrapper.vm.authStore.user = { username: "Alice" };

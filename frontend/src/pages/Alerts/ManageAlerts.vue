@@ -51,16 +51,11 @@
 
   function loadRouteQuery() {
     // load filters given in route
-    loadFilters();
-    // Reload page to clear URL params
-    router.push("/manage_alerts");
-  }
-
-  function loadFilters() {
-    // Set filters in store (alerts will auto-reload)
     filterStore.bulkSetFilters({
       nodeType: "alerts",
       filters: parseFilters(route.query, alertFilters),
     });
+    // Reload page to clear URL params
+    router.push("/manage_alerts");
   }
 </script>

@@ -97,7 +97,7 @@
 
       const updateData = selectedStore.selected.map((uuid) => ({
         uuid: uuid,
-        tags: newAlertTags(uuid, newTags.value),
+        tags: newNodeTags(uuid, newTags.value),
       }));
 
       await nodeStore.update(updateData);
@@ -112,10 +112,10 @@
     }
   }
 
-  function newAlertTags(uuid, tags) {
-    const alert = tableStore.visibleQueriedItemById(uuid);
-    const alertTags = alert ? alert.tags : [];
-    return tagValues(alertTags).concat(tags);
+  function newNodeTags(uuid, tags) {
+    const node = tableStore.visibleQueriedItemById(uuid);
+    const nodeTags = node ? node.tags : [];
+    return tagValues(nodeTags).concat(tags);
   }
 
   async function createTags(tags) {

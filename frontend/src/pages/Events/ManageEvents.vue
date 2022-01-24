@@ -51,16 +51,11 @@
 
   function loadRouteQuery() {
     // load filters given in route
-    loadFilters();
-    // Reload page to clear URL params
-    router.push("/manage_events");
-  }
-
-  function loadFilters() {
-    // Set filters in store (events will auto-reload)
     filterStore.bulkSetFilters({
       nodeType: "events",
       filters: parseFilters(route.query, eventFilters),
     });
+    // Reload page to clear URL params
+    router.push("/manage_events");
   }
 </script>

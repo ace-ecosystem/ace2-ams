@@ -1,7 +1,7 @@
-import ManageAlerts from "@/pages/Alerts/ManageAlerts.vue";
-import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
+import ManageEvents from "@/pages/Events/ManageEvents.vue";
 import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
-import TheAlertsTable from "@/components/Alerts/TheAlertsTable.vue";
+import TheEventsTable from "@/components/Events/TheEventsTable.vue";
+import TheNodeActionToolbarVue from "@/components/Node/TheNodeActionToolbar.vue";
 import DateRangePicker from "@/components/UserInterface/DateRangePicker.vue";
 import { mount, VueWrapper } from "@vue/test-utils";
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
@@ -12,7 +12,7 @@ import { useModalStore } from "@/stores/modal";
 import * as helpers from "@/etc/helpers";
 
 function factory(
-  initialLocation = "/manage_alerts",
+  initialLocation = "/manage_events",
   piniaOptions?: TestingOptions,
 ) {
   const router = createRouterMock({
@@ -20,11 +20,11 @@ function factory(
   });
   injectRouterMock(router);
 
-  const wrapper = mount(ManageAlerts, {
+  const wrapper = mount(ManageEvents, {
     global: {
       plugins: [createTestingPinia(piniaOptions)],
       directives: { tooltip: Tooltip },
-      stubs: ["TheAlertsTable", "TagModal", "FilterChipContainer"],
+      stubs: ["TheEventsTable", "TagModal", "FilterChipContainer"],
     },
   });
 
@@ -34,7 +34,7 @@ function factory(
   return { wrapper, filterStore, modalStore, router };
 }
 
-describe("ManageAlerts.vue", () => {
+describe("ManageEvents.vue", () => {
   it("renders", () => {
     const { wrapper } = factory();
     expect(wrapper.exists()).toBe(true);
@@ -43,16 +43,16 @@ describe("ManageAlerts.vue", () => {
   it("contains expected components", () => {
     const { wrapper } = factory();
 
-    expect(wrapper.findComponent(TheAlertActionToolbar).exists()).toBe(true);
+    expect(wrapper.findComponent(TheNodeActionToolbarVue).exists()).toBe(true);
     expect(wrapper.findComponent(TheFilterToolbar).exists()).toBe(true);
-    expect(wrapper.findComponent(TheAlertsTable).exists()).toBe(true);
+    expect(wrapper.findComponent(TheEventsTable).exists()).toBe(true);
   });
 
     it("will not add any filters that cannot be found", () => {
     jest
       .spyOn(helpers, "populateCommonStores")
       .mockImplementationOnce(() => Promise.resolve());
-    factory("/manage_alerts?fake_filter=blah");
+    factory("/manage_events?fake_filter=blah");
     const filterStore = useFilterStore();
 
     expect(Object.keys(filterStore.alerts).length).toBeFalsy();
@@ -63,48 +63,48 @@ describe("ManageAlerts.vue", () => {
       .spyOn(helpers, "populateCommonStores")
       .mockImplementationOnce(() => Promise.resolve());
     const { wrapper, filterStore, router } = factory(
-      "/manage_alerts?tags=tagA,tagB",
+      "/manage_events?tags=tagA,tagB",
       {
         stubActions: false,
       },
     );
 
     await wrapper.vm.$nextTick();
-    expect(filterStore.alerts).toEqual({
+    expect(filterStore.events).toEqual({
       tags: ["tagA", "tagB"],
     });
 
-    // should route you back to /manage_alerts when done
-    expect(router.currentRoute.value.fullPath).toEqual("/manage_alerts");
+    // should route you back to /manage_events when done
+    expect(router.currentRoute.value.fullPath).toEqual("/manage_events");
   });
 
   it("executes loadRouteQuery when route changes", async () => {
     jest
       .spyOn(helpers, "populateCommonStores")
       .mockImplementationOnce(() => Promise.resolve());
-    const { wrapper, filterStore, router } = factory("/manage_alerts", {
+    const { wrapper, filterStore, router } = factory("/manage_events", {
       stubActions: false,
     });
 
     await wrapper.vm.$nextTick();
-    expect(filterStore.alerts).toEqual({});
+    expect(filterStore.events).toEqual({});
 
     // push new route with query
-    router.push("/manage_alerts?tags=tagA,tagB");
+    router.push("/manage_events?tags=tagA,tagB");
     await wrapper.vm.$nextTick();
-    expect(filterStore.alerts).toEqual({
+    expect(filterStore.events).toEqual({
       tags: ["tagA", "tagB"],
     });
 
-    // should route you back to /manage_alerts when done
-    expect(router.currentRoute.value.fullPath).toEqual("/manage_alerts");
+    // should route you back to /manage_events when done
+    expect(router.currentRoute.value.fullPath).toEqual("/manage_events");
   });
 
   it("will attempt to load common stores if url parameters are provided", async () => {
     const spy = jest
       .spyOn(helpers, "populateCommonStores")
       .mockImplementationOnce(() => Promise.resolve());
-    factory("/manage_alerts?fake_filter=blah");
+    factory("/manage_events?fake_filter=blah");
     expect(spy).toHaveBeenCalled();
   });
 });
