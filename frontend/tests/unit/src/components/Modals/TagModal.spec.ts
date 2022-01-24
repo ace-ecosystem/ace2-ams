@@ -27,7 +27,7 @@ function factory(options?: TestingOptions) {
 
 describe("TagModal.vue", () => {
   afterEach(() => {
-    nock.abortPendingRequests();
+    nock.cleanAll();
   });
 
   it("renders", () => {
@@ -109,11 +109,11 @@ describe("TagModal.vue", () => {
     myNock.post("/node/tag/", { value: "tag2" }).reply(200);
 
     const { wrapper } = factory({ stubActions: false });
+    await wrapper.vm.loadTags();
+    expect(wrapper.vm.storeTagValues).toEqual(["tag1", "tag3"]);
 
     wrapper.vm.storeTagValues = ["tag1", "tag3"];
-    wrapper.vm.createTags(["tag2"]);
-
-    await wrapper.vm.loadTags();
+    await wrapper.vm.createTags(["tag2"]);
 
     expect(wrapper.vm.storeTagValues).toEqual(["tag1", "tag2", "tag3"]);
   });
@@ -225,6 +225,7 @@ describe("TagModal.vue", () => {
       .reply(403, "Unauthorized");
 
     const { wrapper } = factory({ stubActions: false });
+    await wrapper.vm.loadTags();
 
     wrapper.vm.selectedAlertStore.selected = ["uuid1", "uuid2"];
     wrapper.vm.storeTagValues = ["tag1", "tag3"];
