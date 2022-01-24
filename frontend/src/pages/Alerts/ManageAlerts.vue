@@ -2,7 +2,9 @@
 
 <template>
   <br />
-  <TheAlertActionToolbar page="Manage Alerts" />
+  <div id="AlertActionToolbar">
+    <TheAlertActionToolbar reload-object="table" />
+  </div>
   <br />
   <div id="FilterToolbar"><TheFilterToolbar /></div>
   <br />

@@ -1,7 +1,7 @@
 <!-- ViewAlert.vue -->
 
 <template>
-  <TheAlertActionToolbar id="AlertActionToolbar" page="View Alert" />
+  <TheAlertActionToolbar id="AlertActionToolbar" reload-object="node" />
   <Card>
     <template #content>
       <div class="p-tree p-component p-tree-wrapper" style="border: none">

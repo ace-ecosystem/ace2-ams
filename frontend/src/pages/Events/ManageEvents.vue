@@ -2,7 +2,7 @@
 
 <template>
   <br />
-  <TheEventActionToolbar page="Manage Events" />
+  <TheNodeActionToolbarVue reload-object="table" />
   <br />
   <div id="FilterToolbar"><TheFilterToolbar /></div>
   <br />
@@ -16,7 +16,7 @@
 
   import { eventFilters, eventRangeFilters } from "@/etc/constants";
 
-  import TheEventActionToolbar from "@/components/Events/TheEventActionToolbar.vue";
+  import TheNodeActionToolbarVue from "@/components/Node/TheNodeActionToolbar.vue";
   import TheFilterToolbar from "@/components/Filters/TheFilterToolbar";
   import TheEventsTable from "@/components/Events/TheEventsTable";
   import { useRoute, useRouter } from "vue-router";
