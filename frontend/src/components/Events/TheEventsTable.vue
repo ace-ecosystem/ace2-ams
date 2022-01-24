@@ -3,14 +3,7 @@
 <!-- The table where all currently filtered events are displayed, selected to take action, or link to an individual event page -->
 
 <template>
-  <TheNodeTable
-    :columns="columns"
-    :column-select="true"
-    :export-c-s-v="true"
-    :keyword-search="true"
-    :reset-table="true"
-    :row-expansion="false"
-  >
+  <TheNodeTable :columns="columns" :row-expansion="false">
     <template #rowCell="{ data, field }">
       <EventTableCell :data="data" :field="field"></EventTableCell>
     </template>

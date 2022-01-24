@@ -2,14 +2,7 @@
 <!-- The table where all currently filtered alerts are displayed, selected to take action, or link to an individual alert page -->
 
 <template>
-  <TheNodeTable
-    :columns="columns"
-    :column-select="true"
-    :export-c-s-v="true"
-    :keyword-search="true"
-    :reset-table="true"
-    :row-expansion="true"
-  >
+  <TheNodeTable :columns="columns">
     <template #rowCell="{ data, field }">
       <AlertTableCell :data="data" :field="field"></AlertTableCell>
     </template>

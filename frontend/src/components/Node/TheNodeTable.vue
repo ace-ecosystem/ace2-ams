@@ -143,11 +143,11 @@
 
   const props = defineProps({
     columns: { type: Array, required: true },
-    columnSelect: { type: Boolean, required: true },
-    exportCSV: { type: Boolean, required: true },
-    keywordSearch: { type: Boolean, required: true },
-    resetTable: { type: Boolean, required: true },
-    rowExpansion: { type: Boolean, required: true },
+    columnSelect: { type: Boolean, default: true },
+    exportCSV: { type: Boolean, default: true },
+    keywordSearch: { type: Boolean, default: true },
+    resetTable: { type: Boolean, default: true },
+    rowExpansion: { type: Boolean, default: true },
   });
 
   defineEmits(["rowExpand", "rowCollapse"]);
@@ -240,6 +240,12 @@
     error.value = null;
   };
 
+  const onColumnToggle = (val) => {
+    // Toggles selected columns to display
+    // This method required/provided by Primevue 'ColToggle' docs
+    selectedColumns.value = props.columns.filter((col) => val.includes(col));
+  };
+
   const reloadTable = async () => {
     selectedStore.unselectAll();
     tableStore.requestReload = false;
@@ -258,12 +264,6 @@
       error.value = err.message || "Something went wrong!";
     }
     isLoading.value = false;
-  };
-
-  const onColumnToggle = (val) => {
-    // Toggles selected columns to display
-    // This method required/provided by Primevue 'ColToggle' docs
-    selectedColumns.value = props.columns.filter((col) => val.includes(col));
   };
 
   const onPage = async (event) => {
