@@ -59,7 +59,7 @@
 </template>
 
 <script setup>
-  import { ref, defineProps, inject } from "vue";
+  import { ref, defineProps, defineExpose, inject } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -115,15 +115,19 @@
     }
   }
 
-  function requestReload() {
+  const requestReload = () => {
     if (props.reloadObject == "table") {
       tableStore.requestReload = true;
     } else if (props.reloadObject == "node") {
       nodeStore.requestReload = true;
     }
-  }
+  };
 
   const handleError = () => {
     error.value = null;
   };
+
+  defineExpose({
+    requestReload,
+  });
 </script>
