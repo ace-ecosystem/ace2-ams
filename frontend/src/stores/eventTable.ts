@@ -6,6 +6,7 @@ import { camelToSnakeCase } from "@/etc/helpers";
 
 export function parseEventSummary(event: eventRead): eventSummary {
   return {
+    comments: event.comments,
     createdTime: event.creationTime,
     // disposition: event.disposition,  // Need to edit the API so that it adds disposition into the Event response
     name: event.name,
@@ -13,6 +14,7 @@ export function parseEventSummary(event: eventRead): eventSummary {
     preventionTools: event.preventionTools.map((x) => x.value),
     riskLevel: event.riskLevel ? event.riskLevel.value : "None",
     status: event.status ? event.status.value : "None",
+    tags: event.tags,
     threatActors: event.threatActors.map((x) => x.value),
     threats: event.threats.map((x) => x.value),
     type: event.type ? event.type.value : "None",

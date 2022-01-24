@@ -18,6 +18,7 @@ import { userRead } from "./user";
 
 // High-level event data that will be displayed in Manage Events
 export interface eventSummary {
+  comments: nodeCommentRead[];
   createdTime: Date;
   // disposition: string;
   name: string;
@@ -25,6 +26,7 @@ export interface eventSummary {
   preventionTools: string[];
   riskLevel: string;
   status: string;
+  tags: nodeTagRead[];
   threatActors?: string[];
   threats?: string[];
   type: string;

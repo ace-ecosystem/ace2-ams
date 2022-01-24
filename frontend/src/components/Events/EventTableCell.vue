@@ -6,8 +6,16 @@
         props.data.name
       }}</router-link></span
     >
+    <!-- Event Tags -->
+    <span data-cy="tags">
+      <NodeTagVue
+        v-for="tag in props.data.tags"
+        :key="tag.uuid"
+        :tag="tag"
+      ></NodeTagVue>
+    </span>
     <br />
-    <!-- Any comments on the event -->
+    <!-- Event Comments -->
     <span v-if="props.data.comments">
       <pre
         v-for="comment in props.data.comments"
@@ -31,6 +39,7 @@
 
 <script setup>
   import { defineProps } from "vue";
+  import NodeTagVue from "../Node/NodeTag.vue";
 
   const props = defineProps({
     data: { type: Object, required: true },
