@@ -40,7 +40,7 @@ export const useAlertTableStore = defineStore({
     requestReload: false,
 
     // current sort field
-    sortField: "eventTime",
+    sortField: "eventTime" as string | null,
 
     // current sort oder
     sortOrder: "desc" as string | null,
