@@ -39,18 +39,16 @@
 
   import { useModalStore } from "@/stores/modal";
 
-  const modalStore = useModalStore();
-
   const props = defineProps({
     reloadObject: { type: String, required: true },
   });
-  
-  const toolbar = ref(null);
 
+  const modalStore = useModalStore();
   const open = (name) => {
     modalStore.open(name);
   };
 
+  const toolbar = ref(null);
   const requestReload = () => {
     toolbar.value.requestReload();
   }
