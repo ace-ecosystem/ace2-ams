@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-  import { computed, defineProps, ref, defineEmits } from "vue";
+  import { computed, defineProps, ref, defineEmits, inject } from "vue";
 
   import Button from "primevue/button";
   import Dropdown from "primevue/dropdown";
@@ -48,36 +48,37 @@
 
   import BaseModal from "@/components/Modals/BaseModal";
 
-  import { useAlertStore } from "@/stores/alert";
+  import { nodeSelectedStores, nodeStores } from "@/stores/index";
   import { useModalStore } from "@/stores/modal";
-  import { useSelectedAlertStore } from "@/stores/selectedAlert";
   import { useUserStore } from "@/stores/user";
 
-  const alertStore = useAlertStore();
+  const props = defineProps({
+    name: { type: String, required: true },
+  });
+
+  const emit = defineEmits(["requestReload"]);
+
+  const nodeType = inject("nodeType");
+
+  const selectedStore = nodeSelectedStores[nodeType]();
+  const nodeStore = nodeStores[nodeType]();
   const modalStore = useModalStore();
-  const selectedAlertStore = useSelectedAlertStore();
   const userStore = useUserStore();
 
   const error = ref(null);
   const isLoading = ref(false);
   const selectedUser = ref(null);
 
-  const emit = defineEmits(["requestReload"]);
-
-  const props = defineProps({
-    name: { type: String, required: true },
-  });
-
   const assignUser = async () => {
     isLoading.value = true;
 
     try {
-      const updateData = selectedAlertStore.selected.map((uuid) => ({
+      const updateData = selectedStore.selected.map((uuid) => ({
         uuid: uuid,
         owner: selectedUser.value.username,
       }));
 
-      await alertStore.update(updateData);
+      await nodeStore.update(updateData);
     } catch (err) {
       error.value = err.message;
     }
@@ -89,7 +90,7 @@
   };
 
   const allowSubmit = computed(() => {
-    return selectedAlertStore.anySelected && selectedUser.value;
+    return selectedStore.anySelected && selectedUser.value;
   });
 
   const handleError = () => {

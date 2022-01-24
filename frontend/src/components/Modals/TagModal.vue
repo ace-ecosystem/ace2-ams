@@ -37,7 +37,14 @@
 </template>
 
 <script setup>
-  import { computed, defineEmits, defineProps, onMounted, ref } from "vue";
+  import {
+    computed,
+    defineEmits,
+    defineProps,
+    onMounted,
+    ref,
+    inject,
+  } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -47,18 +54,21 @@
   import BaseModal from "@/components/Modals/BaseModal";
 
   import { NodeTag } from "@/services/api/nodeTag";
-
-  import { useAlertStore } from "@/stores/alert";
-  import { useAlertTableStore } from "@/stores/alertTable";
+  import {
+    nodeStores,
+    nodeSelectedStores,
+    nodeTableStores,
+  } from "@/stores/index";
   import { useModalStore } from "@/stores/modal";
   import { useNodeTagStore } from "@/stores/nodeTag";
-  import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
-  const alertStore = useAlertStore();
-  const alertTableStore = useAlertTableStore();
+  const nodeType = inject("nodeType");
+
+  const nodeStore = nodeStores[nodeType]();
+  const tableStore = nodeTableStores[nodeType]();
+  const selectedStore = nodeSelectedStores[nodeType]();
   const modalStore = useModalStore();
   const nodeTagStore = useNodeTagStore();
-  const selectedAlertStore = useSelectedAlertStore();
 
   const emit = defineEmits(["requestReload"]);
 
@@ -85,12 +95,12 @@
     try {
       await createTags(newTags.value);
 
-      const updateData = selectedAlertStore.selected.map((uuid) => ({
+      const updateData = selectedStore.selected.map((uuid) => ({
         uuid: uuid,
         tags: newAlertTags(uuid, newTags.value),
       }));
 
-      await alertStore.update(updateData);
+      await nodeStore.update(updateData);
     } catch (err) {
       error.value = err.message;
     }
@@ -103,7 +113,7 @@
   }
 
   function newAlertTags(uuid, tags) {
-    const alert = alertTableStore.visibleQueriedAlertById(uuid);
+    const alert = tableStore.visibleQueriedItemById(uuid);
     const alertTags = alert ? alert.tags : [];
     return tagValues(alertTags).concat(tags);
   }
@@ -135,7 +145,7 @@
   }
 
   const allowSubmit = computed(() => {
-    return selectedAlertStore.anySelected && newTags.value.length;
+    return selectedStore.anySelected && newTags.value.length;
   });
 
   const handleError = () => {

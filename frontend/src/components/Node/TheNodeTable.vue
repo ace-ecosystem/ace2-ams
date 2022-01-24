@@ -138,11 +138,8 @@
   import Paginator from "primevue/paginator";
   import Toolbar from "primevue/toolbar";
 
-  import { useAlertTableStore } from "@/stores/alertTable";
-  import { useEventTableStore } from "@/stores/eventTable";
   import { useFilterStore } from "@/stores/filter";
-  import { useSelectedAlertStore } from "@/stores/selectedAlert";
-  import { useSelectedEventStore } from "@/stores/selectedEvent";
+  import { nodeSelectedStores, nodeTableStores } from "@/stores/index";
 
   const props = defineProps({
     columns: { type: Array, required: true },
@@ -157,14 +154,6 @@
 
   const filterStore = useFilterStore();
   const nodeType = inject("nodeType");
-  const nodeTableStores = {
-    alerts: useAlertTableStore,
-    events: useEventTableStore,
-  };
-  const nodeSelectedStores = {
-    alerts: useSelectedAlertStore,
-    events: useSelectedEventStore,
-  };
   const tableStore = nodeTableStores[nodeType]();
   const selectedStore = nodeSelectedStores[nodeType]();
 

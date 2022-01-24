@@ -22,7 +22,11 @@
 
   function filterByTags() {
     // Determine what page to route to, right now only option is alerts - Manage Alerts
-    const route = nodeType == "alerts" ? "/manage_alerts" : null;
+    const nodeRoutes = {
+      alerts: "/manage_alerts",
+      events: "/manage_events",
+    };
+    const route = nodeRoutes[nodeType];
     if (route) {
       // Route to given page with query for filtering by this tag's value
       router.replace({ path: route, query: { tags: props.tag.value } });
