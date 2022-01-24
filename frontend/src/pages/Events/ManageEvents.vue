@@ -2,7 +2,9 @@
 
 <template>
   <br />
-  <TheNodeActionToolbarVue reload-object="table" />
+  <div id="EventActionToolbar">
+    <TheNodeActionToolbarVue reload-object="table" />
+  </div>
   <br />
   <div id="FilterToolbar"><TheFilterToolbar /></div>
   <br />
