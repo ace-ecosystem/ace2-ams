@@ -9,7 +9,7 @@
     :export-c-s-v="true"
     :keyword-search="true"
     :reset-table="true"
-    :row-expansion="true"
+    :row-expansion="false"
   >
     <template #rowCell="{ data, field }">
       <EventTableCell :data="data" :field="field"></EventTableCell>
