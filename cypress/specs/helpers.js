@@ -1,4 +1,4 @@
-export function visitUrl(url) {
+export function visitUrl(options) {
   // Persist the cookies for the duration of the test
   Cypress.Cookies.preserveOnce("access_token", "refresh_token");
 
@@ -28,10 +28,10 @@ export function visitUrl(url) {
   cy.intercept("GET", "/api/user/?offset=0").as("user");
 
   // Visit the intended URL
-  cy.visit(url);
+  cy.visit(options.url);
 
   // Wait for all of the intercepted calls to complete
-  cy.wait([
+  const intercepts = [
     "@authRefresh",
     "@alertDisposition",
     "@alertQueue",
@@ -47,7 +47,14 @@ export function visitUrl(url) {
     "@nodeDirective",
     "@observableType",
     "@user",
-  ]).then((interceptions) => {
+  ];
+
+  // Also wait for any extra intercepts that were passed in
+  if (options.extraIntercepts) {
+    intercepts.push.apply(intercepts, options.extraIntercepts);
+  }
+
+  cy.wait(intercepts).then((interceptions) => {
     for (let i = 0; i < interceptions.length; i++) {
       cy.wrap(interceptions[i]).its("state").should("eq", "Complete");
     }
