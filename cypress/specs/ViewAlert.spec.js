@@ -232,6 +232,7 @@ describe("ViewAlert.vue", () => {
     // Open tag modal
     cy.get(".p-toolbar-group-left > :nth-child(5)").click();
     cy.get(".p-dialog-content").should("be.visible");
+    cy.wait("@getNodeTags").its("state").should("eq", "Complete");
     // Type a tag
     cy.get(".p-chips > .p-inputtext").click().type("TestTag").type("{enter}");
     // Select a tag from the dropdown
@@ -244,7 +245,6 @@ describe("ViewAlert.vue", () => {
 
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
-    cy.wait("@getNodeTags").its("state").should("eq", "Complete");
   });
 
   it("will reroute to the Manage Alerts page with tag filter applied when tag clicked", () => {
