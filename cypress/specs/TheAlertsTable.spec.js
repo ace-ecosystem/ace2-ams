@@ -66,6 +66,7 @@ describe("TheAlertsTable.vue", () => {
     cy.get(
       ".p-datatable-header > .p-toolbar > .p-toolbar-group-right > :nth-child(2)"
     ).click();
+    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
     // Test that it's gone back to the normal columns
     cy.get(".p-multiselect-label").should(
       "have.text",
@@ -231,8 +232,11 @@ describe("TheAlertsTable.vue", () => {
   // });
 
   it("correctly fetches and displays observables when alert row is expanded and hides when collapsed", () => {
+    cy.intercept("POST", "/api/node/tree/observable").as("getAlertObservables");
+
     // Find the toggle button to expand and click (on the Small Alert alert)
     cy.get(":nth-child(7) > :nth-child(1) > .p-row-toggler").click();
+    cy.wait("@getAlertObservables").its("state").should("eq", "Complete");
     // List of observables should now exist
     cy.get("td > ul").should("exist").should("be.visible");
     // Check the first observable to make sure it's the expected one (aka sorting and formatting worked)
@@ -251,12 +255,14 @@ describe("TheAlertsTable.vue", () => {
     cy.get("td > ul").should("not.exist");
   });
   it("correctly filters by observable when an observable in the dropdown is clicked", () => {
+    cy.intercept("POST", "/api/node/tree/observable").as("getAlertObservables");
     cy.intercept({
       method: "GET",
       path: "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&observable=email_address%7Cbadguy%40evil.com",
     }).as("filterURL");
     // Find the toggle button to expand and click (on the Small Alert alert)
     cy.get(":nth-child(7) > :nth-child(1) > .p-row-toggler").click();
+    cy.wait("@getAlertObservables").its("state").should("eq", "Complete");
     // List of observables should now exist
     cy.get("td > ul").should("exist").should("be.visible");
     // Find and click the first observable in list
@@ -269,12 +275,14 @@ describe("TheAlertsTable.vue", () => {
     cy.get(".p-checkbox-box").should("have.length", 2);
   });
   it("correctly filters by tag when an observable tag in the dropdown is clicked", () => {
+    cy.intercept("POST", "/api/node/tree/observable").as("getAlertObservables");
     cy.intercept({
       method: "GET",
       path: "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=from_address",
     }).as("filterURL");
     // Find the toggle button to expand and click (on the Small Alert alert)
     cy.get(":nth-child(7) > :nth-child(1) > .p-row-toggler").click();
+    cy.wait("@getAlertObservables").its("state").should("eq", "Complete");
     // List of observables should now exist
     cy.get("td > ul").should("exist").should("be.visible");
     // Find and click the first observable tag in list
