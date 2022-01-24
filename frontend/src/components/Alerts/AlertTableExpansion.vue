@@ -15,23 +15,29 @@
 </template>
 
 <script setup>
-  import { ref, defineProps } from "vue";
+  import { ref, defineProps, onMounted } from "vue";
 
   import NodeTagVue from "../Node/NodeTag.vue";
 
   import { NodeTree } from "@/services/api/nodeTree";
+
+  const observables = ref(null);
+
+  onMounted(async () => {
+    await getObservables(props.uuid);
+  });
 
   const props = defineProps({
     uuid: { type: String, required: true },
   });
 
   const getObservables = async (uuid) => {
-    const observables = await NodeTree.readNodesOfNodeTree(
+    const unsortedObservables = await NodeTree.readNodesOfNodeTree(
       [uuid],
       "observable",
     );
 
-    return observables.sort((a, b) => {
+    observables.value = unsortedObservables.sort((a, b) => {
       if (a.type.value === b.type.value) {
         return a.value < b.value ? -1 : 1;
       } else {
@@ -39,8 +45,6 @@
       }
     });
   };
-
-  const observables = ref(await getObservables(props.uuid));
 
   const formatObservable = (observable) => {
     return `${observable.type.value} : ${observable.value}`;

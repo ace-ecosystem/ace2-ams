@@ -215,62 +215,6 @@ describe("TheNodeTable data/creation", () => {
     });
   });
 
-  //   it("will fetch an alert's observables and set the sorted array in expandedRowsData on rowExpand", async () => {
-  //     const { wrapper } = factory();
-
-  //     myNock.post("/node/tree/observable", '["uuid1"]').reply(200, [
-  //       { type: { value: "type_B" }, value: "value_B" },
-  //       { type: { value: "type_A" }, value: "value_A" },
-  //     ]);
-  //     await wrapper.vm.rowExpand("uuid1");
-  //     expect(wrapper.vm.expandedRowsData).toStrictEqual({
-  //       uuid1: [
-  //         { type: { value: "type_A" }, value: "value_A" },
-  //         { type: { value: "type_B" }, value: "value_B" },
-  //       ],
-  //     });
-  //   });
-
-  //   it("will remove the given property (an alert UUID) from expandedRowsData on rowCollapse", () => {
-  //     const { wrapper } = factory();
-
-  //     wrapper.vm.expandedRowsData = {
-  //       uuid1: [
-  //         { type: { value: "type_A" }, value: "value_A" },
-  //         { type: { value: "type_B" }, value: "value_B" },
-  //       ],
-  //     };
-  //     wrapper.vm.rowCollapse("uuid1");
-  //     expect(wrapper.vm.expandedRowsData).toStrictEqual({});
-  //   });
-
-  //   it("will set filters to the given observable and clear expandedRows on filterByObservable", async () => {
-  //     myNock.get("/alert/?sort=event_time%7Cdesc&limit=10&offset=0").reply(200, {
-  //       items: [mockAPIAlert, mockAPIAlert],
-  //       total: 2,
-  //     });
-  //     myNock
-  //       .get(
-  //         "/alert/?sort=event_time%7Cdesc&limit=10&offset=0&observable=type_A%7Cvalue_A",
-  //       )
-  //       .reply(200, {
-  //         items: [],
-  //         total: 0,
-  //       });
-  //     const { wrapper, filterStore } = factory({ stubActions: false });
-
-  //     wrapper.vm.expandedRows = ["uuid1"];
-  //     wrapper.vm.filterByObservable({
-  //       type: { value: "type_A" },
-  //       value: "value_A",
-  //     });
-
-  //     expect(wrapper.vm.expandedRows).toEqual([]);
-  //     expect(filterStore.alerts).toStrictEqual({
-  //       observable: { category: { value: "type_A" }, value: "value_A" },
-  //     });
-  //   });
-
   // Skip this test for now since the CSV export needs to be reworked & this test currently gives a warning
   it.skip("will export the alerts table to CSV on exportCSV", async () => {
     const { wrapper } = factory();
