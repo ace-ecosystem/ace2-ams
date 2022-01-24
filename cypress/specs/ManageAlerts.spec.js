@@ -487,6 +487,9 @@ describe("Manage Alerts Tags", () => {
   });
 
   it("will add given tags to an alert via the tag modal", () => {
+    cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTags");
+    cy.intercept("POST", "/api/node/tag").as("addTags");
+
     // Get first visible alert checkbox
     cy.get(".p-checkbox-box").eq(1).click();
     // Open the tag modal
@@ -494,6 +497,7 @@ describe("Manage Alerts Tags", () => {
       "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(5)"
     ).click();
     cy.get(".p-dialog-content").should("be.visible");
+    cy.wait("@getNodeTags").its("state").should("eq", "Complete");
     // Type a tag
     cy.get(".p-chips > .p-inputtext").click().type("TestTag").type("{enter}");
     // Select a tag from the dropdown
@@ -502,6 +506,7 @@ describe("Manage Alerts Tags", () => {
     // Enter & close modal
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(".p-dialog-content").should("not.exist");
+    cy.wait("@addTags").its("state").should("eq", "Complete");
     // Check for the tags after adding
     cy.get("[data-cy='tags']")
       .eq(0)
