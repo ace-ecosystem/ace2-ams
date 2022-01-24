@@ -6,7 +6,7 @@ describe("ManageAlerts.vue", () => {
   });
 
   beforeEach(() => {
-    visitUrl("/manage_alerts");
+    visitUrl({ url: "/manage_alerts" });
   });
 
   it("renders", () => {
@@ -220,7 +220,7 @@ describe("ManageAlerts.vue", () => {
 
 describe("Manage Alerts Filter Actions", () => {
   beforeEach(() => {
-    visitUrl("/manage_alerts");
+    visitUrl({ url: "/manage_alerts" });
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -459,7 +459,7 @@ describe("Manage Alerts Filter Actions", () => {
 // Comment will not change sort
 describe("Manage Alerts Comment", () => {
   beforeEach(() => {
-    visitUrl("/manage_alerts");
+    visitUrl({ url: "/manage_alerts" });
   });
 
   it("will add a given comment to an alert via the comment modal", () => {
@@ -483,7 +483,7 @@ describe("Manage Alerts Comment", () => {
 // Tags will not change sort
 describe("Manage Alerts Tags", () => {
   beforeEach(() => {
-    visitUrl("/manage_alerts");
+    visitUrl({ url: "/manage_alerts" });
   });
 
   it("will add given tags to an alert via the tag modal", () => {
@@ -515,7 +515,7 @@ describe("Manage Alerts Tags", () => {
 // Changing owner will change sort
 describe("Manage Alerts Take Ownership", () => {
   beforeEach(() => {
-    visitUrl("/manage_alerts");
+    visitUrl({ url: "/manage_alerts" });
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -541,7 +541,7 @@ describe("Manage Alerts Take Ownership", () => {
 // Changing owner will change sort
 describe("Manage Alerts Assign", () => {
   beforeEach(() => {
-    visitUrl("/manage_alerts");
+    visitUrl({ url: "/manage_alerts" });
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -574,7 +574,7 @@ describe("Manage Alerts Assign", () => {
 // Changing disposition will change sort
 describe("Manage Alerts Disposition", () => {
   beforeEach(() => {
-    visitUrl("/manage_alerts");
+    visitUrl({ url: "/manage_alerts" });
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -609,7 +609,7 @@ describe("Manage Alerts Disposition", () => {
 
 describe("Manage Alerts URL Param Filters", () => {
   beforeEach(() => {
-    visitUrl("/manage_alerts");
+    visitUrl({ url: "/manage_alerts" });
   });
 
   // Can't test at the moment, no way to check clipboard data in insecure context
@@ -701,7 +701,7 @@ describe("Manage Alerts URL Param Filters", () => {
 
 describe("Manage Alerts Filters Chips", () => {
   beforeEach(() => {
-    visitUrl("/manage_alerts");
+    visitUrl({ url: "/manage_alerts" });
   });
 
   it("will display a set filter as chip in chips toolbar", () => {

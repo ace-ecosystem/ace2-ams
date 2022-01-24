@@ -10,7 +10,7 @@ describe("ViewAlert.vue", () => {
   });
 
   beforeEach(() => {
-    visitUrl("/alert/02f8299b-2a24-400f-9751-7dd9164daf6a");
+    visitUrl({ url: "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a" });
   });
 
   it("View Alert page renders", () => {

@@ -45,7 +45,7 @@ describe("AnalyzeAlert.vue", () => {
   });
 
   beforeEach(() => {
-    visitUrl("/analyze");
+    visitUrl({ url: "/analyze" });
   });
 
   it("Analyze page renders", () => {
