@@ -43,12 +43,19 @@ describe("ViewAnalysis.vue", () => {
   });
 
   it("Will route to home (Manage Alerts) when home breadcrumb is clicked", () => {
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+    ).as("getAlerts");
+
     cy.get(".p-breadcrumb-home > .p-menuitem-link").click();
+    cy.wait("@getAlerts").its("state").should("eq", "Complete");
     cy.url().should("contain", "/manage_alerts");
   });
 
   it("Will route to parent alert when alert breadcrumb is clicked", () => {
     cy.get(".p-menuitem-link").contains('"Small Alert"').click();
+    cy.wait("@getAlert").its("state").should("eq", "Complete");
     cy.url().should(
       "not.contain",
       "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a/"
