@@ -51,5 +51,5 @@
   const toolbar = ref(null);
   const requestReload = () => {
     toolbar.value.requestReload();
-  }
+  };
 </script>

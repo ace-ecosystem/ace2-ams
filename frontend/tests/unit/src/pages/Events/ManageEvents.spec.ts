@@ -48,7 +48,7 @@ describe("ManageEvents.vue", () => {
     expect(wrapper.findComponent(TheEventsTable).exists()).toBe(true);
   });
 
-    it("will not add any filters that cannot be found", () => {
+  it("will not add any filters that cannot be found", () => {
     jest
       .spyOn(helpers, "populateCommonStores")
       .mockImplementationOnce(() => Promise.resolve());

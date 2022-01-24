@@ -53,8 +53,7 @@ export const useFilterStore = defineStore({
       filterValue: alertFilterValues | eventFilterValues;
     }) {
       if (!isEmpty(payload.filterValue)) {
-        this.$state[payload.nodeType][payload.filterName] =
-          payload.filterValue;
+        this.$state[payload.nodeType][payload.filterName] = payload.filterValue;
         localStorage.setItem("aceFilters", JSON.stringify(this.$state));
       }
     },
