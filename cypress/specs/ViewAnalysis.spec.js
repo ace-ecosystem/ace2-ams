@@ -10,7 +10,17 @@ describe("ViewAnalysis.vue", () => {
   });
 
   beforeEach(() => {
-    visitUrl({ url: "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a" });
+    // Intercept the API call that loads the alert data
+    cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "getAlert"
+    );
+
+    visitUrl({
+      url: "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a",
+      extraIntercepts: ["@getAlert"],
+    });
+
+    // Open up the "Test Analysis" analysis details
     cy.get('[data-cy="Test Analysis"]').contains("Test Analysis").click();
   });
 

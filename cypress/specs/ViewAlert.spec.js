@@ -10,7 +10,15 @@ describe("ViewAlert.vue", () => {
   });
 
   beforeEach(() => {
-    visitUrl({ url: "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a" });
+    // Intercept the API call that loads the alert data
+    cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "getAlert"
+    );
+
+    visitUrl({
+      url: "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a",
+      extraIntercepts: ["@getAlert"],
+    });
   });
 
   it("View Alert page renders", () => {
@@ -219,6 +227,7 @@ describe("ViewAlert.vue", () => {
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
       "getAlert"
     );
+    cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTags");
 
     // Open tag modal
     cy.get(".p-toolbar-group-left > :nth-child(5)").click();
@@ -235,6 +244,7 @@ describe("ViewAlert.vue", () => {
 
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
+    cy.wait("@getNodeTags").its("state").should("eq", "Complete");
   });
 
   it("will reroute to the Manage Alerts page with tag filter applied when tag clicked", () => {
