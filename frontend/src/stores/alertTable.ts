@@ -43,7 +43,7 @@ export const useAlertTableStore = defineStore({
     sortField: "eventTime",
 
     // current sort oder
-    sortOrder: "desc",
+    sortOrder: "desc" as string | null,
 
     // current page size
     pageSize: 10,
