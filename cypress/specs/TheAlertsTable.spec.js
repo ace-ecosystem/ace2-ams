@@ -2,17 +2,24 @@ import { visitUrl } from "./helpers";
 
 describe("TheAlertsTable.vue", () => {
   before(() => {
-    cy.log("logging in");
     cy.login();
   });
 
   after(() => {
-    cy.log("logging out");
     cy.logout();
   });
 
   beforeEach(() => {
-    visitUrl("/manage_alerts");
+    // Intercept the API call that loads the default alert table view
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+    ).as("getAlertsDefaultRows");
+
+    visitUrl({
+      url: "/manage_alerts",
+      extraIntercepts: ["@getAlertsDefaultRows"],
+    });
   });
 
   it("renders", () => {
@@ -141,10 +148,6 @@ describe("TheAlertsTable.vue", () => {
   it("lazy pagination works correctly when page size or number is changed", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
-    ).as("getAlertsDefaultRows");
-    cy.intercept(
-      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=5&offset=0"
     ).as("getAlertsChangedRows");
     cy.intercept(
@@ -152,7 +155,6 @@ describe("TheAlertsTable.vue", () => {
       "/api/alert/?sort=event_time%7Cdesc&limit=5&offset=5"
     ).as("getAlertsChangedRowsOffset");
     // Should start with default number of rows
-    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
     cy.get("tr").should("have.length", 8);
     // Change number of rows to 5 per page
     cy.get(".p-dropdown-trigger").click();
