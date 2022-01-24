@@ -6,7 +6,16 @@ describe("ManageAlerts.vue", () => {
   });
 
   beforeEach(() => {
-    visitUrl({ url: "/manage_alerts" });
+    // Intercept the API call that loads the default alert table view
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+    ).as("getAlertsDefaultRows");
+
+    visitUrl({
+      url: "/manage_alerts",
+      extraIntercepts: ["@getAlertsDefaultRows"],
+    });
   });
 
   it("renders", () => {
@@ -220,7 +229,16 @@ describe("ManageAlerts.vue", () => {
 
 describe("Manage Alerts Filter Actions", () => {
   beforeEach(() => {
-    visitUrl({ url: "/manage_alerts" });
+    // Intercept the API call that loads the default alert table view
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+    ).as("getAlertsDefaultRows");
+
+    visitUrl({
+      url: "/manage_alerts",
+      extraIntercepts: ["@getAlertsDefaultRows"],
+    });
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -459,7 +477,16 @@ describe("Manage Alerts Filter Actions", () => {
 // Comment will not change sort
 describe("Manage Alerts Comment", () => {
   beforeEach(() => {
-    visitUrl({ url: "/manage_alerts" });
+    // Intercept the API call that loads the default alert table view
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+    ).as("getAlertsDefaultRows");
+
+    visitUrl({
+      url: "/manage_alerts",
+      extraIntercepts: ["@getAlertsDefaultRows"],
+    });
   });
 
   it("will add a given comment to an alert via the comment modal", () => {
@@ -483,7 +510,16 @@ describe("Manage Alerts Comment", () => {
 // Tags will not change sort
 describe("Manage Alerts Tags", () => {
   beforeEach(() => {
-    visitUrl({ url: "/manage_alerts" });
+    // Intercept the API call that loads the default alert table view
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+    ).as("getAlertsDefaultRows");
+
+    visitUrl({
+      url: "/manage_alerts",
+      extraIntercepts: ["@getAlertsDefaultRows"],
+    });
   });
 
   it("will add given tags to an alert via the tag modal", () => {
@@ -520,7 +556,16 @@ describe("Manage Alerts Tags", () => {
 // Changing owner will change sort
 describe("Manage Alerts Take Ownership", () => {
   beforeEach(() => {
-    visitUrl({ url: "/manage_alerts" });
+    // Intercept the API call that loads the default alert table view
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+    ).as("getAlertsDefaultRows");
+
+    visitUrl({
+      url: "/manage_alerts",
+      extraIntercepts: ["@getAlertsDefaultRows"],
+    });
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -546,7 +591,16 @@ describe("Manage Alerts Take Ownership", () => {
 // Changing owner will change sort
 describe("Manage Alerts Assign", () => {
   beforeEach(() => {
-    visitUrl({ url: "/manage_alerts" });
+    // Intercept the API call that loads the default alert table view
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+    ).as("getAlertsDefaultRows");
+
+    visitUrl({
+      url: "/manage_alerts",
+      extraIntercepts: ["@getAlertsDefaultRows"],
+    });
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -579,7 +633,16 @@ describe("Manage Alerts Assign", () => {
 // Changing disposition will change sort
 describe("Manage Alerts Disposition", () => {
   beforeEach(() => {
-    visitUrl({ url: "/manage_alerts" });
+    // Intercept the API call that loads the default alert table view
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+    ).as("getAlertsDefaultRows");
+
+    visitUrl({
+      url: "/manage_alerts",
+      extraIntercepts: ["@getAlertsDefaultRows"],
+    });
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -614,7 +677,16 @@ describe("Manage Alerts Disposition", () => {
 
 describe("Manage Alerts URL Param Filters", () => {
   beforeEach(() => {
-    visitUrl({ url: "/manage_alerts" });
+    // Intercept the API call that loads the default alert table view
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+    ).as("getAlertsDefaultRows");
+
+    visitUrl({
+      url: "/manage_alerts",
+      extraIntercepts: ["@getAlertsDefaultRows"],
+    });
   });
 
   // Can't test at the moment, no way to check clipboard data in insecure context
@@ -706,7 +778,16 @@ describe("Manage Alerts URL Param Filters", () => {
 
 describe("Manage Alerts Filters Chips", () => {
   beforeEach(() => {
-    visitUrl({ url: "/manage_alerts" });
+    // Intercept the API call that loads the default alert table view
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+    ).as("getAlertsDefaultRows");
+
+    visitUrl({
+      url: "/manage_alerts",
+      extraIntercepts: ["@getAlertsDefaultRows"],
+    });
   });
 
   it("will display a set filter as chip in chips toolbar", () => {
