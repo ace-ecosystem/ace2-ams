@@ -1,10 +1,10 @@
 import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
-import { flushPromises, mount, VueWrapper } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
 
 import { useFilterStore } from "@/stores/filter";
 import myNock from "@unit/services/api/nock";
-import nock from "nock/types";
+import nock from "nock";
 
 function factory(options: TestingOptions = {}) {
   const wrapper: VueWrapper<any> = mount(AlertTableExpansion, {
