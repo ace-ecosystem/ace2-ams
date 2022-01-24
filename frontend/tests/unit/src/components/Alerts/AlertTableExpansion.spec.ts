@@ -1,5 +1,5 @@
 import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
-import { mount, VueWrapper } from "@vue/test-utils";
+import { flushPromises, mount, VueWrapper } from "@vue/test-utils";
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
 
 import { useFilterStore } from "@/stores/filter";
@@ -34,7 +34,8 @@ describe("AlertTableExpansion", () => {
     ])
     .persist();
 
-  afterAll(() => {
+  afterAll(async () => {
+    await flushPromises();
     nock.cleanAll();
   });
 
