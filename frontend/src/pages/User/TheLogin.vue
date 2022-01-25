@@ -1,5 +1,3 @@
-<!-- ManageAlerts.vue -->
-
 <template>
   <div class="card" name="loginForm">
     <div class="flex align-items-center justify-content-center">
@@ -35,8 +33,14 @@
             label="Log In"
             icon="pi pi-user"
             class="w-full"
+            :disabled="isDisabled"
             @click="login"
           ></Button>
+        </div>
+
+        <!-- Make a reusable Error component -->
+        <div v-if="loginError" id="error" class="p-error">
+          Invalid username or password
         </div>
       </div>
     </div>
@@ -58,6 +62,12 @@
   const username = ref(null);
   const password = ref(null);
 
+  const loginError = ref(false);
+
+  const isDisabled = computed(() => {
+    return username.value == null || password.value == null;
+  });
+
   const loginData = computed(() => {
     return { username: username.value, password: password.value };
   });
@@ -66,14 +76,15 @@
     await authApi
       .authenticate(loginData.value)
       .then(async () => {
+        loginError.value = false;
+
         // And then populate some of the stores with items from the API that
         // will be used throughout the application.
         await populateCommonStores();
       })
-      .catch((error) => {
-        // TODO: Add a proper message saying the login failed
+      .catch(() => {
         console.error("Invalid username or password");
-        throw error;
+        loginError.value = true;
       });
 
     username.value = null;

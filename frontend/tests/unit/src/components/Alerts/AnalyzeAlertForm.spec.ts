@@ -286,38 +286,13 @@ describe("AnalyzeAlertForm async methods", () => {
     'Could not create alert Manual Alert: Error: Request failed with status code 404 "Create failed"';
 
   beforeEach(async () => {
-    myNock
-      .persist()
-      .get("/alert/queue/?offset=0")
-      .reply(200, { items: ["default"] });
-    myNock
-      .persist()
-      .get("/alert/type/?offset=0")
-      .reply(200, { items: ["manual"] });
-    myNock.persist().get("/node/directive/?offset=0").reply(200, { items: [] });
-    myNock
-      .persist()
-      .get("/observable/type/?offset=0")
-      .reply(200, { items: ["file", "ipv4"] });
     wrapper.vm.initData();
-    await wrapper.vm.initExternalData();
     expectedAlertCreate.eventTime = moment(wrapper.vm.alertDate)
       .tz(moment.tz.guess())
       .format();
   });
   afterEach(async () => {
     nock.cleanAll();
-  });
-
-  // getters
-  it("will populate dropdowns using mapped Pinia actions (which perform API calls) when initExternalData is called", async () => {
-    expect(wrapper.vm.alertQueueStore.items).toStrictEqual(["default"]);
-    expect(wrapper.vm.alertTypeStore.items).toStrictEqual(["manual"]);
-    expect(wrapper.vm.observableTypeStore.items).toStrictEqual([
-      "file",
-      "ipv4",
-    ]);
-    expect(wrapper.vm.nodeDirectiveStore.items).toStrictEqual([]);
   });
 
   // submitAlert

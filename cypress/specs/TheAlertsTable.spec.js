@@ -1,21 +1,25 @@
-// WARNING!! These tests are running under the assumption that it is a freshly reset container and AnalyzeAlert.spec.js has successfully completed ONE time.
-// Need to add some setup/teardown utilities in order to decouple these tests.
+import { visitUrl } from "./helpers";
 
 describe("TheAlertsTable.vue", () => {
   before(() => {
-    cy.log("logging in");
     cy.login();
   });
 
   after(() => {
-    cy.log("logging out");
     cy.logout();
   });
 
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
-    cy.visit("/manage_alerts");
-    cy.url().should("contain", "/manage_alerts");
+    // Intercept the API call that loads the default alert table view
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+    ).as("getAlertsDefaultRows");
+
+    visitUrl({
+      url: "/manage_alerts",
+      extraIntercepts: ["@getAlertsDefaultRows"],
+    });
   });
 
   it("renders", () => {
@@ -29,20 +33,20 @@ describe("TheAlertsTable.vue", () => {
   it("has default columns visible", () => {
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Event Time, Name, Owner, Disposition",
+      "Event Time, Name, Owner, Disposition"
     );
     cy.get("tr > .p-highlight").should("have.text", "Event Time");
     cy.get(".p-datatable-thead > tr > :nth-child(4)").should(
       "have.text",
-      "Name",
+      "Name"
     );
     cy.get(".p-datatable-thead > tr > :nth-child(5)").should(
       "have.text",
-      "Owner",
+      "Owner"
     );
     cy.get(".p-datatable-thead > tr > :nth-child(6)").should(
       "have.text",
-      "Disposition",
+      "Disposition"
     );
   });
 
@@ -54,18 +58,19 @@ describe("TheAlertsTable.vue", () => {
     // Test that all of the selected columns are there
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Dispositioned Time, Insert Time, Event Time, Name, Owner, Disposition, Dispositioned By, Queue, Type",
+      "Dispositioned Time, Insert Time, Event Time, Name, Owner, Disposition, Dispositioned By, Queue, Type"
     );
     // Close the column multiselect
     cy.get(".p-multiselect-close").click();
     // Click the reset button
     cy.get(
-      ".p-datatable-header > .p-toolbar > .p-toolbar-group-right > :nth-child(2)",
+      ".p-datatable-header > .p-toolbar > .p-toolbar-group-right > :nth-child(2)"
     ).click();
+    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
     // Test that it's gone back to the normal columns
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Event Time, Name, Owner, Disposition",
+      "Event Time, Name, Owner, Disposition"
     );
   });
 
@@ -97,7 +102,7 @@ describe("TheAlertsTable.vue", () => {
     });
     // Test that when one is clicked that is the only one toggled
     cy.get(
-      ":nth-child(3) > .p-selection-column > .p-checkbox > .p-checkbox-box",
+      ":nth-child(3) > .p-selection-column > .p-checkbox > .p-checkbox-box"
     ).click();
     cy.get(".p-checkbox-box").each((item, index) => {
       if (index == 0) {
@@ -119,7 +124,7 @@ describe("TheAlertsTable.vue", () => {
     });
     // Test that when is clicked while selected, it is the only one toggled
     cy.get(
-      ":nth-child(3) > .p-selection-column > .p-checkbox > .p-checkbox-box",
+      ":nth-child(3) > .p-selection-column > .p-checkbox > .p-checkbox-box"
     ).click();
     cy.get(".p-checkbox-box").each((item, index) => {
       if (index == 0) {
@@ -144,18 +149,13 @@ describe("TheAlertsTable.vue", () => {
   it("lazy pagination works correctly when page size or number is changed", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
-    ).as("getAlertsDefaultRows");
-    cy.intercept(
-      "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=5&offset=0",
+      "/api/alert/?sort=event_time%7Cdesc&limit=5&offset=0"
     ).as("getAlertsChangedRows");
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=5&offset=5",
+      "/api/alert/?sort=event_time%7Cdesc&limit=5&offset=5"
     ).as("getAlertsChangedRowsOffset");
     // Should start with default number of rows
-    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
     cy.get("tr").should("have.length", 8);
     // Change number of rows to 5 per page
     cy.get(".p-dropdown-trigger").click();
@@ -173,18 +173,18 @@ describe("TheAlertsTable.vue", () => {
 
   it("correctly changes the sort filter when a column is clicked", () => {
     cy.intercept("GET", "/api/alert/?sort=name%7Casc&limit=10&offset=0").as(
-      "nameSortAsc",
+      "nameSortAsc"
     );
     cy.intercept("GET", "/api/alert/?sort=name%7Cdesc&limit=10&offset=0").as(
-      "nameSortDesc",
+      "nameSortDesc"
     );
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Casc&limit=10&offset=0",
+      "/api/alert/?sort=event_time%7Casc&limit=10&offset=0"
     ).as("eventTimeSortAsc");
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
     ).as("defaultSort");
 
     // sort by name to start, will default to ascending
@@ -194,7 +194,7 @@ describe("TheAlertsTable.vue", () => {
     // check first alerts name
     cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(4)").should(
       "have.text",
-      "Manual Alert",
+      "Manual Alert"
     );
     // sort by name again, will change to descending
     cy.get(".p-datatable-thead > tr > :nth-child(4)").click();
@@ -215,7 +215,7 @@ describe("TheAlertsTable.vue", () => {
     cy.get('[data-cy="alertName"]').eq(0).should("have.text", "Small Alert");
     // click the reset table button
     cy.get(
-      ".p-datatable-header > .p-toolbar > .p-toolbar-group-right > :nth-child(2)",
+      ".p-datatable-header > .p-toolbar > .p-toolbar-group-right > :nth-child(2)"
     ).click();
     // check api call
     cy.wait("@defaultSort").its("state").should("eq", "Complete");
@@ -232,19 +232,22 @@ describe("TheAlertsTable.vue", () => {
   // });
 
   it("correctly fetches and displays observables when alert row is expanded and hides when collapsed", () => {
+    cy.intercept("POST", "/api/node/tree/observable").as("getAlertObservables");
+
     // Find the toggle button to expand and click (on the Small Alert alert)
     cy.get(":nth-child(7) > :nth-child(1) > .p-row-toggler").click();
+    cy.wait("@getAlertObservables").its("state").should("eq", "Complete");
     // List of observables should now exist
     cy.get("td > ul").should("exist").should("be.visible");
     // Check the first observable to make sure it's the expected one (aka sorting and formatting worked)
     cy.get(":nth-child(1) > .link-text").should(
       "have.text",
-      "email_address : badguy@evil.com",
+      "email_address : badguy@evil.com"
     );
     // Also check that the tag is there for that observable
     cy.get("[data-cy=tags] > :nth-child(3) > .p-tag > .tag").should(
       "have.text",
-      "from_address",
+      "from_address"
     );
     // Click the toggle button again to close
     cy.get(":nth-child(7) > :nth-child(1) > .p-row-toggler").click();
@@ -252,12 +255,14 @@ describe("TheAlertsTable.vue", () => {
     cy.get("td > ul").should("not.exist");
   });
   it("correctly filters by observable when an observable in the dropdown is clicked", () => {
+    cy.intercept("POST", "/api/node/tree/observable").as("getAlertObservables");
     cy.intercept({
       method: "GET",
       path: "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&observable=email_address%7Cbadguy%40evil.com",
     }).as("filterURL");
     // Find the toggle button to expand and click (on the Small Alert alert)
     cy.get(":nth-child(7) > :nth-child(1) > .p-row-toggler").click();
+    cy.wait("@getAlertObservables").its("state").should("eq", "Complete");
     // List of observables should now exist
     cy.get("td > ul").should("exist").should("be.visible");
     // Find and click the first observable in list
@@ -270,12 +275,14 @@ describe("TheAlertsTable.vue", () => {
     cy.get(".p-checkbox-box").should("have.length", 2);
   });
   it("correctly filters by tag when an observable tag in the dropdown is clicked", () => {
+    cy.intercept("POST", "/api/node/tree/observable").as("getAlertObservables");
     cy.intercept({
       method: "GET",
       path: "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=from_address",
     }).as("filterURL");
     // Find the toggle button to expand and click (on the Small Alert alert)
     cy.get(":nth-child(7) > :nth-child(1) > .p-row-toggler").click();
+    cy.wait("@getAlertObservables").its("state").should("eq", "Complete");
     // List of observables should now exist
     cy.get("td > ul").should("exist").should("be.visible");
     // Find and click the first observable tag in list

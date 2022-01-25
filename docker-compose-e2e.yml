@@ -1,8 +1,9 @@
 version: "3.9"
 
 services:
-  gui:
-    command: bash -c 'while !</dev/tcp/api/80; do sleep 1; done; npm run production'
+  api:
+    environment:
+      - TESTING=yes
 
   cypress:
     image: cypress/included:9.3.0

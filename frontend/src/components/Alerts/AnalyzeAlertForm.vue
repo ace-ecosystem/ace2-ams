@@ -160,6 +160,8 @@
                     name="observable-directives"
                     placeholder="No directives selected"
                     class="inputfield w-full"
+                    option-label="value"
+                    option-value="value"
                     :options="nodeDirectiveStore.items"
                   />
                 </div>
@@ -297,9 +299,8 @@
     return observables.value.length - 1;
   });
 
-  onMounted(async () => {
+  onMounted(() => {
     initData();
-    await initExternalData();
   });
 
   const addError = (object, error) => {
@@ -374,13 +375,6 @@
     timezone.value = moment.tz.guess();
     observables.value = [];
     addFormObservable();
-  };
-
-  const initExternalData = async () => {
-    await alertQueueStore.readAll();
-    await alertTypeStore.readAll();
-    await nodeDirectiveStore.readAll();
-    await observableTypeStore.readAll();
   };
 
   const isLastObservable = (index) => {
