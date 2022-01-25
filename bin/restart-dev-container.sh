@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+ACE2_ENV_PATH="$HOME/.ace2.env"
+
 if [ "$1" = "testing" ]; then
     TESTING="yes"
 else
