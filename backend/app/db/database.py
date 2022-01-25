@@ -8,7 +8,7 @@ from core.config import get_settings
 
 database_url = get_settings().database_url
 if "TESTING" in os.environ and os.environ["TESTING"].lower() == "yes":
-    database_url = f"{database_url}_test"
+    database_url = get_settings().database_test_url
 
 echo_value = False
 if "SQL_ECHO" in os.environ and os.environ["SQL_ECHO"].lower() == "yes":

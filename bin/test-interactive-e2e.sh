@@ -4,14 +4,12 @@
 ACE2_ENV_PATH="$HOME/.ace2.env"
 set -a
 source "$ACE2_ENV_PATH"
+export TESTING=yes
 set +a
 
-# The e2e tests expect that the containers are reset
-/usr/bin/env bash bin/reset-dev-container.sh testing
-
-# Insert the test alert that the e2e tests use into the database
-/usr/bin/env bash bin/insert-alerts.sh backend/app/tests/alerts/small.json
+# Bring up the containers (if they aren't already) in testing mode
+docker-compose -f docker-compose.yml up -d
 
 printf "\nYou can now open Cypress on your host system\n"
 printf "Remember to exit test mode when you are finished!\n"
-printf "Example: bin/restart-dev-container\n"
+printf "Example: bin/disable-test-mode.sh\n"
