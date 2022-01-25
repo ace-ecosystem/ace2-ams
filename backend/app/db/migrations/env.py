@@ -23,7 +23,7 @@ def run_migrations_online() -> None:
     """
 
     # Handle database configuration for running tests
-    database_urls = [os.environ["DATABASE_URL"], f"{os.environ['DATABASE_URL']}_test"]
+    database_urls = [os.environ["DATABASE_URL"], os.environ["DATABASE_TEST_URL"]]
     for database_url in database_urls:
         connectable = config.attributes.get("connection", None)
         config.set_main_option("sqlalchemy.url", database_url)
@@ -47,7 +47,7 @@ def run_migrations_offline() -> None:
     Run migrations in "offline" mode.
     """
 
-    database_urls = [os.environ["DATABASE_URL"], f"{os.environ['DATABASE_URL']}_test"]
+    database_urls = [os.environ["DATABASE_URL"], os.environ["DATABASE_TEST_URL"]]
     for database_url in database_urls:
         alembic.context.configure(url=database_url)
 
