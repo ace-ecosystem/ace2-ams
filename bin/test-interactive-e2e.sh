@@ -7,9 +7,11 @@ source "$ACE2_ENV_PATH"
 set +a
 
 # The e2e tests expect that the containers are reset
-/usr/bin/env bash bin/reset-dev-container.sh
+/usr/bin/env bash bin/reset-dev-container.sh testing
 
 # Insert the test alert that the e2e tests use into the database
 /usr/bin/env bash bin/insert-alerts.sh backend/app/tests/alerts/small.json
 
 printf "\nYou can now open Cypress on your host system\n"
+printf "Remember to exit test mode when you are finished!\n"
+printf "Example: bin/restart-dev-container\n"
