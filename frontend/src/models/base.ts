@@ -46,5 +46,7 @@ export interface filterOption {
   readonly valueProperty?: string;
   readonly store?: StoreDefinition;
   readonly stringRepr?: (filter: any) => string;
-  readonly parseStringRepr?: (filter: string) => any;
+  readonly parseStringRepr?: (
+    filter: string,
+  ) => string[] | Date | { category: string; value: string };
 }

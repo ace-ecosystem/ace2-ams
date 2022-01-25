@@ -8,15 +8,15 @@ import each from "jest-each";
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
 
 import DateRangePicker from "@/components/UserInterface/DateRangePicker.vue";
-import { mount } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 
 function factory(options?: TestingOptions) {
-  const wrapper = mount(DateRangePicker, {
+  const wrapper: VueWrapper<any> = mount(DateRangePicker, {
     global: {
       plugins: [createTestingPinia(options)],
       directives: { tooltip: Tooltip },
       provide: {
-        filterType: "alerts",
+        nodeType: "alerts",
         rangeFilterOptions: ["Example Time", "Other Time"],
         rangeFilters: {
           "Example Time": {
@@ -54,7 +54,7 @@ describe("DateRangePicker setup", () => {
   it("receives expected injected data", () => {
     const { wrapper } = factory();
 
-    expect(wrapper.vm.filterType).toEqual("alerts");
+    expect(wrapper.vm.nodeType).toEqual("alerts");
     expect(wrapper.vm.rangeFilterOptions).toEqual([
       "Example Time",
       "Other Time",
@@ -110,13 +110,13 @@ describe("DateRangePicker computed properties", () => {
     const yesterday = new Date(today.setDate(yesterdayDate));
 
     wrapper.vm.filterStore.setFilter({
-      filterType: "alerts",
+      nodeType: "alerts",
       filterName: "exampleTimeAfter",
       filterValue: yesterday,
     });
 
     wrapper.vm.filterStore.setFilter({
-      filterType: "alerts",
+      nodeType: "alerts",
       filterName: "exampleTimeBefore",
       filterValue: today,
     });
@@ -139,13 +139,13 @@ describe("DateRangePicker watchers", () => {
     const { wrapper } = factory({ stubActions: false });
 
     wrapper.vm.filterStore.setFilter({
-      filterType: "alerts",
+      nodeType: "alerts",
       filterName: "exampleTimeAfter",
       filterValue: yesterday,
     });
 
     wrapper.vm.filterStore.setFilter({
-      filterType: "alerts",
+      nodeType: "alerts",
       filterName: "exampleTimeBefore",
       filterValue: today,
     });

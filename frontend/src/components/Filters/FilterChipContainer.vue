@@ -18,13 +18,13 @@
 
   import { useFilterStore } from "@/stores/filter";
   const filterStore = useFilterStore();
-  const filterType = inject("filterType");
+  const nodeType = inject("nodeType");
 
   const setFilters = computed(() => {
-    return Object.keys(filterStore[filterType]);
+    return Object.keys(filterStore[nodeType]);
   });
 
   function filterValue(filterName) {
-    return filterStore[filterType][filterName];
+    return filterStore[nodeType][filterName];
   }
 </script>

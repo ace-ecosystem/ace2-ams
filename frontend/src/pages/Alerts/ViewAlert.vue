@@ -1,7 +1,7 @@
 <!-- ViewAlert.vue -->
 
 <template>
-  <TheAlertActionToolbar id="AlertActionToolbar" page="View Alert" />
+  <TheAlertActionToolbar id="AlertActionToolbar" reload-object="node" />
   <Card>
     <template #content>
       <div class="p-tree p-component p-tree-wrapper" style="border: none">
@@ -29,7 +29,7 @@
   const alertStore = useAlertStore();
   const selectedAlertStore = useSelectedAlertStore();
 
-  provide("filterType", "alerts");
+  provide("nodeType", "alerts");
 
   onBeforeMount(async () => {
     await initPage(route.params.alertID);

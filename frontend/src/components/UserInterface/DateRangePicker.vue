@@ -139,14 +139,14 @@
 
   const filterStore = useFilterStore();
 
-  const filterType = inject("filterType");
+  const nodeType = inject("nodeType");
   const rangeFilters = inject("rangeFilters");
 
   const currentRangeFilter = ref(Object.keys(rangeFilters)[0]);
   const op = ref(null);
 
   const filters = computed(() => {
-    return filterStore.$state[filterType];
+    return filterStore.$state[nodeType];
   });
 
   const startFilter = computed(() => {
@@ -192,7 +192,7 @@
     }
 
     filterStore.setFilter({
-      filterType: filterType,
+      nodeType: nodeType,
       filterName: filterName,
       filterValue: date,
     });
@@ -200,7 +200,7 @@
 
   const clearDate = (filterName) => {
     filterStore.unsetFilter({
-      filterType: filterType,
+      nodeType: nodeType,
       filterName: filterName,
     });
   };

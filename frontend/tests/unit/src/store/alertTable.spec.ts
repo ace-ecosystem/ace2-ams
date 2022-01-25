@@ -153,39 +153,39 @@ describe("alertTable getters", () => {
     store.$reset();
   });
 
-  it("will correctly return visibleQueriedAlertSummaries", () => {
-    store.visibleQueriedAlerts = [
+  it("will correctly return  visibleQueriedItemSummaries", () => {
+    store.visibleQueriedItems = [
       mockAlertReadA,
       mockAlertReadB,
       mockAlertReadC,
     ];
-    expect(store.visibleQueriedAlertSummaries).toEqual([
+    expect(store.visibleQueriedItemSummaries).toEqual([
       mockAlertReadASummary,
       mockAlertReadBSummary,
       mockAlertReadCSummary,
     ]);
   });
 
-  it("will correctly return visibleQueriedAlertsUuids", () => {
-    store.visibleQueriedAlerts = [
+  it("will correctly return  visibleQueriedItemsUuids", () => {
+    store.visibleQueriedItems = [
       mockAlertReadA,
       mockAlertReadB,
       mockAlertReadC,
     ];
-    expect(store.visibleQueriedAlertsUuids).toEqual([
-      "uuid1",
-      "uuid2",
-      "uuid3",
-    ]);
+    expect(store.visibleQueriedItemsUuids).toEqual(["uuid1", "uuid2", "uuid3"]);
   });
 
-  it("will correctly return visibleQueriedAlertById", () => {
-    store.visibleQueriedAlerts = [
+  it("will correctly return  visibleQueriedItemById", () => {
+    store.visibleQueriedItems = [
       mockAlertReadA,
       mockAlertReadB,
       mockAlertReadC,
     ];
-    expect(store.visibleQueriedAlertById("uuid1")).toEqual(mockAlertReadA);
+    expect(store.visibleQueriedItemById("uuid1")).toEqual(mockAlertReadA);
+  });
+
+  it("will correctly return sortFilter", () => {
+    expect(store.sortFilter).toEqual("event_time|desc");
   });
 });
 
@@ -203,7 +203,7 @@ describe("alertTable actions", () => {
     await store.readPage(mockParams);
 
     expect(mockRequest.isDone()).toEqual(true);
-    expect(store.visibleQueriedAlerts).toEqual([
+    expect(store.visibleQueriedItems).toEqual([
       Object.assign({}, JSON.parse(JSON.stringify(mockAlertReadA)), {
         eventTime: "2021-12-18T00:59:43.570Z",
         insertTime: "2021-12-18T00:59:43.570Z",
@@ -221,7 +221,7 @@ describe("alertTable actions", () => {
         uuid: "uuid3",
       }),
     ]);
-    expect(store.totalAlerts).toEqual(3);
+    expect(store.totalItems).toEqual(3);
     expect(store.requestReload).toEqual(false);
   });
 
@@ -232,8 +232,17 @@ describe("alertTable actions", () => {
       new Error("Request failed with status code 403"),
     );
 
-    expect(store.visibleQueriedAlerts).toEqual([]);
-    expect(store.totalAlerts).toEqual(0);
+    expect(store.visibleQueriedItems).toEqual([]);
+    expect(store.totalItems).toEqual(0);
     expect(store.requestReload).toEqual(false);
+  });
+  it("will reset the sort order and sort field to written defaults on resetSort", () => {
+    store.sortField = "exampleSort";
+    store.sortOrder = "asc";
+
+    store.resetSort();
+
+    expect(store.sortField).toEqual("eventTime");
+    expect(store.sortOrder).toEqual("desc");
   });
 });

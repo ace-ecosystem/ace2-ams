@@ -98,7 +98,7 @@ function factory(
     global: {
       plugins: [createTestingPinia(options)],
       provide: {
-        filterType: "alerts",
+        nodeType: "alerts",
         availableFilters: FILTERS_STUB,
       },
     },

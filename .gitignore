@@ -31,3 +31,6 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# E2E test videos
+.mp4

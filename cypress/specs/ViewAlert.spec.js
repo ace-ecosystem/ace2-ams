@@ -147,7 +147,8 @@ describe("ViewAlert.vue", () => {
     );
 
     // Open disposition modal
-    cy.get(".p-button-normal").click();
+        cy.get("[data-cy=disposition-button]").click();
+
     cy.get(".p-dialog-content").should("be.visible");
     // Select first option
     cy.get('[aria-label="FALSE_POSITIVE"]').click();
@@ -175,7 +176,8 @@ describe("ViewAlert.vue", () => {
     );
 
     // Open comment modal
-    cy.get(".p-toolbar-group-left > :nth-child(2)").click();
+        cy.get("[data-cy=comment-button]").click();
+
     cy.get(".p-dialog-content").should("be.visible");
     // Add a comment
     cy.get(".p-inputtextarea").click().type("testing regular comment!");
@@ -196,7 +198,7 @@ describe("ViewAlert.vue", () => {
 
     // Click button
 
-    cy.get(".p-toolbar-group-left > :nth-child(3)").click();
+    cy.get("[data-cy=take-ownership-button]").click();
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
   });
@@ -208,7 +210,8 @@ describe("ViewAlert.vue", () => {
       "getAlert"
     );
     // Open assign modal
-    cy.get(".p-toolbar-group-left > :nth-child(4)").click();
+    cy.get("[data-cy=assign-button]").click();
+
     cy.get(".p-dialog-content").should("be.visible");
     // Select first option
     cy.get(".p-dropdown-label").click();
@@ -222,7 +225,7 @@ describe("ViewAlert.vue", () => {
   });
 
   // Tag
-  it.only("should make a request to update tags and get updated alert when owner is set", () => {
+  it("should make a request to update tags and get updated alert when owner is set", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
       "getAlert"
@@ -230,7 +233,8 @@ describe("ViewAlert.vue", () => {
     cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTags");
 
     // Open tag modal
-    cy.get(".p-toolbar-group-left > :nth-child(5)").click();
+    cy.get("[data-cy=tag-button]").click();
+
     cy.get(".p-dialog-content").should("be.visible");
     cy.wait("@getNodeTags").its("state").should("eq", "Complete");
     // Type a tag
@@ -262,8 +266,10 @@ describe("ViewAlert.vue", () => {
     cy.get(".p-checkbox-box").should("have.length", 1);
 
     // Verify in the filter modal that the correct filter is set
-    cy.get("[data-cy=edit-filters]").click();
-    cy.get(":nth-child(1) > .p-dropdown > .p-dropdown-label").should(
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
+    cy.get(":nth-child(1) > .p-dropdown > .p-dropdown-label").first().should(
       "have.text",
       "Tags"
     );
@@ -287,13 +293,15 @@ describe("ViewAlert.vue", () => {
     cy.get(".p-checkbox-box").should("have.length", 1);
 
     // Verify in the filter modal that the correct filter is set
-    cy.get("[data-cy=edit-filters]").click();
+    cy.get(".p-splitbutton-menubutton").click();
+    cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(
       ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-label"
-    ).should("have.text", "Observable");
+    ).first().should("have.text", "Observable");
     cy.get(
       ".col > :nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-label"
-    ).should("have.text", "email_subject");
+    ).eq(0).should("have.text", "email_subject");
     cy.get(".col > :nth-child(1) > :nth-child(2) > input").should(
       "have.value",
       "Hello"

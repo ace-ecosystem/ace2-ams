@@ -37,7 +37,7 @@
 </template>
 
 <script setup>
-  import { computed, defineEmits, defineProps, ref } from "vue";
+  import { computed, defineEmits, defineProps, ref, inject } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -47,17 +47,9 @@
 
   import { NodeComment } from "@/services/api/nodeComment";
 
+  import { nodeSelectedStores } from "@/stores/index";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
-  import { useSelectedAlertStore } from "@/stores/selectedAlert";
-
-  const authStore = useAuthStore();
-  const modalStore = useModalStore();
-  const selectedAlertStore = useSelectedAlertStore();
-
-  const error = ref(null);
-  const isLoading = ref(false);
-  const newComment = ref("");
 
   const emit = defineEmits(["requestReload"]);
 
@@ -65,11 +57,20 @@
     name: { type: String, required: true },
   });
 
+  const nodeType = inject("nodeType");
+  const selectedStore = nodeSelectedStores[nodeType]();
+  const authStore = useAuthStore();
+  const modalStore = useModalStore();
+
+  const error = ref(null);
+  const isLoading = ref(false);
+  const newComment = ref("");
+
   async function addComment() {
     isLoading.value = true;
     try {
       await NodeComment.create(
-        selectedAlertStore.selected.map((uuid) => ({
+        selectedStore.selected.map((uuid) => ({
           nodeUuid: uuid,
           ...commentData.value,
         })),
@@ -93,7 +94,7 @@
   });
 
   const allowSubmit = computed(() => {
-    return selectedAlertStore.anySelected && newComment.value.length;
+    return selectedStore.anySelected && newComment.value.length;
   });
 
   const handleError = () => {

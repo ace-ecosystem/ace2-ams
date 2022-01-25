@@ -220,7 +220,7 @@ describe("TheAlertsTable.vue", () => {
     // check api call
     cy.wait("@defaultSort").its("state").should("eq", "Complete");
     // check first alerts name
-    cy.get('[data-cy="alertName"]').eq(0).should("have.text", "Small Alert");
+    cy.get('[data-cy="alertName"]').eq(0).should("have.text", "Manual Alert 0.0.0.0");
   });
 
   // This test broken by pagination changes

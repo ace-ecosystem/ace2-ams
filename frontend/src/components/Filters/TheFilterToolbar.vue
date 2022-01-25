@@ -55,13 +55,17 @@
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
 
-  import { formatForAPI } from "@/services/api/alert";
-  import { copyToClipboard } from "@/etc/helpers";
+  import { copyToClipboard, formatNodeFiltersForAPI } from "@/etc/helpers";
+  import { alertFilters, eventFilters } from "@/etc/constants";
 
-  const filterType = inject("filterType");
+  const nodeType = inject("nodeType");
+  const filterOptions = {
+    alerts: alertFilters,
+    events: eventFilters,
+  };
 
   const clear = () => {
-    filterStore.clearAll({ filterType: filterType });
+    filterStore.clearAll({ nodeType: nodeType });
   };
 
   const openFilterModal = () => {
@@ -69,7 +73,7 @@
   };
 
   const reset = () => {
-    filterStore.clearAll({ filterType: filterType });
+    filterStore.clearAll({ nodeType: nodeType });
   };
 
   const buttons = [
@@ -96,15 +100,15 @@
   ];
 
   function generateLink() {
-    let link = `${window.location.origin}/manage_${filterType}`;
+    let link = `${window.location.origin}/manage_${nodeType}`;
     // If there are filters set, build the link for it
-    if (Object.keys(filterStore[filterType]).length) {
+    if (Object.keys(filterStore[nodeType]).length) {
       let urlParams = new URLSearchParams(
-        formatForAPI(filterStore[filterType]),
+        formatNodeFiltersForAPI(filterOptions[nodeType], filterStore[nodeType]),
       );
       link = `${
         window.location.origin
-      }/manage_${filterType}?${urlParams.toString()}`;
+      }/manage_${nodeType}?${urlParams.toString()}`;
     }
     return link;
   }
@@ -121,7 +125,7 @@
 
   const addFilter = () => {
     filterStore.setFilter({
-      filterType: filterType,
+      nodeType: nodeType,
       filterName: filterModel.value.filterName,
       filterValue: filterModel.value.filterValue,
     });

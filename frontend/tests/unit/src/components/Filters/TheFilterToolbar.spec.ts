@@ -11,7 +11,7 @@ describe("TheFilterToolbar.vue", () => {
       global: {
         plugins: [createTestingPinia(options)],
         provide: {
-          filterType: "alerts",
+          nodeType: "alerts",
         },
       },
     });
@@ -36,7 +36,7 @@ describe("TheFilterToolbar.vue", () => {
   it("correctly receives injected data", () => {
     const { wrapper } = factory();
 
-    expect(wrapper.vm.filterType).toEqual("alerts");
+    expect(wrapper.vm.nodeType).toEqual("alerts");
   });
   it("correctly calls Pinia action", () => {
     const { wrapper, filterStore } = factory();
@@ -49,12 +49,12 @@ describe("TheFilterToolbar.vue", () => {
 
     wrapper.vm.clear();
     expect(filterStore.clearAll).toHaveBeenLastCalledWith({
-      filterType: "alerts",
+      nodeType: "alerts",
     });
 
     wrapper.vm.reset();
     expect(filterStore.clearAll).toHaveBeenLastCalledWith({
-      filterType: "alerts",
+      nodeType: "alerts",
     });
 
     expect(filterStore.clearAll).toHaveBeenCalledTimes(2);
@@ -66,7 +66,7 @@ describe("TheFilterToolbar.vue", () => {
     expect(link).toEqual("http://localhost/manage_alerts");
 
     wrapper.vm.filterStore.bulkSetFilters({
-      filterType: "alerts",
+      nodeType: "alerts",
       filters: { name: "hello world", owner: { username: "test_analyst" } },
     });
 

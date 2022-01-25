@@ -2,9 +2,11 @@ import { defineStore } from "pinia";
 import { UUID } from "@/models/base";
 import { Event } from "@/services/api/event";
 import { eventFilterParams, eventRead, eventSummary } from "@/models/event";
+import { camelToSnakeCase } from "@/etc/helpers";
 
 export function parseEventSummary(event: eventRead): eventSummary {
   return {
+    comments: event.comments,
     createdTime: event.creationTime,
     // disposition: event.disposition,  // Need to edit the API so that it adds disposition into the Event response
     name: event.name,
@@ -12,6 +14,7 @@ export function parseEventSummary(event: eventRead): eventSummary {
     preventionTools: event.preventionTools.map((x) => x.value),
     riskLevel: event.riskLevel ? event.riskLevel.value : "None",
     status: event.status ? event.status.value : "None",
+    tags: event.tags,
     threatActors: event.threatActors.map((x) => x.value),
     threats: event.threats.map((x) => x.value),
     type: event.type ? event.type.value : "None",
@@ -25,27 +28,43 @@ export const useEventTableStore = defineStore({
 
   state: () => ({
     // all events returned from the current page using the current filters
-    visibleQueriedEvents: [] as eventRead[],
+    visibleQueriedItems: [] as eventRead[],
 
     // total number of events from all pages
-    totalEvents: 0,
+    totalItems: 0,
 
     // whether the event table should be reloaded
     requestReload: false,
+
+    // current sort field
+    sortField: "createdTime",
+
+    // current sort oder
+    sortOrder: "desc",
+
+    // current page size
+    pageSize: 10,
   }),
 
   getters: {
-    visibleQueriedEventSummaries(): eventSummary[] {
-      return this.visibleQueriedEvents.map((x) => parseEventSummary(x));
+    visibleQueriedItemSummaries(): eventSummary[] {
+      return this.visibleQueriedItems.map((x) => parseEventSummary(x));
     },
 
-    visibleQueriedEventsUuids(): UUID[] {
-      return this.visibleQueriedEvents.map((x) => x.uuid);
+    visibleQueriedItemsUuids(): UUID[] {
+      return this.visibleQueriedItems.map((x) => x.uuid);
     },
 
-    visibleQueriedEventById: (state) => {
+    visibleQueriedItemById: (state) => {
       return (eventUuid: UUID) =>
-        state.visibleQueriedEvents.find((event) => event.uuid === eventUuid);
+        state.visibleQueriedItems.find((event) => event.uuid === eventUuid);
+    },
+
+    sortFilter: (state) => {
+      if (state.sortField && state.sortOrder) {
+        return `${camelToSnakeCase(state.sortField)}|${state.sortOrder}`;
+      }
+      return null;
     },
   },
 
@@ -53,12 +72,16 @@ export const useEventTableStore = defineStore({
     async readPage(params: eventFilterParams) {
       await Event.readPage(params)
         .then((page) => {
-          this.visibleQueriedEvents = page.items;
-          this.totalEvents = page.total;
+          this.visibleQueriedItems = page.items;
+          this.totalItems = page.total;
         })
         .catch((error) => {
           throw error;
         });
+    },
+    resetSort() {
+      this.sortField = "createdTime";
+      this.sortOrder = "desc";
     },
   },
 });

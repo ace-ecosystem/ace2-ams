@@ -1,357 +1,47 @@
-/* eslint-disable vue/attribute-hyphenation */
 <!-- TheAlertsTable.vue -->
 <!-- The table where all currently filtered alerts are displayed, selected to take action, or link to an individual alert page -->
 
 <template>
-  <DataTable
-    ref="dt"
-    v-model:expandedRows="expandedRows"
-    v-model:filters="alertTableFilter"
-    v-model:selection="selectedRows"
-    :value="alertTableStore.visibleQueriedAlertSummaries"
-    :global-filter-fields="selectedColumns.field"
-    :resizable-columns="true"
-    :sort-order="-1"
-    :loading="isLoading"
-    column-resize-mode="expand"
-    data-key="uuid"
-    removable-sort
-    responsive-layout="scroll"
-    :sort-field="sortField"
-    @sort="sort"
-    @row-expand="rowExpand($event.data.uuid)"
-    @row-collapse="rowCollapse($event.data.uuid)"
-    @rowSelect="selectedAlertStore.select($event.data.uuid)"
-    @rowUnselect="selectedAlertStore.unselect($event.data.uuid)"
-    @rowSelect-all="
-      selectedAlertStore.selectAll(alertTableStore.visibleQueriedAlertsUuids)
-    "
-    @rowUnselect-all="selectedAlertStore.unselectAll()"
-  >
-    <!--        ALERT TABLE TOOLBAR-->
-    <template #header>
-      <Toolbar style="border: none">
-        <template #start>
-          <MultiSelect
-            :model-value="selectedColumns"
-            :options="columns"
-            option-label="header"
-            placeholder="Select Columns"
-            @update:modelValue="onColumnToggle"
-          />
-        </template>
-        <template #end>
-          <span class="p-input-icon-left p-m-1">
-            <i class="pi pi-search" />
-            <InputText
-              v-model="alertTableFilter['global'].value"
-              placeholder="Search in table"
-            />
-          </span>
-          <!--            CLEAR TABLE FILTERS -->
-          <Button
-            icon="pi pi-refresh"
-            class="p-button-rounded p-m-1"
-            @click="reset()"
-          />
-          <!--            EXPORT TABLE -->
-          <Button
-            class="p-button-rounded p-m-1"
-            icon="pi pi-download"
-            @click="exportCSV($event)"
-          />
-        </template>
-      </Toolbar>
+  <TheNodeTable :columns="columns">
+    <template #rowCell="{ data, field }">
+      <AlertTableCell :data="data" :field="field"></AlertTableCell>
     </template>
 
-    <!-- DROPDOWN COLUMN-->
-    <Column id="alert-expand" :expander="true" header-style="width: 3rem" />
-
-    <!-- CHECKBOX COLUMN -->
-    <!-- It's annoying, but the PrimeVue DataTable selectionMode attribute works when camelCase -->
-    <Column
-      id="alert-select"
-      header-style="width: 3em"
-      selection-mode="multiple"
-    />
-
-    <!-- DATA COLUMN -->
-    <Column
-      v-for="(col, index) of selectedColumns"
-      :key="col.field + '_' + index"
-      :field="col.field"
-      :header="col.header"
-      :sortable="true"
-    >
-      <!-- DATA COLUMN BODY-->
-      <template #body="{ data }">
-        <!-- NAME COLUMN - INCL. TAGS AND TODO: ALERT ICONS-->
-        <div v-if="col.field === 'name'">
-          <span class="p-m-1" data-cy="alertName">
-            <router-link :to="getAlertLink(data.uuid)">{{
-              data.name
-            }}</router-link></span
-          >
-          <br />
-          <span data-cy="tags">
-            <NodeTagVue
-              v-for="tag in getAllTags(data)"
-              :key="tag.uuid"
-              :tag="tag"
-            ></NodeTagVue>
-          </span>
-          <span v-if="data.comments">
-            <pre
-              v-for="comment in data.comments"
-              :key="comment.uuid"
-              class="p-mr-2 comment"
-            >
-({{ comment.user.displayName }}) {{ comment.value }}</pre
-            >
-          </span>
-        </div>
-        <span v-else-if="col.field.includes('Time')">
-          {{ formatDateTime(data[col.field]) }}</span
-        >
-        <span v-else> {{ data[col.field] }}</span>
-      </template>
-    </Column>
-
-    <!--      ALERT ROW DROPDOWN -->
-    <template #expansion="slotProps">
-      <ul>
-        <li
-          v-for="obs of expandedRowsData[slotProps.data.uuid]"
-          :key="obs.value"
-        >
-          <span class="link-text" @click="filterByObservable(obs)"
-            >{{ obs.type.value }} : {{ obs.value }}</span
-          >
-
-          <NodeTagVue v-for="tag of obs.tags" :key="tag.value" :tag="tag" />
-        </li>
-      </ul>
+    <!-- Row Expansion -->
+    <template #rowExpansion="{ data }">
+      <suspense>
+        <template #fallback>
+          <ul></ul>
+        </template>
+        <template #default>
+          <AlertTableExpansion
+            :uuid="data.uuid"
+            :data="data"
+          ></AlertTableExpansion>
+        </template>
+      </suspense>
     </template>
-  </DataTable>
-  <Paginator
-    :rows="numRows"
-    :rows-per-page-options="[5, 10, 50, 100]"
-    :total-records="alertTableStore.totalAlerts"
-    template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-    current-page-report-template="Showing {first} to {last} of {totalRecords}"
-    @page="
-      onPage($event);
-      selectedAlertStore.unselectAll();
-    "
-  ></Paginator>
+  </TheNodeTable>
 </template>
 
 <script setup>
-  import { computed, onMounted, ref } from "vue";
+  import { ref } from "vue";
 
-  import Button from "primevue/button";
-  import Column from "primevue/column";
-  import DataTable from "primevue/datatable";
-  import { FilterMatchMode } from "primevue/api";
-  import InputText from "primevue/inputtext";
-  import MultiSelect from "primevue/multiselect";
-  import NodeTagVue from "../Node/NodeTag.vue";
-  import Toolbar from "primevue/toolbar";
-  import Paginator from "primevue/paginator";
+  import TheNodeTable from "../Node/TheNodeTable";
+  import AlertTableCell from "./AlertTableCell";
+  import AlertTableExpansion from "./AlertTableExpansion";
 
-  import { camelToSnakeCase } from "@/etc/helpers";
-  import { NodeTree } from "@/services/api/nodeTree";
-
-  import { useAlertTableStore } from "@/stores/alertTable";
-  import { useFilterStore } from "@/stores/filter";
-  import { useSelectedAlertStore } from "@/stores/selectedAlert";
-
-  const alertTableStore = useAlertTableStore();
-  const filterStore = useFilterStore();
-  const selectedAlertStore = useSelectedAlertStore();
-
-  const defaultColumns = ["eventTime", "name", "owner", "disposition"];
-
-  const alertTableFilter = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-  });
   const columns = ref([
-    { field: "dispositionTime", header: "Dispositioned Time" },
-    { field: "insertTime", header: "Insert Time" },
-    { field: "eventTime", header: "Event Time" },
-    { field: "name", header: "Name" },
-    { field: "owner", header: "Owner" },
-    { field: "disposition", header: "Disposition" },
-    { field: "dispositionUser", header: "Dispositioned By" },
-    { field: "queue", header: "Queue" },
-    { field: "type", header: "Type" },
+    { field: "dispositionTime", header: "Dispositioned Time", default: false },
+    { field: "insertTime", header: "Insert Time", default: false },
+    { field: "eventTime", header: "Event Time", default: true },
+    { field: "name", header: "Name", default: true },
+    { field: "owner", header: "Owner", default: true },
+    { field: "disposition", header: "Disposition", default: true },
+    { field: "dispositionUser", header: "Dispositioned By", default: false },
+    { field: "queue", header: "Queue", default: false },
+    { field: "type", header: "Type", default: false },
   ]);
-  const dt = ref(null);
-  const error = ref(null);
-  const expandedRows = ref([]);
-  const expandedRowsData = ref({});
-  const isLoading = ref(false);
-  const selectedColumns = ref([]);
-  const sortField = ref("eventTime");
-  const sortOrder = ref("desc");
-  const numRows = ref(10);
-  const page = ref(0);
-
-  const sortFilter = computed(() => {
-    return sortField.value
-      ? `${camelToSnakeCase(sortField.value)}|${sortOrder.value}`
-      : null;
-  });
-
-  const pageOptions = computed(() => {
-    return {
-      limit: numRows.value,
-      offset: numRows.value * page.value,
-    };
-  });
-
-  filterStore.$subscribe(
-    async () => {
-      await loadAlerts();
-    },
-    { deep: true },
-  );
-
-  alertTableStore.$subscribe(async (_, state) => {
-    if (state.requestReload) {
-      await reloadTable();
-    }
-  });
-
-  const selectedRows = computed(() => {
-    return alertTableStore.visibleQueriedAlerts.filter((alert) =>
-      selectedAlertStore.selected.includes(alert.uuid),
-    );
-  });
-
-  const reloadTable = async () => {
-    selectedAlertStore.unselectAll();
-    alertTableStore.requestReload = false;
-    await loadAlerts();
-  };
-
-  const rowExpand = async (uuid) => {
-    const observables = await NodeTree.readNodesOfNodeTree(
-      [uuid],
-      "observable",
-    );
-
-    expandedRowsData.value[uuid] = observables.sort((a, b) => {
-      if (a.type.value === b.type.value) {
-        return a.value < b.value ? -1 : 1;
-      } else {
-        return a.type.value < b.type.value ? -1 : 1;
-      }
-    });
-  };
-
-  const rowCollapse = (uuid) => {
-    delete expandedRowsData.value[uuid];
-  };
-
-  const filterByObservable = (observable) => {
-    expandedRows.value = [];
-    filterStore.bulkSetFilters({
-      filterType: "alerts",
-      filters: {
-        observable: {
-          category: observable.type,
-          value: observable.value,
-        },
-      },
-    });
-  };
-
-  onMounted(async () => {
-    initAlertTable();
-    await loadAlerts();
-  });
-
-  const exportCSV = () => {
-    // Exports currently filtered alerts to CSV
-    dt.value.exportCSV();
-  };
-
-  const formatDateTime = (dateTime) => {
-    if (dateTime) {
-      const d = new Date(dateTime);
-      return d.toLocaleString("en-US");
-    }
-
-    return "None";
-  };
-
-  const getAlertLink = (uuid) => {
-    return "/alert/" + uuid;
-  };
-
-  const getAllTags = (alert) => {
-    const allTags = alert.tags.concat(alert.childTags);
-
-    // Return a sorted and deduplicated list of the tags based on the tag UUID.
-    return [...new Map(allTags.map((v) => [v.uuid, v])).values()].sort((a, b) =>
-      a.value > b.value ? 1 : -1,
-    );
-  };
-
-  const initAlertTable = () => {
-    // Initializes alert filter (the keyword search)
-    alertTableFilter.value = {
-      global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    };
-    selectedColumns.value = columns.value.filter((col) => {
-      return defaultColumns.includes(col.field);
-    });
-    error.value = null;
-  };
-
-  const loadAlerts = async () => {
-    isLoading.value = true;
-    try {
-      await alertTableStore.readPage({
-        sort: sortFilter.value,
-        ...pageOptions.value,
-        ...filterStore.alerts,
-      });
-    } catch (err) {
-      error.value = err.message || "Something went wrong!";
-    }
-    isLoading.value = false;
-  };
-
-  const onColumnToggle = (val) => {
-    // Toggles selected columns to display
-    // This method required/provided by Primevue 'ColToggle' docs
-    selectedColumns.value = columns.value.filter((col) => val.includes(col));
-  };
-
-  const onPage = async (event) => {
-    selectedAlertStore.unselectAll();
-    numRows.value = event.rows;
-    page.value = event.page;
-    await loadAlerts();
-  };
-
-  const reset = async () => {
-    initAlertTable();
-    await sort({ sortField: "eventTime", sortOrder: "-1" });
-  };
-
-  const sort = async (event) => {
-    if (event.sortField) {
-      sortField.value = event.sortField;
-      sortOrder.value = event.sortOrder > 0 ? "asc" : "desc";
-      await loadAlerts();
-    } else {
-      sortField.value = null;
-      sortOrder.value = null;
-    }
-  };
 </script>
 
 <style>

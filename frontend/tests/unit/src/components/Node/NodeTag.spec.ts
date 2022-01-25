@@ -5,7 +5,7 @@ import { createRouterMock, injectRouterMock } from "vue-router-mock";
 
 const tagStub = { value: "my_tag" };
 
-function factory(piniaOptions?: TestingOptions, filterType = "alerts") {
+function factory(piniaOptions?: TestingOptions, nodeType = "alerts") {
   const router = createRouterMock({
     initialLocation: "/alert/uuid1",
   });
@@ -18,7 +18,7 @@ function factory(piniaOptions?: TestingOptions, filterType = "alerts") {
     global: {
       plugins: [createTestingPinia(piniaOptions)],
       provide: {
-        filterType: filterType,
+        nodeType: nodeType,
       },
     },
   });
@@ -35,14 +35,14 @@ describe("NodeTag.vue", () => {
     const { wrapper } = factory();
     expect(wrapper.vm.props).toEqual({ tag: tagStub });
   });
-  it("will route to manage_alerts with tag query on filterByTags if filterType is 'alerts'", async () => {
+  it("will route to manage_alerts with tag query on filterByTags if nodeType is 'alerts'", async () => {
     const { wrapper, router } = factory();
     wrapper.vm.filterByTags();
     expect(router.currentRoute.value.fullPath).toEqual(
       "/manage_alerts?tags=my_tag",
     );
   });
-  it("will not route anywhere on filterByTags if filterType is unsupported", async () => {
+  it("will not route anywhere on filterByTags if nodeType is unsupported", async () => {
     const { wrapper, router } = factory(undefined, "unsupported");
     wrapper.vm.filterByTags();
     expect(router.currentRoute.value.fullPath).toEqual("/alert/uuid1");

@@ -7,7 +7,7 @@ import { useModalStore } from "@/stores/modal";
 import { alertFilterParams } from "@/models/alert";
 
 function factory(args: {
-  filters?: { filterType: "alerts"; filters: alertFilterParams };
+  filters?: { nodeType: "alerts"; filters: alertFilterParams };
   options?: TestingOptions;
 }) {
   const testingPinia = createTestingPinia(args.options);
@@ -23,7 +23,7 @@ function factory(args: {
     global: {
       plugins: [testingPinia],
       provide: {
-        filterType: "alerts",
+        nodeType: "alerts",
       },
     },
     props: { name: "FilterModal" },
@@ -48,13 +48,13 @@ describe("FilterModal setup", () => {
   it("executes loadFormFilters when the modal is mounted so preexisting filters are shown in the form", () => {
     const { wrapper } = factory({
       filters: {
-        filterType: "alerts",
+        nodeType: "alerts",
         filters: { name: "hello world" },
       },
       options: { stubActions: false },
     });
 
-    expect(wrapper.vm.filterStore.$state[wrapper.vm.filterType]).toEqual({
+    expect(wrapper.vm.filterStore.$state[wrapper.vm.nodeType]).toEqual({
       name: "hello world",
     });
     expect(wrapper.vm.submitFilters).toEqual({ name: "hello world" });
@@ -79,10 +79,10 @@ describe("FilterModal computed properties", () => {
     const { wrapper } = factory({ options: { stubActions: false } });
 
     wrapper.vm.filterStore.bulkSetFilters({
-      filterType: "alerts",
+      nodeType: "alerts",
       filters: { name: "hello world" },
     });
-    expect(wrapper.vm.filterStore.$state[wrapper.vm.filterType]).toEqual({
+    expect(wrapper.vm.filterStore.$state[wrapper.vm.nodeType]).toEqual({
       name: "hello world",
     });
 
@@ -96,17 +96,17 @@ describe("FilterModal watchers", () => {
   it("executes loadFormFilters when filters change", async () => {
     const { wrapper } = factory({ options: { stubActions: false } });
 
-    expect(wrapper.vm.filterStore.$state[wrapper.vm.filterType]).toEqual({});
+    expect(wrapper.vm.filterStore.$state[wrapper.vm.nodeType]).toEqual({});
     expect(wrapper.vm.formFilters).toEqual([]);
 
     wrapper.vm.filterStore.bulkSetFilters({
-      filterType: "alerts",
+      nodeType: "alerts",
       filters: { name: "hello world" },
     });
 
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.vm.filterStore.$state[wrapper.vm.filterType]).toEqual({
+    expect(wrapper.vm.filterStore.$state[wrapper.vm.nodeType]).toEqual({
       name: "hello world",
     });
     expect(wrapper.vm.formFilters).toEqual([
@@ -123,7 +123,7 @@ describe("FilterModal methods", () => {
     const { wrapper } = factory({ options: { stubActions: false } });
 
     // Test submitting new filters
-    expect(wrapper.vm.filterStore.$state[wrapper.vm.filterType]).toEqual({});
+    expect(wrapper.vm.filterStore.$state[wrapper.vm.nodeType]).toEqual({});
     expect(wrapper.vm.formFilters).toEqual([]);
     wrapper.vm.formFilters = [
       {
@@ -132,7 +132,7 @@ describe("FilterModal methods", () => {
       },
     ];
     wrapper.vm.submit();
-    expect(wrapper.vm.filterStore.$state[wrapper.vm.filterType]).toEqual({
+    expect(wrapper.vm.filterStore.$state[wrapper.vm.nodeType]).toEqual({
       name: "hello world",
     });
   });
@@ -141,7 +141,7 @@ describe("FilterModal methods", () => {
 
     wrapper.vm.formFilters = [];
     wrapper.vm.submit();
-    expect(wrapper.vm.filterStore.$state[wrapper.vm.filterType]).toEqual({});
+    expect(wrapper.vm.filterStore.$state[wrapper.vm.nodeType]).toEqual({});
   });
   it("executes deleteFormFilter as expected", () => {
     const { wrapper } = factory({});
@@ -211,11 +211,11 @@ describe("FilterModal methods", () => {
   it("executes loadFormFilters as expected", async () => {
     const { wrapper } = factory({ options: { stubActions: false } });
 
-    expect(wrapper.vm.filterStore.$state[wrapper.vm.filterType]).toEqual({});
+    expect(wrapper.vm.filterStore.$state[wrapper.vm.nodeType]).toEqual({});
     expect(wrapper.vm.formFilters).toEqual([]);
 
     wrapper.vm.filterStore.bulkSetFilters({
-      filterType: "alerts",
+      nodeType: "alerts",
       filters: { name: "hello world", owner: "test analyst" },
     });
 
@@ -235,7 +235,7 @@ describe("FilterModal methods", () => {
     const { wrapper } = factory({ options: { stubActions: false } });
 
     wrapper.vm.filterStore.bulkSetFilters({
-      filterType: "alerts",
+      nodeType: "alerts",
       filters: { name: "hello world", owner: "test analyst" },
     });
 

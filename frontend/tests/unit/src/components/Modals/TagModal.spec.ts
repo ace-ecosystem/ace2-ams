@@ -6,7 +6,6 @@ import nock from "nock";
 
 import myNock from "@unit/services/api/nock";
 import { useModalStore } from "@/stores/modal";
-import { useSelectedAlertStore } from "@/stores/selectedAlert";
 import { useUserStore } from "@/stores/user";
 
 function factory(options?: TestingOptions) {
@@ -14,15 +13,15 @@ function factory(options?: TestingOptions) {
     attachTo: document.body,
     global: {
       plugins: [createTestingPinia(options), PrimeVue],
+      provide: { nodeType: "alerts" },
     },
     props: { name: "TagModal" },
   });
 
   const modalStore = useModalStore();
-  const selectedAlertStore = useSelectedAlertStore();
   const userStore = useUserStore();
 
-  return { wrapper, modalStore, selectedAlertStore, userStore };
+  return { wrapper, modalStore, userStore };
 }
 
 describe("TagModal.vue", () => {
@@ -66,19 +65,19 @@ describe("TagModal.vue", () => {
     const { wrapper } = factory();
 
     // No alerts selected and no value set
-    wrapper.vm.selectedAlertStore.selected = [];
+    wrapper.vm.selectedStore.selected = [];
     wrapper.vm.newTags = [];
     expect(wrapper.vm.allowSubmit).toBeFalsy();
     // Alerts selected and no value set
-    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.selectedStore.selected = ["1", "2"];
     wrapper.vm.newTags = [];
     expect(wrapper.vm.allowSubmit).toBeFalsy();
     // No alerts selected and value set
-    wrapper.vm.selectedAlertStore.selected = [];
+    wrapper.vm.selectedStore.selected = [];
     wrapper.vm.newTags = ["tag1", "tag2"];
     expect(wrapper.vm.allowSubmit).toBeFalsy();
     // Alerts selected and value set
-    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+    wrapper.vm.selectedStore.selected = ["1", "2"];
     wrapper.vm.newTags = ["tag1", "tag2"];
     expect(wrapper.vm.allowSubmit).toBeTruthy();
   });
@@ -143,21 +142,21 @@ describe("TagModal.vue", () => {
     expect(wrapper.vm.newTags).toEqual(["tag1"]);
   });
 
-  it("will correctly combine existing alert tags with new tags on newAlertTags", () => {
+  it("will correctly combine existing alert tags with new tags on newNodeTags", () => {
     myNock
       .get("/node/tag/?offset=0")
       .twice()
       .reply(200, { items: [{ value: "tag1" }, { value: "tag3" }] });
     const { wrapper } = factory({ stubActions: false });
 
-    wrapper.vm.alertTableStore.visibleQueriedAlerts = [
+    wrapper.vm.tableStore.visibleQueriedItems = [
       { uuid: "uuid1", tags: [] },
       { uuid: "uuid2", tags: [{ value: "tag1" }] },
     ];
 
-    const res1 = wrapper.vm.newAlertTags("uuid1", ["tag2", "tag3"]);
-    const res2 = wrapper.vm.newAlertTags("uuid2", ["tag2", "tag3"]);
-    const res3 = wrapper.vm.newAlertTags("uuid3", ["tag2", "tag3"]);
+    const res1 = wrapper.vm.newNodeTags("uuid1", ["tag2", "tag3"]);
+    const res2 = wrapper.vm.newNodeTags("uuid2", ["tag2", "tag3"]);
+    const res3 = wrapper.vm.newNodeTags("uuid3", ["tag2", "tag3"]);
 
     expect(res1).toEqual(["tag2", "tag3"]);
     expect(res2).toEqual(["tag1", "tag2", "tag3"]);
@@ -187,12 +186,12 @@ describe("TagModal.vue", () => {
     const { wrapper } = factory({ stubActions: false });
 
     // Set the selected alert
-    wrapper.vm.selectedAlertStore.selected = ["uuid1", "uuid2"];
+    wrapper.vm.selectedStore.selected = ["uuid1", "uuid2"];
 
     // Set data
     wrapper.vm.storeTagValues = ["tag1", "tag3"];
     wrapper.vm.newTags = ["tag1", "tag2"];
-    wrapper.vm.alertTableStore.visibleQueriedAlerts = [
+    wrapper.vm.tableStore.visibleQueriedItems = [
       { uuid: "uuid1", tags: [] },
       { uuid: "uuid2", tags: [{ value: "tag1" }] },
     ];
@@ -227,10 +226,10 @@ describe("TagModal.vue", () => {
     const { wrapper } = factory({ stubActions: false });
     await wrapper.vm.loadTags();
 
-    wrapper.vm.selectedAlertStore.selected = ["uuid1", "uuid2"];
+    wrapper.vm.selectedStore.selected = ["uuid1", "uuid2"];
     wrapper.vm.storeTagValues = ["tag1", "tag3"];
     wrapper.vm.newTags = ["tag1", "tag2"];
-    wrapper.vm.alertTableStore.visibleQueriedAlerts = [
+    wrapper.vm.tableStore.visibleQueriedItems = [
       { uuid: "uuid1", tags: [] },
       { uuid: "uuid2", tags: [{ value: "tag1" }] },
     ];

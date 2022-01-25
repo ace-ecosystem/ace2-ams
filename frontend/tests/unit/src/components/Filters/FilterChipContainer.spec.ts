@@ -10,7 +10,7 @@ describe("FilterChipContainer.vue", () => {
       global: {
         plugins: [createTestingPinia(options)],
         provide: {
-          filterType: "alerts",
+          nodeType: "alerts",
         },
       },
     });
@@ -29,7 +29,7 @@ describe("FilterChipContainer.vue", () => {
   it("correctly receives injected data", () => {
     const { wrapper } = factory();
 
-    expect(wrapper.vm.filterType).toEqual("alerts");
+    expect(wrapper.vm.nodeType).toEqual("alerts");
   });
   it("correctly computes setFilters", () => {
     const { wrapper, filterStore } = factory();
