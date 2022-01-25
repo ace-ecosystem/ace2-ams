@@ -9,9 +9,6 @@ coverage/
 site/
 .mypy_cache/
 
-cypress/videos/
-cypress/screenshots/
-
 # local env files
 .env
 .env.local
@@ -32,5 +29,6 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-# E2E test videos
-.mp4
+# E2E test screenshots and videos
+frontend/tests/e2e/screenshots
+frontend/tests/e2e/videos
