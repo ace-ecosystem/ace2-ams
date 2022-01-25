@@ -27,6 +27,10 @@ from db.schemas.user_role import UserRole
 # NOTE: The print statements in this file show up in the Docker logs when you run:
 # docker logs ace2-gui-backend
 
+# Quit early if running in TESTING mode
+if "TESTING" in os.environ and os.environ["TESTING"].lower() == "yes":
+    print("Skipping seeding in TESTING mode")
+    sys.exit()
 
 # Quit early if the config file does not exist
 if not os.path.exists("etc/defaults.yml"):
