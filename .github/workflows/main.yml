@@ -90,7 +90,7 @@ jobs:
         run: docker-compose up -d
 
       - name: Add mock alert data
-        run: docker exec -e SQL_ECHO=no ace2-ams-api python insert-alerts.py backend/app/tests/alerts/small.json
+        run: docker exec -e TESTING=yes -e SQL_ECHO=no ace2-ams-api python insert-alerts.py backend/app/tests/alerts/small.json
 
       - name: E2E tests
         run: docker-compose -f docker-compose.yml -f docker-compose-e2e.yml -f docker-compose-e2e-ci.yml up --exit-code-from cypress

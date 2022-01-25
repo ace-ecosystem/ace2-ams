@@ -1,6 +1,10 @@
 version: "3.9"
 
 services:
+  api:
+    environment:
+      - TESTING=yes
+
   cypress:
     image: cypress/included:9.3.0
     container_name: cypress
