@@ -171,7 +171,7 @@ describe("TheAlertsTable.vue", () => {
     cy.get("tr").should("have.length", 3);
   });
 
-  it("correctly changes the sort filter when a column is clicked", () => {
+  it.only("correctly changes the sort filter when a column is clicked", () => {
     cy.intercept("GET", "/api/alert/?sort=name%7Casc&limit=10&offset=0").as(
       "nameSortAsc"
     );
@@ -220,7 +220,7 @@ describe("TheAlertsTable.vue", () => {
     // check api call
     cy.wait("@defaultSort").its("state").should("eq", "Complete");
     // check first alerts name
-    cy.get('[data-cy="alertName"]').eq(0).should("have.text", "Small Alert");
+    cy.get('[data-cy="alertName"]').eq(0).should("have.text", "Manual Alert 0.0.0.0");
   });
 
   // This test broken by pagination changes

@@ -562,9 +562,8 @@ describe("Manage Alerts Comment", () => {
     // Get first visible alert checkbox
     cy.get(".p-checkbox-box").eq(1).click();
     // Open the comment modal
-    cy.get(
-      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(2)"
-    ).click();
+        cy.get("[data-cy=comment-button]").click();
+
     cy.get(".p-dialog-content").should("be.visible");
     // Set Comment
     cy.get(".p-inputtextarea").click().type("Test comment");
@@ -600,9 +599,8 @@ describe("Manage Alerts Tags", () => {
     // Get first visible alert checkbox
     cy.get(".p-checkbox-box").eq(1).click();
     // Open the tag modal
-    cy.get(
-      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(5)"
-    ).click();
+        cy.get("[data-cy=tag-button]").click();
+
     cy.get(".p-dialog-content").should("be.visible");
     cy.wait("@getNodeTags").its("state").should("eq", "Complete");
     // Type a tag
@@ -640,7 +638,7 @@ describe("Manage Alerts Take Ownership", () => {
     });
   });
 
-  it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
+  it("will set the owner via the take ownership button", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
 
     // Check first visible alert current owner, should be "None"
@@ -651,9 +649,8 @@ describe("Manage Alerts Take Ownership", () => {
     // Get first visible alert checkbox
     cy.get(" .p-checkbox-box").eq(1).click();
     // Click Take Ownership button
-    cy.get(
-      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(3)"
-    ).click();
+        cy.get("[data-cy=take-ownership-button]").click();
+
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
     // Check owner name after taking ownership
     cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span").should(
@@ -679,7 +676,7 @@ describe("Manage Alerts Assign", () => {
     });
   });
 
-  it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
+  it("will set the owner via the assign modal", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
 
     // Check SECOND (first is already assigned) visible alert current owner, should be "None"
@@ -690,9 +687,8 @@ describe("Manage Alerts Assign", () => {
     // Get SECOND visible alert checkbox
     cy.get(" .p-checkbox-box").eq(2).click();
     // Open assign owner modal
-    cy.get(
-      "#AlertActionToolbar > .p-toolbar-group-left > :nth-child(4)"
-    ).click();
+        cy.get("[data-cy=assign-button]").click();
+
     cy.get(".p-dialog-content").should("be.visible");
     // Select first option from the dropdown
     cy.get(".p-field > .p-dropdown > .p-dropdown-trigger").click();
@@ -725,7 +721,7 @@ describe("Manage Alerts Disposition", () => {
     });
   });
 
-  it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
+  it("will set the disposition and disposition comment via disposition modal", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("POST", "/api/node/comment/").as("addComment");
 
@@ -737,7 +733,8 @@ describe("Manage Alerts Disposition", () => {
     // Get first visible alert checkbox
     cy.get(" .p-checkbox-box").eq(1).click();
     // Open disposition modal
-    cy.get(".p-button-normal").click();
+        cy.get("[data-cy=disposition-button]").click();
+
     cy.get(".p-dialog-content").should("be.visible");
     // Select disposition option
     cy.get('[aria-label="FALSE_POSITIVE"]').click();
