@@ -815,7 +815,7 @@ describe("Manage Alerts URL Param Filters", () => {
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&name=Small+Alert&owner=bob"
     ).as("getAlerts");
 
-    cy.visit("/manage_alerts?name=Small+Alert&owner=bob");
+    visitUrl({ url: "/manage_alerts?name=Small+Alert&owner=bob" });
 
     // Check current URL
     cy.url().should("contain", "/manage_alerts");
