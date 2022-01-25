@@ -35,6 +35,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - LOG_LEVEL=debug
       - SQL_ECHO=${SQL_ECHO}
+      - TESTING=${TESTING}
     ports:
       - 7777:80
     volumes:

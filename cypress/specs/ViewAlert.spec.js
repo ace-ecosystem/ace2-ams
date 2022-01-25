@@ -1,18 +1,24 @@
+import { visitUrl } from "./helpers";
+
 describe("ViewAlert.vue", () => {
   before(() => {
-    cy.log("logging in");
     cy.login();
   });
 
   after(() => {
-    cy.log("logging out");
     cy.logout();
   });
 
   beforeEach(() => {
-    Cypress.Cookies.preserveOnce("access_token", "refresh_token");
-    cy.visit("/alert/02f8299b-2a24-400f-9751-7dd9164daf6a");
-    cy.url().should("contain", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a");
+    // Intercept the API call that loads the alert data
+    cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "getAlert"
+    );
+
+    visitUrl({
+      url: "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a",
+      extraIntercepts: ["@getAlert"],
+    });
   });
 
   it("View Alert page renders", () => {
@@ -42,7 +48,7 @@ describe("ViewAlert.vue", () => {
 
     // First 'fqdn: evil.com' toggle icon
     cy.get(
-      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
+      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon'
     )
       .first()
       .should("have.class", "pi-chevron-down");
@@ -55,7 +61,7 @@ describe("ViewAlert.vue", () => {
 
     // Second 'fqdn: evil.com' toggle icon
     cy.get(
-      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
+      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon'
     )
       .last()
       .should("have.class", "pi-chevron-right");
@@ -67,7 +73,7 @@ describe("ViewAlert.vue", () => {
   it("should toggle observable/analysis expanded status when icon clicked", () => {
     // Second 'fqdn: evil.com' toggle icon
     cy.get(
-      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
+      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon'
     )
       .last()
       .should("have.class", "pi-chevron-right");
@@ -77,7 +83,7 @@ describe("ViewAlert.vue", () => {
 
     // Click the toggle
     cy.get(
-      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
+      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon'
     )
       .last()
       .click();
@@ -90,7 +96,7 @@ describe("ViewAlert.vue", () => {
 
     // Should now have down/'expanded' toggle icon
     cy.get(
-      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
+      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon'
     )
       .last()
       .should("have.class", "pi-chevron-down");
@@ -100,14 +106,14 @@ describe("ViewAlert.vue", () => {
 
     // Click the toggle again
     cy.get(
-      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
+      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon'
     )
       .last()
       .click();
 
     // Should have the right/'collapsed' toggle icon again
     cy.get(
-      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
+      '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon'
     )
       .last()
       .should("have.class", "pi-chevron-right");
@@ -137,7 +143,7 @@ describe("ViewAlert.vue", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("POST", "/api/node/comment").as("createComment");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "getAlert",
+      "getAlert"
     );
 
     // Open disposition modal
@@ -165,7 +171,7 @@ describe("ViewAlert.vue", () => {
       method: "POST",
     }).as("createComment");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "getAlert",
+      "getAlert"
     );
 
     // Open comment modal
@@ -185,7 +191,7 @@ describe("ViewAlert.vue", () => {
   it("should make a request to update and get updated alert take ownership is clicked", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "getAlert",
+      "getAlert"
     );
 
     // Click button
@@ -199,7 +205,7 @@ describe("ViewAlert.vue", () => {
   it("should make a request to update owner and get updated alert when owner is set", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "getAlert",
+      "getAlert"
     );
     // Open assign modal
     cy.get(".p-toolbar-group-left > :nth-child(4)").click();
@@ -219,12 +225,14 @@ describe("ViewAlert.vue", () => {
   it.only("should make a request to update tags and get updated alert when owner is set", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "getAlert",
+      "getAlert"
     );
+    cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTags");
 
     // Open tag modal
     cy.get(".p-toolbar-group-left > :nth-child(5)").click();
     cy.get(".p-dialog-content").should("be.visible");
+    cy.wait("@getNodeTags").its("state").should("eq", "Complete");
     // Type a tag
     cy.get(".p-chips > .p-inputtext").click().type("TestTag").type("{enter}");
     // Select a tag from the dropdown
@@ -242,7 +250,7 @@ describe("ViewAlert.vue", () => {
   it("will reroute to the Manage Alerts page with tag filter applied when tag clicked", () => {
     // Find the recipient tag and click
     cy.get(
-      '[data-cy="email_address: goodguy@company.com"] > :nth-child(1) > :nth-child(3) > :nth-child(1) > .p-tag',
+      '[data-cy="email_address: goodguy@company.com"] > :nth-child(1) > :nth-child(3) > :nth-child(1) > .p-tag'
     )
       .contains("recipient")
       .click();
@@ -257,7 +265,7 @@ describe("ViewAlert.vue", () => {
     cy.get("[data-cy=edit-filters]").click();
     cy.get(":nth-child(1) > .p-dropdown > .p-dropdown-label").should(
       "have.text",
-      "Tags",
+      "Tags"
     );
     cy.get(".p-chips-token").should("exist");
     cy.get(".p-chips-token").should("have.text", "recipient");
@@ -269,7 +277,7 @@ describe("ViewAlert.vue", () => {
   it("will reroute to the Manage Alerts page with observable filter applied when observable clicked", () => {
     // Find the email subject observable and click
     cy.get(
-      '[data-cy="email_subject: Hello"] > .p-treenode-content > .treenode-text',
+      '[data-cy="email_subject: Hello"] > .p-treenode-content > .treenode-text'
     ).click();
 
     // Should have been rerouted
@@ -281,14 +289,14 @@ describe("ViewAlert.vue", () => {
     // Verify in the filter modal that the correct filter is set
     cy.get("[data-cy=edit-filters]").click();
     cy.get(
-      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-label",
+      ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-label"
     ).should("have.text", "Observable");
     cy.get(
-      ".col > :nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-label",
+      ".col > :nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-label"
     ).should("have.text", "email_subject");
     cy.get(".col > :nth-child(1) > :nth-child(2) > input").should(
       "have.value",
-      "Hello",
+      "Hello"
     );
 
     // Close the modal to finish

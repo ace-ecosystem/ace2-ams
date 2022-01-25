@@ -2,7 +2,7 @@
 <!-- 'Tag' action modal, agnostic to what is being tagged -->
 
 <template>
-  <BaseModal :name="name" header="Add Tags">
+  <BaseModal :name="name" header="Add Tags" @show="loadTags">
     <div>
       <div v-if="error" class="p-col">
         <Message severity="error" @close="handleError">{{ error }}</Message>
@@ -37,14 +37,7 @@
 </template>
 
 <script setup>
-  import {
-    computed,
-    defineEmits,
-    defineProps,
-    onMounted,
-    ref,
-    inject,
-  } from "vue";
+  import { computed, defineEmits, defineProps, ref, inject } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -80,10 +73,6 @@
   const storeTagValues = ref([]);
   const error = ref(null);
   const isLoading = ref(false);
-
-  onMounted(async () => {
-    await loadTags();
-  });
 
   async function loadTags() {
     await nodeTagStore.readAll();

@@ -10,4 +10,4 @@ set +a
 new_path=${1#backend/app/}
 
 docker-compose up -d
-docker exec -e TESTING=1 -e SQL_ECHO=no ace2-ams-api pytest "$new_path" -vv
+docker exec -e TESTING=yes -e SQL_ECHO=no ace2-ams-api pytest "$new_path" -vv
