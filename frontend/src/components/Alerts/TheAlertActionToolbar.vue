@@ -6,6 +6,7 @@
     <template #start>
       <!--      DISPOSITION -->
       <Button
+        data-cy="disposition-button"
         class="p-m-1 p-button-normal p-button-success"
         icon="pi pi-thumbs-up"
         label="Disposition"
@@ -17,6 +18,7 @@
       />
       <!--      REMEDIATE MODAL -->
       <Button
+        data-cy="remediate-button"
         class="p-m-1 p-button-sm"
         icon="pi pi-times-circle"
         label="Remediate"

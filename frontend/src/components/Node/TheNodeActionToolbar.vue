@@ -13,6 +13,7 @@
       <!--      COMMENT -->
       <div v-if="props.comment">
         <Button
+          data-cy="comment-button"
           class="p-m-1 p-button-sm"
           icon="pi pi-comment"
           label="Comment"
@@ -23,6 +24,7 @@
       <!--      TAKE OWNERSHIP -- NO MODAL -->
       <div v-if="props.takeOwnership">
         <Button
+          data-cy="take-ownership-button"
           class="p-m-1 p-button-sm"
           icon="pi pi-briefcase"
           label="Take Ownership"
@@ -33,6 +35,7 @@
       <!--      ASSIGN -->
       <div v-if="props.assign">
         <Button
+          data-cy="assign-button"
           class="p-m-1 p-button-sm"
           icon="pi pi-user"
           label="Assign"
@@ -43,6 +46,7 @@
       <!--      TAG MODAL -->
       <div v-if="props.tag">
         <Button
+          data-cy="tag-button"
           class="p-m-1 p-button-sm"
           icon="pi pi-tags"
           label="Tag"
