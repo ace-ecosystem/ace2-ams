@@ -1,9 +1,3 @@
-// cy.window()
-//   .its("authStore")
-//   .then((authStore) => {
-//     console.log("user", authStore.user);
-//   });
-
 Cypress.Commands.add("login", () => {
   cy.request({
     method: "POST",
