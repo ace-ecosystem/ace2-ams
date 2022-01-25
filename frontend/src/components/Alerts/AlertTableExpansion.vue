@@ -1,5 +1,5 @@
-<!-- TheAlertsTable.vue -->
-<!-- The table where all currently filtered alerts are displayed, selected to take action, or link to an individual alert page -->
+<!-- AlertTableExpansion.vue -->
+<!-- Contains logic and functionality for displaying data in alert row dropdown, currently list of alert's observables -->
 
 <template>
   <ul>

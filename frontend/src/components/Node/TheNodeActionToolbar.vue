@@ -1,5 +1,5 @@
 <!-- NodeActionToolbar.vue -->
-<!-- Toolbar containing all alert-related actions, such as Disposition, Assign, Comment, etc. -->
+<!-- Toolbar containing node actions, such as Assign, Comment, Tag, etc. -->
 
 <template>
   <div>

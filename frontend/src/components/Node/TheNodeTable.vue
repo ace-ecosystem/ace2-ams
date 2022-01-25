@@ -1,8 +1,5 @@
-/* eslint-disable vue/attribute-hyphenation */
 <!-- TheNodesTable.vue -->
 <!-- The table where all currently filtered nodes are displayed, selected to take action, or link to an individual node page -->
-
-<!-- ASSUMPTIONS FOR NODE CLASSES USING THIS COMPONENT -->
 
 <template>
   <DataTable

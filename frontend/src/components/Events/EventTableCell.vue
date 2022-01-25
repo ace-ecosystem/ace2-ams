@@ -1,3 +1,6 @@
+<!-- EventTableCell.vue -->
+<!-- Contains logic and functionality to display field-specific data in TheEventTable -->
+
 <template>
   <!-- Event Name -->
   <div v-if="props.field === 'name'">

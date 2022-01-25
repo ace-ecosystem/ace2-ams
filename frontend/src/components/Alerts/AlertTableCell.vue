@@ -1,5 +1,5 @@
-<!-- TheAlertsTable.vue -->
-<!-- The table where all currently filtered alerts are displayed, selected to take action, or link to an individual alert page -->
+<!-- AlertTableCell.vue -->
+<!-- Contains logic and functionality to display field-specific data in TheAlertTable -->
 
 <template>
   <!-- Alert Name -->

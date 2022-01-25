@@ -1,5 +1,5 @@
-<!-- AlertActionToolbar.vue -->
-<!-- Toolbar containing all alert-related actions, such as Disposition, Assign, Comment, etc. -->
+<!-- TheAlertActionToolbar.vue -->
+<!-- Toolbar containing alert-specific actions, such as Disposition and Remediation -->
 
 <template>
   <TheNodeActionToolbarVue ref="toolbar" :reload-object="props.reloadObject">
