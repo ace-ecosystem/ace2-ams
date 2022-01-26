@@ -44,7 +44,7 @@
   import Chips from "primevue/chips";
   import Dropdown from "primevue/dropdown";
 
-  import BaseModal from "@/components/Modals/BaseModal";
+  import BaseModal from "@/components/Modals/BaseModal.vue";
 
   import { NodeTag } from "@/services/api/nodeTag";
   import {

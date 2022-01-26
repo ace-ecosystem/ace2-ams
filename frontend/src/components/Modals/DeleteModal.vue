@@ -24,7 +24,7 @@
 
   import Button from "primevue/button";
 
-  import BaseModal from "@/components/Modals/BaseModal";
+  import BaseModal from "@/components/Modals/BaseModal.vue";
 
   import { useModalStore } from "@/stores/modal";
 

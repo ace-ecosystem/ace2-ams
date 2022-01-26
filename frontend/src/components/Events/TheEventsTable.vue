@@ -13,8 +13,8 @@
 <script setup>
   import { ref } from "vue";
 
-  import TheNodeTable from "../Node/TheNodeTable";
-  import EventTableCell from "./EventTableCell";
+  import TheNodeTable from "@/components/Node/TheNodeTable.vue";
+  import EventTableCell from "@/components/Events/EventTableCell.vue";
 
   const columns = ref([
     { field: "createdTime", header: "Created", sortable: true, default: true },

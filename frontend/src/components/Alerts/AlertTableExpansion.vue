@@ -17,7 +17,7 @@
 <script setup>
   import { ref, defineProps, onMounted } from "vue";
 
-  import NodeTagVue from "../Node/NodeTag.vue";
+  import NodeTagVue from "@/components/Node/NodeTag.vue";
 
   import { NodeTree } from "@/services/api/nodeTree";
 

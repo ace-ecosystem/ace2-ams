@@ -65,7 +65,7 @@
   import Chip from "primevue/chip";
   import OverlayPanel from "primevue/overlaypanel";
 
-  import FilterInput from "./FilterInput.vue";
+  import FilterInput from "@/components/Filters/FilterInput.vue";
   const filterStore = useFilterStore();
   const nodeType = inject("nodeType");
 

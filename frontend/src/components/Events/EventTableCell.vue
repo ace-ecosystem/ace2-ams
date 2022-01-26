@@ -42,7 +42,7 @@
 
 <script setup>
   import { defineProps } from "vue";
-  import NodeTagVue from "../Node/NodeTag.vue";
+  import NodeTagVue from "@/components/Node/NodeTag.vue";
 
   const props = defineProps({
     data: { type: Object, required: true },

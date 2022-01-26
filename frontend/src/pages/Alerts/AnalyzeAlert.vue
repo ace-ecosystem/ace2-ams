@@ -7,7 +7,7 @@
 </template>
 
 <script>
-  import AnalyzeAlertForm from "@/components/Alerts/AnalyzeAlertForm";
+  import AnalyzeAlertForm from "@/components/Alerts/AnalyzeAlertForm.vue";
 
   export default {
     components: { AnalyzeAlertForm },

@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-  import FilterChipVue from "./FilterChip.vue";
+  import FilterChipVue from "@/components/Filters/FilterChip.vue";
   import { inject, computed } from "vue";
 
   import { useFilterStore } from "@/stores/filter";

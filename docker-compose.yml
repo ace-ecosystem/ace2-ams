@@ -52,7 +52,7 @@ services:
       dockerfile: ./Dockerfile.dev
     environment:
       - DATABASE_TEST_URL=${DATABASE_TEST_URL}
-      - VUE_APP_BACKEND_URL=http://ace2-ams:8080/api/
+      - VITE_BACKEND_URL=http://ace2-ams:8080/api/
     volumes:
       - ./frontend:/app
       - /app/node_modules

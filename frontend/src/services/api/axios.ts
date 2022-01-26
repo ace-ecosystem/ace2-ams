@@ -5,7 +5,7 @@ import camelcaseKeys from "camelcase-keys";
 import { useAuthStore } from "@/stores/auth";
 
 const instance = axios.create({
-  baseURL: `${process.env.VUE_APP_BACKEND_URL}`,
+  baseURL: `${import.meta.env.VITE_BACKEND_URL}`,
   headers: {
     "Content-Type": "application/json",
   },

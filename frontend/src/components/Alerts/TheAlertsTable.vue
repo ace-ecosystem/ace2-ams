@@ -27,9 +27,9 @@
 <script setup>
   import { ref } from "vue";
 
-  import TheNodeTable from "../Node/TheNodeTable";
-  import AlertTableCell from "./AlertTableCell";
-  import AlertTableExpansion from "./AlertTableExpansion";
+  import TheNodeTable from "@/components/Node/TheNodeTable.vue";
+  import AlertTableCell from "@/components/Alerts/AlertTableCell.vue";
+  import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
 
   const columns = ref([
     { field: "dispositionTime", header: "Dispositioned Time", default: false },

@@ -20,8 +20,8 @@
   import Card from "primevue/card";
   import { useRoute } from "vue-router";
 
-  import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar";
-  import AlertTree from "@/components/Alerts/AlertTree";
+  import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
+  import AlertTree from "@/components/Alerts/AlertTree.vue";
   import { useAlertStore } from "@/stores/alert";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 

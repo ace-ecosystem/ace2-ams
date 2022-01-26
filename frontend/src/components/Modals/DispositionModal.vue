@@ -59,8 +59,8 @@
   import Listbox from "primevue/listbox";
   import Textarea from "primevue/textarea";
 
-  import BaseModal from "@/components/Modals/BaseModal";
-  import SaveToEventModal from "@/components/Modals/SaveToEventModal";
+  import BaseModal from "@/components/Modals/BaseModal.vue";
+  import SaveToEventModal from "@/components/Modals/SaveToEventModal.vue";
 
   import { NodeComment } from "@/services/api/nodeComment";
 

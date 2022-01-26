@@ -86,7 +86,7 @@
   import TabView from "primevue/tabview";
   import Textarea from "primevue/textarea";
 
-  import BaseModal from "@/components/Modals/BaseModal";
+  import BaseModal from "@/components/Modals/BaseModal.vue";
 
   export default {
     name: "SaveToEventModal",
