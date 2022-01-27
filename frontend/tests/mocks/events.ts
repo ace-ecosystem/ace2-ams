@@ -1,10 +1,55 @@
 import { UUID } from "@/models/base";
-import { eventRead, eventSummary } from "@/models/event";
+import {
+  eventRead,
+  eventCreate,
+  eventSummary,
+  eventUpdate,
+} from "@/models/event";
 import { genericObjectReadFactory } from "./genericObject";
 
 const mockEventUUID: UUID = "testEvent1";
 
-export const eventFactory = ({
+export const eventCreateFactory = ({
+  alertTime = undefined,
+  containTime = undefined,
+  dispositionTime = undefined,
+  eventTime = undefined,
+  name = "Test event",
+  owner = undefined,
+  ownershipTime = undefined,
+  preventionTools = undefined,
+  queue = "testQueue",
+  remediationTime = undefined,
+  riskLevel = undefined,
+  source = undefined,
+  status = undefined,
+  tags = undefined,
+  threatActors = undefined,
+  threats = undefined,
+  type = undefined,
+  vectors = undefined,
+}: Partial<eventCreate> = {}): eventCreate => ({
+  alertTime: alertTime,
+  containTime: containTime,
+  dispositionTime: dispositionTime,
+  eventTime: eventTime,
+  name: name,
+  owner: owner,
+  ownershipTime: ownershipTime,
+  preventionTools: preventionTools,
+  queue: queue,
+  remediationTime: remediationTime,
+  riskLevel: riskLevel,
+  source: source,
+  status: status,
+  tags: tags,
+  threatActors: threatActors,
+  threats: threats,
+  type: type,
+  vectors: vectors,
+});
+
+export const eventReadFactory = ({
   alertTime = null,
   alertUuids = [],
   comments = [],
@@ -56,6 +101,48 @@ export const eventFactory = ({
   uuid: uuid,
   vectors: vectors,
   version: version,
+});
+
+export const eventUpdateFactory = ({
+  alertTime = undefined,
+  containTime = undefined,
+  dispositionTime = undefined,
+  eventTime = undefined,
+  name = undefined,
+  owner = undefined,
+  ownershipTime = undefined,
+  preventionTools = undefined,
+  queue = undefined,
+  remediationTime = undefined,
+  riskLevel = undefined,
+  source = undefined,
+  status = undefined,
+  tags = undefined,
+  threatActors = undefined,
+  threats = undefined,
+  type = undefined,
+  uuid = mockEventUUID,
+  vectors = undefined,
+}: Partial<eventUpdate> = {}): eventUpdate => ({
+  alertTime: alertTime,
+  containTime: containTime,
+  dispositionTime: dispositionTime,
+  eventTime: eventTime,
+  name: name,
+  owner: owner,
+  ownershipTime: ownershipTime,
+  preventionTools: preventionTools,
+  queue: queue,
+  remediationTime: remediationTime,
+  riskLevel: riskLevel,
+  source: source,
+  status: status,
+  tags: tags,
+  threatActors: threatActors,
+  threats: threats,
+  type: type,
+  uuid: uuid,
+  vectors: vectors,
 });
 
 export const eventSummaryFactory = ({

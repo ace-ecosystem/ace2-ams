@@ -3,7 +3,7 @@ import myNock from "@unit/services/api/nock";
 import { eventFilterParams } from "@/models/event";
 import { parseEventSummary, useEventTableStore } from "@/stores/eventTable";
 import { createTestingPinia } from "@pinia/testing";
-import { eventFactory, eventSummaryFactory } from "../../../mocks/events";
+import { eventReadFactory, eventSummaryFactory } from "../../../mocks/events";
 import { genericObjectReadFactory } from "../../../mocks/genericObject";
 import { nodeThreatReadFactory } from "../../../mocks/nodeThreat";
 import { userReadFactory } from "../../../mocks/user";
@@ -11,43 +11,42 @@ import { userReadFactory } from "../../../mocks/user";
 createTestingPinia();
 const store = useEventTableStore();
 
+const mockEventReadA = eventReadFactory({ uuid: "uuid1" });
+const mockEventReadASummary = eventSummaryFactory({ uuid: "uuid1" });
+const mockEventReadB = eventReadFactory({ uuid: "uuid2" });
+const mockEventReadBSummary = eventSummaryFactory({ uuid: "uuid2" });
+
+const mockOwner = userReadFactory();
 const mockPreventionTool = genericObjectReadFactory({
   value: "preventionTool",
 });
-const mockThreatActor = genericObjectReadFactory({ value: "threatActor" });
-const mockThreat = nodeThreatReadFactory();
-const mockVector = genericObjectReadFactory({ value: "vector" });
-const mockOwner = userReadFactory();
 const mockRiskLevel = genericObjectReadFactory({ value: "riskLevel" });
 const mockStatus = genericObjectReadFactory({ value: "status" });
+const mockThreat = nodeThreatReadFactory();
+const mockThreatActor = genericObjectReadFactory({ value: "threatActor" });
 const mockType = genericObjectReadFactory({ value: "type" });
-
-const mockEventReadA = eventFactory({ uuid: "uuid1" });
-const mockEventReadB = eventFactory({ uuid: "uuid2" });
-const mockEventReadC = eventFactory({
+const mockVector = genericObjectReadFactory({ value: "vector" });
+const mockEventReadC = eventReadFactory({
   uuid: "uuid3",
-  preventionTools: [mockPreventionTool],
-  threatActors: [mockThreatActor],
-  threats: [mockThreat],
-  vectors: [mockVector],
   owner: mockOwner,
+  preventionTools: [mockPreventionTool],
   riskLevel: mockRiskLevel,
   status: mockStatus,
+  threatActors: [mockThreatActor],
+  threats: [mockThreat],
   type: mockType,
+  vectors: [mockVector],
 });
-
-const mockEventReadASummary = eventSummaryFactory({ uuid: "uuid1" });
-const mockEventReadBSummary = eventSummaryFactory({ uuid: "uuid2" });
 const mockEventReadCSummary = eventSummaryFactory({
   uuid: "uuid3",
-  preventionTools: ["preventionTool"],
-  threatActors: ["threatActor"],
-  threats: ["nodeThreat"],
-  vectors: ["vector"],
   owner: "Test Analyst",
+  preventionTools: ["preventionTool"],
   riskLevel: "riskLevel",
   status: "status",
+  threatActors: ["threatActor"],
+  threats: ["nodeThreat"],
   type: "type",
+  vectors: ["vector"],
 });
 
 const mockParams: eventFilterParams = { limit: 5, offset: 0 };
