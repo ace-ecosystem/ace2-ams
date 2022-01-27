@@ -3,7 +3,7 @@ import myNock from "@unit/services/api/nock";
 import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
 import { parseAlertSummary, useAlertTableStore } from "@/stores/alertTable";
 import { createTestingPinia } from "@pinia/testing";
-import { mockAlert } from "../../../mockData/alert";
+import { mockAlert } from "../../../mocks/alert";
 
 createTestingPinia();
 const store = useAlertTableStore();

@@ -9,7 +9,7 @@ import { createRouterMock, getRouter, injectRouterMock } from "vue-router-mock";
 import {
   mockAlert,
   mockAlertReadDateStrings,
-} from "../../../../mockData/alert";
+} from "../../../../mocks/alert";
 import nock from "nock";
 
 function factory(options?: TestingOptions) {
