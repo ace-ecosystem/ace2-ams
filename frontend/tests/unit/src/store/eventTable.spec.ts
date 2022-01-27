@@ -1,118 +1,54 @@
 // TODO: Move to eventTable store tests
 import myNock from "@unit/services/api/nock";
-import { eventFilterParams, eventRead, eventSummary } from "@/models/event";
+import { eventFilterParams } from "@/models/event";
 import { parseEventSummary, useEventTableStore } from "@/stores/eventTable";
 import { createTestingPinia } from "@pinia/testing";
-import { eventQueueRead } from "@/models/eventQueue";
+import { eventFactory, eventSummaryFactory } from "../../../mocks/events";
+import { genericObjectReadFactory } from "../../../mocks/genericObject";
+import { nodeThreatReadFactory } from "../../../mocks/nodeThreat";
+import { userReadFactory } from "../../../mocks/user";
 
 createTestingPinia();
 const store = useEventTableStore();
 
-const mockQueue: eventQueueRead = {
-  description: null,
-  uuid: "",
-  value: "",
-};
+const mockPreventionTool = genericObjectReadFactory({
+  value: "preventionTool",
+});
+const mockThreatActor = genericObjectReadFactory({ value: "threatActor" });
+const mockThreat = nodeThreatReadFactory();
+const mockVector = genericObjectReadFactory({ value: "vector" });
+const mockOwner = userReadFactory();
+const mockRiskLevel = genericObjectReadFactory({ value: "riskLevel" });
+const mockStatus = genericObjectReadFactory({ value: "status" });
+const mockType = genericObjectReadFactory({ value: "type" });
 
-const mockEvent: eventRead = {
-  comments: [],
-  name: "Test Event",
-  tags: [],
-  uuid: "uuid1",
-  alertTime: null,
-  alertUuids: [],
-  containTime: null,
-  creationTime: new Date("2020-01-01"),
-  dispositionTime: null,
-  eventTime: null,
-  owner: null,
-  ownershipTime: null,
-  preventionTools: [],
-  queue: mockQueue,
-  remediations: [],
-  remediationTime: null,
-  riskLevel: null,
-  source: null,
-  status: null,
-  threatActors: [],
-  threats: [],
-  type: null,
-  vectors: [],
-  nodeType: "",
-  version: "",
-};
-
-const mockEventReadA = Object.assign({}, mockEvent, { uuid: "uuid1" });
-const mockEventReadB = Object.assign({}, mockEvent, { uuid: "uuid2" });
-const mockEventReadC: eventRead = {
-  dispositionTime: new Date("2021-12-18T00:59:43.570343+00:00"),
-  eventTime: new Date("2021-12-18T00:59:43.570343+00:00"),
-  name: "Test event",
-  owner: null,
-  queue: { value: "testQueue", description: null, uuid: "1" },
-  type: { value: "testType", description: null, uuid: "1" },
-  comments: [],
-  nodeType: "",
-  tags: [],
-  threats: [],
+const mockEventReadA = eventFactory({ uuid: "uuid1" });
+const mockEventReadB = eventFactory({ uuid: "uuid2" });
+const mockEventReadC = eventFactory({
   uuid: "uuid3",
-  version: "",
-  threatActors: [],
-  alertTime: null,
-  alertUuids: [],
-  containTime: null,
-  creationTime: new Date("2020-01-01"),
-  ownershipTime: null,
-  preventionTools: [],
-  remediations: [],
-  remediationTime: null,
-  riskLevel: null,
-  source: null,
-  status: null,
-  vectors: [],
-};
+  preventionTools: [mockPreventionTool],
+  threatActors: [mockThreatActor],
+  threats: [mockThreat],
+  vectors: [mockVector],
+  owner: mockOwner,
+  riskLevel: mockRiskLevel,
+  status: mockStatus,
+  type: mockType,
+});
 
-const mockEventReadASummary: eventSummary = {
-  comments: [],
-  name: "Small Event",
-  owner: "Analyst",
-  tags: [],
-  type: "test_type",
-  uuid: "uuid1",
-  createdTime: new Date(),
-  preventionTools: [],
-  riskLevel: "",
-  status: "",
-  vectors: [],
-};
-
-const mockEventReadBSummary: eventSummary = {
-  comments: [],
-  name: "Small Event",
-  owner: "Analyst",
-  tags: [],
-  type: "test_type",
-  uuid: "uuid1",
-  createdTime: new Date(),
-  preventionTools: [],
-  riskLevel: "",
-  status: "",
-  vectors: [],
-};
-
-const mockEventReadCSummary: eventSummary = {
-  comments: [],
-  name: "Small Event",
-  owner: "Analyst",
-  tags: [],
-  type: "test_type",
-  uuid: "uuid1",
-  createdTime: new Date(),
-  preventionTools: [],
-  riskLevel: "",
-  status: "",
-  vectors: [],
-};
+const mockEventReadASummary = eventSummaryFactory({ uuid: "uuid1" });
+const mockEventReadBSummary = eventSummaryFactory({ uuid: "uuid2" });
+const mockEventReadCSummary = eventSummaryFactory({
+  uuid: "uuid3",
+  preventionTools: ["preventionTool"],
+  threatActors: ["threatActor"],
+  threats: ["nodeThreat"],
+  vectors: ["vector"],
+  owner: "Test Analyst",
+  riskLevel: "riskLevel",
+  status: "status",
+  type: "type",
+});
 
 const mockParams: eventFilterParams = { limit: 5, offset: 0 };
 
@@ -162,7 +98,11 @@ describe("eventTable getters", () => {
   });
 
   it("will correctly return sortFilter", () => {
-    expect(store.sortFilter).toEqual("event_time|desc");
+    expect(store.sortFilter).toEqual("created_time|desc");
+
+    store.sortField = null;
+    store.sortOrder = null;
+    expect(store.sortFilter).toBeNull();
   });
 });
 
@@ -181,22 +121,9 @@ describe("eventTable actions", () => {
 
     expect(mockRequest.isDone()).toEqual(true);
     expect(store.visibleQueriedItems).toEqual([
-      Object.assign({}, JSON.parse(JSON.stringify(mockEventReadA)), {
-        eventTime: "2021-12-18T00:59:43.570Z",
-        insertTime: "2021-12-18T00:59:43.570Z",
-        uuid: "uuid1",
-      }),
-      Object.assign({}, JSON.parse(JSON.stringify(mockEventReadB)), {
-        eventTime: "2021-12-18T00:59:43.570Z",
-        insertTime: "2021-12-18T00:59:43.570Z",
-        uuid: "uuid2",
-      }),
-      Object.assign({}, JSON.parse(JSON.stringify(mockEventReadC)), {
-        eventTime: "2021-12-18T00:59:43.570Z",
-        insertTime: "2021-12-18T00:59:43.570Z",
-        dispositionTime: "2021-12-18T00:59:43.570Z",
-        uuid: "uuid3",
-      }),
+      JSON.parse(JSON.stringify(mockEventReadA)),
+      JSON.parse(JSON.stringify(mockEventReadB)),
+      JSON.parse(JSON.stringify(mockEventReadC)),
     ]);
     expect(store.totalItems).toEqual(3);
     expect(store.requestReload).toEqual(false);
@@ -219,7 +146,7 @@ describe("eventTable actions", () => {
 
     store.resetSort();
 
-    expect(store.sortField).toEqual("eventTime");
+    expect(store.sortField).toEqual("createdTime");
     expect(store.sortOrder).toEqual("desc");
   });
 });

@@ -1,57 +1,45 @@
-import { eventRead } from "@/models/event";
-import { eventPreventionToolRead } from "@/models/eventPreventionTool";
-import { eventQueueRead } from "@/models/eventQueue";
-import { eventRemediationRead } from "@/models/eventRemediation";
-import { eventRiskLevelRead } from "@/models/eventRiskLevel";
-import { eventSourceRead } from "@/models/eventSource";
-import { eventStatusRead } from "@/models/eventStatus";
-import { eventTypeRead } from "@/models/eventType";
-import { eventVectorRead } from "@/models/eventVector";
-import { nodeCommentRead } from "@/models/nodeComment";
-import { nodeTagRead } from "@/models/nodeTag";
-import { nodeThreatRead } from "@/models/nodeThreat";
-import { nodeThreatActorRead } from "@/models/nodeThreatActor";
-import { userRead } from "@/models/user";
-import { genericObjectFactory } from "./genericObject";
-import { userFactory } from "./user";
+import { UUID } from "@/models/base";
+import { eventRead, eventSummary } from "@/models/event";
+import { genericObjectReadFactory } from "./genericObject";
 
-export const eventFactory = (
-  comments: nodeCommentRead[] = [],
-  name = "Test Event",
-  tags: nodeTagRead[] = [],
-  uuid = "testEvent1",
-  alertTime: Date | null = null,
+const mockEventUUID: UUID = "testEvent1";
+
+export const eventFactory = ({
+  alertTime = null,
   alertUuids = [],
-  containTime: Date | null = null,
-  creationTime: Date = new Date("2020-01-01"),
-  dispositionTime: Date | null = null,
-  eventTime: Date | null = null,
-  owner: userRead = userFactory(),
-  ownershipTime: Date | null = null,
-  preventionTools: eventPreventionToolRead[] = [],
-  queue: eventQueueRead = genericObjectFactory(),
-  remediations: eventRemediationRead[] = [],
-  remediationTime: Date | null = null,
-  riskLevel: eventRiskLevelRead | null = null,
-  source: eventSourceRead | null = null,
-  status: eventStatusRead | null = null,
-  threatActors: nodeThreatActorRead[] = [],
-  threats: nodeThreatRead[] = [],
-  type: eventTypeRead | null = null,
-  vectors: eventVectorRead[] = [],
+  comments = [],
+  containTime = null,
+  creationTime = new Date("2020-01-01"),
+  dispositionTime = null,
+  eventTime = null,
+  name = "Test Event",
   nodeType = "",
+  owner = null,
+  ownershipTime = null,
+  preventionTools = [],
+  queue = genericObjectReadFactory(),
+  remediations = [],
+  remediationTime = null,
+  riskLevel = null,
+  source = null,
+  status = null,
+  tags = [],
+  threatActors = [],
+  threats = [],
+  type = null,
+  uuid = mockEventUUID,
+  vectors = [],
   version = "testEventVersion1",
-): eventRead => ({
-  comments: comments,
-  name: name,
-  tags: tags,
-  uuid: uuid,
+}: Partial<eventRead> = {}): eventRead => ({
   alertTime: alertTime,
   alertUuids: alertUuids,
+  comments: comments,
   containTime: containTime,
   creationTime: creationTime,
   dispositionTime: dispositionTime,
   eventTime: eventTime,
+  name: name,
+  nodeType: nodeType,
   owner: owner,
   ownershipTime: ownershipTime,
   preventionTools: preventionTools,
@@ -61,10 +49,41 @@ export const eventFactory = (
   riskLevel: riskLevel,
   source: source,
   status: status,
+  tags: tags,
   threatActors: threatActors,
   threats: threats,
   type: type,
+  uuid: uuid,
   vectors: vectors,
-  nodeType: nodeType,
   version: version,
+});
+
+export const eventSummaryFactory = ({
+  comments = [],
+  createdTime = new Date("2020-01-01"),
+  name = "Test Event",
+  owner = "None",
+  preventionTools = [],
+  riskLevel = "None",
+  status = "None",
+  tags = [],
+  threats = [],
+  threatActors = [],
+  type = "None",
+  uuid = mockEventUUID,
+  vectors = [],
+}: Partial<eventSummary> = {}): eventSummary => ({
+  comments: comments,
+  createdTime: createdTime,
+  name: name,
+  owner: owner,
+  preventionTools: preventionTools,
+  riskLevel: riskLevel,
+  status: status,
+  tags: tags,
+  threats: threats,
+  threatActors: threatActors,
+  type: type,
+  uuid: uuid,
+  vectors: vectors,
 });

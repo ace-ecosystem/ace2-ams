@@ -1,10 +1,10 @@
-import { genericObjectRead, UUID } from "@/models/base";
+import { genericObjectRead } from "@/models/base";
 
-export const genericObjectFactory = (
-  description = "A test queue",
-  uuid: UUID = "testQueue1",
-  value = "testQueue",
-): genericObjectRead => ({
+export const genericObjectReadFactory = ({
+  description = "A generic object",
+  uuid = "testObject1",
+  value = "testObject",
+}: Partial<genericObjectRead> = {}): genericObjectRead => ({
   description: description,
   uuid: uuid,
   value: value,

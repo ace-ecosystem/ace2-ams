@@ -3,48 +3,15 @@
  */
 
 import myNock from "@unit/services/api/nock";
-import { eventRead } from "@/models/event";
 import { useEventStore } from "@/stores/event";
 import { createTestingPinia } from "@pinia/testing";
-import { eventQueueRead } from "@/models/eventQueue";
+import { eventFactory } from "../../../mocks/events";
 
 createTestingPinia();
 
 const store = useEventStore();
 
-const mockQueue: eventQueueRead = {
-  description: null,
-  uuid: "",
-  value: "",
-};
-
-const mockEvent: eventRead = {
-  comments: [],
-  name: "Test Event",
-  tags: [],
-  uuid: "uuid1",
-  alertTime: null,
-  alertUuids: [],
-  containTime: null,
-  creationTime: new Date("2020-01-01"),
-  dispositionTime: null,
-  eventTime: null,
-  owner: null,
-  ownershipTime: null,
-  preventionTools: [],
-  queue: mockQueue,
-  remediations: [],
-  remediationTime: null,
-  riskLevel: null,
-  source: null,
-  status: null,
-  threatActors: [],
-  threats: [],
-  type: null,
-  vectors: [],
-  nodeType: "",
-  version: "",
-};
+const mockEvent = eventFactory({ uuid: "uuid1" });
 
 describe("event Actions", () => {
   beforeEach(() => {
@@ -57,7 +24,8 @@ describe("event Actions", () => {
 
     expect(mockRequest.isDone()).toEqual(true);
 
-    expect(store.openEvent).toEqual(mockEvent);
+    // The openEvent is not parsed at all when received, so any dates will be in string format
+    expect(store.openEvent).toEqual(JSON.parse(JSON.stringify(mockEvent)));
   });
 
   it("will make a request to update an event given the UUID and update data upon the updateEvent action", async () => {
