@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from api.routes import helpers
 from db.database import get_db
-from seed import seed
+from seed import seed_test
 
 
 router = APIRouter(
@@ -62,7 +62,7 @@ helpers.api_route_create(
 def seed_test_database():
     # Only proceed if the API is running in TESTING mode
     if "TESTING" in os.environ and os.environ["TESTING"].lower() == "yes":
-        seed()
+        seed_test()
 
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     else:

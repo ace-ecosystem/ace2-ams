@@ -22,6 +22,7 @@ from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.observable_type import ObservableType
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
+from tests import helpers
 
 
 # NOTE: The print statements in this file show up in the Docker logs when you run:
@@ -186,6 +187,21 @@ def seed():
 
     # Commit all of the changes
     crud.commit(db)
+
+
+def seed_test():
+    """
+    Designed to be called during tests that might want to add extra information like the sample alert.
+    """
+
+    # Perform the normal seeding
+    seed()
+
+    # Get a database connection
+    db: Session = next(get_db())
+
+    # Insert the sample alert
+    helpers.create_alert_from_json_file(db=db, json_path="/app/tests/alerts/small.json")
 
 
 if __name__ == "__main__":
