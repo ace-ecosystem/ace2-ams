@@ -4,10 +4,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from core.config import get_settings
+from core.config import get_settings, is_in_testing_mode
 
 database_url = get_settings().database_url
-if "TESTING" in os.environ and os.environ["TESTING"].lower() == "yes":
+if is_in_testing_mode():
     database_url = get_settings().database_test_url
 
 echo_value = False
