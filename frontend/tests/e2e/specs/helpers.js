@@ -1,19 +1,3 @@
-const pg = require("pg");
-
-const connectionString = process.env.DATABASE_TEST_URL;
-
-const client = new pg.Client({
-  connectionString,
-});
-client.connect();
-
-export function addUser(options) {
-  client.query("SELECT NOW()", (err, res) => {
-    console.log(err, res);
-    client.end();
-  });
-}
-
 export function visitUrl(options) {
   // Persist the cookies for the duration of the test
   Cypress.Cookies.preserveOnce("access_token", "refresh_token");
