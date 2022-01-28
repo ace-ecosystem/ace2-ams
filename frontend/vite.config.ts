@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
 
@@ -9,14 +9,15 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "./src"),
-      "@unit": resolve(__dirname, "./tests/unit"),
+      "@unit": resolve(__dirname, "./tests/unit/src"),
     },
   },
   plugins: [vue()],
   test: {
     globals: true,
-    environment: "happy-dom",
+    environment: "jsdom",
     include: ["**/unit/**/*.spec.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+    reporters: ["verbose"],
   },
   server: {
     host: "0.0.0.0",
@@ -29,14 +30,14 @@ export default defineConfig({
         ws: true,
       },
     },
-    watch: {
-      usePolling: true,
-    },
-    hmr: {
-      // Internal port
-      port: 8080,
-      // External port (Docker host)
-      clientPort: 8080,
-    },
+    // watch: {
+    //   usePolling: true,
+    // },
+    // hmr: {
+    //   // Internal port
+    //   port: 8080,
+    //   // External port (Docker host)
+    //   clientPort: 8080,
+    // },
   },
 });

@@ -1,11 +1,14 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
 import snakecaseKeys from "snakecase-keys";
 import { NodeComment } from "@/services/api/nodeComment";
 import myNock from "@unit/services/api/nock";
 import { nodeCommentCreate, nodeCommentRead } from "@/models/nodeComment";
+import { createCustomPinia } from "@unit/helpers";
+
+createCustomPinia();
 
 describe("NodeComment API calls", () => {
   const successMessage = "Request successful";
@@ -59,7 +62,7 @@ describe("NodeComment API calls", () => {
     myNock
       .post("/node/comment/", JSON.stringify(snakecaseKeys(mockObjectCreate)))
       .reply(200, successMessage, {
-        "content-location": "http://test_app.com:1234/newItem",
+        "content-location": "/newItem",
       })
       .get("/newItem")
       .reply(200, secondSuccessMessage);

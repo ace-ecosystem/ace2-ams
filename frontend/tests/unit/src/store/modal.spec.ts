@@ -1,7 +1,7 @@
-import { createTestingPinia } from "@pinia/testing";
 import { useModalStore } from "@/stores/modal";
+import { createCustomPinia } from "@unit/helpers";
 
-createTestingPinia();
+createCustomPinia();
 
 const store = useModalStore();
 

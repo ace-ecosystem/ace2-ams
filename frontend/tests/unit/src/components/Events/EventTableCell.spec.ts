@@ -1,11 +1,12 @@
 import EventTableCell from "@/components/Events/EventTableCell.vue";
 import { shallowMount, VueWrapper } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
 import { nodeCommentRead } from "@/models/nodeComment";
 import { userRead } from "@/models/user";
+import { createCustomPinia } from "@unit/helpers";
 
 const mockUser: userRead = {
   defaultAlertQueue: { description: null, uuid: "1", value: "default" },
@@ -29,7 +30,7 @@ const mockComment: nodeCommentRead = {
 };
 
 function factory(
-  piniaOptions: TestingOptions = {},
+  piniaOptions?: TestingOptions,
   data = { name: "event" },
   field = "name",
 ) {
@@ -38,7 +39,7 @@ function factory(
 
   const wrapper: VueWrapper<any> = shallowMount(EventTableCell, {
     global: {
-      plugins: [createTestingPinia(piniaOptions), PrimeVue],
+      plugins: [createCustomPinia(piniaOptions), PrimeVue],
     },
     props: {
       data: data,

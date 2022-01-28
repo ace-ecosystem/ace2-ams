@@ -1,9 +1,8 @@
-import { createTestingPinia } from "@pinia/testing";
-
 import auth from "@/services/api/auth";
 import myNock from "@unit/services/api/nock";
+import { createCustomPinia } from "@unit/helpers";
 
-createTestingPinia();
+createCustomPinia();
 
 const mockLoginData = {
   username: "user",

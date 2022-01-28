@@ -1,12 +1,13 @@
 import AlertTableCell from "@/components/Alerts/AlertTableCell.vue";
 import { shallowMount, VueWrapper } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
 import { alertSummary } from "@/models/alert";
 import { nodeCommentRead } from "@/models/nodeComment";
 import { userRead } from "@/models/user";
+import { createCustomPinia } from "@unit/helpers";
 
 const mockUser: userRead = {
   defaultAlertQueue: { description: null, uuid: "1", value: "default" },
@@ -69,7 +70,7 @@ const mockAlertReadASummary: alertSummary = {
 };
 
 function factory(
-  piniaOptions: TestingOptions = {},
+  piniaOptions?: TestingOptions,
   data: alertSummary = mockAlertReadASummary,
   field = "name",
 ) {
@@ -78,7 +79,7 @@ function factory(
 
   const wrapper: VueWrapper<any> = shallowMount(AlertTableCell, {
     global: {
-      plugins: [createTestingPinia(piniaOptions), PrimeVue],
+      plugins: [createCustomPinia(piniaOptions), PrimeVue],
     },
     props: {
       data: data,

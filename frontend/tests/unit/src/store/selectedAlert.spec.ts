@@ -1,7 +1,7 @@
-import { createTestingPinia } from "@pinia/testing";
 import { useSelectedAlertStore } from "@/stores/selectedAlert";
+import { createCustomPinia } from "@unit/helpers";
 
-createTestingPinia();
+createCustomPinia();
 
 const store = useSelectedAlertStore();
 

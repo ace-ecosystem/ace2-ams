@@ -1,6 +1,5 @@
-import ViewAnalysis from "../../../../../src/pages/Alerts/ViewAnalysis.vue";
+import ViewAnalysis from "@/pages/Alerts/ViewAnalysis.vue";
 import { mount, VueWrapper } from "@vue/test-utils";
-import { createTestingPinia } from "@pinia/testing";
 import { useAlertStore } from "@/stores/alert";
 import myNock from "@unit/services/api/nock";
 import { createRouterMock, getRouter, injectRouterMock } from "vue-router-mock";
@@ -10,6 +9,7 @@ import {
   mockAlertReadDateStrings,
 } from "../../../../mockData/alert";
 import nock from "nock";
+import { createCustomPinia } from "@unit/helpers";
 
 describe("ViewAnalysis.vue", () => {
   myNock.get("/alert/uuid1").reply(200, mockAlert).persist();
@@ -19,7 +19,7 @@ describe("ViewAnalysis.vue", () => {
     initialLocation: "/alert/uuid1/uuid2",
   });
 
-  const pinia = createTestingPinia({ stubActions: false });
+  const pinia = createCustomPinia({ stubActions: false });
 
   injectRouterMock(router);
   getRouter().setParams({ alertID: "uuid1", analysisID: "uuid2" });

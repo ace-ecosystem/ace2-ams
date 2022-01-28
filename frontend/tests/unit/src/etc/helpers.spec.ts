@@ -7,7 +7,7 @@ import { useUserStore } from "@/stores/user";
 import { createTestingPinia } from "@pinia/testing";
 
 describe("parseFilters", () => {
-  createTestingPinia();
+  createTestingPinia({ createSpy: vi.fn });
   it("will correctly parse and add any multiselect filters", async () => {
     const observableTypeStore = useObservableTypeStore();
     observableTypeStore.items = [

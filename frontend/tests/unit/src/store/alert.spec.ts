@@ -6,9 +6,9 @@ import myNock from "@unit/services/api/nock";
 import snakecaseKeys from "snakecase-keys";
 import { alertCreate } from "@/models/alert";
 import { useAlertStore } from "@/stores/alert";
-import { createTestingPinia } from "@pinia/testing";
+import { createCustomPinia } from "@unit/helpers";
 
-createTestingPinia();
+createCustomPinia();
 
 const store = useAlertStore();
 

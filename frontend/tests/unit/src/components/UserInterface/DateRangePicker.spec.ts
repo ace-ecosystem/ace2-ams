@@ -4,16 +4,16 @@ import InputText from "primevue/inputtext";
 import { DatePicker } from "v-calendar";
 import Tooltip from "primevue/tooltip";
 import MockDate from "mockdate";
-import each from "jest-each";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 
 import DateRangePicker from "@/components/UserInterface/DateRangePicker.vue";
 import { mount, VueWrapper } from "@vue/test-utils";
+import { createCustomPinia } from "@unit/helpers";
 
 function factory(options?: TestingOptions) {
   const wrapper: VueWrapper<any> = mount(DateRangePicker, {
     global: {
-      plugins: [createTestingPinia(options)],
+      plugins: [createCustomPinia(options)],
       directives: { tooltip: Tooltip },
       provide: {
         nodeType: "alerts",
@@ -48,7 +48,9 @@ describe("DateRangePicker setup", () => {
     expect(wrapper.findComponent(Button).exists()).toBe(true);
     expect(wrapper.findComponent(OverlayPanel).exists()).toBe(true);
     expect(wrapper.findComponent(InputText).exists()).toBe(true);
-    expect(wrapper.findComponent(DatePicker).exists()).toBe(true);
+    expect(
+      wrapper.findComponent("[data-cy=date-range-picker-start]").exists(),
+    ).toBe(true);
   });
 
   it("receives expected injected data", () => {
@@ -185,54 +187,87 @@ describe("DateRangePicker methods", () => {
     expect(wrapper.vm.filterStore.alerts).toEqual({});
   });
 
-  each([
-    [
-      "today",
-      new Date(1997, 2, 2, 0, 0, 0, 0),
-      new Date(1997, 2, 2, 23, 59, 59, 0),
-    ],
-    [
-      "yesterday",
-      new Date(1997, 2, 1, 0, 0, 0, 0),
-      new Date(1997, 2, 1, 23, 59, 59, 0),
-    ],
-    [
-      "last_seven",
-      new Date(1997, 1, 23, 0, 0, 0, 0),
-      new Date(1997, 2, 2, 23, 59, 59, 0),
-    ],
-    [
-      "last_thirty",
-      new Date(1997, 0, 31, 0, 0, 0, 0),
-      new Date(1997, 2, 2, 23, 59, 59, 0),
-    ],
-    [
-      "last_sixty",
-      new Date(1997, 0, 1, 0, 0, 0, 0),
-      new Date(1997, 2, 2, 23, 59, 59, 0),
-    ],
-    [
-      "this_month",
-      new Date(1997, 2, 1, 0, 0, 0, 0),
-      new Date(1997, 2, 2, 23, 59, 59, 0),
-    ],
-    [
-      "last_month",
-      new Date(1997, 1, 1, 0, 0, 0, 0),
-      new Date(1997, 1, 28, 23, 59, 59, 0),
-    ],
-  ]).it(
-    "sets date range to the correct range option '%s'",
-    (option, startDate, endDate) => {
-      const { wrapper } = factory({ stubActions: false });
+  it("sets date range to the correct range option today", () => {
+    const { wrapper } = factory({ stubActions: false });
 
-      MockDate.set(new Date(1997, 2, 2));
-      wrapper.vm.setRange(option);
+    MockDate.set(new Date(1997, 2, 2));
+    wrapper.vm.setRange("today");
 
-      expect(wrapper.vm.filterStore.alerts).toEqual({
-        exampleTimeAfter: startDate,
-        exampleTimeBefore: endDate,
-      });
-    },
-  );
+    expect(wrapper.vm.filterStore.alerts).toEqual({
+      exampleTimeAfter: new Date(1997, 2, 2, 0, 0, 0, 0),
+      exampleTimeBefore: new Date(1997, 2, 2, 23, 59, 59, 0),
+    });
+  });
+
+  it("sets date range to the correct range option yesterday", () => {
+    const { wrapper } = factory({ stubActions: false });
+
+    MockDate.set(new Date(1997, 2, 2));
+    wrapper.vm.setRange("yesterday");
+
+    expect(wrapper.vm.filterStore.alerts).toEqual({
+      exampleTimeAfter: new Date(1997, 2, 1, 0, 0, 0, 0),
+      exampleTimeBefore: new Date(1997, 2, 1, 23, 59, 59, 0),
+    });
+  });
+
+  it("sets date range to the correct range option last_seven", () => {
+    const { wrapper } = factory({ stubActions: false });
+
+    MockDate.set(new Date(1997, 2, 2));
+    wrapper.vm.setRange("last_seven");
+
+    expect(wrapper.vm.filterStore.alerts).toEqual({
+      exampleTimeAfter: new Date(1997, 1, 23, 0, 0, 0, 0),
+      exampleTimeBefore: new Date(1997, 2, 2, 23, 59, 59, 0),
+    });
+  });
+
+  it("sets date range to the correct range option last_thirty", () => {
+    const { wrapper } = factory({ stubActions: false });
+
+    MockDate.set(new Date(1997, 2, 2));
+    wrapper.vm.setRange("last_thirty");
+
+    expect(wrapper.vm.filterStore.alerts).toEqual({
+      exampleTimeAfter: new Date(1997, 0, 31, 0, 0, 0, 0),
+      exampleTimeBefore: new Date(1997, 2, 2, 23, 59, 59, 0),
+    });
+  });
+
+  it("sets date range to the correct range option last_sixty", () => {
+    const { wrapper } = factory({ stubActions: false });
+
+    MockDate.set(new Date(1997, 2, 2));
+    wrapper.vm.setRange("last_sixty");
+
+    expect(wrapper.vm.filterStore.alerts).toEqual({
+      exampleTimeAfter: new Date(1997, 0, 1, 0, 0, 0, 0),
+      exampleTimeBefore: new Date(1997, 2, 2, 23, 59, 59, 0),
+    });
+  });
+
+  it("sets date range to the correct range option this_month", () => {
+    const { wrapper } = factory({ stubActions: false });
+
+    MockDate.set(new Date(1997, 2, 2));
+    wrapper.vm.setRange("this_month");
+
+    expect(wrapper.vm.filterStore.alerts).toEqual({
+      exampleTimeAfter: new Date(1997, 2, 1, 0, 0, 0, 0),
+      exampleTimeBefore: new Date(1997, 2, 2, 23, 59, 59, 0),
+    });
+  });
+
+  it("sets date range to the correct range option last_month", () => {
+    const { wrapper } = factory({ stubActions: false });
+
+    MockDate.set(new Date(1997, 2, 2));
+    wrapper.vm.setRange("last_month");
+
+    expect(wrapper.vm.filterStore.alerts).toEqual({
+      exampleTimeAfter: new Date(1997, 1, 1, 0, 0, 0, 0),
+      exampleTimeBefore: new Date(1997, 1, 28, 23, 59, 59, 0),
+    });
+  });
 });

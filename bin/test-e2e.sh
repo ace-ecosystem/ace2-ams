@@ -8,7 +8,7 @@ export TESTING=yes
 set +a
 
 # Bring up the containers (if they aren't already) in testing mode
-docker-compose -f docker-compose.yml up -d
+docker-compose -f docker-compose.yml -f docker-compose-e2e.yml up -d
 
 # Run Cypress
 docker exec ace2-ams-gui xvfb-run cypress run --headed --browser chrome

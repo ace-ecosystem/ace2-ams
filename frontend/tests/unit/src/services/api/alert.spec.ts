@@ -46,7 +46,7 @@ describe("Alert calls", () => {
     myNock
       .post("/alert/")
       .reply(200, "Create successful", {
-        "content-location": "http://test_app.com:1234/newItem",
+        "content-location": "/newItem",
       })
       .get("/newItem")
       .reply(200, "Read successful");

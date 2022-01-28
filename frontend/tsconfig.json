@@ -15,7 +15,9 @@
       "@/*": ["./src/*"],
       "@unit/*": ["./tests/unit/src/*"]
     },
-    "allowJs": true
+    "types": ["vite/client", "vitest/globals"],
+    "allowJs": true,
+    "skipLibCheck": true
   },
   "include": [
     "./src/**/*.ts",
@@ -24,5 +26,11 @@
     "./src/**/*.vue",
     "./tests/**/*.ts",
     "./tests/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "./node_modules",
+    "./node_modules/*",
+    "./node_modules/@types/node/index.d.ts"
   ]
 }

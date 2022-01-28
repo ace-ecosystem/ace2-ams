@@ -1,5 +1,3 @@
-import { addUser } from "./helpers.js";
-
 describe("/login", () => {
   beforeEach(() => {
     cy.visit("/login");

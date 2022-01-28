@@ -16,14 +16,15 @@ import moment from "moment-timezone";
 import myNock from "@unit/services/api/nock";
 import nock from "nock";
 import router from "@/router";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 
 import snakecaseKeys from "snakecase-keys";
+import { createCustomPinia } from "@unit/helpers";
 
 function factory(options?: TestingOptions) {
   const wrapper: VueWrapper<any> = mount(AnalyzeAlertForm, {
     global: {
-      plugins: [createTestingPinia(options), PrimeVue, router],
+      plugins: [createCustomPinia(options), PrimeVue, router],
     },
   });
 
