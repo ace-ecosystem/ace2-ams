@@ -1,7 +1,9 @@
 import { visitUrl } from "./helpers";
 
 describe("ManageAlerts.vue", () => {
+  // These tests do not affect the database, so only need to reset the database once.
   before(() => {
+    cy.resetDatabase();
     cy.login();
   });
 
@@ -266,6 +268,12 @@ describe("ManageAlerts.vue", () => {
 });
 
 describe("Manage Alerts Filter Actions", () => {
+  // These tests do not affect the database, so only need to reset the database once.
+  before(() => {
+    cy.resetDatabase();
+    cy.login();
+  });
+
   beforeEach(() => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
@@ -518,32 +526,43 @@ describe("Manage Alerts Filter Actions", () => {
     // Select "observable" type filter from the dropdown
     cy.get(".col-fixed > .p-dropdown > .p-dropdown-trigger").click();
     cy.get(".p-dropdown-item:nth-child(10)").click();
-    // Select 'email_subject' type
+    // Select 'ipv4' type
     cy.get(
       ".col > :nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
     ).click();
-    cy.get(".p-dropdown-item:nth-child(2)").contains("email_subject").click();
+    cy.get("li[aria-label='ipv4']").click();
     // Type in observable value and submit
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&disposition=FALSE_POSITIVE&observable=email_subject%7CTest+Email+Subject",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&disposition=FALSE_POSITIVE&observable=ipv4%7C127.0.0.1",
     ).as("getAlerts");
     cy.get(".field > .p-inputtext").click();
-    cy.get(":nth-child(2) > .p-inputtext").type("Test Email Subject");
+    cy.get(":nth-child(2) > .p-inputtext").type("127.0.0.1");
     cy.get(".p-overlaypanel-content > .p-button").click();
     cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
     // Check value
     cy.get(".filter-name-text").last().should("have.text", "Observable:");
-    cy.get(".link-text")
-      .last()
-      .should("have.text", "email_subject|Test Email Subject");
+    cy.get(".link-text").last().should("have.text", "ipv4|127.0.0.1");
   });
 });
 
 // Comment will not change sort
 describe("Manage Alerts Comment", () => {
   beforeEach(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Add a test alert to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_alerts",
+      body: {
+        template: "small.json",
+        count: 1,
+      },
+    });
+
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
@@ -580,6 +599,19 @@ describe("Manage Alerts Comment", () => {
 // Tags will not change sort
 describe("Manage Alerts Tags", () => {
   beforeEach(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Add a test alert to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_alerts",
+      body: {
+        template: "small.json",
+        count: 1,
+      },
+    });
+
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
@@ -626,6 +658,19 @@ describe("Manage Alerts Tags", () => {
 // Changing owner will change sort
 describe("Manage Alerts Take Ownership", () => {
   beforeEach(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Add a test alert to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_alerts",
+      body: {
+        template: "small.json",
+        count: 1,
+      },
+    });
+
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
@@ -641,10 +686,10 @@ describe("Manage Alerts Take Ownership", () => {
   it("will set the owner via the take ownership button", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
 
-    // Check first visible alert current owner, should be "None"
+    // Check first visible alert current owner, should be "Analyst Bob" (from the test alert that was inserted)
     cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span").should(
       "have.text",
-      "None",
+      "Analyst Bob",
     );
     // Get first visible alert checkbox
     cy.get(" .p-checkbox-box").eq(1).click();
@@ -664,6 +709,19 @@ describe("Manage Alerts Take Ownership", () => {
 // Changing owner will change sort
 describe("Manage Alerts Assign", () => {
   beforeEach(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Add a test alert to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_alerts",
+      body: {
+        template: "small.json",
+        count: 1,
+      },
+    });
+
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
@@ -679,25 +737,24 @@ describe("Manage Alerts Assign", () => {
   it("will set the owner via the assign modal", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
 
-    // Check SECOND (first is already assigned) visible alert current owner, should be "None"
-    cy.get(".p-datatable-tbody > :nth-child(2) > :nth-child(5) > span").should(
+    // Check first visible alert current owner, should be "Analyst Bob" (from the test alert that was inserted)
+    cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span").should(
       "have.text",
-      "None",
+      "Analyst Bob",
     );
-    // Get SECOND visible alert checkbox
-    cy.get(" .p-checkbox-box").eq(2).click();
+    // Get first visible alert checkbox
+    cy.get(" .p-checkbox-box").eq(1).click();
     // Open assign owner modal
     cy.get("[data-cy=assign-button]").click();
-
     cy.get(".p-dialog-content").should("be.visible");
-    // Select first option from the dropdown
+    // Select Analyst Alice from the dropdown
     cy.get(".p-field > .p-dropdown > .p-dropdown-trigger").click();
-    cy.get(".p-dropdown-items > :nth-child(1)").click();
+    cy.get("li[aria-label='Analyst Alice']").click();
     // Submit and close modal
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(".p-dialog-content").should("not.exist");
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
-    // Check owner name after assigning -- checking first in the table bc it will be moved to the top
+    // Check owner name after assigning
     cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span").should(
       "have.text",
       "Analyst Alice",
@@ -709,6 +766,19 @@ describe("Manage Alerts Assign", () => {
 // Changing disposition will change sort
 describe("Manage Alerts Disposition", () => {
   beforeEach(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Add a test alert to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_alerts",
+      body: {
+        template: "small.json",
+        count: 1,
+      },
+    });
+
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
@@ -734,7 +804,6 @@ describe("Manage Alerts Disposition", () => {
     cy.get(" .p-checkbox-box").eq(1).click();
     // Open disposition modal
     cy.get("[data-cy=disposition-button]").click();
-
     cy.get(".p-dialog-content").should("be.visible");
     // Select disposition option
     cy.get('[aria-label="FALSE_POSITIVE"]').click();
@@ -761,6 +830,9 @@ describe("Manage Alerts Disposition", () => {
 
 describe("Manage Alerts URL Param Filters", () => {
   beforeEach(() => {
+    cy.resetDatabase();
+    cy.login();
+
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
@@ -774,6 +846,7 @@ describe("Manage Alerts URL Param Filters", () => {
   });
 
   // Can't test at the moment, no way to check clipboard data in insecure context
+  // Tried using clipboardy package, but Cypress throws a fit when importing ES6 modules
   it.skip("will generate and copy a link of currently applied filters when link button clicked", () => {
     // Start by setting a filter
 
@@ -799,11 +872,12 @@ describe("Manage Alerts URL Param Filters", () => {
 
     // Click link button
     cy.get(
-      "#FilterToolbar > .p-toolbar-group-right > .p-button-icon-only",
+      ".p-button.p-button-icon-only.p-component.p-splitbutton-menubutton",
     ).click();
+    cy.get("li:nth-of-type(4) > a[role='menuitem']").click();
 
     // Check clipboard data
-    // hmm..
+    // ???
   });
 
   it("will load filters from URL and reroute to /manage_alerts if URL params are provided", () => {
@@ -834,43 +908,57 @@ describe("Manage Alerts URL Param Filters", () => {
       "Analyst Bob",
     );
     cy.get(".p-dialog-header-icon").click();
-
-    // Check which alerts are visible (should be 2, 1 header + 1 alert)
-    cy.get(".p-checkbox-box").should("have.length", 2);
-    cy.get(".p-datatable-tbody > tr > :nth-child(4) > div").should(
-      "contain.text",
-      "Small Alert",
-    );
-    cy.get(".p-datatable-tbody > tr > :nth-child(5)").should(
-      "contain.text",
-      "Analyst Bob",
-    );
-    cy.wait("@getAlerts").its("state").should("eq", "Complete");
   });
 
   it("will filter by a given tag when clicked", () => {
+    // Add a test alert to the database and reload the Manage Alerts page
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_alerts",
+      body: {
+        template: "small.json",
+        count: 1,
+      },
+    });
+    visitUrl({ url: "/manage_alerts" });
+
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=TestTag",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=c2",
     ).as("getAlerts");
 
-    // Find the TestTag tag and click
-    cy.get("[data-cy=tags]").contains("TestTag").click();
+    // Find the c2 tag and click
+    cy.get("[data-cy=tags]").contains("c2").click();
     cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
-    // Check which alerts are visible (should be 2, 1 header + 1 alert that has the TestTag tag)
+    // Check which alerts are visible (should be 2, 1 header + 1 alert that has the c2 tag)
     cy.get(".p-checkbox-box").should("have.length", 2);
 
     // Verify it is the correct alert and the filtered tag is there
     cy.get(".p-datatable-tbody > tr > :nth-child(4) > div").should(
       "contain.text",
-      "Manual Alert 4.3.2.1",
+      "Small Alert",
     );
-    cy.get("[data-cy=tags]").contains("TestTag").should("exist");
+    cy.get("[data-cy=tags]").contains("c2").should("exist");
   });
 });
 
 describe("Manage Alerts Filters Chips", () => {
+  before(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Add a test alert to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_alerts",
+      body: {
+        template: "small.json",
+        count: 1,
+      },
+    });
+  });
+
   beforeEach(() => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
@@ -887,27 +975,27 @@ describe("Manage Alerts Filters Chips", () => {
   it("will display a set filter as chip in chips toolbar", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=TestTag",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=c2",
     ).as("getAlerts");
 
     // Find the TestTag tag and click to set filter
-    cy.get("[data-cy=tags]").contains("TestTag").click();
+    cy.get("[data-cy=tags]").contains("c2").click();
     cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
     // Check that the filter chip is visible and has right text
     cy.get(".p-chip").should("exist");
     cy.get(".filter-name-text").should("have.text", "Tags:");
-    cy.get(".link-text").should("have.text", "TestTag");
+    cy.get(".link-text").should("have.text", "c2");
   });
 
   it("will delete a filter and remove chip when it's value in the filter chip is clicked", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=TestTag",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=c2",
     ).as("getAlerts");
 
-    // Find the TestTag tag and click to set filter
-    cy.get("[data-cy=tags]").contains("TestTag").click();
+    // Find the c2 tag and click to set filter
+    cy.get("[data-cy=tags]").contains("c2").click();
     cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
     // Click the filter value
@@ -919,11 +1007,11 @@ describe("Manage Alerts Filters Chips", () => {
   it("will delete a filter and remove chip when the close icon in the filter chip is clicked", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=TestTag",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=c2",
     ).as("getAlerts");
 
-    // Find the TestTag tag and click to set filter
-    cy.get("[data-cy=tags]").contains("TestTag").click();
+    // Find the c2 tag and click to set filter
+    cy.get("[data-cy=tags]").contains("c2").click();
     cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
     // Click the close icon
@@ -953,7 +1041,7 @@ describe("Manage Alerts Filters Chips", () => {
     // Select a different disposition and submit
     cy.get(".field > .p-dropdown > .p-dropdown-trigger").click();
     cy.get(".p-dropdown-item:nth-child(5)").click();
-    cy.get(".pi-check").click();
+    cy.get("button[name='update-filter']").click();
     cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
     // Verify that the filter changed
