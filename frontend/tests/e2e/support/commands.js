@@ -17,6 +17,18 @@ Cypress.Commands.add("logout", () => {
   });
 });
 
+Cypress.Commands.add("resetDatabase", () => {
+  cy.request({
+    method: "POST",
+    url: "/api/test/reset_tables",
+  });
+
+  cy.request({
+    method: "POST",
+    url: "/api/test/seed",
+  });
+});
+
 Cypress.Commands.add("addFormObservable", () => {
   cy.get("#add-observable").click();
 });
