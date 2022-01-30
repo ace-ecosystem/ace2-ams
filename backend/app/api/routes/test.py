@@ -26,8 +26,10 @@ router = APIRouter(
 def add_test_alerts(alert: AddTestAlert, db: Session = Depends(get_db)):
     # Only proceed if the API is running in TESTING mode
     if is_in_testing_mode():
-        for _ in range(alert.count):
-            test_helpers.create_alert_from_json_file(db=db, json_path=f"/app/tests/alerts/{alert.template}")
+        for i in range(alert.count):
+            test_helpers.create_alert_from_json_file(
+                db=db, json_path=f"/app/tests/alerts/{alert.template}", alert_name=f"Manual Alert {i}"
+            )
 
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     else:
