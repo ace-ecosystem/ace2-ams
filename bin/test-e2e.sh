@@ -12,3 +12,6 @@ docker-compose -f docker-compose.yml up -d
 
 # Run Cypress
 docker exec ace2-ams-gui xvfb-run cypress run --headed --browser chrome
+
+# Disable TESTING mode
+/usr/bin/env bash bin/disable-test-mode.sh
