@@ -2,12 +2,13 @@
 <!-- A tag that shows a currently applied filter (by type, ex. 'queue' or 'owner' -->
 <!-- Contains actions to remove (and eventually edit/add) a filter through click actions -->
 <template>
-  <span style="padding: 2px">
+  <span style="padding: 2px" data-cy="filter=chip">
     <Chip>
       <span class="p-chip-text filter-name-text chip-content"
         >{{ filterLabel }}:</span
       >
       <span
+        data-cy="filter-chip-content"
         class="link-text p-chip-text chip-content"
         style="padding-left: 2px; padding-right: 2px; font-weight: bold"
         @click="unsetFilter"
@@ -15,6 +16,7 @@
         {{ formatValue(filterValue) }}</span
       >
       <i
+        data-cy="filter-chip-edit-button"
         class="pi pi-pencil icon-button chip-content"
         style="cursor: pointer"
         @click="
@@ -23,6 +25,7 @@
         "
       />
       <i
+        data-cy="filter-chip-remove-button"
         class="pi pi-times-circle icon-button chip-content"
         style="cursor: pointer"
         @click="unsetFilter"
@@ -30,6 +33,7 @@
     </Chip>
     <OverlayPanel
       ref="op"
+      data-cy="filter-chip-edit-panel"
       style="padding: 1rem"
       @keypress.enter="
         updateFilter();
@@ -43,6 +47,7 @@
       >
       </FilterInput>
       <Button
+        data-cy="filter-chip-submit-button"
         name="update-filter"
         icon="pi pi-check"
         @click="

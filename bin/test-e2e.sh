@@ -11,6 +11,7 @@ set +a
 
 # Insert the test alert that the e2e tests use into the database
 docker exec -e TESTING=yes -e SQL_ECHO=no ace2-ams-api python insert-alerts.py backend/app/tests/alerts/small.json
+docker exec -e TESTING=yes -e SQL_ECHO=no ace2-ams-api python insert-event.py backend/app/tests/alerts/small.json
 
 # Start the e2e tests in the background
 docker-compose -f docker-compose.yml -f docker-compose-e2e.yml up -d
