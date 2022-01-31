@@ -1,4 +1,8 @@
 describe("/login", () => {
+  before(() => {
+    cy.logout();
+  });
+
   beforeEach(() => {
     cy.visit("/login");
   });
@@ -29,6 +33,8 @@ describe("/login", () => {
   });
 
   it("navigates to /manage_alerts on successful login (pressing enter)", () => {
+    cy.resetDatabase();
+
     cy.intercept("POST", "/api/auth").as("auth");
     cy.get("#username").type("analyst");
     cy.get("#password").type("analyst{enter}");

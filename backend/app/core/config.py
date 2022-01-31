@@ -2,9 +2,9 @@
 Environment variables / configuration
 """
 
-from typing import List, Union
+import os
 
-from pydantic import BaseSettings, Field, PostgresDsn, validator
+from pydantic import BaseSettings, Field, PostgresDsn
 
 
 class Settings(BaseSettings):
@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     cookies_samesite: str = Field(default="lax")
     cookies_secure: bool = Field(default=True)
     database_url: PostgresDsn
+    database_test_url: PostgresDsn
     jwt_access_expire_seconds: int
     jwt_algorithm: str
     jwt_refresh_expire_seconds: int
@@ -27,3 +28,7 @@ def get_settings():
     """
 
     return Settings()
+
+
+def is_in_testing_mode() -> bool:
+    return "TESTING" in os.environ and os.environ["TESTING"].lower() == "yes"

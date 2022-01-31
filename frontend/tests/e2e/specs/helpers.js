@@ -7,16 +7,16 @@ export function visitUrl(options) {
 
   // Intercept all of the populateCommonStores API calls
   cy.intercept("GET", "/api/alert/disposition/?offset=0").as(
-    "alertDisposition"
+    "alertDisposition",
   );
   cy.intercept("GET", "/api/alert/queue/?offset=0").as("alertQueue");
   cy.intercept("GET", "/api/alert/tool/?offset=0").as("alertTool");
   cy.intercept("GET", "/api/alert/tool/instance/?offset=0").as(
-    "alertToolInstance"
+    "alertToolInstance",
   );
   cy.intercept("GET", "/api/alert/type/?offset=0").as("alertType");
   cy.intercept("GET", "/api/event/prevention_tool/?offset=0").as(
-    "eventPreventionTool"
+    "eventPreventionTool",
   );
   cy.intercept("GET", "/api/event/queue/?offset=0").as("eventQueue");
   cy.intercept("GET", "/api/event/risk_level/?offset=0").as("eventRiskLevel");

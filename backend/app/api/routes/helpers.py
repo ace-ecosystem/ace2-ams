@@ -38,22 +38,34 @@ def api_route_auth(
 #
 
 
-def api_route_create(router: APIRouter, endpoint: Callable, path: str = "/"):
-    router.add_api_route(
-        dependencies=[Depends(validate_access_token)],
-        path=path,
-        endpoint=endpoint,
-        methods=["POST"],
-        response_class=Response,  # This allows to respond with a 201 and no body listed in the documentation
-        responses={
+def api_route_create(
+    router: APIRouter,
+    endpoint: Callable,
+    path: str = "/",
+    dependencies: list = None,
+    responses: dict = None,
+    status_code=status.HTTP_201_CREATED,
+):
+    if dependencies is None:
+        dependencies = [Depends(validate_access_token)]
+
+    if responses is None:
+        responses = {
             status.HTTP_201_CREATED: {
                 "headers": {
                     "Content-Location": {"description": "The path to retrieve the resource"},
                 },
             },
             status.HTTP_409_CONFLICT: {"description": "The resource already exists"},
-        },
-        status_code=status.HTTP_201_CREATED,
+        }
+    router.add_api_route(
+        dependencies=dependencies,
+        path=path,
+        endpoint=endpoint,
+        methods=["POST"],
+        response_class=Response,  # This allows to respond with a 201 and no body listed in the documentation
+        responses=responses,
+        status_code=status_code,
     )
 
 

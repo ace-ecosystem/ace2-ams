@@ -2,7 +2,6 @@ import json
 import uuid
 
 from datetime import datetime
-from faker import Faker
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
@@ -540,7 +539,7 @@ def create_user_role(value: str, db: Session) -> UserRole:
     return _create_basic_object(db_table=UserRole, value=value, db=db)
 
 
-def create_alert_from_json_file(db: Session, json_path: str) -> NodeTree:
+def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) -> NodeTree:
     def _create_analysis(a, parent_tree: NodeTree):
         observable_types = None
         if "observable_types" in a:
@@ -594,27 +593,20 @@ def create_alert_from_json_file(db: Session, json_path: str) -> NodeTree:
             for analysis in o["analyses"]:
                 _create_analysis(a=analysis, parent_tree=leaf)
 
-    def _replace_tokens(text: str, token: str, num_words: int = 1) -> str:
-        num_tokens = text.count(token)
-        if num_words == 1:
-            replacements = faker.words(nb=num_tokens, unique=True)
-        else:
-            replacements = [" ".join(faker.words(nb=num_words, unique=True)) for _ in range(num_tokens)]
-
-        for i in range(num_tokens):
-            text = text.replace(token, replacements[i], 1)
+    def _replace_tokens(text: str, token: str, base_replacement_string: str) -> str:
+        for i in range(text.count(token)):
+            text = text.replace(token, f"{base_replacement_string}{i}", 1)
 
         return text
 
-    faker = Faker()
     with open(json_path) as f:
         text = f.read()
 
-        text = text.replace("<ALERT_NAME>", faker.sentence(nb_words=8))
-        text = _replace_tokens(text, "<A_TYPE>", 3)
-        text = _replace_tokens(text, "<O_TYPE>")
-        text = _replace_tokens(text, "<O_VALUE>", 2)
-        text = _replace_tokens(text, "<TAG>")
+        text = text.replace("<ALERT_NAME>", alert_name)
+        text = _replace_tokens(text, "<A_TYPE>", "a_type")
+        text = _replace_tokens(text, "<O_TYPE>", "o_type")
+        text = _replace_tokens(text, "<O_VALUE>", "o_value")
+        text = _replace_tokens(text, "<TAG>", "tag")
 
         data = json.loads(text)
 

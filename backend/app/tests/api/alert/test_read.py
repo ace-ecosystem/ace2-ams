@@ -707,7 +707,9 @@ def test_get_sort_by_type(client_valid_access_token, db):
 
 
 def test_get_alert_tree(client_valid_access_token, db):
-    alert_tree = helpers.create_alert_from_json_file(db=db, json_path="/app/tests/alerts/small.json")
+    alert_tree = helpers.create_alert_from_json_file(
+        db=db, json_path="/app/tests/alerts/small.json", alert_name="Test Alert"
+    )
 
     # The small.json alert has 14 observables and 8 analyses. However, it only has two root observables.
     get = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}")

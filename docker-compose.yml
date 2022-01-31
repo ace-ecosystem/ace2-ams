@@ -29,13 +29,14 @@ services:
       - COOKIES_SAMESITE=${COOKIES_SAMESITE}
       - COOKIES_SECURE=${COOKIES_SECURE}
       - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_TEST_URL=${DATABASE_TEST_URL}
       - JWT_ACCESS_EXPIRE_SECONDS=${JWT_ACCESS_EXPIRE_SECONDS}
       - JWT_ALGORITHM=${JWT_ALGORITHM}
       - JWT_REFRESH_EXPIRE_SECONDS=${JWT_REFRESH_EXPIRE_SECONDS}
       - JWT_SECRET=${JWT_SECRET}
       - LOG_LEVEL=debug
       - SQL_ECHO=${SQL_ECHO}
-      - TESTING=${TESTING}
+      - TESTING=${TESTING:-no}
     ports:
       - 7777:80
     volumes:
@@ -50,11 +51,11 @@ services:
       context: ./frontend
       dockerfile: ./Dockerfile.dev
     environment:
+      - DATABASE_TEST_URL=${DATABASE_TEST_URL}
       - VUE_APP_BACKEND_URL=http://ace2-ams:8080/api/
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    command: bash -c 'while !</dev/tcp/api/80; do sleep 1; done; npm run serve'
 
   ace2-ams:
     depends_on:

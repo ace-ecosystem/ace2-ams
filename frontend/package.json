@@ -26,6 +26,8 @@
     "vue-router": "^4.0.11"
   },
   "devDependencies": {
+    "@cypress/vue": "^3.1.0",
+    "@cypress/webpack-dev-server": "^1.8.0",
     "@pinia/testing": "^0.0.8",
     "@types/jest": "^27.0.2",
     "@types/js-cookie": "^3.0.0",
@@ -43,7 +45,9 @@
     "@vue/eslint-config-typescript": "^7.0.0",
     "@vue/test-utils": "^2.0.0-rc.17",
     "circular-dependency-plugin": "^5.2.2",
+    "cypress": "^9.3.1",
     "eslint": "^7.32.0",
+    "eslint-plugin-cypress": "^2.12.1",
     "eslint-plugin-prettier": "^3.4.1",
     "eslint-plugin-vue": "^7.18.0",
     "html-webpack-plugin": "^4.5.2",
