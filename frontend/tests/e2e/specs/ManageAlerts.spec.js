@@ -101,7 +101,7 @@ describe("ManageAlerts.vue", () => {
     const todayStartString = `${todayString} 00:00`;
     const todayEndString = `${todayString} 23:59`;
     // Click on the date options button
-    cy.get('[data-cy="date-range-picker-options"]').click();
+    cy.get('[data-cy="date-range-picker-options-button"]').click();
     cy.get(".p-overlaypanel-content").should("be.visible");
     //  Click the 'Today' range button
     cy.get(".p-flex-column > :nth-child(1) > .p-button", {
@@ -124,7 +124,7 @@ describe("ManageAlerts.vue", () => {
     ).as("getAlerts");
 
     // Set the date range to 'today' using the date options dropdown
-    cy.get('[data-cy="date-range-picker-options"]').click();
+    cy.get('[data-cy="date-range-picker-options-button"]').click();
     cy.get(".p-overlaypanel-content").should("be.visible");
     cy.get(".p-flex-column > :nth-child(1) > .p-button", {
       timeout: 10000,
@@ -158,7 +158,7 @@ describe("ManageAlerts.vue", () => {
     ).as("getAlerts");
 
     // Set the date range to 'today' using the date options dropdown
-    cy.get('[data-cy="date-range-picker-options"]').click();
+    cy.get('[data-cy="date-range-picker-options-button"]').click();
     cy.get(".p-overlaypanel-content").should("be.visible");
     cy.get(".p-flex-column > :nth-child(1) > .p-button", {
       timeout: 10000,
@@ -182,7 +182,7 @@ describe("ManageAlerts.vue", () => {
       "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&event_time_after=*&event_time_before=*",
     ).as("getAlerts");
-    cy.get('[data-cy="date-range-picker-options"]').click();
+    cy.get('[data-cy="date-range-picker-options-button"]').click();
     cy.get(".p-overlaypanel-content").should("be.visible");
     cy.get(".p-flex-column > :nth-child(1) > .p-button", {
       timeout: 10000,
@@ -212,7 +212,7 @@ describe("ManageAlerts.vue", () => {
     ).as("getAlerts");
 
     // Set the date range filter type to be "Insert Time"
-    cy.get('[data-cy="date-range-picker-options"]').click();
+    cy.get('[data-cy="date-range-picker-options-button"]').click();
     cy.get(".p-overlaypanel-content").should("be.visible");
     cy.get(":nth-child(1) > .p-dropdown > .p-dropdown-trigger", {
       timeout: 10000,
@@ -250,7 +250,7 @@ describe("ManageAlerts.vue", () => {
     cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
     // Change the date range filter type to "Insert Time"
-    cy.get('[data-cy="date-range-picker-options"]').click();
+    cy.get('[data-cy="date-range-picker-options-button"]').click();
     cy.get(".p-overlaypanel-content").should("be.visible");
     cy.get(":nth-child(1) > .p-dropdown > .p-dropdown-trigger", {
       timeout: 10000,
