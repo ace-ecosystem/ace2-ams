@@ -8,7 +8,7 @@ import {
   mockAlert,
   mockAnalysisRead,
   mockAlertReadDateStrings,
-} from "../../../../mockData/alert";
+} from "../../../../mocks/alert";
 import nock from "nock";
 
 describe("ViewAnalysis.vue", () => {
