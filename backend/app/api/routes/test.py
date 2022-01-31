@@ -33,9 +33,7 @@ def add_test_alerts(alert: AddTestAlert, db: Session = Depends(get_db)):
 
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     else:
-        raise HTTPException(
-            status_code=403, detail="Unable to reset the test database when not running in TESTING mode"
-        )
+        raise HTTPException(status_code=403, detail="Unable to add test alerts when not running in TESTING mode")
 
 
 helpers.api_route_create(
@@ -60,7 +58,9 @@ helpers.api_route_create(
 
 def reset_test_database(db: Session = Depends(get_db)):
     # Only proceed if the API is running in TESTING mode
-    if is_in_testing_mode():
+    # NOTE: This functionality is excluded from code coverage since testing it is not possible
+    #       with the way that it uses Alembic migrations (and the tests use Alembic migrations)
+    if is_in_testing_mode():  # pragma: no cover
         # Use Alembic to downgrade (delete all the database tables) and then upgrade (rebuild the tables)
         config = Config("alembic.ini")
         alembic.command.downgrade(config, "base")
