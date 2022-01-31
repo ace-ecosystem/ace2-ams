@@ -58,7 +58,7 @@ helpers.api_route_create(
 #
 
 
-def reset_test_database():
+def reset_test_database(db: Session = Depends(get_db)):
     # Only proceed if the API is running in TESTING mode
     if is_in_testing_mode():
         # Use Alembic to downgrade (delete all the database tables) and then upgrade (rebuild the tables)
@@ -67,7 +67,7 @@ def reset_test_database():
         alembic.command.upgrade(config, "head")
 
         # Re-seed the database tables so the tests have a default set of data to work with
-        seed()
+        seed(db)
 
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     else:

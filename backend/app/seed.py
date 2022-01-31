@@ -5,6 +5,7 @@ import yaml
 from sqlalchemy.orm import Session
 
 from core.auth import hash_password
+from core.config import is_in_testing_mode
 from db import crud
 from db.database import get_db
 from db.schemas.alert_disposition import AlertDisposition
@@ -28,7 +29,7 @@ from db.schemas.user_role import UserRole
 # docker logs ace2-gui-backend
 
 
-def seed():
+def seed(db: Session):
     # Quit early if the config file does not exist
     if not os.path.exists("etc/defaults.yml"):
         print("etc/defaults.yml does not exist!")
@@ -42,9 +43,6 @@ def seed():
     if data is None:
         print("etc/defaults.yml is empty!")
         sys.exit()
-
-    # Get a database connection
-    db: Session = next(get_db())
 
     # Add the objects to the database but only if their respective tables do not have any items already.
     if "alert_disposition" in data and not crud.read_all(db_table=AlertDisposition, db=db):
@@ -190,5 +188,6 @@ def seed():
 
 if __name__ == "__main__":
     # Don't seed the database automatically if running in TESTING mode
-    if "TESTING" not in os.environ or os.environ["TESTING"].lower() != "yes":
-        seed()
+    if not is_in_testing_mode():
+        db: Session = next(get_db())
+        seed(db)
