@@ -9,4 +9,3 @@ export const genericObjectReadFactory = ({
   uuid: uuid,
   value: value,
 });
-

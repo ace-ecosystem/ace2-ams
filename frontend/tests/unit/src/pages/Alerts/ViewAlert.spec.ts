@@ -6,10 +6,7 @@ import { useSelectedAlertStore } from "@/stores/selectedAlert";
 import myNock from "@unit/services/api/nock";
 import { createRouterMock, getRouter, injectRouterMock } from "vue-router-mock";
 
-import {
-  mockAlert,
-  mockAlertReadDateStrings,
-} from "../../../../mocks/alert";
+import { mockAlert, mockAlertReadDateStrings } from "../../../../mocks/alert";
 import nock from "nock";
 
 function factory(options?: TestingOptions) {
