@@ -2,17 +2,24 @@ import { visitUrl } from "./helpers";
 
 describe("ViewAnalysis.vue", () => {
   before(() => {
+    cy.resetDatabase();
     cy.login();
-  });
 
-  after(() => {
-    cy.logout();
+    // Add the test alert to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_alerts",
+      body: {
+        template: "small.json",
+        count: 1,
+      },
+    });
   });
 
   beforeEach(() => {
     // Intercept the API call that loads the alert data
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "getAlert"
+      "getAlert",
     );
 
     visitUrl({
@@ -45,7 +52,7 @@ describe("ViewAnalysis.vue", () => {
   it("Will route to home (Manage Alerts) when home breadcrumb is clicked", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0"
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlerts");
 
     cy.get(".p-breadcrumb-home > .p-menuitem-link").click();
@@ -58,7 +65,7 @@ describe("ViewAnalysis.vue", () => {
     cy.wait("@getAlert").its("state").should("eq", "Complete");
     cy.url().should(
       "not.contain",
-      "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a/"
+      "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a/",
     );
     cy.url().should("contain", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a");
   });

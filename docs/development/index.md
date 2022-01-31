@@ -129,7 +129,7 @@ However, this will need to be performed on your local system ouside of the conta
 **Step 1:** Install Cypress on your host system (this only needs to be done one time):
 
 ```
-npm install -g cypress@9.3.0
+npm install -g cypress@9.3.1
 ```
 
 **Step 2:** Prep the application to run the tests in interactive mode:
@@ -148,3 +148,9 @@ cypress open
 ![Test Runner](test-runner.png)
 
 For more information on what you can do with the Test Runner, view the Test Runner [documentation](https://docs.cypress.io/guides/core-concepts/test-runner).
+
+**Step 4:** Disable testing mode once you are finished using the Test Runner:
+
+```
+bin/disable-test-mode.sh
+```

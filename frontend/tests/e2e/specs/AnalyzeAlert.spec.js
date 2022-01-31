@@ -37,11 +37,8 @@ const addMultipleObservables = () => {
 
 describe("AnalyzeAlert.vue", () => {
   before(() => {
+    cy.resetDatabase();
     cy.login();
-  });
-
-  after(() => {
-    cy.logout();
   });
 
   beforeEach(() => {
@@ -74,8 +71,8 @@ describe("AnalyzeAlert.vue", () => {
     // Check dropdown options and select 'ipv4'
     cy.get("div[name='observable-type']").click();
     cy.get("div[name='observable-input']")
-      .get(".p-dropdown-item", { timeout: 5_000 })
-      .should("have.length", 9)
+      .get(".p-dropdown-item")
+      .should("have.length", 2)
       .contains("ipv4")
       .click();
     // Check that input switched to text input
@@ -97,7 +94,7 @@ describe("AnalyzeAlert.vue", () => {
     // Switch back to file observable type and check that input switches back to file input
     cy.get("div[name='observable-type']").click();
     cy.get("div[name='observable-input']")
-      .get(".p-dropdown-item", { timeout: 5_000 })
+      .get(".p-dropdown-item")
       .contains("file")
       .click();
     cy.get("div[name='observable-value']")
