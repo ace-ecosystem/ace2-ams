@@ -3,9 +3,24 @@
 <!-- The table where all currently filtered events are displayed, selected to take action, or link to an individual event page -->
 
 <template>
-  <TheNodeTable :columns="columns" :row-expansion="false">
+  <TheNodeTable :columns="columns">
     <template #rowCell="{ data, field }">
       <EventTableCell :data="data" :field="field"></EventTableCell>
+    </template>
+
+    <!-- Row Expansion -->
+    <template #rowExpansion="{ data }">
+      <suspense>
+        <template #fallback>
+          <ul></ul>
+        </template>
+        <template #default>
+          <EventTableExpansion
+            :uuid="data.uuid"
+            :data="data"
+          ></EventTableExpansion>
+        </template>
+      </suspense>
     </template>
   </TheNodeTable>
 </template>
@@ -15,6 +30,7 @@
 
   import TheNodeTable from "../Node/TheNodeTable";
   import EventTableCell from "./EventTableCell";
+  import EventTableExpansion from "./EventTableExpansion";
 
   const columns = ref([
     { field: "createdTime", header: "Created", sortable: true, default: true },
