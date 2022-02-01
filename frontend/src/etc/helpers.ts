@@ -1,6 +1,7 @@
-import { alertFilterParams } from "@/models/alert";
+import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
 import { filterOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
+import { nodeTagRead } from "@/models/nodeTag";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
 import { useAlertQueueStore } from "@/stores/alertQueue";
 import { useAlertToolStore } from "@/stores/alertTool";
@@ -230,7 +231,7 @@ export function parseFilters(
 export function formatNodeFiltersForAPI(
   availableFilters: readonly filterOption[],
   params: alertFilterParams | eventFilterParams,
-): Record<string, string> {
+): Record<string, string> | Record<string, number> {
   const formattedParams = {} as alertFilterParams;
   for (const param in params) {
     let paramValue = params[param] as any;
@@ -254,4 +255,39 @@ export function formatNodeFiltersForAPI(
     formattedParams[param] = paramValue;
   }
   return formattedParams;
+}
+
+export function getAllAlertTags(alert: alertRead): Array<nodeTagRead> {
+  const allTags = alert.tags.concat(alert.childTags);
+
+  // Return a sorted and deduplicated list of the tags based on the tag UUID.
+  return [...new Map(allTags.map((v) => [v.uuid, v])).values()].sort((a, b) =>
+    a.value > b.value ? 1 : -1,
+  );
+}
+
+export function getAlertLink(alert: alertRead): string {
+  return "/alert/" + alert.uuid;
+}
+
+export function parseAlertSummary(alert: alertRead): alertSummary {
+  return {
+    childTags: alert.childTags,
+    comments: alert.comments,
+    description: alert.description ? alert.description : "",
+    disposition: alert.disposition ? alert.disposition.value : "OPEN",
+    dispositionTime: alert.dispositionTime ? alert.dispositionTime : null,
+    dispositionUser: alert.dispositionUser
+      ? alert.dispositionUser.displayName
+      : "None",
+    eventTime: alert.eventTime,
+    insertTime: alert.insertTime,
+    name: alert.name,
+    owner: alert.owner ? alert.owner.displayName : "None",
+    queue: alert.queue.value,
+    tags: alert.tags,
+    tool: alert.tool ? alert.tool.value : "None",
+    type: alert.type.value,
+    uuid: alert.uuid,
+  };
 }
