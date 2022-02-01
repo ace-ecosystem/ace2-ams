@@ -12,6 +12,7 @@
     responsiveLayout="scroll"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} alerts in the event"
     :loading="isLoading"
+    data-cy="expandedEvent"
   >
     <template #loading>Loading alerts, please wait...</template>
     <Column
