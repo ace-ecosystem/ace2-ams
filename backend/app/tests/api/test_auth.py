@@ -145,7 +145,14 @@ def test_missing_route_authentication(client, route):
     """
 
     # There are some special endpoints that do not require authentication.
-    if route.path in ["/api/ping", "/api/auth", "/api/auth/logout", "/api/test/add_alerts", "/api/test/reset_database"]:
+    if route.path in [
+        "/api/ping",
+        "/api/auth",
+        "/api/auth/logout",
+        "/api/test/add_alerts",
+        "/api/test/add_event",
+        "/api/test/reset_database",
+    ]:
         return
 
     for method in route.methods:
