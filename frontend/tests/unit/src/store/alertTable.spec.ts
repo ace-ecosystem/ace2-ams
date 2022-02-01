@@ -1,7 +1,8 @@
 // TODO: Move to alertTable store tests
 import myNock from "@unit/services/api/nock";
 import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
-import { parseAlertSummary, useAlertTableStore } from "@/stores/alertTable";
+import { useAlertTableStore } from "@/stores/alertTable";
+import { parseAlertSummary } from "@/etc/helpers";
 import { createTestingPinia } from "@pinia/testing";
 import { mockAlert } from "../../../mocks/alert";
 
