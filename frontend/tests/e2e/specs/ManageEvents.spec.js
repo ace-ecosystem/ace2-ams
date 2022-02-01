@@ -2,7 +2,7 @@ import { visitUrl } from "./helpers";
 
 describe("ManageEvents.vue UI Elements", () => {
   before(() => {
-    cy.visit("/login");
+    cy.resetDatabase();
     cy.login();
   });
 
@@ -55,8 +55,19 @@ describe("ManageEvents.vue UI Elements", () => {
 
 describe("ManageEvents.vue table functionality", () => {
   before(() => {
-    cy.visit("/login");
+    cy.resetDatabase();
     cy.login();
+
+    // Add a test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
   });
 
   beforeEach(() => {
@@ -179,7 +190,7 @@ describe("ManageEvents.vue table functionality", () => {
     cy.get(".p-dropdown-item").eq(3).should("have.text", "100");
   });
 
-  it("will refetch alerts when page size is changed", () => {
+  it("will refetch events when page size is changed", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=5&offset=0",
@@ -259,8 +270,19 @@ describe("ManageEvents.vue table functionality", () => {
 
 describe("ManageEvents.vue Filtering", () => {
   before(() => {
-    cy.visit("/login");
+    cy.resetDatabase();
     cy.login();
+
+    // Add a test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
   });
 
   beforeEach(() => {
@@ -553,12 +575,21 @@ describe("ManageEvents.vue Filtering", () => {
 });
 
 describe("ManageEvents.vue Actions", () => {
-  before(() => {
-    cy.visit("/login");
-    cy.login();
-  });
-
   beforeEach(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Add a test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
+
     // Intercept the API call that loads the default event table view
     cy.intercept(
       "GET",
