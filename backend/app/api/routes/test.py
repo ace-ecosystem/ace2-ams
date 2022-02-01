@@ -66,6 +66,7 @@ def add_test_events(event: AddTestEvent, db: Session = Depends(get_db)):
                 db=db, json_path=f"/app/tests/alerts/{event.alert_template}", alert_name=f"Manual Alert {i}"
             )
             alert_tree.node.event_uuid = db_event.uuid
+            db.commit()
 
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     else:
