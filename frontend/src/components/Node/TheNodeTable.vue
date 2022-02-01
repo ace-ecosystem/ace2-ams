@@ -36,6 +36,7 @@
             v-if="columnSelect"
             :model-value="selectedColumns"
             :options="columns"
+            data-cy="table-column-select"
             option-label="header"
             placeholder="Select Columns"
             @update:modelValue="onColumnToggle"
@@ -47,12 +48,14 @@
             <i class="pi pi-search" />
             <InputText
               v-model="nodeTableFilter['global'].value"
+              data-cy="table-keyword-search"
               placeholder="Search in table"
             />
           </span>
           <!-- CLEAR TABLE FILTERS -->
           <Button
             v-if="resetTable"
+            data-cy="reset-table-button"
             icon="pi pi-refresh"
             class="p-button-rounded p-m-1"
             @click="reset()"
@@ -60,6 +63,7 @@
           <!-- EXPORT TABLE TO CSV -->
           <Button
             v-if="exportCSV"
+            data-cy="export-table-button"
             class="p-button-rounded p-m-1"
             icon="pi pi-download"
             @click="exportCSV($event)"
@@ -104,6 +108,7 @@
   </DataTable>
 
   <Paginator
+    data-cy="table-pagination-options"
     :rows="tableStore.pageSize"
     :rows-per-page-options="[5, 10, 50, 100]"
     :total-records="tableStore.totalItems"

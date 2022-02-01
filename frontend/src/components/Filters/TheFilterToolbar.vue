@@ -5,6 +5,7 @@
   <Toolbar>
     <template #start>
       <SplitButton
+        data-cy="edit-filter-button"
         label="Quick Add"
         icon="pi pi-plus"
         :model="buttons"
@@ -15,9 +16,20 @@
     </template>
 
     <template #end>
-      <OverlayPanel ref="op" style="padding: 1rem" @keypress.enter="addFilter">
-        <FilterInput v-model="filterModel" :allow-delete="false"> </FilterInput>
+      <OverlayPanel
+        ref="op"
+        data-cy="quick-add-filter-panel"
+        style="padding: 1rem"
+        @keypress.enter="addFilter"
+      >
+        <FilterInput
+          v-model="filterModel"
+          data-cy="filter-input"
+          :allow-delete="false"
+        >
+        </FilterInput>
         <Button
+          data-cy="quick-add-filter-submit-button"
           name="update-filter"
           icon="pi pi-check"
           @click="

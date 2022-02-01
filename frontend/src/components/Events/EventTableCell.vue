@@ -19,7 +19,7 @@
     </span>
     <br />
     <!-- Event Comments -->
-    <span v-if="props.data.comments">
+    <span v-if="props.data.comments" data-cy="comments">
       <pre
         v-for="comment in props.data.comments"
         :key="comment.uuid"
