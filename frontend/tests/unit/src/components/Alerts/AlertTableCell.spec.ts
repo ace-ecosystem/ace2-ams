@@ -57,6 +57,7 @@ const mockAlertReadASummary: alertSummary = {
   disposition: "OPEN",
   dispositionTime: null,
   dispositionUser: "Analyst",
+  eventUuid: "None",
   eventTime: new Date("2021-12-18T00:59:43.570343+00:00"),
   insertTime: new Date("2021-12-18T00:59:43.570343+00:00"),
   name: "Small Alert",
@@ -64,6 +65,7 @@ const mockAlertReadASummary: alertSummary = {
   queue: "test_queue",
   tags: [],
   tool: "test_tool",
+  toolInstance: "test_tool_instance",
   type: "test_type",
   uuid: "uuid1",
 };

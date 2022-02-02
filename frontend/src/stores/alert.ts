@@ -7,7 +7,8 @@ import {
   alertUpdate,
 } from "@/models/alert";
 import { UUID } from "@/models/base";
-import { Alert, parseAlertSummary } from "@/services/api/alert";
+import { Alert } from "@/services/api/alert";
+import { parseAlertSummary } from "@/etc/helpers";
 
 export const useAlertStore = defineStore({
   id: "alertStore",
