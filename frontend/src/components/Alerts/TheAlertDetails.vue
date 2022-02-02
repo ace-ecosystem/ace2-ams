@@ -1,4 +1,4 @@
-<!-- ViewAlert.vue -->
+<!-- TheAlertDetails.vue -->
 
 <template>
   <Card>

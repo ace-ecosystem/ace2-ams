@@ -5,12 +5,10 @@ import {
   alertFilterParams,
   alertRead,
   alertReadPage,
-  alertSummary,
   alertTreeRead,
   alertUpdate,
 } from "@/models/alert";
 import { UUID } from "@/models/base";
-import { nodeTagRead } from "@/models/nodeTag";
 import { BaseApi } from "./base";
 
 const api = new BaseApi();
