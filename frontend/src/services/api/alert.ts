@@ -29,11 +29,17 @@ export const Alert = {
       formattedParams = formatNodeFiltersForAPI(alertFilters, params);
     }
 
-    return api.read(`${endpoint}`, formattedParams);
+    return api.read(endpoint, formattedParams);
   },
 
-  update: (data: alertUpdate[]): Promise<void> =>
-    api.update(`${endpoint}`, data),
+  readAllPages: async (
+    params: alertFilterParams,
+  ): Promise<Array<alertRead>> => {
+    const formattedParams = formatNodeFiltersForAPI(alertFilters, params);
+    return api.readAll(endpoint, formattedParams);
+  },
+
+  update: (data: alertUpdate[]): Promise<void> => api.update(endpoint, data),
 };
 
 export function parseAlertSummary(

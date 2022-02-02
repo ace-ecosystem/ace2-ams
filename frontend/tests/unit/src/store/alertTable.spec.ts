@@ -2,7 +2,7 @@
 import myNock from "@unit/services/api/nock";
 import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
 import { useAlertTableStore } from "@/stores/alertTable";
-import { parseAlertSummary } from "@/services/api/alert";
+import { parseAlertSummary } from "@/etc/helpers";
 import { createTestingPinia } from "@pinia/testing";
 import { mockAlert } from "../../../mocks/alert";
 
@@ -71,6 +71,7 @@ const mockAlertReadASummary: alertSummary = {
   disposition: "OPEN",
   dispositionTime: null,
   dispositionUser: "Analyst",
+  eventUuid: "None",
   eventTime: new Date("2021-12-18T00:59:43.570343+00:00"),
   insertTime: new Date("2021-12-18T00:59:43.570343+00:00"),
   name: "Small Alert",
@@ -78,6 +79,7 @@ const mockAlertReadASummary: alertSummary = {
   queue: "test_queue",
   tags: [],
   tool: "test_tool",
+  toolInstance: "test_tool_instance",
   type: "test_type",
   uuid: "uuid1",
 };
@@ -110,6 +112,8 @@ const mockAlertReadBSummary: alertSummary = {
   disposition: "OPEN",
   dispositionTime: null,
   dispositionUser: "Analyst",
+  eventUuid: "None",
+
   eventTime: new Date("2021-12-18T00:59:43.570343+00:00"),
   insertTime: new Date("2021-12-18T00:59:43.570343+00:00"),
   name: "Small Alert",
@@ -117,6 +121,8 @@ const mockAlertReadBSummary: alertSummary = {
   queue: "test_queue",
   tags: [],
   tool: "test_tool",
+  toolInstance: "test_tool_instance",
+
   type: "test_type",
   uuid: "uuid2",
 };
@@ -127,6 +133,7 @@ const mockAlertReadCSummary: alertSummary = {
   disposition: "FALSE_POSITIVE",
   dispositionTime: new Date("2021-12-18T00:59:43.570343+00:00"),
   dispositionUser: "None",
+  eventUuid: "None",
   eventTime: new Date("2021-12-18T00:59:43.570343+00:00"),
   insertTime: new Date("2021-12-18T00:59:43.570343+00:00"),
   name: "Test alert",
@@ -134,6 +141,8 @@ const mockAlertReadCSummary: alertSummary = {
   queue: "testQueue",
   tags: [],
   tool: "None",
+  toolInstance: "None",
+
   type: "testType",
   uuid: "uuid3",
 };

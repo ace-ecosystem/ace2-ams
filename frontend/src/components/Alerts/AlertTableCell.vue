@@ -6,7 +6,7 @@
   <div v-if="props.field === 'name'">
     <!-- Name w/ Link to Alert -->
     <span class="p-m-1" data-cy="alertName">
-      <router-link :to="getAlertLink(props.data.uuid)">{{
+      <router-link :to="getAlertLink(props.data)">{{
         props.data.name
       }}</router-link></span
     >
@@ -14,7 +14,7 @@
     <!-- Alert Tags -->
     <span data-cy="tags">
       <NodeTagVue
-        v-for="tag in getAllTags(props.data)"
+        v-for="tag in getAllAlertTags(props.data)"
         :key="tag.uuid"
         :tag="tag"
       ></NodeTagVue>
@@ -52,10 +52,11 @@
 
 <script setup>
   import { defineProps } from "vue";
-  import { getAllTags } from "@/services/api/alert";
 
   import NodeTagVue from "../Node/NodeTag.vue";
   import NodeComment from "../Node/NodeComment.vue";
+
+  import { getAllAlertTags, getAlertLink } from "@/etc/helpers";
 
   const props = defineProps({
     data: { type: Object, required: true },
@@ -69,10 +70,6 @@
     }
 
     return "None";
-  };
-
-  const getAlertLink = (uuid) => {
-    return "/alert/" + uuid;
   };
 </script>
 

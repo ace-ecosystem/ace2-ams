@@ -2,8 +2,7 @@ import { defineStore } from "pinia";
 import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
 import { UUID } from "@/models/base";
 import { Alert } from "@/services/api/alert";
-import { camelToSnakeCase } from "@/etc/helpers";
-import { parseAlertSummary } from "@/services/api/alert";
+import { camelToSnakeCase, parseAlertSummary } from "@/etc/helpers";
 
 export const useAlertTableStore = defineStore({
   id: "alertTableStore",
