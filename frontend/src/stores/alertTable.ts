@@ -3,28 +3,7 @@ import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
 import { UUID } from "@/models/base";
 import { Alert } from "@/services/api/alert";
 import { camelToSnakeCase } from "@/etc/helpers";
-
-export function parseAlertSummary(alert: alertRead): alertSummary {
-  return {
-    childTags: alert.childTags,
-    comments: alert.comments,
-    description: alert.description ? alert.description : "",
-    disposition: alert.disposition ? alert.disposition.value : "OPEN",
-    dispositionTime: alert.dispositionTime ? alert.dispositionTime : null,
-    dispositionUser: alert.dispositionUser
-      ? alert.dispositionUser.displayName
-      : "None",
-    eventTime: alert.eventTime,
-    insertTime: alert.insertTime,
-    name: alert.name,
-    owner: alert.owner ? alert.owner.displayName : "None",
-    queue: alert.queue.value,
-    tags: alert.tags,
-    tool: alert.tool ? alert.tool.value : "None",
-    type: alert.type.value,
-    uuid: alert.uuid,
-  };
-}
+import { parseAlertSummary } from "@/services/api/alert";
 
 export const useAlertTableStore = defineStore({
   id: "alertTableStore",
