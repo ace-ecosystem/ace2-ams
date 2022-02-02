@@ -1,7 +1,7 @@
 import AlertTree from "@/components/Alerts/AlertTree.vue";
 import { mount, VueWrapper } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
-import { mockAlert, mockAnalysisRead } from "../../../../mockData/alert";
+import { mockAlert, mockAnalysisRead } from "../../../../mocks/alert";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
 import { useAlertStore } from "@/stores/alert";
 import { createCustomPinia } from "@unit/helpers";

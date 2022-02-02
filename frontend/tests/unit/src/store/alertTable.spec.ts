@@ -2,7 +2,7 @@
 import myNock from "@unit/services/api/nock";
 import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
 import { useAlertTableStore } from "@/stores/alertTable";
-import { mockAlert } from "../../../mockData/alert";
+import { mockAlert } from "../../../mocks/alert";
 import { createCustomPinia } from "@unit/helpers";
 import { parseAlertSummary } from "@/etc/helpers";
 

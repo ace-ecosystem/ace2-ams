@@ -1,12 +1,13 @@
 import EventTableExpansion from "@/components/Events/EventTableExpansion.vue";
 import { flushPromises, mount, VueWrapper } from "@vue/test-utils";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
 
 import { useFilterStore } from "@/stores/filter";
 import myNock from "@unit/services/api/nock";
 import nock from "nock";
 import { mockAlertPage } from "../../../../mocks/alert";
+import { createCustomPinia } from "@unit/helpers";
 
 function factory(options: TestingOptions = {}) {
   const router = createRouterMock();
@@ -14,7 +15,7 @@ function factory(options: TestingOptions = {}) {
 
   const wrapper: VueWrapper<any> = mount(EventTableExpansion, {
     global: {
-      plugins: [createTestingPinia(options)],
+      plugins: [createCustomPinia(options)],
       provide: { nodeType: "events" },
     },
     props: {

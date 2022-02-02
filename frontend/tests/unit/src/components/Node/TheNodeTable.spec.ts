@@ -15,7 +15,7 @@ import { createRouterMock, injectRouterMock } from "vue-router-mock";
 import { useSelectedAlertStore } from "@/stores/selectedAlert";
 import TheNodeTableVue from "@/components/Node/TheNodeTable.vue";
 import { useAlertTableStore } from "@/stores/alertTable";
-import { mockAlert } from "../../../../mockData/alert";
+import { mockAlert } from "../../../../mocks/alert";
 import { createCustomPinia } from "@unit/helpers";
 
 const mockAlertReadA = Object.assign({}, mockAlert, { uuid: "uuid1" });
