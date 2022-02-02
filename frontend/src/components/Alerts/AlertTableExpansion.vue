@@ -8,7 +8,7 @@
       <span class="link-text" @click="filterByObservable(obs)">{{
         formatObservable(obs)
       }}</span>
-      <!-- Display each observable's -->
+      <!-- Display each observable's tags -->
       <NodeTagVue v-for="tag of obs.tags" :key="tag.value" :tag="tag" />
     </li>
   </ul>

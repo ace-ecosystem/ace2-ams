@@ -3,7 +3,6 @@ import { filterOption } from "@/models/base";
 import { eventFilterNameTypes } from "@/models/event";
 import { eventPreventionToolRead } from "@/models/eventPreventionTool";
 import { eventVectorRead } from "@/models/eventVector";
-import { nodeTagRead } from "@/models/nodeTag";
 import { nodeThreatRead } from "@/models/nodeThreat";
 import { nodeThreatActorRead } from "@/models/nodeThreatActor";
 import { observableTypeRead } from "@/models/observableType";

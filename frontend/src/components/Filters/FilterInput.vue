@@ -3,6 +3,7 @@
     <div v-if="!fixedFilterName" class="field col-fixed">
       <Dropdown
         v-model="filterName"
+        data-cy="filter-input-type"
         :options="availableFilters"
         option-label="label"
         type="text"
@@ -18,6 +19,7 @@
       <div v-if="isInputText" class="field">
         <InputText
           v-model="filterValue"
+          data-cy="filter-input-value"
           class="inputfield w-16rem"
           type="text"
           @input="updateValue('filterValue', $event.target.value)"
@@ -26,6 +28,7 @@
       <div v-else-if="isDropdown" class="field">
         <Dropdown
           v-model="filterValue"
+          data-cy="filter-input-value"
           class="inputfield w-16rem"
           :options="filterOptions"
           :option-label="filterOptionProperty"
@@ -36,6 +39,7 @@
       <div v-else-if="isMultiSelect" class="field">
         <Multiselect
           v-model="filterValue"
+          data-cy="filter-input-value"
           class="inputfield w-16rem"
           :options="filterOptions"
           :option-label="filterOptionProperty"
@@ -46,6 +50,7 @@
       <div v-else-if="isChips" class="field p-fluid">
         <Chips
           v-model="filterValue"
+          data-cy="filter-input-value"
           class="w-full"
           @update:model-value="updateValue('filterValue', $event)"
         ></Chips>
@@ -61,6 +66,7 @@
           <template #default="{ inputValue, inputEvents }">
             <div class="p-inputgroup">
               <InputText
+                data-cy="filter-input-value"
                 class="inputfield w-16rem"
                 type="text"
                 :value="inputValue"
@@ -75,6 +81,7 @@
         <div class="field">
           <Dropdown
             v-model="categorizedValueCategory"
+            data-cy="filter-input-value-category"
             :options="filterOptions"
             :option-label="filterOptionProperty"
             class="w-16rem"
@@ -85,6 +92,7 @@
         <div class="field">
           <InputText
             v-model="categorizedValueValue"
+            data-cy="filter-input-value-value"
             class="w-16rem"
             type="text"
             @input="updateValue('filterValue', categorizedValueObject)"
@@ -94,6 +102,7 @@
     </div>
     <div v-if="allowDelete" class="field col-fixed">
       <Button
+        data-cy="filter-input-delete"
         name="delete-filter"
         icon="pi pi-times"
         class="w-3rem"

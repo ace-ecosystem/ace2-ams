@@ -18,6 +18,7 @@ def apply_migrations():
 
     config = Config("alembic.ini")
 
+    alembic.command.downgrade(config, "base")
     alembic.command.upgrade(config, "head")
     yield
     alembic.command.downgrade(config, "base")

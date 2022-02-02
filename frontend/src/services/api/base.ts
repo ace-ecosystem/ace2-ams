@@ -88,7 +88,10 @@ export class BaseApi {
     return await this.baseRequest(url, "GET", { params: params });
   }
 
-  async readAll(url: string, params?: Record<string, unknown>): Promise<any> {
+  async readAll(
+    url: string,
+    params?: Record<string, unknown>,
+  ): Promise<Array<any>> {
     let results: any[] = [];
     let offset = 0;
 

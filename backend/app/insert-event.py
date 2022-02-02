@@ -80,8 +80,8 @@ if args.type:
 if args.vectors:
     event.vectors = [helpers.create_event_vector(value=v, db=db) for v in args.vectors.split(",")]
 
-for _ in range(args.num_alerts):
-    alert_tree = helpers.create_alert_from_json_file(db=db, json_path=alert_json_path)
+for i in range(args.num_alerts):
+    alert_tree = helpers.create_alert_from_json_file(db=db, json_path=alert_json_path, alert_name=f"Manual Alert {i}")
     alert_tree.node.event_uuid = event.uuid
 
 db.commit()

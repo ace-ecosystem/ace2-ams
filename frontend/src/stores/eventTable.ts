@@ -37,10 +37,10 @@ export const useEventTableStore = defineStore({
     requestReload: false,
 
     // current sort field
-    sortField: "createdTime",
+    sortField: "createdTime" as string | null,
 
     // current sort oder
-    sortOrder: "desc",
+    sortOrder: "desc" as string | null,
 
     // current page size
     pageSize: 10,

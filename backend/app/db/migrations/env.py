@@ -1,9 +1,10 @@
 import alembic
 import logging
-import os
 
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
+
+from core.config import get_settings, is_in_testing_mode
 
 # Load the database schemas so that Alembic knows what it needs to create/update
 from db import schemas
@@ -23,23 +24,26 @@ def run_migrations_online() -> None:
     """
 
     # Handle database configuration for running tests
-    database_urls = [os.environ["DATABASE_URL"], os.environ["DATABASE_TEST_URL"]]
-    for database_url in database_urls:
-        connectable = config.attributes.get("connection", None)
-        config.set_main_option("sqlalchemy.url", database_url)
+    if is_in_testing_mode():
+        database_url = get_settings().database_test_url
+    else:
+        database_url = get_settings().database_url
 
-        if connectable is None:
-            connectable = engine_from_config(
-                config.get_section(config.config_ini_section),
-                prefix="sqlalchemy.",
-                poolclass=pool.NullPool,
-            )
+    connectable = config.attributes.get("connection", None)
+    config.set_main_option("sqlalchemy.url", database_url)
 
-        with connectable.connect() as connection:
-            alembic.context.configure(connection=connection, target_metadata=Base.metadata)
+    if connectable is None:
+        connectable = engine_from_config(
+            config.get_section(config.config_ini_section),
+            prefix="sqlalchemy.",
+            poolclass=pool.NullPool,
+        )
 
-            with alembic.context.begin_transaction():
-                alembic.context.run_migrations()
+    with connectable.connect() as connection:
+        alembic.context.configure(connection=connection, target_metadata=Base.metadata)
+
+        with alembic.context.begin_transaction():
+            alembic.context.run_migrations()
 
 
 def run_migrations_offline() -> None:
@@ -47,12 +51,15 @@ def run_migrations_offline() -> None:
     Run migrations in "offline" mode.
     """
 
-    database_urls = [os.environ["DATABASE_URL"], os.environ["DATABASE_TEST_URL"]]
-    for database_url in database_urls:
-        alembic.context.configure(url=database_url)
+    if is_in_testing_mode():
+        database_url = get_settings().database_test_url
+    else:
+        database_url = get_settings().database_url
 
-        with alembic.context.begin_transaction():
-            alembic.context.run_migrations()
+    alembic.context.configure(url=database_url)
+
+    with alembic.context.begin_transaction():
+        alembic.context.run_migrations()
 
 
 if alembic.context.is_offline_mode():

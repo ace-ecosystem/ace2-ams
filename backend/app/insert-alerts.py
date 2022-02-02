@@ -31,5 +31,5 @@ if len(sys.argv) == 3:
 
 db: Session = next(get_db())
 
-for _ in range(num_alerts):
-    helpers.create_alert_from_json_file(db=db, json_path=json_path)
+for i in range(num_alerts):
+    helpers.create_alert_from_json_file(db=db, json_path=json_path, alert_name=f"Manual Alert {i}")

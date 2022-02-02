@@ -2,6 +2,8 @@
 Environment variables / configuration
 """
 
+import os
+
 from pydantic import BaseSettings, Field, PostgresDsn
 
 
@@ -26,3 +28,7 @@ def get_settings():
     """
 
     return Settings()
+
+
+def is_in_testing_mode() -> bool:
+    return "TESTING" in os.environ and os.environ["TESTING"].lower() == "yes"

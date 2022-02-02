@@ -2,7 +2,7 @@
   <!--      DATE PICKER OPTIONS  -->
   <Button
     icon="pi pi-calendar"
-    data-cy="date-range-picker-options"
+    data-cy="date-range-picker-options-button"
     @click="toggleOptionsMenu"
   />
   <OverlayPanel ref="op">
@@ -74,12 +74,14 @@
             value: startDateUTC,
             disabled: !startDateUTC,
           }"
+          data-cy="date-range-picker-start-input"
           type="text"
           :value="inputValue"
           placeholder="The beginning of time"
           v-on="inputEvents"
         />
         <Button
+          data-cy="date-range-picker-start-clear"
           icon="pi pi-times"
           class="p-button-outlined p-button-secondary"
           @click="clearDate(startFilter)"
@@ -103,12 +105,14 @@
             value: endDateUTC,
             disabled: !endDateUTC,
           }"
+          data-cy="date-range-picker-end-input"
           type="text"
           :value="inputValue"
           placeholder="Now"
           v-on="inputEvents"
         />
         <Button
+          data-cy="date-range-picker-end-clear"
           icon="pi pi-times"
           class="p-button-outlined p-button-secondary"
           @click="clearDate(endFilter)"

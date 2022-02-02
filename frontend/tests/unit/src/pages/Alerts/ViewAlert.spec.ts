@@ -6,10 +6,7 @@ import { useSelectedAlertStore } from "@/stores/selectedAlert";
 import myNock from "@unit/services/api/nock";
 import { createRouterMock, getRouter, injectRouterMock } from "vue-router-mock";
 
-import {
-  mockAlert,
-  mockAlertReadDateStrings,
-} from "../../../../mockData/alert";
+import { mockAlert, mockAlertReadDateStrings } from "../../../../mocks/alert";
 import nock from "nock";
 import { createCustomPinia } from "@unit/helpers";
 

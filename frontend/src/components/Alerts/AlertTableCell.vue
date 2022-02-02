@@ -6,7 +6,7 @@
   <div v-if="props.field === 'name'">
     <!-- Name w/ Link to Alert -->
     <span class="p-m-1" data-cy="alertName">
-      <router-link :to="getAlertLink(props.data.uuid)">{{
+      <router-link :to="getAlertLink(props.data)">{{
         props.data.name
       }}</router-link></span
     >
@@ -14,7 +14,7 @@
     <!-- Alert Tags -->
     <span data-cy="tags">
       <NodeTagVue
-        v-for="tag in getAllTags(props.data)"
+        v-for="tag in getAllAlertTags(props.data)"
         :key="tag.uuid"
         :tag="tag"
       ></NodeTagVue>
@@ -44,6 +44,8 @@
 
   import NodeTagVue from "@/components/Node/NodeTag.vue";
 
+  import { getAllAlertTags, getAlertLink } from "@/etc/helpers";
+
   const props = defineProps({
     data: { type: Object, required: true },
     field: { type: String, required: true },
@@ -60,19 +62,6 @@
     }
 
     return "None";
-  };
-
-  const getAlertLink = (uuid) => {
-    return "/alert/" + uuid;
-  };
-
-  const getAllTags = (alert) => {
-    const allTags = alert.tags.concat(alert.childTags);
-
-    // Return a sorted and deduplicated list of the tags based on the tag UUID.
-    return [...new Map(allTags.map((v) => [v.uuid, v])).values()].sort((a, b) =>
-      a.value > b.value ? 1 : -1,
-    );
   };
 </script>
 
