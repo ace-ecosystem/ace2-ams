@@ -1,7 +1,5 @@
 FROM cypress/included:9.3.1
 
-USER node
-
 WORKDIR /app
 
 COPY package*.json ./
