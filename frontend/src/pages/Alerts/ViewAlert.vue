@@ -1,18 +1,18 @@
 <!-- ViewAlert.vue -->
 
 <template>
-  <TheAlertActionToolbar id="AlertActionToolbar" reload-object="node" />
-  <Card>
-    <template #content>
-      <div class="p-tree p-component p-tree-wrapper" style="border: none">
-        <AlertTree
-          v-if="alertStore.openAlert"
-          id="alert-tree"
-          :items="alertStore.openAlert.children"
-        />
-      </div>
-    </template>
-  </Card>
+  <TheAlertActionToolbar reload-object="node" />
+  <div v-if="alertStore.openAlert">
+    <TheAlertDetails />
+    <br />
+    <Card>
+      <template #content>
+        <div class="p-tree p-component p-tree-wrapper" style="border: none">
+          <AlertTree id="alert-tree" :items="alertStore.openAlert.children" />
+        </div>
+      </template>
+    </Card>
+  </div>
 </template>
 
 <script setup>
@@ -22,6 +22,7 @@
 
   import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar";
   import AlertTree from "@/components/Alerts/AlertTree";
+  import TheAlertDetails from "@/components/Alerts/TheAlertDetails";
   import { useAlertStore } from "@/stores/alert";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
