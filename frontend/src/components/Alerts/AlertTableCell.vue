@@ -21,12 +21,11 @@
     </span>
     <!-- Alert comments -->
     <span v-if="props.data.comments">
-      <pre
-        v-for="comment in props.data.comments"
-        :key="comment.uuid"
-        class="p-mr-2 comment"
-        >{{ formatComment(comment) }}</pre
-      >
+      <pre class="p-mr-2 comment"><NodeComment
+      v-for="comment in props.data.comments"
+      :key="comment.uuid"
+      :comment="comment"
+    /></pre>
     </span>
   </div>
 
@@ -35,23 +34,33 @@
     {{ formatDateTime(props.data[props.field]) }}</span
   >
 
+  <!-- Alert Comments -->
+  <div v-else-if="props.field === 'comments'">
+    <span v-if="!props.data.comments.length">None</span>
+    <NodeComment
+      v-for="comment in props.data.comments"
+      v-else
+      :key="comment.uuid"
+      :comment="comment"
+      :include-time="true"
+    />
+  </div>
+
   <!-- Everything else -->
   <span v-else> {{ props.data[props.field] }}</span>
 </template>
 
 <script setup>
   import { defineProps } from "vue";
+  import { getAllTags } from "@/services/api/alert";
 
   import NodeTagVue from "../Node/NodeTag.vue";
+  import NodeComment from "../Node/NodeComment.vue";
 
   const props = defineProps({
     data: { type: Object, required: true },
     field: { type: String, required: true },
   });
-
-  const formatComment = (comment) => {
-    return `(${comment.user.displayName}) ${comment.value}`;
-  };
 
   const formatDateTime = (dateTime) => {
     if (dateTime) {
@@ -64,15 +73,6 @@
 
   const getAlertLink = (uuid) => {
     return "/alert/" + uuid;
-  };
-
-  const getAllTags = (alert) => {
-    const allTags = alert.tags.concat(alert.childTags);
-
-    // Return a sorted and deduplicated list of the tags based on the tag UUID.
-    return [...new Map(allTags.map((v) => [v.uuid, v])).values()].sort((a, b) =>
-      a.value > b.value ? 1 : -1,
-    );
   };
 </script>
 
