@@ -58,7 +58,7 @@
   const formatDateTime = (dateTime) => {
     if (dateTime) {
       const d = new Date(dateTime);
-      return d.toLocaleString("en-US");
+      return d.toLocaleString("en-US", { timeZone: "UTC" });
     }
 
     return "None";
