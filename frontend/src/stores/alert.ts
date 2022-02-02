@@ -1,8 +1,14 @@
 import { defineStore } from "pinia";
 
-import { alertCreate, alertTreeRead, alertUpdate } from "@/models/alert";
+import {
+  alertCreate,
+  alertSummary,
+  alertTreeRead,
+  alertUpdate,
+} from "@/models/alert";
 import { UUID } from "@/models/base";
 import { Alert } from "@/services/api/alert";
+import { parseAlertSummary } from "@/etc/helpers";
 
 export const useAlertStore = defineStore({
   id: "alertStore",
@@ -13,6 +19,15 @@ export const useAlertStore = defineStore({
     // whether the alert should be reloaded
     requestReload: false,
   }),
+
+  getters: {
+    openAlertSummary(): alertSummary | null {
+      if (this.openAlert) {
+        return parseAlertSummary(this.openAlert);
+      }
+      return null;
+    },
+  },
 
   actions: {
     async create(newAlert: alertCreate) {

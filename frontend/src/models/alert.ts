@@ -65,12 +65,14 @@ export interface alertSummary {
   dispositionTime: Date | null;
   dispositionUser: string;
   eventTime: Date;
+  eventUuid: string;
   insertTime: Date;
   name: string;
   owner: string;
   queue: string;
   tags: nodeTagRead[];
   tool: string;
+  toolInstance: string;
   type: string;
   uuid: UUID;
 }

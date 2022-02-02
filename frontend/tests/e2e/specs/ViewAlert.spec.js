@@ -34,19 +34,19 @@ describe("ViewAlert.vue", () => {
 
   it("Renders the expected number of nodes", () => {
     // Total number of nodes
-    cy.get(".pi").should("have.length", 31);
+    cy.get(".p-treenode-content").should("have.length", 20);
 
     // Number of expandable nodes
     cy.get(".p-tree-toggler-icon").should("have.length", 14);
 
     // Number of expanded nodes
-    cy.get(".pi-chevron-down").should("have.length", 13);
+    cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 13);
     // Number of collapsed nodes
-    cy.get(".pi-chevron-right").should("have.length", 1);
+    cy.get(".p-treenode-content .pi-chevron-right").should("have.length", 1);
   });
 
   it("Renders the expected number of tags", () => {
-    cy.get(".p-tag").should("have.length", 4);
+    cy.get(".p-tag").should("have.length", 8);
   });
 
   it("should automatically collapse repeated observable analysis", () => {
@@ -97,9 +97,9 @@ describe("ViewAlert.vue", () => {
 
     // Only that icon should have changed
     // Number of expanded nodes
-    cy.get(".pi-chevron-down").should("have.length", 15);
+    cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 15);
     // Number of collapsed nodes
-    cy.get(".pi-chevron-right").should("not.exist");
+    cy.get(".p-treenode-content .pi-chevron-right").should("not.exist");
 
     // Should now have down/'expanded' toggle icon
     cy.get(
@@ -130,9 +130,9 @@ describe("ViewAlert.vue", () => {
 
     // Node counts back to original
     // Number of expanded nodes
-    cy.get(".pi-chevron-down").should("have.length", 13);
+    cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 13);
     // Number of collapsed nodes
-    cy.get(".pi-chevron-right").should("have.length", 1);
+    cy.get(".p-treenode-content .pi-chevron-right").should("have.length", 1);
   });
 
   it("should route to a 'View Analysis' page when analysis is clicked", () => {
@@ -317,5 +317,81 @@ describe("ViewAlert.vue", () => {
 
     // Close the modal to finish
     cy.get(".p-dialog-header-icon").click();
+  });
+  it.only("Correctly displays alert details content", () => {
+    // Check details card title and elements
+    cy.get(".p-card-title").should("contain.text", "Small Alert");
+    cy.get(".p-card-title > .p-button").should("be.visible");
+    cy.get(":nth-child(1) > .p-card-body > .p-card-content").should(
+      "be.visible",
+    );
+    cy.get(".p-accordion-toggle-icon").should("be.visible");
+    cy.get(".p-accordion-header-text").should("contain.text", "Details");
+
+    // Check each details table row to contain correct text
+    cy.get(":nth-child(1) > .header-cell").should(
+      "contain.text",
+      "Insert Time",
+    );
+    cy.get(":nth-child(2) > .header-cell").should("contain.text", "Event Time");
+    cy.get(":nth-child(3) > .header-cell").should("contain.text", "Tool");
+    cy.get(":nth-child(3) > .content-cell > span").should(
+      "contain.text",
+      "test_tool",
+    );
+    cy.get(":nth-child(4) > .header-cell").should(
+      "contain.text",
+      "Tool Instance",
+    );
+    cy.get(":nth-child(4) > .content-cell > span").should(
+      "contain.text",
+      "test_tool_instance",
+    );
+    cy.get(":nth-child(5) > .header-cell").should("contain.text", "Type");
+    cy.get(":nth-child(5) > .content-cell > span").should(
+      "contain.text",
+      "test_type",
+    );
+    cy.get(":nth-child(6) > .header-cell").should(
+      "contain.text",
+      "Disposition",
+    );
+    cy.get(":nth-child(6) > .content-cell > span").should(
+      "contain.text",
+      "OPEN",
+    );
+    cy.get(":nth-child(7) > .header-cell").should("contain.text", "Event");
+    cy.get(":nth-child(7) > .content-cell > span").should(
+      "contain.text",
+      "None",
+    );
+    cy.get(":nth-child(8) > .header-cell").should("contain.text", "Queue");
+    cy.get(":nth-child(8) > .content-cell > span").should(
+      "contain.text",
+      "test_queue",
+    );
+    cy.get(":nth-child(9) > .header-cell").should("contain.text", "Owner");
+    cy.get(":nth-child(9) > .content-cell > span").should(
+      "contain.text",
+      "Analyst Bob",
+    );
+    cy.get(":nth-child(10) > .header-cell").should("contain.text", "Comments");
+    cy.get(":nth-child(10) > .content-cell").should("contain.text", "None");
+  });
+  it.only("collapses and expands the alert details when header is clicked", () => {
+    // Details table panel should start out open
+    cy.get(":nth-child(1) > .header-cell").should("be.visible");
+
+    // Click the toggle
+    cy.get(".p-accordion-toggle-icon").click();
+
+    // The details panel should no longer be visible/open
+    cy.get(":nth-child(1) > .header-cell").should("not.be.visible");
+
+    // Click the toggle again
+    cy.get(".p-accordion-toggle-icon").click();
+
+    // Details table panel should be open/visible again
+    cy.get(":nth-child(1) > .header-cell").should("be.visible");
   });
 });

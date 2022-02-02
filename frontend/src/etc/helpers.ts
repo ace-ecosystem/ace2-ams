@@ -1,4 +1,9 @@
-import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
+import {
+  alertFilterParams,
+  alertRead,
+  alertSummary,
+  alertTreeRead,
+} from "@/models/alert";
 import { filterOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
 import { nodeTagRead } from "@/models/nodeTag";
@@ -257,7 +262,9 @@ export function formatNodeFiltersForAPI(
   return formattedParams;
 }
 
-export function getAllAlertTags(alert: alertRead): Array<nodeTagRead> {
+export function getAllAlertTags(
+  alert: alertRead | alertTreeRead,
+): Array<nodeTagRead> {
   const allTags = alert.tags.concat(alert.childTags);
 
   // Return a sorted and deduplicated list of the tags based on the tag UUID.
@@ -281,12 +288,14 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
       ? alert.dispositionUser.displayName
       : "None",
     eventTime: alert.eventTime,
+    eventUuid: alert.eventUuid ? alert.eventUuid : "None",
     insertTime: alert.insertTime,
     name: alert.name,
     owner: alert.owner ? alert.owner.displayName : "None",
     queue: alert.queue.value,
     tags: alert.tags,
     tool: alert.tool ? alert.tool.value : "None",
+    toolInstance: alert.toolInstance ? alert.toolInstance.value : "None",
     type: alert.type.value,
     uuid: alert.uuid,
   };

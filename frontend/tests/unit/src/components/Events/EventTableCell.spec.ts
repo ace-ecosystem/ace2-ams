@@ -54,12 +54,6 @@ describe("EventTableCell", () => {
     const { wrapper } = factory();
     expect(wrapper.exists()).toBe(true);
   });
-
-  it("correctly formats a given comment object into string", () => {
-    const { wrapper } = factory();
-    const result = wrapper.vm.formatComment(mockComment);
-    expect(result).toEqual("(Test Analyst) Test comment");
-  });
   it("correctly formats a given date object into string", () => {
     const { wrapper } = factory();
     let result = wrapper.vm.formatDateTime(null);
