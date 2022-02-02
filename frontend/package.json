@@ -50,7 +50,6 @@
     "mock-local-storage": "^1.1.19",
     "mockdate": "^3.0.5",
     "nock": "^13.2.2",
-    "pg": "^8.7.1",
     "prettier": "^2.5.1",
     "sass": "^1.49.0",
     "stylelint": "^14.3.0",
