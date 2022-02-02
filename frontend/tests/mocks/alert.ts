@@ -581,7 +581,6 @@ export const mockAlertReadASummary: alertSummary = {
   uuid: "uuid1",
 };
 
-
 export const mockAlertPage: alertReadPage = {
   items: [
     {

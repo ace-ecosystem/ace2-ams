@@ -49,7 +49,7 @@ describe("alert Actions", () => {
     store.openAlert = mockAlertReadA;
     expect(store.openAlertSummary).toEqual(mockAlertReadASummary);
   });
-  
+
   it("will request to create an alert with a given AlertCreate object, and set the openAlert to result on success", async () => {
     const mockRequest = myNock
       .post("/alert/", JSON.stringify(snakecaseKeys(mockAlertCreate)))

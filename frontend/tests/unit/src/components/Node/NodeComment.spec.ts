@@ -35,10 +35,14 @@ describe("NodeComment.vue", () => {
   });
   it("correctly returns formatComment when includeTime is set to true", () => {
     const { wrapper } = factory();
-    expect(wrapper.vm.formatComment(mockComment)).toEqual("1/1/2020, 12:00:00 AM (Test Analyst) A test comment");
+    expect(wrapper.vm.formatComment(mockComment)).toEqual(
+      "1/1/2020, 12:00:00 AM (Test Analyst) A test comment",
+    );
   });
   it("correctly returns formatComment when includeTime is set to false", () => {
     const { wrapper } = factory(false);
-    expect(wrapper.vm.formatComment(mockComment)).toEqual("(Test Analyst) A test comment");
+    expect(wrapper.vm.formatComment(mockComment)).toEqual(
+      "(Test Analyst) A test comment",
+    );
   });
 });
