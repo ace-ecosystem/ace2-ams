@@ -262,7 +262,9 @@ export function formatNodeFiltersForAPI(
   return formattedParams;
 }
 
-export function getAllAlertTags(alert: alertRead): Array<nodeTagRead> {
+export function getAllAlertTags(
+  alert: alertRead | alertTreeRead,
+): Array<nodeTagRead> {
   const allTags = alert.tags.concat(alert.childTags);
 
   // Return a sorted and deduplicated list of the tags based on the tag UUID.
@@ -297,13 +299,4 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
     type: alert.type.value,
     uuid: alert.uuid,
   };
-}
-
-export function getAllTags(alert: alertRead | alertTreeRead): nodeTagRead[] {
-  const allTags = alert.tags.concat(alert.childTags);
-
-  // Return a sorted and deduplicated list of the tags based on the tag UUID.
-  return [...new Map(allTags.map((v) => [v.uuid, v])).values()].sort((a, b) =>
-    a.value > b.value ? 1 : -1,
-  );
 }

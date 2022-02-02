@@ -54,6 +54,7 @@
 
   const alertStore = useAlertStore();
 
+  // Key 'values' must be properties of model alertSummary
   const alertDetailKeys = [
     { value: "insertTime", label: "Insert Time" },
     { value: "eventTime", label: "Event Time" },

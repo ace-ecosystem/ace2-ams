@@ -2,7 +2,7 @@
   <span>
     {{ formatComment(props.comment) }}
   </span>
-  <br v-if="props.lineBreak" />
+  <br v-if="props.includeLineBreak" />
 </template>
 
 <script setup>
@@ -11,7 +11,7 @@
   const props = defineProps({
     comment: { type: Object, required: true },
     includeTime: { type: Boolean, required: false, default: false },
-    lineBreak: { type: Boolean, required: false, default: true },
+    includeLineBreak: { type: Boolean, required: false, default: true },
   });
 
   const formatComment = (comment) => {

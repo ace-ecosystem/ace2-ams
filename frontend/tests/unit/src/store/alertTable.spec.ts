@@ -4,12 +4,15 @@ import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
 import { useAlertTableStore } from "@/stores/alertTable";
 import { parseAlertSummary } from "@/etc/helpers";
 import { createTestingPinia } from "@pinia/testing";
-import { mockAlert } from "../../../mocks/alert";
+import {
+  mockAlert,
+  mockAlertReadA,
+  mockAlertReadASummary,
+} from "../../../mocks/alert";
 
 createTestingPinia();
 const store = useAlertTableStore();
 
-const mockAlertReadA = Object.assign({}, mockAlert, { uuid: "uuid1" });
 const mockAlertReadB = Object.assign({}, mockAlert, { uuid: "uuid2" });
 const mockAlertReadC: alertRead = {
   childTags: [],
@@ -41,47 +44,6 @@ const mockAlertReadC: alertRead = {
   uuid: "uuid3",
   version: "",
   threatActors: [],
-};
-
-const mockAlertReadASummary: alertSummary = {
-  childTags: [
-    {
-      description: null,
-      value: "recipient",
-      uuid: "c5d3321d-883c-4772-b511-489273e13fde",
-    },
-    {
-      description: null,
-      value: "from_address",
-      uuid: "f9081b70-c2bf-4a7d-ba90-a675e8a929d2",
-    },
-    {
-      description: null,
-      value: "contacted_host",
-      uuid: "3c1ca637-48d1-4d47-aeee-0962bc32d96d",
-    },
-    {
-      description: null,
-      value: "c2",
-      uuid: "a0b2d514-c544-4a8f-a059-b6151b9f1dd6",
-    },
-  ],
-  comments: [],
-  description: "",
-  disposition: "OPEN",
-  dispositionTime: null,
-  dispositionUser: "Analyst",
-  eventUuid: "None",
-  eventTime: new Date("2021-12-18T00:59:43.570343+00:00"),
-  insertTime: new Date("2021-12-18T00:59:43.570343+00:00"),
-  name: "Small Alert",
-  owner: "Analyst",
-  queue: "test_queue",
-  tags: [],
-  tool: "test_tool",
-  toolInstance: "test_tool_instance",
-  type: "test_type",
-  uuid: "uuid1",
 };
 
 const mockAlertReadBSummary: alertSummary = {
