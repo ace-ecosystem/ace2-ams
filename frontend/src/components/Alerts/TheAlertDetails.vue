@@ -10,7 +10,7 @@
         @click="copyLink"
       />
       <NodeTagVue
-        v-for="tag in getAllTags(alertStore.openAlert)"
+        v-for="tag in getAllAlertTags(alertStore.openAlert)"
         :key="tag.uuid"
         :tag="tag"
       ></NodeTagVue>
@@ -49,7 +49,7 @@
 
   import { copyToClipboard } from "@/etc/helpers";
   import { useAlertStore } from "@/stores/alert";
-  import { getAllTags } from "@/services/api/alert";
+  import { getAllAlertTags } from "@/etc/helpers";
   import AlertTableCell from "./AlertTableCell.vue";
 
   const alertStore = useAlertStore();
