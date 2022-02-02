@@ -1,5 +1,11 @@
 import { alertFilters } from "@/etc/constants";
-import { formatNodeFiltersForAPI, parseFilters } from "@/etc/helpers";
+import {
+  formatNodeFiltersForAPI,
+  parseFilters,
+  getAlertLink,
+  getAllAlertTags,
+} from "@/etc/helpers";
+import { mockAlertReadA } from "../../../mocks/alert";
 import { alertFilterParams } from "@/models/alert";
 import { userRead } from "@/models/user";
 import { useObservableTypeStore } from "@/stores/observableType";
@@ -220,5 +226,36 @@ describe("formatNodeFiltersForAPI", () => {
       tags: "tagA,tagB",
       observable: "test|example",
     });
+  });
+
+  it("getAlertLink correctly generates an alert link given an alert object", () => {
+    const result = getAlertLink(mockAlertReadA);
+    expect(result).toEqual("/alert/uuid1");
+  });
+
+  it("getAllAlertTags formats a given alert's tags into a sorted and dedup'd list of tags", () => {
+    const result = getAllAlertTags(mockAlertReadA);
+    expect(result).toEqual([
+      {
+        description: null,
+        value: "c2",
+        uuid: "a0b2d514-c544-4a8f-a059-b6151b9f1dd6",
+      },
+      {
+        description: null,
+        value: "contacted_host",
+        uuid: "3c1ca637-48d1-4d47-aeee-0962bc32d96d",
+      },
+      {
+        description: null,
+        value: "from_address",
+        uuid: "f9081b70-c2bf-4a7d-ba90-a675e8a929d2",
+      },
+      {
+        description: null,
+        value: "recipient",
+        uuid: "c5d3321d-883c-4772-b511-489273e13fde",
+      },
+    ]);
   });
 });

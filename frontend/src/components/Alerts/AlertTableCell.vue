@@ -21,12 +21,11 @@
     </span>
     <!-- Alert comments -->
     <span v-if="props.data.comments">
-      <pre
-        v-for="comment in props.data.comments"
-        :key="comment.uuid"
-        class="p-mr-2 comment"
-        >{{ formatComment(comment) }}</pre
-      >
+      <pre class="p-mr-2 comment"><NodeComment
+      v-for="comment in props.data.comments"
+      :key="comment.uuid"
+      :comment="comment"
+    /></pre>
     </span>
   </div>
 
@@ -34,6 +33,18 @@
   <span v-else-if="props.field.includes('Time')">
     {{ formatDateTime(props.data[props.field]) }}</span
   >
+
+  <!-- Alert Comments -->
+  <div v-else-if="props.field === 'comments'">
+    <span v-if="!props.data.comments.length">None</span>
+    <NodeComment
+      v-for="comment in props.data.comments"
+      v-else
+      :key="comment.uuid"
+      :comment="comment"
+      :include-time="true"
+    />
+  </div>
 
   <!-- Everything else -->
   <span v-else> {{ props.data[props.field] }}</span>
@@ -43,6 +54,7 @@
   import { defineProps } from "vue";
 
   import NodeTagVue from "@/components/Node/NodeTag.vue";
+  import NodeComment from "../Node/NodeComment.vue";
 
   import { getAllAlertTags, getAlertLink } from "@/etc/helpers";
 
@@ -50,10 +62,6 @@
     data: { type: Object, required: true },
     field: { type: String, required: true },
   });
-
-  const formatComment = (comment) => {
-    return `(${comment.user.displayName}) ${comment.value}`;
-  };
 
   const formatDateTime = (dateTime) => {
     if (dateTime) {

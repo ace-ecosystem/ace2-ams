@@ -7,6 +7,7 @@ import snakecaseKeys from "snakecase-keys";
 import { alertCreate } from "@/models/alert";
 import { useAlertStore } from "@/stores/alert";
 import { createCustomPinia } from "@unit/helpers";
+import { mockAlertReadA, mockAlertReadASummary } from "../../../mocks/alert";
 
 createCustomPinia();
 
@@ -41,6 +42,12 @@ const mockAlert = {
 describe("alert Actions", () => {
   beforeEach(() => {
     store.$reset();
+  });
+
+  it("will have openAlertSummary return the current openAlert summary if there is one, otherwise it will return null", () => {
+    expect(store.openAlertSummary).toBeNull();
+    store.openAlert = mockAlertReadA;
+    expect(store.openAlertSummary).toEqual(mockAlertReadASummary);
   });
 
   it("will request to create an alert with a given AlertCreate object, and set the openAlert to result on success", async () => {

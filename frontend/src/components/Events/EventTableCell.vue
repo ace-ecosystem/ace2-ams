@@ -20,12 +20,11 @@
     <br />
     <!-- Event Comments -->
     <span v-if="props.data.comments" data-cy="comments">
-      <pre
-        v-for="comment in props.data.comments"
-        :key="comment.uuid"
-        class="p-mr-2 comment"
-        >{{ formatComment(comment) }}</pre
-      >
+      <pre class="p-mr-2 comment"><NodeComment
+      v-for="comment in props.data.comments"
+      :key="comment.uuid"
+      :comment="comment"
+    /></pre>
     </span>
   </div>
   <!-- Event Time fields -->
@@ -43,15 +42,12 @@
 <script setup>
   import { defineProps } from "vue";
   import NodeTagVue from "@/components/Node/NodeTag.vue";
+  import NodeComment from "../Node/NodeComment.vue";
 
   const props = defineProps({
     data: { type: Object, required: true },
     field: { type: String, required: true },
   });
-
-  const formatComment = (comment) => {
-    return `(${comment.user.displayName}) ${comment.value}`;
-  };
 
   const formatDateTime = (dateTime) => {
     if (dateTime) {

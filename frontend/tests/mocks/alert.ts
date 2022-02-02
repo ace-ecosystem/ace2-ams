@@ -1,4 +1,4 @@
-import { alertReadPage, alertTreeRead } from "@/models/alert";
+import { alertReadPage, alertSummary, alertTreeRead } from "@/models/alert";
 import { analysisRead } from "@/models/analysis";
 
 export const mockAlert: alertTreeRead = {
@@ -537,6 +537,48 @@ export const mockAlert: alertTreeRead = {
     value: "test_type",
     uuid: "d0cd113a-04f6-437a-8b72-222d2161d074",
   },
+};
+
+export const mockAlertReadA = Object.assign({}, mockAlert, { uuid: "uuid1" });
+export const mockAlertReadASummary: alertSummary = {
+  childTags: [
+    {
+      description: null,
+      value: "recipient",
+      uuid: "c5d3321d-883c-4772-b511-489273e13fde",
+    },
+    {
+      description: null,
+      value: "from_address",
+      uuid: "f9081b70-c2bf-4a7d-ba90-a675e8a929d2",
+    },
+    {
+      description: null,
+      value: "contacted_host",
+      uuid: "3c1ca637-48d1-4d47-aeee-0962bc32d96d",
+    },
+    {
+      description: null,
+      value: "c2",
+      uuid: "a0b2d514-c544-4a8f-a059-b6151b9f1dd6",
+    },
+  ],
+  comments: [],
+  description: "",
+  disposition: "OPEN",
+  dispositionTime: null,
+  dispositionUser: "Analyst",
+  eventUuid: "None",
+  eventTime: new Date("2021-12-18T00:59:43.570343+00:00"),
+  insertTime: new Date("2021-12-18T00:59:43.570343+00:00"),
+  name: "Small Alert",
+  owner: "Analyst",
+  queue: "test_queue",
+  tags: [],
+  tool: "test_tool",
+  toolInstance: "test_tool_instance",
+  type: "test_type",
+  uuid: "uuid1",
 };
 
 export const mockAlertPage: alertReadPage = {
