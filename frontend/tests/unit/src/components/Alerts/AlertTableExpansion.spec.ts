@@ -14,7 +14,7 @@ function factory(options?: TestingOptions) {
       provide: { nodeType: "alerts" },
     },
     props: {
-      uuid: "uuid1",
+      uuid: "05975cf2-fd3d-4485-a03f-7cbc1e7efbbc",
     },
   });
 
@@ -25,7 +25,7 @@ function factory(options?: TestingOptions) {
 
 describe("AlertTableExpansion", () => {
   myNock
-    .post("/node/tree/observable", '["uuid1"]')
+    .post("/node/tree/observable", '["05975cf2-fd3d-4485-a03f-7cbc1e7efbbc"]')
     .reply(200, [
       { type: { value: "type_B" }, value: "value_B", tags: [] },
       { type: { value: "type_C" }, value: "value_C", tags: [] },
@@ -48,7 +48,7 @@ describe("AlertTableExpansion", () => {
   it("correctly fetches, sets, and sorts observables on getObservables", async () => {
     const { wrapper } = factory();
 
-    await wrapper.vm.getObservables("uuid1");
+    await wrapper.vm.getObservables("05975cf2-fd3d-4485-a03f-7cbc1e7efbbc");
 
     expect(wrapper.vm.observables).toEqual([
       { type: { value: "type_A" }, value: "value_A", tags: [] },
