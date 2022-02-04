@@ -44,11 +44,9 @@
         @click="open('SaveToEventModal')"
       />
     </template>
-    <!--  SAVE TO EVENT  -->
-    <template #child>
-      <SaveToEventModal @save-to-event="close" />
-    </template>
   </BaseModal>
+  <!--  SAVE TO EVENT  -->
+  <SaveToEventModal name="SaveToEventModal" @saveToEvent="setDisposition" />
 </template>
 
 <script setup>
