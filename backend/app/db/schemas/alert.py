@@ -1,10 +1,29 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Index, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, DateTime, ForeignKey, func, Index, String
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
 from api.models.alert import AlertTreeRead
+from db.database import Base
 from db.schemas.node import Node
 from db.schemas.helpers import utcnow
+
+
+class AlertHistory(Base):
+    __tablename__ = "alert_history"
+
+    uuid = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+
+    action = Column(String, nullable=False)
+
+    action_by = Column(String, nullable=False)
+
+    action_time = Column(DateTime(timezone=True), server_default=utcnow(), nullable=False)
+
+    record_uuid = Column(UUID(as_uuid=True), index=True, nullable=False)
+
+    field = Column(String)
+
+    diff = Column(JSONB)
 
 
 class Alert(Node):
