@@ -93,16 +93,14 @@
         uuid: uuid,
         disposition: newDisposition.value.value,
       }));
-
       await alertStore.update(updateData);
 
       if (dispositionComment.value) {
-        await NodeComment.create(
-          selectedAlertStore.selected.map((uuid) => ({
-            nodeUuid: uuid,
-            ...commentData.value,
-          })),
-        );
+        const commentCreateData = selectedAlertStore.selected.map((uuid) => ({
+          nodeUuid: uuid,
+          ...commentData.value,
+        }));
+        await NodeComment.create(commentCreateData);
       }
     } catch (err) {
       if (err.message.includes("409")) {
