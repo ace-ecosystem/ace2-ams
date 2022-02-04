@@ -14,7 +14,7 @@ from api.routes.observable import _create_observable
 from core.auth import validate_access_token
 from db import crud
 from db.database import get_db
-from db.schemas.alert import Alert
+from db.schemas.alert import Alert, AlertHistory
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.alert_queue import AlertQueue
 from db.schemas.alert_tool import AlertTool
@@ -47,6 +47,7 @@ def create_alert(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
+    username: str = Depends(validate_access_token),
 ):
     # Create the new alert Node using the data from the request
     new_alert: Alert = create_node(
@@ -91,6 +92,15 @@ def create_alert(
         )
 
     crud.commit(db)
+
+    # Add an entry to the AlertHistory table
+    crud.record_create_history(
+        history_table=AlertHistory,
+        action_by=username,
+        record_uuid=alert.uuid,
+        db=db,
+    )
+
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=new_alert.uuid)
 
 
@@ -389,15 +399,22 @@ def update_alerts(
 ):
     for alert in alerts:
         # Update the Node attributes
-        db_alert: Alert = update_node(node_update=alert, uuid=alert.uuid, db_table=Alert, db=db)
+        db_alert, diffs = update_node(node_update=alert, uuid=alert.uuid, db_table=Alert, db=db)
 
         # Get the data that was given in the request and use it to update the database object
         update_data = alert.dict(exclude_unset=True)
 
         if "description" in update_data:
+            diffs.append(crud.Diff(field="description", old=db_alert.description, new=update_data["description"]))
+
             db_alert.description = update_data["description"]
 
         if "disposition" in update_data:
+            diff = crud.Diff(field="disposition", old=None, new=update_data["disposition"])
+            if db_alert.disposition:
+                diff.old = db_alert.disposition.value
+            diffs.append(diff)
+
             db_alert.disposition = crud.read_by_value(
                 value=update_data["disposition"], db_table=AlertDisposition, db=db
             )
@@ -405,6 +422,8 @@ def update_alerts(
             db_alert.disposition_user = crud.read_user_by_username(username=username, db=db)
 
         if "event_uuid" in update_data:
+            diffs.append(crud.Diff(field="event_uuid", old=db_alert.event_uuid, new=update_data["event_uuid"]))
+
             if update_data["event_uuid"]:
                 db_alert.event = crud.read(uuid=update_data["event_uuid"], db_table=Event, db=db)
 
@@ -414,18 +433,34 @@ def update_alerts(
                 db_alert.event = None
 
         if "event_time" in update_data:
+            diffs.append(crud.Diff(field="event_time", old=db_alert.event_time, new=update_data["event_time"]))
+
             db_alert.event_time = update_data["event_time"]
 
         if "instructions" in update_data:
+            diffs.append(crud.Diff(field="instructions", old=db_alert.instructions, new=update_data["instructions"]))
+
             db_alert.instructions = update_data["instructions"]
 
         if "owner" in update_data:
+            diff = crud.Diff(field="owner", old=None, new=update_data["owner"])
+            if db_alert.owner:
+                diff.old = db_alert.owner.username
+            diffs.append(diff)
+
             db_alert.owner = crud.read_user_by_username(username=update_data["owner"], db=db)
 
         if "queue" in update_data:
+            diffs.append(crud.Diff(field="queue", old=db_alert.queue, new=update_data["queue"]))
+
             db_alert.queue = crud.read_by_value(value=update_data["queue"], db_table=AlertQueue, db=db)
 
         crud.commit(db)
+
+        # Add the entries to the AlertHistory table
+        crud.record_update_histories(
+            history_table=AlertHistory, action_by=username, record_uuid=alert.uuid, diffs=diffs, db=db
+        )
 
         response.headers["Content-Location"] = request.url_for("get_alert", uuid=alert.uuid)
 
