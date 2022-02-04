@@ -2,64 +2,62 @@
 <!-- 'Save to Event' alert action modal, will close the Disposition Modal that opened it -->
 
 <template>
-  <BaseModal :name="name" header="Save to Event">
-    <TabView class="p-m-1">
-      <TabPanel
-        v-for="eventType of existingEvents"
-        :key="eventType.title"
-        :header="eventType.title"
-      >
-        <div
-          v-for="eventItem of eventType.events"
-          :key="eventItem"
-          class="p-field-radiobutton p-inputgroup"
+  <BaseModal
+    ref="modal"
+    :name="name"
+    header="Save to Event"
+    :style="{ width: '75vw' }"
+  >
+    <div v-if="isLoading" style="height: 75vh">
+      Loading events, hold on a sec...
+    </div>
+    <div v-else style="height: 70vh">
+      <TabView v-model:activeIndex="selectedEventStatus" class="p-m-1">
+        <TabPanel key="newEvent" header="NEW">
+          <div class="p-m-1 p-grid p-fluid p-formgrid">
+            <div class="p-field p-col p-m-1">
+              <br />
+              <span class="p-float-label">
+                <InputText
+                  id="newEventName"
+                  v-model="newEventName"
+                  name="newEventName"
+                  type="text"
+                />
+                <label for="newEventName">Event Name</label>
+              </span>
+              <br />
+              <br />
+              <span class="p-float-label">
+                <Textarea
+                  id="newEventComment"
+                  v-model="newEventComment"
+                  :auto-resize="true"
+                  rows="5"
+                  cols="30"
+                />
+                <label for="newEventComment">Disposition Comment</label>
+              </span>
+            </div>
+          </div>
+        </TabPanel>
+        <TabPanel
+          v-for="eventType of availableEventStatusOptions"
+          :key="eventType.uuid"
+          :header="eventType.value"
         >
-          <RadioButton
-            :id="eventItem"
-            v-model="selectedEvent"
-            name="eventItem"
-            :value="eventItem"
+          <Listbox
+            v-if="!newEventSelected"
+            v-model="selectedExistingEvent"
+            :options="events[eventType.value]"
+            :filter="true"
+            option-label="name"
+            filter-placeholder="Search"
+            list-style="height: 55vh"
           />
-          <label :for="eventItem">{{ eventItem }}</label>
-        </div>
-        <div class="p-field-radiobutton p-inputgroup">
-          <RadioButton
-            id="newEventItem"
-            v-model="selectedEvent"
-            name="newEventItem"
-            value="New Event"
-          />
-          <label for="newEventItem">New Event</label>
-        </div>
-        <div v-if="newEventSelected" class="p-m-1 p-grid p-fluid p-formgrid">
-          <div class="p-field p-col p-m-1">
-            <InputText v-model="newEventName" name="newEventName" type="text" />
-            <Textarea
-              id="newEventComment"
-              v-model="newEventComment"
-              :auto-resize="true"
-              rows="5"
-              cols="30"
-              placeholder="Add a comment..."
-            />
-            <Dropdown
-              v-model="newEventComment"
-              :options="suggestedComments"
-              :show-clear="true"
-              placeholder="Select from a past comment"
-            />
-          </div>
-          <div class="p-col-1 p-m-1">
-            <Button
-              type="button"
-              icon="pi pi-refresh"
-              class="p-button-outlined p-m-1"
-              @click="autoSetEventName"
-            />
-          </div>
-        </div>
-      </TabPanel>
-    </TabView>
+        </TabPanel>
+      </TabView>
+    </div>
     <template #footer>
       <Button
         label="Back"
@@ -70,95 +68,173 @@
       <Button
         label="Save"
         icon="pi pi-check"
-        :disabled="!anyEventSelected"
-        @click="save"
+        :disabled="!allowEventSelectionSubmit"
+        @click="saveToEvent"
       />
     </template>
   </BaseModal>
 </template>
 
-<script>
+<script setup>
+  import { computed, defineEmits, defineProps, ref, watch } from "vue";
+
+  import { useAuthStore } from "@/stores/auth";
+  import { useModalStore } from "@/stores/modal";
+  import { useSelectedAlertStore } from "@/stores/selectedAlert";
+  import { useEventStatusStore } from "@/stores/eventStatus";
+  import { useAlertStore } from "@/stores/alert";
+
+  import { Event } from "@/services/api/event";
+  import { parseEventSummary } from "@/stores/eventTable";
+  import { NodeComment } from "@/services/api/nodeComment";
+  const authStore = useAuthStore();
+  const alertStore = useAlertStore();
+  const eventStatusStore = useEventStatusStore();
+  const modalStore = useModalStore();
+  const selectedAlertStore = useSelectedAlertStore();
+
   import Button from "primevue/button";
-  import Dropdown from "primevue/dropdown";
   import InputText from "primevue/inputtext";
-  import RadioButton from "primevue/radiobutton";
   import TabPanel from "primevue/tabpanel";
   import TabView from "primevue/tabview";
   import Textarea from "primevue/textarea";
+  import Listbox from "primevue/listbox";
 
   import BaseModal from "@/components/Modals/BaseModal";
 
-  export default {
-    name: "SaveToEventModal",
-    components: {
-      BaseModal,
-      Button,
-      Dropdown,
-      InputText,
-      RadioButton,
-      TabPanel,
-      TabView,
-      Textarea,
-    },
+  const props = defineProps({
+    name: { type: String, required: true },
+  });
 
-    emits: ["save-to-event"],
+  const emit = defineEmits(["saveToEvent"]);
 
-    data() {
-      return {
-        selectedEvent: null,
-        displaySaveToEventModal: false,
+  const selectedExistingEvent = ref(null);
+  const events = ref({});
+  const newEventComment = ref(null);
+  const modal = ref(null);
+  const newEventName = ref("");
+  const availableEventStatusOptions = ref([]);
+  const isLoading = ref(false);
+  const selectedEventStatus = ref(1);
 
-        existingEvents: [
-          { title: "Open", events: ["event1", "event2"] },
-          { title: "Closed", events: ["event3", "event4"] },
-        ],
+  const eventStatusOptions = ["OPEN", "CLOSED"];
 
-        newEventComment: null,
-        newEventName: null,
-        suggestedComments: ["this is an old comment", "and another"],
-      };
-    },
+  const loadEvents = async () => {
+    isLoading.value = true;
 
-    computed: {
-      anyEventSelected: function () {
-        return Boolean(this.selectedEvent);
-      },
+    // Fetch all known event status objects that are configured in eventStatusOptions
+    availableEventStatusOptions.value = eventStatusStore.allItems.filter(
+      (status) => eventStatusOptions.includes(status.value),
+    );
 
-      newEventSelected: function () {
-        return this.selectedEvent === "New Event";
-      },
+    // Resort our filtered list to match the order of eventStatusOptions
+    availableEventStatusOptions.value.sort(function (a, b) {
+      return (
+        eventStatusOptions.indexOf(a.value) -
+        eventStatusOptions.indexOf(b.value)
+      );
+    });
 
-      name() {
-        return this.$options.name;
-      },
-    },
+    // Fetch and cache all events for each configured status
+    for (const status of availableEventStatusOptions.value) {
+      events.value[status.value] = await getEventsWithStatus(status);
+    }
 
-    created() {
-      this.autoSetEventName();
-    },
+    isLoading.value = false;
+  };
 
-    methods: {
-      autoSetEventName() {
-        // Automagically set new event name using data from selected alerts
-        this.newEventName = "this is a placeholder";
-      },
+  watch(modalStore, () => {
+    if (modalStore.active === props.name) {
+      loadEvents();
+    }
+  });
 
-      close() {
-        this.selectedEvent = null;
-        this.displaySaveToEventModal = false;
-        this.existingEvents = [
-          { title: "Open", events: ["event1", "event2"] },
-          { title: "Closed", events: ["event3", "event4"] },
-        ];
-        this.newEventComment = null;
-        this.newEventName = null;
-        this.$store.dispatch("modals/close", this.name);
-      },
+  const getEventsWithStatus = async (status) => {
+    const allEvents = await Event.readAllPages({
+      status: status,
+      sort: "created_time|asc",
+    });
 
-      save() {
-        this.close();
-        this.$emit("save-to-event");
-      },
-    },
+    return allEvents.map((x) => parseEventSummary(x));
+  };
+
+  const commentData = computed(() => {
+    if (!newEventComment.value) {
+      return null;
+    }
+    return {
+      user: authStore.user ? authStore.user.username : null,
+      value: newEventComment.value,
+    };
+  });
+  const allowEventSelectionSubmit = computed(() => {
+    return (
+      Boolean(selectedExistingEvent.value) ||
+      (Boolean(newEventSelected.value) &&
+        newEventName.value &&
+        newEventName.value.length)
+    );
+  });
+  const newEventSelected = computed(() => {
+    return selectedEventStatus.value === 0;
+  });
+
+  const close = () => {
+    selectedExistingEvent.value = null;
+    events.value = [
+      { title: "Open", events: ["event1", "event2"] },
+      { title: "Closed", events: ["event3", "event4"] },
+    ];
+    newEventComment.value = null;
+    newEventName.value = null;
+    modalStore.close(props.name);
+  };
+
+  const saveToEvent = async () => {
+    let eventUuid = null;
+
+    // If the event doesn't exist, create it
+    if (newEventSelected.value) {
+      const newEvent = await Event.create(
+        {
+          name: newEventName.value,
+          queue: authStore.user.defaultEventQueue.value,
+          owner: authStore.user.username,
+          status: "OPEN",
+        },
+        true,
+      );
+      eventUuid = newEvent.uuid;
+    } else {
+      eventUuid = selectedExistingEvent.value.uuid;
+    }
+
+    // Update alert(s) eventUuid
+    await alertStore.update(
+      selectedAlertStore.selected.map((uuid) => ({
+        uuid: uuid,
+        eventUuid: eventUuid,
+      })),
+    );
+
+    // Add any comments if necessary
+    if (commentData.value) {
+      try {
+        await NodeComment.create(
+          selectedAlertStore.selected.map((uuid) => ({
+            nodeUuid: uuid,
+            ...commentData.value,
+          })),
+        );
+      } catch (err) {
+        if ("409" in err) {
+          console.warning("Comment already exists!");
+        }
+      }
+    }
+
+    close();
+    // This will close the disposition modal
+    emit("saveToEvent");
   };
 </script>
