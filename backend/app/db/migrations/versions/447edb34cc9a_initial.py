@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 9915657d0f60
+Revision ID: 447edb34cc9a
 Revises: 
-Create Date: 2022-01-10 16:57:28.837953
+Create Date: 2022-02-04 18:51:47.556480
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '9915657d0f60'
+revision = '447edb34cc9a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,6 +26,17 @@ def upgrade() -> None:
     sa.UniqueConstraint('rank')
     )
     op.create_index(op.f('ix_alert_disposition_value'), 'alert_disposition', ['value'], unique=True)
+    op.create_table('alert_history',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('action', sa.String(), nullable=False),
+    sa.Column('action_by', sa.String(), nullable=False),
+    sa.Column('action_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
+    sa.Column('record_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('field', sa.String(), nullable=True),
+    sa.Column('diff', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_alert_history_record_uuid'), 'alert_history', ['record_uuid'], unique=False)
     op.create_table('alert_queue',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -341,7 +352,14 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
     sa.PrimaryKeyConstraint('uuid')
     )
+    op.create_index(op.f('ix_event_alert_time'), 'event', ['alert_time'], unique=False)
+    op.create_index(op.f('ix_event_contain_time'), 'event', ['contain_time'], unique=False)
+    op.create_index(op.f('ix_event_creation_time'), 'event', ['creation_time'], unique=False)
+    op.create_index(op.f('ix_event_disposition_time'), 'event', ['disposition_time'], unique=False)
+    op.create_index(op.f('ix_event_event_time'), 'event', ['event_time'], unique=False)
+    op.create_index(op.f('ix_event_ownership_time'), 'event', ['ownership_time'], unique=False)
     op.create_index(op.f('ix_event_queue_uuid'), 'event', ['queue_uuid'], unique=False)
+    op.create_index(op.f('ix_event_remediation_time'), 'event', ['remediation_time'], unique=False)
     op.create_table('node_comment',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('insert_time', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
@@ -476,7 +494,14 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_node_comment_node_uuid'), table_name='node_comment')
     op.drop_index('comment_value_trgm', table_name='node_comment', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_table('node_comment')
+    op.drop_index(op.f('ix_event_remediation_time'), table_name='event')
     op.drop_index(op.f('ix_event_queue_uuid'), table_name='event')
+    op.drop_index(op.f('ix_event_ownership_time'), table_name='event')
+    op.drop_index(op.f('ix_event_event_time'), table_name='event')
+    op.drop_index(op.f('ix_event_disposition_time'), table_name='event')
+    op.drop_index(op.f('ix_event_creation_time'), table_name='event')
+    op.drop_index(op.f('ix_event_contain_time'), table_name='event')
+    op.drop_index(op.f('ix_event_alert_time'), table_name='event')
     op.drop_table('event')
     op.drop_table('user')
     op.drop_index('type_value', table_name='observable')
@@ -555,6 +580,8 @@ def downgrade() -> None:
     op.drop_table('alert_tool')
     op.drop_index(op.f('ix_alert_queue_value'), table_name='alert_queue')
     op.drop_table('alert_queue')
+    op.drop_index(op.f('ix_alert_history_record_uuid'), table_name='alert_history')
+    op.drop_table('alert_history')
     op.drop_index(op.f('ix_alert_disposition_value'), table_name='alert_disposition')
     op.drop_table('alert_disposition')
     # ### end Alembic commands ###
