@@ -2,17 +2,12 @@
 <!-- 'Save to Event' alert action modal, will close the Disposition Modal that opened it -->
 
 <template>
-  <BaseModal
-    ref="modal"
-    :name="name"
-    header="Save to Event"
-    :style="{ width: '75vw' }"
-  >
+  <BaseModal :name="name" header="Save to Event" :style="{ width: '75vw' }">
     <div v-if="isLoading" style="height: 75vh">
       Loading events, hold on a sec...
     </div>
     <div v-else style="height: 70vh">
-      <TabView v-model:activeIndex="selectedEventStatus" class="p-m-1">
+      <TabView v-model:activeIndex="selectedEventStatusOption" class="p-m-1">
         <TabPanel key="newEvent" header="NEW">
           <div class="p-m-1 p-grid p-fluid p-formgrid">
             <div class="p-field p-col p-m-1">
@@ -78,29 +73,30 @@
 <script setup>
   import { computed, defineEmits, defineProps, ref, watch } from "vue";
 
-  import { useAuthStore } from "@/stores/auth";
-  import { useModalStore } from "@/stores/modal";
-  import { useSelectedAlertStore } from "@/stores/selectedAlert";
-  import { useEventStatusStore } from "@/stores/eventStatus";
-  import { useAlertStore } from "@/stores/alert";
-
-  import { Event } from "@/services/api/event";
-  import { parseEventSummary } from "@/stores/eventTable";
-  import { NodeComment } from "@/services/api/nodeComment";
-  const authStore = useAuthStore();
-  const alertStore = useAlertStore();
-  const eventStatusStore = useEventStatusStore();
-  const modalStore = useModalStore();
-  const selectedAlertStore = useSelectedAlertStore();
-
   import Button from "primevue/button";
   import InputText from "primevue/inputtext";
+  import Listbox from "primevue/listbox";
   import TabPanel from "primevue/tabpanel";
   import TabView from "primevue/tabview";
   import Textarea from "primevue/textarea";
-  import Listbox from "primevue/listbox";
 
   import BaseModal from "@/components/Modals/BaseModal";
+
+  import { Event } from "@/services/api/event";
+  import { NodeComment } from "@/services/api/nodeComment";
+  import { parseEventSummary } from "@/stores/eventTable";
+
+  import { useAlertStore } from "@/stores/alert";
+  import { useAuthStore } from "@/stores/auth";
+  import { useEventStatusStore } from "@/stores/eventStatus";
+  import { useModalStore } from "@/stores/modal";
+  import { useSelectedAlertStore } from "@/stores/selectedAlert";
+
+  const alertStore = useAlertStore();
+  const authStore = useAuthStore();
+  const eventStatusStore = useEventStatusStore();
+  const modalStore = useModalStore();
+  const selectedAlertStore = useSelectedAlertStore();
 
   const props = defineProps({
     name: { type: String, required: true },
@@ -108,16 +104,15 @@
 
   const emit = defineEmits(["saveToEvent"]);
 
-  const selectedExistingEvent = ref(null);
-  const events = ref({});
-  const newEventComment = ref(null);
-  const modal = ref(null);
-  const newEventName = ref("");
-  const availableEventStatusOptions = ref([]);
-  const isLoading = ref(false);
-  const selectedEventStatus = ref(1);
-
   const eventStatusOptions = ["OPEN", "CLOSED"];
+
+  const availableEventStatusOptions = ref([]);
+  const events = ref({});
+  const isLoading = ref(false);
+  const newEventComment = ref(null);
+  const newEventName = ref("");
+  const selectedEventStatusOption = ref(1);
+  const selectedExistingEvent = ref(null);
 
   const loadEvents = async () => {
     isLoading.value = true;
@@ -135,19 +130,13 @@
       );
     });
 
-    // Fetch and cache all events for each configured status
+    // Fetch and store all events for each configured status
     for (const status of availableEventStatusOptions.value) {
       events.value[status.value] = await getEventsWithStatus(status);
     }
 
     isLoading.value = false;
   };
-
-  watch(modalStore, () => {
-    if (modalStore.active === props.name) {
-      loadEvents();
-    }
-  });
 
   const getEventsWithStatus = async (status) => {
     const allEvents = await Event.readAllPages({
@@ -158,37 +147,12 @@
     return allEvents.map((x) => parseEventSummary(x));
   };
 
-  const commentData = computed(() => {
-    if (!newEventComment.value) {
-      return null;
+  // Load available events when modal becomes active
+  watch(modalStore, () => {
+    if (modalStore.active === props.name) {
+      loadEvents();
     }
-    return {
-      user: authStore.user ? authStore.user.username : null,
-      value: newEventComment.value,
-    };
   });
-  const allowEventSelectionSubmit = computed(() => {
-    return (
-      Boolean(selectedExistingEvent.value) ||
-      (Boolean(newEventSelected.value) &&
-        newEventName.value &&
-        newEventName.value.length)
-    );
-  });
-  const newEventSelected = computed(() => {
-    return selectedEventStatus.value === 0;
-  });
-
-  const close = () => {
-    selectedExistingEvent.value = null;
-    events.value = [
-      { title: "Open", events: ["event1", "event2"] },
-      { title: "Closed", events: ["event3", "event4"] },
-    ];
-    newEventComment.value = null;
-    newEventName.value = null;
-    modalStore.close(props.name);
-  };
 
   const saveToEvent = async () => {
     let eventUuid = null;
@@ -236,5 +200,44 @@
     close();
     // This will close the disposition modal
     emit("saveToEvent");
+  };
+
+  const allowEventSelectionSubmit = computed(() => {
+    return (
+      // Alerts must be selected AND
+      useSelectedAlertStore.anySelected &&
+      // Existing alert must be selected OR
+      (Boolean(selectedExistingEvent.value) ||
+        // New Event option must be selected AND
+        (Boolean(newEventSelected.value) &&
+          // a name for the new event has been given
+          newEventName.value &&
+          newEventName.value.length))
+    );
+  });
+
+  const commentData = computed(() => {
+    if (!newEventComment.value) {
+      return null;
+    }
+    return {
+      user: authStore.user ? authStore.user.username : null,
+      value: newEventComment.value,
+    };
+  });
+
+  const newEventSelected = computed(() => {
+    return selectedEventStatusOption.value === 0;
+  });
+
+  const close = () => {
+    selectedExistingEvent.value = null;
+    events.value = [
+      { title: "Open", events: ["event1", "event2"] },
+      { title: "Closed", events: ["event3", "event4"] },
+    ];
+    newEventComment.value = null;
+    newEventName.value = null;
+    modalStore.close(props.name);
   };
 </script>
