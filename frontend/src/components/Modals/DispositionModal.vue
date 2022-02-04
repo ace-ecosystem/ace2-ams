@@ -107,7 +107,11 @@
         );
       }
     } catch (err) {
-      error.value = err.message;
+      if (err.message.includes("409")) {
+        console.warn("That comment already exists!");
+      } else {
+        error.value = err.message;
+      }
     }
 
     isLoading.value = false;
