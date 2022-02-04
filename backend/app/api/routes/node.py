@@ -48,13 +48,18 @@ def create_node(
     return db_node
 
 
-def update_node(node_update: NodeUpdate, uuid: UUID, db_table: DeclarativeMeta, db: Session) -> DeclarativeMeta:
+def update_node(
+    node_update: NodeUpdate, uuid: UUID, db_table: DeclarativeMeta, db: Session
+) -> tuple[Node, list[crud.Diff]]:
     """
     Helper function when updating a Node that enforces version matching and updates the attributes inherited from Node.
     """
 
     # Fetch the Node from the database
     db_node: Node = crud.read(uuid=uuid, db_table=db_table, db=db)
+
+    # Capture all of the diffs that were made (for adding to the history tables)
+    diffs: list[crud.Diff] = []
 
     # Get the data that was given in the request and use it to update the database object
     update_data = node_update.dict(exclude_unset=True)
@@ -66,23 +71,33 @@ def update_node(node_update: NodeUpdate, uuid: UUID, db_table: DeclarativeMeta, 
         )
 
     if "directives" in update_data:
+        diffs.append(
+            crud.Diff(field="directives", old=[x.value for x in db_node.directives], new=update_data["directives"])
+        )
         db_node.directives = crud.read_by_values(values=update_data["directives"], db_table=NodeDirective, db=db)
 
     if "tags" in update_data:
+        diffs.append(crud.Diff(field="tags", old=[x.value for x in db_node.tags], new=update_data["tags"]))
         db_node.tags = crud.read_by_values(values=update_data["tags"], db_table=NodeTag, db=db)
 
     if "threat_actors" in update_data:
+        diffs.append(
+            crud.Diff(
+                field="threat_actors", old=[x.value for x in db_node.threat_actors], new=update_data["threat_actors"]
+            )
+        )
         db_node.threat_actors = crud.read_by_values(
             values=update_data["threat_actors"], db_table=NodeThreatActor, db=db
         )
 
     if "threats" in update_data:
+        diffs.append(crud.Diff(field="threats", old=[x.value for x in db_node.threats], new=update_data["threats"]))
         db_node.threats = crud.read_by_values(values=update_data["threats"], db_table=NodeThreat, db=db)
 
     # Update the node version
     db_node.version = uuid4()
 
-    return db_node
+    return db_node, diffs
 
 
 #
