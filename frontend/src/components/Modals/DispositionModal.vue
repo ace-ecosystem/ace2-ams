@@ -2,7 +2,7 @@
 <!-- 'Disposition' alert action modal, contains trigger to open SaveToEvent modal -->
 
 <template>
-  <BaseModal :name="name" header="Set Disposition">
+  <BaseModal :name="name" header="Set Disposition" :style="{ width: '75vw' }">
     <div>
       <div v-if="error" class="p-col">
         <Message severity="error" @close="handleError">{{ error }}</Message>
@@ -15,7 +15,7 @@
           :options="alertDispositionStore.allItems"
           option-label="value"
           list-style="max-height:250px"
-          style="width: 20rem"
+          style="width: 70vw"
         />
       </div>
       <div class="p-field p-col">
