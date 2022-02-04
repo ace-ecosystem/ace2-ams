@@ -40,7 +40,7 @@
         v-if="showAddToEventButton"
         label="Save to Event"
         class="p-button-raised"
-        disabled
+        :disabled="!showAddToEventButton"
         @click="open('SaveToEventModal')"
       />
     </template>
