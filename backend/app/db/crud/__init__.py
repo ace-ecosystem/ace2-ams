@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from fastapi import HTTPException, status
 from pydantic import BaseModel
 from pydantic.types import UUID4
@@ -17,6 +18,40 @@ from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.user import User
+
+
+#
+# HISTORY
+#
+
+
+@dataclass
+class Diff:
+    field: str
+    old: Union[None, str, list[str]]
+    new: Union[None, str, list[str]]
+
+
+def record_create_history(history_table: DeclarativeMeta, action_by: str, record_uuid: UUID, db: Session):
+    db.add(history_table(action="CREATE", action_by=action_by, record_uuid=record_uuid))
+    commit(db)
+
+
+def record_update_histories(
+    history_table: DeclarativeMeta, action_by: str, record_uuid: UUID, diffs: list[Diff], db: Session
+):
+    for diff in diffs:
+        db.add(
+            history_table(
+                action="UPDATE",
+                action_by=action_by,
+                record_uuid=record_uuid,
+                field=diff.field,
+                diff={"old": diff.old, "new": diff.new},
+            )
+        )
+
+    commit(db)
 
 
 #
