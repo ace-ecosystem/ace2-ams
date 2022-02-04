@@ -31,8 +31,12 @@ export const Event = {
     return api.read(endpoint, formattedParams);
   },
 
-  readAllPages: (params: eventFilterParams): Promise<eventRead[]> => {
-    const formattedParams = formatNodeFiltersForAPI(eventFilters, params);
+  readAllPages: (params?: eventFilterParams): Promise<eventRead[]> => {
+    let formattedParams = {} as eventFilterParams;
+    if (params) {
+      formattedParams = formatNodeFiltersForAPI(eventFilters, params);
+    }
+
     return api.readAll(endpoint, formattedParams);
   },
 
