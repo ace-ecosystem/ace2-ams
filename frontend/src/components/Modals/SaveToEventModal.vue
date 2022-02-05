@@ -238,14 +238,16 @@
   const allowEventSelectionSubmit = computed(() => {
     return (
       // Alerts must be selected AND
-      useSelectedAlertStore.anySelected &&
-      // Existing alert must be selected OR
-      (Boolean(selectedExistingEvent.value) ||
+      selectedAlertStore.anySelected &&
+      // Existing alert must be selected AND
+      ((selectedExistingEvent.value &&
+        //  NOT newEventSelected OR
+        !newEventSelected.value) ||
         // New Event option must be selected AND
-        (Boolean(newEventSelected.value) &&
+
+        (newEventSelected.value &&
           // a name for the new event has been given
-          newEventName.value &&
-          newEventName.value.length))
+          Boolean(newEventName.value.length)))
     );
   });
 
