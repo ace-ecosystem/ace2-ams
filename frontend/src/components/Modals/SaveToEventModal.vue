@@ -3,6 +3,11 @@
 
 <template>
   <BaseModal :name="name" header="Save to Event" :style="{ width: '75vw' }">
+    <div>
+      <div v-if="error" class="p-col">
+        <Message severity="error" @close="handleError">{{ error }}</Message>
+      </div>
+    </div>
     <div v-if="isLoading" style="height: 75vh">
       Loading events, hold on a sec...
     </div>
@@ -76,6 +81,7 @@
   import Button from "primevue/button";
   import InputText from "primevue/inputtext";
   import Listbox from "primevue/listbox";
+  import Message from "primevue/message";
   import TabPanel from "primevue/tabpanel";
   import TabView from "primevue/tabview";
   import Textarea from "primevue/textarea";
@@ -104,9 +110,11 @@
 
   const emit = defineEmits(["saveToEvent"]);
 
+  // TODO, may want to make this configurable in the constants file
   const eventStatusOptions = ["OPEN", "CLOSED"];
 
   const availableEventStatusOptions = ref([]);
+  const error = ref(null);
   const events = ref({});
   const isLoading = ref(false);
   const newEventComment = ref(null);
@@ -114,9 +122,7 @@
   const selectedEventStatusOption = ref(1);
   const selectedExistingEvent = ref(null);
 
-  const loadEvents = async () => {
-    isLoading.value = true;
-
+  const getAvailableEventStatusOptions = () => {
     // Fetch all known event status objects that are configured in eventStatusOptions
     availableEventStatusOptions.value = eventStatusStore.allItems.filter(
       (status) => eventStatusOptions.includes(status.value),
@@ -129,10 +135,21 @@
         eventStatusOptions.indexOf(b.value)
       );
     });
+  };
 
-    // Fetch and store all events for each configured status
-    for (const status of availableEventStatusOptions.value) {
-      events.value[status.value] = await getEventsWithStatus(status);
+  const loadEvents = async () => {
+    isLoading.value = true;
+
+    getAvailableEventStatusOptions();
+
+    try {
+      // Fetch and store all events for each configured status
+      for (const status of availableEventStatusOptions.value) {
+        events.value[status.value] = await getEventsWithStatus(status);
+      }
+    } catch (err) {
+      console.debug(err.message)
+      error.value = err.message;
     }
 
     isLoading.value = false;
@@ -148,9 +165,9 @@
   };
 
   // Load available events when modal becomes active
-  watch(modalStore, () => {
+  watch(modalStore, async () => {
     if (modalStore.active === props.name) {
-      loadEvents();
+      await loadEvents();
     }
   });
 
@@ -159,42 +176,58 @@
 
     // If the event doesn't exist, create it
     if (newEventSelected.value) {
-      const newEvent = await Event.create(
-        {
-          name: newEventName.value,
-          queue: authStore.user.defaultEventQueue.value,
-          owner: authStore.user.username,
-          status: "OPEN",
-        },
-        true,
-      );
-      eventUuid = newEvent.uuid;
+      try {
+        const newEvent = await Event.create(
+          {
+            name: newEventName.value,
+            queue: authStore.user.defaultEventQueue.value,
+            owner: authStore.user.username,
+            status: "OPEN",
+          },
+          true,
+        );
+        eventUuid = newEvent.uuid;
+      } catch (err) {
+        console.debug(err.message);
+        error.value = err.message;
+        return;
+      }
+
+      // Add any comments if necessary
+      if (commentData.value) {
+        const newCommentData = selectedAlertStore.selected.map((uuid) => ({
+          nodeUuid: uuid,
+          ...commentData.value,
+        }));
+        try {
+          await NodeComment.create(newCommentData);
+        } catch (err) {
+          console.debug(err.message);
+
+          if (err.message.includes("409")) {
+            console.warn("Comment already exists!");
+          } else {
+            error.value = err.message;
+            return;
+          }
+        }
+      }
     } else {
       eventUuid = selectedExistingEvent.value.uuid;
     }
 
     // Update alert(s) eventUuid
-    await alertStore.update(
-      selectedAlertStore.selected.map((uuid) => ({
-        uuid: uuid,
-        eventUuid: eventUuid,
-      })),
-    );
+    const updateData = selectedAlertStore.selected.map((uuid) => ({
+      uuid: uuid,
+      eventUuid: eventUuid,
+    }));
+    try {
+      await alertStore.update(updateData);
+    } catch (err) {
+      console.debug(err.message);
 
-    // Add any comments if necessary
-    if (commentData.value) {
-      try {
-        await NodeComment.create(
-          selectedAlertStore.selected.map((uuid) => ({
-            nodeUuid: uuid,
-            ...commentData.value,
-          })),
-        );
-      } catch (err) {
-        if ("409" in err) {
-          console.warning("Comment already exists!");
-        }
-      }
+      error.value = err.message;
+      return;
     }
 
     close();
@@ -221,7 +254,7 @@
       return null;
     }
     return {
-      user: authStore.user ? authStore.user.username : null,
+      user: authStore.user.username,
       value: newEventComment.value,
     };
   });
@@ -230,14 +263,15 @@
     return selectedEventStatusOption.value === 0;
   });
 
+  const handleError = () => {
+    error.value = null;
+  };
+
   const close = () => {
     selectedExistingEvent.value = null;
-    events.value = [
-      { title: "Open", events: ["event1", "event2"] },
-      { title: "Closed", events: ["event3", "event4"] },
-    ];
     newEventComment.value = null;
-    newEventName.value = null;
+    newEventName.value = "";
+    error.value = null;
     modalStore.close(props.name);
   };
 </script>
