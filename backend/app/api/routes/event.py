@@ -10,11 +10,12 @@ from uuid import UUID
 from api.models.event import EventCreate, EventRead, EventUpdateMultiple
 from api.routes import helpers
 from api.routes.node import create_node, update_node
+from core.auth import validate_access_token
 from db import crud
 from db.database import get_db
 from db.schemas.alert import Alert
 from db.schemas.alert_disposition import AlertDisposition
-from db.schemas.event import Event
+from db.schemas.event import Event, EventHistory
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_queue import EventQueue
 from db.schemas.event_remediation import EventRemediation
@@ -52,6 +53,7 @@ def create_event(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
+    username: str = Depends(validate_access_token),
 ):
     # Create the new event Node using the data from the request
     new_event: Event = create_node(node_create=event, db_node_type=Event, db=db, exclude={"alert_uuids"})
@@ -89,6 +91,14 @@ def create_event(
     # Save the new event to the database
     db.add(new_event)
     crud.commit(db)
+
+    # Add an entry to the history table
+    crud.record_create_history(
+        history_table=EventHistory,
+        action_by=username,
+        record_uuid=new_event.uuid,
+        db=db,
+    )
 
     response.headers["Content-Location"] = request.url_for("get_event", uuid=new_event.uuid)
 
@@ -448,6 +458,7 @@ def update_events(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
+    username: str = Depends(validate_access_token),
 ):
     for event in events:
         # Update the Node attributes
@@ -457,27 +468,52 @@ def update_events(
         update_data = event.dict(exclude_unset=True)
 
         if "alert_time" in update_data:
+            diffs.append(crud.create_diff(field="alert_time", old=db_event.alert_time, new=update_data["alert_time"]))
             db_event.alert_time = update_data["alert_time"]
 
         if "contain_time" in update_data:
+            diffs.append(
+                crud.create_diff(field="contain_time", old=db_event.contain_time, new=update_data["contain_time"])
+            )
             db_event.contain_time = update_data["contain_time"]
 
         if "disposition_time" in update_data:
+            diffs.append(
+                crud.create_diff(
+                    field="disposition_time", old=db_event.disposition_time, new=update_data["disposition_time"]
+                )
+            )
             db_event.disposition_time = update_data["disposition_time"]
 
         if "event_time" in update_data:
+            diffs.append(crud.create_diff(field="event_time", old=db_event.event_time, new=update_data["event_time"]))
             db_event.event_time = update_data["event_time"]
 
         if "name" in update_data:
+            diffs.append(crud.create_diff(field="name", old=db_event.name, new=update_data["name"]))
             db_event.name = update_data["name"]
 
         if "owner" in update_data:
+            old = db_event.owner.username if db_event.owner else None
+            diffs.append(crud.create_diff(field="owner", old=old, new=update_data["owner"]))
+
             db_event.owner = crud.read_user_by_username(username=update_data["owner"], db=db)
 
         if "ownership_time" in update_data:
+            diffs.append(
+                crud.create_diff(field="ownership_time", old=db_event.ownership_time, new=update_data["ownership_time"])
+            )
             db_event.ownership_time = update_data["ownership_time"]
 
         if "prevention_tools" in update_data:
+            diffs.append(
+                crud.create_diff(
+                    field="prevention_tools",
+                    old=[x.value for x in db_event.prevention_tools],
+                    new=update_data["prevention_tools"],
+                )
+            )
+
             db_event.prevention_tools = crud.read_by_values(
                 values=update_data["prevention_tools"],
                 db_table=EventPreventionTool,
@@ -485,12 +521,26 @@ def update_events(
             )
 
         if "queue" in update_data:
+            diffs.append(crud.create_diff(field="queue", old=db_event.queue.value, new=update_data["queue"]))
             db_event.queue = crud.read_by_value(value=update_data["queue"], db_table=EventQueue, db=db)
 
         if "remediation_time" in update_data:
+            diffs.append(
+                crud.create_diff(
+                    field="remediation_time", old=db_event.remediation_time, new=update_data["remediation_time"]
+                )
+            )
             db_event.remediation_time = update_data["remediation_time"]
 
         if "remediations" in update_data:
+            diffs.append(
+                crud.create_diff(
+                    field="remediations",
+                    old=[x.value for x in db_event.remediations],
+                    new=update_data["remediations"],
+                )
+            )
+
             db_event.remediations = crud.read_by_values(
                 values=update_data["remediations"],
                 db_table=EventRemediation,
@@ -498,21 +548,45 @@ def update_events(
             )
 
         if "risk_level" in update_data:
+            old = db_event.risk_level.value if db_event.risk_level else None
+            diffs.append(crud.create_diff(field="risk_level", old=old, new=update_data["risk_level"]))
+
             db_event.risk_level = crud.read_by_value(value=update_data["risk_level"], db_table=EventRiskLevel, db=db)
 
         if "source" in update_data:
+            old = db_event.source.value if db_event.source else None
+            diffs.append(crud.create_diff(field="source", old=old, new=update_data["source"]))
+
             db_event.source = crud.read_by_value(value=update_data["source"], db_table=EventSource, db=db)
 
         if "status" in update_data:
+            diffs.append(crud.create_diff(field="status", old=db_event.status.value, new=update_data["status"]))
+
             db_event.status = crud.read_by_value(value=update_data["status"], db_table=EventStatus, db=db)
 
         if "type" in update_data:
+            old = db_event.type.value if db_event.type else None
+            diffs.append(crud.create_diff(field="type", old=old, new=update_data["type"]))
+
             db_event.type = crud.read_by_value(value=update_data["type"], db_table=EventType, db=db)
 
         if "vectors" in update_data:
+            diffs.append(
+                crud.create_diff(
+                    field="vectors",
+                    old=[x.value for x in db_event.vectors],
+                    new=update_data["vectors"],
+                )
+            )
+
             db_event.vectors = crud.read_by_values(values=update_data["vectors"], db_table=EventVector, db=db)
 
         crud.commit(db)
+
+        # Add the entries to the history table
+        crud.record_update_histories(
+            history_table=EventHistory, action_by=username, record_uuid=event.uuid, diffs=diffs, db=db
+        )
 
         response.headers["Content-Location"] = request.url_for("get_event", uuid=event.uuid)
 
