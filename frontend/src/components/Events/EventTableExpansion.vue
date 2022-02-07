@@ -2,8 +2,10 @@
 <!-- Contains logic and functionality for displaying data in event row dropdown, currently table of alerts -->
 
 <template>
+  <div v-if="isLoading">Loading alerts, please hold...</div>
   <DataTable
-    :value="alerts"
+    v-else
+    :value="props.alerts"
     :paginator="true"
     :rows="10"
     paginator-template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -11,10 +13,8 @@
     :total-records="alerts.length"
     responsive-layout="scroll"
     current-page-report-template="Showing {first} to {last} of {totalRecords} alerts in the event"
-    :loading="isLoading"
     data-cy="expandedEvent"
   >
-    <template #loading>Loading alerts, please wait...</template>
     <Column
       v-for="col of columns"
       :key="col.field"
@@ -28,44 +28,24 @@
 </template>
 
 <script setup>
-  import { ref, defineProps, onMounted } from "vue";
+  import { computed, defineProps } from "vue";
 
   import Column from "primevue/column";
   import DataTable from "primevue/datatable";
 
   import AlertTableCell from "../Alerts/AlertTableCell.vue";
-
-  import { Alert } from "@/services/api/alert";
-  import { parseAlertSummary } from "@/etc/helpers";
-
-  const alerts = ref([]);
-  const isLoading = ref(false);
-
   const columns = [
     { field: "eventTime", header: "Event Time" },
     { field: "name", header: "Name" },
     { field: "owner", header: "Owner" },
     { field: "disposition", header: "Disposition" },
   ];
-
-  onMounted(async () => {
-    await getAlerts(props.uuid);
-  });
-
   const props = defineProps({
-    uuid: { type: String, required: true },
+    alerts: { type: Array, required: false, default: () => [] },
   });
-
-  const getAlerts = async (uuid) => {
-    isLoading.value = true;
-    const allAlerts = await Alert.readAllPages({
-      eventUuid: uuid,
-      sort: "event_time|asc",
-    });
-
-    alerts.value = allAlerts.map((x) => parseAlertSummary(x));
-    isLoading.value = false;
-  };
+  const isLoading = computed(() => {
+    return props.alerts == undefined;
+  });
 </script>
 
 <style>
