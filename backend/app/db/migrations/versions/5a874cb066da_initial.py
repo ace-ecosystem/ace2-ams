@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 057216dfd812
+Revision ID: 5a874cb066da
 Revises: 
-Create Date: 2022-02-07 18:37:18.356148
+Create Date: 2022-02-07 19:49:28.997709
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '057216dfd812'
+revision = '5a874cb066da'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -203,6 +203,17 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_observable_type_value'), 'observable_type', ['value'], unique=True)
+    op.create_table('user_history',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('action', sa.String(), nullable=False),
+    sa.Column('action_by', sa.String(), nullable=False),
+    sa.Column('action_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
+    sa.Column('record_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('field', sa.String(), nullable=True),
+    sa.Column('diff', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_user_history_record_uuid'), 'user_history', ['record_uuid'], unique=False)
     op.create_table('user_role',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -539,6 +550,8 @@ def downgrade() -> None:
     op.drop_table('analysis')
     op.drop_index(op.f('ix_user_role_value'), table_name='user_role')
     op.drop_table('user_role')
+    op.drop_index(op.f('ix_user_history_record_uuid'), table_name='user_history')
+    op.drop_table('user_history')
     op.drop_index(op.f('ix_observable_type_value'), table_name='observable_type')
     op.drop_table('observable_type')
     op.drop_index(op.f('ix_observable_history_record_uuid'), table_name='observable_history')

@@ -3,7 +3,12 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from db.database import Base
+from db.schemas.history import History
 from db.schemas.user_role_mapping import user_role_mapping
+
+
+class UserHistory(Base, History):
+    __tablename__ = "user_history"
 
 
 class User(Base):
