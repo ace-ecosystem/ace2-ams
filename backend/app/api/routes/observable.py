@@ -123,7 +123,7 @@ def update_observable(
     db: Session = Depends(get_db),
 ):
     # Update the Node attributes
-    db_observable: Observable = update_node(node_update=observable, uuid=uuid, db_table=Observable, db=db)
+    db_observable, diffs = update_node(node_update=observable, uuid=uuid, db_table=Observable, db=db)
 
     # Get the data that was given in the request and use it to update the database object
     update_data = observable.dict(exclude_unset=True)

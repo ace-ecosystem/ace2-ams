@@ -451,7 +451,7 @@ def update_events(
 ):
     for event in events:
         # Update the Node attributes
-        db_event: Event = update_node(node_update=event, uuid=event.uuid, db_table=Event, db=db)
+        db_event, diffs = update_node(node_update=event, uuid=event.uuid, db_table=Event, db=db)
 
         # Get the data that was given in the request and use it to update the database object
         update_data = event.dict(exclude_unset=True)
