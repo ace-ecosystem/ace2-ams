@@ -3,7 +3,7 @@
 
 <template>
   <BaseModal
-  data-cy="save-to-event-modal"
+    data-cy="save-to-event-modal"
     :name="name"
     header="Save to Event"
     :style="{ width: '75vw' }"

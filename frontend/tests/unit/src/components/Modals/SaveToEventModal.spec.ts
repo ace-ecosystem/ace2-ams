@@ -25,12 +25,12 @@ const CLOSED_EVENT_STATUS = genericObjectReadFactory({
 });
 const NEW_EVENT = eventReadFactory({
   // eslint-disable-next-line prettier/prettier
-            name: "New Event",
+  name: "New Event",
   status: OPEN_EVENT_STATUS,
 });
 const OPEN_EVENT = eventReadFactory({
   // eslint-disable-next-line prettier/prettier
-            name: "Open Event",
+  name: "Open Event",
   status: OPEN_EVENT_STATUS,
 });
 const CLOSED_EVENT = eventReadFactory({
@@ -499,7 +499,7 @@ describe("SaveToEventModal.vue", () => {
 
   it("correctly handleError", () => {
     const { wrapper } = factory();
-    wrapper.vm.error = "There was an error!"
+    wrapper.vm.error = "There was an error!";
     wrapper.vm.handleError();
 
     expect(wrapper.vm.error).toBeNull();
@@ -511,7 +511,7 @@ describe("SaveToEventModal.vue", () => {
     wrapper.vm.selectedEventStatusOption = 0;
     wrapper.vm.newEventComment = "test comment";
     wrapper.vm.newEventName = "new event";
-    wrapper.vm.error = "There was an error!"
+    wrapper.vm.error = "There was an error!";
     wrapper.vm.close();
 
     expect(wrapper.vm.selectedEventStatusOption).toEqual(1);
