@@ -28,8 +28,26 @@ from db.schemas.user import User
 @dataclass
 class Diff:
     field: str
-    old: Union[None, str, list[str]]
-    new: Union[None, str, list[str]]
+    old_value: Optional[str] = None
+    new_value: Optional[str] = None
+    added_to_list: Optional[list[str]] = None
+    removed_from_list: Optional[list[str]] = None
+
+
+def create_diff(
+    field: str,
+    old: Union[str, list[str]] = None,
+    new: Union[str, list[str]] = None,
+) -> Optional[Diff]:
+    if isinstance(old, list) and isinstance(new, list):
+        added = sorted([x for x in new if x not in old])
+        removed = sorted([x for x in old if x not in new])
+        return Diff(field=field, added_to_list=added, removed_from_list=removed)
+
+    if isinstance(old, str) and isinstance(new, str):
+        return Diff(field=field, old_value=old, new_value=new)
+
+    return None
 
 
 def record_create_history(history_table: DeclarativeMeta, action_by: str, record_uuid: UUID, db: Session):
@@ -41,15 +59,21 @@ def record_update_histories(
     history_table: DeclarativeMeta, action_by: str, record_uuid: UUID, diffs: list[Diff], db: Session
 ):
     for diff in diffs:
-        db.add(
-            history_table(
-                action="UPDATE",
-                action_by=action_by,
-                record_uuid=record_uuid,
-                field=diff.field,
-                diff={"old": diff.old, "new": diff.new},
+        if diff:
+            db.add(
+                history_table(
+                    action="UPDATE",
+                    action_by=action_by,
+                    record_uuid=record_uuid,
+                    field=diff.field,
+                    diff={
+                        "old_value": diff.old_value,
+                        "new_value": diff.new_value,
+                        "added_to_list": diff.added_to_list,
+                        "removed_from_list": diff.removed_from_list,
+                    },
+                )
             )
-        )
 
     commit(db)
 

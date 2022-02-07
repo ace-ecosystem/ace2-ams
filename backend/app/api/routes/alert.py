@@ -405,15 +405,16 @@ def update_alerts(
         update_data = alert.dict(exclude_unset=True)
 
         if "description" in update_data:
-            diffs.append(crud.Diff(field="description", old=db_alert.description, new=update_data["description"]))
-
+            diffs.append(
+                crud.create_diff(field="description", old=db_alert.description, new=update_data["description"])
+            )
             db_alert.description = update_data["description"]
 
         if "disposition" in update_data:
-            diff = crud.Diff(field="disposition", old=None, new=update_data["disposition"])
+            old = None
             if db_alert.disposition:
-                diff.old = db_alert.disposition.value
-            diffs.append(diff)
+                old = db_alert.disposition.value
+            diffs.append(crud.create_diff(field="disposition", old=old, new=update_data["disposition"]))
 
             db_alert.disposition = crud.read_by_value(
                 value=update_data["disposition"], db_table=AlertDisposition, db=db
@@ -422,7 +423,7 @@ def update_alerts(
             db_alert.disposition_user = crud.read_user_by_username(username=username, db=db)
 
         if "event_uuid" in update_data:
-            diffs.append(crud.Diff(field="event_uuid", old=db_alert.event_uuid, new=update_data["event_uuid"]))
+            diffs.append(crud.create_diff(field="event_uuid", old=db_alert.event_uuid, new=update_data["event_uuid"]))
 
             if update_data["event_uuid"]:
                 db_alert.event = crud.read(uuid=update_data["event_uuid"], db_table=Event, db=db)
@@ -433,25 +434,27 @@ def update_alerts(
                 db_alert.event = None
 
         if "event_time" in update_data:
-            diffs.append(crud.Diff(field="event_time", old=db_alert.event_time, new=update_data["event_time"]))
+            diffs.append(crud.create_diff(field="event_time", old=db_alert.event_time, new=update_data["event_time"]))
 
             db_alert.event_time = update_data["event_time"]
 
         if "instructions" in update_data:
-            diffs.append(crud.Diff(field="instructions", old=db_alert.instructions, new=update_data["instructions"]))
+            diffs.append(
+                crud.create_diff(field="instructions", old=db_alert.instructions, new=update_data["instructions"])
+            )
 
             db_alert.instructions = update_data["instructions"]
 
         if "owner" in update_data:
-            diff = crud.Diff(field="owner", old=None, new=update_data["owner"])
+            old = None
             if db_alert.owner:
-                diff.old = db_alert.owner.username
-            diffs.append(diff)
+                old = db_alert.owner.username
+            diffs.append(crud.create_diff(field="owner", old=old, new=update_data["owner"]))
 
             db_alert.owner = crud.read_user_by_username(username=update_data["owner"], db=db)
 
         if "queue" in update_data:
-            diffs.append(crud.Diff(field="queue", old=db_alert.queue, new=update_data["queue"]))
+            diffs.append(crud.create_diff(field="queue", old=db_alert.queue, new=update_data["queue"]))
 
             db_alert.queue = crud.read_by_value(value=update_data["queue"], db_table=AlertQueue, db=db)
 

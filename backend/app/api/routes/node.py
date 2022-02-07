@@ -72,17 +72,20 @@ def update_node(
 
     if "directives" in update_data:
         diffs.append(
-            crud.Diff(field="directives", old=[x.value for x in db_node.directives], new=update_data["directives"])
+            crud.create_diff(
+                field="directives", old=[x.value for x in db_node.directives], new=update_data["directives"]
+            )
         )
+
         db_node.directives = crud.read_by_values(values=update_data["directives"], db_table=NodeDirective, db=db)
 
     if "tags" in update_data:
-        diffs.append(crud.Diff(field="tags", old=[x.value for x in db_node.tags], new=update_data["tags"]))
+        diffs.append(crud.create_diff(field="tags", old=[x.value for x in db_node.tags], new=update_data["tags"]))
         db_node.tags = crud.read_by_values(values=update_data["tags"], db_table=NodeTag, db=db)
 
     if "threat_actors" in update_data:
         diffs.append(
-            crud.Diff(
+            crud.create_diff(
                 field="threat_actors", old=[x.value for x in db_node.threat_actors], new=update_data["threat_actors"]
             )
         )
@@ -91,7 +94,9 @@ def update_node(
         )
 
     if "threats" in update_data:
-        diffs.append(crud.Diff(field="threats", old=[x.value for x in db_node.threats], new=update_data["threats"]))
+        diffs.append(
+            crud.create_diff(field="threats", old=[x.value for x in db_node.threats], new=update_data["threats"])
+        )
         db_node.threats = crud.read_by_values(values=update_data["threats"], db_table=NodeThreat, db=db)
 
     # Update the node version
