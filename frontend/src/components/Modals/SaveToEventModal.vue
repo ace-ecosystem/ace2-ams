@@ -2,9 +2,15 @@
 <!-- 'Save to Event' alert action modal, will close the Disposition Modal that opened it -->
 
 <template>
-  <BaseModal :name="name" header="Save to Event" :style="{ width: '75vw' }">
+  <BaseModal
+  data-cy="save-to-event-modal"
+    :name="name"
+    header="Save to Event"
+    :style="{ width: '75vw' }"
+    @dialogClose="close"
+  >
     <div>
-      <div v-if="error" class="p-col">
+      <div v-if="error" data-cy="save-to-event-error" class="p-col">
         <Message severity="error" @close="handleError">{{ error }}</Message>
       </div>
     </div>
@@ -21,6 +27,7 @@
                 <InputText
                   id="newEventName"
                   v-model="newEventName"
+                  data-cy="new-event-name"
                   name="newEventName"
                   type="text"
                 />
@@ -32,6 +39,7 @@
                 <Textarea
                   id="newEventComment"
                   v-model="newEventComment"
+                  data-cy="new-event-comment"
                   :auto-resize="true"
                   rows="5"
                   cols="30"
@@ -51,6 +59,7 @@
             v-model="selectedExistingEvent"
             :options="events[eventType.value]"
             :filter="true"
+            data-cy="event-options"
             option-label="name"
             filter-placeholder="Search"
             list-style="height: 55vh"
@@ -60,12 +69,14 @@
     </div>
     <template #footer>
       <Button
+        data-cy="save-to-event-back-button"
         label="Back"
         icon="pi pi-arrow-left"
         class="p-button-text"
         @click="close"
       />
       <Button
+        data-cy="save-to-event-submit-button"
         label="Save"
         icon="pi pi-check"
         :disabled="!allowEventSelectionSubmit"
@@ -148,7 +159,7 @@
         events.value[status.value] = await getEventsWithStatus(status);
       }
     } catch (err) {
-      console.debug(err.message)
+      console.debug(err.message);
       error.value = err.message;
     }
 
@@ -270,6 +281,7 @@
   };
 
   const close = () => {
+    selectedEventStatusOption.value = 1;
     selectedExistingEvent.value = null;
     newEventComment.value = null;
     newEventName.value = "";
