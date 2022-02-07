@@ -68,7 +68,7 @@ def test_add_event(client_valid_access_token):
     assert get.json()["total"] == 0
 
     result = client_valid_access_token.post(
-        "/api/test/add_event", json={"alert_template": "small.json", "alert_count": 1, "name": "Test Event"}
+        "/api/test/add_event", json={"alert_template": "small.json", "alert_count": 1, "name": "Test Event", "status": "OPEN"}
     )
     assert result.status_code == status.HTTP_204_NO_CONTENT
 

@@ -59,7 +59,7 @@ helpers.api_route_create(
 def add_test_events(event: AddTestEvent, db: Session = Depends(get_db)):
     # Only proceed if the API is running in TESTING mode
     if is_in_testing_mode():
-        db_event = test_helpers.create_event(name=event.name, db=db)
+        db_event = test_helpers.create_event(name=event.name, status=event.status, db=db)
 
         for i in range(event.alert_count):
             alert_tree = test_helpers.create_alert_from_json_file(
