@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from fastapi import HTTPException, status
 from pydantic import BaseModel
 from pydantic.types import UUID4
@@ -36,18 +37,27 @@ class Diff:
 
 def create_diff(
     field: str,
-    old: Union[str, list[str]] = None,
-    new: Union[str, list[str]] = None,
+    old: Union[None, str, list[str], datetime, UUID] = None,
+    new: Union[None, str, list[str], datetime, UUID] = None,
 ) -> Optional[Diff]:
+    # Convert datetime objects to UTC strings
+    if isinstance(old, datetime):
+        old = old.astimezone(timezone.utc).isoformat()
+    if isinstance(new, datetime):
+        new = new.astimezone(timezone.utc).isoformat()
+
+    # Convert UUID objects to strings
+    if isinstance(old, UUID):
+        old = str(old)
+    if isinstance(new, UUID):
+        new = str(new)
+
     if isinstance(old, list) and isinstance(new, list):
-        added = sorted([x for x in new if x not in old])
-        removed = sorted([x for x in old if x not in new])
+        added = sorted(set([x for x in new if x not in old]))
+        removed = sorted(set([x for x in old if x not in new]))
         return Diff(field=field, added_to_list=added, removed_from_list=removed)
 
-    if isinstance(old, str) and isinstance(new, str):
-        return Diff(field=field, old_value=old, new_value=new)
-
-    return None
+    return Diff(field=field, old_value=old, new_value=new)
 
 
 def record_create_history(history_table: DeclarativeMeta, action_by: str, record_uuid: UUID, db: Session):
@@ -195,6 +205,12 @@ def read_by_uuids(uuids: List[UUID], db_table: DeclarativeMeta, db: Session):
             )
 
     return resources
+
+
+def read_history_records(history_table: DeclarativeMeta, record_uuid: UUID, db: Session):
+    """Returns a list of records from the given history table that involve the given record UUID."""
+
+    return db.execute(select(history_table).where(history_table.record_uuid == record_uuid)).scalars().all()
 
 
 def read_observable(type: str, value: str, db: Session) -> Union[Observable, None]:
