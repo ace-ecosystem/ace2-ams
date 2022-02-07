@@ -283,6 +283,7 @@ def test_create_verify_history(client_valid_access_token, db):
         assert str(history[0].record_uuid) == observable["uuid"]
         assert history[0].field is None
         assert history[0].diff is None
+        assert history[0].snapshot["value"] == observable["value"]
 
 
 def test_create_bulk(client_valid_access_token, db):

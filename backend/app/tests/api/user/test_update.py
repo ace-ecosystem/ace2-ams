@@ -116,6 +116,7 @@ def test_update_valid_alert_queue(client_valid_access_token, db):
     assert history[0].field == "default_alert_queue"
     assert history[0].diff["old_value"] == "test_queue"
     assert history[0].diff["new_value"] == "test_queue2"
+    assert history[0].snapshot["default_alert_queue"]["value"] == "test_queue2"
 
 
 def test_update_valid_event_queue(client_valid_access_token, db):
@@ -139,6 +140,7 @@ def test_update_valid_event_queue(client_valid_access_token, db):
     assert history[0].field == "default_event_queue"
     assert history[0].diff["old_value"] == "test_queue"
     assert history[0].diff["new_value"] == "test_queue2"
+    assert history[0].snapshot["default_event_queue"]["value"] == "test_queue2"
 
 
 @pytest.mark.parametrize(
@@ -173,6 +175,7 @@ def test_update_valid_roles(client_valid_access_token, db, values):
     assert history[0].diff["new_value"] is None
     assert history[0].diff["added_to_list"] == values
     assert history[0].diff["removed_from_list"] == initial_roles
+    assert len(history[0].snapshot["roles"]) == len(set(values))
 
 
 @pytest.mark.parametrize(
@@ -212,6 +215,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     assert history[0].field == key
     assert history[0].diff["old_value"] == initial_value
     assert history[0].diff["new_value"] == updated_value
+    assert history[0].snapshot["username"] == obj.username
 
 
 @pytest.mark.parametrize(
@@ -243,3 +247,4 @@ def test_update_password(client_valid_access_token, db, initial_value, updated_v
     assert history[0].field == "password"
     assert history[0].diff["old_value"] is None
     assert history[0].diff["new_value"] is None
+    assert history[0].snapshot["username"] == "johndoe"

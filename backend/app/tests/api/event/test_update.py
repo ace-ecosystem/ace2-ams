@@ -181,6 +181,7 @@ def test_update_owner(client_valid_access_token, db):
     assert history[0].field == "owner"
     assert history[0].diff["old_value"] is None
     assert history[0].diff["new_value"] == "johndoe"
+    assert history[0].snapshot["owner"]["username"] == "johndoe"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"owner": None, "uuid": str(event.uuid)}])
@@ -195,6 +196,7 @@ def test_update_owner(client_valid_access_token, db):
     assert history[1].field == "owner"
     assert history[1].diff["old_value"] == "johndoe"
     assert history[1].diff["new_value"] is None
+    assert history[1].snapshot["owner"] is None
 
 
 def test_update_prevention_tools(client_valid_access_token, db):
@@ -224,6 +226,7 @@ def test_update_prevention_tools(client_valid_access_token, db):
     assert history[0].diff["new_value"] is None
     assert history[0].diff["added_to_list"] == ["test"]
     assert history[0].diff["removed_from_list"] == []
+    assert history[0].snapshot["prevention_tools"][0]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"prevention_tools": [], "uuid": str(event.uuid)}])
@@ -240,6 +243,7 @@ def test_update_prevention_tools(client_valid_access_token, db):
     assert history[1].diff["new_value"] is None
     assert history[1].diff["added_to_list"] == []
     assert history[1].diff["removed_from_list"] == ["test"]
+    assert history[1].snapshot["prevention_tools"] == []
 
 
 def test_update_queue(client_valid_access_token, db):
@@ -265,6 +269,7 @@ def test_update_queue(client_valid_access_token, db):
     assert history[0].field == "queue"
     assert history[0].diff["old_value"] == "default"
     assert history[0].diff["new_value"] == "updated_queue"
+    assert history[0].snapshot["queue"]["value"] == "updated_queue"
 
 
 def test_update_remediations(client_valid_access_token, db):
@@ -292,6 +297,7 @@ def test_update_remediations(client_valid_access_token, db):
     assert history[0].diff["new_value"] is None
     assert history[0].diff["added_to_list"] == ["test"]
     assert history[0].diff["removed_from_list"] == []
+    assert history[0].snapshot["remediations"][0]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"remediations": [], "uuid": str(event.uuid)}])
@@ -308,6 +314,7 @@ def test_update_remediations(client_valid_access_token, db):
     assert history[1].diff["new_value"] is None
     assert history[1].diff["added_to_list"] == []
     assert history[1].diff["removed_from_list"] == ["test"]
+    assert history[1].snapshot["remediations"] == []
 
 
 def test_update_risk_level(client_valid_access_token, db):
@@ -332,6 +339,7 @@ def test_update_risk_level(client_valid_access_token, db):
     assert history[0].field == "risk_level"
     assert history[0].diff["old_value"] is None
     assert history[0].diff["new_value"] == "test"
+    assert history[0].snapshot["risk_level"]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"risk_level": None, "uuid": str(event.uuid)}])
@@ -346,6 +354,7 @@ def test_update_risk_level(client_valid_access_token, db):
     assert history[1].field == "risk_level"
     assert history[1].diff["old_value"] == "test"
     assert history[1].diff["new_value"] is None
+    assert history[1].snapshot["risk_level"] is None
 
 
 def test_update_source(client_valid_access_token, db):
@@ -370,6 +379,7 @@ def test_update_source(client_valid_access_token, db):
     assert history[0].field == "source"
     assert history[0].diff["old_value"] is None
     assert history[0].diff["new_value"] == "test"
+    assert history[0].snapshot["source"]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"source": None, "uuid": str(event.uuid)}])
@@ -384,6 +394,7 @@ def test_update_source(client_valid_access_token, db):
     assert history[1].field == "source"
     assert history[1].diff["old_value"] == "test"
     assert history[1].diff["new_value"] is None
+    assert history[1].snapshot["source"] is None
 
 
 def test_update_status(client_valid_access_token, db):
@@ -408,6 +419,7 @@ def test_update_status(client_valid_access_token, db):
     assert history[0].field == "status"
     assert history[0].diff["old_value"] == "OPEN"
     assert history[0].diff["new_value"] == "test"
+    assert history[0].snapshot["status"]["value"] == "test"
 
 
 def test_update_type(client_valid_access_token, db):
@@ -432,6 +444,7 @@ def test_update_type(client_valid_access_token, db):
     assert history[0].field == "type"
     assert history[0].diff["old_value"] is None
     assert history[0].diff["new_value"] == "test"
+    assert history[0].snapshot["type"]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"type": None, "uuid": str(event.uuid)}])
@@ -446,6 +459,7 @@ def test_update_type(client_valid_access_token, db):
     assert history[1].field == "type"
     assert history[1].diff["old_value"] == "test"
     assert history[1].diff["new_value"] is None
+    assert history[1].snapshot["type"] is None
 
 
 def test_update_vectors(client_valid_access_token, db):
@@ -473,6 +487,7 @@ def test_update_vectors(client_valid_access_token, db):
     assert history[0].diff["new_value"] is None
     assert history[0].diff["added_to_list"] == ["test"]
     assert history[0].diff["removed_from_list"] == []
+    assert history[0].snapshot["vectors"][0]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch(
@@ -491,6 +506,7 @@ def test_update_vectors(client_valid_access_token, db):
     assert history[1].diff["new_value"] is None
     assert history[1].diff["added_to_list"] == []
     assert history[1].diff["removed_from_list"] == ["test"]
+    assert history[1].snapshot["vectors"] == []
 
 
 @pytest.mark.parametrize(
@@ -529,6 +545,7 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
             assert history[0].diff["new_value"] is None
             assert history[0].diff["added_to_list"] == sorted(set(value_list))
             assert history[0].diff["removed_from_list"] == ["remove_me"]
+            assert len(history[0].snapshot[key]) == len(set(value_list))
 
 
 @pytest.mark.parametrize(
@@ -601,5 +618,6 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     else:
         assert getattr(event, key) == updated_value
         assert history[0].diff["new_value"] == updated_value
+    assert history[0].snapshot["name"] == event.name
 
     assert event.version != initial_event_version

@@ -75,6 +75,8 @@ def create_observables(
         db.add(new_observable)
         observable.uuid = new_observable.uuid
 
+        crud.commit(db)
+
         # Add an entry to the history table
         crud.record_create_history(
             history_table=ObservableHistory,

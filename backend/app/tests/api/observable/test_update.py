@@ -159,6 +159,7 @@ def test_update_type(client_valid_access_token, db):
     assert history[0].field == "type"
     assert history[0].diff["old_value"] == "test_type"
     assert history[0].diff["new_value"] == "test_type2"
+    assert history[0].snapshot["type"]["value"] == "test_type2"
 
 
 def test_update_redirection_uuid(client_valid_access_token, db):
@@ -186,6 +187,7 @@ def test_update_redirection_uuid(client_valid_access_token, db):
     assert history[0].field == "redirection_uuid"
     assert history[0].diff["old_value"] is None
     assert history[0].diff["new_value"] == str(observable_tree2.node.uuid)
+    assert history[0].snapshot["redirection_uuid"] == str(observable_tree2.node.uuid)
 
     # Set it back to None
     update = client_valid_access_token.patch(
@@ -202,6 +204,7 @@ def test_update_redirection_uuid(client_valid_access_token, db):
     assert history[1].field == "redirection_uuid"
     assert history[1].diff["old_value"] == str(observable_tree2.node.uuid)
     assert history[1].diff["new_value"] is None
+    assert history[1].snapshot["redirection_uuid"] is None
 
 
 @pytest.mark.parametrize(
@@ -252,6 +255,7 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
             assert history[0].diff["new_value"] is None
             assert history[0].diff["added_to_list"] == sorted(set(value_list))
             assert history[0].diff["removed_from_list"] == ["remove_me"]
+            assert len(history[0].snapshot[key]) == len(set(value_list))
 
 
 @pytest.mark.parametrize(
@@ -316,3 +320,5 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
         assert getattr(observable_tree.node, key) == updated_value
         assert history[0].diff["old_value"] == initial_value
         assert history[0].diff["new_value"] == updated_value
+
+    assert history[0].snapshot["value"] == observable_tree.node.value

@@ -293,6 +293,7 @@ def test_create_verify_history(client_valid_access_token, db):
     assert str(history[0].record_uuid) == alert_uuid
     assert history[0].field is None
     assert history[0].diff is None
+    assert history[0].snapshot["name"] == "test alert"
 
 
 @pytest.mark.parametrize(

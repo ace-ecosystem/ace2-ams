@@ -142,6 +142,7 @@ def test_update_disposition(client_valid_access_token, db):
     assert history[0].field == "disposition"
     assert history[0].diff["old_value"] is None
     assert history[0].diff["new_value"] == "test"
+    assert history[0].snapshot["disposition"]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch(
@@ -158,6 +159,7 @@ def test_update_disposition(client_valid_access_token, db):
     assert history[1].field == "disposition"
     assert history[1].diff["old_value"] == "test"
     assert history[1].diff["new_value"] is None
+    assert history[1].snapshot["disposition"] is None
 
 
 def test_update_event_uuid(client_valid_access_token, db):
@@ -184,6 +186,7 @@ def test_update_event_uuid(client_valid_access_token, db):
     assert history[0].field == "event_uuid"
     assert history[0].diff["old_value"] is None
     assert history[0].diff["new_value"] == str(event.uuid)
+    assert history[0].snapshot["event_uuid"] == str(event.uuid)
 
     # By adding the alert to the event, you should be able to see the alert UUID in the event's
     # alert_uuids list even though it was not explicitly added.
@@ -207,6 +210,7 @@ def test_update_event_uuid(client_valid_access_token, db):
     assert history[1].field == "event_uuid"
     assert history[1].diff["old_value"] == str(event.uuid)
     assert history[1].diff["new_value"] is None
+    assert history[1].snapshot["event_uuid"] is None
 
 
 def test_update_owner(client_valid_access_token, db):
@@ -232,6 +236,7 @@ def test_update_owner(client_valid_access_token, db):
     assert history[0].field == "owner"
     assert history[0].diff["old_value"] is None
     assert history[0].diff["new_value"] == "johndoe"
+    assert history[0].snapshot["owner"]["username"] == "johndoe"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/alert/", json=[{"owner": None, "uuid": str(alert_tree.node_uuid)}])
@@ -246,6 +251,7 @@ def test_update_owner(client_valid_access_token, db):
     assert history[1].field == "owner"
     assert history[1].diff["old_value"] == "johndoe"
     assert history[1].diff["new_value"] is None
+    assert history[1].snapshot["owner"] is None
 
 
 def test_update_queue(client_valid_access_token, db):
@@ -271,6 +277,7 @@ def test_update_queue(client_valid_access_token, db):
     assert history[0].field == "queue"
     assert history[0].diff["old_value"] == "test_queue"
     assert history[0].diff["new_value"] == "test_queue2"
+    assert history[0].snapshot["queue"]["value"] == "test_queue2"
 
 
 @pytest.mark.parametrize(
@@ -312,6 +319,7 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
             assert history[0].diff["new_value"] is None
             assert history[0].diff["added_to_list"] == sorted(set(value_list))
             assert history[0].diff["removed_from_list"] == ["remove_me"]
+            assert len(history[0].snapshot[key]) == len(set(value_list))
 
 
 @pytest.mark.parametrize(
@@ -358,6 +366,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     else:
         assert getattr(alert_tree.node, key) == updated_value
         assert history[0].diff["new_value"] == updated_value
+    assert history[0].snapshot["name"] == "Test Alert"
 
     assert alert_tree.node.version != initial_alert_version
 
@@ -403,6 +412,7 @@ def test_update_multiple_alerts(client_valid_access_token, db):
     assert history[0].field == "description"
     assert history[0].diff["old_value"] is None
     assert history[0].diff["new_value"] == "updated_description"
+    assert history[0].snapshot["name"] == "Test Alert"
 
     history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree2.node_uuid, db=db)
     assert len(history) == 1
@@ -411,6 +421,7 @@ def test_update_multiple_alerts(client_valid_access_token, db):
     assert history[0].field == "event_time"
     assert history[0].diff["old_value"] == initial_event_time
     assert history[0].diff["new_value"] == parse("2022-01-01T00:00:00+00:00").isoformat()
+    assert history[0].snapshot["name"] == "Test Alert"
 
     history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree3.node_uuid, db=db)
     assert len(history) == 1
@@ -419,6 +430,7 @@ def test_update_multiple_alerts(client_valid_access_token, db):
     assert history[0].field == "instructions"
     assert history[0].diff["old_value"] is None
     assert history[0].diff["new_value"] == "updated_instructions"
+    assert history[0].snapshot["name"] == "Test Alert"
 
 
 def test_update_multiple_fields(client_valid_access_token, db):
@@ -447,9 +459,13 @@ def test_update_multiple_fields(client_valid_access_token, db):
     assert history[0].field == "description"
     assert history[0].diff["old_value"] is None
     assert history[0].diff["new_value"] == "updated_description"
+    assert history[0].snapshot["description"] == "updated_description"
+    assert history[0].snapshot["instructions"] == "updated_instructions"
 
     assert history[1].action == "UPDATE"
     assert history[1].action_by == "analyst"
     assert history[1].field == "instructions"
     assert history[1].diff["old_value"] is None
     assert history[1].diff["new_value"] == "updated_instructions"
+    assert history[1].snapshot["description"] == "updated_description"
+    assert history[1].snapshot["instructions"] == "updated_instructions"
