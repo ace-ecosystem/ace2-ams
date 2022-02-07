@@ -4,6 +4,9 @@ import uuid
 from dateutil.parser import parse
 from fastapi import status
 
+from db import crud
+from db.schemas.alert import AlertHistory
+from db.schemas.history import History
 from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import helpers
 
@@ -131,12 +134,30 @@ def test_update_disposition(client_valid_access_token, db):
     assert alert_tree.node.disposition.value == "test"
     assert alert_tree.node.version != initial_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree.node_uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "disposition"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] == "test"
+
     # Set it back to None
     update = client_valid_access_token.patch(
         "/api/alert/", json=[{"disposition": None, "uuid": str(alert_tree.node_uuid)}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.disposition is None
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree.node_uuid, db=db)
+    assert len(history) == 2
+    assert history[1].action == "UPDATE"
+    assert history[1].action_by == "analyst"
+    assert history[1].field == "disposition"
+    assert history[1].diff["old_value"] == "test"
+    assert history[1].diff["new_value"] is None
 
 
 def test_update_event_uuid(client_valid_access_token, db):
@@ -155,6 +176,15 @@ def test_update_event_uuid(client_valid_access_token, db):
     assert alert_tree.node.event_uuid == event.uuid
     assert alert_tree.node.version != initial_alert_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree.node_uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "event_uuid"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] == str(event.uuid)
+
     # By adding the alert to the event, you should be able to see the alert UUID in the event's
     # alert_uuids list even though it was not explicitly added.
     assert event.alert_uuids == [alert_tree.node_uuid]
@@ -168,6 +198,15 @@ def test_update_event_uuid(client_valid_access_token, db):
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.event is None
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree.node_uuid, db=db)
+    assert len(history) == 2
+    assert history[1].action == "UPDATE"
+    assert history[1].action_by == "analyst"
+    assert history[1].field == "event_uuid"
+    assert history[1].diff["old_value"] == str(event.uuid)
+    assert history[1].diff["new_value"] is None
 
 
 def test_update_owner(client_valid_access_token, db):
@@ -185,10 +224,28 @@ def test_update_owner(client_valid_access_token, db):
     assert alert_tree.node.owner.username == "johndoe"
     assert alert_tree.node.version != initial_alert_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree.node_uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "owner"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] == "johndoe"
+
     # Set it back to None
     update = client_valid_access_token.patch("/api/alert/", json=[{"owner": None, "uuid": str(alert_tree.node_uuid)}])
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.owner is None
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree.node_uuid, db=db)
+    assert len(history) == 2
+    assert history[1].action == "UPDATE"
+    assert history[1].action_by == "analyst"
+    assert history[1].field == "owner"
+    assert history[1].diff["old_value"] == "johndoe"
+    assert history[1].diff["new_value"] is None
 
 
 def test_update_queue(client_valid_access_token, db):
@@ -206,6 +263,15 @@ def test_update_queue(client_valid_access_token, db):
     assert alert_tree.node.queue.value == "test_queue2"
     assert alert_tree.node.version != initial_alert_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree.node_uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "queue"
+    assert history[0].diff["old_value"] == "test_queue"
+    assert history[0].diff["new_value"] == "test_queue2"
+
 
 @pytest.mark.parametrize(
     "key,value_lists,helper_create_func",
@@ -217,7 +283,7 @@ def test_update_queue(client_valid_access_token, db):
 )
 def test_update_valid_node_fields(client_valid_access_token, db, key, value_lists, helper_create_func):
     for value_list in value_lists:
-        alert_tree = helpers.create_alert(db=db)
+        alert_tree = helpers.create_alert(tags=["remove_me"], threat_actors=["remove_me"], threats=["remove_me"], db=db)
         initial_alert_version = alert_tree.node.version
 
         for value in value_list:
@@ -234,6 +300,18 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
         assert update.status_code == status.HTTP_204_NO_CONTENT
         assert len(getattr(alert_tree.node, key)) == len(set(value_list))
         assert alert_tree.node.version != initial_alert_version
+
+        # Verify the history
+        if value_list:
+            history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree.node_uuid, db=db)
+            assert len(history) == 1
+            assert history[0].action == "UPDATE"
+            assert history[0].action_by == "analyst"
+            assert history[0].field == key
+            assert history[0].diff["old_value"] is None
+            assert history[0].diff["new_value"] is None
+            assert history[0].diff["added_to_list"] == sorted(set(value_list))
+            assert history[0].diff["removed_from_list"] == ["remove_me"]
 
 
 @pytest.mark.parametrize(
@@ -266,20 +344,31 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree.node_uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == key
+    assert history[0].diff["old_value"] == initial_value
+
     if key == "event_time":
         assert alert_tree.node.event_time == parse("2022-01-01T00:00:00+00:00")
+        assert history[0].diff["new_value"] == parse("2022-01-01T00:00:00+00:00").isoformat()
     else:
         assert getattr(alert_tree.node, key) == updated_value
+        assert history[0].diff["new_value"] == updated_value
 
     assert alert_tree.node.version != initial_alert_version
 
 
-def test_update_multiple(client_valid_access_token, db):
+def test_update_multiple_alerts(client_valid_access_token, db):
     alert_tree1 = helpers.create_alert(db=db)
     initial_alert1_version = alert_tree1.node.version
 
     alert_tree2 = helpers.create_alert(db=db)
     initial_alert2_version = alert_tree2.node.version
+    initial_event_time = alert_tree2.node.event_time.isoformat()
 
     alert_tree3 = helpers.create_alert(db=db)
     initial_alert3_version = alert_tree3.node.version
@@ -305,3 +394,62 @@ def test_update_multiple(client_valid_access_token, db):
 
     assert alert_tree3.node.instructions == "updated_instructions"
     assert alert_tree3.node.version != initial_alert3_version
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree1.node_uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "description"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] == "updated_description"
+
+    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree2.node_uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "event_time"
+    assert history[0].diff["old_value"] == initial_event_time
+    assert history[0].diff["new_value"] == parse("2022-01-01T00:00:00+00:00").isoformat()
+
+    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree3.node_uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "instructions"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] == "updated_instructions"
+
+
+def test_update_multiple_fields(client_valid_access_token, db):
+    alert_tree = helpers.create_alert(db=db)
+    initial_alert_version = alert_tree.node.version
+
+    # Update it
+    update = client_valid_access_token.patch(
+        "/api/alert/",
+        json=[
+            {
+                "description": "updated_description",
+                "instructions": "updated_instructions",
+                "uuid": str(alert_tree.node_uuid),
+            }
+        ],
+    )
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert alert_tree.node.version != initial_alert_version
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree.node_uuid, db=db)
+    assert len(history) == 2
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "description"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] == "updated_description"
+
+    assert history[1].action == "UPDATE"
+    assert history[1].action_by == "analyst"
+    assert history[1].field == "instructions"
+    assert history[1].diff["old_value"] is None
+    assert history[1].diff["new_value"] == "updated_instructions"

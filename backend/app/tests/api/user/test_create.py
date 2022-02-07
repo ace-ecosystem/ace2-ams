@@ -3,6 +3,9 @@ import uuid
 
 from fastapi import status
 
+from db import crud
+from db.schemas.history import History
+from db.schemas.user import UserHistory
 from tests import helpers
 
 
@@ -145,6 +148,36 @@ def test_create_missing_required_fields(client_valid_access_token, key):
 #
 # VALID TESTS
 #
+
+
+def test_create_verify_history(client_valid_access_token, db):
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_event_queue(value="test_queue", db=db)
+    helpers.create_user_role(value="test_role", db=db)
+
+    # Create the object
+    user_uuid = str(uuid.uuid4())
+    create_json = {
+        "default_alert_queue": "test_queue",
+        "default_event_queue": "test_queue",
+        "display_name": "John Doe",
+        "email": "john@test.com",
+        "password": "abcd1234",
+        "roles": ["test_role"],
+        "username": "johndoe",
+        "uuid": user_uuid,
+    }
+    create = client_valid_access_token.post("/api/user/", json=create_json)
+    assert create.status_code == status.HTTP_201_CREATED
+
+    # Verify the history record
+    history: list[History] = crud.read_history_records(UserHistory, record_uuid=user_uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "CREATE"
+    assert history[0].action_by == "analyst"
+    assert str(history[0].record_uuid) == user_uuid
+    assert history[0].field is None
+    assert history[0].diff is None
 
 
 @pytest.mark.parametrize(

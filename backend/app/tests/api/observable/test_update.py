@@ -5,6 +5,9 @@ from datetime import datetime
 from dateutil.parser import parse
 from fastapi import status
 
+from db import crud
+from db.schemas.observable import ObservableHistory
+from db.schemas.history import History
 from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import helpers
 
@@ -148,6 +151,15 @@ def test_update_type(client_valid_access_token, db):
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert observable_tree.node.type.value == "test_type2"
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(ObservableHistory, record_uuid=observable_tree.node.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "type"
+    assert history[0].diff["old_value"] == "test_type"
+    assert history[0].diff["new_value"] == "test_type2"
+
 
 def test_update_redirection_uuid(client_valid_access_token, db):
     alert_tree = helpers.create_alert(db=db)
@@ -166,12 +178,30 @@ def test_update_redirection_uuid(client_valid_access_token, db):
     assert observable_tree1.node.redirection_uuid == observable_tree2.node.uuid
     assert observable_tree1.node.version != initial_observable_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(ObservableHistory, record_uuid=observable_tree1.node.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "redirection_uuid"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] == str(observable_tree2.node.uuid)
+
     # Set it back to None
     update = client_valid_access_token.patch(
         f"/api/observable/{observable_tree1.node.uuid}", json={"redirection_uuid": None}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert observable_tree1.node.redirection is None
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(ObservableHistory, record_uuid=observable_tree1.node.uuid, db=db)
+    assert len(history) == 2
+    assert history[1].action == "UPDATE"
+    assert history[1].action_by == "analyst"
+    assert history[1].field == "redirection_uuid"
+    assert history[1].diff["old_value"] == str(observable_tree2.node.uuid)
+    assert history[1].diff["new_value"] is None
 
 
 @pytest.mark.parametrize(
@@ -184,9 +214,20 @@ def test_update_redirection_uuid(client_valid_access_token, db):
     ],
 )
 def test_update_valid_node_fields(client_valid_access_token, db, key, value_lists, helper_create_func):
-    for value_list in value_lists:
+    for i in range(len(value_lists)):
+        value_list = value_lists[i]
+
         alert_tree = helpers.create_alert(db=db)
-        observable_tree = helpers.create_observable(type="test_type", value="test", parent_tree=alert_tree, db=db)
+        observable_tree = helpers.create_observable(
+            type="test_type",
+            value=f"test{i}",
+            directives=["remove_me"],
+            tags=["remove_me"],
+            threat_actors=["remove_me"],
+            threats=["remove_me"],
+            parent_tree=alert_tree,
+            db=db,
+        )
         initial_observable_version = observable_tree.node.version
 
         for value in value_list:
@@ -198,6 +239,20 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
         assert len(getattr(observable_tree.node, key)) == len(set(value_list))
         assert observable_tree.node.version != initial_observable_version
 
+        # Verify the history
+        if value_list:
+            history: list[History] = crud.read_history_records(
+                ObservableHistory, record_uuid=observable_tree.node.uuid, db=db
+            )
+            assert len(history) == 1
+            assert history[0].action == "UPDATE"
+            assert history[0].action_by == "analyst"
+            assert history[0].field == key
+            assert history[0].diff["old_value"] is None
+            assert history[0].diff["new_value"] is None
+            assert history[0].diff["added_to_list"] == sorted(set(value_list))
+            assert history[0].diff["removed_from_list"] == ["remove_me"]
+
 
 @pytest.mark.parametrize(
     "key,initial_value,updated_value",
@@ -205,13 +260,13 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
         ("context", None, "test"),
         ("context", "test", None),
         ("context", "test", "test"),
-        ("expires_on", 1640995200, 1640995200),
+        ("expires_on", 1609459200, 1640995200),
         ("expires_on", None, 1640995200),
         ("expires_on", None, "2022-01-01T00:00:00Z"),
         ("expires_on", None, "2022-01-01 00:00:00"),
         ("expires_on", None, "2022-01-01 00:00:00.000000"),
         ("expires_on", None, "2021-12-31 19:00:00-05:00"),
-        ("expires_on", 1640995200, None),
+        ("expires_on", 1609459200, None),
         ("for_detection", True, False),
         ("for_detection", True, True),
         ("time", "2021-01-01T00:00:00+00:00", 1640995200),
@@ -237,10 +292,27 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     update = client_valid_access_token.patch(f"/api/observable/{observable_tree.node_uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(ObservableHistory, record_uuid=observable_tree.node_uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == key
+
     # If the test is for expires_on, make sure that the retrieved value matches the proper UTC timestamp
-    if key == "expires_on" and updated_value:
-        assert observable_tree.node.expires_on == parse("2022-01-01T00:00:00+00:00")
-    elif key == "time" and updated_value:
-        assert observable_tree.node.time == parse("2022-01-01T00:00:00+00:00")
+    if key == "expires_on" or key == "time":
+        if initial_value:
+            assert history[0].diff["old_value"] == parse("2021-01-01T00:00:00+00:00").isoformat()
+        else:
+            assert history[0].diff["old_value"] is None
+
+        if updated_value:
+            assert getattr(observable_tree.node, key) == parse("2022-01-01T00:00:00+00:00")
+            assert history[0].diff["new_value"] == parse("2022-01-01T00:00:00+00:00").isoformat()
+        else:
+            assert getattr(observable_tree.node, key) is None
+            assert history[0].diff["new_value"] is None
     else:
         assert getattr(observable_tree.node, key) == updated_value
+        assert history[0].diff["old_value"] == initial_value
+        assert history[0].diff["new_value"] == updated_value

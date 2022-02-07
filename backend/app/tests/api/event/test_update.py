@@ -4,6 +4,9 @@ import uuid
 from dateutil.parser import parse
 from fastapi import status
 
+from db import crud
+from db.schemas.event import EventHistory
+from db.schemas.history import History
 from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import helpers
 
@@ -170,10 +173,28 @@ def test_update_owner(client_valid_access_token, db):
     assert event.owner.username == "johndoe"
     assert event.version != initial_event_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "owner"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] == "johndoe"
+
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"owner": None, "uuid": str(event.uuid)}])
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert event.owner is None
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 2
+    assert history[1].action == "UPDATE"
+    assert history[1].action_by == "analyst"
+    assert history[1].field == "owner"
+    assert history[1].diff["old_value"] == "johndoe"
+    assert history[1].diff["new_value"] is None
 
 
 def test_update_prevention_tools(client_valid_access_token, db):
@@ -193,10 +214,32 @@ def test_update_prevention_tools(client_valid_access_token, db):
     assert event.prevention_tools[0].value == "test"
     assert event.version != initial_event_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "prevention_tools"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] is None
+    assert history[0].diff["added_to_list"] == ["test"]
+    assert history[0].diff["removed_from_list"] == []
+
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"prevention_tools": [], "uuid": str(event.uuid)}])
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert event.prevention_tools == []
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 2
+    assert history[1].action == "UPDATE"
+    assert history[1].action_by == "analyst"
+    assert history[1].field == "prevention_tools"
+    assert history[1].diff["old_value"] is None
+    assert history[1].diff["new_value"] is None
+    assert history[1].diff["added_to_list"] == []
+    assert history[1].diff["removed_from_list"] == ["test"]
 
 
 def test_update_queue(client_valid_access_token, db):
@@ -214,6 +257,15 @@ def test_update_queue(client_valid_access_token, db):
     assert event.queue.value == "updated_queue"
     assert event.version != initial_event_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "queue"
+    assert history[0].diff["old_value"] == "default"
+    assert history[0].diff["new_value"] == "updated_queue"
+
 
 def test_update_remediations(client_valid_access_token, db):
     # Create an event
@@ -230,10 +282,32 @@ def test_update_remediations(client_valid_access_token, db):
     assert event.remediations[0].value == "test"
     assert event.version != initial_event_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "remediations"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] is None
+    assert history[0].diff["added_to_list"] == ["test"]
+    assert history[0].diff["removed_from_list"] == []
+
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"remediations": [], "uuid": str(event.uuid)}])
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert event.remediations == []
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 2
+    assert history[1].action == "UPDATE"
+    assert history[1].action_by == "analyst"
+    assert history[1].field == "remediations"
+    assert history[1].diff["old_value"] is None
+    assert history[1].diff["new_value"] is None
+    assert history[1].diff["added_to_list"] == []
+    assert history[1].diff["removed_from_list"] == ["test"]
 
 
 def test_update_risk_level(client_valid_access_token, db):
@@ -250,10 +324,28 @@ def test_update_risk_level(client_valid_access_token, db):
     assert event.risk_level.value == "test"
     assert event.version != initial_event_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "risk_level"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] == "test"
+
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"risk_level": None, "uuid": str(event.uuid)}])
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert event.risk_level is None
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 2
+    assert history[1].action == "UPDATE"
+    assert history[1].action_by == "analyst"
+    assert history[1].field == "risk_level"
+    assert history[1].diff["old_value"] == "test"
+    assert history[1].diff["new_value"] is None
 
 
 def test_update_source(client_valid_access_token, db):
@@ -270,10 +362,28 @@ def test_update_source(client_valid_access_token, db):
     assert event.source.value == "test"
     assert event.version != initial_event_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "source"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] == "test"
+
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"source": None, "uuid": str(event.uuid)}])
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert event.source is None
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 2
+    assert history[1].action == "UPDATE"
+    assert history[1].action_by == "analyst"
+    assert history[1].field == "source"
+    assert history[1].diff["old_value"] == "test"
+    assert history[1].diff["new_value"] is None
 
 
 def test_update_status(client_valid_access_token, db):
@@ -290,6 +400,15 @@ def test_update_status(client_valid_access_token, db):
     assert event.status.value == "test"
     assert event.version != initial_event_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "status"
+    assert history[0].diff["old_value"] == "OPEN"
+    assert history[0].diff["new_value"] == "test"
+
 
 def test_update_type(client_valid_access_token, db):
     # Create an event
@@ -305,10 +424,28 @@ def test_update_type(client_valid_access_token, db):
     assert event.type.value == "test"
     assert event.version != initial_event_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "type"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] == "test"
+
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"type": None, "uuid": str(event.uuid)}])
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert event.type is None
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 2
+    assert history[1].action == "UPDATE"
+    assert history[1].action_by == "analyst"
+    assert history[1].field == "type"
+    assert history[1].diff["old_value"] == "test"
+    assert history[1].diff["new_value"] is None
 
 
 def test_update_vectors(client_valid_access_token, db):
@@ -326,12 +463,34 @@ def test_update_vectors(client_valid_access_token, db):
     assert event.vectors[0].value == "test"
     assert event.version != initial_event_version
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == "vectors"
+    assert history[0].diff["old_value"] is None
+    assert history[0].diff["new_value"] is None
+    assert history[0].diff["added_to_list"] == ["test"]
+    assert history[0].diff["removed_from_list"] == []
+
     # Set it back to None
     update = client_valid_access_token.patch(
         "/api/event/", json=[{"vectors": [], "uuid": str(event.uuid), "uuid": str(event.uuid)}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert event.vectors == []
+
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 2
+    assert history[1].action == "UPDATE"
+    assert history[1].action_by == "analyst"
+    assert history[1].field == "vectors"
+    assert history[1].diff["old_value"] is None
+    assert history[1].diff["new_value"] is None
+    assert history[1].diff["added_to_list"] == []
+    assert history[1].diff["removed_from_list"] == ["test"]
 
 
 @pytest.mark.parametrize(
@@ -345,7 +504,9 @@ def test_update_vectors(client_valid_access_token, db):
 def test_update_valid_node_fields(client_valid_access_token, db, key, value_lists, helper_create_func):
     for value_list in value_lists:
         # Create an event
-        event = helpers.create_event(name="test", db=db)
+        event = helpers.create_event(
+            name="test", tags=["remove_me"], threat_actors=["remove_me"], threats=["remove_me"], db=db
+        )
         initial_event_version = event.version
 
         for value in value_list:
@@ -356,6 +517,18 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
         assert update.status_code == status.HTTP_204_NO_CONTENT
         assert len(getattr(event, key)) == len(set(value_list))
         assert event.version != initial_event_version
+
+        # Verify the history
+        if value_list:
+            history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+            assert len(history) == 1
+            assert history[0].action == "UPDATE"
+            assert history[0].action_by == "analyst"
+            assert history[0].field == key
+            assert history[0].diff["old_value"] is None
+            assert history[0].diff["new_value"] is None
+            assert history[0].diff["added_to_list"] == sorted(set(value_list))
+            assert history[0].diff["removed_from_list"] == ["remove_me"]
 
 
 @pytest.mark.parametrize(
@@ -413,10 +586,20 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     update = client_valid_access_token.patch("/api/event/", json=[{key: updated_value, "uuid": str(event.uuid)}])
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
+    # Verify the history
+    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "UPDATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].field == key
+    assert history[0].diff["old_value"] == initial_value
+
     # If the test is for one of the times, make sure that the retrieved value matches the proper UTC timestamp
     if key.endswith("_time") and updated_value:
         assert getattr(event, key) == parse("2022-01-01T00:00:00+00:00")
+        assert history[0].diff["new_value"] == parse("2022-01-01T00:00:00+00:00").isoformat()
     else:
         assert getattr(event, key) == updated_value
+        assert history[0].diff["new_value"] == updated_value
 
     assert event.version != initial_event_version
