@@ -29,7 +29,6 @@ from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
 from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment
-from db.schemas.node_history_action import NodeHistoryAction
 from db.schemas.node_directive import NodeDirective
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
@@ -405,10 +404,6 @@ def create_node_comment(
 
 def create_node_directive(value: str, db: Session) -> NodeDirective:
     return _create_basic_object(db_table=NodeDirective, value=value, db=db)
-
-
-def create_node_history_action(value: str, db: Session) -> NodeHistoryAction:
-    return _create_basic_object(db_table=NodeHistoryAction, value=value, db=db)
 
 
 def create_node_tag(value: str, db: Session) -> NodeTag:

@@ -4,11 +4,17 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
 from api.models.event import EventRead
+from db.database import Base
 from db.schemas.event_prevention_tool_mapping import event_prevention_tool_mapping
 from db.schemas.event_remediation_mapping import event_remediation_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
 from db.schemas.helpers import utcnow
+from db.schemas.history import History
 from db.schemas.node import Node
+
+
+class EventHistory(Base, History):
+    __tablename__ = "event_history"
 
 
 class Event(Node):
