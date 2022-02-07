@@ -2,24 +2,20 @@
 <!-- The table where all currently filtered alerts are displayed, selected to take action, or link to an individual alert page -->
 
 <template>
-  <TheNodeTable :columns="columns">
+  <TheNodeTable
+    :columns="columns"
+    @rowExpand="onRowExpand"
+    @rowCollapse="onRowCollapse"
+  >
     <template #rowCell="{ data, field }">
       <AlertTableCell :data="data" :field="field"></AlertTableCell>
     </template>
 
     <!-- Row Expansion -->
     <template #rowExpansion="{ data }">
-      <suspense>
-        <template #fallback>
-          <ul></ul>
-        </template>
-        <template #default>
-          <AlertTableExpansion
-            :uuid="data.uuid"
-            :data="data"
-          ></AlertTableExpansion>
-        </template>
-      </suspense>
+      <AlertTableExpansion
+        :observables="alertObservables[data.uuid]"
+      ></AlertTableExpansion>
     </template>
   </TheNodeTable>
 </template>
@@ -30,6 +26,7 @@
   import TheNodeTable from "../Node/TheNodeTable";
   import AlertTableCell from "./AlertTableCell";
   import AlertTableExpansion from "./AlertTableExpansion";
+  import { NodeTree } from "@/services/api/nodeTree";
 
   const columns = ref([
     { field: "dispositionTime", header: "Dispositioned Time", default: false },
@@ -42,6 +39,34 @@
     { field: "queue", header: "Queue", default: false },
     { field: "type", header: "Type", default: false },
   ]);
+
+  const alertObservables = ref({});
+
+  const onRowExpand = async (event) => {
+    const alertUuid = event.data.uuid;
+    // Set to null first so AlertTableExpansion can show loading
+    alertObservables.value[alertUuid] = null;
+    alertObservables.value[alertUuid] = await getObservables(alertUuid);
+  };
+  const onRowCollapse = (event) => {
+    const alertUuid = event.data.uuid;
+    delete alertObservables.value[alertUuid];
+  };
+
+  const getObservables = async (uuid) => {
+    const unsortedObservables = await NodeTree.readNodesOfNodeTree(
+      [uuid],
+      "observable",
+    );
+
+    return unsortedObservables.sort((a, b) => {
+      if (a.type.value === b.type.value) {
+        return a.value < b.value ? -1 : 1;
+      } else {
+        return a.type.value < b.type.value ? -1 : 1;
+      }
+    });
+  };
 </script>
 
 <style>

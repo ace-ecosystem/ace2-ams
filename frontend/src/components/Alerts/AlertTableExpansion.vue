@@ -2,7 +2,15 @@
 <!-- Contains logic and functionality for displaying data in alert row dropdown, currently list of alert's observables -->
 
 <template>
-  <ul>
+  <div v-if="isLoading" style="flex: 1">
+    <ul>
+      <li><Skeleton width="30%"></Skeleton></li>
+      <li><Skeleton width="25%"></Skeleton></li>
+      <li><Skeleton width="30%"></Skeleton></li>
+      <li><Skeleton width="25%"></Skeleton></li>
+    </ul>
+  </div>
+  <ul v-else>
     <!-- List each observable with link to filter -->
     <li v-for="obs of observables" :key="obs.value">
       <span class="link-text" @click="filterByObservable(obs)">{{
@@ -15,36 +23,18 @@
 </template>
 
 <script setup>
-  import { ref, defineProps, onMounted } from "vue";
+  import { computed, defineProps } from "vue";
+  import Skeleton from "primevue/skeleton";
 
   import NodeTagVue from "../Node/NodeTag.vue";
 
-  import { NodeTree } from "@/services/api/nodeTree";
-
-  const observables = ref(null);
-
-  onMounted(async () => {
-    await getObservables(props.uuid);
-  });
-
   const props = defineProps({
-    uuid: { type: String, required: true },
+    observables: { type: [Array, null], required: true },
   });
 
-  const getObservables = async (uuid) => {
-    const unsortedObservables = await NodeTree.readNodesOfNodeTree(
-      [uuid],
-      "observable",
-    );
-
-    observables.value = unsortedObservables.sort((a, b) => {
-      if (a.type.value === b.type.value) {
-        return a.value < b.value ? -1 : 1;
-      } else {
-        return a.type.value < b.type.value ? -1 : 1;
-      }
-    });
-  };
+  const isLoading = computed(() => {
+    return props.observables === null;
+  });
 
   const formatObservable = (observable) => {
     return `${observable.type.value} : ${observable.value}`;
