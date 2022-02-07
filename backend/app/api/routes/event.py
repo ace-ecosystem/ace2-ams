@@ -96,6 +96,8 @@ def create_event(
     crud.record_create_history(
         history_table=EventHistory,
         action_by=username,
+        record_read_model=EventRead,
+        record_table=Event,
         record_uuid=new_event.uuid,
         db=db,
     )
@@ -585,7 +587,13 @@ def update_events(
 
         # Add the entries to the history table
         crud.record_update_histories(
-            history_table=EventHistory, action_by=username, record_uuid=event.uuid, diffs=diffs, db=db
+            history_table=EventHistory,
+            action_by=username,
+            record_read_model=EventRead,
+            record_table=Event,
+            record_uuid=event.uuid,
+            diffs=diffs,
+            db=db,
         )
 
         response.headers["Content-Location"] = request.url_for("get_event", uuid=event.uuid)

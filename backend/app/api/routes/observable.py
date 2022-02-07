@@ -79,6 +79,8 @@ def create_observables(
         crud.record_create_history(
             history_table=ObservableHistory,
             action_by=username,
+            record_read_model=ObservableRead,
+            record_table=Observable,
             record_uuid=new_observable.uuid,
             db=db,
         )
@@ -189,7 +191,13 @@ def update_observable(
 
     # Add the entries to the history table
     crud.record_update_histories(
-        history_table=ObservableHistory, action_by=username, record_uuid=db_observable.uuid, diffs=diffs, db=db
+        history_table=ObservableHistory,
+        action_by=username,
+        record_read_model=ObservableRead,
+        record_table=Observable,
+        record_uuid=db_observable.uuid,
+        diffs=diffs,
+        db=db,
     )
 
     response.headers["Content-Location"] = request.url_for("get_observable", uuid=uuid)

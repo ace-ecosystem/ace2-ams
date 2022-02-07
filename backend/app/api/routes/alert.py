@@ -1,3 +1,5 @@
+import json
+
 from datetime import datetime
 from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi_pagination.ext.sqlalchemy_future import paginate
@@ -8,6 +10,7 @@ from uuid import UUID, uuid4
 
 
 from api.models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
+from api.models.observable import ObservableRead
 from api.routes import helpers
 from api.routes.node import create_node, update_node
 from api.routes.observable import _create_observable
@@ -26,7 +29,7 @@ from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.node_tree import NodeTree
-from db.schemas.observable import Observable
+from db.schemas.observable import Observable, ObservableHistory
 from db.schemas.observable_type import ObservableType
 from db.schemas.user import User
 
@@ -81,6 +84,17 @@ def create_alert(
         db.add(db_observable)
         observable.uuid = db_observable.uuid
 
+        crud.commit(db)
+
+        crud.record_create_history(
+            history_table=ObservableHistory,
+            action_by=username,
+            record_read_model=ObservableRead,
+            record_table=Observable,
+            record_uuid=db_observable.uuid,
+            db=db,
+        )
+
     # Create a NodeTree with the alert as the root and link the observables to it
     node_tree = crud.create_node_tree_leaf(root_node_uuid=new_alert.uuid, node_uuid=new_alert.uuid, db=db)
 
@@ -97,6 +111,8 @@ def create_alert(
     crud.record_create_history(
         history_table=AlertHistory,
         action_by=username,
+        record_read_model=AlertRead,
+        record_table=Alert,
         record_uuid=new_alert.uuid,
         db=db,
     )
@@ -458,7 +474,13 @@ def update_alerts(
 
         # Add the entries to the history table
         crud.record_update_histories(
-            history_table=AlertHistory, action_by=username, record_uuid=alert.uuid, diffs=diffs, db=db
+            history_table=AlertHistory,
+            action_by=username,
+            record_read_model=AlertRead,
+            record_table=Alert,
+            record_uuid=alert.uuid,
+            diffs=diffs,
+            db=db,
         )
 
         response.headers["Content-Location"] = request.url_for("get_alert", uuid=alert.uuid)

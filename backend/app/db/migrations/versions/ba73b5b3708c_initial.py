@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 5a874cb066da
+Revision ID: ba73b5b3708c
 Revises: 
-Create Date: 2022-02-07 19:49:28.997709
+Create Date: 2022-02-07 20:13:52.511694
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '5a874cb066da'
+revision = 'ba73b5b3708c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -34,6 +34,7 @@ def upgrade() -> None:
     sa.Column('record_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('field', sa.String(), nullable=True),
     sa.Column('diff', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('snapshot', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_alert_history_record_uuid'), 'alert_history', ['record_uuid'], unique=False)
@@ -85,6 +86,7 @@ def upgrade() -> None:
     sa.Column('record_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('field', sa.String(), nullable=True),
     sa.Column('diff', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('snapshot', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_event_history_record_uuid'), 'event_history', ['record_uuid'], unique=False)
@@ -193,6 +195,7 @@ def upgrade() -> None:
     sa.Column('record_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('field', sa.String(), nullable=True),
     sa.Column('diff', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('snapshot', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_observable_history_record_uuid'), 'observable_history', ['record_uuid'], unique=False)
@@ -211,6 +214,7 @@ def upgrade() -> None:
     sa.Column('record_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('field', sa.String(), nullable=True),
     sa.Column('diff', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('snapshot', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_user_history_record_uuid'), 'user_history', ['record_uuid'], unique=False)

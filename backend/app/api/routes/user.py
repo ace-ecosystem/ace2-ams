@@ -59,6 +59,8 @@ def create_user(
     crud.record_create_history(
         history_table=UserHistory,
         action_by=username,
+        record_read_model=UserRead,
+        record_table=User,
         record_uuid=new_user.uuid,
         db=db,
     )
@@ -170,7 +172,13 @@ def update_user(
 
     # Add the entries to the history table
     crud.record_update_histories(
-        history_table=UserHistory, action_by=username, record_uuid=db_user.uuid, diffs=diffs, db=db
+        history_table=UserHistory,
+        action_by=username,
+        record_read_model=UserRead,
+        record_table=User,
+        record_uuid=db_user.uuid,
+        diffs=diffs,
+        db=db,
     )
 
     response.headers["Content-Location"] = request.url_for("get_user", uuid=uuid)

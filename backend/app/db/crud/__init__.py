@@ -1,3 +1,5 @@
+import json
+
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from fastapi import HTTPException, status
@@ -60,14 +62,32 @@ def create_diff(
     return Diff(field=field, old_value=old, new_value=new)
 
 
-def record_create_history(history_table: DeclarativeMeta, action_by: str, record_uuid: UUID, db: Session):
-    db.add(history_table(action="CREATE", action_by=action_by, record_uuid=record_uuid))
+def record_create_history(
+    history_table: DeclarativeMeta,
+    action_by: str,
+    record_read_model: BaseModel,
+    record_table: DeclarativeMeta,
+    record_uuid: UUID,
+    db: Session,
+):
+    db_obj = read(uuid=record_uuid, db_table=record_table, db=db)
+    snapshot = json.loads(record_read_model(**db_obj.__dict__).json())
+    db.add(history_table(action="CREATE", action_by=action_by, record_uuid=record_uuid, snapshot=snapshot))
     commit(db)
 
 
 def record_update_histories(
-    history_table: DeclarativeMeta, action_by: str, record_uuid: UUID, diffs: list[Diff], db: Session
+    history_table: DeclarativeMeta,
+    action_by: str,
+    record_read_model: BaseModel,
+    record_table: DeclarativeMeta,
+    record_uuid: UUID,
+    diffs: list[Diff],
+    db: Session,
 ):
+    db_obj = read(uuid=record_uuid, db_table=record_table, db=db)
+    snapshot = json.loads(record_read_model(**db_obj.__dict__).json())
+
     for diff in diffs:
         if diff:
             db.add(
@@ -82,6 +102,7 @@ def record_update_histories(
                         "added_to_list": diff.added_to_list,
                         "removed_from_list": diff.removed_from_list,
                     },
+                    snapshot=snapshot,
                 )
             )
 

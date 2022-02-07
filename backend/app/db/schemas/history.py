@@ -26,3 +26,5 @@ class History:
     field = Column(String)
 
     diff = Column(JSONB)
+
+    snapshot = Column(JSONB, nullable=False)
