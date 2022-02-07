@@ -5,7 +5,7 @@
   <div v-if="isLoading">Loading alerts, please hold...</div>
   <DataTable
     v-else
-    :value="props.alerts"
+    :value="alerts"
     :paginator="true"
     :rows="10"
     paginator-template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
@@ -41,10 +41,10 @@
     { field: "disposition", header: "Disposition" },
   ];
   const props = defineProps({
-    alerts: { type: Array, required: false, default: () => [] },
+    alerts: { type: [Array, null], required: true },
   });
   const isLoading = computed(() => {
-    return props.alerts == undefined;
+    return props.alerts === null;
   });
 </script>
 

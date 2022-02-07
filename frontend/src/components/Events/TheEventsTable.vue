@@ -63,6 +63,7 @@
 
   const onRowExpand = async (event) => {
     const eventUuid = event.data.uuid;
+    eventAlerts.value[eventUuid] = null;
     eventAlerts.value[eventUuid] = await getAlerts(eventUuid);
   };
   const onRowCollapse = (event) => {
