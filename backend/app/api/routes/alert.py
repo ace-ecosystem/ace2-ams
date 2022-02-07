@@ -93,11 +93,11 @@ def create_alert(
 
     crud.commit(db)
 
-    # Add an entry to the AlertHistory table
+    # Add an entry to the history table
     crud.record_create_history(
         history_table=AlertHistory,
         action_by=username,
-        record_uuid=alert.uuid,
+        record_uuid=new_alert.uuid,
         db=db,
     )
 
@@ -411,9 +411,7 @@ def update_alerts(
             db_alert.description = update_data["description"]
 
         if "disposition" in update_data:
-            old = None
-            if db_alert.disposition:
-                old = db_alert.disposition.value
+            old = db_alert.disposition.value if db_alert.disposition else None
             diffs.append(crud.create_diff(field="disposition", old=old, new=update_data["disposition"]))
 
             db_alert.disposition = crud.read_by_value(
@@ -446,9 +444,7 @@ def update_alerts(
             db_alert.instructions = update_data["instructions"]
 
         if "owner" in update_data:
-            old = None
-            if db_alert.owner:
-                old = db_alert.owner.username
+            old = db_alert.owner.username if db_alert.owner else None
             diffs.append(crud.create_diff(field="owner", old=old, new=update_data["owner"]))
 
             db_alert.owner = crud.read_user_by_username(username=update_data["owner"], db=db)
@@ -460,7 +456,7 @@ def update_alerts(
 
         crud.commit(db)
 
-        # Add the entries to the AlertHistory table
+        # Add the entries to the history table
         crud.record_update_histories(
             history_table=AlertHistory, action_by=username, record_uuid=alert.uuid, diffs=diffs, db=db
         )
