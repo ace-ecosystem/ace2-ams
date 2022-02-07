@@ -44,6 +44,8 @@
 
   const onRowExpand = async (event) => {
     const alertUuid = event.data.uuid;
+    // Set to null first so AlertTableExpansion can show loading
+    alertObservables.value[alertUuid] = null;
     alertObservables.value[alertUuid] = await getObservables(alertUuid);
   };
   const onRowCollapse = (event) => {

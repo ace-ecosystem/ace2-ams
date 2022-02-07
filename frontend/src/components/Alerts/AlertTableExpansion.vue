@@ -12,7 +12,7 @@
   </div>
   <ul v-else>
     <!-- List each observable with link to filter -->
-    <li v-for="obs of props.observables" :key="obs.value">
+    <li v-for="obs of observables" :key="obs.value">
       <span class="link-text" @click="filterByObservable(obs)">{{
         formatObservable(obs)
       }}</span>
@@ -29,11 +29,11 @@
   import NodeTagVue from "../Node/NodeTag.vue";
 
   const props = defineProps({
-    observables: { type: Array, required: false, default: () => [] },
+    observables: { type: [Array, null], required: true },
   });
 
   const isLoading = computed(() => {
-    return props.observables == undefined;
+    return props.observables === null;
   });
 
   const formatObservable = (observable) => {
