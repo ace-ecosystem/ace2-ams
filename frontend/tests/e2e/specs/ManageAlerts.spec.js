@@ -828,6 +828,523 @@ describe("Manage Alerts Disposition", () => {
   });
 });
 
+describe("Manage Alerts - Save to Event", () => {
+  beforeEach(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Add a test alert to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_alerts",
+      body: {
+        template: "small.json",
+        count: 1,
+      },
+    });
+
+    // Add an OPEN test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small.json",
+        alert_count: 1,
+        name: "Test Open Event",
+        status: "OPEN",
+      },
+    });
+
+    // Add a CLOSED test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small.json",
+        alert_count: 1,
+        name: "Test Closed Event",
+        status: "CLOSED",
+      },
+    });
+
+    // Intercept the API call that loads the default alert table view
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
+    ).as("getAlertsDefaultRows");
+
+    visitUrl({
+      url: "/manage_alerts",
+      extraIntercepts: ["@getAlertsDefaultRows"],
+    });
+  });
+
+  it("will only allow submission of event when alert(s) are selected and either an existing event is selected or a new event is selected and given a name ", () => {
+    cy.intercept(
+      "GET",
+      "/api/event/?status=OPEN&sort=created_time%7Casc&offset=0",
+    ).as("getOpenEvents");
+    cy.intercept(
+      "GET",
+      "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
+    ).as("getClosedEvents");
+
+    // Open disposition modal, select disposition, and open save to event modal
+    cy.get("[data-cy=disposition-button]").click();
+    cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+    cy.get(".p-dialog-footer > .p-button-raised").click();
+
+    cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
+    cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
+
+    // No alerts selected, should be disabled
+    cy.get("[data-cy=save-to-event-submit-button]").should("be.disabled");
+    // Select an existing event, should be disabled
+    cy.get(
+      "[data-cy=event-options] > .p-listbox-list-wrapper > .p-listbox-list > .p-listbox-item",
+    )
+      .eq(0)
+      .click();
+    cy.get("[data-cy=save-to-event-submit-button]").should("be.disabled");
+    // Select new event, should be disabled
+    cy.get(":nth-child(1) > .p-tabview-nav-link").click();
+    cy.get("[data-cy=save-to-event-submit-button]").should("be.disabled");
+    // Add new event name, should be disabled
+    cy.get("[data-cy=new-event-name]").click().type("Test new event");
+    cy.get("[data-cy=save-to-event-submit-button]").should("be.disabled");
+
+    // Close both modals
+    cy.get(".p-dialog-header-close-icon").last().click();
+    cy.get(".p-dialog-header-close-icon").eq(0).click();
+
+    // Select all alerts and reopen modal
+    cy.get(".p-column-header-content > .p-checkbox > .p-checkbox-box").click();
+    cy.get("[data-cy=disposition-button]").click();
+    cy.get(".p-dialog-footer > .p-button-raised").click();
+
+    cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
+    cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
+
+    // No event selected, should be disabled
+    cy.get("[data-cy=save-to-event-submit-button]").should("be.disabled");
+    // Select an existing event, should not be disabled
+    cy.get(
+      "[data-cy=event-options] > .p-listbox-list-wrapper > .p-listbox-list > .p-listbox-item",
+    )
+      .eq(0)
+      .click();
+    cy.get("[data-cy=save-to-event-submit-button]").should("not.be.disabled");
+    // Select new event, should be disabled
+    cy.get(":nth-child(1) > .p-tabview-nav-link").click();
+    cy.get("[data-cy=save-to-event-submit-button]").should("be.disabled");
+    // Add new event name, should not be disabled
+    cy.get("[data-cy=new-event-name]").click().type("Test new event");
+    cy.get("[data-cy=save-to-event-submit-button]").should("not.be.disabled");
+  });
+  it("will correctly load the 'NEW' tab in the Save to Event modal", () => {
+    cy.intercept(
+      "GET",
+      "/api/event/?status=OPEN&sort=created_time%7Casc&offset=0",
+    ).as("getOpenEvents");
+    cy.intercept(
+      "GET",
+      "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
+    ).as("getClosedEvents");
+
+    // Open disposition modal, select disposition, and open save to event modal
+    cy.get("[data-cy=disposition-button]").click();
+    cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+    cy.get(".p-dialog-footer > .p-button-raised").click();
+
+    cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
+    cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
+
+    // Go to New Event tab
+    cy.get(":nth-child(1) > .p-tabview-nav-link > .p-tabview-title").click();
+    cy.get("[data-cy=new-event-name]")
+      .should("be.visible")
+      .should("contain.text", "");
+    cy.get("[data-cy=new-event-name]").should("be.visible").should("be.empty");
+  });
+  it("will close the save to event modal when back button clicked", () => {
+    cy.intercept(
+      "GET",
+      "/api/event/?status=OPEN&sort=created_time%7Casc&offset=0",
+    ).as("getOpenEvents");
+    cy.intercept(
+      "GET",
+      "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
+    ).as("getClosedEvents");
+
+    // Open disposition modal, select disposition, and open save to event modal
+    cy.get("[data-cy=disposition-button]").click();
+    cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+    cy.get(".p-dialog-footer > .p-button-raised").click();
+
+    cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
+    cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
+
+    // Click back button
+    cy.get("[data-cy=save-to-event-back-button]").click();
+    cy.get("[data-cy=save-to-event-modal]").should("not.exist");
+  });
+  it("will close the save to event modal when close button clicked", () => {
+    cy.intercept(
+      "GET",
+      "/api/event/?status=OPEN&sort=created_time%7Casc&offset=0",
+    ).as("getOpenEvents");
+    cy.intercept(
+      "GET",
+      "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
+    ).as("getClosedEvents");
+
+    // Open disposition modal, select disposition, and open save to event modal
+    cy.get("[data-cy=disposition-button]").click();
+    cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+    cy.get(".p-dialog-footer > .p-button-raised").click();
+
+    cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
+    cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
+
+    // Click close button
+    cy.get(".p-dialog-header-icon").eq(1).click();
+    cy.get("[data-cy=save-to-event-modal]").should("not.exist");
+  });
+  it("will correctly load each dynamic tab in the Save to Event modal", () => {
+    cy.intercept(
+      "GET",
+      "/api/event/?status=OPEN&sort=created_time%7Casc&offset=0",
+    ).as("getOpenEvents");
+    cy.intercept(
+      "GET",
+      "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
+    ).as("getClosedEvents");
+
+    // Open disposition modal, select disposition, and open save to event modal
+    cy.get("[data-cy=disposition-button]").click();
+    cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+    cy.get(".p-dialog-footer > .p-button-raised").click();
+
+    cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
+    cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
+
+    // First check the initial 'OPEN' tab
+    cy.get("[data-cy=event-options]").should("be.visible");
+    cy.get("[data-cy=save-to-event-modal] .p-listbox-item")
+      .eq(0)
+      .should("be.visible")
+      .should("contain.text", "Test Open Event");
+    cy.get("[data-cy=save-to-event-modal] .p-listbox-item")
+      .eq(1)
+      .should("not.be.visible");
+    // Then check 'CLOSED' tab
+    cy.get(".p-tabview-title").last().click();
+    cy.get("[data-cy=event-options]").should("be.visible");
+    cy.get("[data-cy=save-to-event-modal] .p-listbox-item")
+      .eq(1)
+      .should("be.visible")
+      .should("contain.text", "Test Closed Event");
+    cy.get("[data-cy=save-to-event-modal] .p-listbox-item")
+      .eq(0)
+      .should("not.be.visible");
+  });
+  it("will successfully save to an existing event and update alert disposition on save", () => {
+    cy.intercept(
+      "GET",
+      "/api/event/?status=OPEN&sort=created_time%7Casc&offset=0",
+    ).as("getOpenEvents");
+    cy.intercept(
+      "GET",
+      "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
+    ).as("getClosedEvents");
+    cy.intercept("PATCH", "/api/alert/").as("updateAlerts");
+
+    //  Select all alerts
+    cy.get(".p-column-header-content > .p-checkbox > .p-checkbox-box").click();
+
+    // Open disposition modal, select disposition, and open save to event modal
+    cy.get("[data-cy=disposition-button]").click();
+    cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+    cy.get(".p-dialog-footer > .p-button-raised").click();
+
+    cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
+    cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
+
+    // Select "Test Open Event"
+    cy.get("[data-cy=save-to-event-modal] .p-listbox-item").eq(0).click();
+
+    cy.get("[data-cy=save-to-event-submit-button]").click();
+
+    // Update alerts event uuid
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+    // Update alerts disposition
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+
+    cy.get("[data-cy=save-to-event-modal]").should("not.exist");
+
+    // Check first alert disposition
+    cy.get(".p-datatable-tbody > tr > :nth-child(6) > span").should(
+      "contain.text",
+      "APPROVED_BUSINESS",
+    );
+  });
+  it("will successfully save to an existing event, update alert disposition, and add given disposition comment on save", () => {
+    cy.intercept(
+      "GET",
+      "/api/event/?status=OPEN&sort=created_time%7Casc&offset=0",
+    ).as("getOpenEvents");
+    cy.intercept(
+      "GET",
+      "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
+    ).as("getClosedEvents");
+    cy.intercept("PATCH", "/api/alert/").as("updateAlerts");
+    cy.intercept("POST", "/api/node/comment").as("addComment");
+
+    //  Select all alerts
+    cy.get(".p-column-header-content > .p-checkbox > .p-checkbox-box").click();
+
+    // Open disposition modal, select disposition, add disposition comment, and open save to event modal
+    cy.get("[data-cy=disposition-button]").click();
+    cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+    cy.get(".p-inputtextarea").click().type("disposition comment");
+    cy.get(".p-dialog-footer > .p-button-raised").click();
+
+    // Select "Test Open Event"
+    cy.get("[data-cy=save-to-event-modal] .p-listbox-item").eq(0).click();
+
+    cy.get("[data-cy=save-to-event-submit-button]").click();
+
+    // Update alerts event uuid
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+    // Update alerts disposition
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+    // Add disposition comment
+    cy.wait("@addComment").its("state").should("eq", "Complete");
+
+    cy.get("[data-cy=save-to-event-modal]").should("not.exist");
+
+    // Check first alert disposition
+    cy.get(".p-datatable-tbody > tr > :nth-child(6) > span").should(
+      "contain.text",
+      "APPROVED_BUSINESS",
+    );
+    // Check alert comment
+    cy.get(".p-datatable-tbody > tr > :nth-child(4) .p-mr-2").should(
+      "contain.text",
+      "(Analyst) disposition comment",
+    );
+  });
+  it("will successfully create and add alert to event, and update disposition on save", () => {
+    cy.intercept(
+      "GET",
+      "/api/event/?status=OPEN&sort=created_time%7Casc&offset=0",
+    ).as("getOpenEvents");
+    cy.intercept(
+      "GET",
+      "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
+    ).as("getClosedEvents");
+    cy.intercept("PATCH", "/api/alert/").as("updateAlerts");
+    cy.intercept("POST", "/api/event/").as("createEvent");
+
+    //  Select all alerts
+    cy.get(".p-column-header-content > .p-checkbox > .p-checkbox-box").click();
+
+    // Open disposition modal, select disposition, and open save to event modal
+    cy.get("[data-cy=disposition-button]").click();
+    cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+    cy.get(".p-dialog-footer > .p-button-raised").click();
+
+    cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
+    cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
+
+    // Select new event
+    cy.get(":nth-child(1) > .p-tabview-nav-link").click();
+    cy.get("[data-cy=new-event-name]").click().type("Test new event");
+
+    cy.get("[data-cy=save-to-event-submit-button]").click();
+
+    // Create new event
+    cy.wait("@createEvent").its("state").should("eq", "Complete");
+    // Update alerts event uuid
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+    // Update alerts disposition
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+
+    cy.get("[data-cy=save-to-event-modal]").should("not.exist");
+
+    // Check first alert disposition
+    cy.get(".p-datatable-tbody > tr > :nth-child(6) > span").should(
+      "contain.text",
+      "APPROVED_BUSINESS",
+    );
+  });
+  it("will successfully create and add alert to event, update disposition and add given disposition comment on save", () => {
+    cy.intercept(
+      "GET",
+      "/api/event/?status=OPEN&sort=created_time%7Casc&offset=0",
+    ).as("getOpenEvents");
+    cy.intercept(
+      "GET",
+      "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
+    ).as("getClosedEvents");
+    cy.intercept("PATCH", "/api/alert/").as("updateAlerts");
+    cy.intercept("POST", "/api/event/").as("createEvent");
+    cy.intercept("POST", "/api/node/comment").as("addComment");
+
+    //  Select all alerts
+    cy.get(".p-column-header-content > .p-checkbox > .p-checkbox-box").click();
+
+    // Open disposition modal, select disposition, add disposition comment, and open save to event modal
+    cy.get("[data-cy=disposition-button]").click();
+    cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+    cy.get(".p-inputtextarea").click().type("disposition comment");
+    cy.get(".p-dialog-footer > .p-button-raised").click();
+
+    cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
+    cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
+
+    // Select new event
+    cy.get(":nth-child(1) > .p-tabview-nav-link").click();
+    cy.get("[data-cy=new-event-name]").click().type("Test new event");
+
+    cy.get("[data-cy=save-to-event-submit-button]").click();
+
+    // Create new event
+    cy.wait("@createEvent").its("state").should("eq", "Complete");
+    // Update alerts event uuid
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+    // Update alerts disposition
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+    // Add disposition comment
+    cy.wait("@addComment").its("state").should("eq", "Complete");
+
+    cy.get("[data-cy=save-to-event-modal]").should("not.exist");
+
+    // Check first alert disposition
+    cy.get(".p-datatable-tbody > tr > :nth-child(6) > span").should(
+      "contain.text",
+      "APPROVED_BUSINESS",
+    );
+
+    // Check alert comment
+    cy.get(".p-datatable-tbody > tr > :nth-child(4) .p-mr-2").should(
+      "contain.text",
+      "(Analyst) disposition comment",
+    );
+  });
+  it("will successfully create and add alert to event, update disposition and add given event comment on save", () => {
+    cy.intercept(
+      "GET",
+      "/api/event/?status=OPEN&sort=created_time%7Casc&offset=0",
+    ).as("getOpenEvents");
+    cy.intercept(
+      "GET",
+      "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
+    ).as("getClosedEvents");
+    cy.intercept("PATCH", "/api/alert/").as("updateAlerts");
+    cy.intercept("POST", "/api/event/").as("createEvent");
+    cy.intercept("POST", "/api/node/comment").as("addComment");
+
+    //  Select all alerts
+    cy.get(".p-column-header-content > .p-checkbox > .p-checkbox-box").click();
+
+    // Open disposition modal, select disposition and open save to event modal
+    cy.get("[data-cy=disposition-button]").click();
+    cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+    cy.get(".p-dialog-footer > .p-button-raised").click();
+
+    cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
+    cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
+
+    // Select new event
+    cy.get(":nth-child(1) > .p-tabview-nav-link").click();
+    cy.get("[data-cy=new-event-name]").click().type("Test new event");
+    cy.get("[data-cy=new-event-comment]").click().type("new event comment");
+
+    cy.get("[data-cy=save-to-event-submit-button]").click();
+
+    // Create new event
+    cy.wait("@createEvent").its("state").should("eq", "Complete");
+    // Add event comment
+    cy.wait("@addComment").its("state").should("eq", "Complete");
+    // Update alerts event uuid
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+    // Update alerts disposition
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+
+    cy.get("[data-cy=save-to-event-modal]").should("not.exist");
+
+    // Check first alert disposition
+    cy.get(".p-datatable-tbody > tr > :nth-child(6) > span").should(
+      "contain.text",
+      "APPROVED_BUSINESS",
+    );
+
+    // Check alert comment
+    cy.get(".p-datatable-tbody > tr > :nth-child(4) .p-mr-2").should(
+      "contain.text",
+      "(Analyst) new event comment",
+    );
+  });
+  it("will successfully create and add alert to event, update disposition add given comments on save, ignoring any duplicate errors", () => {
+    cy.intercept(
+      "GET",
+      "/api/event/?status=OPEN&sort=created_time%7Casc&offset=0",
+    ).as("getOpenEvents");
+    cy.intercept(
+      "GET",
+      "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
+    ).as("getClosedEvents");
+    cy.intercept("PATCH", "/api/alert/").as("updateAlerts");
+    cy.intercept("POST", "/api/event/").as("createEvent");
+    cy.intercept("POST", "/api/node/comment").as("addComment");
+
+    //  Select all alerts
+    cy.get(".p-column-header-content > .p-checkbox > .p-checkbox-box").click();
+
+    // Open disposition modal, select disposition, add disposition comment, and open save to event modal
+    cy.get("[data-cy=disposition-button]").click();
+    cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+    cy.get(".p-inputtextarea").click().type("test comment");
+    cy.get(".p-dialog-footer > .p-button-raised").click();
+
+    cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
+    cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
+
+    // Select new event
+    cy.get(":nth-child(1) > .p-tabview-nav-link").click();
+    cy.get("[data-cy=new-event-name]").click().type("Test new event");
+    cy.get("[data-cy=new-event-comment]").click().type("test comment");
+
+    cy.get("[data-cy=save-to-event-submit-button]").click();
+
+    // Create new event
+    cy.wait("@createEvent").its("state").should("eq", "Complete");
+    // Add event comment
+    cy.wait("@addComment").its("state").should("eq", "Complete");
+    // Update alerts event uuid
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+    // Update alerts disposition
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+
+    cy.get("[data-cy=save-to-event-modal]").should("not.exist");
+    // Add disposition comment
+    cy.wait("@addComment").its("state").should("eq", "Complete");
+
+    // Check first alert disposition
+    cy.get(".p-datatable-tbody > tr > :nth-child(6) > span").should(
+      "contain.text",
+      "APPROVED_BUSINESS",
+    );
+
+    // Check alert comment
+    cy.get(".p-datatable-tbody > tr > :nth-child(4) .p-mr-2").should(
+      "contain.text",
+      "(Analyst) test comment",
+    );
+  });
+});
+
 describe("Manage Alerts URL Param Filters", () => {
   beforeEach(() => {
     cy.resetDatabase();

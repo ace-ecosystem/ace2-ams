@@ -47,7 +47,7 @@ export interface eventCreate extends nodeCreate {
   remediationTime?: Date;
   riskLevel?: string;
   source?: string;
-  status?: string;
+  status: string;
   tags?: string[];
   threatActors?: string[];
   threats?: string[];

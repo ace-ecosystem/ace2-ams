@@ -7,7 +7,7 @@ import { camelToSnakeCase } from "@/etc/helpers";
 export function parseEventSummary(event: eventRead): eventSummary {
   return {
     comments: event.comments,
-    createdTime: event.creationTime,
+    createdTime: new Date(event.creationTime),
     // disposition: event.disposition,  // Need to edit the API so that it adds disposition into the Event response
     name: event.name,
     owner: event.owner ? event.owner.displayName : "None",

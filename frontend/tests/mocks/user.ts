@@ -10,7 +10,7 @@ export const userReadFactory = ({
   roles = [],
   timezone = "",
   training = false,
-  username = "",
+  username = "analyst",
   uuid = "",
 }: Partial<userRead> = {}): userRead => ({
   defaultAlertQueue: defaultAlertQueue,
