@@ -6,7 +6,7 @@ from db import crud
 from db.schemas.alert import AlertHistory
 from db.schemas.history import History
 from db.schemas.node_tree import NodeTree
-from db.schemas.observable import Observable
+from db.schemas.observable import Observable, ObservableHistory
 
 from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import helpers
@@ -294,6 +294,16 @@ def test_create_verify_history(client_valid_access_token, db):
     assert history[0].field is None
     assert history[0].diff is None
     assert history[0].snapshot["name"] == "test alert"
+
+    db_observable = crud.read_observable(type="o_type", value="o_value", db=db)
+    history: list[History] = crud.read_history_records(ObservableHistory, record_uuid=db_observable.uuid, db=db)
+    assert len(history) == 1
+    assert history[0].action == "CREATE"
+    assert history[0].action_by == "analyst"
+    assert history[0].record_uuid == db_observable.uuid
+    assert history[0].field is None
+    assert history[0].diff is None
+    assert history[0].snapshot["value"] == "o_value"
 
 
 @pytest.mark.parametrize(
