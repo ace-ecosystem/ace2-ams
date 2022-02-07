@@ -14,25 +14,14 @@
     <!-- Row Expansion -->
     <template #rowExpansion="{ data }">
       <AlertTableExpansion
-        v-if="alertObservables[data.uuid]"
         :observables="alertObservables[data.uuid]"
       ></AlertTableExpansion>
-      <div v-else style="flex: 1">
-        <ul>
-          <li><Skeleton width="30%"></Skeleton></li>
-          <li><Skeleton width="25%"></Skeleton></li>
-          <li><Skeleton width="30%"></Skeleton></li>
-          <li><Skeleton width="25%"></Skeleton></li>
-        </ul>
-      </div>
     </template>
   </TheNodeTable>
 </template>
 
 <script setup>
   import { ref } from "vue";
-
-  import Skeleton from "primevue/skeleton";
 
   import TheNodeTable from "../Node/TheNodeTable";
   import AlertTableCell from "./AlertTableCell";
