@@ -18,4 +18,4 @@ class AddTestEvent(BaseModel):
 
     name: str = Field(description="The name to use for the event")
 
-    status: Optional[type_str] = Field(description="The status to use for the event")
+    status: Optional[type_str] = Field(description="The status to use for the event", default="OPEN")
