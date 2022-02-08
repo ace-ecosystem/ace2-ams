@@ -42,7 +42,7 @@ class Node(Base):
         "NodeTag",
         secondary="join(NodeTag, node_tag_mapping, NodeTag.uuid == node_tag_mapping.c.tag_uuid)."
         "join(NodeTree, NodeTree.node_uuid == node_tag_mapping.c.node_uuid)",
-        primaryjoin="Node.uuid == NodeTree.root_node_uuid",
+        primaryjoin="and_(Node.uuid == NodeTree.root_node_uuid, Node.uuid != NodeTree.node_uuid)",
         viewonly=True,
         lazy="selectin",
     )
@@ -51,7 +51,7 @@ class Node(Base):
         "NodeThreatActor",
         secondary="join(NodeThreatActor, node_threat_actor_mapping, NodeThreatActor.uuid == node_threat_actor_mapping.c.threat_actor_uuid)."
         "join(NodeTree, NodeTree.node_uuid == node_threat_actor_mapping.c.node_uuid)",
-        primaryjoin="Node.uuid == NodeTree.root_node_uuid",
+        primaryjoin="and_(Node.uuid == NodeTree.root_node_uuid, Node.uuid != NodeTree.node_uuid)",
         viewonly=True,
         lazy="selectin",
     )
@@ -60,7 +60,7 @@ class Node(Base):
         "NodeThreat",
         secondary="join(NodeThreat, node_threat_mapping, NodeThreat.uuid == node_threat_mapping.c.threat_uuid)."
         "join(NodeTree, NodeTree.node_uuid == node_threat_mapping.c.node_uuid)",
-        primaryjoin="Node.uuid == NodeTree.root_node_uuid",
+        primaryjoin="and_(Node.uuid == NodeTree.root_node_uuid, Node.uuid != NodeTree.node_uuid)",
         viewonly=True,
         lazy="selectin",
     )
