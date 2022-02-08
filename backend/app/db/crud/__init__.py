@@ -269,7 +269,15 @@ def read_by_uuids(uuids: List[UUID], db_table: DeclarativeMeta, db: Session):
 def read_history_records(history_table: DeclarativeMeta, record_uuid: UUID, db: Session):
     """Returns a list of records from the given history table that involve the given record UUID."""
 
-    return db.execute(select(history_table).where(history_table.record_uuid == record_uuid)).scalars().all()
+    return (
+        db.execute(
+            select(history_table)
+            .where(history_table.record_uuid == record_uuid)
+            .order_by(history_table.action_time.asc())
+        )
+        .scalars()
+        .all()
+    )
 
 
 def read_observable(type: str, value: str, db: Session) -> Union[Observable, None]:
