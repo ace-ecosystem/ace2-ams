@@ -14,11 +14,16 @@ from sqlalchemy.sql.expression import join
 from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
+from api.models.alert import AlertRead
+from api.models.event import EventRead
 from api.models.node import NodeRead, NodeTreeMetadata
+from api.models.observable import ObservableRead
 from core.auth import verify_password
+from db.schemas.alert import Alert, AlertHistory
+from db.schemas.event import Event, EventHistory
 from db.schemas.node import Node
 from db.schemas.node_tree import NodeTree
-from db.schemas.observable import Observable
+from db.schemas.observable import Observable, ObservableHistory
 from db.schemas.observable_type import ObservableType
 from db.schemas.user import User
 
@@ -74,6 +79,39 @@ def record_create_history(
     snapshot = json.loads(record_read_model(**db_obj.__dict__).json())
     db.add(history_table(action="CREATE", action_by=action_by, record_uuid=record_uuid, snapshot=snapshot))
     commit(db)
+
+
+def record_comment_history(record_node: Node, username: str, diff: Diff, db: Session):
+    if record_node.node_type == "alert":
+        record_update_histories(
+            history_table=AlertHistory,
+            action_by=username,
+            record_read_model=AlertRead,
+            record_table=Alert,
+            record_uuid=record_node.uuid,
+            diffs=[diff],
+            db=db,
+        )
+    elif record_node.node_type == "event":
+        record_update_histories(
+            history_table=EventHistory,
+            action_by=username,
+            record_read_model=EventRead,
+            record_table=Event,
+            record_uuid=record_node.uuid,
+            diffs=[diff],
+            db=db,
+        )
+    elif record_node.node_type == "observable":
+        record_update_histories(
+            history_table=ObservableHistory,
+            action_by=username,
+            record_read_model=ObservableRead,
+            record_table=Observable,
+            record_uuid=record_node.uuid,
+            diffs=[diff],
+            db=db,
+        )
 
 
 def record_update_histories(
@@ -473,13 +511,14 @@ def update(uuid: UUID, obj: BaseModel, db_table: DeclarativeMeta, db: Session):
 #
 
 
-def delete(uuid: UUID, db_table: DeclarativeMeta, db: Session):
+def delete(uuid: UUID, db_table: DeclarativeMeta, db: Session, read_first: bool = True):
     """Deletes the object with the given UUID from the database.
     Designed to be called only by the API since it raises an HTTPException."""
 
     # Make sure the resource exists so that better error messages can be returned. The read
     # function will raise an exception and return a 404 status if the resource does not exist.
-    result = read(uuid=uuid, db_table=db_table, db=db)
+    if read_first:
+        result = read(uuid=uuid, db_table=db_table, db=db)
 
     # NOTE: This will need to be updated to account for foreign key constraint errors.
     result = db.execute(sql_delete(db_table).where(db_table.uuid == uuid))

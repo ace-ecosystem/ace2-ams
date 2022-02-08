@@ -15,6 +15,8 @@ class NodeComment(Base):
 
     node_uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), index=True)
 
+    node = relationship("Node", foreign_keys=[node_uuid], lazy="selectin")
+
     user_uuid = Column(UUID(as_uuid=True), ForeignKey("user.uuid"))
 
     user = relationship("User", foreign_keys=[user_uuid])
