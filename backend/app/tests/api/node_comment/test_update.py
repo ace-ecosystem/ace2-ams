@@ -3,11 +3,6 @@ import uuid
 
 from fastapi import status
 
-from db import crud
-from db.schemas.alert import AlertHistory
-from db.schemas.event import EventHistory
-from db.schemas.history import History
-from db.schemas.observable import ObservableHistory
 from tests import helpers
 
 
@@ -70,17 +65,17 @@ def test_update_alerts(client_valid_access_token, db):
     assert alert_tree.node.comments[0].value == "updated"
 
     # Verify the history record
-    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_tree.node_uuid, db=db)
-    assert len(history) == 1
-    assert history[0].action == "UPDATE"
-    assert history[0].action_by == "analyst"
-    assert history[0].record_uuid == alert_tree.node_uuid
-    assert history[0].field == "comments"
-    assert history[0].diff["old_value"] is None
-    assert history[0].diff["new_value"] is None
-    assert history[0].diff["added_to_list"] == ["updated"]
-    assert history[0].diff["removed_from_list"] == ["test"]
-    assert history[0].snapshot["name"] == "Test Alert"
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "UPDATE"
+    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["record_uuid"] == str(alert_tree.node_uuid)
+    assert history.json()["items"][0]["field"] == "comments"
+    assert history.json()["items"][0]["diff"]["old_value"] is None
+    assert history.json()["items"][0]["diff"]["new_value"] is None
+    assert history.json()["items"][0]["diff"]["added_to_list"] == ["updated"]
+    assert history.json()["items"][0]["diff"]["removed_from_list"] == ["test"]
+    assert history.json()["items"][0]["snapshot"]["name"] == "Test Alert"
 
 
 def test_update_events(client_valid_access_token, db):
@@ -95,17 +90,17 @@ def test_update_events(client_valid_access_token, db):
     assert event.comments[0].value == "updated"
 
     # Verify the history record
-    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event.uuid, db=db)
-    assert len(history) == 1
-    assert history[0].action == "UPDATE"
-    assert history[0].action_by == "analyst"
-    assert history[0].record_uuid == event.uuid
-    assert history[0].field == "comments"
-    assert history[0].diff["old_value"] is None
-    assert history[0].diff["new_value"] is None
-    assert history[0].diff["added_to_list"] == ["updated"]
-    assert history[0].diff["removed_from_list"] == ["test"]
-    assert history[0].snapshot["name"] == "Test Event"
+    history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "UPDATE"
+    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["record_uuid"] == str(event.uuid)
+    assert history.json()["items"][0]["field"] == "comments"
+    assert history.json()["items"][0]["diff"]["old_value"] is None
+    assert history.json()["items"][0]["diff"]["new_value"] is None
+    assert history.json()["items"][0]["diff"]["added_to_list"] == ["updated"]
+    assert history.json()["items"][0]["diff"]["removed_from_list"] == ["test"]
+    assert history.json()["items"][0]["snapshot"]["name"] == "Test Event"
 
 
 def test_update_observables(client_valid_access_token, db):
@@ -121,14 +116,14 @@ def test_update_observables(client_valid_access_token, db):
     assert observable_tree.node.comments[0].value == "updated"
 
     # Verify the history record
-    history: list[History] = crud.read_history_records(ObservableHistory, record_uuid=observable_tree.node_uuid, db=db)
-    assert len(history) == 1
-    assert history[0].action == "UPDATE"
-    assert history[0].action_by == "analyst"
-    assert history[0].record_uuid == observable_tree.node_uuid
-    assert history[0].field == "comments"
-    assert history[0].diff["old_value"] is None
-    assert history[0].diff["new_value"] is None
-    assert history[0].diff["added_to_list"] == ["updated"]
-    assert history[0].diff["removed_from_list"] == ["test"]
-    assert history[0].snapshot["value"] == "test_value"
+    history = client_valid_access_token.get(f"/api/observable/{observable_tree.node_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "UPDATE"
+    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["record_uuid"] == str(observable_tree.node_uuid)
+    assert history.json()["items"][0]["field"] == "comments"
+    assert history.json()["items"][0]["diff"]["old_value"] is None
+    assert history.json()["items"][0]["diff"]["new_value"] is None
+    assert history.json()["items"][0]["diff"]["added_to_list"] == ["updated"]
+    assert history.json()["items"][0]["diff"]["removed_from_list"] == ["test"]
+    assert history.json()["items"][0]["snapshot"]["value"] == "test_value"

@@ -10,6 +10,7 @@ from uuid import UUID, uuid4
 
 
 from api.models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
+from api.models.history import AlertHistoryRead
 from api.models.observable import ObservableRead
 from api.routes import helpers
 from api.routes.node import create_node, update_node
@@ -397,8 +398,13 @@ def get_alert(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read_node_tree(root_node_uuid=uuid, db=db)
 
 
+def get_alert_history(uuid: UUID, db: Session = Depends(get_db)):
+    return crud.read_history_records(history_table=AlertHistory, record_uuid=uuid, db=db)
+
+
 helpers.api_route_read_all(router, get_all_alerts, AlertRead)
 helpers.api_route_read(router, get_alert, dict)
+helpers.api_route_read_all(router, get_alert_history, AlertHistoryRead, path="/{uuid}/history")
 
 
 #

@@ -2,11 +2,10 @@ import pytest
 import uuid
 
 from fastapi import status
+
 from db import crud
-from db.schemas.alert import AlertHistory
-from db.schemas.history import History
 from db.schemas.node_tree import NodeTree
-from db.schemas.observable import Observable, ObservableHistory
+from db.schemas.observable import Observable
 
 from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import helpers
@@ -286,24 +285,24 @@ def test_create_verify_history(client_valid_access_token, db):
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
-    history: list[History] = crud.read_history_records(AlertHistory, record_uuid=alert_uuid, db=db)
-    assert len(history) == 1
-    assert history[0].action == "CREATE"
-    assert history[0].action_by == "analyst"
-    assert str(history[0].record_uuid) == alert_uuid
-    assert history[0].field is None
-    assert history[0].diff is None
-    assert history[0].snapshot["name"] == "test alert"
+    history = client_valid_access_token.get(f"/api/alert/{alert_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "CREATE"
+    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["record_uuid"] == alert_uuid
+    assert history.json()["items"][0]["field"] is None
+    assert history.json()["items"][0]["diff"] is None
+    assert history.json()["items"][0]["snapshot"]["name"] == "test alert"
 
     db_observable = crud.read_observable(type="o_type", value="o_value", db=db)
-    history: list[History] = crud.read_history_records(ObservableHistory, record_uuid=db_observable.uuid, db=db)
-    assert len(history) == 1
-    assert history[0].action == "CREATE"
-    assert history[0].action_by == "analyst"
-    assert history[0].record_uuid == db_observable.uuid
-    assert history[0].field is None
-    assert history[0].diff is None
-    assert history[0].snapshot["value"] == "o_value"
+    history = client_valid_access_token.get(f"/api/observable/{db_observable.uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "CREATE"
+    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["record_uuid"] == str(db_observable.uuid)
+    assert history.json()["items"][0]["field"] is None
+    assert history.json()["items"][0]["diff"] is None
+    assert history.json()["items"][0]["snapshot"]["value"] == "o_value"
 
 
 @pytest.mark.parametrize(

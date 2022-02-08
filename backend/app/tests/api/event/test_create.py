@@ -3,9 +3,6 @@ import uuid
 
 from fastapi import status
 
-from db import crud
-from db.schemas.event import EventHistory
-from db.schemas.history import History
 from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import helpers
 
@@ -256,14 +253,14 @@ def test_create_verify_history(client_valid_access_token, db):
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
-    history: list[History] = crud.read_history_records(EventHistory, record_uuid=event_uuid, db=db)
-    assert len(history) == 1
-    assert history[0].action == "CREATE"
-    assert history[0].action_by == "analyst"
-    assert str(history[0].record_uuid) == event_uuid
-    assert history[0].field is None
-    assert history[0].diff is None
-    assert history[0].snapshot["name"] == "test"
+    history = client_valid_access_token.get(f"/api/event/{event_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "CREATE"
+    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert str(history.json()["items"][0]["record_uuid"]) == event_uuid
+    assert history.json()["items"][0]["field"] is None
+    assert history.json()["items"][0]["diff"] is None
+    assert history.json()["items"][0]["snapshot"]["name"] == "test"
 
 
 @pytest.mark.parametrize(

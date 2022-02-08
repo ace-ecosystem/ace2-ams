@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 from uuid import UUID
 
+from api.models.history import UserHistoryRead
 from api.models.user import (
     UserCreate,
     UserRead,
@@ -84,8 +85,13 @@ def get_user(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=User, db=db)
 
 
+def get_user_history(uuid: UUID, db: Session = Depends(get_db)):
+    return crud.read_history_records(history_table=UserHistory, record_uuid=uuid, db=db)
+
+
 helpers.api_route_read_all(router, get_all_users, UserRead)
 helpers.api_route_read(router, get_user, UserRead)
+helpers.api_route_read_all(router, get_user_history, UserHistoryRead, path="/{uuid}/history")
 
 
 #

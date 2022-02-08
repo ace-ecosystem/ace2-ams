@@ -8,6 +8,7 @@ from typing import List, Optional
 from uuid import UUID
 
 from api.models.event import EventCreate, EventRead, EventUpdateMultiple
+from api.models.history import EventHistoryRead
 from api.routes import helpers
 from api.routes.node import create_node, update_node
 from core.auth import validate_access_token
@@ -446,8 +447,13 @@ def get_event(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=Event, db=db)
 
 
+def get_event_history(uuid: UUID, db: Session = Depends(get_db)):
+    return crud.read_history_records(history_table=EventHistory, record_uuid=uuid, db=db)
+
+
 helpers.api_route_read_all(router, get_all_events, EventRead)
 helpers.api_route_read(router, get_event, EventRead)
+helpers.api_route_read_all(router, get_event_history, EventHistoryRead, path="/{uuid}/history")
 
 
 #

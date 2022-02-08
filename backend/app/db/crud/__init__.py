@@ -3,6 +3,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from fastapi import HTTPException, status
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from pydantic import BaseModel
 from pydantic.types import UUID4
 from sqlalchemy import delete as sql_delete, select, update as sql_update
@@ -67,6 +68,16 @@ def create_diff(
     return Diff(field=field, old_value=old, new_value=new)
 
 
+def read_history_records(history_table: DeclarativeMeta, record_uuid: UUID, db: Session):
+    """Returns a paginated list of records from the given history table that involve the given record UUID."""
+
+    query = (
+        select(history_table).where(history_table.record_uuid == record_uuid).order_by(history_table.action_time.asc())
+    )
+
+    return paginate(db, query)
+
+
 def record_create_history(
     history_table: DeclarativeMeta,
     action_by: str,
@@ -77,7 +88,15 @@ def record_create_history(
 ):
     db_obj = read(uuid=record_uuid, db_table=record_table, db=db)
     snapshot = json.loads(record_read_model(**db_obj.__dict__).json())
-    db.add(history_table(action="CREATE", action_by=action_by, record_uuid=record_uuid, snapshot=snapshot))
+    db.add(
+        history_table(
+            action="CREATE",
+            action_by=action_by,
+            action_time=datetime.utcnow(),
+            record_uuid=record_uuid,
+            snapshot=snapshot,
+        )
+    )
     commit(db)
 
 
@@ -132,6 +151,7 @@ def record_update_histories(
                 history_table(
                     action="UPDATE",
                     action_by=action_by,
+                    action_time=datetime.utcnow(),
                     record_uuid=record_uuid,
                     field=diff.field,
                     diff={
@@ -264,20 +284,6 @@ def read_by_uuids(uuids: List[UUID], db_table: DeclarativeMeta, db: Session):
             )
 
     return resources
-
-
-def read_history_records(history_table: DeclarativeMeta, record_uuid: UUID, db: Session):
-    """Returns a list of records from the given history table that involve the given record UUID."""
-
-    return (
-        db.execute(
-            select(history_table)
-            .where(history_table.record_uuid == record_uuid)
-            .order_by(history_table.action_time.asc())
-        )
-        .scalars()
-        .all()
-    )
 
 
 def read_observable(type: str, value: str, db: Session) -> Union[Observable, None]:

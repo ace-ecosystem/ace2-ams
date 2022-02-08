@@ -5,6 +5,7 @@ from sqlalchemy.sql.expression import select
 from typing import List, Union
 from uuid import UUID
 
+from api.models.history import ObservableHistoryRead
 from api.models.observable import (
     ObservableCreate,
     ObservableCreateWithAlert,
@@ -120,8 +121,13 @@ def get_observable(uuid: UUID, db: Session = Depends(get_db)):
     return crud.read(uuid=uuid, db_table=Observable, db=db)
 
 
+def get_observable_history(uuid: UUID, db: Session = Depends(get_db)):
+    return crud.read_history_records(history_table=ObservableHistory, record_uuid=uuid, db=db)
+
+
 helpers.api_route_read_all(router, get_all_observables, ObservableRead)
 helpers.api_route_read(router, get_observable, ObservableRead)
+helpers.api_route_read_all(router, get_observable_history, ObservableHistoryRead, path="/{uuid}/history")
 
 
 #

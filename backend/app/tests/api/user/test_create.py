@@ -3,9 +3,6 @@ import uuid
 
 from fastapi import status
 
-from db import crud
-from db.schemas.history import History
-from db.schemas.user import UserHistory
 from tests import helpers
 
 
@@ -171,14 +168,14 @@ def test_create_verify_history(client_valid_access_token, db):
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
-    history: list[History] = crud.read_history_records(UserHistory, record_uuid=user_uuid, db=db)
-    assert len(history) == 1
-    assert history[0].action == "CREATE"
-    assert history[0].action_by == "analyst"
-    assert str(history[0].record_uuid) == user_uuid
-    assert history[0].field is None
-    assert history[0].diff is None
-    assert history[0].snapshot["username"] == "johndoe"
+    history = client_valid_access_token.get(f"/api/user/{user_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "CREATE"
+    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["record_uuid"] == user_uuid
+    assert history.json()["items"][0]["field"] is None
+    assert history.json()["items"][0]["diff"] is None
+    assert history.json()["items"][0]["snapshot"]["username"] == "johndoe"
 
 
 @pytest.mark.parametrize(
