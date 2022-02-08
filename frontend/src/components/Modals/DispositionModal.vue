@@ -2,7 +2,7 @@
 <!-- 'Disposition' alert action modal, contains trigger to open SaveToEvent modal -->
 
 <template>
-  <BaseModal :name="name" header="Set Disposition">
+  <BaseModal :name="name" header="Set Disposition" :style="{ width: '75vw' }">
     <div>
       <div v-if="error" class="p-col">
         <Message severity="error" @close="handleError">{{ error }}</Message>
@@ -15,7 +15,7 @@
           :options="alertDispositionStore.allItems"
           option-label="value"
           list-style="max-height:250px"
-          style="width: 20rem"
+          style="width: 70vw"
         />
       </div>
       <div class="p-field p-col">
@@ -40,15 +40,13 @@
         v-if="showAddToEventButton"
         label="Save to Event"
         class="p-button-raised"
-        disabled
+        :disabled="!showAddToEventButton"
         @click="open('SaveToEventModal')"
       />
     </template>
-    <!--  SAVE TO EVENT  -->
-    <template #child>
-      <SaveToEventModal @save-to-event="close" />
-    </template>
   </BaseModal>
+  <!--  SAVE TO EVENT  -->
+  <SaveToEventModal name="SaveToEventModal" @saveToEvent="setDisposition" />
 </template>
 
 <script setup>
@@ -93,19 +91,21 @@
         uuid: uuid,
         disposition: newDisposition.value.value,
       }));
-
       await alertStore.update(updateData);
 
       if (dispositionComment.value) {
-        await NodeComment.create(
-          selectedAlertStore.selected.map((uuid) => ({
-            nodeUuid: uuid,
-            ...commentData.value,
-          })),
-        );
+        const commentCreateData = selectedAlertStore.selected.map((uuid) => ({
+          nodeUuid: uuid,
+          ...commentData.value,
+        }));
+        await NodeComment.create(commentCreateData);
       }
     } catch (err) {
-      error.value = err.message;
+      if (err.message.includes("409")) {
+        console.warn("That comment already exists!");
+      } else {
+        error.value = err.message;
+      }
     }
 
     isLoading.value = false;

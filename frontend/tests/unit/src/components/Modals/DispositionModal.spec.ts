@@ -16,6 +16,7 @@ function factory(options?: TestingOptions) {
     attachTo: document.body,
     global: {
       plugins: [createTestingPinia(options), PrimeVue],
+      stubs: { SaveToEventModal: true },
     },
     props: { name: "DispositionModal" },
   });
@@ -230,5 +231,54 @@ describe("DispositionModal.vue", () => {
       "DispositionModal",
     ]);
     expect(wrapper.emitted("requestReload")).toBeFalsy();
+  });
+
+  it("will ignore an error in setDisposition if it is a 409 (duplicate comment)", async () => {
+    const { wrapper } = factory({ stubActions: false });
+
+    // Set the selected alert
+    wrapper.vm.selectedAlertStore.selected = ["1", "2"];
+
+    // Set the selected user
+    wrapper.vm.authStore.user = { username: "Alice" };
+
+    // Set the new disposition / comment values
+    wrapper.vm.newDisposition = { value: "low disposition", rank: 1 };
+    wrapper.vm.dispositionComment = "test comment";
+
+    // Mock the update alert API call
+    myNock.options("/alert/").reply(200, "Success");
+    myNock
+      .patch("/alert/", [
+        { uuid: "1", disposition: "low disposition" },
+        { uuid: "2", disposition: "low disposition" },
+      ])
+      .reply(200, "Success");
+
+    myNock
+      .post("/node/comment/", [
+        {
+          user: "Alice",
+          value: "test comment",
+          node_uuid: "1",
+        },
+        {
+          user: "Alice",
+          value: "test comment",
+          node_uuid: "2",
+        },
+      ])
+      .reply(409, "Duplicate comment");
+
+    expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
+    wrapper.vm.modalStore.open("DispositionModal");
+    expect(wrapper.vm.modalStore.openModals).toStrictEqual([
+      "DispositionModal",
+    ]);
+    await wrapper.vm.setDisposition();
+    expect(wrapper.vm.newDisposition).toBeNull();
+    expect(wrapper.vm.dispositionComment).toBeNull();
+    expect(wrapper.vm.modalStore.openModals).toStrictEqual([]);
+    expect(wrapper.emitted("requestReload")).toBeTruthy();
   });
 });

@@ -1,6 +1,6 @@
 import { visitUrl } from "./helpers";
 
-describe.only("TheEventsTable.vue", () => {
+describe("TheEventsTable.vue", () => {
   before(() => {
     cy.resetDatabase();
     cy.login();
@@ -296,7 +296,7 @@ describe.only("TheEventsTable.vue", () => {
     cy.get(".p-checkbox-box").should("have.length", 7);
   });
 
-  it.only("pagination works correctly when a row is expanded", () => {
+  it("pagination works correctly when a row is expanded", () => {
     cy.intercept("GET", "/api/alert/?event_uuid=*").as("getEventAlerts");
     // Find the toggle button to expand and click on the first event
     cy.get(".p-row-toggler").eq(0).click();

@@ -45,6 +45,26 @@ describe("Event calls", () => {
     expect(res).toEqual("Read successful");
   });
 
+  it("will make a get request to the /event/?offset={offset} endpoint as many times as needed to get all pages when 'readAllPages' is called with no params, if none given", async () => {
+    myNock
+      .get("/event/?offset=0")
+      .reply(200, { limit: 1, total: 1, items: ["eventA"] });
+    const res = await api.readAllPages();
+    expect(res).toEqual(["eventA"]);
+  });
+
+  it("will make a get request to the /event/?offset={offset} endpoint as many times as needed to get all pages when 'readAllPages' is called with formatted params, if given", async () => {
+    const eventParams: eventFilterParams = {
+      limit: 10,
+      name: "Test Name",
+    };
+    myNock
+      .get("/event/?offset=0&limit=10&name=Test+Name")
+      .reply(200, { limit: 10, total: 1, items: ["eventA"] });
+    const res = await api.readAllPages(eventParams);
+    expect(res).toEqual(["eventA"]);
+  });
+
   it("will make a get request to the /event/ endpoint when 'readPage' is called with properly formatted params", async () => {
     const eventParams: eventFilterParams = {
       limit: 10,

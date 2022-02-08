@@ -22,20 +22,25 @@ export const Event = {
     return api.read(`${endpoint}${uuid}`);
   },
 
-  readAll: (): Promise<eventRead[]> => {
-    return api.readAll(endpoint);
-  },
-
   readPage: (params?: eventFilterParams): Promise<eventReadPage> => {
     let formattedParams = {} as eventFilterParams;
     if (params) {
       formattedParams = formatNodeFiltersForAPI(eventFilters, params);
     }
 
-    return api.read(`${endpoint}`, formattedParams);
+    return api.read(endpoint, formattedParams);
+  },
+
+  readAllPages: (params?: eventFilterParams): Promise<eventRead[]> => {
+    let formattedParams = {} as eventFilterParams;
+    if (params) {
+      formattedParams = formatNodeFiltersForAPI(eventFilters, params);
+    }
+
+    return api.readAll(endpoint, formattedParams);
   },
 
   update: (data: eventUpdate[]): Promise<void> => {
-    return api.update(`${endpoint}`, data);
+    return api.update(endpoint, data);
   },
 };

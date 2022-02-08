@@ -9,6 +9,8 @@
     append-to="self"
     :header="header"
     :modal="true"
+    :style="props.style"
+    :draggable="false"
     @update:visible="close"
   >
     <template #header>
@@ -41,10 +43,7 @@
   const props = defineProps({
     name: { type: String, required: true },
     header: { type: String, required: false },
-  });
-
-  const isActive = computed(() => {
-    return store.active === props.name;
+    style: { type: Object, required: false },
   });
 
   const isOpen = computed(() => {
