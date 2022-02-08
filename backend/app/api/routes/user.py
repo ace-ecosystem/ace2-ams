@@ -198,8 +198,4 @@ helpers.api_route_update(router, update_user)
 #
 
 
-def delete_user(uuid: UUID, db: Session = Depends(get_db)):
-    crud.delete(uuid=uuid, db_table=User, db=db)
-
-
-helpers.api_route_delete(router, delete_user)
+# Deleting users is not currently supported (mark them as disabled instead)
