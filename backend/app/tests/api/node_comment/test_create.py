@@ -23,9 +23,6 @@ from tests import helpers
         ("node_uuid", None),
         ("node_uuid", ""),
         ("node_uuid", "abc"),
-        ("user", 123),
-        ("user", None),
-        ("user", ""),
         ("uuid", 123),
         ("uuid", None),
         ("uuid", ""),
@@ -42,12 +39,11 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
 
 def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
     alert_tree = helpers.create_alert(db=db)
-    helpers.create_user(username="johndoe", db=db)
+    helpers.create_user(username="analyst", db=db)
 
     # Create a comment
     create_json = {
         "node_uuid": str(alert_tree.node_uuid),
-        "user": "johndoe",
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
@@ -57,7 +53,6 @@ def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
     # Make sure you cannot add the same comment value to a node
     create_json = {
         "node_uuid": str(alert_tree.node_uuid),
-        "user": "johndoe",
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
@@ -73,12 +68,11 @@ def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
 )
 def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     alert_tree = helpers.create_alert(db=db)
-    helpers.create_user(username="johndoe", db=db)
+    helpers.create_user(username="analyst", db=db)
 
     # Create a comment
     create1_json = {
         "node_uuid": str(alert_tree.node_uuid),
-        "user": "johndoe",
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
@@ -87,7 +81,6 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     # Ensure you cannot create another comment with the same unique field value
     create2_json = {
         "node_uuid": str(alert_tree.node_uuid),
-        "user": "johndoe",
         "uuid": str(uuid.uuid4()),
         "value": "test2",
     }
@@ -97,26 +90,11 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
 
 
 def test_create_nonexistent_node_uuid(client_valid_access_token, db):
-    helpers.create_user(username="johndoe", db=db)
+    helpers.create_user(username="analyst", db=db)
 
     # Create a comment
     create_json = {
         "node_uuid": str(uuid.uuid4()),
-        "user": "johndoe",
-        "uuid": str(uuid.uuid4()),
-        "value": "test",
-    }
-    create = client_valid_access_token.post("/api/node/comment/", json=[create_json])
-    assert create.status_code == status.HTTP_404_NOT_FOUND
-
-
-def test_create_nonexistent_user(client_valid_access_token, db):
-    alert_tree = helpers.create_alert(db=db)
-
-    # Create a comment
-    create_json = {
-        "node_uuid": str(alert_tree.node_uuid),
-        "user": "johndoe",
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
@@ -130,12 +108,12 @@ def test_create_nonexistent_user(client_valid_access_token, db):
 
 
 def test_create_verify_history_alerts(client_valid_access_token, db):
-    helpers.create_user(username="johndoe", db=db)
+    helpers.create_user(username="analyst", db=db)
     alert_tree = helpers.create_alert(db=db)
 
     # Add a comment to the node
     create_json = [
-        {"node_uuid": str(alert_tree.node_uuid), "user": "johndoe", "value": "test"},
+        {"node_uuid": str(alert_tree.node_uuid), "value": "test"},
     ]
     create = client_valid_access_token.post("/api/node/comment/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
@@ -155,12 +133,12 @@ def test_create_verify_history_alerts(client_valid_access_token, db):
 
 
 def test_create_verify_history_events(client_valid_access_token, db):
-    helpers.create_user(username="johndoe", db=db)
+    helpers.create_user(username="analyst", db=db)
     event = helpers.create_event(name="Test Event", db=db)
 
     # Add a comment to the node
     create_json = [
-        {"node_uuid": str(event.uuid), "user": "johndoe", "value": "test"},
+        {"node_uuid": str(event.uuid), "value": "test"},
     ]
     create = client_valid_access_token.post("/api/node/comment/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
@@ -180,13 +158,13 @@ def test_create_verify_history_events(client_valid_access_token, db):
 
 
 def test_create_verify_history_observables(client_valid_access_token, db):
-    helpers.create_user(username="johndoe", db=db)
+    helpers.create_user(username="analyst", db=db)
     alert_tree = helpers.create_alert(db=db)
     observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
 
     # Add a comment to the node
     create_json = [
-        {"node_uuid": str(observable_tree.node_uuid), "user": "johndoe", "value": "test"},
+        {"node_uuid": str(observable_tree.node_uuid), "value": "test"},
     ]
     create = client_valid_access_token.post("/api/node/comment/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
@@ -206,7 +184,7 @@ def test_create_verify_history_observables(client_valid_access_token, db):
 
 
 def test_create_multiple(client_valid_access_token, db):
-    helpers.create_user(username="johndoe", db=db)
+    helpers.create_user(username="analyst", db=db)
 
     alert_tree1 = helpers.create_alert(db=db)
     initial_alert1_version = alert_tree1.node.version
@@ -223,35 +201,37 @@ def test_create_multiple(client_valid_access_token, db):
 
     # Add a comment to each node at once
     create_json = [
-        {"node_uuid": str(alert_tree1.node_uuid), "user": "johndoe", "value": "test1"},
-        {"node_uuid": str(alert_tree2.node_uuid), "user": "johndoe", "value": "test2"},
-        {"node_uuid": str(alert_tree3.node_uuid), "user": "johndoe", "value": "test3"},
+        {"node_uuid": str(alert_tree1.node_uuid), "value": "test1"},
+        {"node_uuid": str(alert_tree2.node_uuid), "value": "test2"},
+        {"node_uuid": str(alert_tree3.node_uuid), "value": "test3"},
     ]
     create = client_valid_access_token.post("/api/node/comment/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     assert len(alert_tree1.node.comments) == 1
     assert alert_tree1.node.comments[0].value == "test1"
+    assert alert_tree1.node.comments[0].user.username == "analyst"
     assert alert_tree1.node.version != initial_alert1_version
 
     assert len(alert_tree2.node.comments) == 1
     assert alert_tree2.node.comments[0].value == "test2"
+    assert alert_tree2.node.comments[0].user.username == "analyst"
     assert alert_tree2.node.version != initial_alert2_version
 
     assert len(alert_tree3.node.comments) == 1
     assert alert_tree3.node.comments[0].value == "test3"
+    assert alert_tree3.node.comments[0].user.username == "analyst"
     assert alert_tree3.node.version != initial_alert3_version
 
 
 def test_create_valid_required_fields(client_valid_access_token, db):
+    helpers.create_user(username="analyst", db=db)
     alert_tree = helpers.create_alert(db=db)
     initial_node_version = alert_tree.node.version
-    helpers.create_user(username="johndoe", db=db)
 
     # Create a comment
     create_json = {
         "node_uuid": str(alert_tree.node_uuid),
-        "user": "johndoe",
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
@@ -259,4 +239,5 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     assert create.status_code == status.HTTP_201_CREATED
     assert len(alert_tree.node.comments) == 1
     assert alert_tree.node.comments[0].value == "test"
+    assert alert_tree.node.comments[0].user.username == "analyst"
     assert alert_tree.node.version != initial_node_version

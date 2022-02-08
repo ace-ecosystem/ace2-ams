@@ -41,7 +41,7 @@ def create_node_comments(
         db_node.version = uuid4()
 
         # Set the user on the comment
-        new_comment.user = crud.read_user_by_username(username=node_comment.user, db=db)
+        new_comment.user = crud.read_user_by_username(username=username, db=db)
 
         # Save the new comment to the database
         db.add(new_comment)

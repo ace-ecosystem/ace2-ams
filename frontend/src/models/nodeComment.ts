@@ -3,7 +3,6 @@ import { userRead } from "./user";
 
 export interface nodeCommentCreate {
   nodeUuid: UUID;
-  user: string;
   uuid?: UUID;
   value: string;
   [key: string]: unknown;
