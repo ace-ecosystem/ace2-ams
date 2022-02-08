@@ -114,7 +114,7 @@ helpers.api_route_update(router, update_node_comment)
 
 
 def delete_node_comment(uuid: UUID, db: Session = Depends(get_db), username: str = Depends(validate_access_token)):
-    # Read the current node comment from the database
+    # Read the current node comment from the database to get its value
     db_node_comment: NodeComment = crud.read(uuid=uuid, db_table=NodeComment, db=db)
 
     # Add an entry to the correct history table based on the node_type.
@@ -122,7 +122,7 @@ def delete_node_comment(uuid: UUID, db: Session = Depends(get_db), username: str
     crud.record_comment_history(record_node=db_node_comment.node, username=username, diff=diff, db=db)
 
     # Delete the comment
-    crud.delete(uuid=uuid, db_table=NodeComment, db=db, read_first=False)
+    crud.delete(uuid=uuid, db_table=NodeComment, db=db)
 
 
 helpers.api_route_delete(router, delete_node_comment)

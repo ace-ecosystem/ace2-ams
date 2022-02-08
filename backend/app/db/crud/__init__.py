@@ -511,14 +511,13 @@ def update(uuid: UUID, obj: BaseModel, db_table: DeclarativeMeta, db: Session):
 #
 
 
-def delete(uuid: UUID, db_table: DeclarativeMeta, db: Session, read_first: bool = True):
+def delete(uuid: UUID, db_table: DeclarativeMeta, db: Session):
     """Deletes the object with the given UUID from the database.
     Designed to be called only by the API since it raises an HTTPException."""
 
     # Make sure the resource exists so that better error messages can be returned. The read
     # function will raise an exception and return a 404 status if the resource does not exist.
-    if read_first:
-        result = read(uuid=uuid, db_table=db_table, db=db)
+    result = read(uuid=uuid, db_table=db_table, db=db)
 
     # NOTE: This will need to be updated to account for foreign key constraint errors.
     result = db.execute(sql_delete(db_table).where(db_table.uuid == uuid))
