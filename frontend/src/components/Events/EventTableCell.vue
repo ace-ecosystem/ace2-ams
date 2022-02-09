@@ -35,6 +35,20 @@
   <span v-else-if="Array.isArray(props.data[props.field])">
     {{ joinStringArray(props.data[props.field]) }}
   </span>
+  <!-- Edit event cell -->
+  <span v-else-if="props.field === 'edit'">
+    <Button
+      data-cy="disposition-button"
+      class="p-button-sm"
+      icon="pi pi-pencil"
+      @click="open(`EditEventModal-${props.data.uuid}`)"
+    />
+    <EditEventModal
+      :id="props.data.uuid"
+      :name="`EditEventModal-${props.data.uuid}`"
+      :event-uuid="props.data.uuid"
+    />
+  </span>
   <!-- All other columns -->
   <span v-else> {{ props.data[props.field] }}</span>
 </template>
@@ -43,6 +57,9 @@
   import { defineProps } from "vue";
   import NodeTagVue from "../Node/NodeTag.vue";
   import NodeComment from "../Node/NodeComment.vue";
+  import EditEventModal from "../Modals/EditEventModal.vue";
+
+  import Button from "primevue/button";
 
   const props = defineProps({
     data: { type: Object, required: true },
@@ -64,5 +81,12 @@
 
   const joinStringArray = (arr) => {
     return arr.join(", ");
+  };
+
+  import { useModalStore } from "@/stores/modal";
+
+  const modalStore = useModalStore();
+  const open = (name) => {
+    modalStore.open(name);
   };
 </script>
