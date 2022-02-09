@@ -26,8 +26,7 @@
           v-model="filterModel"
           data-cy="filter-input"
           :allow-delete="false"
-                  input-type="filter"
-
+          input-type="filter"
         >
         </NodePropertyInput>
         <Button

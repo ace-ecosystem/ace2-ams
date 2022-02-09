@@ -21,8 +21,7 @@
             v-model="formFields[field.name]"
             :fixed-filter-name="true"
             :allow-delete="false"
-                    input-type="edit"
-
+            input-type="edit"
           />
         </div>
       </div>
@@ -61,8 +60,7 @@
 
   import { useModalStore } from "@/stores/modal";
   import { useEventStore } from "@/stores/event";
-    import NodePropertyInput from "../Node/NodePropertyInput.vue";
-
+  import NodePropertyInput from "../Node/NodePropertyInput.vue";
 
   import { Event } from "@/services/api/event";
 
@@ -133,18 +131,18 @@
   const modalStore = useModalStore();
 
   import { useNodeThreatStore } from "@/stores/nodeThreat";
-import NodeThreatSelector from "../Node/NodeThreatSelector.vue";
+  import NodeThreatSelector from "../Node/NodeThreatSelector.vue";
   const nodeThreatStore = useNodeThreatStore();
 
-  const newThreats = ref([])
+  const newThreats = ref([]);
   const eventThreats = computed(() => {
-    return [...nodeThreatStore.allItems, ...newThreats.value]
+    return [...nodeThreatStore.allItems, ...newThreats.value];
   });
 
-  const showEditThreat = ref(false)
+  const showEditThreat = ref(false);
   const toggleShowEditThreat = () => {
     showEditThreat.value = !showEditThreat.value;
-  }
+  };
 
   const error = ref(null);
   const event = ref(null);

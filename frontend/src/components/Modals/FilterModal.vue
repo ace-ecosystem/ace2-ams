@@ -16,8 +16,7 @@
         class="w-12"
         :allow-delete="true"
         @deleteFormFilter="deleteFormFilter(index)"
-                input-type="filter"
-
+        input-type="filter"
       ></NodePropertyInput>
     </div>
     <template #footer>
