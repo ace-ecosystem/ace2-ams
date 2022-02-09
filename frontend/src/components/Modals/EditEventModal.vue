@@ -96,8 +96,8 @@ import { populateEventStores } from "@/etc/helpers";
   // Load event data when modal becomes active
   watch(modalStore, async () => {
     if (modalStore.active === props.name) {
-      await nodeThreatStore.readAll();
       isLoading.value = true;
+      await populateEventStores();
       await resetForm();
       isLoading.value = false;
     }

@@ -17,6 +17,8 @@ import { useEventQueueStore } from "@/stores/eventQueue";
 import { useEventRiskLevelStore } from "@/stores/eventRiskLevel";
 import { useEventStatusStore } from "@/stores/eventStatus";
 import { useEventTypeStore } from "@/stores/eventType";
+import { useNodeThreatStore } from "@/stores/nodeThreat";
+import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
 import { useEventVectorStore } from "@/stores/eventVector";
 import { useNodeDirectiveStore } from "@/stores/nodeDirective";
 import { useObservableTypeStore } from "@/stores/observableType";
@@ -56,6 +58,30 @@ export async function populateCommonStores(): Promise<void> {
     eventVectorStore.readAll(),
     nodeDirectiveStore.readAll(),
     observableTypeStore.readAll(),
+    userStore.readAll(),
+  ]).catch((error) => {
+    throw error;
+  });
+}
+
+export async function populateEventStores(): Promise<void> {
+  const eventPreventionToolStore = useEventPreventionToolStore();
+  const eventRiskLevelStore = useEventRiskLevelStore();
+  const eventStatusStore = useEventStatusStore();
+  const eventTypeStore = useEventTypeStore();
+  const nodeThreatActorStore = useNodeThreatActorStore();
+  const nodeThreatStore = useNodeThreatStore();
+  const userStore = useUserStore();
+  const eventVectorStore = useEventVectorStore();
+
+  await Promise.all([
+    eventPreventionToolStore.readAll(),
+    eventRiskLevelStore.readAll(),
+    eventStatusStore.readAll(),
+    eventTypeStore.readAll(),
+    nodeThreatActorStore.readAll(),
+    nodeThreatStore.readAll(),
+    eventVectorStore.readAll(),
     userStore.readAll(),
   ]).catch((error) => {
     throw error;
