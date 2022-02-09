@@ -8,9 +8,13 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
+from api.models.alert import AlertRead
+from api.models.event import EventRead
+from api.models.observable import ObservableRead
+from api.models.user import UserRead
 from core.auth import hash_password
 from db import crud
-from db.schemas.alert import Alert
+from db.schemas.alert import Alert, AlertHistory
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.alert_queue import AlertQueue
 from db.schemas.alert_tool import AlertTool
@@ -18,7 +22,7 @@ from db.schemas.alert_tool_instance import AlertToolInstance
 from db.schemas.alert_type import AlertType
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_module_type import AnalysisModuleType
-from db.schemas.event import Event
+from db.schemas.event import Event, EventHistory
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_queue import EventQueue
 from db.schemas.event_remediation import EventRemediation
@@ -35,9 +39,9 @@ from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.node_tree import NodeTree
-from db.schemas.observable import Observable
+from db.schemas.observable import Observable, ObservableHistory
 from db.schemas.observable_type import ObservableType
-from db.schemas.user import User
+from db.schemas.user import User, UserHistory
 from db.schemas.user_role import UserRole
 
 
@@ -93,7 +97,7 @@ def create_alert(
     alert_uuid: Optional[Union[str, UUID]] = None,
     disposition: Optional[str] = None,
     disposition_time: Optional[datetime] = None,
-    disposition_user: Optional[str] = None,
+    disposition_user: str = "analyst",
     event: Optional[Event] = None,
     event_time: datetime = None,
     insert_time: datetime = None,
@@ -106,6 +110,11 @@ def create_alert(
     tool: str = "test_tool",
     tool_instance: str = "test_tool_instance",
 ) -> NodeTree:
+    diffs = []
+
+    if disposition_time is None:
+        disposition_time = datetime.utcnow()
+
     if alert_uuid is None:
         alert_uuid = uuid.uuid4()
 
@@ -129,17 +138,9 @@ def create_alert(
 
     if disposition:
         alert.disposition = create_alert_disposition(value=disposition, db=db)
-
-    if disposition_time:
         alert.disposition_time = disposition_time
-
-    if disposition_user:
-        alert.disposition_user = create_user(
-            email=f"{disposition_user}@{disposition_user}.com",
-            username=disposition_user,
-            db=db,
-            alert_queue=alert_queue,
-        )
+        alert.disposition_user = create_user(username=disposition_user, display_name=disposition_user, db=db)
+        diffs.append(crud.create_diff(field="disposition", old=None, new=disposition))
 
     if event:
         alert.event = event
@@ -177,6 +178,27 @@ def create_alert(
             )
 
     crud.commit(db)
+
+    # Add an entry to the history table
+    crud.record_create_history(
+        history_table=AlertHistory,
+        action_by="Analyst",
+        record_read_model=AlertRead,
+        record_table=Alert,
+        record_uuid=alert.uuid,
+        db=db,
+    )
+
+    crud.record_update_histories(
+        history_table=AlertHistory,
+        action_by=disposition_user,
+        action_time=disposition_time,
+        record_read_model=AlertRead,
+        record_table=Alert,
+        record_uuid=alert.uuid,
+        diffs=diffs,
+        db=db,
+    )
 
     return node_tree
 
@@ -353,6 +375,16 @@ def create_event(
 
     db.add(obj)
     crud.commit(db)
+
+    crud.record_create_history(
+        history_table=EventHistory,
+        action_by="Analyst",
+        record_read_model=EventRead,
+        record_table=Event,
+        record_uuid=obj.uuid,
+        db=db,
+    )
+
     return obj
 
 
@@ -399,6 +431,11 @@ def create_node_comment(
     obj = NodeComment(insert_time=insert_time, node_uuid=node.uuid, user=user, uuid=uuid.uuid4(), value=value)
     db.add(obj)
     crud.commit(db)
+
+    crud.record_comment_history(
+        record_node=node, action_by="Analyst", diff=crud.Diff(field="comments", added_to_list=[obj.value]), db=db
+    )
+
     return obj
 
 
@@ -490,6 +527,15 @@ def create_observable(
 
     crud.commit(db)
 
+    crud.record_create_history(
+        history_table=ObservableHistory,
+        action_by="Analyst",
+        record_read_model=ObservableRead,
+        record_table=Observable,
+        record_uuid=obj.uuid,
+        db=db,
+    )
+
     return node_tree
 
 
@@ -531,6 +577,16 @@ def create_user(
     )
     db.add(obj)
     crud.commit(db)
+
+    crud.record_create_history(
+        history_table=UserHistory,
+        action_by="Analyst",
+        record_read_model=UserRead,
+        record_table=User,
+        record_uuid=obj.uuid,
+        db=db,
+    )
+
     return obj
 
 

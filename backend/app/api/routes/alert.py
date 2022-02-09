@@ -1,5 +1,3 @@
-import json
-
 from datetime import datetime
 from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi_pagination.ext.sqlalchemy_future import paginate
@@ -7,7 +5,6 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from uuid import UUID, uuid4
-
 
 from api.models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
 from api.models.history import AlertHistoryRead
@@ -193,18 +190,27 @@ def get_all_alerts(
     if disposition_user:
         disposition_user_query = (
             select(Alert)
-            .join(User, onclause=Alert.disposition_user_uuid == User.uuid)
-            .where(User.username == disposition_user)
+            .join(AlertHistory, onclause=Alert.uuid == AlertHistory.record_uuid)
+            .join(User, onclause=AlertHistory.action_by == User.display_name)
+            .where(and_(User.username == disposition_user, AlertHistory.field == "disposition"))
         )
 
         query = _join_as_subquery(query, disposition_user_query)
 
     if dispositioned_after:
-        dispositioned_after_query = select(Alert).where(Alert.disposition_time > dispositioned_after)
+        dispositioned_after_query = (
+            select(Alert)
+            .join(AlertHistory, onclause=Alert.uuid == AlertHistory.record_uuid)
+            .where(and_(AlertHistory.action_time > dispositioned_after, AlertHistory.field == "disposition"))
+        )
         query = _join_as_subquery(query, dispositioned_after_query)
 
     if dispositioned_before:
-        dispositioned_before_query = select(Alert).where(Alert.disposition_time < dispositioned_before)
+        dispositioned_before_query = (
+            select(Alert)
+            .join(AlertHistory, onclause=Alert.uuid == AlertHistory.record_uuid)
+            .where(and_(AlertHistory.action_time < dispositioned_before, AlertHistory.field == "disposition"))
+        )
         query = _join_as_subquery(query, dispositioned_before_query)
 
     if event_time_after:

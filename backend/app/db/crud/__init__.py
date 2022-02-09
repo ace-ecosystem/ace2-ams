@@ -141,9 +141,13 @@ def record_update_histories(
     record_uuid: UUID,
     diffs: list[Diff],
     db: Session,
+    action_time: Optional[datetime] = None,
 ):
     db_obj = read(uuid=record_uuid, db_table=record_table, db=db)
     snapshot = json.loads(record_read_model(**db_obj.__dict__).json())
+
+    if action_time is None:
+        action_time = datetime.utcnow()
 
     for diff in diffs:
         if diff:
@@ -151,7 +155,7 @@ def record_update_histories(
                 history_table(
                     action="UPDATE",
                     action_by=action_by,
-                    action_time=datetime.utcnow(),
+                    action_time=action_time,
                     record_uuid=record_uuid,
                     field=diff.field,
                     diff={
