@@ -47,6 +47,7 @@
       :id="props.data.uuid"
       :name="`EditEventModal-${props.data.uuid}`"
       :event-uuid="props.data.uuid"
+      @requestReload="requestReload"
     />
   </span>
   <!-- All other columns -->
@@ -61,6 +62,10 @@
 
   import Button from "primevue/button";
 
+  import { useEventTableStore } from "@/stores/eventTable";
+  const eventTableStore = useEventTableStore()
+  
+
   const props = defineProps({
     data: { type: Object, required: true },
     field: { type: String, required: true },
@@ -73,6 +78,10 @@
     }
 
     return "None";
+  };
+
+  const requestReload = () => {
+      eventTableStore.requestReload = true;
   };
 
   const getEventLink = (uuid) => {
