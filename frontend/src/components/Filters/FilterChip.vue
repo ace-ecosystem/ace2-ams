@@ -42,7 +42,7 @@
     >
       <NodePropertyInput
         v-model="filterModel"
-        :fixed-filter-name="true"
+        :fixed-property-type="true"
         :allow-delete="false"
         input-type="filter"
       >

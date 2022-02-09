@@ -19,7 +19,7 @@
           <NodePropertyInput
             id="field.name"
             v-model="formFields[field.name]"
-            :fixed-filter-name="true"
+            :fixed-property-type="true"
             :allow-delete="false"
             input-type="edit"
           />
