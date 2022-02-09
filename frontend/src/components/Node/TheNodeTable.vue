@@ -35,7 +35,7 @@
           <MultiSelect
             v-if="columnSelect"
             :model-value="selectedColumns"
-            :options="columns"
+            :options="columnOptions"
             data-cy="table-column-select"
             option-label="header"
             placeholder="Select Columns"
@@ -89,11 +89,11 @@
 
     <!-- DATA COLUMNS -->
     <Column
-      v-for="(col, index) of selectedColumns"
+      v-for="(col, index) of displayedColumns"
       :key="col.field + '_' + index"
       :field="col.field"
       :header="col.header"
-      :sortable="true"
+      :sortable="col.sortable"
     >
       <!-- DATA COLUMN CELL BODIES-->
       <template #body="{ data, field }">
@@ -165,9 +165,9 @@
     props.columnSelect ||
     props.resetTable;
 
-  const defaultColumns = props.columns.filter((col) => {
-    return col.default;
-  });
+  const columnOptions = props.columns.filter((col) => !col.required);
+  const requiredColumns = props.columns.filter((col) => col.required);
+  const defaultColumns = props.columns.filter((col) => col.default);
 
   const datatable = ref(null);
   const error = ref(null);
@@ -197,6 +197,10 @@
   onMounted(async () => {
     initNodeTable();
     await loadNodes();
+  });
+
+  const displayedColumns = computed(() => {
+    return [...requiredColumns, ...selectedColumns.value];
   });
 
   const selectedRows = computed(() => {
