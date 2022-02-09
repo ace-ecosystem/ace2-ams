@@ -6,7 +6,6 @@ import nock from "nock";
 
 import myNock from "@unit/services/api/nock";
 import { useModalStore } from "@/stores/modal";
-import { useUserStore } from "@/stores/user";
 
 function factory(options?: TestingOptions) {
   const wrapper = mount(CommentModal, {
@@ -19,9 +18,8 @@ function factory(options?: TestingOptions) {
   });
 
   const modalStore = useModalStore();
-  const userStore = useUserStore();
 
-  return { wrapper, modalStore, userStore };
+  return { wrapper, modalStore };
 }
 
 describe("CommentModal.vue", () => {
@@ -37,14 +35,10 @@ describe("CommentModal.vue", () => {
   it("correctly computes commentData", () => {
     const { wrapper } = factory();
 
-    // Set the selected user
-    wrapper.vm.authStore.user = { username: "Alice" };
-
     // Set the new comment value
     wrapper.vm.newComment = "test comment";
 
     expect(wrapper.vm.commentData).toEqual({
-      user: "Alice",
       value: "test comment",
     });
   });
@@ -102,9 +96,6 @@ describe("CommentModal.vue", () => {
     // Set the selected alert
     wrapper.vm.selectedStore.selected = ["1", "2"];
 
-    // Set the selected user
-    wrapper.vm.authStore.user = { username: "Alice" };
-
     // Set the new comment value
     wrapper.vm.newComment = "test comment";
 
@@ -112,12 +103,10 @@ describe("CommentModal.vue", () => {
     myNock
       .post("/node/comment/", [
         {
-          user: "Alice",
           value: "test comment",
           node_uuid: "1",
         },
         {
-          user: "Alice",
           value: "test comment",
           node_uuid: "2",
         },
@@ -138,9 +127,6 @@ describe("CommentModal.vue", () => {
 
     // Set the selected alert
     wrapper.vm.selectedStore.selected = ["1", "2"];
-
-    // Set the selected user
-    wrapper.vm.authStore.user = { username: "Alice" };
 
     // Set the new comment value
     wrapper.vm.newComment = "test comment";

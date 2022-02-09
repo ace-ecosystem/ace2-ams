@@ -1,4 +1,9 @@
+import json
+
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from fastapi import HTTPException, status
+from fastapi_pagination.ext.sqlalchemy_future import paginate
 from pydantic import BaseModel
 from pydantic.types import UUID4
 from sqlalchemy import delete as sql_delete, select, update as sql_update
@@ -10,13 +15,156 @@ from sqlalchemy.sql.expression import join
 from typing import Dict, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
+from api.models.alert import AlertRead
+from api.models.event import EventRead
 from api.models.node import NodeRead, NodeTreeMetadata
+from api.models.observable import ObservableRead
 from core.auth import verify_password
+from db.schemas.alert import Alert, AlertHistory
+from db.schemas.event import Event, EventHistory
 from db.schemas.node import Node
 from db.schemas.node_tree import NodeTree
-from db.schemas.observable import Observable
+from db.schemas.observable import Observable, ObservableHistory
 from db.schemas.observable_type import ObservableType
 from db.schemas.user import User
+
+
+#
+# HISTORY
+#
+
+
+@dataclass
+class Diff:
+    field: str
+    old_value: Optional[str] = None
+    new_value: Optional[str] = None
+    added_to_list: Optional[list[str]] = None
+    removed_from_list: Optional[list[str]] = None
+
+
+def create_diff(
+    field: str,
+    old: Union[None, str, list[str], datetime, UUID] = None,
+    new: Union[None, str, list[str], datetime, UUID] = None,
+) -> Optional[Diff]:
+    # Convert datetime objects to UTC strings
+    if isinstance(old, datetime):
+        old = old.astimezone(timezone.utc).isoformat()
+    if isinstance(new, datetime):
+        new = new.astimezone(timezone.utc).isoformat()
+
+    # Convert UUID objects to strings
+    if isinstance(old, UUID):
+        old = str(old)
+    if isinstance(new, UUID):
+        new = str(new)
+
+    if isinstance(old, list) and isinstance(new, list):
+        added = sorted(set([x for x in new if x not in old]))
+        removed = sorted(set([x for x in old if x not in new]))
+        return Diff(field=field, added_to_list=added, removed_from_list=removed)
+
+    return Diff(field=field, old_value=old, new_value=new)
+
+
+def read_history_records(history_table: DeclarativeMeta, record_uuid: UUID, db: Session):
+    """Returns a paginated list of records from the given history table that involve the given record UUID."""
+
+    query = (
+        select(history_table).where(history_table.record_uuid == record_uuid).order_by(history_table.action_time.asc())
+    )
+
+    return paginate(db, query)
+
+
+def record_create_history(
+    history_table: DeclarativeMeta,
+    action_by: str,
+    record_read_model: BaseModel,
+    record_table: DeclarativeMeta,
+    record_uuid: UUID,
+    db: Session,
+):
+    db_obj = read(uuid=record_uuid, db_table=record_table, db=db)
+    snapshot = json.loads(record_read_model(**db_obj.__dict__).json())
+    db.add(
+        history_table(
+            action="CREATE",
+            action_by=action_by,
+            action_time=datetime.utcnow(),
+            record_uuid=record_uuid,
+            snapshot=snapshot,
+        )
+    )
+    commit(db)
+
+
+def record_comment_history(record_node: Node, action_by: str, diff: Diff, db: Session):
+    if record_node.node_type == "alert":
+        record_update_histories(
+            history_table=AlertHistory,
+            action_by=action_by,
+            record_read_model=AlertRead,
+            record_table=Alert,
+            record_uuid=record_node.uuid,
+            diffs=[diff],
+            db=db,
+        )
+    elif record_node.node_type == "event":
+        record_update_histories(
+            history_table=EventHistory,
+            action_by=action_by,
+            record_read_model=EventRead,
+            record_table=Event,
+            record_uuid=record_node.uuid,
+            diffs=[diff],
+            db=db,
+        )
+    elif record_node.node_type == "observable":
+        record_update_histories(
+            history_table=ObservableHistory,
+            action_by=action_by,
+            record_read_model=ObservableRead,
+            record_table=Observable,
+            record_uuid=record_node.uuid,
+            diffs=[diff],
+            db=db,
+        )
+
+
+def record_update_histories(
+    history_table: DeclarativeMeta,
+    action_by: str,
+    record_read_model: BaseModel,
+    record_table: DeclarativeMeta,
+    record_uuid: UUID,
+    diffs: list[Diff],
+    db: Session,
+):
+    db_obj = read(uuid=record_uuid, db_table=record_table, db=db)
+    snapshot = json.loads(record_read_model(**db_obj.__dict__).json())
+
+    for diff in diffs:
+        if diff:
+            db.add(
+                history_table(
+                    action="UPDATE",
+                    action_by=action_by,
+                    action_time=datetime.utcnow(),
+                    record_uuid=record_uuid,
+                    field=diff.field,
+                    diff={
+                        "old_value": diff.old_value,
+                        "new_value": diff.new_value,
+                        "added_to_list": diff.added_to_list,
+                        "removed_from_list": diff.removed_from_list,
+                    },
+                    snapshot=snapshot,
+                )
+            )
+
+    commit(db)
 
 
 #

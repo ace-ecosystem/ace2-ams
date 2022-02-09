@@ -242,6 +242,27 @@ def test_create_nonexistent_node_fields(client_valid_access_token, db, key):
 #
 
 
+def test_create_verify_history(client_valid_access_token, db):
+    helpers.create_event_queue(value="default", db=db)
+    helpers.create_event_status(value="OPEN", db=db)
+
+    event_uuid = str(uuid.uuid4())
+    create = client_valid_access_token.post(
+        "/api/event/", json={"uuid": event_uuid, "name": "test", "queue": "default", "status": "OPEN"}
+    )
+    assert create.status_code == status.HTTP_201_CREATED
+
+    # Verify the history record
+    history = client_valid_access_token.get(f"/api/event/{event_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "CREATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert str(history.json()["items"][0]["record_uuid"]) == event_uuid
+    assert history.json()["items"][0]["field"] is None
+    assert history.json()["items"][0]["diff"] is None
+    assert history.json()["items"][0]["snapshot"]["name"] == "test"
+
+
 @pytest.mark.parametrize(
     "key,value",
     [

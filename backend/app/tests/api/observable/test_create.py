@@ -2,8 +2,8 @@ import pytest
 import uuid
 
 from fastapi import status
-from db.schemas.observable import Observable
 
+from db.schemas.observable import Observable
 from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import helpers
 
@@ -251,6 +251,39 @@ def test_create_nonexistent_type(client_valid_access_token, db):
 #
 
 
+def test_create_verify_history(client_valid_access_token, db):
+    # Create an alert
+    node_tree = helpers.create_alert(db=db)
+
+    # Create an observable type
+    helpers.create_observable_type(value="test_type", db=db)
+
+    # Create some observables
+    observables = []
+    for i in range(3):
+        observables.append(
+            {
+                "uuid": str(uuid.uuid4()),
+                "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+                "type": "test_type",
+                "value": f"test{i}",
+            }
+        )
+    create = client_valid_access_token.post("/api/observable/", json=observables)
+    assert create.status_code == status.HTTP_201_CREATED
+
+    # Verify the history records
+    for observable in observables:
+        history = client_valid_access_token.get(f"/api/observable/{observable['uuid']}/history")
+        assert history.json()["total"] == 1
+        assert history.json()["items"][0]["action"] == "CREATE"
+        assert history.json()["items"][0]["action_by"] == "Analyst"
+        assert history.json()["items"][0]["record_uuid"] == observable["uuid"]
+        assert history.json()["items"][0]["field"] is None
+        assert history.json()["items"][0]["diff"] is None
+        assert history.json()["items"][0]["snapshot"]["value"] == observable["value"]
+
+
 def test_create_bulk(client_valid_access_token, db):
     # Create an alert
     node_tree = helpers.create_alert(db=db)
@@ -272,7 +305,7 @@ def test_create_bulk(client_valid_access_token, db):
     create = client_valid_access_token.post("/api/observable/", json=observables)
     assert create.status_code == status.HTTP_201_CREATED
 
-    # Their should be 3 observables in the database
+    # There should be 3 observables in the database
     observables = db.query(Observable).all()
     assert len(observables) == 3
 

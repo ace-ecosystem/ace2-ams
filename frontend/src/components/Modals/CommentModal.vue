@@ -48,7 +48,6 @@
   import { NodeComment } from "@/services/api/nodeComment";
 
   import { nodeSelectedStores } from "@/stores/index";
-  import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
 
   const emit = defineEmits(["requestReload"]);
@@ -59,7 +58,6 @@
 
   const nodeType = inject("nodeType");
   const selectedStore = nodeSelectedStores[nodeType]();
-  const authStore = useAuthStore();
   const modalStore = useModalStore();
 
   const error = ref(null);
@@ -88,7 +86,6 @@
 
   const commentData = computed(() => {
     return {
-      user: authStore.user ? authStore.user.username : null,
       value: newComment.value,
     };
   });

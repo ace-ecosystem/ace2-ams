@@ -5,6 +5,7 @@ from uuid import UUID, uuid4
 
 from api.models.node_comment import NodeCommentCreate, NodeCommentRead, NodeCommentUpdate
 from api.routes import helpers
+from core.auth import validate_access_token
 from db import crud
 from db.database import get_db
 from db.schemas.node import Node
@@ -27,23 +28,30 @@ def create_node_comments(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
+    claims: dict = Depends(validate_access_token),
 ):
     for node_comment in node_comments:
         # Create the new node comment
         new_comment = NodeComment(**node_comment.dict())
 
         # Make sure the node actually exists
-        db_node = crud.read(uuid=node_comment.node_uuid, db_table=Node, db=db)
+        db_node: Node = crud.read(uuid=node_comment.node_uuid, db_table=Node, db=db)
 
         # This counts a modifying the node, so it should receive a new version.
         db_node.version = uuid4()
 
         # Set the user on the comment
-        new_comment.user = crud.read_user_by_username(username=node_comment.user, db=db)
+        new_comment.user = crud.read_user_by_username(username=claims["sub"], db=db)
 
         # Save the new comment to the database
         db.add(new_comment)
         crud.commit(db)
+
+        # Add an entry to the correct history table based on the node_type.
+        # Even though this is creating a comment, we treat it as though it is
+        # modifying the node for history tracking purposes.
+        diff = crud.Diff(field="comments", added_to_list=[node_comment.value])
+        crud.record_comment_history(record_node=db_node, action_by=claims["full_name"], diff=diff, db=db)
 
         response.headers["Content-Location"] = request.url_for("get_node_comment", uuid=new_comment.uuid)
 
@@ -74,20 +82,25 @@ def update_node_comment(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
+    claims: dict = Depends(validate_access_token),
 ):
     # Read the current node comment from the database
     db_node_comment: NodeComment = crud.read(uuid=uuid, db_table=NodeComment, db=db)
 
     # Read the node from the database
-    db_node = crud.read(uuid=db_node_comment.node_uuid, db_table=Node, db=db)
+    db_node: Node = crud.read(uuid=db_node_comment.node_uuid, db_table=Node, db=db)
 
     # Set the new comment value
+    diff = crud.Diff(field="comments", added_to_list=[node_comment.value], removed_from_list=[db_node_comment.value])
     db_node_comment.value = node_comment.value
 
     # Modifying the comment counts as modifying the node, so it should receive a new version
     db_node.version = uuid4()
 
     crud.commit(db)
+
+    # Add an entry to the correct history table based on the node_type.
+    crud.record_comment_history(record_node=db_node, action_by=claims["full_name"], diff=diff, db=db)
 
     response.headers["Content-Location"] = request.url_for("get_node_comment", uuid=uuid)
 
@@ -100,7 +113,15 @@ helpers.api_route_update(router, update_node_comment)
 #
 
 
-def delete_node_comment(uuid: UUID, db: Session = Depends(get_db)):
+def delete_node_comment(uuid: UUID, db: Session = Depends(get_db), claims: dict = Depends(validate_access_token)):
+    # Read the current node comment from the database to get its value
+    db_node_comment: NodeComment = crud.read(uuid=uuid, db_table=NodeComment, db=db)
+
+    # Add an entry to the correct history table based on the node_type.
+    diff = crud.Diff(field="comments", removed_from_list=[db_node_comment.value])
+    crud.record_comment_history(record_node=db_node_comment.node, action_by=claims["full_name"], diff=diff, db=db)
+
+    # Delete the comment
     crud.delete(uuid=uuid, db_table=NodeComment, db=db)
 
 

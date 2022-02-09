@@ -250,6 +250,7 @@
   import { useAlertStore } from "@/stores/alert";
   import { useAlertQueueStore } from "@/stores/alertQueue";
   import { useAlertTypeStore } from "@/stores/alertType";
+  import { useAuthStore } from "@/stores/auth";
   import { useNodeDirectiveStore } from "@/stores/nodeDirective";
   import { useObservableTypeStore } from "@/stores/observableType";
 
@@ -258,6 +259,7 @@
   const alertStore = useAlertStore();
   const alertQueueStore = useAlertQueueStore();
   const alertTypeStore = useAlertTypeStore();
+  const authStore = useAuthStore();
   const nodeDirectiveStore = useNodeDirectiveStore();
   const observableTypeStore = useObservableTypeStore();
 
@@ -415,6 +417,7 @@
       eventTime: adjustedAlertDate.value,
       name: alertDescriptionFormatted.value,
       observables: observables,
+      owner: authStore.user.username,
       queue: alertQueue.value,
       type: alertType.value,
     };

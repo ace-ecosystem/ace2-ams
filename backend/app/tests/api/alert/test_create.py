@@ -2,7 +2,8 @@ import pytest
 import uuid
 
 from fastapi import status
-from db.schemas.analysis import Analysis
+
+from db import crud
 from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 
@@ -263,6 +264,45 @@ def test_create_nonexistent_node_fields(client_valid_access_token, db, key):
 #
 # VALID TESTS
 #
+
+
+def test_create_verify_history(client_valid_access_token, db):
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_alert_type(value="test_type", db=db)
+    helpers.create_observable_type(value="o_type", db=db)
+
+    alert_uuid = str(uuid.uuid4())
+    create = client_valid_access_token.post(
+        "/api/alert/",
+        json={
+            "uuid": alert_uuid,
+            "name": "test alert",
+            "queue": "test_queue",
+            "observables": [{"type": "o_type", "value": "o_value"}],
+            "type": "test_type",
+        },
+    )
+    assert create.status_code == status.HTTP_201_CREATED
+
+    # Verify the history record
+    history = client_valid_access_token.get(f"/api/alert/{alert_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "CREATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert history.json()["items"][0]["record_uuid"] == alert_uuid
+    assert history.json()["items"][0]["field"] is None
+    assert history.json()["items"][0]["diff"] is None
+    assert history.json()["items"][0]["snapshot"]["name"] == "test alert"
+
+    db_observable = crud.read_observable(type="o_type", value="o_value", db=db)
+    history = client_valid_access_token.get(f"/api/observable/{db_observable.uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "CREATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert history.json()["items"][0]["record_uuid"] == str(db_observable.uuid)
+    assert history.json()["items"][0]["field"] is None
+    assert history.json()["items"][0]["diff"] is None
+    assert history.json()["items"][0]["snapshot"]["value"] == "o_value"
 
 
 @pytest.mark.parametrize(

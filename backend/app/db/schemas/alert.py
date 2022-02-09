@@ -3,8 +3,14 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from api.models.alert import AlertTreeRead
+from db.database import Base
+from db.schemas.history import History
 from db.schemas.node import Node
 from db.schemas.helpers import utcnow
+
+
+class AlertHistory(Base, History):
+    __tablename__ = "alert_history"
 
 
 class Alert(Node):

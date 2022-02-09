@@ -11,8 +11,6 @@ class NodeCommentBase(BaseModel):
 
     node_uuid: UUID4 = Field(description="The UUID of the node associated with this comment")
 
-    user: type_str = Field(description="The username that created the comment")
-
     value: type_str = Field(description="The value of the comment")
 
 

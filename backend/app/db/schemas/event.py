@@ -4,11 +4,17 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 
 from api.models.event import EventRead
+from db.database import Base
 from db.schemas.event_prevention_tool_mapping import event_prevention_tool_mapping
 from db.schemas.event_remediation_mapping import event_remediation_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
 from db.schemas.helpers import utcnow
+from db.schemas.history import History
 from db.schemas.node import Node
+
+
+class EventHistory(Base, History):
+    __tablename__ = "event_history"
 
 
 class Event(Node):
@@ -16,19 +22,19 @@ class Event(Node):
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
 
-    alert_time = Column(DateTime(timezone=True))
+    alert_time = Column(DateTime(timezone=True), index=True)
 
     alerts = relationship("Alert", primaryjoin="Alert.event_uuid == Event.uuid", lazy="selectin")
 
     alert_uuids = association_proxy("alerts", "uuid")
 
-    contain_time = Column(DateTime(timezone=True))
+    contain_time = Column(DateTime(timezone=True), index=True)
 
-    creation_time = Column(DateTime(timezone=True), server_default=utcnow())
+    creation_time = Column(DateTime(timezone=True), server_default=utcnow(), index=True)
 
-    disposition_time = Column(DateTime(timezone=True))
+    disposition_time = Column(DateTime(timezone=True), index=True)
 
-    event_time = Column(DateTime(timezone=True))
+    event_time = Column(DateTime(timezone=True), index=True)
 
     name = Column(String, nullable=False)
 
@@ -36,7 +42,7 @@ class Event(Node):
 
     owner = relationship("User", foreign_keys=[owner_uuid], lazy="selectin")
 
-    ownership_time = Column(DateTime(timezone=True))
+    ownership_time = Column(DateTime(timezone=True), index=True)
 
     prevention_tools = relationship("EventPreventionTool", secondary=event_prevention_tool_mapping, lazy="selectin")
 
@@ -44,7 +50,7 @@ class Event(Node):
 
     queue_uuid = Column(UUID(as_uuid=True), ForeignKey("event_queue.uuid"), nullable=False, index=True)
 
-    remediation_time = Column(DateTime(timezone=True))
+    remediation_time = Column(DateTime(timezone=True), index=True)
 
     remediations = relationship("EventRemediation", secondary=event_remediation_mapping, lazy="selectin")
 

@@ -395,7 +395,7 @@ def test_get_filter_queue(client_valid_access_token, db):
 
 
 def test_get_filter_tags(client_valid_access_token, db):
-    alert_tree1 = helpers.create_alert(db)
+    alert_tree1 = helpers.create_alert(db, tags=["alert_tag"])
     helpers.create_observable(type="fqdn", value="bad.com", parent_tree=alert_tree1, db=db, tags=["obs1"])
     helpers.create_alert(db, tags=["tag1"])
     helpers.create_alert(db, tags=["tag2", "tag3", "tag4"])
@@ -446,6 +446,7 @@ def test_get_filter_threat_actors(client_valid_access_token, db):
     # There should be 1 alert when we filter by the child observable threat_actor
     get = client_valid_access_token.get("/api/alert/?threat_actors=bad_guys")
     assert get.json()["total"] == 1
+    assert len(get.json()["items"][0]["child_threat_actors"]) == 1
     assert get.json()["items"][0]["child_threat_actors"][0]["value"] == "bad_guys"
 
     # All the alerts should be returned if you don't specify anything for the filter
@@ -479,6 +480,7 @@ def test_get_filter_threats(client_valid_access_token, db):
     # There should be 1 alert when we filter by the child observable threat
     get = client_valid_access_token.get("/api/alert/?threats=malz")
     assert get.json()["total"] == 1
+    assert len(get.json()["items"][0]["child_threats"]) == 1
     assert get.json()["items"][0]["child_threats"][0]["value"] == "malz"
 
     # All the alerts should be returned if you don't specify any threats for the filter

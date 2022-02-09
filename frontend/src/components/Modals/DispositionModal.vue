@@ -64,13 +64,11 @@
 
   import { useAlertDispositionStore } from "@/stores/alertDisposition";
   import { useAlertStore } from "@/stores/alert";
-  import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
   const alertDispositionStore = useAlertDispositionStore();
   const alertStore = useAlertStore();
-  const authStore = useAuthStore();
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
 
@@ -128,7 +126,6 @@
 
   const commentData = computed(() => {
     return {
-      user: authStore.user ? authStore.user.username : null,
       value: dispositionComment.value,
     };
   });
