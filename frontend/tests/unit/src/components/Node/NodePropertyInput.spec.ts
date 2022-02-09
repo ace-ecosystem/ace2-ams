@@ -1,6 +1,6 @@
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
 
-import FilterInput from "@/components/Filters/FilterInput.vue";
+import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
 import { mount } from "@vue/test-utils";
 import { filterTypes } from "@/etc/constants";
 import { useObservableTypeStore } from "@/stores/observableType";
@@ -91,9 +91,10 @@ function factory(
   },
   options?: TestingOptions,
 ) {
-  const wrapper = mount(FilterInput, {
+  const wrapper = mount(NodePropertyInput, {
     props: {
       modelValue: filter,
+      inputType: "filter",
     },
     global: {
       plugins: [createTestingPinia(options)],
@@ -107,7 +108,7 @@ function factory(
   return { wrapper };
 }
 
-describe("FilterInput.vue", () => {
+describe("NodePropertyInput.vue", () => {
   it("renders with no given filter", () => {
     const { wrapper } = factory({ filterName: null, filterValue: null });
 

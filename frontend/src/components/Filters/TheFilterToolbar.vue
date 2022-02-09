@@ -22,12 +22,14 @@
         style="padding: 1rem"
         @keypress.enter="addFilter"
       >
-        <FilterInput
+        <NodePropertyInput
           v-model="filterModel"
           data-cy="filter-input"
           :allow-delete="false"
+                  input-type="filter"
+
         >
-        </FilterInput>
+        </NodePropertyInput>
         <Button
           data-cy="quick-add-filter-submit-button"
           name="update-filter"
@@ -59,7 +61,7 @@
   import Toolbar from "primevue/toolbar";
   import OverlayPanel from "primevue/overlaypanel";
   import SplitButton from "primevue/splitbutton";
-  import FilterInput from "./FilterInput.vue";
+  import NodePropertyInput from "../Node/NodePropertyInput.vue";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
@@ -131,19 +133,19 @@
   }
 
   const filterModel = ref({
-    filterName: null,
-    filterValue: null,
+    propertyType: null,
+    propertyValue: null,
   });
 
   const addFilter = () => {
     filterStore.setFilter({
       nodeType: nodeType,
-      filterName: filterModel.value.filterName,
-      filterValue: filterModel.value.filterValue,
+      filterName: filterModel.value.propertyType,
+      filterValue: filterModel.value.propertyValue,
     });
     filterModel.value = {
-      filterName: null,
-      filterValue: null,
+      propertyType: null,
+      propertyValue: null,
     };
   };
 

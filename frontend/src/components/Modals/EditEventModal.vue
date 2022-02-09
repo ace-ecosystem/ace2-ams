@@ -16,11 +16,13 @@
           field.label
         }}</label>
         <div class="col">
-          <FilterInput
+          <NodePropertyInput
             id="field.name"
             v-model="formFields[field.name]"
             :fixed-filter-name="true"
             :allow-delete="false"
+                    input-type="edit"
+
           />
         </div>
       </div>
@@ -59,7 +61,8 @@
 
   import { useModalStore } from "@/stores/modal";
   import { useEventStore } from "@/stores/event";
-  import FilterInput from "../Filters/FilterInput.vue";
+    import NodePropertyInput from "../Node/NodePropertyInput.vue";
+
 
   import { Event } from "@/services/api/event";
 
@@ -116,8 +119,8 @@
   onMounted(() => {
     for (const option of fieldOptions) {
       formFields.value[option.name] = {
-        filterName: option.name,
-        filterValue: null,
+        propertyType: option.name,
+        propertyValue: null,
       };
     }
   });
@@ -163,8 +166,8 @@ import NodeThreatSelector from "../Node/NodeThreatSelector.vue";
 
   const fillFormFields = () => {
     for (const field in formFields.value) {
-      formFields.value[field].filterValue =
-        event.value[formFields.value[field].filterName];
+      formFields.value[field].propertyValue =
+        event.value[formFields.value[field].propertyType];
     }
   };
 

@@ -9,14 +9,16 @@
     @dialogClose="loadFormFilters"
   >
     <div class="flex flex-wrap">
-      <FilterInput
+      <NodePropertyInput
         v-for="(filter, index) in formFilters"
         :key="filter.index"
         v-model="formFilters[index]"
         class="w-12"
         :allow-delete="true"
         @deleteFormFilter="deleteFormFilter(index)"
-      ></FilterInput>
+                input-type="filter"
+
+      ></NodePropertyInput>
     </div>
     <template #footer>
       <Button
@@ -50,7 +52,7 @@
   import Button from "primevue/button";
 
   import BaseModal from "@/components/Modals/BaseModal";
-  import FilterInput from "@/components/Filters/FilterInput.vue";
+  import NodePropertyInput from "../Node/NodePropertyInput.vue";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
@@ -81,8 +83,8 @@
     let submitFilters = {};
     for (const index in formFilters.value) {
       const filter = formFilters.value[index];
-      const filterName = filter.filterName ? filter.filterName : filter;
-      submitFilters[filterName] = filter.filterValue;
+      const filterName = filter.propertyType ? filter.propertyType : filter;
+      submitFilters[filterName] = filter.propertyValue;
     }
     return submitFilters;
   });
@@ -106,15 +108,15 @@
   };
 
   const addNewFilter = () => {
-    formFilters.value.push({ filterName: null, filterValue: null });
+    formFilters.value.push({ propertyType: null, propertyValue: null });
   };
 
   const loadFormFilters = () => {
     formFilters.value = [];
     for (const filter in filterStore.$state[nodeType]) {
       formFilters.value.push({
-        filterName: filter,
-        filterValue: filterStore.$state[nodeType][filter],
+        propertyType: filter,
+        propertyValue: filterStore.$state[nodeType][filter],
       });
     }
   };

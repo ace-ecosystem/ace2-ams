@@ -40,12 +40,13 @@
         resetFilterModel();
       "
     >
-      <FilterInput
+      <NodePropertyInput
         v-model="filterModel"
         :fixed-filter-name="true"
         :allow-delete="false"
+        input-type="filter"
       >
-      </FilterInput>
+      </NodePropertyInput>
       <Button
         data-cy="filter-chip-submit-button"
         name="update-filter"
@@ -70,7 +71,7 @@
   import Chip from "primevue/chip";
   import OverlayPanel from "primevue/overlaypanel";
 
-  import FilterInput from "./FilterInput.vue";
+  import NodePropertyInput from "../Node/NodePropertyInput.vue";
   const filterStore = useFilterStore();
   const nodeType = inject("nodeType");
 
@@ -92,8 +93,8 @@
   });
 
   const filterModel = ref({
-    filterName: props.filterName,
-    filterValue: props.filterValue,
+    propertyType: props.filterName,
+    propertyValue: props.filterValue,
   });
 
   const filterLabel = computed(() => {
@@ -105,8 +106,8 @@
 
   function resetFilterModel() {
     filterModel.value = {
-      filterName: props.filterName,
-      filterValue: props.filterValue,
+      propertyType: props.filterName,
+      propertyValue: props.filterValue,
     };
   }
 
@@ -114,7 +115,7 @@
     filterStore.setFilter({
       nodeType: nodeType,
       filterName: props.filterName,
-      filterValue: filterModel.value.filterValue,
+      filterValue: filterModel.value.propertyValue,
     });
   }
 

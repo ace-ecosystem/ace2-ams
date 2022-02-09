@@ -30,6 +30,7 @@
   const router = useRouter();
 
   provide("availableFilters", alertFilters);
+  provide("availableEditFields", []);
   provide("nodeType", "alerts");
   provide("rangeFilters", alertRangeFilters);
 
