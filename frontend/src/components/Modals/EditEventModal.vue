@@ -33,12 +33,7 @@
         class="p-button-text"
         @click="close"
       />
-      <Button
-        label="Save"
-        icon="pi pi-check"
-        :disabled="!allowSave"
-        @click="saveEvent()"
-      />
+      <Button label="Save" icon="pi pi-check" @click="saveEvent()" />
     </template>
   </BaseModal>
 </template>
@@ -60,6 +55,11 @@
 
   import { useModalStore } from "@/stores/modal";
   import { useEventStore } from "@/stores/event";
+  import { eventEditableProperties } from "@/etc/constants";
+import { populateEventStores } from "@/etc/helpers";
+
+  const eventStore = useEventStore();
+
   import NodePropertyInput from "../Node/NodePropertyInput.vue";
 
   import { Event } from "@/services/api/event";
@@ -69,53 +69,14 @@
     eventUuid: { type: String, required: true },
   });
 
-  const fieldOptions = [
-    {
-      label: "Name",
-      name: "name",
-    },
-    {
-      label: "Owner",
-      name: "owner",
-    },
-    {
-      label: "Status",
-      name: "status",
-    },
-    {
-      label: "Event Type",
-      name: "type",
-    },
-    {
-      label: "Vectors",
-      name: "vectors",
-    },
-    {
-      label: "Severity",
-      name: "riskLevel",
-    },
-    {
-      label: "Prevention Tools",
-      name: "preventionTools",
-    },
-    {
-      label: "Comments",
-      name: "comments",
-    },
-    {
-      label: "Threat Actors",
-      name: "threatActors",
-    },
-    {
-      label: "Threats",
-      name: "threats",
-    },
-  ];
+  const fieldOptions = eventEditableProperties;
+  const fieldOptionObjects = ref({});
 
   const formFields = ref({});
 
   onMounted(() => {
     for (const option of fieldOptions) {
+      fieldOptionObjects.value[option.name] = option;
       formFields.value[option.name] = {
         propertyType: option.name,
         propertyValue: null,
@@ -127,22 +88,7 @@
 
   const emit = defineEmits(["requestReload"]);
 
-  const eventStore = useEventStore();
   const modalStore = useModalStore();
-
-  import { useNodeThreatStore } from "@/stores/nodeThreat";
-  import NodeThreatSelector from "../Node/NodeThreatSelector.vue";
-  const nodeThreatStore = useNodeThreatStore();
-
-  const newThreats = ref([]);
-  const eventThreats = computed(() => {
-    return [...nodeThreatStore.allItems, ...newThreats.value];
-  });
-
-  const showEditThreat = ref(false);
-  const toggleShowEditThreat = () => {
-    showEditThreat.value = !showEditThreat.value;
-  };
 
   const error = ref(null);
   const event = ref(null);
@@ -184,14 +130,29 @@
     }
   };
 
-  const updateData = computed(() => {
-    return {
-      uuid: props.event.uuid,
-    };
-  });
+  import { isObject } from "@/etc/helpers";
+  function formatValue(field, value) {
+    if (fieldOptionObjects.value[field].valueProperty && isObject(value)) {
+      return value[fieldOptionObjects.value[field].valueProperty];
+    } else if (Array.isArray(value)) {
+      let valueProperty = "value";
+      if (fieldOptionObjects.value[field].valueProperty) {
+        valueProperty = fieldOptionObjects.value[field].valueProperty;
+      }
+      return value.map((x) => x[valueProperty]);
+    }
 
-  const allowSave = computed(() => {
-    return false;
+    return value;
+  }
+
+  const updateData = computed(() => {
+    const data = { uuid: props.eventUuid };
+    for (const field in formFields.value) {
+      if (formFields.value[field].propertyValue != event.value[field]) {
+        data[field] = formatValue(field, formFields.value[field].propertyValue);
+      }
+    }
+    return [data];
   });
 
   const handleError = () => {
