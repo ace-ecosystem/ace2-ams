@@ -239,9 +239,6 @@ describe("DispositionModal.vue", () => {
     // Set the selected alert
     wrapper.vm.selectedAlertStore.selected = ["1", "2"];
 
-    // Set the selected user
-    wrapper.vm.authStore.user = { username: "Alice" };
-
     // Set the new disposition / comment values
     wrapper.vm.newDisposition = { value: "low disposition", rank: 1 };
     wrapper.vm.dispositionComment = "test comment";
@@ -258,12 +255,10 @@ describe("DispositionModal.vue", () => {
     myNock
       .post("/node/comment/", [
         {
-          user: "Alice",
           value: "test comment",
           node_uuid: "1",
         },
         {
-          user: "Alice",
           value: "test comment",
           node_uuid: "2",
         },
