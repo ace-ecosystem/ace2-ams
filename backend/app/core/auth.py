@@ -60,7 +60,7 @@ oauth2_access_scheme = OAuth2PasswordBearerCookieOrHeader(tokenUrl="/api/auth", 
 oauth2_refresh_scheme = OAuth2PasswordBearerCookieOrHeader(tokenUrl="/api/auth", token_type="refresh_token")
 
 
-def _create_token(token_type: str, lifetime: timedelta, sub: str) -> str:
+def _create_token(token_type: str, lifetime: timedelta, sub: str, full_name: str) -> str:
     """
     Generic function to generate and return a JWT.
 
@@ -75,6 +75,7 @@ def _create_token(token_type: str, lifetime: timedelta, sub: str) -> str:
         "exp": datetime.utcnow() + lifetime,
         "iat": datetime.utcnow(),
         "sub": sub,
+        "full_name": full_name,
         # A UUID is used so that if the token is generated at the exact same time it will be different
         "ace2_uuid": str(uuid.uuid4()),
     }
@@ -82,7 +83,7 @@ def _create_token(token_type: str, lifetime: timedelta, sub: str) -> str:
     return jwt.encode(payload, get_settings().jwt_secret, algorithm=get_settings().jwt_algorithm)
 
 
-def create_access_token(sub: str) -> str:
+def create_access_token(sub: str, full_name: str) -> str:
     """
     Generates and returns an access_token JWT that is used to authenticate to the API endpoints.
 
@@ -94,10 +95,11 @@ def create_access_token(sub: str) -> str:
         token_type="access_token",
         lifetime=timedelta(seconds=get_settings().jwt_access_expire_seconds),
         sub=sub,
+        full_name=full_name,
     )
 
 
-def create_refresh_token(sub: str) -> str:
+def create_refresh_token(sub: str, full_name: str) -> str:
     """
     Generates and returns a refresh_token JWT that is used to obtain a new access_token.
 
@@ -109,6 +111,7 @@ def create_refresh_token(sub: str) -> str:
         token_type="refresh_token",
         lifetime=timedelta(seconds=get_settings().jwt_refresh_expire_seconds),
         sub=sub,
+        full_name=full_name,
     )
 
 
@@ -183,12 +186,12 @@ def refresh_token(db: Session = Depends(get_db), refresh_token: str = Depends(oa
                 )
 
             # Rotate the refresh token and save it to the database
-            new_refresh_token = create_refresh_token(claims["sub"])
+            new_refresh_token = create_refresh_token(sub=claims["sub"], full_name=claims["full_name"])
             user.refresh_token = new_refresh_token
             db.commit()
 
             return {
-                "access_token": create_access_token(claims["sub"]),
+                "access_token": create_access_token(sub=claims["sub"], full_name=claims["full_name"]),
                 "refresh_token": new_refresh_token,
                 "user": user,
             }
@@ -212,7 +215,7 @@ def refresh_token(db: Session = Depends(get_db), refresh_token: str = Depends(oa
         )
 
 
-def validate_access_token(access_token: str = Depends(oauth2_access_scheme)) -> str:
+def validate_access_token(access_token: str = Depends(oauth2_access_scheme)) -> Mapping[str, str]:
     """
     Validates that the given access_token can be decoded using our secret key, that it is not expired, and
     that it is in fact an access_token and not another type of token.
@@ -234,7 +237,7 @@ def validate_access_token(access_token: str = Depends(oauth2_access_scheme)) -> 
         claims = decode_token(access_token)
 
         if _is_access_token(claims):
-            return claims["sub"]
+            return claims
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -255,7 +258,7 @@ def validate_access_token(access_token: str = Depends(oauth2_access_scheme)) -> 
         )
 
 
-def validate_refresh_token(refresh_token: str = Depends(oauth2_refresh_scheme)) -> str:
+def validate_refresh_token(refresh_token: str = Depends(oauth2_refresh_scheme)) -> Mapping[str, str]:
     """
     Validates that the given refresh_token can be decoded using our secret key, that it is not expired, and
     that it is in fact an refresh_token and not another type of token.
@@ -277,7 +280,7 @@ def validate_refresh_token(refresh_token: str = Depends(oauth2_refresh_scheme)) 
         claims = decode_token(refresh_token)
 
         if _is_refresh_token(claims):
-            return claims["sub"]
+            return claims
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

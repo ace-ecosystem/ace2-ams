@@ -70,10 +70,10 @@ def auth(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), d
     if user is None or not user.enabled:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password")
 
-    access_token = create_access_token(sub=user.username)
+    access_token = create_access_token(sub=user.username, full_name=user.display_name)
     _set_access_token_cookie(response, access_token)
 
-    refresh_token = create_refresh_token(sub=user.username)
+    refresh_token = create_refresh_token(sub=user.username, full_name=user.display_name)
     _set_refresh_token_cookie(response, refresh_token)
 
     # Save the refresh token to the database

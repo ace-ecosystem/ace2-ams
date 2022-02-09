@@ -100,11 +100,11 @@ def record_create_history(
     commit(db)
 
 
-def record_comment_history(record_node: Node, username: str, diff: Diff, db: Session):
+def record_comment_history(record_node: Node, action_by: str, diff: Diff, db: Session):
     if record_node.node_type == "alert":
         record_update_histories(
             history_table=AlertHistory,
-            action_by=username,
+            action_by=action_by,
             record_read_model=AlertRead,
             record_table=Alert,
             record_uuid=record_node.uuid,
@@ -114,7 +114,7 @@ def record_comment_history(record_node: Node, username: str, diff: Diff, db: Ses
     elif record_node.node_type == "event":
         record_update_histories(
             history_table=EventHistory,
-            action_by=username,
+            action_by=action_by,
             record_read_model=EventRead,
             record_table=Event,
             record_uuid=record_node.uuid,
@@ -124,7 +124,7 @@ def record_comment_history(record_node: Node, username: str, diff: Diff, db: Ses
     elif record_node.node_type == "observable":
         record_update_histories(
             history_table=ObservableHistory,
-            action_by=username,
+            action_by=action_by,
             record_read_model=ObservableRead,
             record_table=Observable,
             record_uuid=record_node.uuid,

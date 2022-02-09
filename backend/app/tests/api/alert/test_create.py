@@ -288,7 +288,7 @@ def test_create_verify_history(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/alert/{alert_uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "CREATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["record_uuid"] == alert_uuid
     assert history.json()["items"][0]["field"] is None
     assert history.json()["items"][0]["diff"] is None
@@ -298,7 +298,7 @@ def test_create_verify_history(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/observable/{db_observable.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "CREATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["record_uuid"] == str(db_observable.uuid)
     assert history.json()["items"][0]["field"] is None
     assert history.json()["items"][0]["diff"] is None

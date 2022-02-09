@@ -152,7 +152,7 @@ def test_update_type(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/observable/{observable_tree.node_uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "type"
     assert history.json()["items"][0]["diff"]["old_value"] == "test_type"
     assert history.json()["items"][0]["diff"]["new_value"] == "test_type2"
@@ -180,7 +180,7 @@ def test_update_redirection_uuid(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/observable/{observable_tree1.node_uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "redirection_uuid"
     assert history.json()["items"][0]["diff"]["old_value"] is None
     assert history.json()["items"][0]["diff"]["new_value"] == str(observable_tree2.node.uuid)
@@ -197,7 +197,7 @@ def test_update_redirection_uuid(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/observable/{observable_tree1.node_uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "analyst"
+    assert history.json()["items"][1]["action_by"] == "Analyst"
     assert history.json()["items"][1]["field"] == "redirection_uuid"
     assert history.json()["items"][1]["diff"]["old_value"] == str(observable_tree2.node.uuid)
     assert history.json()["items"][1]["diff"]["new_value"] is None
@@ -244,7 +244,7 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
             history = client_valid_access_token.get(f"/api/observable/{observable_tree.node_uuid}/history")
             assert history.json()["total"] == 1
             assert history.json()["items"][0]["action"] == "UPDATE"
-            assert history.json()["items"][0]["action_by"] == "analyst"
+            assert history.json()["items"][0]["action_by"] == "Analyst"
             assert history.json()["items"][0]["field"] == key
             assert history.json()["items"][0]["diff"]["old_value"] is None
             assert history.json()["items"][0]["diff"]["new_value"] is None
@@ -295,7 +295,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     history = client_valid_access_token.get(f"/api/observable/{observable_tree.node_uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == key
 
     # If the test is for expires_on, make sure that the retrieved value matches the proper UTC timestamp

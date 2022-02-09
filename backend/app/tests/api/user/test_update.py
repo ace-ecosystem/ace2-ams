@@ -109,7 +109,7 @@ def test_update_valid_alert_queue(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "default_alert_queue"
     assert history.json()["items"][0]["diff"]["old_value"] == "test_queue"
     assert history.json()["items"][0]["diff"]["new_value"] == "test_queue2"
@@ -133,7 +133,7 @@ def test_update_valid_event_queue(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "default_event_queue"
     assert history.json()["items"][0]["diff"]["old_value"] == "test_queue"
     assert history.json()["items"][0]["diff"]["new_value"] == "test_queue2"
@@ -166,7 +166,7 @@ def test_update_valid_roles(client_valid_access_token, db, values):
     history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "roles"
     assert history.json()["items"][0]["diff"]["old_value"] is None
     assert history.json()["items"][0]["diff"]["new_value"] is None
@@ -208,7 +208,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == key
     assert history.json()["items"][0]["diff"]["old_value"] == initial_value
     assert history.json()["items"][0]["diff"]["new_value"] == updated_value
@@ -240,7 +240,7 @@ def test_update_password(client_valid_access_token, db, initial_value, updated_v
     history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "password"
     assert history.json()["items"][0]["diff"]["old_value"] is None
     assert history.json()["items"][0]["diff"]["new_value"] is None

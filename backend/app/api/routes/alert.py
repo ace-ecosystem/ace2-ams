@@ -51,7 +51,7 @@ def create_alert(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    username: str = Depends(validate_access_token),
+    claims: dict = Depends(validate_access_token),
 ):
     # Create the new alert Node using the data from the request
     new_alert: Alert = create_node(
@@ -89,7 +89,7 @@ def create_alert(
 
         crud.record_create_history(
             history_table=ObservableHistory,
-            action_by=username,
+            action_by=claims["full_name"],
             record_read_model=ObservableRead,
             record_table=Observable,
             record_uuid=db_observable.uuid,
@@ -111,7 +111,7 @@ def create_alert(
     # Add an entry to the history table
     crud.record_create_history(
         history_table=AlertHistory,
-        action_by=username,
+        action_by=claims["full_name"],
         record_read_model=AlertRead,
         record_table=Alert,
         record_uuid=new_alert.uuid,
@@ -417,7 +417,7 @@ def update_alerts(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    username: str = Depends(validate_access_token),
+    claims: dict = Depends(validate_access_token),
 ):
     for alert in alerts:
         # Update the Node attributes
@@ -440,7 +440,7 @@ def update_alerts(
                 value=update_data["disposition"], db_table=AlertDisposition, db=db
             )
             db_alert.disposition_time = datetime.utcnow()
-            db_alert.disposition_user = crud.read_user_by_username(username=username, db=db)
+            db_alert.disposition_user = crud.read_user_by_username(username=claims["sub"], db=db)
 
         if "event_uuid" in update_data:
             diffs.append(crud.create_diff(field="event_uuid", old=db_alert.event_uuid, new=update_data["event_uuid"]))
@@ -481,7 +481,7 @@ def update_alerts(
         # Add the entries to the history table
         crud.record_update_histories(
             history_table=AlertHistory,
-            action_by=username,
+            action_by=claims["full_name"],
             record_read_model=AlertRead,
             record_table=Alert,
             record_uuid=alert.uuid,

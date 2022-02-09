@@ -68,7 +68,7 @@ def test_update_alerts(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["record_uuid"] == str(alert_tree.node_uuid)
     assert history.json()["items"][0]["field"] == "comments"
     assert history.json()["items"][0]["diff"]["old_value"] is None
@@ -93,7 +93,7 @@ def test_update_events(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["record_uuid"] == str(event.uuid)
     assert history.json()["items"][0]["field"] == "comments"
     assert history.json()["items"][0]["diff"]["old_value"] is None
@@ -119,7 +119,7 @@ def test_update_observables(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/observable/{observable_tree.node_uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["record_uuid"] == str(observable_tree.node_uuid)
     assert history.json()["items"][0]["field"] == "comments"
     assert history.json()["items"][0]["diff"]["old_value"] is None

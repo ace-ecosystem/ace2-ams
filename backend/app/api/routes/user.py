@@ -36,7 +36,7 @@ def create_user(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    username: str = Depends(validate_access_token),
+    claims: dict = Depends(validate_access_token),
 ):
     # Create the new user using the data from the request
     new_user = User(**user.dict())
@@ -59,7 +59,7 @@ def create_user(
     # Add an entry to the history table
     crud.record_create_history(
         history_table=UserHistory,
-        action_by=username,
+        action_by=claims["full_name"],
         record_read_model=UserRead,
         record_table=User,
         record_uuid=new_user.uuid,
@@ -105,7 +105,7 @@ def update_user(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    username: str = Depends(validate_access_token),
+    claims: dict = Depends(validate_access_token),
 ):
     # Read the current user from the database
     db_user: User = crud.read(uuid=uuid, db_table=User, db=db)
@@ -179,7 +179,7 @@ def update_user(
     # Add the entries to the history table
     crud.record_update_histories(
         history_table=UserHistory,
-        action_by=username,
+        action_by=claims["full_name"],
         record_read_model=UserRead,
         record_table=User,
         record_uuid=db_user.uuid,

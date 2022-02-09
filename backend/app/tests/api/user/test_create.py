@@ -171,7 +171,7 @@ def test_create_verify_history(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/user/{user_uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "CREATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["record_uuid"] == user_uuid
     assert history.json()["items"][0]["field"] is None
     assert history.json()["items"][0]["diff"] is None

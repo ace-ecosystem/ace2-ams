@@ -54,7 +54,7 @@ def create_event(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    username: str = Depends(validate_access_token),
+    claims: dict = Depends(validate_access_token),
 ):
     # Create the new event Node using the data from the request
     new_event: Event = create_node(node_create=event, db_node_type=Event, db=db, exclude={"alert_uuids"})
@@ -96,7 +96,7 @@ def create_event(
     # Add an entry to the history table
     crud.record_create_history(
         history_table=EventHistory,
-        action_by=username,
+        action_by=claims["full_name"],
         record_read_model=EventRead,
         record_table=Event,
         record_uuid=new_event.uuid,
@@ -466,7 +466,7 @@ def update_events(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    username: str = Depends(validate_access_token),
+    claims: dict = Depends(validate_access_token),
 ):
     for event in events:
         # Update the Node attributes
@@ -594,7 +594,7 @@ def update_events(
         # Add the entries to the history table
         crud.record_update_histories(
             history_table=EventHistory,
-            action_by=username,
+            action_by=claims["full_name"],
             record_read_model=EventRead,
             record_table=Event,
             record_uuid=event.uuid,

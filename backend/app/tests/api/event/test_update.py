@@ -174,7 +174,7 @@ def test_update_owner(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "owner"
     assert history.json()["items"][0]["diff"]["old_value"] is None
     assert history.json()["items"][0]["diff"]["new_value"] == "johndoe"
@@ -189,7 +189,7 @@ def test_update_owner(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "analyst"
+    assert history.json()["items"][1]["action_by"] == "Analyst"
     assert history.json()["items"][1]["field"] == "owner"
     assert history.json()["items"][1]["diff"]["old_value"] == "johndoe"
     assert history.json()["items"][1]["diff"]["new_value"] is None
@@ -217,7 +217,7 @@ def test_update_prevention_tools(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "prevention_tools"
     assert history.json()["items"][0]["diff"]["old_value"] is None
     assert history.json()["items"][0]["diff"]["new_value"] is None
@@ -234,7 +234,7 @@ def test_update_prevention_tools(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "analyst"
+    assert history.json()["items"][1]["action_by"] == "Analyst"
     assert history.json()["items"][1]["field"] == "prevention_tools"
     assert history.json()["items"][1]["diff"]["old_value"] is None
     assert history.json()["items"][1]["diff"]["new_value"] is None
@@ -262,7 +262,7 @@ def test_update_queue(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "queue"
     assert history.json()["items"][0]["diff"]["old_value"] == "default"
     assert history.json()["items"][0]["diff"]["new_value"] == "updated_queue"
@@ -288,7 +288,7 @@ def test_update_remediations(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "remediations"
     assert history.json()["items"][0]["diff"]["old_value"] is None
     assert history.json()["items"][0]["diff"]["new_value"] is None
@@ -305,7 +305,7 @@ def test_update_remediations(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "analyst"
+    assert history.json()["items"][1]["action_by"] == "Analyst"
     assert history.json()["items"][1]["field"] == "remediations"
     assert history.json()["items"][1]["diff"]["old_value"] is None
     assert history.json()["items"][1]["diff"]["new_value"] is None
@@ -332,7 +332,7 @@ def test_update_risk_level(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "risk_level"
     assert history.json()["items"][0]["diff"]["old_value"] is None
     assert history.json()["items"][0]["diff"]["new_value"] == "test"
@@ -347,7 +347,7 @@ def test_update_risk_level(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "analyst"
+    assert history.json()["items"][1]["action_by"] == "Analyst"
     assert history.json()["items"][1]["field"] == "risk_level"
     assert history.json()["items"][1]["diff"]["old_value"] == "test"
     assert history.json()["items"][1]["diff"]["new_value"] is None
@@ -372,7 +372,7 @@ def test_update_source(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "source"
     assert history.json()["items"][0]["diff"]["old_value"] is None
     assert history.json()["items"][0]["diff"]["new_value"] == "test"
@@ -387,7 +387,7 @@ def test_update_source(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "analyst"
+    assert history.json()["items"][1]["action_by"] == "Analyst"
     assert history.json()["items"][1]["field"] == "source"
     assert history.json()["items"][1]["diff"]["old_value"] == "test"
     assert history.json()["items"][1]["diff"]["new_value"] is None
@@ -412,7 +412,7 @@ def test_update_status(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "status"
     assert history.json()["items"][0]["diff"]["old_value"] == "OPEN"
     assert history.json()["items"][0]["diff"]["new_value"] == "test"
@@ -437,7 +437,7 @@ def test_update_type(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "type"
     assert history.json()["items"][0]["diff"]["old_value"] is None
     assert history.json()["items"][0]["diff"]["new_value"] == "test"
@@ -452,7 +452,7 @@ def test_update_type(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "analyst"
+    assert history.json()["items"][1]["action_by"] == "Analyst"
     assert history.json()["items"][1]["field"] == "type"
     assert history.json()["items"][1]["diff"]["old_value"] == "test"
     assert history.json()["items"][1]["diff"]["new_value"] is None
@@ -478,7 +478,7 @@ def test_update_vectors(client_valid_access_token, db):
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == "vectors"
     assert history.json()["items"][0]["diff"]["old_value"] is None
     assert history.json()["items"][0]["diff"]["new_value"] is None
@@ -498,7 +498,7 @@ def test_update_vectors(client_valid_access_token, db):
     print(history.json())
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "analyst"
+    assert history.json()["items"][1]["action_by"] == "Analyst"
     assert history.json()["items"][1]["field"] == "vectors"
     assert history.json()["items"][1]["diff"]["old_value"] is None
     assert history.json()["items"][1]["diff"]["new_value"] is None
@@ -537,7 +537,7 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
             history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
             assert history.json()["total"] == 1
             assert history.json()["items"][0]["action"] == "UPDATE"
-            assert history.json()["items"][0]["action_by"] == "analyst"
+            assert history.json()["items"][0]["action_by"] == "Analyst"
             assert history.json()["items"][0]["field"] == key
             assert history.json()["items"][0]["diff"]["old_value"] is None
             assert history.json()["items"][0]["diff"]["new_value"] is None
@@ -605,7 +605,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "analyst"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
     assert history.json()["items"][0]["field"] == key
     assert history.json()["items"][0]["diff"]["old_value"] == initial_value
 

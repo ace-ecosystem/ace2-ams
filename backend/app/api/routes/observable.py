@@ -64,7 +64,7 @@ def create_observables(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    username: str = Depends(validate_access_token),
+    claims: dict = Depends(validate_access_token),
 ):
     # NOTE: There are multiple crud.commit(db) statements to avoid the possibility of
     # getting an IntegrityError when trying to read the observable from the Node table. This
@@ -81,7 +81,7 @@ def create_observables(
         # Add an entry to the history table
         crud.record_create_history(
             history_table=ObservableHistory,
-            action_by=username,
+            action_by=claims["full_name"],
             record_read_model=ObservableRead,
             record_table=Observable,
             record_uuid=new_observable.uuid,
@@ -141,7 +141,7 @@ def update_observable(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    username: str = Depends(validate_access_token),
+    claims: dict = Depends(validate_access_token),
 ):
     # Update the Node attributes
     db_observable, diffs = update_node(node_update=observable, uuid=uuid, db_table=Observable, db=db)
@@ -200,7 +200,7 @@ def update_observable(
     # Add the entries to the history table
     crud.record_update_histories(
         history_table=ObservableHistory,
-        action_by=username,
+        action_by=claims["full_name"],
         record_read_model=ObservableRead,
         record_table=Observable,
         record_uuid=db_observable.uuid,
