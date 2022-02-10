@@ -19,6 +19,7 @@ import { useEventStatusStore } from "@/stores/eventStatus";
 import { useEventTypeStore } from "@/stores/eventType";
 import { useNodeThreatStore } from "@/stores/nodeThreat";
 import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
+import { useNodeThreatTypeStore } from "@/stores/nodeThreatType";
 import { useEventVectorStore } from "@/stores/eventVector";
 import { useNodeDirectiveStore } from "@/stores/nodeDirective";
 import { useObservableTypeStore } from "@/stores/observableType";
@@ -71,6 +72,7 @@ export async function populateEventStores(): Promise<void> {
   const eventTypeStore = useEventTypeStore();
   const nodeThreatActorStore = useNodeThreatActorStore();
   const nodeThreatStore = useNodeThreatStore();
+  const nodeThreatTypeStore = useNodeThreatTypeStore();
   const userStore = useUserStore();
   const eventVectorStore = useEventVectorStore();
 
@@ -81,6 +83,7 @@ export async function populateEventStores(): Promise<void> {
     eventTypeStore.readAll(),
     nodeThreatActorStore.readAll(),
     nodeThreatStore.readAll(),
+    nodeThreatTypeStore.readAll(),
     eventVectorStore.readAll(),
     userStore.readAll(),
   ]).catch((error) => {
