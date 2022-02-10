@@ -4,7 +4,7 @@
       <Dropdown
         v-model="propertyType"
         data-cy="property-input-type"
-        :options="propertyOptions"
+        :options="propertyTypeOptions"
         option-label="label"
         type="text"
         class="w-13rem"
@@ -134,10 +134,10 @@
   const availableFilters = inject("availableFilters");
   const availableEditFields = inject("availableEditFields");
 
-  const propertyOptions =
-    props.inputType == "filter"
+  const propertyTypeOptions =
+    props.formType == "filter"
       ? availableFilters
-      : props.inputType == "edit"
+      : props.formType == "edit"
       ? availableEditFields
       : null;
 
@@ -146,14 +146,14 @@
     modelValue: { type: Object, required: true },
     fixedPropertyType: { type: Boolean, required: false },
     allowDelete: { type: Boolean, required: false },
-    inputType: { type: String, required: true },
+    formType: { type: String, required: true },
   });
 
   const getPropertyTypeObject = (propertyType) => {
     if (!propertyType) {
-      return propertyOptions[0];
+      return propertyTypeOptions ? propertyTypeOptions[0] : null;
     }
-    let property = propertyOptions.find((option) => {
+    let property = propertyTypeOptions.find((option) => {
       return option.name === propertyType;
     });
     property = property ? property : null;
@@ -204,10 +204,10 @@
   });
 
   const isDate = computed(() => {
-    return formInputType.value == "date";
+    return inputType.value == "date";
   });
   const isCategorizedValue = computed(() => {
-    return formInputType.value == "categorizedValue";
+    return inputType.value == "categorizedValue";
   });
   const categorizedValueObject = computed(() => {
     return {
@@ -216,22 +216,22 @@
     };
   });
   const isChips = computed(() => {
-    return formInputType.value == "chips";
+    return inputType.value == "chips";
   });
 
   const isInputText = computed(() => {
-    return formInputType.value == "inputText";
+    return inputType.value == "inputText";
   });
 
   const isDropdown = computed(() => {
-    return formInputType.value == "select";
+    return inputType.value == "select";
   });
 
   const isMultiSelect = computed(() => {
-    return formInputType.value == "multiselect";
+    return inputType.value == "multiselect";
   });
 
-  const formInputType = computed(() => {
+  const inputType = computed(() => {
     return propertyType.value ? propertyType.value.type : null;
   });
 

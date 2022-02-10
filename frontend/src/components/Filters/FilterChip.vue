@@ -44,7 +44,7 @@
         v-model="filterModel"
         :fixed-property-type="true"
         :allow-delete="false"
-        input-type="filter"
+        form-type="filter"
       >
       </NodePropertyInput>
       <Button

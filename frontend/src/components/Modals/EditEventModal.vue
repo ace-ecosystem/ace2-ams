@@ -26,7 +26,7 @@
             v-model="formFields[field.name]"
             :fixed-property-type="true"
             :allow-delete="false"
-            input-type="edit"
+            form-type="edit"
           />
         </div>
       </div>
