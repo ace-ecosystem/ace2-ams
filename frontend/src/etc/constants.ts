@@ -314,10 +314,10 @@ const eventEventTimeProperty = {
   name: eventPropertyTypes.EVENT_TIME_PROPERTY,
   label: "Event TIme",
   type: filterTypes.DATE,
-  stringRepr: (value: Date) => {
+  stringRepr: (value: Date): string => {
     return value.toISOString();
   },
-  parseStringRepr: (valueString: string) => {
+  parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
   },
 };
@@ -325,10 +325,10 @@ const eventAlertTimeProperty = {
   name: eventPropertyTypes.ALERT_TIME_PROPERTY,
   label: "Alert Time",
   type: filterTypes.DATE,
-  stringRepr: (value: Date) => {
+  stringRepr: (value: Date): string => {
     return value.toISOString();
   },
-  parseStringRepr: (valueString: string) => {
+  parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
   },
 };
@@ -336,10 +336,10 @@ const eventOwnershipTimeProperty = {
   name: eventPropertyTypes.OWNERSHIP_TIME_PROPERTY,
   label: "Ownership Time",
   type: filterTypes.DATE,
-  stringRepr: (value: Date) => {
+  stringRepr: (value: Date): string => {
     return value.toISOString();
   },
-  parseStringRepr: (valueString: string) => {
+  parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
   },
 };
@@ -347,10 +347,10 @@ const eventDispositionTimeProperty = {
   name: eventPropertyTypes.DISPOSITION_TIME_PROPERTY,
   label: "Disposition Time",
   type: filterTypes.DATE,
-  stringRepr: (value: Date) => {
+  stringRepr: (value: Date): string => {
     return value.toISOString();
   },
-  parseStringRepr: (valueString: string) => {
+  parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
   },
 };
@@ -358,10 +358,10 @@ const eventContainTimeProperty = {
   name: eventPropertyTypes.CONTAIN_TIME_PROPERTY,
   label: "Contain Time",
   type: filterTypes.DATE,
-  stringRepr: (value: Date) => {
+  stringRepr: (value: Date): string => {
     return value.toISOString();
   },
-  parseStringRepr: (valueString: string) => {
+  parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
   },
 };
@@ -369,10 +369,10 @@ const eventRemediationTimeProperty = {
   name: eventPropertyTypes.REMEDIATION_TIME_PROPERTY,
   label: "Remediation Time",
   type: filterTypes.DATE,
-  stringRepr: (value: Date) => {
+  stringRepr: (value: Date): string => {
     return value.toISOString();
   },
-  parseStringRepr: (valueString: string) => {
+  parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
   },
 };
@@ -382,14 +382,14 @@ const eventRemediationProperty = {
   label: "Remediation",
   type: filterTypes.MULTISELECT,
   store: useEventRemediationStore,
-  stringRepr: (value: eventRemediationRead[]) => {
+  stringRepr: (value: eventRemediationRead[]): string => {
     return value
       .map(function (elem) {
         return elem.value;
       })
       .join();
   },
-  parseStringRepr: (valueString: string) => {
+  parseStringRepr: (valueString: string): string[] => {
     return valueString.split(",");
   },
 };
