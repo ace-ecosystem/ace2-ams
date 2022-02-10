@@ -3,7 +3,7 @@
 <!-- 'Assign' alert action modal -->
 
 <template>
-  <BaseModal :name="name" header="Edit Event" :style="{ width: '45vw' }">
+  <BaseModal :name="name" header="Edit Event" :style="{ width: '70vw' }">
     <div>
       <div v-if="error" class="p-col">
         <Message severity="error" @close="handleError">{{ error }}</Message>
@@ -11,12 +11,22 @@
     </div>
     <div v-if="isLoading">Loading...</div>
     <div v-else class="p-grid p-fluid p-formgrid p-grid">
-      <div v-for="field of fieldOptions" :key="field.name" class="field grid">
-        <label for="field.name" class="col-fixed" style="width: 100px">{{
+      <div
+        v-for="field of fieldOptions"
+        :key="field.name"
+        class="field grid"
+        style="width: 100%"
+      >
+        <label for="field.name" class="col-fixed" style="width: 30%">{{
           field.label
         }}</label>
         <div class="col">
+          <NodeThreatSelector
+            v-if="field.name == 'threats'"
+            v-model="formFields['threats'].propertyValue"
+          ></NodeThreatSelector>
           <NodePropertyInput
+            v-else
             id="field.name"
             v-model="formFields[field.name]"
             :fixed-property-type="true"
@@ -56,7 +66,7 @@
   import { useModalStore } from "@/stores/modal";
   import { useEventStore } from "@/stores/event";
   import { eventEditableProperties } from "@/etc/constants";
-import { populateEventStores } from "@/etc/helpers";
+  import { populateEventStores } from "@/etc/helpers";
 
   const eventStore = useEventStore();
 
@@ -131,6 +141,7 @@ import { populateEventStores } from "@/etc/helpers";
   };
 
   import { isObject } from "@/etc/helpers";
+  import NodeThreatSelector from "../Node/NodeThreatSelector.vue";
   function formatValue(field, value) {
     if (fieldOptionObjects.value[field].valueProperty && isObject(value)) {
       return value[fieldOptionObjects.value[field].valueProperty];
