@@ -130,8 +130,8 @@ describe("FilterChip.vue", () => {
   it("correctly sets filterModel on mount", () => {
     const { wrapper } = factory();
     expect(wrapper.vm.filterModel).toEqual({
-      filterName: "name",
-      filterValue: "test",
+      propertyType: "name",
+      propertyValue: "test",
     });
   });
   it("correctly resets filterModel on resetFilterModel", () => {
@@ -139,8 +139,8 @@ describe("FilterChip.vue", () => {
     wrapper.vm.filterModel = undefined;
     wrapper.vm.resetFilterModel();
     expect(wrapper.vm.filterModel).toEqual({
-      filterName: "name",
-      filterValue: "test",
+      propertyType: "name",
+      propertyValue: "test",
     });
   });
   it("updates the filterStore with set filterModel on updateFilter", () => {
