@@ -25,8 +25,6 @@ from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment
 from db.schemas.node_directive import NodeDirective
 from db.schemas.node_directive_mapping import node_directive_mapping
-from db.schemas.node_history import NodeHistory
-from db.schemas.node_history_action import NodeHistoryAction
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_tag_mapping import node_tag_mapping
 from db.schemas.node_threat import NodeThreat

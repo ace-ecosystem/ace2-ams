@@ -17,6 +17,7 @@ import myNock from "@unit/services/api/nock";
 import nock from "nock";
 import router from "@/router";
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { userReadFactory } from "../../../../mocks/user";
 
 import snakecaseKeys from "snakecase-keys";
 
@@ -26,6 +27,8 @@ function factory(options?: TestingOptions) {
       plugins: [createTestingPinia(options), PrimeVue, router],
     },
   });
+
+  wrapper.vm.authStore.user = userReadFactory({ username: "analyst" });
 
   return { wrapper };
 }
@@ -278,6 +281,7 @@ describe("AnalyzeAlertForm async methods", () => {
     eventTime: moment(wrapper.vm.alertDate).tz(moment.tz.guess()).format(),
     name: "Manual Alert",
     observables: [expectedObservableCreate],
+    owner: "analyst",
     queue: "default",
     type: "manual",
   };

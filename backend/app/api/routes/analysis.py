@@ -94,7 +94,7 @@ def update_analysis(
     db: Session = Depends(get_db),
 ):
     # Update the Node attributes
-    db_analysis: Analysis = update_node(node_update=analysis, uuid=uuid, db_table=Analysis, db=db)
+    db_analysis, diffs = update_node(node_update=analysis, uuid=uuid, db_table=Analysis, db=db)
 
     # Get the data that was given in the request and use it to update the database object
     update_data = analysis.dict(exclude_unset=True)

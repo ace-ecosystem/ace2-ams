@@ -147,6 +147,37 @@ def test_create_missing_required_fields(client_valid_access_token, key):
 #
 
 
+def test_create_verify_history(client_valid_access_token, db):
+    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_event_queue(value="test_queue", db=db)
+    helpers.create_user_role(value="test_role", db=db)
+
+    # Create the object
+    user_uuid = str(uuid.uuid4())
+    create_json = {
+        "default_alert_queue": "test_queue",
+        "default_event_queue": "test_queue",
+        "display_name": "John Doe",
+        "email": "john@test.com",
+        "password": "abcd1234",
+        "roles": ["test_role"],
+        "username": "johndoe",
+        "uuid": user_uuid,
+    }
+    create = client_valid_access_token.post("/api/user/", json=create_json)
+    assert create.status_code == status.HTTP_201_CREATED
+
+    # Verify the history record
+    history = client_valid_access_token.get(f"/api/user/{user_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "CREATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert history.json()["items"][0]["record_uuid"] == user_uuid
+    assert history.json()["items"][0]["field"] is None
+    assert history.json()["items"][0]["diff"] is None
+    assert history.json()["items"][0]["snapshot"]["username"] == "johndoe"
+
+
 @pytest.mark.parametrize(
     "key,value",
     [("enabled", False), ("timezone", "America/New_York"), ("training", False), ("uuid", str(uuid.uuid4()))],

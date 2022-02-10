@@ -14,7 +14,6 @@ describe("NodeComment API calls", () => {
   const mockObjectCreate: nodeCommentCreate[] = [
     {
       nodeUuid: "uuid1",
-      user: "Alice",
       description: "This is a comment",
       value: "Test",
     },

@@ -131,12 +131,32 @@ def test_update_disposition(client_valid_access_token, db):
     assert alert_tree.node.disposition.value == "test"
     assert alert_tree.node.version != initial_version
 
+    # Verify the history
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "UPDATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert history.json()["items"][0]["field"] == "disposition"
+    assert history.json()["items"][0]["diff"]["old_value"] is None
+    assert history.json()["items"][0]["diff"]["new_value"] == "test"
+    assert history.json()["items"][0]["snapshot"]["disposition"]["value"] == "test"
+
     # Set it back to None
     update = client_valid_access_token.patch(
         "/api/alert/", json=[{"disposition": None, "uuid": str(alert_tree.node_uuid)}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.disposition is None
+
+    # Verify the history
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"] == "Analyst"
+    assert history.json()["items"][1]["field"] == "disposition"
+    assert history.json()["items"][1]["diff"]["old_value"] == "test"
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["snapshot"]["disposition"] is None
 
 
 def test_update_event_uuid(client_valid_access_token, db):
@@ -155,6 +175,16 @@ def test_update_event_uuid(client_valid_access_token, db):
     assert alert_tree.node.event_uuid == event.uuid
     assert alert_tree.node.version != initial_alert_version
 
+    # Verify the history
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "UPDATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert history.json()["items"][0]["field"] == "event_uuid"
+    assert history.json()["items"][0]["diff"]["old_value"] is None
+    assert history.json()["items"][0]["diff"]["new_value"] == str(event.uuid)
+    assert history.json()["items"][0]["snapshot"]["event_uuid"] == str(event.uuid)
+
     # By adding the alert to the event, you should be able to see the alert UUID in the event's
     # alert_uuids list even though it was not explicitly added.
     assert event.alert_uuids == [alert_tree.node_uuid]
@@ -168,6 +198,16 @@ def test_update_event_uuid(client_valid_access_token, db):
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.event is None
+
+    # Verify the history
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"] == "Analyst"
+    assert history.json()["items"][1]["field"] == "event_uuid"
+    assert history.json()["items"][1]["diff"]["old_value"] == str(event.uuid)
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["snapshot"]["event_uuid"] is None
 
 
 def test_update_owner(client_valid_access_token, db):
@@ -185,10 +225,30 @@ def test_update_owner(client_valid_access_token, db):
     assert alert_tree.node.owner.username == "johndoe"
     assert alert_tree.node.version != initial_alert_version
 
+    # Verify the history
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "UPDATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert history.json()["items"][0]["field"] == "owner"
+    assert history.json()["items"][0]["diff"]["old_value"] is None
+    assert history.json()["items"][0]["diff"]["new_value"] == "johndoe"
+    assert history.json()["items"][0]["snapshot"]["owner"]["username"] == "johndoe"
+
     # Set it back to None
     update = client_valid_access_token.patch("/api/alert/", json=[{"owner": None, "uuid": str(alert_tree.node_uuid)}])
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.owner is None
+
+    # Verify the history
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"] == "Analyst"
+    assert history.json()["items"][1]["field"] == "owner"
+    assert history.json()["items"][1]["diff"]["old_value"] == "johndoe"
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["snapshot"]["owner"] is None
 
 
 def test_update_queue(client_valid_access_token, db):
@@ -206,6 +266,16 @@ def test_update_queue(client_valid_access_token, db):
     assert alert_tree.node.queue.value == "test_queue2"
     assert alert_tree.node.version != initial_alert_version
 
+    # Verify the history
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "UPDATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert history.json()["items"][0]["field"] == "queue"
+    assert history.json()["items"][0]["diff"]["old_value"] == "test_queue"
+    assert history.json()["items"][0]["diff"]["new_value"] == "test_queue2"
+    assert history.json()["items"][0]["snapshot"]["queue"]["value"] == "test_queue2"
+
 
 @pytest.mark.parametrize(
     "key,value_lists,helper_create_func",
@@ -217,7 +287,7 @@ def test_update_queue(client_valid_access_token, db):
 )
 def test_update_valid_node_fields(client_valid_access_token, db, key, value_lists, helper_create_func):
     for value_list in value_lists:
-        alert_tree = helpers.create_alert(db=db)
+        alert_tree = helpers.create_alert(tags=["remove_me"], threat_actors=["remove_me"], threats=["remove_me"], db=db)
         initial_alert_version = alert_tree.node.version
 
         for value in value_list:
@@ -234,6 +304,19 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
         assert update.status_code == status.HTTP_204_NO_CONTENT
         assert len(getattr(alert_tree.node, key)) == len(set(value_list))
         assert alert_tree.node.version != initial_alert_version
+
+        # Verify the history
+        if value_list:
+            history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+            assert history.json()["total"] == 1
+            assert history.json()["items"][0]["action"] == "UPDATE"
+            assert history.json()["items"][0]["action_by"] == "Analyst"
+            assert history.json()["items"][0]["field"] == key
+            assert history.json()["items"][0]["diff"]["old_value"] is None
+            assert history.json()["items"][0]["diff"]["new_value"] is None
+            assert history.json()["items"][0]["diff"]["added_to_list"] == sorted(set(value_list))
+            assert history.json()["items"][0]["diff"]["removed_from_list"] == ["remove_me"]
+            assert len(history.json()["items"][0]["snapshot"][key]) == len(set(value_list))
 
 
 @pytest.mark.parametrize(
@@ -266,20 +349,32 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
+    # Verify the history
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "UPDATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert history.json()["items"][0]["field"] == key
+    assert history.json()["items"][0]["diff"]["old_value"] == initial_value
+
     if key == "event_time":
         assert alert_tree.node.event_time == parse("2022-01-01T00:00:00+00:00")
+        assert history.json()["items"][0]["diff"]["new_value"] == parse("2022-01-01T00:00:00+00:00").isoformat()
     else:
         assert getattr(alert_tree.node, key) == updated_value
+        assert history.json()["items"][0]["diff"]["new_value"] == updated_value
+    assert history.json()["items"][0]["snapshot"]["name"] == "Test Alert"
 
     assert alert_tree.node.version != initial_alert_version
 
 
-def test_update_multiple(client_valid_access_token, db):
+def test_update_multiple_alerts(client_valid_access_token, db):
     alert_tree1 = helpers.create_alert(db=db)
     initial_alert1_version = alert_tree1.node.version
 
     alert_tree2 = helpers.create_alert(db=db)
     initial_alert2_version = alert_tree2.node.version
+    initial_event_time = alert_tree2.node.event_time.isoformat()
 
     alert_tree3 = helpers.create_alert(db=db)
     initial_alert3_version = alert_tree3.node.version
@@ -305,3 +400,69 @@ def test_update_multiple(client_valid_access_token, db):
 
     assert alert_tree3.node.instructions == "updated_instructions"
     assert alert_tree3.node.version != initial_alert3_version
+
+    # Verify the history
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree1.node_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "UPDATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert history.json()["items"][0]["field"] == "description"
+    assert history.json()["items"][0]["diff"]["old_value"] is None
+    assert history.json()["items"][0]["diff"]["new_value"] == "updated_description"
+    assert history.json()["items"][0]["snapshot"]["name"] == "Test Alert"
+
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree2.node_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "UPDATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert history.json()["items"][0]["field"] == "event_time"
+    assert history.json()["items"][0]["diff"]["old_value"] == initial_event_time
+    assert history.json()["items"][0]["diff"]["new_value"] == parse("2022-01-01T00:00:00+00:00").isoformat()
+    assert history.json()["items"][0]["snapshot"]["name"] == "Test Alert"
+
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree3.node_uuid}/history")
+    assert history.json()["total"] == 1
+    assert history.json()["items"][0]["action"] == "UPDATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert history.json()["items"][0]["field"] == "instructions"
+    assert history.json()["items"][0]["diff"]["old_value"] is None
+    assert history.json()["items"][0]["diff"]["new_value"] == "updated_instructions"
+    assert history.json()["items"][0]["snapshot"]["name"] == "Test Alert"
+
+
+def test_update_multiple_fields(client_valid_access_token, db):
+    alert_tree = helpers.create_alert(db=db)
+    initial_alert_version = alert_tree.node.version
+
+    # Update it
+    update = client_valid_access_token.patch(
+        "/api/alert/",
+        json=[
+            {
+                "description": "updated_description",
+                "instructions": "updated_instructions",
+                "uuid": str(alert_tree.node_uuid),
+            }
+        ],
+    )
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert alert_tree.node.version != initial_alert_version
+
+    # Verify the history
+    history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    assert history.json()["total"] == 2
+    assert history.json()["items"][0]["action"] == "UPDATE"
+    assert history.json()["items"][0]["action_by"] == "Analyst"
+    assert history.json()["items"][0]["field"] == "description"
+    assert history.json()["items"][0]["diff"]["old_value"] is None
+    assert history.json()["items"][0]["diff"]["new_value"] == "updated_description"
+    assert history.json()["items"][0]["snapshot"]["description"] == "updated_description"
+    assert history.json()["items"][0]["snapshot"]["instructions"] == "updated_instructions"
+
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"] == "Analyst"
+    assert history.json()["items"][1]["field"] == "instructions"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] == "updated_instructions"
+    assert history.json()["items"][1]["snapshot"]["description"] == "updated_description"
+    assert history.json()["items"][1]["snapshot"]["instructions"] == "updated_instructions"

@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 9915657d0f60
+Revision ID: ba73b5b3708c
 Revises: 
-Create Date: 2022-01-10 16:57:28.837953
+Create Date: 2022-02-07 20:13:52.511694
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '9915657d0f60'
+revision = 'ba73b5b3708c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,6 +26,18 @@ def upgrade() -> None:
     sa.UniqueConstraint('rank')
     )
     op.create_index(op.f('ix_alert_disposition_value'), 'alert_disposition', ['value'], unique=True)
+    op.create_table('alert_history',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('action', sa.String(), nullable=False),
+    sa.Column('action_by', sa.String(), nullable=False),
+    sa.Column('action_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
+    sa.Column('record_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('field', sa.String(), nullable=True),
+    sa.Column('diff', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('snapshot', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_alert_history_record_uuid'), 'alert_history', ['record_uuid'], unique=False)
     op.create_table('alert_queue',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -66,6 +78,18 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_analysis_module_type_value'), 'analysis_module_type', ['value'], unique=False)
     op.create_index(op.f('ix_analysis_module_type_version'), 'analysis_module_type', ['version'], unique=False)
+    op.create_table('event_history',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('action', sa.String(), nullable=False),
+    sa.Column('action_by', sa.String(), nullable=False),
+    sa.Column('action_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
+    sa.Column('record_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('field', sa.String(), nullable=True),
+    sa.Column('diff', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('snapshot', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_event_history_record_uuid'), 'event_history', ['record_uuid'], unique=False)
     op.create_table('event_prevention_tool',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -135,13 +159,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_node_directive_value'), 'node_directive', ['value'], unique=True)
-    op.create_table('node_history_action',
-    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
-    sa.Column('description', sa.String(), nullable=True),
-    sa.Column('value', sa.String(), nullable=False),
-    sa.PrimaryKeyConstraint('uuid')
-    )
-    op.create_index(op.f('ix_node_history_action_value'), 'node_history_action', ['value'], unique=True)
     op.create_table('node_tag',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -170,6 +187,18 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_node_threat_type_value'), 'node_threat_type', ['value'], unique=True)
+    op.create_table('observable_history',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('action', sa.String(), nullable=False),
+    sa.Column('action_by', sa.String(), nullable=False),
+    sa.Column('action_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
+    sa.Column('record_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('field', sa.String(), nullable=True),
+    sa.Column('diff', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('snapshot', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_observable_history_record_uuid'), 'observable_history', ['record_uuid'], unique=False)
     op.create_table('observable_type',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -177,6 +206,18 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_observable_type_value'), 'observable_type', ['value'], unique=True)
+    op.create_table('user_history',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('action', sa.String(), nullable=False),
+    sa.Column('action_by', sa.String(), nullable=False),
+    sa.Column('action_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
+    sa.Column('record_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('field', sa.String(), nullable=True),
+    sa.Column('diff', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('snapshot', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_user_history_record_uuid'), 'user_history', ['record_uuid'], unique=False)
     op.create_table('user_role',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -341,7 +382,14 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
     sa.PrimaryKeyConstraint('uuid')
     )
+    op.create_index(op.f('ix_event_alert_time'), 'event', ['alert_time'], unique=False)
+    op.create_index(op.f('ix_event_contain_time'), 'event', ['contain_time'], unique=False)
+    op.create_index(op.f('ix_event_creation_time'), 'event', ['creation_time'], unique=False)
+    op.create_index(op.f('ix_event_disposition_time'), 'event', ['disposition_time'], unique=False)
+    op.create_index(op.f('ix_event_event_time'), 'event', ['event_time'], unique=False)
+    op.create_index(op.f('ix_event_ownership_time'), 'event', ['ownership_time'], unique=False)
     op.create_index(op.f('ix_event_queue_uuid'), 'event', ['queue_uuid'], unique=False)
+    op.create_index(op.f('ix_event_remediation_time'), 'event', ['remediation_time'], unique=False)
     op.create_table('node_comment',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('insert_time', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
@@ -355,19 +403,6 @@ def upgrade() -> None:
     )
     op.create_index('comment_value_trgm', 'node_comment', ['value'], unique=False, postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.create_index(op.f('ix_node_comment_node_uuid'), 'node_comment', ['node_uuid'], unique=False)
-    op.create_table('node_history',
-    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
-    sa.Column('action_uuid', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('action_user_uuid', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('after', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('before', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('timestamp', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
-    sa.ForeignKeyConstraint(['action_user_uuid'], ['user.uuid'], ),
-    sa.ForeignKeyConstraint(['action_uuid'], ['node_history_action.uuid'], ),
-    sa.ForeignKeyConstraint(['node_uuid'], ['node.uuid'], ),
-    sa.PrimaryKeyConstraint('uuid')
-    )
     op.create_table('user_role_mapping',
     sa.Column('user_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('user_role_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -472,11 +507,17 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_user_role_mapping_user_uuid'), table_name='user_role_mapping')
     op.drop_index(op.f('ix_user_role_mapping_user_role_uuid'), table_name='user_role_mapping')
     op.drop_table('user_role_mapping')
-    op.drop_table('node_history')
     op.drop_index(op.f('ix_node_comment_node_uuid'), table_name='node_comment')
     op.drop_index('comment_value_trgm', table_name='node_comment', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_table('node_comment')
+    op.drop_index(op.f('ix_event_remediation_time'), table_name='event')
     op.drop_index(op.f('ix_event_queue_uuid'), table_name='event')
+    op.drop_index(op.f('ix_event_ownership_time'), table_name='event')
+    op.drop_index(op.f('ix_event_event_time'), table_name='event')
+    op.drop_index(op.f('ix_event_disposition_time'), table_name='event')
+    op.drop_index(op.f('ix_event_creation_time'), table_name='event')
+    op.drop_index(op.f('ix_event_contain_time'), table_name='event')
+    op.drop_index(op.f('ix_event_alert_time'), table_name='event')
     op.drop_table('event')
     op.drop_table('user')
     op.drop_index('type_value', table_name='observable')
@@ -513,8 +554,12 @@ def downgrade() -> None:
     op.drop_table('analysis')
     op.drop_index(op.f('ix_user_role_value'), table_name='user_role')
     op.drop_table('user_role')
+    op.drop_index(op.f('ix_user_history_record_uuid'), table_name='user_history')
+    op.drop_table('user_history')
     op.drop_index(op.f('ix_observable_type_value'), table_name='observable_type')
     op.drop_table('observable_type')
+    op.drop_index(op.f('ix_observable_history_record_uuid'), table_name='observable_history')
+    op.drop_table('observable_history')
     op.drop_index(op.f('ix_node_threat_type_value'), table_name='node_threat_type')
     op.drop_table('node_threat_type')
     op.drop_index(op.f('ix_node_threat_actor_value'), table_name='node_threat_actor')
@@ -523,8 +568,6 @@ def downgrade() -> None:
     op.drop_table('node_threat')
     op.drop_index(op.f('ix_node_tag_value'), table_name='node_tag')
     op.drop_table('node_tag')
-    op.drop_index(op.f('ix_node_history_action_value'), table_name='node_history_action')
-    op.drop_table('node_history_action')
     op.drop_index(op.f('ix_node_directive_value'), table_name='node_directive')
     op.drop_table('node_directive')
     op.drop_table('node')
@@ -544,6 +587,8 @@ def downgrade() -> None:
     op.drop_table('event_queue')
     op.drop_index(op.f('ix_event_prevention_tool_value'), table_name='event_prevention_tool')
     op.drop_table('event_prevention_tool')
+    op.drop_index(op.f('ix_event_history_record_uuid'), table_name='event_history')
+    op.drop_table('event_history')
     op.drop_index(op.f('ix_analysis_module_type_version'), table_name='analysis_module_type')
     op.drop_index(op.f('ix_analysis_module_type_value'), table_name='analysis_module_type')
     op.drop_table('analysis_module_type')
@@ -555,6 +600,8 @@ def downgrade() -> None:
     op.drop_table('alert_tool')
     op.drop_index(op.f('ix_alert_queue_value'), table_name='alert_queue')
     op.drop_table('alert_queue')
+    op.drop_index(op.f('ix_alert_history_record_uuid'), table_name='alert_history')
+    op.drop_table('alert_history')
     op.drop_index(op.f('ix_alert_disposition_value'), table_name='alert_disposition')
     op.drop_table('alert_disposition')
     # ### end Alembic commands ###

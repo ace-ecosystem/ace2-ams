@@ -8,7 +8,6 @@ import myNock from "@unit/services/api/nock";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
 import { useAlertStore } from "@/stores/alert";
 import { useAlertTableStore } from "@/stores/alertTable";
-import { useAuthStore } from "@/stores/auth";
 import { useModalStore } from "@/stores/modal";
 import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
@@ -25,7 +24,6 @@ function factory(options?: TestingOptions) {
   const alertDispositionStore = useAlertDispositionStore();
   const alertStore = useAlertStore();
   const alertTableStore = useAlertTableStore();
-  const authStore = useAuthStore();
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
 
@@ -33,7 +31,6 @@ function factory(options?: TestingOptions) {
     alertDispositionStore,
     alertStore,
     alertTableStore,
-    authStore,
     modalStore,
     selectedAlertStore,
     wrapper,
@@ -98,14 +95,10 @@ describe("DispositionModal.vue", () => {
   it("correctly computes commentData", () => {
     const { wrapper } = factory();
 
-    // Set the selected user
-    wrapper.vm.authStore.user = { username: "Alice" };
-
     // Set the new comment value
     wrapper.vm.dispositionComment = "test comment";
 
     expect(wrapper.vm.commentData).toEqual({
-      user: "Alice",
       value: "test comment",
     });
   });
@@ -140,9 +133,6 @@ describe("DispositionModal.vue", () => {
     // Set the selected alert
     wrapper.vm.selectedAlertStore.selected = ["1", "2"];
 
-    // Set the selected user
-    wrapper.vm.authStore.user = { username: "Alice" };
-
     // Set the new disposition / comment values
     wrapper.vm.newDisposition = { value: "low disposition", rank: 1 };
     wrapper.vm.dispositionComment = "test comment";
@@ -158,12 +148,10 @@ describe("DispositionModal.vue", () => {
     myNock
       .post("/node/comment/", [
         {
-          user: "Alice",
           value: "test comment",
           node_uuid: "1",
         },
         {
-          user: "Alice",
           value: "test comment",
           node_uuid: "2",
         },
@@ -187,9 +175,6 @@ describe("DispositionModal.vue", () => {
 
     // Set the selected alert
     wrapper.vm.selectedAlertStore.selected = ["1", "2"];
-
-    // Set the selected user
-    wrapper.vm.authStore.user = { username: "Alice" };
 
     // Set the new disposition / comment values
     wrapper.vm.newDisposition = { value: "low disposition", rank: 1 };
@@ -220,9 +205,6 @@ describe("DispositionModal.vue", () => {
 
     // Set the selected alert
     wrapper.vm.selectedAlertStore.selected = ["1", "2"];
-
-    // Set the selected user
-    wrapper.vm.authStore.user = { username: "Alice" };
 
     // Set the new disposition / comment values
     wrapper.vm.newDisposition = { value: "low disposition", rank: 1 };
@@ -257,9 +239,6 @@ describe("DispositionModal.vue", () => {
     // Set the selected alert
     wrapper.vm.selectedAlertStore.selected = ["1", "2"];
 
-    // Set the selected user
-    wrapper.vm.authStore.user = { username: "Alice" };
-
     // Set the new disposition / comment values
     wrapper.vm.newDisposition = { value: "low disposition", rank: 1 };
     wrapper.vm.dispositionComment = "test comment";
@@ -276,12 +255,10 @@ describe("DispositionModal.vue", () => {
     myNock
       .post("/node/comment/", [
         {
-          user: "Alice",
           value: "test comment",
           node_uuid: "1",
         },
         {
-          user: "Alice",
           value: "test comment",
           node_uuid: "2",
         },

@@ -597,7 +597,7 @@ describe("Manage Alerts Comment", () => {
 });
 
 // Tags will not change sort
-describe("Manage Alerts Tags", () => {
+describe.only("Manage Alerts Tags", () => {
   beforeEach(() => {
     cy.resetDatabase();
     cy.login();
@@ -624,9 +624,10 @@ describe("Manage Alerts Tags", () => {
     });
   });
 
-  it("will add given tags to an alert via the tag modal", () => {
+  it.only("will add given tags to an alert via the tag modal", () => {
     cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTags");
     cy.intercept("POST", "/api/node/tag").as("addTags");
+    cy.intercept("PATCH", "/api/alert/").as("updateAlert");
 
     // Get first visible alert checkbox
     cy.get(".p-checkbox-box").eq(1).click();
@@ -644,6 +645,7 @@ describe("Manage Alerts Tags", () => {
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(".p-dialog-content").should("not.exist");
     cy.wait("@addTags").its("state").should("eq", "Complete");
+    cy.wait("@updateAlert").its("state").should("eq", "Complete");
     // Check for the tags after adding
     cy.get("[data-cy='tags']")
       .eq(0)

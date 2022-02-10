@@ -21,7 +21,6 @@ from api.routes.event_vector import router as event_vector_router
 from api.routes.node import router as node_router
 from api.routes.node_comment import router as node_comment_router
 from api.routes.node_directive import router as node_directive_router
-from api.routes.node_history_action import router as node_history_action_router
 from api.routes.node_tag import router as node_tag_router
 from api.routes.node_threat import router as node_threat_router
 from api.routes.node_threat_actor import router as node_threat_actor_router
@@ -58,7 +57,6 @@ router.include_router(event_vector_router)
 router.include_router(node_router)
 router.include_router(node_comment_router)
 router.include_router(node_directive_router)
-router.include_router(node_history_action_router)
 router.include_router(node_tag_router)
 router.include_router(node_threat_router)
 router.include_router(node_threat_actor_router)

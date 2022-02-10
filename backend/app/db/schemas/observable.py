@@ -11,8 +11,14 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from api.models.observable import ObservableNodeTreeRead
+from db.database import Base
 from db.schemas.helpers import utcnow
+from db.schemas.history import History
 from db.schemas.node import Node
+
+
+class ObservableHistory(Base, History):
+    __tablename__ = "observable_history"
 
 
 class Observable(Node):
