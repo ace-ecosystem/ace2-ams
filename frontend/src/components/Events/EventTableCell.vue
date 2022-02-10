@@ -63,8 +63,7 @@
   import Button from "primevue/button";
 
   import { useEventTableStore } from "@/stores/eventTable";
-  const eventTableStore = useEventTableStore()
-  
+  const eventTableStore = useEventTableStore();
 
   const props = defineProps({
     data: { type: Object, required: true },
@@ -81,7 +80,7 @@
   };
 
   const requestReload = () => {
-      eventTableStore.requestReload = true;
+    eventTableStore.requestReload = true;
   };
 
   const getEventLink = (uuid) => {
