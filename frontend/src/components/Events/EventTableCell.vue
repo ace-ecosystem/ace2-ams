@@ -56,14 +56,17 @@
 
 <script setup>
   import { defineProps } from "vue";
+  import Button from "primevue/button";
+
   import NodeTagVue from "../Node/NodeTag.vue";
   import NodeComment from "../Node/NodeComment.vue";
   import EditEventModal from "../Modals/EditEventModal.vue";
 
-  import Button from "primevue/button";
-
+  import { useModalStore } from "@/stores/modal";
   import { useEventTableStore } from "@/stores/eventTable";
+
   const eventTableStore = useEventTableStore();
+  const modalStore = useModalStore();
 
   const props = defineProps({
     data: { type: Object, required: true },
@@ -79,10 +82,6 @@
     return "None";
   };
 
-  const requestReload = () => {
-    eventTableStore.requestReload = true;
-  };
-
   const getEventLink = (uuid) => {
     return "/event/" + uuid;
   };
@@ -91,9 +90,10 @@
     return arr.join(", ");
   };
 
-  import { useModalStore } from "@/stores/modal";
+  const requestReload = () => {
+    eventTableStore.requestReload = true;
+  };
 
-  const modalStore = useModalStore();
   const open = (name) => {
     modalStore.open(name);
   };
