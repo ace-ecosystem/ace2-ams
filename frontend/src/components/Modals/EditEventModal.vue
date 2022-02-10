@@ -11,15 +11,10 @@
     </div>
     <div v-if="isLoading">Loading...</div>
     <div v-else class="p-grid p-fluid p-formgrid p-grid">
-      <div
-        v-for="field of fieldOptions"
-        :key="field.name"
-        class="field grid"
-        style="width: 100%"
-      >
-        <label for="field.name" class="col-fixed" style="width: 30%">{{
-          field.label
-        }}</label>
+      <div v-for="field of fieldOptions" :key="field.name" class="field grid">
+        <label for="field.name" class="col-fixed" style="width: 30%"
+          ><span style="font-weight: bold">{{ field.label }}</span></label
+        >
         <div class="col">
           <NodeThreatSelector
             v-if="field.name == 'threats'"

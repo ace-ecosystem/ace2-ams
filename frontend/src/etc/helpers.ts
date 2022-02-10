@@ -1,3 +1,4 @@
+import { useEventRemediationStore } from './../stores/eventRemediation';
 import {
   alertFilterParams,
   alertRead,
@@ -67,6 +68,7 @@ export async function populateCommonStores(): Promise<void> {
 
 export async function populateEventStores(): Promise<void> {
   const eventPreventionToolStore = useEventPreventionToolStore();
+  const eventRemediationStore = useEventRemediationStore();
   const eventRiskLevelStore = useEventRiskLevelStore();
   const eventStatusStore = useEventStatusStore();
   const eventTypeStore = useEventTypeStore();
@@ -79,6 +81,7 @@ export async function populateEventStores(): Promise<void> {
   await Promise.all([
     eventPreventionToolStore.readAll(),
     eventRiskLevelStore.readAll(),
+    eventRemediationStore.readAll(),
     eventStatusStore.readAll(),
     eventTypeStore.readAll(),
     nodeThreatActorStore.readAll(),

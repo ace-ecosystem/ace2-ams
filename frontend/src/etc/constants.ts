@@ -1,3 +1,4 @@
+import { eventRemediationRead } from "./../models/eventRemediation";
 import { filterOption } from "@/models/base";
 import { eventPreventionToolRead } from "@/models/eventPreventionTool";
 import { eventVectorRead } from "@/models/eventVector";
@@ -12,6 +13,7 @@ import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";
 import { useEventPreventionToolStore } from "@/stores/eventPreventionTool";
 import { useEventQueueStore } from "@/stores/eventQueue";
+import { useEventRemediationStore } from "@/stores/eventRemediation";
 import { useEventRiskLevelStore } from "@/stores/eventRiskLevel";
 import { useEventSourceStore } from "@/stores/eventSource";
 import { useEventStatusStore } from "@/stores/eventStatus";
@@ -284,13 +286,20 @@ export const alertRangeFilters = {
 export const eventPropertyTypes: Record<string, string> = {
   CREATED_AFTER_PROPERTY: "createdAfter",
   CREATED_BEFORE_PROPERTY: "createdBefore",
-  DISPOSITION_PROPERTY: "disposition",
+  CONTAIN_TIME_PROPERTY: "containTime",
+  EVENT_TIME_PROPERTY: "eventTime",
+  ALERT_TIME_PROPERTY: "alertTime",
+  OWNERSHIP_TIME_PROPERTY: "ownershipTime",
+  DISPOSITION_TIME_PROPERTY: "dispositionTime",
+  REMEDIATION_TIME_PROPERTY: "remediationTime",
+  DISPOSITION_PROPERTY_PROPERTY: "disposition",
   NAME_PROPERTY: "name",
   OBSERVABLE_TYPES_PROPERTY: "observableTypes",
   OBSERVABLE_VALUE_PROPERTY: "observableValue",
   OWNER_PROPERTY: "owner",
   PREVENTION_TOOLS_PROPERTY: "preventionTools",
   QUEUE_PROPERTY: "queue",
+  REMEDIATIONS_PROPERTY: "remediations",
   RISK_LEVEL_PROPERTY: "riskLevel",
   SOURCE_PROPERTY: "source",
   STATUS_PROPERTY: "status",
@@ -299,6 +308,90 @@ export const eventPropertyTypes: Record<string, string> = {
   THREATS_PROPERTY: "threats",
   TYPE_PROPERTY: "type",
   VECTORS_PROPERTY: "vectors",
+};
+
+const eventEventTimeProperty = {
+  name: eventPropertyTypes.EVENT_TIME_PROPERTY,
+  label: "Event TIme",
+  type: filterTypes.DATE,
+  stringRepr: (value: Date) => {
+    return value.toISOString();
+  },
+  parseStringRepr: (valueString: string) => {
+    return new Date(valueString);
+  },
+};
+const eventAlertTimeProperty = {
+  name: eventPropertyTypes.ALERT_TIME_PROPERTY,
+  label: "Alert Time",
+  type: filterTypes.DATE,
+  stringRepr: (value: Date) => {
+    return value.toISOString();
+  },
+  parseStringRepr: (valueString: string) => {
+    return new Date(valueString);
+  },
+};
+const eventOwnershipTimeProperty = {
+  name: eventPropertyTypes.OWNERSHIP_TIME_PROPERTY,
+  label: "Ownership Time",
+  type: filterTypes.DATE,
+  stringRepr: (value: Date) => {
+    return value.toISOString();
+  },
+  parseStringRepr: (valueString: string) => {
+    return new Date(valueString);
+  },
+};
+const eventDispositionTimeProperty = {
+  name: eventPropertyTypes.DISPOSITION_TIME_PROPERTY,
+  label: "Disposition Time",
+  type: filterTypes.DATE,
+  stringRepr: (value: Date) => {
+    return value.toISOString();
+  },
+  parseStringRepr: (valueString: string) => {
+    return new Date(valueString);
+  },
+};
+const eventContainTimeProperty = {
+  name: eventPropertyTypes.CONTAIN_TIME_PROPERTY,
+  label: "Contain Time",
+  type: filterTypes.DATE,
+  stringRepr: (value: Date) => {
+    return value.toISOString();
+  },
+  parseStringRepr: (valueString: string) => {
+    return new Date(valueString);
+  },
+};
+const eventRemediationTimeProperty = {
+  name: eventPropertyTypes.REMEDIATION_TIME_PROPERTY,
+  label: "Remediation Time",
+  type: filterTypes.DATE,
+  stringRepr: (value: Date) => {
+    return value.toISOString();
+  },
+  parseStringRepr: (valueString: string) => {
+    return new Date(valueString);
+  },
+};
+
+const eventRemediationProperty = {
+  name: eventPropertyTypes.REMEDIATIONS_PROPERTY,
+  label: "Remediation",
+  type: filterTypes.MULTISELECT,
+  store: useEventRemediationStore,
+  stringRepr: (value: eventRemediationRead[]) => {
+    return value
+      .map(function (elem) {
+        return elem.value;
+      })
+      .join();
+  },
+  parseStringRepr: (valueString: string) => {
+    return valueString.split(",");
+  },
 };
 
 const eventNameProperty: filterOption = {
@@ -410,6 +503,7 @@ const eventVectorsProperty: filterOption = {
 export const eventEditableProperties: readonly filterOption[] = [
   eventNameProperty,
   eventOwnerProperty,
+  eventRemediationProperty,
   eventPreventionToolsProperty,
   eventRiskLevelProperty,
   eventStatusProperty,
@@ -417,6 +511,12 @@ export const eventEditableProperties: readonly filterOption[] = [
   eventThreatsProperty,
   eventTypeProperty,
   eventVectorsProperty,
+  eventEventTimeProperty,
+  eventAlertTimeProperty,
+  eventOwnershipTimeProperty,
+  eventDispositionTimeProperty,
+  eventContainTimeProperty,
+  eventRemediationTimeProperty,
 ];
 
 export const eventFilters: readonly filterOption[] = [
