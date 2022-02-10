@@ -1,6 +1,6 @@
 ]
-<!-- AssignModal.vue -->
-<!-- 'Assign' alert action modal -->
+<!-- EditEventModal.vue -->
+<!-- Edit various configured properties of an event -->
 
 <template>
   <BaseModal :name="name" header="Edit Event" :style="{ width: '70vw' }">
@@ -46,38 +46,44 @@
 <script setup>
   import {
     computed,
-    defineProps,
-    ref,
     defineEmits,
-    watch,
+    defineProps,
     onMounted,
+    ref,
+    watch,
   } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
 
   import BaseModal from "@/components/Modals/BaseModal";
-
-  import { useModalStore } from "@/stores/modal";
-  import { useEventStore } from "@/stores/event";
-  import { eventEditableProperties } from "@/etc/constants";
-  import { populateEventStores } from "@/etc/helpers";
-
-  const eventStore = useEventStore();
-
   import NodePropertyInput from "../Node/NodePropertyInput.vue";
+  import NodeThreatSelector from "../Node/NodeThreatSelector.vue";
 
   import { Event } from "@/services/api/event";
+  import { useEventStore } from "@/stores/event";
+  import { useModalStore } from "@/stores/modal";
+  import { eventEditableProperties } from "@/etc/constants";
+  import { isObject, populateEventStores } from "@/etc/helpers";
+
+  const modalStore = useModalStore();
+  const eventStore = useEventStore();
 
   const props = defineProps({
     name: { type: String, required: true },
     eventUuid: { type: String, required: true },
   });
 
-  const fieldOptions = eventEditableProperties;
-  const fieldOptionObjects = ref({});
+  const emit = defineEmits(["requestReload"]);
 
+  // Loaded directly from /etc/constants
+  const fieldOptions = eventEditableProperties;
+
+  const error = ref(null);
+  const event = ref(null);
+  const fieldOptionObjects = ref({});
   const formFields = ref({});
+  const isLoading = ref(false);
 
   onMounted(() => {
     for (const option of fieldOptions) {
@@ -89,15 +95,6 @@
     }
   });
 
-  const isLoading = ref(false);
-
-  const emit = defineEmits(["requestReload"]);
-
-  const modalStore = useModalStore();
-
-  const error = ref(null);
-  const event = ref(null);
-
   // Load event data when modal becomes active
   watch(modalStore, async () => {
     if (modalStore.active === props.name) {
@@ -106,6 +103,16 @@
       await resetForm();
       isLoading.value = false;
     }
+  });
+
+  const updateData = computed(() => {
+    const data = { uuid: props.eventUuid };
+    for (const field in formFields.value) {
+      if (formFields.value[field].propertyValue != event.value[field]) {
+        data[field] = formatValue(field, formFields.value[field].propertyValue);
+      }
+    }
+    return [data];
   });
 
   const resetForm = async () => {
@@ -135,8 +142,6 @@
     }
   };
 
-  import { isObject } from "@/etc/helpers";
-  import NodeThreatSelector from "../Node/NodeThreatSelector.vue";
   function formatValue(field, value) {
     if (fieldOptionObjects.value[field].valueProperty && isObject(value)) {
       return value[fieldOptionObjects.value[field].valueProperty];
@@ -147,19 +152,8 @@
       }
       return value.map((x) => x[valueProperty]);
     }
-
     return value;
   }
-
-  const updateData = computed(() => {
-    const data = { uuid: props.eventUuid };
-    for (const field in formFields.value) {
-      if (formFields.value[field].propertyValue != event.value[field]) {
-        data[field] = formatValue(field, formFields.value[field].propertyValue);
-      }
-    }
-    return [data];
-  });
 
   const handleError = () => {
     error.value = null;
