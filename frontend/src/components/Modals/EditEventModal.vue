@@ -50,6 +50,7 @@
     defineProps,
     onMounted,
     ref,
+    inject,
     watch,
   } from "vue";
 
@@ -63,10 +64,10 @@
   import { Event } from "@/services/api/event";
   import { useEventStore } from "@/stores/event";
   import { useModalStore } from "@/stores/modal";
-  import { eventEditableProperties } from "@/etc/constants";
   import { isObject, populateEventStores } from "@/etc/helpers";
 
-  const modalStore = useModalStore();
+  const modalStore = \\
+  seModalStore();
   const eventStore = useEventStore();
 
   const props = defineProps({
@@ -76,8 +77,7 @@
 
   const emit = defineEmits(["requestReload"]);
 
-  // Loaded directly from /etc/constants
-  const fieldOptions = eventEditableProperties;
+  const fieldOptions = inject("availableEditFields");
 
   const error = ref(null);
   const event = ref(null);
@@ -87,7 +87,9 @@
 
   onMounted(() => {
     for (const option of fieldOptions) {
+      // Create a lookup by field/option name of all the fieldOptionObjects
       fieldOptionObjects.value[option.name] = option;
+      // Set up all the form field objects (to be used in NodePropertyInput)
       formFields.value[option.name] = {
         propertyType: option.name,
         propertyValue: null,
@@ -95,32 +97,39 @@
     }
   });
 
-  // Load event data when modal becomes active
+  // Load event data only when modal becomes active
   watch(modalStore, async () => {
     if (modalStore.active === props.name) {
       isLoading.value = true;
-      await populateEventStores();
-      await resetForm();
+      try {
+        await populateEventStores();
+        await resetForm();
+      } catch (err) {
+        error.value = err.message;
+      }
       isLoading.value = false;
     }
   });
 
   const updateData = computed(() => {
+    // All updateData will have the event uuid
     const data = { uuid: props.eventUuid };
+    // Add the formatted valueds for all fields in the form
     for (const field in formFields.value) {
-      if (formFields.value[field].propertyValue != event.value[field]) {
-        data[field] = formatValue(field, formFields.value[field].propertyValue);
-      }
+      data[field] = formatValue(field, formFields.value[field].propertyValue);
     }
     return [data];
   });
 
   const resetForm = async () => {
     event.value = await Event.read(props.eventUuid);
+    if (event.value) {
     fillFormFields();
+    }
   };
 
   const fillFormFields = () => {
+    // Fill in form field values with data from event
     for (const field in formFields.value) {
       formFields.value[field].propertyValue =
         event.value[formFields.value[field].propertyType];
@@ -135,6 +144,7 @@
     } catch (err) {
       error.value = err.message;
     }
+
     isLoading.value = false;
     if (!error.value) {
       close();
@@ -143,8 +153,12 @@
   };
 
   function formatValue(field, value) {
+    // If there is a 'valueProperty' available for the field, and the field value
+    // Is an object, use that property as a value
     if (fieldOptionObjects.value[field].valueProperty && isObject(value)) {
       return value[fieldOptionObjects.value[field].valueProperty];
+      // If the field value is an array, try to build a list of strings using either
+      // the valueProperty (if available), or 'value' as the valueProperty as default
     } else if (Array.isArray(value)) {
       let valueProperty = "value";
       if (fieldOptionObjects.value[field].valueProperty) {
@@ -152,6 +166,7 @@
       }
       return value.map((x) => x[valueProperty]);
     }
+    // Otherwise return the plain value
     return value;
   }
 
