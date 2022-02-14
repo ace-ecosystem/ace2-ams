@@ -84,6 +84,22 @@ class EventCreate(NodeCreate, EventBase):
 class EventRead(NodeRead, EventBase):
     alert_uuids: List[UUID4] = Field(default_factory=list, description="A list of alert UUIDs contained in the event")
 
+    auto_alert_time: Optional[datetime] = Field(
+        description="The automatically calculated time of the earliest insert time from the alerts in the event"
+    )
+
+    auto_disposition_time: Optional[datetime] = Field(
+        description="The automatically calculated earliest time one of the alerts in the event was dispositioned"
+    )
+
+    auto_event_time: Optional[datetime] = Field(
+        description="The automatically calculated time of the earliest event time from the alerts in the event"
+    )
+
+    auto_ownership_time: Optional[datetime] = Field(
+        description="The automatically calculated earliest time an analyst took ownership of one of the alerts"
+    )
+
     comments: List[NodeCommentRead] = Field(description="A list of comments added to the event")
 
     creation_time: datetime = Field(description="The time the event was created")
