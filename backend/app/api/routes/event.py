@@ -14,7 +14,7 @@ from api.routes.node import create_node, update_node
 from core.auth import validate_access_token
 from db import crud
 from db.database import get_db
-from db.schemas.alert import Alert
+from db.schemas.alert import Alert, AlertHistory
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.event import Event, EventHistory
 from db.schemas.event_prevention_tool import EventPreventionTool
@@ -96,7 +96,7 @@ def create_event(
     # Add an entry to the history table
     crud.record_create_history(
         history_table=EventHistory,
-        action_by=claims["full_name"],
+        action_by=crud.read_user_by_username(username=claims["sub"], db=db),
         record_read_model=EventRead,
         record_table=Event,
         record_uuid=new_event.uuid,
@@ -179,7 +179,7 @@ def get_all_events(
         alert_time_before_query = (
             select(Event)
             .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-            .where(Alert.insert_time < alert_time_before)
+            .where(or_(Event.alert_time < alert_time_before, Alert.insert_time < alert_time_before))
         )
         query = _join_as_subquery(query, alert_time_before_query)
 
@@ -214,7 +214,14 @@ def get_all_events(
         disposition_time_after_query = (
             select(Event)
             .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-            .where(Alert.disposition_time > disposition_time_after)
+            .where(
+                or_(
+                    Event.disposition_time > disposition_time_after,
+                    Alert.history.any(
+                        and_(AlertHistory.field == "disposition", AlertHistory.action_time > disposition_time_after)
+                    ),
+                )
+            )
         )
         query = _join_as_subquery(query, disposition_time_after_query)
 
@@ -222,7 +229,14 @@ def get_all_events(
         disposition_time_before_query = (
             select(Event)
             .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-            .where(Alert.disposition_time < disposition_time_before)
+            .where(
+                or_(
+                    Event.disposition_time < disposition_time_before,
+                    Alert.history.any(
+                        and_(AlertHistory.field == "disposition", AlertHistory.action_time < disposition_time_before)
+                    ),
+                )
+            )
         )
         query = _join_as_subquery(query, disposition_time_before_query)
 
@@ -594,7 +608,7 @@ def update_events(
         # Add the entries to the history table
         crud.record_update_histories(
             history_table=EventHistory,
-            action_by=claims["full_name"],
+            action_by=crud.read_user_by_username(username=claims["sub"], db=db),
             record_read_model=EventRead,
             record_table=Event,
             record_uuid=event.uuid,
