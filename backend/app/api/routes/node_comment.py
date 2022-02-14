@@ -51,7 +51,7 @@ def create_node_comments(
         # Even though this is creating a comment, we treat it as though it is
         # modifying the node for history tracking purposes.
         diff = crud.Diff(field="comments", added_to_list=[node_comment.value])
-        crud.record_comment_history(record_node=db_node, action_by=claims["full_name"], diff=diff, db=db)
+        crud.record_comment_history(record_node=db_node, action_by=new_comment.user, diff=diff, db=db)
 
         response.headers["Content-Location"] = request.url_for("get_node_comment", uuid=new_comment.uuid)
 
@@ -100,7 +100,9 @@ def update_node_comment(
     crud.commit(db)
 
     # Add an entry to the correct history table based on the node_type.
-    crud.record_comment_history(record_node=db_node, action_by=claims["full_name"], diff=diff, db=db)
+    crud.record_comment_history(
+        record_node=db_node, action_by=crud.read_user_by_username(username=claims["sub"], db=db), diff=diff, db=db
+    )
 
     response.headers["Content-Location"] = request.url_for("get_node_comment", uuid=uuid)
 
@@ -119,7 +121,12 @@ def delete_node_comment(uuid: UUID, db: Session = Depends(get_db), claims: dict 
 
     # Add an entry to the correct history table based on the node_type.
     diff = crud.Diff(field="comments", removed_from_list=[db_node_comment.value])
-    crud.record_comment_history(record_node=db_node_comment.node, action_by=claims["full_name"], diff=diff, db=db)
+    crud.record_comment_history(
+        record_node=db_node_comment.node,
+        action_by=crud.read_user_by_username(username=claims["sub"], db=db),
+        diff=diff,
+        db=db,
+    )
 
     # Delete the comment
     crud.delete(uuid=uuid, db_table=NodeComment, db=db)
