@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from db.database import engine, get_db
 from main import app
+from tests import helpers
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -20,6 +21,11 @@ def apply_migrations():
 
     alembic.command.downgrade(config, "base")
     alembic.command.upgrade(config, "head")
+
+    # Add the analyst user so API calls that create history entries have a valid user to link to.
+    session_db = next(get_db())
+    helpers.create_user(username="analyst", db=session_db)
+
     yield
     alembic.command.downgrade(config, "base")
 
