@@ -80,7 +80,7 @@ def read_history_records(history_table: DeclarativeMeta, record_uuid: UUID, db: 
 
 def record_create_history(
     history_table: DeclarativeMeta,
-    action_by: str,
+    action_by: User,
     record_read_model: BaseModel,
     record_table: DeclarativeMeta,
     record_uuid: UUID,
@@ -100,7 +100,7 @@ def record_create_history(
     commit(db)
 
 
-def record_comment_history(record_node: Node, action_by: str, diff: Diff, db: Session):
+def record_comment_history(record_node: Node, action_by: User, diff: Diff, db: Session):
     if record_node.node_type == "alert":
         record_update_histories(
             history_table=AlertHistory,
@@ -135,7 +135,7 @@ def record_comment_history(record_node: Node, action_by: str, diff: Diff, db: Se
 
 def record_update_histories(
     history_table: DeclarativeMeta,
-    action_by: str,
+    action_by: User,
     record_read_model: BaseModel,
     record_table: DeclarativeMeta,
     record_uuid: UUID,
