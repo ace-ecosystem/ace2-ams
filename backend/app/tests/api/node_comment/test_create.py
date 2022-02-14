@@ -34,7 +34,6 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
 
 def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
     alert_tree = helpers.create_alert(db=db)
-    helpers.create_user(username="analyst", db=db)
 
     # Create a comment
     create_json = {
@@ -63,7 +62,6 @@ def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
 )
 def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
     alert_tree = helpers.create_alert(db=db)
-    helpers.create_user(username="analyst", db=db)
 
     # Create a comment
     create1_json = {
@@ -85,8 +83,6 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
 
 
 def test_create_nonexistent_node_uuid(client_valid_access_token, db):
-    helpers.create_user(username="analyst", db=db)
-
     # Create a comment
     create_json = {
         "node_uuid": str(uuid.uuid4()),
@@ -103,7 +99,6 @@ def test_create_nonexistent_node_uuid(client_valid_access_token, db):
 
 
 def test_create_verify_history_alerts(client_valid_access_token, db):
-    helpers.create_user(username="analyst", db=db)
     alert_tree = helpers.create_alert(db=db)
 
     # Add a comment to the node
@@ -115,20 +110,19 @@ def test_create_verify_history_alerts(client_valid_access_token, db):
 
     # Verify the history record
     history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["record_uuid"] == str(alert_tree.node_uuid)
-    assert history.json()["items"][0]["field"] == "comments"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] is None
-    assert history.json()["items"][0]["diff"]["added_to_list"] == ["test"]
-    assert history.json()["items"][0]["diff"]["removed_from_list"] is None
-    assert history.json()["items"][0]["snapshot"]["name"] == "Test Alert"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["record_uuid"] == str(alert_tree.node_uuid)
+    assert history.json()["items"][1]["field"] == "comments"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["diff"]["added_to_list"] == ["test"]
+    assert history.json()["items"][1]["diff"]["removed_from_list"] is None
+    assert history.json()["items"][1]["snapshot"]["name"] == "Test Alert"
 
 
 def test_create_verify_history_events(client_valid_access_token, db):
-    helpers.create_user(username="analyst", db=db)
     event = helpers.create_event(name="Test Event", db=db)
 
     # Add a comment to the node
@@ -140,20 +134,19 @@ def test_create_verify_history_events(client_valid_access_token, db):
 
     # Verify the history record
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["record_uuid"] == str(event.uuid)
-    assert history.json()["items"][0]["field"] == "comments"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] is None
-    assert history.json()["items"][0]["diff"]["added_to_list"] == ["test"]
-    assert history.json()["items"][0]["diff"]["removed_from_list"] is None
-    assert history.json()["items"][0]["snapshot"]["name"] == "Test Event"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["record_uuid"] == str(event.uuid)
+    assert history.json()["items"][1]["field"] == "comments"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["diff"]["added_to_list"] == ["test"]
+    assert history.json()["items"][1]["diff"]["removed_from_list"] is None
+    assert history.json()["items"][1]["snapshot"]["name"] == "Test Event"
 
 
 def test_create_verify_history_observables(client_valid_access_token, db):
-    helpers.create_user(username="analyst", db=db)
     alert_tree = helpers.create_alert(db=db)
     observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
 
@@ -166,21 +159,19 @@ def test_create_verify_history_observables(client_valid_access_token, db):
 
     # Verify the history record
     history = client_valid_access_token.get(f"/api/observable/{observable_tree.node_uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["record_uuid"] == str(observable_tree.node_uuid)
-    assert history.json()["items"][0]["field"] == "comments"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] is None
-    assert history.json()["items"][0]["diff"]["added_to_list"] == ["test"]
-    assert history.json()["items"][0]["diff"]["removed_from_list"] is None
-    assert history.json()["items"][0]["snapshot"]["value"] == "test_value"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["record_uuid"] == str(observable_tree.node_uuid)
+    assert history.json()["items"][1]["field"] == "comments"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["diff"]["added_to_list"] == ["test"]
+    assert history.json()["items"][1]["diff"]["removed_from_list"] is None
+    assert history.json()["items"][1]["snapshot"]["value"] == "test_value"
 
 
 def test_create_multiple(client_valid_access_token, db):
-    helpers.create_user(username="analyst", db=db)
-
     alert_tree1 = helpers.create_alert(db=db)
     initial_alert1_version = alert_tree1.node.version
 
@@ -220,7 +211,6 @@ def test_create_multiple(client_valid_access_token, db):
 
 
 def test_create_valid_required_fields(client_valid_access_token, db):
-    helpers.create_user(username="analyst", db=db)
     alert_tree = helpers.create_alert(db=db)
     initial_node_version = alert_tree.node.version
 

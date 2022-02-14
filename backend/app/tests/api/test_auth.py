@@ -16,13 +16,11 @@ from main import app
 @pytest.mark.parametrize(
     "username,password",
     [
-        ("johndoe", "wrongpassword"),
-        ("wronguser", "abcd1234"),
+        ("analyst", "wrongpassword"),
+        ("wronguser", "asdfasdf"),
     ],
 )
-def test_auth_invalid(client, db, username, password):
-    helpers.create_user(username="johndoe", password="abcd1234", db=db)
-
+def test_auth_invalid(client, username, password):
     # Attempt to authenticate
     auth = client.post("/api/auth", data={"username": username, "password": password})
     assert auth.status_code == status.HTTP_401_UNAUTHORIZED
@@ -35,7 +33,7 @@ def test_auth_invalid(client, db, username, password):
 
 
 def test_disabled_user(client, db):
-    helpers.create_user(username="johndoe", password="abcd1234", db=db)
+    user = helpers.create_user(username="johndoe", password="abcd1234", db=db)
 
     # Attempt to authenticate
     auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
@@ -48,17 +46,15 @@ def test_disabled_user(client, db):
     headers = {"Authorization": f"Bearer {access_token}"}
     get = client.get("/api/user/", headers=headers)
     assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 1
+    assert get.json()["total"] == 2  # There is a default analyst user
 
     # Disable the user
-    user_uuid = get.json()["items"][0]["uuid"]
-    update = client.patch(f"/api/user/{user_uuid}", headers=headers, json={"enabled": False})
-    assert update.status_code == status.HTTP_204_NO_CONTENT
+    user.enabled = False
 
     # The user is disabled, but the token is still valid, so they will still have access until it expires.
     get = client.get("/api/user/", headers=headers)
     assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 1
+    assert get.json()["total"] == 2  # There is a default analyst user
 
     # However, they will not be able to authenticate again to receive a new token.
     auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
@@ -66,7 +62,7 @@ def test_disabled_user(client, db):
     assert auth.json()["detail"] == "Invalid username or password"
 
 
-def test_expired_token(client, db, monkeypatch):
+def test_expired_token(client, monkeypatch):
     def mock_get_settings():
         settings = Settings()
         settings.jwt_access_expire_seconds = 1
@@ -75,10 +71,8 @@ def test_expired_token(client, db, monkeypatch):
     # Patching __code__ works no matter how the function is imported
     monkeypatch.setattr("core.config.get_settings.__code__", mock_get_settings.__code__)
 
-    helpers.create_user(username="johndoe", password="abcd1234", db=db)
-
     # Attempt to authenticate
-    auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
+    auth = client.post("/api/auth", data={"username": "analyst", "password": "asdfasdf"})
     access_token = auth.json()["access_token"]
     assert auth.status_code == status.HTTP_200_OK
     assert auth.json()["token_type"] == "bearer"
@@ -119,11 +113,9 @@ def test_missing_token(client):
     assert get.json()["detail"] == "Not authenticated"
 
 
-def test_wrong_token_type(client, db):
-    helpers.create_user(username="johndoe", password="abcd1234", db=db)
-
+def test_wrong_token_type(client):
     # Attempt to authenticate
-    auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
+    auth = client.post("/api/auth", data={"username": "analyst", "password": "asdfasdf"})
     refresh_token = auth.json()["refresh_token"]
     assert auth.status_code == status.HTTP_200_OK
     assert auth.json()["token_type"] == "bearer"
@@ -176,16 +168,14 @@ def test_missing_route_authentication(client, route):
 #
 
 
-def test_auth_success(client, db):
-    helpers.create_user(username="johndoe", password="abcd1234", db=db)
-
+def test_auth_success(client):
     # Attempt to authenticate
-    auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
+    auth = client.post("/api/auth", data={"username": "analyst", "password": "asdfasdf"})
     access_token = auth.json()["access_token"]
     refresh_token = auth.json()["refresh_token"]
     assert auth.status_code == status.HTTP_200_OK
     assert auth.json()["token_type"] == "bearer"
-    assert auth.json()["user"]["username"] == "johndoe"
+    assert auth.json()["user"]["username"] == "analyst"
     assert access_token
     assert refresh_token
     assert auth.cookies.get("access_token")

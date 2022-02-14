@@ -81,7 +81,7 @@ def test_get_filter_disposition(client_valid_access_token, db):
 
 def test_get_filter_disposition_user(client_valid_access_token, db):
     helpers.create_alert(db)
-    alert_tree = helpers.create_alert(db, disposition="FALSE_POSITIVE")
+    alert_tree = helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="analyst")
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -98,10 +98,10 @@ def test_get_filter_disposition_user_multiple(client_valid_access_token, db):
     helpers.create_alert(db)
 
     # This alert was first dispositioned by alice
-    alert_tree = helpers.create_alert(db, disposition="FALSE_POSITIVE", disposition_user="alice")
+    alert_tree = helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="alice")
 
     # This alert was first dispositioned by analyst
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", disposition_user="analyst")
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="analyst")
 
     # analyst re-dispositions alice's alert
     update = client_valid_access_token.patch(
@@ -126,8 +126,8 @@ def test_get_filter_disposition_user_multiple(client_valid_access_token, db):
 def test_get_filter_dispositioned_after(client_valid_access_token, db):
     now = datetime.utcnow()
     helpers.create_alert(db)
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", disposition_time=now)
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", disposition_time=now + timedelta(seconds=5))
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now)
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now + timedelta(seconds=5))
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -144,8 +144,8 @@ def test_get_filter_dispositioned_after(client_valid_access_token, db):
 def test_get_filter_dispositioned_before(client_valid_access_token, db):
     now = datetime.utcnow()
     helpers.create_alert(db)
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", disposition_time=now - timedelta(seconds=5))
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", disposition_time=now)
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now - timedelta(seconds=5))
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now)
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -163,9 +163,9 @@ def test_get_filter_dispositioned_after_and_before(client_valid_access_token, db
     now = datetime.utcnow()
     after = now - timedelta(days=1)
     before = now + timedelta(days=1)
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", disposition_time=after)
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", disposition_time=now)
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", disposition_time=before)
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=after)
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now)
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=before)
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -602,9 +602,9 @@ def test_get_sort_by_disposition(client_valid_access_token, db):
 
 
 def test_get_sort_by_disposition_time(client_valid_access_token, db):
-    alert_tree1 = helpers.create_alert(db, disposition="FALSE_POSITIVE", disposition_time=datetime.utcnow())
+    alert_tree1 = helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=datetime.utcnow())
     alert_tree2 = helpers.create_alert(
-        db, disposition="FALSE_POSITIVE", disposition_time=datetime.utcnow() + timedelta(seconds=5)
+        db, disposition="FALSE_POSITIVE", update_time=datetime.utcnow() + timedelta(seconds=5)
     )
 
     # If you sort descending, the newest alert (alert2) should appear first
@@ -621,8 +621,8 @@ def test_get_sort_by_disposition_time(client_valid_access_token, db):
 
 
 def test_get_sort_by_disposition_user(client_valid_access_token, db):
-    alert_tree1 = helpers.create_alert(db, disposition="FALSE_POSITIVE", disposition_user="alice")
-    alert_tree2 = helpers.create_alert(db, disposition="FALSE_POSITIVE", disposition_user="bob")
+    alert_tree1 = helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="alice")
+    alert_tree2 = helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="bob")
     alert_tree3 = helpers.create_alert(db)
 
     # If you sort descending: null user, bob, alice

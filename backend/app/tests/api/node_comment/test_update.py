@@ -66,16 +66,27 @@ def test_update_alerts(client_valid_access_token, db):
 
     # Verify the history record
     history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["record_uuid"] == str(alert_tree.node_uuid)
-    assert history.json()["items"][0]["field"] == "comments"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] is None
-    assert history.json()["items"][0]["diff"]["added_to_list"] == ["updated"]
-    assert history.json()["items"][0]["diff"]["removed_from_list"] == ["test"]
-    assert history.json()["items"][0]["snapshot"]["name"] == "Test Alert"
+
+    assert history.json()["total"] == 3
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "johndoe"
+    assert history.json()["items"][1]["record_uuid"] == str(alert_tree.node_uuid)
+    assert history.json()["items"][1]["field"] == "comments"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["diff"]["added_to_list"] == ["test"]
+    assert history.json()["items"][1]["diff"]["removed_from_list"] is None
+    assert history.json()["items"][1]["snapshot"]["name"] == "Test Alert"
+
+    assert history.json()["items"][2]["action"] == "UPDATE"
+    assert history.json()["items"][2]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][2]["record_uuid"] == str(alert_tree.node_uuid)
+    assert history.json()["items"][2]["field"] == "comments"
+    assert history.json()["items"][2]["diff"]["old_value"] is None
+    assert history.json()["items"][2]["diff"]["new_value"] is None
+    assert history.json()["items"][2]["diff"]["added_to_list"] == ["updated"]
+    assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
+    assert history.json()["items"][2]["snapshot"]["name"] == "Test Alert"
 
 
 def test_update_events(client_valid_access_token, db):
@@ -91,16 +102,27 @@ def test_update_events(client_valid_access_token, db):
 
     # Verify the history record
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["record_uuid"] == str(event.uuid)
-    assert history.json()["items"][0]["field"] == "comments"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] is None
-    assert history.json()["items"][0]["diff"]["added_to_list"] == ["updated"]
-    assert history.json()["items"][0]["diff"]["removed_from_list"] == ["test"]
-    assert history.json()["items"][0]["snapshot"]["name"] == "Test Event"
+
+    assert history.json()["total"] == 3
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "johndoe"
+    assert history.json()["items"][1]["record_uuid"] == str(event.uuid)
+    assert history.json()["items"][1]["field"] == "comments"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["diff"]["added_to_list"] == ["test"]
+    assert history.json()["items"][1]["diff"]["removed_from_list"] is None
+    assert history.json()["items"][1]["snapshot"]["name"] == "Test Event"
+
+    assert history.json()["items"][2]["action"] == "UPDATE"
+    assert history.json()["items"][2]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][2]["record_uuid"] == str(event.uuid)
+    assert history.json()["items"][2]["field"] == "comments"
+    assert history.json()["items"][2]["diff"]["old_value"] is None
+    assert history.json()["items"][2]["diff"]["new_value"] is None
+    assert history.json()["items"][2]["diff"]["added_to_list"] == ["updated"]
+    assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
+    assert history.json()["items"][2]["snapshot"]["name"] == "Test Event"
 
 
 def test_update_observables(client_valid_access_token, db):
@@ -117,13 +139,24 @@ def test_update_observables(client_valid_access_token, db):
 
     # Verify the history record
     history = client_valid_access_token.get(f"/api/observable/{observable_tree.node_uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["record_uuid"] == str(observable_tree.node_uuid)
-    assert history.json()["items"][0]["field"] == "comments"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] is None
-    assert history.json()["items"][0]["diff"]["added_to_list"] == ["updated"]
-    assert history.json()["items"][0]["diff"]["removed_from_list"] == ["test"]
-    assert history.json()["items"][0]["snapshot"]["value"] == "test_value"
+
+    assert history.json()["total"] == 3
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "johndoe"
+    assert history.json()["items"][1]["record_uuid"] == str(observable_tree.node_uuid)
+    assert history.json()["items"][1]["field"] == "comments"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["diff"]["added_to_list"] == ["test"]
+    assert history.json()["items"][1]["diff"]["removed_from_list"] is None
+    assert history.json()["items"][1]["snapshot"]["value"] == "test_value"
+
+    assert history.json()["items"][2]["action"] == "UPDATE"
+    assert history.json()["items"][2]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][2]["record_uuid"] == str(observable_tree.node_uuid)
+    assert history.json()["items"][2]["field"] == "comments"
+    assert history.json()["items"][2]["diff"]["old_value"] is None
+    assert history.json()["items"][2]["diff"]["new_value"] is None
+    assert history.json()["items"][2]["diff"]["added_to_list"] == ["updated"]
+    assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
+    assert history.json()["items"][2]["snapshot"]["value"] == "test_value"
