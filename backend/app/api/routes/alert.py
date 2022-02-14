@@ -86,7 +86,7 @@ def create_alert(
 
         crud.record_create_history(
             history_table=ObservableHistory,
-            action_by=claims["full_name"],
+            action_by=crud.read_user_by_username(username=claims["sub"], db=db),
             record_read_model=ObservableRead,
             record_table=Observable,
             record_uuid=db_observable.uuid,
@@ -108,7 +108,7 @@ def create_alert(
     # Add an entry to the history table
     crud.record_create_history(
         history_table=AlertHistory,
-        action_by=claims["full_name"],
+        action_by=crud.read_user_by_username(username=claims["sub"], db=db),
         record_read_model=AlertRead,
         record_table=Alert,
         record_uuid=new_alert.uuid,
@@ -188,28 +188,28 @@ def get_all_alerts(
         query = _join_as_subquery(query, disposition_query)
 
     if disposition_user:
-        disposition_user_query = (
-            select(Alert)
-            .join(AlertHistory, onclause=Alert.uuid == AlertHistory.record_uuid)
-            .join(User, onclause=AlertHistory.action_by == User.display_name)
-            .where(and_(User.username == disposition_user, AlertHistory.field == "disposition"))
+        disposition_user_query = select(Alert).where(
+            Alert.history.any(
+                and_(
+                    AlertHistory.field == "disposition",
+                    AlertHistory.action_by.has(User.username == disposition_user),
+                )
+            )
         )
 
         query = _join_as_subquery(query, disposition_user_query)
 
     if dispositioned_after:
-        dispositioned_after_query = (
-            select(Alert)
-            .join(AlertHistory, onclause=Alert.uuid == AlertHistory.record_uuid)
-            .where(and_(AlertHistory.action_time > dispositioned_after, AlertHistory.field == "disposition"))
+        dispositioned_after_query = select(Alert).where(
+            Alert.history.any(and_(AlertHistory.field == "disposition", AlertHistory.action_time > dispositioned_after))
         )
         query = _join_as_subquery(query, dispositioned_after_query)
 
     if dispositioned_before:
-        dispositioned_before_query = (
-            select(Alert)
-            .join(AlertHistory, onclause=Alert.uuid == AlertHistory.record_uuid)
-            .where(and_(AlertHistory.action_time < dispositioned_before, AlertHistory.field == "disposition"))
+        dispositioned_before_query = select(Alert).where(
+            Alert.history.any(
+                and_(AlertHistory.field == "disposition", AlertHistory.action_time < dispositioned_before)
+            )
         )
         query = _join_as_subquery(query, dispositioned_before_query)
 
@@ -487,7 +487,7 @@ def update_alerts(
         # Add the entries to the history table
         crud.record_update_histories(
             history_table=AlertHistory,
-            action_by=claims["full_name"],
+            action_by=crud.read_user_by_username(username=claims["sub"], db=db),
             record_read_model=AlertRead,
             record_table=Alert,
             record_uuid=alert.uuid,
