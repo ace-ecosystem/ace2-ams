@@ -30,7 +30,7 @@ class HistoryBase(BaseModel):
 
     action: type_str = Field(description="The action that was performed (CREATE/UPDATE/DELETE)")
 
-    action_by: type_str = Field(description="The username that performed the action")
+    action_by: UserRead = Field(description="The user that performed the action")
 
     action_time: datetime = Field(description="The time the action was performed")
 
