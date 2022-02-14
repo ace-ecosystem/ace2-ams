@@ -3,12 +3,14 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from db.database import Base
-from db.schemas.history import History
+from db.schemas.history import HistoryMixin
 from db.schemas.user_role_mapping import user_role_mapping
 
 
-class UserHistory(Base, History):
+class UserHistory(Base, HistoryMixin):
     __tablename__ = "user_history"
+
+    record_uuid = Column(UUID(as_uuid=True), ForeignKey("user.uuid"), index=True, nullable=False)
 
 
 class User(Base):
@@ -29,6 +31,13 @@ class User(Base):
     email = Column(String, unique=True, nullable=False)
 
     enabled = Column(Boolean, default=True, nullable=False)
+
+    history = relationship(
+        "UserHistory",
+        primaryjoin="UserHistory.record_uuid == User.uuid",
+        lazy="selectin",
+        order_by="UserHistory.action_time",
+    )
 
     password = Column(String, nullable=False)
 
