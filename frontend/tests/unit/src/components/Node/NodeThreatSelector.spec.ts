@@ -1,15 +1,12 @@
 import { useNodeThreatTypeStore } from "@/stores/nodeThreatType";
 import { nodeThreatReadFactory } from "./../../../../mocks/nodeThreat";
 import { genericObjectReadFactory } from "./../../../../mocks/genericObject";
-import { genericObjectCreate } from "./../../../../../src/models/base";
-import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
 import NodeThreatSelector from "../../../../../src/components/Node/NodeThreatSelector.vue";
 import { mount } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
 import Tooltip from "primevue/tooltip";
 import PrimeVue from "primevue/config";
 
-import { commentReadFactory } from "../../../../mocks/comment";
 import { useNodeThreatStore } from "@/stores/nodeThreat";
 
 function factory() {
@@ -35,7 +32,7 @@ describe("NodeThreatSelector.vue", () => {
     expect(wrapper.exists()).toBe(true);
   });
   it("loads nodeThreats when mounted", async () => {
-    const { wrapper, nodeThreatStore } = factory();
+    const { nodeThreatStore } = factory();
     expect(nodeThreatStore.readAll).toHaveBeenCalled();
   });
   it("correctly formats a given array of threat types on formatThreatTypes", () => {
