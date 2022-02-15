@@ -1,3 +1,4 @@
+import { commentReadFactory } from "./../../../../mocks/comment";
 import { useEventStore } from "@/stores/event";
 import { eventReadFactory, mockEventUUID } from "./../../../../mocks/events";
 import { filterOption } from "@/models/base";
@@ -23,6 +24,11 @@ const testOwnerField: filterOption = {
   type: "select",
   valueProperty: "username",
   optionProperty: "displayName",
+};
+const testCommentsField: filterOption = {
+  name: "comments",
+  label: "Comments",
+  type: "inputText",
 };
 const availableEditFields: readonly filterOption[] = [testNameField];
 const mockEvent = eventReadFactory();
@@ -148,6 +154,51 @@ describe("EditEventModal.vue", () => {
     expect(wrapper.emitted("requestReload")).toBeTruthy();
     expect(wrapper.vm.error).toBeNull();
     expect(modalStore.close).toHaveBeenCalled();
+  });
+  it("will attempt to save any comments if 'comments' is in the formFields on saveEvent", async () => {
+    const updateComment = myNock
+      .options(`/node/comment/commentUuid1`)
+      .reply(200)
+      .patch(`/node/comment/commentUuid1`)
+      .reply(200);
+
+    const { wrapper, modalStore } = factory();
+
+    wrapper.vm.fieldOptionObjects = { comments: testCommentsField };
+    wrapper.vm.formFields = {
+      comments: {
+        propertyType: "comments",
+        propertyValue: [commentReadFactory()],
+      },
+    };
+
+    await wrapper.vm.saveEvent();
+
+    expect(updateComment.isDone()).toBe(true);
+    expect(wrapper.vm.error).toBeNull();
+    expect(wrapper.emitted("requestReload")).toBeTruthy();
+    expect(modalStore.close).toHaveBeenCalled();
+  });
+  it("will attempt to update all comments in the formFields on saveEventComments", async () => {
+    const updateComment = myNock
+      .options(`/node/comment/commentUuid1`)
+      .reply(200)
+      .patch(`/node/comment/commentUuid1`)
+      .reply(200);
+
+    const { wrapper } = factory();
+
+    wrapper.vm.fieldOptionObjects = { comments: testCommentsField };
+    wrapper.vm.formFields = {
+      comments: {
+        propertyType: "comments",
+        propertyValue: [commentReadFactory()],
+      },
+    };
+
+    await wrapper.vm.saveEventComments();
+
+    expect(updateComment.isDone()).toBe(true);
   });
   it("will use updateData to make a call to update an event on saveEvent, but won't close or emit anything if there is an error", async () => {
     const { wrapper, modalStore, eventStore } = factory();
