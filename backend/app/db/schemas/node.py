@@ -25,6 +25,7 @@ class Node(Base):
     # JOIN node_tag_mapping ON node_tag_mapping.tag_uuid = node_tag.uuid
     # JOIN node_tree ON node_tree.node_uuid = node_tag_mapping.node_uuid
     # WHERE node_tree.root_node_uuid = '02f8299b-2a24-400f-9751-7dd9164daf6a'
+    # AND node_tree.node_uuid != '02f8299b-2a24-400f-9751-7dd9164daf6a'
     #
     # While there is nothing complicated about this SQL query, SQLAlchemy does not have a
     # straightforward way to handle these types of relationships with intermediate tables.

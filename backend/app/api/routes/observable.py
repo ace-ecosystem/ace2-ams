@@ -81,7 +81,7 @@ def create_observables(
         # Add an entry to the history table
         crud.record_create_history(
             history_table=ObservableHistory,
-            action_by=claims["full_name"],
+            action_by=crud.read_user_by_username(username=claims["sub"], db=db),
             record_read_model=ObservableRead,
             record_table=Observable,
             record_uuid=new_observable.uuid,
@@ -200,7 +200,7 @@ def update_observable(
     # Add the entries to the history table
     crud.record_update_histories(
         history_table=ObservableHistory,
-        action_by=claims["full_name"],
+        action_by=crud.read_user_by_username(username=claims["sub"], db=db),
         record_read_model=ObservableRead,
         record_table=Observable,
         record_uuid=db_observable.uuid,

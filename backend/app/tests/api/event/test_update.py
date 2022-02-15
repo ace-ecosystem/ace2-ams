@@ -172,13 +172,13 @@ def test_update_owner(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "owner"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] == "johndoe"
-    assert history.json()["items"][0]["snapshot"]["owner"]["username"] == "johndoe"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "owner"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] == "johndoe"
+    assert history.json()["items"][1]["snapshot"]["owner"]["username"] == "johndoe"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"owner": None, "uuid": str(event.uuid)}])
@@ -187,13 +187,13 @@ def test_update_owner(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 2
-    assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "Analyst"
-    assert history.json()["items"][1]["field"] == "owner"
-    assert history.json()["items"][1]["diff"]["old_value"] == "johndoe"
-    assert history.json()["items"][1]["diff"]["new_value"] is None
-    assert history.json()["items"][1]["snapshot"]["owner"] is None
+    assert history.json()["total"] == 3
+    assert history.json()["items"][2]["action"] == "UPDATE"
+    assert history.json()["items"][2]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][2]["field"] == "owner"
+    assert history.json()["items"][2]["diff"]["old_value"] == "johndoe"
+    assert history.json()["items"][2]["diff"]["new_value"] is None
+    assert history.json()["items"][2]["snapshot"]["owner"] is None
 
 
 def test_update_prevention_tools(client_valid_access_token, db):
@@ -215,15 +215,15 @@ def test_update_prevention_tools(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "prevention_tools"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] is None
-    assert history.json()["items"][0]["diff"]["added_to_list"] == ["test"]
-    assert history.json()["items"][0]["diff"]["removed_from_list"] == []
-    assert history.json()["items"][0]["snapshot"]["prevention_tools"][0]["value"] == "test"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "prevention_tools"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["diff"]["added_to_list"] == ["test"]
+    assert history.json()["items"][1]["diff"]["removed_from_list"] == []
+    assert history.json()["items"][1]["snapshot"]["prevention_tools"][0]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"prevention_tools": [], "uuid": str(event.uuid)}])
@@ -232,15 +232,15 @@ def test_update_prevention_tools(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 2
-    assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "Analyst"
-    assert history.json()["items"][1]["field"] == "prevention_tools"
-    assert history.json()["items"][1]["diff"]["old_value"] is None
-    assert history.json()["items"][1]["diff"]["new_value"] is None
-    assert history.json()["items"][1]["diff"]["added_to_list"] == []
-    assert history.json()["items"][1]["diff"]["removed_from_list"] == ["test"]
-    assert history.json()["items"][1]["snapshot"]["prevention_tools"] == []
+    assert history.json()["total"] == 3
+    assert history.json()["items"][2]["action"] == "UPDATE"
+    assert history.json()["items"][2]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][2]["field"] == "prevention_tools"
+    assert history.json()["items"][2]["diff"]["old_value"] is None
+    assert history.json()["items"][2]["diff"]["new_value"] is None
+    assert history.json()["items"][2]["diff"]["added_to_list"] == []
+    assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
+    assert history.json()["items"][2]["snapshot"]["prevention_tools"] == []
 
 
 def test_update_queue(client_valid_access_token, db):
@@ -260,13 +260,13 @@ def test_update_queue(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "queue"
-    assert history.json()["items"][0]["diff"]["old_value"] == "default"
-    assert history.json()["items"][0]["diff"]["new_value"] == "updated_queue"
-    assert history.json()["items"][0]["snapshot"]["queue"]["value"] == "updated_queue"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "queue"
+    assert history.json()["items"][1]["diff"]["old_value"] == "default"
+    assert history.json()["items"][1]["diff"]["new_value"] == "updated_queue"
+    assert history.json()["items"][1]["snapshot"]["queue"]["value"] == "updated_queue"
 
 
 def test_update_remediations(client_valid_access_token, db):
@@ -286,15 +286,15 @@ def test_update_remediations(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "remediations"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] is None
-    assert history.json()["items"][0]["diff"]["added_to_list"] == ["test"]
-    assert history.json()["items"][0]["diff"]["removed_from_list"] == []
-    assert history.json()["items"][0]["snapshot"]["remediations"][0]["value"] == "test"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "remediations"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["diff"]["added_to_list"] == ["test"]
+    assert history.json()["items"][1]["diff"]["removed_from_list"] == []
+    assert history.json()["items"][1]["snapshot"]["remediations"][0]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"remediations": [], "uuid": str(event.uuid)}])
@@ -303,15 +303,15 @@ def test_update_remediations(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 2
-    assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "Analyst"
-    assert history.json()["items"][1]["field"] == "remediations"
-    assert history.json()["items"][1]["diff"]["old_value"] is None
-    assert history.json()["items"][1]["diff"]["new_value"] is None
-    assert history.json()["items"][1]["diff"]["added_to_list"] == []
-    assert history.json()["items"][1]["diff"]["removed_from_list"] == ["test"]
-    assert history.json()["items"][1]["snapshot"]["remediations"] == []
+    assert history.json()["total"] == 3
+    assert history.json()["items"][2]["action"] == "UPDATE"
+    assert history.json()["items"][2]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][2]["field"] == "remediations"
+    assert history.json()["items"][2]["diff"]["old_value"] is None
+    assert history.json()["items"][2]["diff"]["new_value"] is None
+    assert history.json()["items"][2]["diff"]["added_to_list"] == []
+    assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
+    assert history.json()["items"][2]["snapshot"]["remediations"] == []
 
 
 def test_update_risk_level(client_valid_access_token, db):
@@ -330,13 +330,13 @@ def test_update_risk_level(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "risk_level"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] == "test"
-    assert history.json()["items"][0]["snapshot"]["risk_level"]["value"] == "test"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "risk_level"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] == "test"
+    assert history.json()["items"][1]["snapshot"]["risk_level"]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"risk_level": None, "uuid": str(event.uuid)}])
@@ -345,13 +345,13 @@ def test_update_risk_level(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 2
-    assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "Analyst"
-    assert history.json()["items"][1]["field"] == "risk_level"
-    assert history.json()["items"][1]["diff"]["old_value"] == "test"
-    assert history.json()["items"][1]["diff"]["new_value"] is None
-    assert history.json()["items"][1]["snapshot"]["risk_level"] is None
+    assert history.json()["total"] == 3
+    assert history.json()["items"][2]["action"] == "UPDATE"
+    assert history.json()["items"][2]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][2]["field"] == "risk_level"
+    assert history.json()["items"][2]["diff"]["old_value"] == "test"
+    assert history.json()["items"][2]["diff"]["new_value"] is None
+    assert history.json()["items"][2]["snapshot"]["risk_level"] is None
 
 
 def test_update_source(client_valid_access_token, db):
@@ -370,13 +370,13 @@ def test_update_source(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "source"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] == "test"
-    assert history.json()["items"][0]["snapshot"]["source"]["value"] == "test"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "source"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] == "test"
+    assert history.json()["items"][1]["snapshot"]["source"]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"source": None, "uuid": str(event.uuid)}])
@@ -385,13 +385,13 @@ def test_update_source(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 2
-    assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "Analyst"
-    assert history.json()["items"][1]["field"] == "source"
-    assert history.json()["items"][1]["diff"]["old_value"] == "test"
-    assert history.json()["items"][1]["diff"]["new_value"] is None
-    assert history.json()["items"][1]["snapshot"]["source"] is None
+    assert history.json()["total"] == 3
+    assert history.json()["items"][2]["action"] == "UPDATE"
+    assert history.json()["items"][2]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][2]["field"] == "source"
+    assert history.json()["items"][2]["diff"]["old_value"] == "test"
+    assert history.json()["items"][2]["diff"]["new_value"] is None
+    assert history.json()["items"][2]["snapshot"]["source"] is None
 
 
 def test_update_status(client_valid_access_token, db):
@@ -410,13 +410,13 @@ def test_update_status(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "status"
-    assert history.json()["items"][0]["diff"]["old_value"] == "OPEN"
-    assert history.json()["items"][0]["diff"]["new_value"] == "test"
-    assert history.json()["items"][0]["snapshot"]["status"]["value"] == "test"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "status"
+    assert history.json()["items"][1]["diff"]["old_value"] == "OPEN"
+    assert history.json()["items"][1]["diff"]["new_value"] == "test"
+    assert history.json()["items"][1]["snapshot"]["status"]["value"] == "test"
 
 
 def test_update_type(client_valid_access_token, db):
@@ -435,13 +435,13 @@ def test_update_type(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "type"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] == "test"
-    assert history.json()["items"][0]["snapshot"]["type"]["value"] == "test"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "type"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] == "test"
+    assert history.json()["items"][1]["snapshot"]["type"]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch("/api/event/", json=[{"type": None, "uuid": str(event.uuid)}])
@@ -450,13 +450,13 @@ def test_update_type(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 2
-    assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "Analyst"
-    assert history.json()["items"][1]["field"] == "type"
-    assert history.json()["items"][1]["diff"]["old_value"] == "test"
-    assert history.json()["items"][1]["diff"]["new_value"] is None
-    assert history.json()["items"][1]["snapshot"]["type"] is None
+    assert history.json()["total"] == 3
+    assert history.json()["items"][2]["action"] == "UPDATE"
+    assert history.json()["items"][2]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][2]["field"] == "type"
+    assert history.json()["items"][2]["diff"]["old_value"] == "test"
+    assert history.json()["items"][2]["diff"]["new_value"] is None
+    assert history.json()["items"][2]["snapshot"]["type"] is None
 
 
 def test_update_vectors(client_valid_access_token, db):
@@ -476,15 +476,15 @@ def test_update_vectors(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "vectors"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] is None
-    assert history.json()["items"][0]["diff"]["added_to_list"] == ["test"]
-    assert history.json()["items"][0]["diff"]["removed_from_list"] == []
-    assert history.json()["items"][0]["snapshot"]["vectors"][0]["value"] == "test"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "vectors"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["diff"]["added_to_list"] == ["test"]
+    assert history.json()["items"][1]["diff"]["removed_from_list"] == []
+    assert history.json()["items"][1]["snapshot"]["vectors"][0]["value"] == "test"
 
     # Set it back to None
     update = client_valid_access_token.patch(
@@ -496,15 +496,15 @@ def test_update_vectors(client_valid_access_token, db):
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
     print(history.json())
-    assert history.json()["total"] == 2
-    assert history.json()["items"][1]["action"] == "UPDATE"
-    assert history.json()["items"][1]["action_by"] == "Analyst"
-    assert history.json()["items"][1]["field"] == "vectors"
-    assert history.json()["items"][1]["diff"]["old_value"] is None
-    assert history.json()["items"][1]["diff"]["new_value"] is None
-    assert history.json()["items"][1]["diff"]["added_to_list"] == []
-    assert history.json()["items"][1]["diff"]["removed_from_list"] == ["test"]
-    assert history.json()["items"][1]["snapshot"]["vectors"] == []
+    assert history.json()["total"] == 3
+    assert history.json()["items"][2]["action"] == "UPDATE"
+    assert history.json()["items"][2]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][2]["field"] == "vectors"
+    assert history.json()["items"][2]["diff"]["old_value"] is None
+    assert history.json()["items"][2]["diff"]["new_value"] is None
+    assert history.json()["items"][2]["diff"]["added_to_list"] == []
+    assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
+    assert history.json()["items"][2]["snapshot"]["vectors"] == []
 
 
 @pytest.mark.parametrize(
@@ -535,15 +535,15 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
         # Verify the history
         if value_list:
             history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-            assert history.json()["total"] == 1
-            assert history.json()["items"][0]["action"] == "UPDATE"
-            assert history.json()["items"][0]["action_by"] == "Analyst"
-            assert history.json()["items"][0]["field"] == key
-            assert history.json()["items"][0]["diff"]["old_value"] is None
-            assert history.json()["items"][0]["diff"]["new_value"] is None
-            assert history.json()["items"][0]["diff"]["added_to_list"] == sorted(set(value_list))
-            assert history.json()["items"][0]["diff"]["removed_from_list"] == ["remove_me"]
-            assert len(history.json()["items"][0]["snapshot"][key]) == len(set(value_list))
+            assert history.json()["total"] == 2
+            assert history.json()["items"][1]["action"] == "UPDATE"
+            assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+            assert history.json()["items"][1]["field"] == key
+            assert history.json()["items"][1]["diff"]["old_value"] is None
+            assert history.json()["items"][1]["diff"]["new_value"] is None
+            assert history.json()["items"][1]["diff"]["added_to_list"] == sorted(set(value_list))
+            assert history.json()["items"][1]["diff"]["removed_from_list"] == ["remove_me"]
+            assert len(history.json()["items"][1]["snapshot"][key]) == len(set(value_list))
 
 
 @pytest.mark.parametrize(
@@ -603,19 +603,19 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == key
-    assert history.json()["items"][0]["diff"]["old_value"] == initial_value
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == key
+    assert history.json()["items"][1]["diff"]["old_value"] == initial_value
 
     # If the test is for one of the times, make sure that the retrieved value matches the proper UTC timestamp
     if key.endswith("_time") and updated_value:
         assert getattr(event, key) == parse("2022-01-01T00:00:00+00:00")
-        assert history.json()["items"][0]["diff"]["new_value"] == parse("2022-01-01T00:00:00+00:00").isoformat()
+        assert history.json()["items"][1]["diff"]["new_value"] == parse("2022-01-01T00:00:00+00:00").isoformat()
     else:
         assert getattr(event, key) == updated_value
-        assert history.json()["items"][0]["diff"]["new_value"] == updated_value
-    assert history.json()["items"][0]["snapshot"]["name"] == event.name
+        assert history.json()["items"][1]["diff"]["new_value"] == updated_value
+    assert history.json()["items"][1]["snapshot"]["name"] == event.name
 
     assert event.version != initial_event_version

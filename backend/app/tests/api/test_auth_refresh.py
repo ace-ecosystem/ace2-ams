@@ -38,7 +38,7 @@ def test_disabled_user(client, db):
     assert refresh.json()["detail"] == "Invalid token"
 
 
-def test_expired_token(client, db, monkeypatch):
+def test_expired_token(client, monkeypatch):
     def mock_get_settings():
         settings = Settings()
         settings.jwt_refresh_expire_seconds = 1
@@ -47,10 +47,8 @@ def test_expired_token(client, db, monkeypatch):
     # Patching __code__ works no matter how the function is imported
     monkeypatch.setattr("core.config.get_settings.__code__", mock_get_settings.__code__)
 
-    helpers.create_user(username="johndoe", password="abcd1234", db=db)
-
     # Attempt to authenticate
-    auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
+    auth = client.post("/api/auth", data={"username": "analyst", "password": "asdfasdf"})
     refresh_token = auth.json()["refresh_token"]
     assert auth.status_code == status.HTTP_200_OK
     assert auth.json()["token_type"] == "bearer"
@@ -72,11 +70,9 @@ def test_missing_token(client):
     assert refresh.json()["detail"] == "Not authenticated"
 
 
-def test_reused_token(client, db):
-    helpers.create_user(username="johndoe", password="abcd1234", db=db)
-
+def test_reused_token(client):
     # Attempt to authenticate
-    auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
+    auth = client.post("/api/auth", data={"username": "analyst", "password": "asdfasdf"})
     refresh_token = auth.json()["refresh_token"]
     assert auth.status_code == status.HTTP_200_OK
     assert auth.json()["token_type"] == "bearer"
@@ -92,11 +88,9 @@ def test_reused_token(client, db):
     assert refresh.json()["detail"] == "Reused token"
 
 
-def test_wrong_token_type(client, db):
-    helpers.create_user(username="johndoe", password="abcd1234", db=db)
-
+def test_wrong_token_type(client):
     # Attempt to authenticate
-    auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
+    auth = client.post("/api/auth", data={"username": "analyst", "password": "asdfasdf"})
     access_token = auth.json()["access_token"]
     assert auth.status_code == status.HTTP_200_OK
     assert auth.json()["token_type"] == "bearer"
@@ -113,7 +107,7 @@ def test_wrong_token_type(client, db):
 #
 
 
-def test_auth_refresh_success(client, db, monkeypatch):
+def test_auth_refresh_success(client, monkeypatch):
     def mock_get_settings():
         settings = Settings()
         settings.jwt_access_expire_seconds = 1
@@ -122,10 +116,8 @@ def test_auth_refresh_success(client, db, monkeypatch):
     # Patching __code__ works no matter how the function is imported
     monkeypatch.setattr("core.config.get_settings.__code__", mock_get_settings.__code__)
 
-    helpers.create_user(username="johndoe", password="abcd1234", db=db)
-
     # Attempt to authenticate
-    auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
+    auth = client.post("/api/auth", data={"username": "analyst", "password": "asdfasdf"})
     access_token = auth.json()["access_token"]
     refresh_token = auth.json()["refresh_token"]
     assert auth.status_code == status.HTTP_200_OK

@@ -13,12 +13,14 @@ from sqlalchemy.orm import relationship
 from api.models.observable import ObservableNodeTreeRead
 from db.database import Base
 from db.schemas.helpers import utcnow
-from db.schemas.history import History
+from db.schemas.history import HistoryMixin
 from db.schemas.node import Node
 
 
-class ObservableHistory(Base, History):
+class ObservableHistory(Base, HistoryMixin):
     __tablename__ = "observable_history"
+
+    record_uuid = Column(UUID(as_uuid=True), ForeignKey("observable.uuid"), index=True, nullable=False)
 
 
 class Observable(Node):
@@ -33,6 +35,13 @@ class Observable(Node):
     expires_on = Column(DateTime(timezone=True))
 
     for_detection = Column(Boolean, default=False, nullable=False)
+
+    # History is lazy loaded and is not included by default when fetching an observable from the API.
+    history = relationship(
+        "ObservableHistory",
+        primaryjoin="ObservableHistory.record_uuid == Observable.uuid",
+        order_by="ObservableHistory.action_time",
+    )
 
     redirection_uuid = Column(UUID(as_uuid=True), ForeignKey("observable.uuid"))
 

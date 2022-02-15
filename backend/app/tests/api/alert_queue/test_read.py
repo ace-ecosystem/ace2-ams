@@ -33,10 +33,4 @@ def test_get_all(client_valid_access_token, db):
     # Read them back
     get = client_valid_access_token.get("/api/alert/queue/")
     assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 2
-
-
-def test_get_all_empty(client_valid_access_token):
-    get = client_valid_access_token.get("/api/alert/queue/")
-    assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 0
+    assert get.json()["total"] == 3  # The default analyst user has a queue

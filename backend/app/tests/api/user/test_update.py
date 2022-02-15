@@ -107,13 +107,13 @@ def test_update_valid_alert_queue(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "default_alert_queue"
-    assert history.json()["items"][0]["diff"]["old_value"] == "test_queue"
-    assert history.json()["items"][0]["diff"]["new_value"] == "test_queue2"
-    assert history.json()["items"][0]["snapshot"]["default_alert_queue"]["value"] == "test_queue2"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "default_alert_queue"
+    assert history.json()["items"][1]["diff"]["old_value"] == "test_queue"
+    assert history.json()["items"][1]["diff"]["new_value"] == "test_queue2"
+    assert history.json()["items"][1]["snapshot"]["default_alert_queue"]["value"] == "test_queue2"
 
 
 def test_update_valid_event_queue(client_valid_access_token, db):
@@ -131,13 +131,13 @@ def test_update_valid_event_queue(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "default_event_queue"
-    assert history.json()["items"][0]["diff"]["old_value"] == "test_queue"
-    assert history.json()["items"][0]["diff"]["new_value"] == "test_queue2"
-    assert history.json()["items"][0]["snapshot"]["default_event_queue"]["value"] == "test_queue2"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "default_event_queue"
+    assert history.json()["items"][1]["diff"]["old_value"] == "test_queue"
+    assert history.json()["items"][1]["diff"]["new_value"] == "test_queue2"
+    assert history.json()["items"][1]["snapshot"]["default_event_queue"]["value"] == "test_queue2"
 
 
 @pytest.mark.parametrize(
@@ -164,15 +164,15 @@ def test_update_valid_roles(client_valid_access_token, db, values):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "roles"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] is None
-    assert history.json()["items"][0]["diff"]["added_to_list"] == values
-    assert history.json()["items"][0]["diff"]["removed_from_list"] == initial_roles
-    assert len(history.json()["items"][0]["snapshot"]["roles"]) == len(set(values))
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "roles"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["diff"]["added_to_list"] == values
+    assert history.json()["items"][1]["diff"]["removed_from_list"] == initial_roles
+    assert len(history.json()["items"][1]["snapshot"]["roles"]) == len(set(values))
 
 
 @pytest.mark.parametrize(
@@ -206,13 +206,13 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == key
-    assert history.json()["items"][0]["diff"]["old_value"] == initial_value
-    assert history.json()["items"][0]["diff"]["new_value"] == updated_value
-    assert history.json()["items"][0]["snapshot"]["username"] == obj.username
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == key
+    assert history.json()["items"][1]["diff"]["old_value"] == initial_value
+    assert history.json()["items"][1]["diff"]["new_value"] == updated_value
+    assert history.json()["items"][1]["snapshot"]["username"] == obj.username
 
 
 @pytest.mark.parametrize(
@@ -238,10 +238,10 @@ def test_update_password(client_valid_access_token, db, initial_value, updated_v
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
-    assert history.json()["total"] == 1
-    assert history.json()["items"][0]["action"] == "UPDATE"
-    assert history.json()["items"][0]["action_by"] == "Analyst"
-    assert history.json()["items"][0]["field"] == "password"
-    assert history.json()["items"][0]["diff"]["old_value"] is None
-    assert history.json()["items"][0]["diff"]["new_value"] is None
-    assert history.json()["items"][0]["snapshot"]["username"] == "johndoe"
+    assert history.json()["total"] == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["field"] == "password"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["snapshot"]["username"] == "johndoe"
