@@ -8,7 +8,7 @@ import { BaseApi } from "./base";
 import { observableHistoryReadPage } from "@/models/history";
 
 const api = new BaseApi();
-const endpoint = "/observable/instance/";
+const endpoint = "/observable/";
 
 export const ObservableInstance = {
   create: (data: observableCreate, getAfterCreate = false): Promise<void> =>
