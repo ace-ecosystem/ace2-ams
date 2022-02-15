@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from db.database import engine, get_db
 from main import app
+from tests import helpers
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -20,6 +21,11 @@ def apply_migrations():
 
     alembic.command.downgrade(config, "base")
     alembic.command.upgrade(config, "head")
+
+    # Add the analyst user so API calls that create history entries have a valid user to link to.
+    session_db = next(get_db())
+    helpers.create_user(username="analyst", db=session_db)
+
     yield
     alembic.command.downgrade(config, "base")
 
@@ -74,7 +80,7 @@ def client_valid_access_token(client, monkeypatch):
     """
 
     def mock_validate_access_token():
-        return {"sub": "analyst", "full_name": "Analyst"}
+        return {"sub": "analyst"}
 
     # Due to how imports work, patching __code__ accounts for all cases for how the function is imported and used.
     monkeypatch.setattr("core.auth.validate_access_token.__code__", mock_validate_access_token.__code__)

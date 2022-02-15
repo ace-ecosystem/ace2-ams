@@ -81,7 +81,7 @@ def test_get_filter_disposition(client_valid_access_token, db):
 
 def test_get_filter_disposition_user(client_valid_access_token, db):
     helpers.create_alert(db)
-    helpers.create_alert(db, disposition_user="analyst")
+    alert_tree = helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="analyst")
 
     # There should be 2 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -90,13 +90,44 @@ def test_get_filter_disposition_user(client_valid_access_token, db):
     # There should only be 1 alert when we filter by the disposition user
     get = client_valid_access_token.get("/api/alert/?disposition_user=analyst")
     assert get.json()["total"] == 1
-    assert get.json()["items"][0]["disposition_user"]["username"] == "analyst"
+    assert get.json()["items"][0]["uuid"] == str(alert_tree.node_uuid)
+
+
+def test_get_filter_disposition_user_multiple(client_valid_access_token, db):
+    helpers.create_alert_disposition(value="DELIVERY", rank=2, db=db)
+    helpers.create_alert(db)
+
+    # This alert was first dispositioned by alice
+    alert_tree = helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="alice")
+
+    # This alert was first dispositioned by analyst
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="analyst")
+
+    # analyst re-dispositions alice's alert
+    update = client_valid_access_token.patch(
+        "/api/alert/", json=[{"disposition": "DELIVERY", "uuid": str(alert_tree.node_uuid)}]
+    )
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+
+    # Verify that the alert is no longer dispositioned by alice
+    get = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}")
+    assert get.json()["disposition_user"]["username"] == "analyst"
+
+    # There should be 3 total alerts
+    get = client_valid_access_token.get("/api/alert/")
+    assert get.json()["total"] == 3
+
+    # There should still be 1 alert when we filter by the disposition user alice
+    get = client_valid_access_token.get("/api/alert/?disposition_user=alice")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["uuid"] == str(alert_tree.node_uuid)
 
 
 def test_get_filter_dispositioned_after(client_valid_access_token, db):
+    now = datetime.utcnow()
     helpers.create_alert(db)
-    alert_tree2 = helpers.create_alert(db, disposition_time=datetime.utcnow())
-    helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(seconds=5))
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now)
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now + timedelta(seconds=5))
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -105,15 +136,16 @@ def test_get_filter_dispositioned_after(client_valid_access_token, db):
     # There should only be 1 alert when we filter by dispositioned_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"dispositioned_after": alert_tree2.node.disposition_time}
+    params = {"dispositioned_after": now}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
 def test_get_filter_dispositioned_before(client_valid_access_token, db):
+    now = datetime.utcnow()
     helpers.create_alert(db)
-    helpers.create_alert(db, disposition_time=datetime.utcnow() - timedelta(seconds=5))
-    alert_tree3 = helpers.create_alert(db, disposition_time=datetime.utcnow())
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now - timedelta(seconds=5))
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now)
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -122,15 +154,18 @@ def test_get_filter_dispositioned_before(client_valid_access_token, db):
     # There should only be 1 alert when we filter by dispositioned_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"dispositioned_before": alert_tree3.node.disposition_time}
+    params = {"dispositioned_before": now}
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
 
 
 def test_get_filter_dispositioned_after_and_before(client_valid_access_token, db):
-    alert_tree1 = helpers.create_alert(db, disposition_time=datetime.utcnow() - timedelta(days=1))
-    helpers.create_alert(db, disposition_time=datetime.utcnow())
-    alert_tree3 = helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(days=1))
+    now = datetime.utcnow()
+    after = now - timedelta(days=1)
+    before = now + timedelta(days=1)
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=after)
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now)
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=before)
 
     # There should be 3 total alerts
     get = client_valid_access_token.get("/api/alert/")
@@ -140,8 +175,8 @@ def test_get_filter_dispositioned_after_and_before(client_valid_access_token, db
     # But the timestamp has a timezone specified, which uses the + symbol that needs to be
     # urlencoded since it is a reserved URL character.
     params = {
-        "dispositioned_after": alert_tree1.node.disposition_time,
-        "dispositioned_before": alert_tree3.node.disposition_time,
+        "dispositioned_after": after,
+        "dispositioned_before": before,
     }
     get = client_valid_access_token.get(f"/api/alert/?{urlencode(params)}")
     assert get.json()["total"] == 1
@@ -567,8 +602,10 @@ def test_get_sort_by_disposition(client_valid_access_token, db):
 
 
 def test_get_sort_by_disposition_time(client_valid_access_token, db):
-    alert_tree1 = helpers.create_alert(db, disposition_time=datetime.utcnow())
-    alert_tree2 = helpers.create_alert(db, disposition_time=datetime.utcnow() + timedelta(seconds=5))
+    alert_tree1 = helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=datetime.utcnow())
+    alert_tree2 = helpers.create_alert(
+        db, disposition="FALSE_POSITIVE", update_time=datetime.utcnow() + timedelta(seconds=5)
+    )
 
     # If you sort descending, the newest alert (alert2) should appear first
     get = client_valid_access_token.get("/api/alert/?sort=disposition_time|desc")
@@ -584,8 +621,8 @@ def test_get_sort_by_disposition_time(client_valid_access_token, db):
 
 
 def test_get_sort_by_disposition_user(client_valid_access_token, db):
-    alert_tree1 = helpers.create_alert(db, disposition_user="alice")
-    alert_tree2 = helpers.create_alert(db, disposition_user="bob")
+    alert_tree1 = helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="alice")
+    alert_tree2 = helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="bob")
     alert_tree3 = helpers.create_alert(db)
 
     # If you sort descending: null user, bob, alice

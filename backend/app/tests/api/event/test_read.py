@@ -1,6 +1,7 @@
 import uuid
 
 from datetime import datetime, timedelta
+from dateutil.parser import parse
 from fastapi import status
 from urllib.parse import urlencode
 
@@ -25,6 +26,106 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 # VALID TESTS
 #
+
+
+def test_auto_alert_time(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The auto_alert_time should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert get.json()["auto_alert_time"] is None
+
+    # Add an alert to the event
+    now = datetime.utcnow()
+    alert_tree1 = helpers.create_alert(db=db, event=event, insert_time=now)
+
+    # Verify the auto_alert_time
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert parse(get.json()["auto_alert_time"]).timestamp() == alert_tree1.node.insert_time.timestamp()
+
+    # Add a second alert to the event with an earlier insert time
+    earlier = now - timedelta(seconds=5)
+    alert_tree2 = helpers.create_alert(db=db, event=event, insert_time=earlier)
+
+    # Verify the new auto_alert_time
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert parse(get.json()["auto_alert_time"]).timestamp() == alert_tree2.node.insert_time.timestamp()
+
+
+def test_auto_disposition_time(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The auto_disposition_time should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert get.json()["auto_disposition_time"] is None
+
+    # Add an alert to the event
+    now = datetime.utcnow()
+    alert_tree1 = helpers.create_alert(db=db, event=event, disposition="DELIVERY", update_time=now)
+
+    # Verify the auto_disposition_time
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert parse(get.json()["auto_disposition_time"]) == alert_tree1.node.disposition_time_earliest
+
+    # Add a second alert to the event with an earlier disposition time
+    earlier = now - timedelta(seconds=5)
+    alert_tree2 = helpers.create_alert(db=db, event=event, disposition="DELIVERY", update_time=earlier)
+
+    # Verify the new auto_disposition_time
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert parse(get.json()["auto_disposition_time"]) == alert_tree2.node.disposition_time_earliest
+
+
+def test_auto_event_time(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The auto_event_time should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert get.json()["auto_event_time"] is None
+
+    # Add an alert to the event
+    now = datetime.utcnow()
+    alert_tree1 = helpers.create_alert(db=db, event=event, event_time=now)
+
+    # Verify the auto_event_time
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert parse(get.json()["auto_event_time"]).timestamp() == alert_tree1.node.event_time.timestamp()
+
+    # Add a second alert to the event with an earlier insert time
+    earlier = now - timedelta(seconds=5)
+    alert_tree2 = helpers.create_alert(db=db, event=event, event_time=earlier)
+
+    # Verify the new auto_event_time
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert parse(get.json()["auto_event_time"]).timestamp() == alert_tree2.node.event_time.timestamp()
+
+
+def test_auto_ownership_time(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The auto_ownership_time should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert get.json()["auto_ownership_time"] is None
+
+    # Add an alert to the event
+    now = datetime.utcnow()
+    alert_tree1 = helpers.create_alert(db=db, event=event, owner="alice", update_time=now)
+
+    # Verify the auto_ownership_time
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert parse(get.json()["auto_ownership_time"]) == alert_tree1.node.ownership_time_earliest
+
+    # Add a second alert to the event with an earlier ownership time
+    earlier = now - timedelta(seconds=5)
+    alert_tree2 = helpers.create_alert(db=db, event=event, owner="alice", update_time=earlier)
+
+    # Verify the new auto_ownership_time
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert parse(get.json()["auto_ownership_time"]) == alert_tree2.node.ownership_time_earliest
 
 
 def test_get_all_pagination(client_valid_access_token, db):
@@ -73,7 +174,7 @@ def test_get_filter_alert_time_after(client_valid_access_token, db):
     alert_tree2 = helpers.create_alert(event=event2, insert_time=datetime.utcnow(), db=db)
 
     event3 = helpers.create_event(name="event3", db=db)
-    helpers.create_alert(event=event3, insert_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    alert_tree3 = helpers.create_alert(event=event3, insert_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client_valid_access_token.get("/api/event/")
@@ -86,11 +187,12 @@ def test_get_filter_alert_time_after(client_valid_access_token, db):
     get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
+    assert parse(get.json()["items"][0]["auto_alert_time"]) == alert_tree3.node.insert_time
 
 
 def test_get_filter_alert_time_before(client_valid_access_token, db):
     event1 = helpers.create_event(name="event1", db=db)
-    helpers.create_alert(event=event1, insert_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    alert_tree1 = helpers.create_alert(event=event1, insert_time=datetime.utcnow() - timedelta(seconds=5), db=db)
 
     event2 = helpers.create_event(name="event2", db=db)
     alert_tree2 = helpers.create_alert(event=event2, insert_time=datetime.utcnow(), db=db)
@@ -109,6 +211,7 @@ def test_get_filter_alert_time_before(client_valid_access_token, db):
     get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
+    assert parse(get.json()["items"][0]["auto_alert_time"]) == alert_tree1.node.insert_time
 
 
 def test_get_filter_contain_time_after(client_valid_access_token, db):
@@ -205,14 +308,16 @@ def test_get_filter_disposition(client_valid_access_token, db):
 
 
 def test_get_filter_disposition_time_after(client_valid_access_token, db):
+    now = datetime.utcnow()
+
     event1 = helpers.create_event(name="event1", db=db)
-    helpers.create_alert(event=event1, disposition_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    helpers.create_alert(event=event1, disposition="DELIVERY", update_time=now - timedelta(seconds=5), db=db)
 
     event2 = helpers.create_event(name="event2", db=db)
-    alert_tree2 = helpers.create_alert(event=event2, disposition_time=datetime.utcnow(), db=db)
+    helpers.create_alert(event=event2, disposition="DELIVERY", update_time=now, db=db)
 
     event3 = helpers.create_event(name="event3", db=db)
-    helpers.create_alert(event=event3, disposition_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    helpers.create_alert(event=event3, disposition="DELIVERY", update_time=now + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client_valid_access_token.get("/api/event/")
@@ -221,21 +326,23 @@ def test_get_filter_disposition_time_after(client_valid_access_token, db):
     # There should only be 1 event when we filter by disposition_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"disposition_time_after": alert_tree2.node.disposition_time}
+    params = {"disposition_time_after": now}
     get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
 
 def test_get_filter_disposition_time_before(client_valid_access_token, db):
+    now = datetime.utcnow()
+
     event1 = helpers.create_event(name="event1", db=db)
-    helpers.create_alert(event=event1, disposition_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    helpers.create_alert(event=event1, disposition="DELIVERY", update_time=now - timedelta(seconds=5), db=db)
 
     event2 = helpers.create_event(name="event2", db=db)
-    alert_tree2 = helpers.create_alert(event=event2, disposition_time=datetime.utcnow(), db=db)
+    helpers.create_alert(event=event2, disposition="DELIVERY", update_time=now, db=db)
 
     event3 = helpers.create_event(name="event3", db=db)
-    helpers.create_alert(event=event3, disposition_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    helpers.create_alert(event=event3, disposition="DELIVERY", update_time=now + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client_valid_access_token.get("/api/event/")
@@ -244,7 +351,7 @@ def test_get_filter_disposition_time_before(client_valid_access_token, db):
     # There should only be 1 event when we filter by disposition_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"disposition_time_before": alert_tree2.node.disposition_time}
+    params = {"disposition_time_before": now}
     get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"

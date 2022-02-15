@@ -60,7 +60,7 @@ oauth2_access_scheme = OAuth2PasswordBearerCookieOrHeader(tokenUrl="/api/auth", 
 oauth2_refresh_scheme = OAuth2PasswordBearerCookieOrHeader(tokenUrl="/api/auth", token_type="refresh_token")
 
 
-def _create_token(token_type: str, lifetime: timedelta, sub: str, full_name: str) -> str:
+def _create_token(token_type: str, lifetime: timedelta, sub: str) -> str:
     """
     Generic function to generate and return a JWT.
 
@@ -75,7 +75,6 @@ def _create_token(token_type: str, lifetime: timedelta, sub: str, full_name: str
         "exp": datetime.utcnow() + lifetime,
         "iat": datetime.utcnow(),
         "sub": sub,
-        "full_name": full_name,
         # A UUID is used so that if the token is generated at the exact same time it will be different
         "ace2_uuid": str(uuid.uuid4()),
     }
@@ -83,7 +82,7 @@ def _create_token(token_type: str, lifetime: timedelta, sub: str, full_name: str
     return jwt.encode(payload, get_settings().jwt_secret, algorithm=get_settings().jwt_algorithm)
 
 
-def create_access_token(sub: str, full_name: str) -> str:
+def create_access_token(sub: str) -> str:
     """
     Generates and returns an access_token JWT that is used to authenticate to the API endpoints.
 
@@ -95,11 +94,10 @@ def create_access_token(sub: str, full_name: str) -> str:
         token_type="access_token",
         lifetime=timedelta(seconds=get_settings().jwt_access_expire_seconds),
         sub=sub,
-        full_name=full_name,
     )
 
 
-def create_refresh_token(sub: str, full_name: str) -> str:
+def create_refresh_token(sub: str) -> str:
     """
     Generates and returns a refresh_token JWT that is used to obtain a new access_token.
 
@@ -111,7 +109,6 @@ def create_refresh_token(sub: str, full_name: str) -> str:
         token_type="refresh_token",
         lifetime=timedelta(seconds=get_settings().jwt_refresh_expire_seconds),
         sub=sub,
-        full_name=full_name,
     )
 
 
@@ -186,12 +183,12 @@ def refresh_token(db: Session = Depends(get_db), refresh_token: str = Depends(oa
                 )
 
             # Rotate the refresh token and save it to the database
-            new_refresh_token = create_refresh_token(sub=claims["sub"], full_name=claims["full_name"])
+            new_refresh_token = create_refresh_token(sub=claims["sub"])
             user.refresh_token = new_refresh_token
             db.commit()
 
             return {
-                "access_token": create_access_token(sub=claims["sub"], full_name=claims["full_name"]),
+                "access_token": create_access_token(sub=claims["sub"]),
                 "refresh_token": new_refresh_token,
                 "user": user,
             }

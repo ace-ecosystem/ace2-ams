@@ -9,6 +9,7 @@ import {
   alertUpdate,
 } from "@/models/alert";
 import { UUID } from "@/models/base";
+import { alertHistoryReadPage } from "@/models/history";
 import { BaseApi } from "./base";
 
 const api = new BaseApi();
@@ -20,6 +21,9 @@ export const Alert = {
 
   read: async (uuid: UUID): Promise<alertTreeRead> =>
     await api.read(`${endpoint}${uuid}`),
+
+  readHistory: async (uuid: UUID): Promise<alertHistoryReadPage> =>
+    await api.read(`${endpoint}${uuid}/history`),
 
   readPage: (params?: alertFilterParams): Promise<alertReadPage> => {
     let formattedParams = {} as alertFilterParams;

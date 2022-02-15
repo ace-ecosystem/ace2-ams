@@ -80,7 +80,7 @@ def read_history_records(history_table: DeclarativeMeta, record_uuid: UUID, db: 
 
 def record_create_history(
     history_table: DeclarativeMeta,
-    action_by: str,
+    action_by: User,
     record_read_model: BaseModel,
     record_table: DeclarativeMeta,
     record_uuid: UUID,
@@ -100,7 +100,7 @@ def record_create_history(
     commit(db)
 
 
-def record_comment_history(record_node: Node, action_by: str, diff: Diff, db: Session):
+def record_comment_history(record_node: Node, action_by: User, diff: Diff, db: Session):
     if record_node.node_type == "alert":
         record_update_histories(
             history_table=AlertHistory,
@@ -135,15 +135,19 @@ def record_comment_history(record_node: Node, action_by: str, diff: Diff, db: Se
 
 def record_update_histories(
     history_table: DeclarativeMeta,
-    action_by: str,
+    action_by: User,
     record_read_model: BaseModel,
     record_table: DeclarativeMeta,
     record_uuid: UUID,
     diffs: list[Diff],
     db: Session,
+    action_time: Optional[datetime] = None,
 ):
     db_obj = read(uuid=record_uuid, db_table=record_table, db=db)
     snapshot = json.loads(record_read_model(**db_obj.__dict__).json())
+
+    if action_time is None:
+        action_time = datetime.utcnow()
 
     for diff in diffs:
         if diff:
@@ -151,7 +155,7 @@ def record_update_histories(
                 history_table(
                     action="UPDATE",
                     action_by=action_by,
-                    action_time=datetime.utcnow(),
+                    action_time=action_time,
                     record_uuid=record_uuid,
                     field=diff.field,
                     diff={

@@ -33,7 +33,7 @@ def test_delete_nonexistent_uuid(client_valid_access_token):
 
 def test_delete(client_valid_access_token, db):
     # Create the object
-    obj = helpers.create_user_role(value="test_role", db=db)
+    obj = helpers.create_user_role(value="test_role2", db=db)
 
     # Read it back
     get = client_valid_access_token.get(f"/api/user/role/{obj.uuid}")
