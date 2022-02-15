@@ -1,23 +1,24 @@
 import {
-  observableInstanceCreate,
-  observableInstanceRead,
-  observableInstanceUpdate,
-} from "@/models/observableInstance";
+  observableCreate,
+  observableRead,
+  observableUpdate,
+} from "@/models/observable";
 import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
+import { observableHistoryReadPage } from "@/models/history";
 
 const api = new BaseApi();
 const endpoint = "/observable/instance/";
 
 export const ObservableInstance = {
-  create: (
-    data: observableInstanceCreate,
-    getAfterCreate = false,
-  ): Promise<void> => api.create(endpoint, data, getAfterCreate),
+  create: (data: observableCreate, getAfterCreate = false): Promise<void> =>
+    api.create(endpoint, data, getAfterCreate),
 
-  read: (uuid: UUID): Promise<observableInstanceRead> =>
-    api.read(`${endpoint}${uuid}`),
+  read: (uuid: UUID): Promise<observableRead> => api.read(`${endpoint}${uuid}`),
 
-  update: (uuid: UUID, data: observableInstanceUpdate): Promise<void> =>
+  readHistory: async (uuid: UUID): Promise<observableHistoryReadPage> =>
+    await api.read(`${endpoint}${uuid}/history`),
+
+  update: (uuid: UUID, data: observableUpdate): Promise<void> =>
     api.update(`${endpoint}${uuid}`, data),
 };
