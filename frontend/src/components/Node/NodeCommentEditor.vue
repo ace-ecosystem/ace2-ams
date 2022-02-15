@@ -4,6 +4,9 @@
       <div class="p-listbox p-component">
         <div class="p-listbox-list-wrapper">
           <ul class="p-listbox-list">
+            <li v-if="!comments.length" class="p-listbox-item">
+              No comments found.
+            </li>
             <li
               v-for="comment in comments"
               :key="comment.uuid"
