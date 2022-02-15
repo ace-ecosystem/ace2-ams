@@ -66,22 +66,15 @@
 </template>
 
 <script setup>
-  import {
-    computed,
-    defineProps,
-    ref,
-    defineEmits,
-    watch,
-    onMounted,
-  } from "vue";
+  import { computed, defineProps, ref, defineEmits, onMounted } from "vue";
 
-  import Listbox from "primevue/listbox";
   import Button from "primevue/button";
+  import InputText from "primevue/inputtext";
+  import Listbox from "primevue/listbox";
+  import MultiSelect from "primevue/multiselect";
 
   import { useNodeThreatStore } from "@/stores/nodeThreat";
   import { useNodeThreatTypeStore } from "@/stores/nodeThreatType";
-  import MultiSelect from "primevue/multiselect";
-  import InputText from "primevue/inputtext";
 
   const nodeThreatStore = useNodeThreatStore();
   const nodeThreatTypeStore = useNodeThreatTypeStore();
@@ -90,14 +83,14 @@
     modelValue: { type: Array, required: true },
   });
 
-  const newThreatName = ref(null);
-  const newThreatTypes = ref([]);
-
   const emit = defineEmits(["update:modelValue"]);
 
-  const showEditThreat = ref(false);
   const editingExistingThreat = ref(false);
   const editingExistingThreatUuid = ref();
+  const newThreatName = ref(null);
+  const newThreatTypes = ref([]);
+  const selectedThreats = ref(props.modelValue);
+  const showEditThreat = ref(false);
 
   const formatThreatTypes = (threatTypes) => {
     return threatTypes.map((x) => x.value).join(", ");
@@ -117,6 +110,8 @@
       editingExistingThreat.value = true;
       editingExistingThreatUuid.value = threat.uuid;
       newThreatName.value = threat.value;
+      // Preselect any threat types that already belong to the current threat
+      // that also exist in the nodeThreatTypeStore
       newThreatTypes.value = nodeThreatTypeStore.allItems.filter(
         (threatTypeOption) =>
           threat.types.some(
@@ -146,7 +141,6 @@
     emit("update:modelValue", event.value);
   };
 
-  const selectedThreats = ref(props.modelValue);
   const editThreatCloseIcon = computed(() => {
     if (editingExistingThreat.value) {
       return "pi pi-times";
