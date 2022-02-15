@@ -32,10 +32,10 @@ class User(Base):
 
     enabled = Column(Boolean, default=True, nullable=False)
 
+    # History is lazy loaded and is not included by default when fetching a user from the API.
     history = relationship(
         "UserHistory",
         primaryjoin="UserHistory.record_uuid == User.uuid",
-        lazy="selectin",
         order_by="UserHistory.action_time",
     )
 

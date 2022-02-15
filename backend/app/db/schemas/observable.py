@@ -36,10 +36,10 @@ class Observable(Node):
 
     for_detection = Column(Boolean, default=False, nullable=False)
 
+    # History is lazy loaded and is not included by default when fetching an observable from the API.
     history = relationship(
         "ObservableHistory",
         primaryjoin="ObservableHistory.record_uuid == Observable.uuid",
-        lazy="selectin",
         order_by="ObservableHistory.action_time",
     )
 

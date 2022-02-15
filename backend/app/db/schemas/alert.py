@@ -44,10 +44,10 @@ class Alert(Node):
 
     event = relationship("Event", foreign_keys=[event_uuid])
 
+    # History is lazy loaded and is not included by default when fetching an alert from the API.
     history = relationship(
         "AlertHistory",
         primaryjoin="AlertHistory.record_uuid == Alert.uuid",
-        lazy="selectin",
         order_by="AlertHistory.action_time",
     )
 

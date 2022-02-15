@@ -41,10 +41,10 @@ class Event(Node):
 
     event_time = Column(DateTime(timezone=True), index=True)
 
+    # History is lazy loaded and is not included by default when fetching an event from the API.
     history = relationship(
         "EventHistory",
         primaryjoin="EventHistory.record_uuid == Event.uuid",
-        lazy="selectin",
         order_by="EventHistory.action_time",
     )
 
