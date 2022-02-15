@@ -1,4 +1,4 @@
-import { useEventRemediationStore } from './../stores/eventRemediation';
+import { useEventRemediationStore } from "./../stores/eventRemediation";
 import {
   alertFilterParams,
   alertRead,
