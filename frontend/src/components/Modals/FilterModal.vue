@@ -49,7 +49,7 @@
 
   import Button from "primevue/button";
 
-  import BaseModal from "@/components/Modals/BaseModal";
+  import BaseModal from "@/components/Modals/BaseModal.vue";
   import FilterInput from "@/components/Filters/FilterInput.vue";
 
   import { useFilterStore } from "@/stores/filter";

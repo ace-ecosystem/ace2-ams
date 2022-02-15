@@ -1,4 +1,4 @@
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 
 import FilterInput from "@/components/Filters/FilterInput.vue";
 import { mount } from "@vue/test-utils";
@@ -7,6 +7,7 @@ import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
 import { observableTypeRead } from "@/models/observableType";
 import { userRead } from "@/models/user";
+import { createCustomPinia } from "@unit/helpers";
 
 const FILTERS_STUB = [
   {
@@ -96,7 +97,7 @@ function factory(
       modelValue: filter,
     },
     global: {
-      plugins: [createTestingPinia(options)],
+      plugins: [createCustomPinia(options)],
       provide: {
         nodeType: "alerts",
         availableFilters: FILTERS_STUB,

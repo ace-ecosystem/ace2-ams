@@ -1,14 +1,15 @@
 import FilterChipContainer from "@/components/Filters/FilterChipContainer.vue";
 import { shallowMount, VueWrapper } from "@vue/test-utils";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
+import { createCustomPinia } from "@unit/helpers";
 
 describe("FilterChipContainer.vue", () => {
   function factory(options?: TestingOptions) {
     const wrapper: VueWrapper<any> = shallowMount(FilterChipContainer, {
       global: {
-        plugins: [createTestingPinia(options)],
+        plugins: [createCustomPinia(options)],
         provide: {
           nodeType: "alerts",
         },

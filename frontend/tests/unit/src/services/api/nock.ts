@@ -7,7 +7,7 @@ const defaultReplyHeaders = {
   "access-control-allow-credentials": "true",
 };
 
-const myNock = nock("http://test_app.com:1234").defaultReplyHeaders(
+const myNock = nock("http://localhost:3000/api").defaultReplyHeaders(
   defaultReplyHeaders,
 );
 

@@ -97,7 +97,7 @@
   import TabView from "primevue/tabview";
   import Textarea from "primevue/textarea";
 
-  import BaseModal from "@/components/Modals/BaseModal";
+  import BaseModal from "@/components/Modals/BaseModal.vue";
 
   import { Event } from "@/services/api/event";
   import { NodeComment } from "@/services/api/nodeComment";

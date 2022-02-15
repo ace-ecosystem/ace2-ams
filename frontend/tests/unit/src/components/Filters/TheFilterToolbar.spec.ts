@@ -1,15 +1,16 @@
 import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
 import { shallowMount, VueWrapper } from "@vue/test-utils";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import * as helpers from "@/etc/helpers";
 import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
+import { createCustomPinia } from "@unit/helpers";
 
 describe("TheFilterToolbar.vue", () => {
   function factory(options?: TestingOptions) {
     const wrapper: VueWrapper<any> = shallowMount(TheFilterToolbar, {
       global: {
-        plugins: [createTestingPinia(options)],
+        plugins: [createCustomPinia(options)],
         provide: {
           nodeType: "alerts",
         },
@@ -63,7 +64,7 @@ describe("TheFilterToolbar.vue", () => {
     const { wrapper } = factory({ stubActions: false });
 
     let link = wrapper.vm.generateLink();
-    expect(link).toEqual("http://localhost/manage_alerts");
+    expect(link).toEqual("http://localhost:3000/manage_alerts");
 
     wrapper.vm.filterStore.bulkSetFilters({
       nodeType: "alerts",
@@ -72,17 +73,17 @@ describe("TheFilterToolbar.vue", () => {
 
     link = wrapper.vm.generateLink();
     expect(link).toEqual(
-      "http://localhost/manage_alerts?name=hello+world&owner=test_analyst",
+      "http://localhost:3000/manage_alerts?name=hello+world&owner=test_analyst",
     );
   });
   it("calls copyToClipboard with generated link when copyLink is called", () => {
-    const spy = jest
+    const spy = vi
       .spyOn(helpers, "copyToClipboard")
       .mockImplementationOnce(() => null);
     const { wrapper } = factory({ stubActions: false });
 
     wrapper.vm.copyLink();
-    expect(spy).toHaveBeenCalledWith("http://localhost/manage_alerts");
+    expect(spy).toHaveBeenCalledWith("http://localhost:3000/manage_alerts");
   });
   it("correctly sets up filterModel on mount", () => {
     const { wrapper } = factory();

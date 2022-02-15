@@ -46,7 +46,7 @@
   import Message from "primevue/message";
   import ProgressSpinner from "primevue/progressspinner";
 
-  import BaseModal from "@/components/Modals/BaseModal";
+  import BaseModal from "@/components/Modals/BaseModal.vue";
 
   import { nodeSelectedStores, nodeStores } from "@/stores/index";
   import { useModalStore } from "@/stores/modal";

@@ -43,7 +43,7 @@
   import Message from "primevue/message";
   import Textarea from "primevue/textarea";
 
-  import BaseModal from "@/components/Modals/BaseModal";
+  import BaseModal from "@/components/Modals/BaseModal.vue";
 
   import { NodeComment } from "@/services/api/nodeComment";
 

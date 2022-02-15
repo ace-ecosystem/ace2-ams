@@ -1,17 +1,18 @@
 import App from "@/App.vue";
 import { mount } from "@vue/test-utils";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
 
 import { useAuthStore } from "@/stores/auth";
 import { useFilterStore } from "@/stores/filter";
+import { createCustomPinia } from "@unit/helpers";
 
 function factory(args: {
   authenticated?: boolean;
   filters?: Record<string, unknown>;
   options?: TestingOptions;
 }) {
-  const testingPinia = createTestingPinia(args.options);
+  const testingPinia = createCustomPinia(args.options);
   const authStore = useAuthStore();
   const filterStore = useFilterStore();
 

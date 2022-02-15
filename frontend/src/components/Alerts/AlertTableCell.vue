@@ -53,7 +53,7 @@
 <script setup>
   import { defineProps } from "vue";
 
-  import NodeTagVue from "../Node/NodeTag.vue";
+  import NodeTagVue from "@/components/Node/NodeTag.vue";
   import NodeComment from "../Node/NodeComment.vue";
 
   import { getAllAlertTags, getAlertLink } from "@/etc/helpers";
@@ -66,7 +66,7 @@
   const formatDateTime = (dateTime) => {
     if (dateTime) {
       const d = new Date(dateTime);
-      return d.toLocaleString("en-US");
+      return d.toLocaleString("en-US", { timeZone: "UTC" });
     }
 
     return "None";

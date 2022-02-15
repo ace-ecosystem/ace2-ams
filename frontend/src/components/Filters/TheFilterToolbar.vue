@@ -53,13 +53,13 @@
   import { inject, ref } from "vue";
 
   import Button from "primevue/button";
-  import FilterChipContainer from "./FilterChipContainer.vue";
-  import DateRangePicker from "@/components/UserInterface/DateRangePicker";
-  import EditFilterModal from "@/components/Modals/FilterModal";
+  import FilterChipContainer from "@/components/Filters/FilterChipContainer.vue";
+  import DateRangePicker from "@/components/UserInterface/DateRangePicker.vue";
+  import EditFilterModal from "@/components/Modals/FilterModal.vue";
   import Toolbar from "primevue/toolbar";
   import OverlayPanel from "primevue/overlaypanel";
   import SplitButton from "primevue/splitbutton";
-  import FilterInput from "./FilterInput.vue";
+  import FilterInput from "@/components/Filters/FilterInput.vue";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";

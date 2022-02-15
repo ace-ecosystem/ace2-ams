@@ -26,7 +26,7 @@
   import { computed, defineProps } from "vue";
   import Skeleton from "primevue/skeleton";
 
-  import NodeTagVue from "../Node/NodeTag.vue";
+  import NodeTagVue from "@/components/Node/NodeTag.vue";
 
   const props = defineProps({
     observables: { type: [Array, null], required: true },

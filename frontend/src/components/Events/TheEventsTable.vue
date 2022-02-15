@@ -24,9 +24,9 @@
 <script setup>
   import { ref } from "vue";
 
-  import TheNodeTable from "../Node/TheNodeTable";
-  import EventTableCell from "./EventTableCell";
-  import EventTableExpansion from "./EventTableExpansion";
+  import TheNodeTable from "@/components/Node/TheNodeTable.vue";
+  import EventTableCell from "@/components/Events/EventTableCell.vue";
+  import EventTableExpansion from "@/components/Events/EventTableExpansion.vue";
 
   import { Alert } from "@/services/api/alert";
   import { parseAlertSummary } from "@/etc/helpers";

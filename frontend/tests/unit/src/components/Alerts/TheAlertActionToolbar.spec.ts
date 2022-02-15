@@ -1,10 +1,11 @@
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import { mount, VueWrapper } from "@vue/test-utils";
 
 import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
 import Toolbar from "primevue/toolbar";
 import { useAlertTableStore } from "@/stores/alertTable";
 import { useAlertStore } from "@/stores/alert";
+import { createCustomPinia } from "@unit/helpers";
 
 function factory(options?: TestingOptions, reloadObject = "table") {
   const wrapper: VueWrapper<any> = mount(TheAlertActionToolbar, {
@@ -12,7 +13,7 @@ function factory(options?: TestingOptions, reloadObject = "table") {
       reloadObject: reloadObject,
     },
     global: {
-      plugins: [createTestingPinia(options)],
+      plugins: [createCustomPinia(options)],
       provide: { nodeType: "alerts" },
       stubs: {
         AssignModal: true,

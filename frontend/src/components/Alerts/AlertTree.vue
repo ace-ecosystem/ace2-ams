@@ -57,7 +57,7 @@
 </template>
 
 <script setup>
-  import NodeTagVue from "../Node/NodeTag.vue";
+  import NodeTagVue from "@/components/Node/NodeTag.vue";
   import { onBeforeMount, defineProps, ref } from "vue";
   import { useAlertStore } from "@/stores/alert";
   const alertStore = useAlertStore();

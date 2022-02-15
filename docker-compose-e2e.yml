@@ -1,0 +1,5 @@
+version: "3.9"
+
+services:
+  gui:
+    entrypoint: bash -c 'while !</dev/tcp/api/80; do sleep 1; done; npm run build && npm run serve'
