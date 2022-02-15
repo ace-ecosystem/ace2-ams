@@ -21,7 +21,7 @@
             v-model="formFields['threats'].propertyValue"
           ></NodeThreatSelector>
           <NodeCommentEditor
-            v-if="field.name == 'comments'"
+            v-else-if="field.name == 'comments'"
             v-model="formFields['comments'].propertyValue"
           ></NodeCommentEditor>
           <NodePropertyInput
