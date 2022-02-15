@@ -20,6 +20,10 @@
             v-if="field.name == 'threats'"
             v-model="formFields['threats'].propertyValue"
           ></NodeThreatSelector>
+          <NodeCommentEditor
+            v-if="field.name == 'comments'"
+            v-model="formFields['comments'].propertyValue"
+          ></NodeCommentEditor>
           <NodePropertyInput
             v-else
             id="field.name"
@@ -65,9 +69,13 @@
   import { useEventStore } from "@/stores/event";
   import { useModalStore } from "@/stores/modal";
   import { isObject, populateEventStores } from "@/etc/helpers";
+  import NodeCommentEditor from "../Node/NodeCommentEditor.vue";
+  import { NodeComment } from "@/services/api/nodeComment";
+  import { useAuthStore } from "@/stores/auth";
 
   const modalStore = useModalStore();
   const eventStore = useEventStore();
+  const authStore = useAuthStore();
 
   const props = defineProps({
     name: { type: String, required: true },
@@ -144,6 +152,9 @@
 
     try {
       await eventStore.update(updateData.value);
+      if ("comments" in formFields.value) {
+        await saveEventComments();
+      }
     } catch (err) {
       error.value = err.message;
     }
@@ -155,6 +166,14 @@
     }
   };
 
+  const saveEventComments = async () => {
+    for (const comment of formFields.value["comments"].propertyValue) {
+      await NodeComment.update(comment.uuid, {
+        value: comment.value,
+      });
+    }
+  };
+
   function formatValue(field, value) {
     // If the field value is an array, try to build a list of strings using either
     // the valueProperty (if available), or 'value' as the valueProperty as default
@@ -162,8 +181,8 @@
       let valueProperty = "value";
       if (fieldOptionObjects.value[field].valueProperty) {
         valueProperty = fieldOptionObjects.value[field].valueProperty;
-        return value.map((x) => (x[valueProperty] ? x[valueProperty] : x));
       }
+      return value.map((x) => (x[valueProperty] ? x[valueProperty] : x));
     } else if (
       isObject(value) &&
       fieldOptionObjects.value[field].valueProperty

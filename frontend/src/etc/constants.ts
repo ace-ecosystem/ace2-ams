@@ -297,6 +297,7 @@ export const eventPropertyTypes: Record<string, string> = {
   OBSERVABLE_TYPES_PROPERTY: "observableTypes",
   OBSERVABLE_VALUE_PROPERTY: "observableValue",
   OWNER_PROPERTY: "owner",
+  COMMENTS_PROPERTY: "comments",
   PREVENTION_TOOLS_PROPERTY: "preventionTools",
   QUEUE_PROPERTY: "queue",
   REMEDIATIONS_PROPERTY: "remediations",
@@ -409,6 +410,12 @@ const eventOwnerProperty: filterOption = {
   valueProperty: "username",
 };
 
+const eventCommentProperty: filterOption = {
+  name: eventPropertyTypes.COMMENTS_PROPERTY,
+  label: "Comment",
+  type: filterTypes.INPUT_TEXT,
+};
+
 const eventPreventionToolsProperty: filterOption = {
   name: eventPropertyTypes.PREVENTION_TOOLS_PROPERTY,
   label: "Prevention Tools",
@@ -503,6 +510,7 @@ const eventVectorsProperty: filterOption = {
 export const eventEditableProperties: readonly filterOption[] = [
   eventNameProperty,
   eventOwnerProperty,
+  eventCommentProperty,
   eventRemediationProperty,
   eventPreventionToolsProperty,
   eventRiskLevelProperty,
