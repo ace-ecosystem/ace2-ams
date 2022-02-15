@@ -1,4 +1,5 @@
 import { UUID } from "./base";
+import { readPage } from "./page";
 
 export interface nodeCreate {
   uuid?: UUID;
@@ -20,11 +21,8 @@ export interface nodeRead {
   version: UUID;
 }
 
-export interface nodeReadPage {
+export interface nodeReadPage extends readPage {
   items: nodeRead[];
-  limit: number;
-  offset: number;
-  total: number;
 }
 
 export interface nodeUpdate {
