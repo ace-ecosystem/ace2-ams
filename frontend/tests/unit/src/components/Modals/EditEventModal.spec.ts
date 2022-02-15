@@ -3,9 +3,10 @@ import { eventReadFactory, mockEventUUID } from "./../../../../mocks/events";
 import { filterOption } from "@/models/base";
 import EditEventModal from "@/components/Modals/EditEventModal.vue";
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
 import nock from "nock";
+import * as helpers from "@/etc/helpers";
 
 import myNock from "@unit/services/api/nock";
 import { useModalStore } from "@/stores/modal";
@@ -15,6 +16,13 @@ const testNameField: filterOption = {
   name: "name",
   label: "Name",
   type: "inputText",
+};
+const testOwnerField: filterOption = {
+  name: "owner",
+  label: "Owner",
+  type: "select",
+  valueProperty: "username",
+  optionProperty: "displayName",
 };
 const availableEditFields: readonly filterOption[] = [testNameField];
 const mockEvent = eventReadFactory();
@@ -60,19 +68,41 @@ describe("EditEventModal.vue", () => {
     expect(wrapper.vm.isLoading).toEqual(false);
   });
 
-  it.skip("watcher loads given event and populates event stores when modal becomes active", async () => {
+  it("loads given event and populates event stores on initializeData", async () => {
+    const spy = jest
+      .spyOn(helpers, "populateEventStores")
+      .mockResolvedValueOnce(undefined);
+    const { wrapper } = factory();
+
     const getEvent = myNock
       .get(`/event/${mockEventUUID}`)
       .reply(200, mockEvent);
 
-    const { wrapper, modalStore } = factory();
-
-    modalStore.open("EditEventModal");
-    jest.setTimeout(30000);
+    await wrapper.vm.initializeData();
 
     // Check at least one of the stores in populateEventStores
-    // expect(userStore.readAll).toHaveBeenCalled()
+    expect(spy).toHaveBeenCalled();
     expect(getEvent.isDone()).toBe(true);
+    expect(wrapper.vm.isLoading).toBeFalsy();
+  });
+  it("will catch and set error if any are thrown in initializeData", async () => {
+    const spy = jest
+      .spyOn(helpers, "populateEventStores")
+      .mockResolvedValueOnce(undefined);
+    const { wrapper } = factory();
+
+    const getEvent = myNock
+      .get(`/event/${mockEventUUID}`)
+      .reply(403, mockEvent);
+
+    await wrapper.vm.initializeData();
+
+    // Check at least one of the stores in populateEventStores
+    expect(spy).toHaveBeenCalled();
+    expect(getEvent.isDone()).toBe(true);
+
+    expect(wrapper.vm.error).toEqual("Request failed with status code 403");
+    expect(wrapper.vm.isLoading).toBeFalsy();
   });
   it("correctly computes updateData", () => {
     const { wrapper } = factory();
@@ -126,13 +156,52 @@ describe("EditEventModal.vue", () => {
       name: { propertyType: "name", propertyValue: "New Name" },
     };
 
-    eventStore.update = jest.fn().mockImplementationOnce(() => {throw new Error("Request failed")})
+    eventStore.update = jest.fn().mockImplementationOnce(() => {
+      throw new Error("Request failed");
+    });
 
     await wrapper.vm.saveEvent();
 
-    expect(eventStore.update).toHaveBeenCalledWith([{ name: "New Name", uuid: "testEvent1" }]);
+    expect(eventStore.update).toHaveBeenCalledWith([
+      { name: "New Name", uuid: "testEvent1" },
+    ]);
     expect(wrapper.emitted("requestReload")).toBeFalsy();
     expect(wrapper.vm.error).toEqual("Request failed");
     expect(modalStore.close).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [{ name: testNameField }, "name", "test", "test"],
+    [{ name: testNameField }, "name", ["test"], ["test"]],
+    [{ owner: testOwnerField }, "owner", { username: "test" }, "test"],
+    [{ owner: testOwnerField }, "owner", "test", "test"],
+    [{ owner: testOwnerField }, "owner", ["test"], ["test"]],
+    [{ owner: testOwnerField }, "owner", [{ username: "test" }], ["test"]],
+    [
+      { owner: testOwnerField },
+      "owner",
+      [{ value: "test" }],
+      [{ value: "test" }],
+    ],
+  ])(
+    "will correctly format a value on formatValue",
+    (fieldOptionObjects, field, value, expected) => {
+      const { wrapper } = factory();
+      wrapper.vm.fieldOptionObjects = fieldOptionObjects;
+      const result = wrapper.vm.formatValue(field, value);
+      expect(result).toEqual(expected);
+    },
+  );
+  it("will clear the error value and execute close on handleError", () => {
+    const { wrapper, modalStore } = factory();
+    wrapper.vm.error = "test error";
+    wrapper.vm.handleError();
+    expect(wrapper.vm.error).toBeNull();
+    expect(modalStore.close).toHaveBeenCalledWith("EditEventModal");
+  });
+  it("will close the modal in modalStore on close", () => {
+    const { wrapper, modalStore } = factory();
+    wrapper.vm.close();
+    expect(modalStore.close).toHaveBeenCalledWith("EditEventModal");
   });
 });

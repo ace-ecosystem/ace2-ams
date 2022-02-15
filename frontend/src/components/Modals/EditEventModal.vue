@@ -66,8 +66,7 @@
   import { useModalStore } from "@/stores/modal";
   import { isObject, populateEventStores } from "@/etc/helpers";
 
-  const modalStore = \\
-  seModalStore();
+  const modalStore = useModalStore();
   const eventStore = useEventStore();
 
   const props = defineProps({
@@ -100,14 +99,7 @@
   // Load event data only when modal becomes active
   watch(modalStore, async () => {
     if (modalStore.active === props.name) {
-      isLoading.value = true;
-      try {
-        await populateEventStores();
-        await resetForm();
-      } catch (err) {
-        error.value = err.message;
-      }
-      isLoading.value = false;
+      await initializeData();
     }
   });
 
@@ -121,10 +113,21 @@
     return [data];
   });
 
+  const initializeData = async () => {
+    isLoading.value = true;
+    try {
+      await populateEventStores();
+      await resetForm();
+    } catch (err) {
+      error.value = err.message;
+    }
+    isLoading.value = false;
+  };
+
   const resetForm = async () => {
     event.value = await Event.read(props.eventUuid);
     if (event.value) {
-    fillFormFields();
+      fillFormFields();
     }
   };
 
@@ -153,18 +156,21 @@
   };
 
   function formatValue(field, value) {
-    // If there is a 'valueProperty' available for the field, and the field value
-    // Is an object, use that property as a value
-    if (fieldOptionObjects.value[field].valueProperty && isObject(value)) {
-      return value[fieldOptionObjects.value[field].valueProperty];
-      // If the field value is an array, try to build a list of strings using either
-      // the valueProperty (if available), or 'value' as the valueProperty as default
-    } else if (Array.isArray(value)) {
+    // If the field value is an array, try to build a list of strings using either
+    // the valueProperty (if available), or 'value' as the valueProperty as default
+    if (Array.isArray(value)) {
       let valueProperty = "value";
       if (fieldOptionObjects.value[field].valueProperty) {
         valueProperty = fieldOptionObjects.value[field].valueProperty;
+        return value.map((x) => (x[valueProperty] ? x[valueProperty] : x));
       }
-      return value.map((x) => x[valueProperty]);
+    } else if (
+      isObject(value) &&
+      fieldOptionObjects.value[field].valueProperty
+    ) {
+      // If there is a 'valueProperty' available for the field, and the field value
+      // Is an object, use that property as a value
+      return value[fieldOptionObjects.value[field].valueProperty];
     }
     // Otherwise return the plain value
     return value;
