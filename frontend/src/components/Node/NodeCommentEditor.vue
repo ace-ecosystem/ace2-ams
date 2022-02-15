@@ -15,7 +15,6 @@
               <span>
                 <NodeComment :comment="comment" :include-time="true" />
                 <Button
-                  v-tooltip.top="'Edit'"
                   icon="pi pi-pencil"
                   class="p-button-rounded p-button-text pi-button-sm"
                   @click="openEditCommentPanel(comment)"
@@ -55,7 +54,7 @@
     modelValue: { type: Array, required: true },
   });
 
-  const emit = defineEmits(["update:modelValue", "updateComment"]);
+  const emit = defineEmits(["update:modelValue"]);
 
   const comments = ref(props.modelValue);
   const editingCommentValue = ref(null);
