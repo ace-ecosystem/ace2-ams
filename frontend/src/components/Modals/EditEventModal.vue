@@ -51,8 +51,8 @@
       <Button
         label="Save"
         icon="pi pi-check"
-        @click="saveEvent()"
         data-cy="save-edit-event-button"
+        @click="saveEvent()"
       />
     </template>
   </BaseModal>

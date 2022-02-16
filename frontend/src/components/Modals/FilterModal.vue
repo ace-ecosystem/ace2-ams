@@ -15,8 +15,8 @@
         v-model="formFilters[index]"
         class="w-12"
         :allow-delete="true"
-        @deleteFormFilter="deleteFormFilter(index)"
         form-type="filter"
+        @deleteFormField="deleteFormFilter(index)"
       ></NodePropertyInput>
     </div>
     <template #footer>
