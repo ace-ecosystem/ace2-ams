@@ -23,6 +23,7 @@
 
             <Button
               v-tooltip.top="'Edit'"
+              data-cy="edit-threat-button"
               icon="pi pi-pencil"
               class="p-button-rounded p-button-text pi-button-sm"
               @click="openEditThreatPanel(slotProps.option)"
@@ -34,15 +35,17 @@
     <div class="field col-fixed align-items-center flex">
       <Button
         icon="pi pi-plus"
+        data-cy="new-threat-button"
         label="New"
         @click="openEditThreatPanel(null)"
       ></Button>
     </div>
   </div>
 
-  <div v-if="showEditThreat" class="formgrid grid flex align-content-center">
+  <div v-if="showEditThreat" class="formgrid grid flex align-content-center" data-cy="edit-threat-panel">
     <div class="field col-fixed" style="width: 150px">
       <InputText
+      data-cy="threat-name"
         v-model="newThreatName"
         placeholder="My new threat"
         :disabled="editingExistingThreat"
@@ -50,6 +53,7 @@
     </div>
     <div class="field col-fixed" style="width: 150px">
       <MultiSelect
+      data-cy="threat-types"
         v-model="newThreatTypes"
         :options="nodeThreatTypeStore.allItems"
         option-label="value"
@@ -57,10 +61,10 @@
       ></MultiSelect>
     </div>
     <div class="field col-fixed">
-      <Button :icon="editThreatCloseIcon" @click="closeEditThreatPanel" />
+      <Button :icon="editThreatCloseIcon" @click="closeEditThreatPanel" data-cy="close-edit-threat-panel-button" />
     </div>
     <div class="field col-fixed">
-      <Button icon="pi pi-check" @click="submitNewThreat" />
+      <Button icon="pi pi-check" @click="submitNewThreat" data-cy="save-threat-button"/>
     </div>
   </div>
 </template>

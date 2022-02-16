@@ -38,7 +38,7 @@
   <!-- Edit event cell -->
   <span v-else-if="props.field === 'edit'">
     <Button
-      data-cy="disposition-button"
+      data-cy="edit-event-button"
       class="p-button-sm"
       icon="pi pi-pencil"
       @click="open(`EditEventModal-${props.data.uuid}`)"

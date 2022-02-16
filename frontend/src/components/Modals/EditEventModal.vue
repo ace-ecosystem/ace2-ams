@@ -3,7 +3,7 @@
 <!-- Edit various configured properties of an event -->
 
 <template>
-  <BaseModal :name="name" header="Edit Event" :style="{ width: '70vw' }">
+  <BaseModal :name="name" header="Edit Event" :style="{ width: '70vw' }" data-cy="edit-event-modal">
     <div>
       <div v-if="error" class="p-col">
         <Message severity="error" @close="handleError">{{ error }}</Message>
@@ -15,7 +15,7 @@
         <label for="field.name" class="col-fixed" style="width: 30%"
           ><span style="font-weight: bold">{{ field.label }}</span></label
         >
-        <div class="col">
+        <div class="col" :data-cy="`event-${field.name}-field`">
           <NodeThreatSelector
             v-if="field.name == 'threats'"
             v-model="formFields['threats'].propertyValue"
@@ -28,6 +28,7 @@
             v-else
             id="field.name"
             v-model="formFields[field.name]"
+            
             :fixed-property-type="true"
             :allow-delete="false"
             form-type="edit"
@@ -37,12 +38,13 @@
     </div>
     <template #footer>
       <Button
+      data-cy="nevermind-edit-event-button"
         label="Nevermind"
         icon="pi pi-times"
         class="p-button-text"
         @click="close"
       />
-      <Button label="Save" icon="pi pi-check" @click="saveEvent()" />
+      <Button label="Save" icon="pi pi-check" @click="saveEvent()" data-cy="save-edit-event-button" />
     </template>
   </BaseModal>
 </template>

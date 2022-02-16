@@ -18,6 +18,7 @@
               <span>
                 <NodeComment :comment="comment" :include-time="true" />
                 <Button
+                data-cy="edit-comment-button"
                   icon="pi pi-pencil"
                   class="p-button-rounded p-button-text pi-button-sm"
                   @click="openEditCommentPanel(comment)"
@@ -32,16 +33,17 @@
 
   <div
     v-if="editCommentPanelOpen"
+    data-cy="edit-comment-panel"
     class="formgrid grid flex align-content-center"
   >
     <div class="field col-fixed">
-      <InputText v-model="editingCommentValue"></InputText>
+      <InputText v-model="editingCommentValue" data-cy="updated-comment-value"/>
     </div>
     <div class="field col-fixed">
-      <Button icon="pi pi-times" @click="closeEditCommentPanel" />
+      <Button icon="pi pi-times" data-cy="close-edit-comment-panel" @click="closeEditCommentPanel" />
     </div>
     <div class="field col-fixed">
-      <Button icon="pi pi-check" @click="saveModelComment" />
+      <Button icon="pi pi-check" data-cy="save-comment-button" @click="saveModelComment" />
     </div>
   </div>
 </template>
