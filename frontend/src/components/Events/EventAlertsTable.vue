@@ -1,5 +1,5 @@
-<!-- EventTableExpansion.vue -->
-<!-- Contains logic and functionality for displaying data in event row dropdown, currently table of alerts -->
+<!-- EventAlertsTable.vue -->
+<!-- Contains logic and functionality for displaying a table of alerts inside of an event -->
 
 <template>
   <div v-if="isLoading">Loading alerts, please hold...</div>
@@ -14,6 +14,22 @@
       @rowSelect-all="selectedAlertStore.selectAll(visibleAlertUuids)"
       @rowUnselect-all="selectedAlertStore.unselectAll()"
     >
+      <!-- TABLE TOOLBAR-->
+      <template #header>
+        <Toolbar style="border: none">
+          <template #start>
+            <!-- CLEAR TABLE FILTERS -->
+            <Button
+              data-cy="remove-alerts-button"
+              icon="pi pi-times-circle"
+              class="p-button-rounded p-m-1"
+              label="Remove Alerts"
+              @click="removeAlerts()"
+            />
+          </template>
+        </Toolbar>
+      </template>
+
       <!-- CHECKBOX COLUMN -->
       <Column
         id="alert-select"
@@ -37,7 +53,7 @@
     </DataTable>
 
     <Paginator
-      data-cy="alert-table-pagination-options"
+      data-cy="table-pagination-options"
       :rows="10"
       :rows-per-page-options="[5, 10, 50, 100]"
       :total-records="alerts.length"
@@ -54,17 +70,21 @@
 <script setup>
   import { computed, defineProps, onBeforeMount, onUnmounted, ref } from "vue";
 
+  import Button from "primevue/button";
   import Column from "primevue/column";
   import DataTable from "primevue/datatable";
   import Paginator from "primevue/paginator";
+  import Toolbar from "primevue/toolbar";
 
   import AlertTableCell from "../Alerts/AlertTableCell.vue";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
+  import { Alert } from "@/services/api/alert";
+  import { parseAlertSummary } from "@/etc/helpers";
 
   const selectedAlertStore = useSelectedAlertStore();
 
-  onBeforeMount(() => {
-    selectedAlertStore.unselectAll();
+  onBeforeMount(async () => {
+    await initTable();
   });
 
   onUnmounted(() => {
@@ -72,18 +92,17 @@
   });
 
   const props = defineProps({
-    alerts: { type: [Array, null], required: true },
+    eventUuid: { type: String, required: true },
   });
 
+  const alerts = ref([]);
+  const error = ref(null);
+  const isLoading = ref(false);
   const page = ref(0);
   const pageSize = ref(10);
 
-  const isLoading = computed(() => {
-    return props.alerts === null;
-  });
-
   const selectedRows = computed(() => {
-    return props.alerts.filter((alert) =>
+    return alerts.value.filter((alert) =>
       selectedAlertStore.selected.includes(alert.uuid),
     );
   });
@@ -91,7 +110,7 @@
   const visibleAlerts = computed(() => {
     const start = page.value * pageSize.value;
     const end = start + pageSize.value;
-    return props.alerts.slice(start, end);
+    return alerts.value.slice(start, end);
   });
 
   const visibleAlertUuids = computed(() => {
@@ -105,10 +124,43 @@
     { field: "disposition", header: "Disposition" },
   ];
 
+  const getAlerts = async (uuid) => {
+    const allAlerts = await Alert.readAllPages({
+      eventUuid: uuid,
+      sort: "event_time|asc",
+    });
+
+    return allAlerts.map((x) => parseAlertSummary(x));
+  };
+
+  const initTable = async () => {
+    isLoading.value = true;
+    selectedAlertStore.unselectAll();
+    alerts.value = await getAlerts(props.eventUuid);
+    isLoading.value = false;
+  };
+
   const onPage = async (event) => {
     selectedAlertStore.unselectAll();
     page.value = event.page;
     pageSize.value = event.rows;
+  };
+
+  const removeAlerts = async () => {
+    // Remove the alerts from the event
+    try {
+      const updateData = selectedAlertStore.selected.map((uuid) => ({
+        uuid: uuid,
+        eventUuid: null,
+      }));
+
+      await Alert.update(updateData);
+    } catch (err) {
+      error.value = err.message;
+    }
+
+    // Reinitialize the table
+    await initTable();
   };
 </script>
 

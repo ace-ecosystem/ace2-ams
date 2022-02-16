@@ -3,20 +3,14 @@
 <!-- The table where all currently filtered events are displayed, selected to take action, or link to an individual event page -->
 
 <template>
-  <TheNodeTable
-    :columns="columns"
-    @rowExpand="onRowExpand"
-    @rowCollapse="onRowCollapse"
-  >
+  <TheNodeTable :columns="columns">
     <template #rowCell="{ data, field }">
       <EventTableCell :data="data" :field="field"></EventTableCell>
     </template>
 
     <!-- Row Expansion -->
     <template #rowExpansion="{ data }">
-      <EventTableExpansion
-        :alerts="eventAlerts[data.uuid]"
-      ></EventTableExpansion>
+      <EventAlertsTable :event-uuid="data.uuid"></EventAlertsTable>
     </template>
   </TheNodeTable>
 </template>
@@ -26,10 +20,7 @@
 
   import TheNodeTable from "../Node/TheNodeTable";
   import EventTableCell from "./EventTableCell";
-  import EventTableExpansion from "./EventTableExpansion";
-
-  import { Alert } from "@/services/api/alert";
-  import { parseAlertSummary } from "@/etc/helpers";
+  import EventAlertsTable from "./EventAlertsTable.vue";
 
   const columns = ref([
     { field: "createdTime", header: "Created", sortable: true, default: true },
@@ -58,25 +49,4 @@
       default: false,
     },
   ]);
-
-  const eventAlerts = ref({});
-
-  const onRowExpand = async (event) => {
-    const eventUuid = event.data.uuid;
-    eventAlerts.value[eventUuid] = null;
-    eventAlerts.value[eventUuid] = await getAlerts(eventUuid);
-  };
-  const onRowCollapse = (event) => {
-    const eventUuid = event.data.uuid;
-    delete eventAlerts.value[eventUuid];
-  };
-
-  const getAlerts = async (uuid) => {
-    const allAlerts = await Alert.readAllPages({
-      eventUuid: uuid,
-      sort: "event_time|asc",
-    });
-
-    return allAlerts.map((x) => parseAlertSummary(x));
-  };
 </script>
