@@ -3,7 +3,12 @@
 <!-- Edit various configured properties of an event -->
 
 <template>
-  <BaseModal :name="name" header="Edit Event" :style="{ width: '70vw' }" data-cy="edit-event-modal">
+  <BaseModal
+    :name="name"
+    header="Edit Event"
+    :style="{ width: '70vw' }"
+    data-cy="edit-event-modal"
+  >
     <div>
       <div v-if="error" class="p-col">
         <Message severity="error" @close="handleError">{{ error }}</Message>
@@ -28,7 +33,6 @@
             v-else
             id="field.name"
             v-model="formFields[field.name]"
-            
             :fixed-property-type="true"
             :allow-delete="false"
             form-type="edit"
@@ -38,13 +42,18 @@
     </div>
     <template #footer>
       <Button
-      data-cy="nevermind-edit-event-button"
+        data-cy="nevermind-edit-event-button"
         label="Nevermind"
         icon="pi pi-times"
         class="p-button-text"
         @click="close"
       />
-      <Button label="Save" icon="pi pi-check" @click="saveEvent()" data-cy="save-edit-event-button" />
+      <Button
+        label="Save"
+        icon="pi pi-check"
+        @click="saveEvent()"
+        data-cy="save-edit-event-button"
+      />
     </template>
   </BaseModal>
 </template>

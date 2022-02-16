@@ -42,10 +42,14 @@
     </div>
   </div>
 
-  <div v-if="showEditThreat" class="formgrid grid flex align-content-center" data-cy="edit-threat-panel">
+  <div
+    v-if="showEditThreat"
+    class="formgrid grid flex align-content-center"
+    data-cy="edit-threat-panel"
+  >
     <div class="field col-fixed" style="width: 150px">
       <InputText
-      data-cy="threat-name"
+        data-cy="threat-name"
         v-model="newThreatName"
         placeholder="My new threat"
         :disabled="editingExistingThreat"
@@ -53,7 +57,7 @@
     </div>
     <div class="field col-fixed" style="width: 150px">
       <MultiSelect
-      data-cy="threat-types"
+        data-cy="threat-types"
         v-model="newThreatTypes"
         :options="nodeThreatTypeStore.allItems"
         option-label="value"
@@ -61,10 +65,18 @@
       ></MultiSelect>
     </div>
     <div class="field col-fixed">
-      <Button :icon="editThreatCloseIcon" @click="closeEditThreatPanel" data-cy="close-edit-threat-panel-button" />
+      <Button
+        :icon="editThreatCloseIcon"
+        @click="closeEditThreatPanel"
+        data-cy="close-edit-threat-panel-button"
+      />
     </div>
     <div class="field col-fixed">
-      <Button icon="pi pi-check" @click="submitNewThreat" data-cy="save-threat-button"/>
+      <Button
+        icon="pi pi-check"
+        @click="submitNewThreat"
+        data-cy="save-threat-button"
+      />
     </div>
   </div>
 </template>
