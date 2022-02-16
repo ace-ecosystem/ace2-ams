@@ -56,20 +56,25 @@ describe("TheEventsTable.vue", () => {
       "have.text",
       "Created, Name, Owner, Type, Vectors",
     );
+    // Edit event button column
+    cy.get(".p-datatable-thead > tr > :nth-child(3)").should(
+      "have.text",
+      "",
+    );
     cy.get("tr > .p-highlight").should("have.text", "Created");
-    cy.get(".p-datatable-thead > tr > :nth-child(4)").should(
+    cy.get(".p-datatable-thead > tr > :nth-child(5)").should(
       "have.text",
       "Name",
     );
-    cy.get(".p-datatable-thead > tr > :nth-child(5)").should(
+    cy.get(".p-datatable-thead > tr > :nth-child(6)").should(
       "have.text",
       "Owner",
     );
-    cy.get(".p-datatable-thead > tr > :nth-child(6)").should(
+    cy.get(".p-datatable-thead > tr > :nth-child(7)").should(
       "have.text",
       "Type",
     );
-    cy.get(".p-datatable-thead > tr > :nth-child(7)").should(
+    cy.get(".p-datatable-thead > tr > :nth-child(8)").should(
       "have.text",
       "Vectors",
     );
@@ -214,24 +219,24 @@ describe("TheEventsTable.vue", () => {
     ).as("defaultSort");
 
     // sort by name to start, will default to ascending
-    cy.get(".p-datatable-thead > tr > :nth-child(4)").click();
+    cy.get(".p-datatable-thead > tr > :nth-child(5)").click();
     // check api call
     cy.wait("@nameSortAsc").its("state").should("eq", "Complete");
     // check first alerts name
     cy.get('[data-cy="eventName"]').eq(0).should("have.text", "Test Event 0");
     // sort by name again, will change to descending
-    cy.get(".p-datatable-thead > tr > :nth-child(4)").click();
+    cy.get(".p-datatable-thead > tr > :nth-child(5)").click();
     // check api call
     cy.wait("@nameSortDesc").its("state").should("eq", "Complete");
     // check first alerts name
     cy.get('[data-cy="eventName"]').eq(0).should("have.text", "Test Event 5");
     // sort by name again, this time it will remove all sorts
-    cy.get(".p-datatable-thead > tr > :nth-child(4)").click();
+    cy.get(".p-datatable-thead > tr > :nth-child(5)").click();
     // there shouldn't be an API call this time
     // check first alerts name (will be the same)
     cy.get('[data-cy="eventName"]').eq(0).should("have.text", "Test Event 5");
     // sort by event time again, will default to ascending
-    cy.get(".p-datatable-thead > tr > :nth-child(3)").click();
+    cy.get(".p-datatable-thead > tr > :nth-child(4)").click();
     // check api call
     cy.wait("@createdTimeSortAsc").its("state").should("eq", "Complete");
     // check first alerts name
@@ -332,3 +337,67 @@ describe("TheEventsTable.vue", () => {
       });
   });
 });
+
+// // These tests will depend heavily on what is configured to be editable options
+// // The current idea is to test each type of input
+// // However, we might want to look at creating test configuration to be used for E2E (and unit?) testing instead
+// describe("TheEventsTable.vue - EditEventModal", () => {
+//   before(() => {
+//     cy.resetDatabase();
+//     cy.login();
+//   });
+
+//   cy.request({
+//     method: "POST",
+//     url: "/api/test/add_event",
+//     body: {
+//       alert_template: "small_template.json",
+//       alert_count: 1,
+//       name: "Test Event",
+//     },
+//   });
+
+//   beforeEach(() => {
+//     // Intercept the API call that loads the default event table view
+//     cy.intercept(
+//       "GET",
+//       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
+//     ).as("getEventsDefaultRows");
+
+//     visitUrl({
+//       url: "/manage_events",
+//       extraIntercepts: ["@getEventsDefaultRows"],
+//     });
+//   });
+
+//   it("opens edit event modal with expected buttons when open button is clicked", () => {
+//     cy.get("#EventsTable").should("be.visible");
+//   });
+//   // it("loads event data for each input when edit event modal is opened", () => {
+//   //   cy.get("#EventsTable").should("be.visible");
+//   // });
+//   // it("successfully updates an 'input'-type field (ex. name)", () => {
+//   //   cy.get("#EventsTable").should("be.visible");
+//   // });
+//   // it("successfully updates an 'select'-type field (ex. owner)", () => {
+//   //   cy.get("#EventsTable").should("be.visible");
+//   // });
+//   // it("successfully updates an 'multiselect'-type field (ex. remediation)", () => {
+//   //   cy.get("#EventsTable").should("be.visible");
+//   // });
+//   // it("successfully updates a 'date'-type field (ex. event time)", () => {
+//   //   cy.get("#EventsTable").should("be.visible");
+//   // });
+//   // it("successfully updates a comment using NodeCommentEditor", () => {
+//   //   cy.get("#EventsTable").should("be.visible");
+//   // });
+//   // it("successfully creates a new threat using NodeThreatSelector", () => {
+//   //   cy.get("#EventsTable").should("be.visible");
+//   // });
+//   // it("successfully updates an existing threat using NodeThreatSelector", () => {
+//   //   cy.get("#EventsTable").should("be.visible");
+//   // });
+//   // it("successfully adds an threats to an event using the NodeThreatSelector", () => {
+//   //   cy.get("#EventsTable").should("be.visible");
+//   // });
+// });

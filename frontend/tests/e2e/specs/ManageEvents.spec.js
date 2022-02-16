@@ -305,12 +305,12 @@ describe("ManageEvents.vue Filtering", () => {
     ).as("getEventsNameFilter");
 
     cy.get('[data-cy="edit-filter-button"]').click();
-    cy.get('[data-cy="filter-input-type"]').click();
+    cy.get('[data-cy="property-input-type"]').click();
     // Select the 'name' filter type
     cy.get(".p-dropdown-item").eq(3).click();
-    cy.get('[data-cy="filter-input-type"]').should("have.text", "Name");
-    cy.get('[data-cy="filter-input-value"]').should("be.empty");
-    cy.get('[data-cy="filter-input-value"]').click().type("Test");
+    cy.get('[data-cy="property-input-type"]').should("have.text", "Name");
+    cy.get('[data-cy="property-input-value"]').should("be.empty");
+    cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get('[data-cy="quick-add-filter-submit-button"]').click();
 
     cy.wait("@getEventsNameFilter").its("state").should("eq", "Complete");
@@ -332,16 +332,16 @@ describe("ManageEvents.vue Filtering", () => {
 
     // Add filter
     cy.get('[data-cy="edit-filter-button"]').click();
-    cy.get('[data-cy="filter-input-type"]').click();
+    cy.get('[data-cy="property-input-type"]').click();
     cy.get(".p-dropdown-item").eq(3).click();
-    cy.get('[data-cy="filter-input-value"]').click().type("Test");
+    cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get('[data-cy="quick-add-filter-submit-button"]').click();
     cy.wait("@getEventsNameFilter").its("state").should("eq", "Complete");
 
     // Edit the filter
     cy.get('[data-cy="filter-chip-edit-button"]').click();
     cy.get('[data-cy="filter-chip-edit-panel"]').should("be.visible");
-    cy.get('[data-cy="filter-input-value"]')
+    cy.get('[data-cy="property-input-value"]')
       .should("have.value", "Test")
       .click()
       .clear()
@@ -366,9 +366,9 @@ describe("ManageEvents.vue Filtering", () => {
 
     // Add filter
     cy.get('[data-cy="edit-filter-button"]').click();
-    cy.get('[data-cy="filter-input-type"]').click();
+    cy.get('[data-cy="property-input-type"]').click();
     cy.get(".p-dropdown-item").eq(3).click();
-    cy.get('[data-cy="filter-input-value"]').click().type("Test");
+    cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get('[data-cy="quick-add-filter-submit-button"]').click();
     cy.wait("@getEventsNameFilter").its("state").should("eq", "Complete");
 
@@ -379,9 +379,9 @@ describe("ManageEvents.vue Filtering", () => {
 
     // Add filter
     cy.get('[data-cy="edit-filter-button"]').click();
-    cy.get('[data-cy="filter-input-type"]').click();
+    cy.get('[data-cy="property-input-type"]').click();
     cy.get(".p-dropdown-item").eq(3).click();
-    cy.get('[data-cy="filter-input-value"]').click().type("Test");
+    cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get('[data-cy="quick-add-filter-submit-button"]').click();
     cy.wait("@getEventsNameFilter").its("state").should("eq", "Complete");
 
@@ -411,9 +411,9 @@ describe("ManageEvents.vue Filtering", () => {
     cy.get(".p-dialog-footer > button").eq(1).click();
 
     // Add the filter
-    cy.get('[data-cy="filter-input-type"]').click();
+    cy.get('[data-cy="property-input-type"]').click();
     cy.get(".p-dropdown-item").eq(3).click();
-    cy.get('[data-cy="filter-input-value"]').click().type("Test");
+    cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get(".p-dialog-footer > button").eq(3).click();
     cy.wait("@getEventsNameFilter").its("state").should("eq", "Complete");
 
@@ -423,8 +423,8 @@ describe("ManageEvents.vue Filtering", () => {
     cy.get(".p-menuitem-link").eq(0).click();
 
     // Check that the currently set filter shows up
-    cy.get('[data-cy="filter-input-type"]').should("have.text", "Name");
-    cy.get('[data-cy="filter-input-value"]').should("have.value", "Test");
+    cy.get('[data-cy="property-input-type"]').should("have.text", "Name");
+    cy.get('[data-cy="property-input-value"]').should("have.value", "Test");
     // Remove the filter and submit
     cy.get('[data-cy="filter-input-delete"]').click();
     cy.get(".p-dialog-footer > button").eq(3).click();
@@ -452,9 +452,9 @@ describe("ManageEvents.vue Filtering", () => {
     cy.get(".p-dialog-footer > button").eq(1).click();
 
     // Add the filter
-    cy.get('[data-cy="filter-input-type"]').click();
+    cy.get('[data-cy="property-input-type"]').click();
     cy.get(".p-dropdown-item").eq(3).click();
-    cy.get('[data-cy="filter-input-value"]').click().type("Test");
+    cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get(".p-dialog-footer > button").eq(3).click();
 
     cy.wait("@getEventsNameFilter").its("state").should("eq", "Complete");
@@ -486,9 +486,9 @@ describe("ManageEvents.vue Filtering", () => {
     cy.get(".p-dialog-footer > button").eq(1).click();
 
     // Add the filter
-    cy.get('[data-cy="filter-input-type"]').click();
+    cy.get('[data-cy="property-input-type"]').click();
     cy.get(".p-dropdown-item").eq(3).click();
-    cy.get('[data-cy="filter-input-value"]').click().type("Test");
+    cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get(".p-dialog-footer > button").eq(3).click();
 
     cy.wait("@getEventsNameFilter").its("state").should("eq", "Complete");
@@ -724,7 +724,7 @@ describe("ManageEvents.vue Actions", () => {
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check owner
-    cy.get(".p-datatable-tbody > tr > :nth-child(5) > span").should(
+    cy.get(".p-datatable-tbody > tr > :nth-child(6) > span").should(
       "have.text",
       "Analyst",
     );
@@ -744,7 +744,7 @@ describe("ManageEvents.vue Actions", () => {
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check owner
-    cy.get(".p-datatable-tbody > tr > :nth-child(5) > span").should(
+    cy.get(".p-datatable-tbody > tr > :nth-child(6) > span").should(
       "have.text",
       "Analyst Alice",
     );
