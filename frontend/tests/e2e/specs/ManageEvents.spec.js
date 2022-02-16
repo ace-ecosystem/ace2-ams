@@ -426,7 +426,7 @@ describe("ManageEvents.vue Filtering", () => {
     cy.get('[data-cy="property-input-type"]').should("have.text", "Name");
     cy.get('[data-cy="property-input-value"]').should("have.value", "Test");
     // Remove the filter and submit
-    cy.get('[data-cy="filter-input-delete"]').click();
+    cy.get("[data-cy=property-input-delete]").click();
     cy.get(".p-dialog-footer > button").eq(3).click();
 
     cy.wait("@getEventsDefault").its("state").should("eq", "Complete");
