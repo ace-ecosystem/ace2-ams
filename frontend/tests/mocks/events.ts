@@ -7,7 +7,7 @@ import {
 } from "@/models/event";
 import { genericObjectReadFactory } from "./genericObject";
 
-const mockEventUUID: UUID = "testEvent1";
+export const mockEventUUID: UUID = "testEvent1";
 
 export const eventCreateFactory = ({
   alertTime = undefined,

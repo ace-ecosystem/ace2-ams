@@ -35,14 +35,38 @@
   <span v-else-if="Array.isArray(props.data[props.field])">
     {{ joinStringArray(props.data[props.field]) }}
   </span>
+  <!-- Edit event cell -->
+  <span v-else-if="props.field === 'edit'">
+    <Button
+      data-cy="edit-event-button"
+      class="p-button-sm"
+      icon="pi pi-pencil"
+      @click="open(`EditEventModal-${props.data.uuid}`)"
+    />
+    <EditEventModal
+      :id="props.data.uuid"
+      :name="`EditEventModal-${props.data.uuid}`"
+      :event-uuid="props.data.uuid"
+      @requestReload="requestReload"
+    />
+  </span>
   <!-- All other columns -->
   <span v-else> {{ props.data[props.field] }}</span>
 </template>
 
 <script setup>
   import { defineProps } from "vue";
+  import Button from "primevue/button";
+
   import NodeTagVue from "../Node/NodeTag.vue";
   import NodeComment from "../Node/NodeComment.vue";
+  import EditEventModal from "../Modals/EditEventModal.vue";
+
+  import { useModalStore } from "@/stores/modal";
+  import { useEventTableStore } from "@/stores/eventTable";
+
+  const eventTableStore = useEventTableStore();
+  const modalStore = useModalStore();
 
   const props = defineProps({
     data: { type: Object, required: true },
@@ -64,5 +88,13 @@
 
   const joinStringArray = (arr) => {
     return arr.join(", ");
+  };
+
+  const requestReload = () => {
+    eventTableStore.requestReload = true;
+  };
+
+  const open = (name) => {
+    modalStore.open(name);
   };
 </script>

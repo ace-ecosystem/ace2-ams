@@ -16,7 +16,11 @@
 <script setup>
   import { onMounted, provide, watch } from "vue";
 
-  import { eventFilters, eventRangeFilters } from "@/etc/constants";
+  import {
+    eventEditableProperties,
+    eventFilters,
+    eventRangeFilters,
+  } from "@/etc/constants";
 
   import TheNodeActionToolbarVue from "@/components/Node/TheNodeActionToolbar.vue";
   import TheFilterToolbar from "@/components/Filters/TheFilterToolbar";
@@ -30,6 +34,7 @@
   const router = useRouter();
 
   provide("availableFilters", eventFilters);
+  provide("availableEditFields", eventEditableProperties);
   provide("nodeType", "events");
   provide("rangeFilters", eventRangeFilters);
 

@@ -1,72 +1,72 @@
 <template>
   <div class="formgrid grid">
-    <div v-if="!fixedFilterName" class="field col-fixed">
+    <div v-if="!fixedPropertyType" class="field col-fixed">
       <Dropdown
-        v-model="filterName"
-        data-cy="filter-input-type"
-        :options="availableFilters"
+        v-model="propertyType"
+        data-cy="property-input-type"
+        :options="propertyTypeOptions"
         option-label="label"
         type="text"
         class="w-13rem"
         tabindex="1"
         @change="
-          clearFilterValue();
-          updateValue('filterName', $event.value);
+          clearPropertyValue();
+          updateValue('propertyType', $event.value);
         "
       />
     </div>
     <div class="col w-16rem">
       <div v-if="isInputText" class="field">
         <InputText
-          v-model="filterValue"
-          data-cy="filter-input-value"
+          v-model="propertyValue"
+          data-cy="property-input-value"
           class="inputfield w-16rem"
           type="text"
-          @input="updateValue('filterValue', $event.target.value)"
+          @input="updateValue('propertyValue', $event.target.value)"
         ></InputText>
       </div>
       <div v-else-if="isDropdown" class="field">
         <Dropdown
-          v-model="filterValue"
-          data-cy="filter-input-value"
+          v-model="propertyValue"
+          data-cy="property-input-value"
           class="inputfield w-16rem"
-          :options="filterOptions"
-          :option-label="filterOptionProperty"
+          :options="propertyValueOptions"
+          :option-label="propertyValueOptionProperty"
           type="text"
-          @change="updateValue('filterValue', $event.value)"
+          @change="updateValue('propertyValue', $event.value)"
         ></Dropdown>
       </div>
       <div v-else-if="isMultiSelect" class="field">
         <Multiselect
-          v-model="filterValue"
-          data-cy="filter-input-value"
+          v-model="propertyValue"
+          data-cy="property-input-value"
           class="inputfield w-16rem"
-          :options="filterOptions"
-          :option-label="filterOptionProperty"
+          :options="propertyValueOptions"
+          :option-label="propertyValueOptionProperty"
           type="text"
-          @change="updateValue('filterValue', $event.value)"
+          @change="updateValue('propertyValue', $event.value)"
         ></Multiselect>
       </div>
       <div v-else-if="isChips" class="field p-fluid">
         <Chips
-          v-model="filterValue"
-          data-cy="filter-input-value"
+          v-model="propertyValue"
+          data-cy="property-input-value"
           class="w-full"
-          @update:model-value="updateValue('filterValue', $event)"
+          @update:model-value="updateValue('propertyValue', $event)"
         ></Chips>
       </div>
       <div v-else-if="isDate" class="field">
         <DatePicker
-          v-model="filterValue"
+          v-model="propertyValue"
           mode="dateTime"
           class="inputfield w-16rem"
           is24hr
-          @update:model-value="updateValue('filterValue', $event)"
+          @update:model-value="updateValue('propertyValue', $event)"
         >
           <template #default="{ inputValue, inputEvents }">
             <div class="p-inputgroup">
               <InputText
-                data-cy="filter-input-value"
+                data-cy="property-input-value"
                 class="inputfield w-16rem"
                 type="text"
                 :value="inputValue"
@@ -81,32 +81,32 @@
         <div class="field">
           <Dropdown
             v-model="categorizedValueCategory"
-            data-cy="filter-input-value-category"
-            :options="filterOptions"
-            :option-label="filterOptionProperty"
+            data-cy="property-input-value-category"
+            :options="propertyValueOptions"
+            :option-label="propertyValueOptionProperty"
             class="w-16rem"
             type="text"
-            @change="updateValue('filterValue', categorizedValueObject)"
+            @change="updateValue('propertyValue', categorizedValueObject)"
           ></Dropdown>
         </div>
         <div class="field">
           <InputText
             v-model="categorizedValueValue"
-            data-cy="filter-input-value-value"
+            data-cy="property-input-value-value"
             class="w-16rem"
             type="text"
-            @input="updateValue('filterValue', categorizedValueObject)"
+            @input="updateValue('propertyValue', categorizedValueObject)"
           ></InputText>
         </div>
       </div>
     </div>
     <div v-if="allowDelete" class="field col-fixed">
       <Button
-        data-cy="filter-input-delete"
-        name="delete-filter"
+        data-cy="property-input-delete"
+        name="delete-property"
         icon="pi pi-times"
         class="w-3rem"
-        @click="$emit('deleteFormFilter')"
+        @click="$emit('deleteFormField')"
       />
     </div>
   </div>
@@ -132,60 +132,72 @@
   import { DatePicker } from "v-calendar";
 
   const availableFilters = inject("availableFilters");
-  const emit = defineEmits(["update:modelValue", "deleteFormFilter"]);
+  const availableEditFields = inject("availableEditFields");
+
+  const propertyTypeOptions =
+    props.formType == "filter"
+      ? availableFilters
+      : props.formType == "edit"
+      ? availableEditFields
+      : null;
+
+  const emit = defineEmits(["update:modelValue", "deleteFormField"]);
   const props = defineProps({
     modelValue: { type: Object, required: true },
-    fixedFilterName: { type: Boolean, required: false },
+    fixedPropertyType: { type: Boolean, required: false },
     allowDelete: { type: Boolean, required: false },
+    formType: { type: String, required: true },
   });
 
-  const getFilterNameObject = (filterName) => {
-    if (!filterName) {
-      return availableFilters[0];
+  const getPropertyTypeObject = (propertyType) => {
+    if (!propertyType) {
+      return propertyTypeOptions ? propertyTypeOptions[0] : null;
     }
-    let filter = availableFilters.find((filter) => {
-      return filter.name === filterName;
+    let property = propertyTypeOptions.find((option) => {
+      return option.name === propertyType;
     });
-    filter = filter ? filter : null;
-    return filter;
+    property = property ? property : null;
+    return property;
   };
 
-  const filterName = ref(getFilterNameObject(props.modelValue.filterName));
-  const filterValue = ref(props.modelValue.filterValue);
+  const propertyType = ref(
+    getPropertyTypeObject(props.modelValue.propertyType),
+  );
+  const propertyValue = ref(props.modelValue.propertyValue);
 
-  // The categorizedValue filter is a bit tricky
+  // The categorizedValue property is a bit tricky
   // We need to copy the values and use those as the model
   // Otherwise, they will directly modify the filterStore state :/
   const categorizedValueCategory = ref(null);
   const categorizedValueValue = ref(null);
 
-  const filterOptions = computed(() => {
-    if (filterName.value && filterName.value.store) {
-      const store = filterName.value.store();
+  const propertyValueOptions = computed(() => {
+    if (propertyType.value && propertyType.value.store) {
+      const store = propertyType.value.store();
       return store.allItems;
     }
     return null;
   });
 
   onMounted(() => {
-    // This will update the filter to the default if one wasn't provided
-    updateValue("filterName", filterName.value);
-    // This will udpate the filter value to the default (if available) if one wasn't provided
-    if (!filterValue.value) {
-      clearFilterValue();
-      updateValue("filterValue", filterValue.value);
+    // This will update the property to the default if one wasn't provided
+    updateValue("propertyType", propertyType.value);
+    // This will udpate the property value to the default (if available) if one wasn't provided
+    if (!propertyValue.value) {
+      clearPropertyValue();
+      updateValue("propertyValue", propertyValue.value);
     }
     // we need to fill in the placeholder refs (see note above) for categorized value
     else if (isCategorizedValue.value) {
-      categorizedValueCategory.value = filterValue.value.category;
-      categorizedValueValue.value = filterValue.value.value;
+      categorizedValueCategory.value = propertyValue.value.category;
+      categorizedValueValue.value = propertyValue.value.value;
     }
   });
 
-  const filterOptionProperty = computed(() => {
-    if (filterName.value) {
-      return filterName.value.optionProperty
-        ? filterName.value.optionProperty
+  const propertyValueOptionProperty = computed(() => {
+    if (propertyType.value) {
+      return propertyType.value.optionProperty
+        ? propertyType.value.optionProperty
         : "value";
     }
     return null;
@@ -220,38 +232,43 @@
   });
 
   const inputType = computed(() => {
-    return filterName.value ? filterName.value.type : null;
+    return propertyType.value ? propertyType.value.type : null;
   });
 
-  watch(filterName, async () => {
-    if (filterName.value.store) {
-      const store = filterName.value.store();
+  watch(propertyType, async () => {
+    if (propertyType.value.store) {
+      const store = propertyType.value.store();
       await store.readAll();
     }
   });
 
-  const clearFilterValue = () => {
+  const clearPropertyValue = () => {
     if (isCategorizedValue.value) {
-      filterValue.value = { category: filterOptions.value[0], value: null };
-      categorizedValueCategory.value = filterOptions.value[0];
+      propertyValue.value = {
+        category: propertyValueOptions.value[0],
+        value: null,
+      };
+      categorizedValueCategory.value = propertyValueOptions.value[0];
       categorizedValueValue.value = null;
     } else if (isDropdown.value) {
-      filterValue.value = filterOptions.value[0];
+      propertyValue.value = propertyValueOptions.value[0];
     } else {
-      filterValue.value = null;
+      propertyValue.value = null;
     }
   };
 
   const updateValue = (attribute, newValue) => {
-    if (attribute === "filterName") {
+    if (attribute === "propertyType") {
       emit("update:modelValue", {
-        filterName: newValue ? newValue.name : filterName.value,
-        filterValue: filterValue.value,
+        propertyType: newValue ? newValue.name : propertyType.value,
+        propertyValue: propertyValue.value,
       });
-    } else if (attribute === "filterValue") {
+    } else if (attribute === "propertyValue") {
       emit("update:modelValue", {
-        filterName: filterName.value ? filterName.value.name : filterName.value,
-        filterValue: newValue,
+        propertyType: propertyType.value
+          ? propertyType.value.name
+          : propertyType.value,
+        propertyValue: newValue,
       });
     }
   };

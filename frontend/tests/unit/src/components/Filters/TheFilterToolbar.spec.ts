@@ -88,23 +88,23 @@ describe("TheFilterToolbar.vue", () => {
     const { wrapper } = factory();
 
     expect(wrapper.vm.filterModel).toEqual({
-      filterName: null,
-      filterValue: null,
+      propertyType: null,
+      propertyValue: null,
     });
   });
   it("correctly adds a filter to store  and resets filterModel on addFilter", () => {
     const { wrapper, filterStore } = factory({ stubActions: false });
     wrapper.vm.filterModel = {
-      filterName: "test",
-      filterValue: "name",
+      propertyType: "test",
+      propertyValue: "name",
     };
 
     wrapper.vm.addFilter();
     expect(filterStore.alerts).toEqual({ test: "name" });
 
     expect(wrapper.vm.filterModel).toEqual({
-      filterName: null,
-      filterValue: null,
+      propertyType: null,
+      propertyValue: null,
     });
   });
 });
