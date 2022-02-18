@@ -100,7 +100,10 @@ jobs:
         run: cd frontend && rm -rf dist
 
       - name: Run environment
-        run: docker-compose -f docker-compose.yml -f docker-compose-e2e.yml up
+        run: docker-compose -f docker-compose.yml -f docker-compose-e2e.yml up -d
+
+      - name: Temp
+        run: docker exec ace2-ams-gui ls -lah /app
 
       # - name: Wait for API and GUI to be accessible
       #   run: bin/wait-for-gui.sh
