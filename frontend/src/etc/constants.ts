@@ -1,6 +1,5 @@
-import { alertFilterNameTypes } from "@/models/alert";
+import { eventRemediationRead } from "./../models/eventRemediation";
 import { filterOption } from "@/models/base";
-import { eventFilterNameTypes } from "@/models/event";
 import { eventPreventionToolRead } from "@/models/eventPreventionTool";
 import { eventVectorRead } from "@/models/eventVector";
 import { nodeThreatRead } from "@/models/nodeThreat";
@@ -14,6 +13,7 @@ import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";
 import { useEventPreventionToolStore } from "@/stores/eventPreventionTool";
 import { useEventQueueStore } from "@/stores/eventQueue";
+import { useEventRemediationStore } from "@/stores/eventRemediation";
 import { useEventRiskLevelStore } from "@/stores/eventRiskLevel";
 import { useEventSourceStore } from "@/stores/eventSource";
 import { useEventStatusStore } from "@/stores/eventStatus";
@@ -38,7 +38,7 @@ export const filterTypes = {
 
 // ** Alerts ** //
 
-export const alertFilterNames: Record<string, alertFilterNameTypes> = {
+export const alertPropertyTypes: Record<string, string> = {
   DISPOSITION_FILTER: "disposition",
   DISPOSITION_USER_FILTER: "dispositionUser",
   DISPOSITIONED_AFTER_FILTER: "dispositionedAfter",
@@ -64,7 +64,7 @@ export const alertFilterNames: Record<string, alertFilterNameTypes> = {
 
 export const alertFilters: readonly filterOption[] = [
   {
-    name: alertFilterNames.DISPOSITION_FILTER,
+    name: alertPropertyTypes.DISPOSITION_FILTER,
     label: "Disposition",
     type: filterTypes.SELECT,
     store: useAlertDispositionStore,
@@ -72,7 +72,7 @@ export const alertFilters: readonly filterOption[] = [
     valueProperty: "value",
   },
   {
-    name: alertFilterNames.DISPOSITION_USER_FILTER,
+    name: alertPropertyTypes.DISPOSITION_USER_FILTER,
     label: "Dispositioned By",
     type: filterTypes.SELECT,
     store: useUserStore,
@@ -80,91 +80,91 @@ export const alertFilters: readonly filterOption[] = [
     valueProperty: "username",
   },
   {
-    name: alertFilterNames.DISPOSITIONED_AFTER_FILTER,
+    name: alertPropertyTypes.DISPOSITIONED_AFTER_FILTER,
     label: "Dispositioned After",
     type: filterTypes.DATE,
     stringRepr: (filter: Date) => {
       return filter.toISOString();
     },
-    parseStringRepr: (filterString: string) => {
-      return new Date(filterString);
+    parseStringRepr: (valueString: string) => {
+      return new Date(valueString);
     },
   },
   {
-    name: alertFilterNames.DISPOSITIONED_BEFORE_FILTER,
+    name: alertPropertyTypes.DISPOSITIONED_BEFORE_FILTER,
     label: "Dispositioned Before",
     type: filterTypes.DATE,
     stringRepr: (filter: Date) => {
       return filter.toISOString();
     },
-    parseStringRepr: (filterString: string) => {
-      return new Date(filterString);
+    parseStringRepr: (valueString: string) => {
+      return new Date(valueString);
     },
   },
   {
-    name: alertFilterNames.EVENT_TIME_AFTER_FILTER,
+    name: alertPropertyTypes.EVENT_TIME_AFTER_FILTER,
     label: "Event Time After",
     type: filterTypes.DATE,
     stringRepr: (filter: Date) => {
       return filter.toISOString();
     },
-    parseStringRepr: (filterString: string) => {
-      return new Date(filterString);
+    parseStringRepr: (valueString: string) => {
+      return new Date(valueString);
     },
   },
   {
-    name: alertFilterNames.EVENT_TIME_BEFORE_FILTER,
+    name: alertPropertyTypes.EVENT_TIME_BEFORE_FILTER,
     label: "Event Time Before",
     type: filterTypes.DATE,
     stringRepr: (filter: Date) => {
       return filter.toISOString();
     },
-    parseStringRepr: (filterString: string) => {
-      return new Date(filterString);
+    parseStringRepr: (valueString: string) => {
+      return new Date(valueString);
     },
   },
   {
-    name: alertFilterNames.INSERT_TIME_AFTER_FILTER,
+    name: alertPropertyTypes.INSERT_TIME_AFTER_FILTER,
     label: "Insert Time After",
     type: filterTypes.DATE,
     stringRepr: (filter: Date) => {
       return filter.toISOString();
     },
-    parseStringRepr: (filterString: string) => {
-      return new Date(filterString);
+    parseStringRepr: (valueString: string) => {
+      return new Date(valueString);
     },
   },
   {
-    name: alertFilterNames.INSERT_TIME_BEFORE_FILTER,
+    name: alertPropertyTypes.INSERT_TIME_BEFORE_FILTER,
     label: "Insert Time Before",
     type: filterTypes.DATE,
     stringRepr: (filter: Date) => {
       return filter.toISOString();
     },
-    parseStringRepr: (filterString: string) => {
-      return new Date(filterString);
+    parseStringRepr: (valueString: string) => {
+      return new Date(valueString);
     },
   },
   {
-    name: alertFilterNames.NAME_FILTER,
+    name: alertPropertyTypes.NAME_FILTER,
     label: "Name",
     type: filterTypes.INPUT_TEXT,
   },
   {
-    name: alertFilterNames.OBSERVABLE_FILTER,
+    name: alertPropertyTypes.OBSERVABLE_FILTER,
     label: "Observable",
     type: filterTypes.CATEGORIZED_VALUE,
     store: useObservableTypeStore,
     stringRepr: (filter: { category: observableTypeRead; value: string }) => {
       return `${filter.category.value}|${filter.value}`;
     },
-    parseStringRepr: (filterString: string) => {
-      const [category, value] = filterString.split("|");
+    parseStringRepr: (valueString: string) => {
+      const [category, value] = valueString.split("|");
       return { category: category, value: value };
     },
   },
   {
-    name: alertFilterNames.OBSERVABLE_TYPES_FILTER,
+    name: alertPropertyTypes.OBSERVABLE_TYPES_FILTER,
     label: "Observable Types",
     type: filterTypes.MULTISELECT,
     store: useObservableTypeStore,
@@ -175,17 +175,17 @@ export const alertFilters: readonly filterOption[] = [
         })
         .join();
     },
-    parseStringRepr: (filterString: string) => {
-      return filterString.split(",");
+    parseStringRepr: (valueString: string) => {
+      return valueString.split(",");
     },
   },
   {
-    name: alertFilterNames.OBSERVABLE_VALUE_FILTER,
+    name: alertPropertyTypes.OBSERVABLE_VALUE_FILTER,
     label: "Observable Value",
     type: filterTypes.INPUT_TEXT,
   },
   {
-    name: alertFilterNames.OWNER_FILTER,
+    name: alertPropertyTypes.OWNER_FILTER,
     label: "Owner",
     type: filterTypes.SELECT,
     store: useUserStore,
@@ -193,7 +193,7 @@ export const alertFilters: readonly filterOption[] = [
     valueProperty: "username",
   },
   {
-    name: alertFilterNames.QUEUE_FILTER,
+    name: alertPropertyTypes.QUEUE_FILTER,
     label: "Queue",
     type: filterTypes.SELECT,
     store: useAlertQueueStore,
@@ -201,7 +201,7 @@ export const alertFilters: readonly filterOption[] = [
     valueProperty: "value",
   },
   {
-    name: alertFilterNames.TAGS_FILTER,
+    name: alertPropertyTypes.TAGS_FILTER,
     label: "Tags",
     type: filterTypes.CHIPS,
     store: useNodeTagStore,
@@ -212,12 +212,12 @@ export const alertFilters: readonly filterOption[] = [
         })
         .join();
     },
-    parseStringRepr: (filterString: string) => {
-      return filterString.split(",");
+    parseStringRepr: (valueString: string) => {
+      return valueString.split(",");
     },
   },
   {
-    name: alertFilterNames.THREAT_ACTOR_FILTER,
+    name: alertPropertyTypes.THREAT_ACTOR_FILTER,
     label: "Threat Actor",
     type: filterTypes.SELECT,
     store: useNodeThreatActorStore,
@@ -225,7 +225,7 @@ export const alertFilters: readonly filterOption[] = [
     valueProperty: "value",
   },
   {
-    name: alertFilterNames.THREATS_FILTER,
+    name: alertPropertyTypes.THREATS_FILTER,
     label: "Threats",
     type: filterTypes.MULTISELECT,
     store: useNodeThreatStore,
@@ -236,12 +236,12 @@ export const alertFilters: readonly filterOption[] = [
         })
         .join();
     },
-    parseStringRepr: (filterString: string) => {
-      return filterString.split(",");
+    parseStringRepr: (valueString: string) => {
+      return valueString.split(",");
     },
   },
   {
-    name: alertFilterNames.TOOL_FILTER,
+    name: alertPropertyTypes.TOOL_FILTER,
     label: "Tool",
     type: filterTypes.SELECT,
     store: useAlertToolStore,
@@ -249,7 +249,7 @@ export const alertFilters: readonly filterOption[] = [
     valueProperty: "value",
   },
   {
-    name: alertFilterNames.TOOL_INSTANCE_FILTER,
+    name: alertPropertyTypes.TOOL_INSTANCE_FILTER,
     label: "Tool Instance",
     type: filterTypes.SELECT,
     store: useAlertToolInstanceStore,
@@ -257,7 +257,7 @@ export const alertFilters: readonly filterOption[] = [
     valueProperty: "value",
   },
   {
-    name: alertFilterNames.TYPE_FILTER,
+    name: alertPropertyTypes.TYPE_FILTER,
     label: "Type",
     type: filterTypes.SELECT,
     store: useAlertTypeStore,
@@ -268,244 +268,376 @@ export const alertFilters: readonly filterOption[] = [
 
 export const alertRangeFilters = {
   "Event Time": {
-    start: alertFilterNames.EVENT_TIME_AFTER_FILTER,
-    end: alertFilterNames.EVENT_TIME_BEFORE_FILTER,
+    start: alertPropertyTypes.EVENT_TIME_AFTER_FILTER,
+    end: alertPropertyTypes.EVENT_TIME_BEFORE_FILTER,
   },
   "Insert Time": {
-    start: alertFilterNames.INSERT_TIME_AFTER_FILTER,
-    end: alertFilterNames.INSERT_TIME_BEFORE_FILTER,
+    start: alertPropertyTypes.INSERT_TIME_AFTER_FILTER,
+    end: alertPropertyTypes.INSERT_TIME_BEFORE_FILTER,
   },
   "Disposition Time": {
-    start: alertFilterNames.DISPOSITIONED_AFTER_FILTER,
-    end: alertFilterNames.DISPOSITIONED_BEFORE_FILTER,
+    start: alertPropertyTypes.DISPOSITIONED_AFTER_FILTER,
+    end: alertPropertyTypes.DISPOSITIONED_BEFORE_FILTER,
   },
 };
 
 // ** Events ** //
 
-export const eventFilterNames: Record<string, eventFilterNameTypes> = {
-  CREATED_AFTER_FILTER: "createdAfter",
-  CREATED_BEFORE_FILTER: "createdBefore",
-  DISPOSITION_FILTER: "disposition",
-  NAME_FILTER: "name",
-  OBSERVABLE_TYPES_FILTER: "observableTypes",
-  OBSERVABLE_VALUE_FILTER: "observableValue",
-  OWNER_FILTER: "owner",
-  PREVENTION_TOOLS_FILTER: "preventionTools",
-  QUEUE_FILTER: "queue",
-  RISK_LEVEL_FILTER: "riskLevel",
-  SOURCE_FILTER: "source",
-  STATUS_FILTER: "status",
-  TAGS_FILTER: "tags",
-  THREAT_ACTORS_FILTER: "threatActors",
-  THREATS_FILTER: "threats",
-  TYPE_FILTER: "type",
-  VECTORS_FILTER: "vectors",
+export const eventPropertyTypes: Record<string, string> = {
+  CREATED_AFTER_PROPERTY: "createdAfter",
+  CREATED_BEFORE_PROPERTY: "createdBefore",
+  CONTAIN_TIME_PROPERTY: "containTime",
+  EVENT_TIME_PROPERTY: "eventTime",
+  ALERT_TIME_PROPERTY: "alertTime",
+  OWNERSHIP_TIME_PROPERTY: "ownershipTime",
+  DISPOSITION_TIME_PROPERTY: "dispositionTime",
+  REMEDIATION_TIME_PROPERTY: "remediationTime",
+  DISPOSITION_PROPERTY_PROPERTY: "disposition",
+  NAME_PROPERTY: "name",
+  OBSERVABLE_TYPES_PROPERTY: "observableTypes",
+  OBSERVABLE_VALUE_PROPERTY: "observableValue",
+  OWNER_PROPERTY: "owner",
+  COMMENTS_PROPERTY: "comments",
+  PREVENTION_TOOLS_PROPERTY: "preventionTools",
+  QUEUE_PROPERTY: "queue",
+  REMEDIATIONS_PROPERTY: "remediations",
+  RISK_LEVEL_PROPERTY: "riskLevel",
+  SOURCE_PROPERTY: "source",
+  STATUS_PROPERTY: "status",
+  TAGS_PROPERTY: "tags",
+  THREAT_ACTORS_PROPERTY: "threatActors",
+  THREATS_PROPERTY: "threats",
+  TYPE_PROPERTY: "type",
+  VECTORS_PROPERTY: "vectors",
 };
+
+const eventEventTimeProperty = {
+  name: eventPropertyTypes.EVENT_TIME_PROPERTY,
+  label: "Event TIme",
+  type: filterTypes.DATE,
+  stringRepr: (value: Date): string => {
+    return value.toISOString();
+  },
+  parseStringRepr: (valueString: string): Date => {
+    return new Date(valueString);
+  },
+};
+const eventAlertTimeProperty = {
+  name: eventPropertyTypes.ALERT_TIME_PROPERTY,
+  label: "Alert Time",
+  type: filterTypes.DATE,
+  stringRepr: (value: Date): string => {
+    return value.toISOString();
+  },
+  parseStringRepr: (valueString: string): Date => {
+    return new Date(valueString);
+  },
+};
+const eventOwnershipTimeProperty = {
+  name: eventPropertyTypes.OWNERSHIP_TIME_PROPERTY,
+  label: "Ownership Time",
+  type: filterTypes.DATE,
+  stringRepr: (value: Date): string => {
+    return value.toISOString();
+  },
+  parseStringRepr: (valueString: string): Date => {
+    return new Date(valueString);
+  },
+};
+const eventDispositionTimeProperty = {
+  name: eventPropertyTypes.DISPOSITION_TIME_PROPERTY,
+  label: "Disposition Time",
+  type: filterTypes.DATE,
+  stringRepr: (value: Date): string => {
+    return value.toISOString();
+  },
+  parseStringRepr: (valueString: string): Date => {
+    return new Date(valueString);
+  },
+};
+const eventContainTimeProperty = {
+  name: eventPropertyTypes.CONTAIN_TIME_PROPERTY,
+  label: "Contain Time",
+  type: filterTypes.DATE,
+  stringRepr: (value: Date): string => {
+    return value.toISOString();
+  },
+  parseStringRepr: (valueString: string): Date => {
+    return new Date(valueString);
+  },
+};
+const eventRemediationTimeProperty = {
+  name: eventPropertyTypes.REMEDIATION_TIME_PROPERTY,
+  label: "Remediation Time",
+  type: filterTypes.DATE,
+  stringRepr: (value: Date): string => {
+    return value.toISOString();
+  },
+  parseStringRepr: (valueString: string): Date => {
+    return new Date(valueString);
+  },
+};
+
+const eventRemediationProperty = {
+  name: eventPropertyTypes.REMEDIATIONS_PROPERTY,
+  label: "Remediation",
+  type: filterTypes.MULTISELECT,
+  store: useEventRemediationStore,
+  stringRepr: (value: eventRemediationRead[]): string => {
+    return value
+      .map(function (elem) {
+        return elem.value;
+      })
+      .join();
+  },
+  parseStringRepr: (valueString: string): string[] => {
+    return valueString.split(",");
+  },
+};
+
+const eventNameProperty: filterOption = {
+  name: eventPropertyTypes.NAME_PROPERTY,
+  label: "Name",
+  type: filterTypes.INPUT_TEXT,
+};
+
+const eventOwnerProperty: filterOption = {
+  name: eventPropertyTypes.OWNER_PROPERTY,
+  label: "Owner",
+  type: filterTypes.SELECT,
+  store: useUserStore,
+  optionProperty: "displayName",
+  valueProperty: "username",
+};
+
+const eventCommentProperty: filterOption = {
+  name: eventPropertyTypes.COMMENTS_PROPERTY,
+  label: "Comment",
+  type: filterTypes.INPUT_TEXT,
+};
+
+const eventPreventionToolsProperty: filterOption = {
+  name: eventPropertyTypes.PREVENTION_TOOLS_PROPERTY,
+  label: "Prevention Tools",
+  type: filterTypes.MULTISELECT,
+  store: useEventPreventionToolStore,
+  stringRepr: (value: eventPreventionToolRead[]) => {
+    return value
+      .map(function (elem) {
+        return elem.value;
+      })
+      .join();
+  },
+  parseStringRepr: (valueString: string) => {
+    return valueString.split(",");
+  },
+};
+const eventRiskLevelProperty: filterOption = {
+  name: eventPropertyTypes.RISK_LEVEL_PROPERTY,
+  label: "Risk Level",
+  type: filterTypes.SELECT,
+  store: useEventRiskLevelStore,
+  optionProperty: "value",
+  valueProperty: "value",
+};
+
+const eventStatusProperty: filterOption = {
+  name: eventPropertyTypes.STATUS_PROPERTY,
+  label: "Status",
+  type: filterTypes.SELECT,
+  store: useEventStatusStore,
+  optionProperty: "value",
+  valueProperty: "value",
+};
+const eventThreatActorsProperty: filterOption = {
+  name: eventPropertyTypes.THREAT_ACTORS_PROPERTY,
+  label: "Threat Actors",
+  type: filterTypes.MULTISELECT,
+  store: useNodeThreatActorStore,
+  stringRepr: (value: nodeThreatActorRead[]) => {
+    return value
+      .map(function (elem) {
+        return elem.value;
+      })
+      .join();
+  },
+  parseStringRepr: (valueString: string) => {
+    return valueString.split(",");
+  },
+};
+const eventThreatsProperty: filterOption = {
+  name: eventPropertyTypes.THREATS_PROPERTY,
+  label: "Threats",
+  type: filterTypes.MULTISELECT,
+  store: useNodeThreatStore,
+  stringRepr: (value: nodeThreatRead[]) => {
+    return value
+      .map(function (elem) {
+        return elem.value;
+      })
+      .join();
+  },
+  parseStringRepr: (valueString: string) => {
+    return valueString.split(",");
+  },
+};
+
+const eventTypeProperty: filterOption = {
+  name: eventPropertyTypes.TYPE_PROPERTY,
+  label: "Type",
+  type: filterTypes.SELECT,
+  store: useEventTypeStore,
+  optionProperty: "value",
+  valueProperty: "value",
+};
+const eventVectorsProperty: filterOption = {
+  name: eventPropertyTypes.VECTORS_PROPERTY,
+  label: "Vectors",
+  type: filterTypes.MULTISELECT,
+  store: useEventVectorStore,
+  stringRepr: (value: eventVectorRead[]) => {
+    return value
+      .map(function (elem) {
+        return elem.value;
+      })
+      .join();
+  },
+  parseStringRepr: (valueString: string) => {
+    return valueString.split(",");
+  },
+};
+
+export const eventEditableProperties: readonly filterOption[] = [
+  eventNameProperty,
+  eventOwnerProperty,
+  eventCommentProperty,
+  eventRemediationProperty,
+  eventPreventionToolsProperty,
+  eventRiskLevelProperty,
+  eventStatusProperty,
+  eventThreatActorsProperty,
+  eventThreatsProperty,
+  eventTypeProperty,
+  eventVectorsProperty,
+  eventEventTimeProperty,
+  eventAlertTimeProperty,
+  eventOwnershipTimeProperty,
+  eventDispositionTimeProperty,
+  eventContainTimeProperty,
+  eventRemediationTimeProperty,
+];
 
 export const eventFilters: readonly filterOption[] = [
   {
-    name: eventFilterNames.CREATED_AFTER_FILTER,
+    name: eventPropertyTypes.CREATED_AFTER_PROPERTY,
     label: "Created After",
     type: filterTypes.DATE,
-    stringRepr: (filter: Date) => {
-      return filter.toISOString();
+    stringRepr: (value: Date) => {
+      return value.toISOString();
     },
-    parseStringRepr: (filterString: string) => {
-      return new Date(filterString);
+    parseStringRepr: (valueString: string) => {
+      return new Date(valueString);
     },
   },
   {
-    name: eventFilterNames.CREATED_BEFORE_FILTER,
+    name: eventPropertyTypes.CREATED_BEFORE_PROPERTY,
     label: "Created Before",
     type: filterTypes.DATE,
-    stringRepr: (filter: Date) => {
-      return filter.toISOString();
+    stringRepr: (value: Date) => {
+      return value.toISOString();
     },
-    parseStringRepr: (filterString: string) => {
-      return new Date(filterString);
+    parseStringRepr: (valueString: string) => {
+      return new Date(valueString);
     },
   },
   {
-    name: eventFilterNames.DISPOSITION_FILTER,
+    name: eventPropertyTypes.DISPOSITION_PROPERTY,
     label: "Disposition",
     type: filterTypes.SELECT,
     store: useAlertDispositionStore,
     optionProperty: "value",
     valueProperty: "value",
   },
+  eventNameProperty,
   {
-    name: eventFilterNames.NAME_FILTER,
-    label: "Name",
-    type: filterTypes.INPUT_TEXT,
-  },
-  {
-    name: eventFilterNames.OBSERVABLE_FILTER,
+    name: eventPropertyTypes.OBSERVABLE_PROPERTY,
     label: "Observable",
     type: filterTypes.CATEGORIZED_VALUE,
     store: useObservableTypeStore,
-    stringRepr: (filter: { category: observableTypeRead; value: string }) => {
-      return `${filter.category.value}|${filter.value}`;
+    stringRepr: (value: { category: observableTypeRead; value: string }) => {
+      return `${value.category.value}|${value.value}`;
     },
-    parseStringRepr: (filterString: string) => {
-      const [category, value] = filterString.split("|");
+    parseStringRepr: (valueString: string) => {
+      const [category, value] = valueString.split("|");
       return { category: category, value: value };
     },
   },
   {
-    name: eventFilterNames.OBSERVABLE_TYPES_FILTER,
+    name: eventPropertyTypes.OBSERVABLE_TYPES_PROPERTY,
     label: "Observable Types",
     type: filterTypes.MULTISELECT,
     store: useObservableTypeStore,
-    stringRepr: (filter: observableTypeRead[]) => {
-      return filter
+    stringRepr: (value: observableTypeRead[]) => {
+      return value
         .map(function (elem) {
           return elem.value;
         })
         .join();
     },
-    parseStringRepr: (filterString: string) => {
-      return filterString.split(",");
+    parseStringRepr: (valueString: string) => {
+      return valueString.split(",");
     },
   },
   {
-    name: eventFilterNames.OBSERVABLE_VALUE_FILTER,
+    name: eventPropertyTypes.OBSERVABLE_VALUE_PROPERTY,
     label: "Observable Value",
     type: filterTypes.INPUT_TEXT,
   },
+  eventOwnerProperty,
+  eventPreventionToolsProperty,
   {
-    name: eventFilterNames.OWNER_FILTER,
-    label: "Owner",
-    type: filterTypes.SELECT,
-    store: useUserStore,
-    optionProperty: "displayName",
-    valueProperty: "username",
-  },
-  {
-    name: eventFilterNames.PREVENTION_TOOLS_FILTER,
-    label: "Prevention Tools",
-    type: filterTypes.MULTISELECT,
-    store: useEventPreventionToolStore,
-    stringRepr: (filter: eventPreventionToolRead[]) => {
-      return filter
-        .map(function (elem) {
-          return elem.value;
-        })
-        .join();
-    },
-    parseStringRepr: (filterString: string) => {
-      return filterString.split(",");
-    },
-  },
-  {
-    name: eventFilterNames.QUEUE_FILTER,
+    name: eventPropertyTypes.QUEUE_PROPERTY,
     label: "Queue",
     type: filterTypes.SELECT,
     store: useEventQueueStore,
     optionProperty: "value",
     valueProperty: "value",
   },
+  eventRiskLevelProperty,
   {
-    name: eventFilterNames.RISK_LEVEL_FILTER,
-    label: "Risk Level",
-    type: filterTypes.SELECT,
-    store: useEventRiskLevelStore,
-    optionProperty: "value",
-    valueProperty: "value",
-  },
-  {
-    name: eventFilterNames.SOURCE_FILTER,
+    name: eventPropertyTypes.SOURCE_PROPERTY,
     label: "Source",
     type: filterTypes.SELECT,
     store: useEventSourceStore,
     optionProperty: "value",
     valueProperty: "value",
   },
+  eventStatusProperty,
   {
-    name: eventFilterNames.STATUS_FILTER,
-    label: "Status",
-    type: filterTypes.SELECT,
-    store: useEventStatusStore,
-    optionProperty: "value",
-    valueProperty: "value",
-  },
-  {
-    name: eventFilterNames.TAGS_FILTER,
+    name: eventPropertyTypes.TAGS_PROPERTY,
     label: "Tags",
     type: filterTypes.CHIPS,
     store: useNodeTagStore,
-    stringRepr: (filter: string[]) => {
-      return filter
+    stringRepr: (value: string[]) => {
+      return value
         .map(function (elem) {
           return elem;
         })
         .join();
     },
-    parseStringRepr: (filterString: string) => {
-      return filterString.split(",");
+    parseStringRepr: (valueString: string) => {
+      return valueString.split(",");
     },
   },
-  {
-    name: eventFilterNames.THREAT_ACTORS_FILTER,
-    label: "Threat Actors",
-    type: filterTypes.MULTISELECT,
-    store: useNodeThreatActorStore,
-    stringRepr: (filter: nodeThreatActorRead[]) => {
-      return filter
-        .map(function (elem) {
-          return elem.value;
-        })
-        .join();
-    },
-    parseStringRepr: (filterString: string) => {
-      return filterString.split(",");
-    },
-  },
-  {
-    name: eventFilterNames.THREATS_FILTER,
-    label: "Threats",
-    type: filterTypes.MULTISELECT,
-    store: useNodeThreatStore,
-    stringRepr: (filter: nodeThreatRead[]) => {
-      return filter
-        .map(function (elem) {
-          return elem.value;
-        })
-        .join();
-    },
-    parseStringRepr: (filterString: string) => {
-      return filterString.split(",");
-    },
-  },
-  {
-    name: eventFilterNames.TYPE_FILTER,
-    label: "Type",
-    type: filterTypes.SELECT,
-    store: useEventTypeStore,
-    optionProperty: "value",
-    valueProperty: "value",
-  },
-  {
-    name: eventFilterNames.VECTORS_FILTER,
-    label: "Vectors",
-    type: filterTypes.MULTISELECT,
-    store: useEventVectorStore,
-    stringRepr: (filter: eventVectorRead[]) => {
-      return filter
-        .map(function (elem) {
-          return elem.value;
-        })
-        .join();
-    },
-    parseStringRepr: (filterString: string) => {
-      return filterString.split(",");
-    },
-  },
+  eventThreatActorsProperty,
+  eventThreatsProperty,
+  eventTypeProperty,
+  eventVectorsProperty,
 ] as const;
 
 export const eventRangeFilters = {
   "Created Time": {
-    start: eventFilterNames.CREATED_AFTER_FILTER,
-    end: eventFilterNames.CREATED_BEFORE_FILTER,
+    start: eventPropertyTypes.CREATED_AFTER_PROPERTY,
+    end: eventPropertyTypes.CREATED_BEFORE_PROPERTY,
   },
 };

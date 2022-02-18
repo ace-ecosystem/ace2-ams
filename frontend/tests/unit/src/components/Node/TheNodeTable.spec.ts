@@ -36,6 +36,7 @@ interface factoryOptions {
 const columns = [
   { field: "test", header: "Test", default: false },
   { field: "otherTest", header: "Other Test", default: true },
+  { field: "requiredTest", header: "Required Test", required: true },
 ];
 
 function factory(
@@ -115,7 +116,9 @@ describe("TheNodeTable data/creation", () => {
     ]);
     expect(wrapper.vm.expandedRows).toStrictEqual([]);
     expect(wrapper.vm.columns).toStrictEqual(columns);
+    expect(wrapper.vm.columnOptions).toStrictEqual([columns[0], columns[1]]);
     expect(wrapper.vm.defaultColumns).toStrictEqual([columns[1]]);
+    expect(wrapper.vm.requiredColumns).toStrictEqual([columns[2]]);
     expect(wrapper.vm.isLoading).toEqual(false);
     expect(wrapper.vm.error).toBeNull();
     expect(wrapper.vm.tableStore.visibleQueriedItemSummaries).toHaveLength(0);
@@ -213,6 +216,19 @@ describe("TheNodeTable data/creation", () => {
       limit: 5,
       offset: 10,
     });
+  });
+
+  it("computes displayedColumns correctly", () => {
+    const { wrapper } = factory();
+
+    // Display the required column(s) and default selected column(s)
+    expect(wrapper.vm.displayedColumns).toEqual([columns[2], columns[1]]);
+
+    // Switch the selected column
+    wrapper.vm.onColumnToggle([wrapper.vm.columns[0]]);
+
+    // Should now be the required column(s) and newly selected column
+    expect(wrapper.vm.displayedColumns).toEqual([columns[2], columns[0]]);
   });
 
   // Skip this test for now since the CSV export needs to be reworked & this test currently gives a warning

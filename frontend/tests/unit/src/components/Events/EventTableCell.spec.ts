@@ -1,32 +1,11 @@
+import { useEventTableStore } from "@/stores/eventTable";
+import { useModalStore } from "@/stores/modal";
 import EventTableCell from "@/components/Events/EventTableCell.vue";
 import { shallowMount, VueWrapper } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
 
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
-import { nodeCommentRead } from "@/models/nodeComment";
-import { userRead } from "@/models/user";
-
-const mockUser: userRead = {
-  defaultAlertQueue: { description: null, uuid: "1", value: "default" },
-  defaultEventQueue: { description: null, uuid: "1", value: "default" },
-  displayName: "Test Analyst",
-  email: "analyst@test.com",
-  enabled: true,
-  roles: [],
-  timezone: "UTC",
-  training: false,
-  username: "test analyst",
-  uuid: "1",
-};
-
-const mockComment: nodeCommentRead = {
-  insertTime: new Date(),
-  nodeUuid: "uuid1",
-  user: mockUser,
-  uuid: "uuid1",
-  value: "Test comment",
-};
 
 function factory(
   piniaOptions: TestingOptions = {},
@@ -46,7 +25,10 @@ function factory(
     },
   });
 
-  return { wrapper };
+  const eventTableStore = useEventTableStore();
+  const modalStore = useModalStore();
+
+  return { wrapper, modalStore, eventTableStore };
 }
 
 describe("EventTableCell", () => {
@@ -70,5 +52,19 @@ describe("EventTableCell", () => {
     const { wrapper } = factory();
     const result = wrapper.vm.joinStringArray(["stringA", "stringB"]);
     expect(result).toEqual("stringA, stringB");
+  });
+  it("correctly opens a given modal on open", () => {
+    const { wrapper, modalStore } = factory({ stubActions: false });
+
+    expect(modalStore.openModals).toEqual([]);
+    wrapper.vm.open("TestModal");
+    expect(modalStore.openModals).toEqual(["TestModal"]);
+  });
+  it("sets the eventTableStore requestReload property to true on requestReload", () => {
+    const { wrapper, eventTableStore } = factory({ stubActions: false });
+
+    expect(eventTableStore.requestReload).toBeFalsy();
+    wrapper.vm.requestReload();
+    expect(eventTableStore.requestReload).toBeTruthy();
   });
 });

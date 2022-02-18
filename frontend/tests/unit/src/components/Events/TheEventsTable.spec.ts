@@ -33,6 +33,12 @@ describe("TheEventsTable data/creation", () => {
     const { wrapper } = factory();
     expect(wrapper.vm.columns).toStrictEqual([
       {
+        field: "edit",
+        header: "",
+        required: true,
+        sortable: false,
+      },
+      {
         field: "createdTime",
         header: "Created",
         sortable: true,

@@ -23,6 +23,12 @@
   import EventAlertsTable from "./EventAlertsTable.vue";
 
   const columns = ref([
+    {
+      field: "edit",
+      header: "",
+      sortable: false,
+      required: true,
+    },
     { field: "createdTime", header: "Created", sortable: true, default: true },
     { field: "name", header: "Name", sortable: true, default: true },
     { field: "owner", header: "Owner", sortable: true, default: true },

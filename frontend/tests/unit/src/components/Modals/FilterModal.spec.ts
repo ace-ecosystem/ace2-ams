@@ -60,8 +60,8 @@ describe("FilterModal setup", () => {
     expect(wrapper.vm.submitFilters).toEqual({ name: "hello world" });
     expect(wrapper.vm.formFilters).toEqual([
       {
-        filterName: "name",
-        filterValue: "hello world",
+        propertyType: "name",
+        propertyValue: "hello world",
       },
     ]);
   });
@@ -111,8 +111,8 @@ describe("FilterModal watchers", () => {
     });
     expect(wrapper.vm.formFilters).toEqual([
       {
-        filterName: "name",
-        filterValue: "hello world",
+        propertyType: "name",
+        propertyValue: "hello world",
       },
     ]);
   });
@@ -127,8 +127,8 @@ describe("FilterModal methods", () => {
     expect(wrapper.vm.formFilters).toEqual([]);
     wrapper.vm.formFilters = [
       {
-        filterName: "name",
-        filterValue: "hello world",
+        propertyType: "name",
+        propertyValue: "hello world",
       },
     ];
     wrapper.vm.submit();
@@ -148,16 +148,16 @@ describe("FilterModal methods", () => {
 
     wrapper.vm.formFilters = [
       {
-        filterName: "name",
-        filterValue: "hello world",
+        propertyType: "name",
+        propertyValue: "hello world",
       },
       {
-        filterName: "name",
-        filterValue: "hello world 2",
+        propertyType: "name",
+        propertyValue: "hello world 2",
       },
       {
-        filterName: "name",
-        filterValue: "hello world 3",
+        propertyType: "name",
+        propertyValue: "hello world 3",
       },
     ];
 
@@ -165,12 +165,12 @@ describe("FilterModal methods", () => {
 
     expect(wrapper.vm.formFilters).toEqual([
       {
-        filterName: "name",
-        filterValue: "hello world",
+        propertyType: "name",
+        propertyValue: "hello world",
       },
       {
-        filterName: "name",
-        filterValue: "hello world 3",
+        propertyType: "name",
+        propertyValue: "hello world 3",
       },
     ]);
   });
@@ -179,16 +179,16 @@ describe("FilterModal methods", () => {
 
     wrapper.vm.formFilters = [
       {
-        filterName: "name",
-        filterValue: "hello world",
+        propertyType: "name",
+        propertyValue: "hello world",
       },
       {
-        filterName: "name",
-        filterValue: "hello world 2",
+        propertyType: "name",
+        propertyValue: "hello world 2",
       },
       {
-        filterName: "name",
-        filterValue: "hello world 3",
+        propertyType: "name",
+        propertyValue: "hello world 3",
       },
     ];
 
@@ -203,8 +203,8 @@ describe("FilterModal methods", () => {
     wrapper.vm.addNewFilter();
     expect(wrapper.vm.formFilters).toEqual([
       {
-        filterName: null,
-        filterValue: null,
+        propertyType: null,
+        propertyValue: null,
       },
     ]);
   });
@@ -222,12 +222,12 @@ describe("FilterModal methods", () => {
     wrapper.vm.loadFormFilters();
     expect(wrapper.vm.formFilters).toEqual([
       {
-        filterName: "name",
-        filterValue: "hello world",
+        propertyType: "name",
+        propertyValue: "hello world",
       },
       {
-        filterName: "owner",
-        filterValue: "test analyst",
+        propertyType: "owner",
+        propertyValue: "test analyst",
       },
     ]);
   });
@@ -244,23 +244,23 @@ describe("FilterModal methods", () => {
 
     wrapper.vm.formFilters = [
       {
-        filterName: "name",
-        filterValue: "hello world",
+        propertyType: "name",
+        propertyValue: "hello world",
       },
       {
-        filterName: "name",
-        filterValue: "hello world 2",
+        propertyType: "name",
+        propertyValue: "hello world 2",
       },
       {
-        filterName: "name",
-        filterValue: "hello world 3",
+        propertyType: "name",
+        propertyValue: "hello world 3",
       },
     ];
     wrapper.vm.close();
     expect(wrapper.vm.modalStore.openModals).toEqual([]);
     expect(wrapper.vm.formFilters).toEqual([
-      { filterName: "name", filterValue: "hello world" },
-      { filterName: "owner", filterValue: "test analyst" },
+      { propertyType: "name", propertyValue: "hello world" },
+      { propertyType: "owner", propertyValue: "test analyst" },
     ]);
   });
 });
