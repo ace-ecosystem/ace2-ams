@@ -97,7 +97,7 @@ jobs:
         run: cd frontend && npm install && npm run build
 
       - name: Run environment
-        run: docker-compose -f docker-compose.yml -f docker-compose-e2e.yml up -d
+        run: docker-compose -f docker-compose.yml -f docker-compose-e2e.yml up
 
       # - name: Wait for API and GUI to be accessible
       #   run: bin/wait-for-gui.sh
