@@ -1,10 +1,9 @@
 import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
-import { flushPromises, mount, VueWrapper } from "@vue/test-utils";
+import { mount, VueWrapper } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
-import { useFilterStore } from "@/stores/filter";
-import myNock from "@unit/services/api/nock";
-import nock from "nock";
 import { createCustomPinia } from "@unit/helpers";
+
+import { useFilterStore } from "@/stores/filter";
 
 function factory(
   options: TestingOptions = {},
@@ -23,7 +22,6 @@ function factory(
     },
     props: {
       observables: observables,
-      uuid: "05975cf2-fd3d-4485-a03f-7cbc1e7efbbc",
     },
   });
 
@@ -34,35 +32,14 @@ function factory(
 
 describe("AlertTableExpansion", () => {
   it("renders", () => {
-  myNock
-    .post("/node/tree/observable", '["05975cf2-fd3d-4485-a03f-7cbc1e7efbbc"]')
-    .reply(200, [
-      { type: { value: "type_B" }, value: "value_B", tags: [] },
-      { type: { value: "type_C" }, value: "value_C", tags: [] },
-      { type: { value: "type_B" }, value: "value_A", tags: [] },
-      { type: { value: "type_A" }, value: "value_A", tags: [] },
-      { type: { value: "type_A" }, value: "value_C", tags: [] },
-    ])
-    .persist();
-
-  afterAll(async () => {
-    await flushPromises();
-    nock.cleanAll();
+    const { wrapper } = factory();
+    expect(wrapper.exists()).toBe(true);
   });
 
   it("correctly computes isLoading as true when observables prop is null", () => {
     const { wrapper } = factory({}, null);
     expect(wrapper.vm.isLoading).toBeTruthy();
   });
-  it("correctly fetches, sets, and sorts observables on getObservables", async () => {
-    const { wrapper } = factory();
-
-    await wrapper.vm.getObservables("05975cf2-fd3d-4485-a03f-7cbc1e7efbbc");
-
-    expect(wrapper.vm.observables).toEqual([
-      { type: { value: "type_A" }, value: "value_A", tags: [] },
-      { type: { value: "type_A" }, value: "value_C", tags: [] },
-      { type: { value: "type_B" }, value: "value_A", tags: [] },
 
   it("correctly computes isLoading as true when observables prop is not null", () => {
     const { wrapper } = factory();

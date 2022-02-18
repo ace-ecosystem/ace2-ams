@@ -3,7 +3,7 @@ import { nodeThreatReadFactory } from "./../../../../mocks/nodeThreat";
 import { genericObjectReadFactory } from "./../../../../mocks/genericObject";
 import NodeThreatSelector from "../../../../../src/components/Node/NodeThreatSelector.vue";
 import { mount } from "@vue/test-utils";
-import { createTestingPinia } from "@pinia/testing";
+import { createCustomPinia } from "@unit/helpers";
 import Tooltip from "primevue/tooltip";
 import PrimeVue from "primevue/config";
 
@@ -15,7 +15,7 @@ function factory() {
       modelValue: [],
     },
     global: {
-      plugins: [createTestingPinia(), PrimeVue],
+      plugins: [createCustomPinia(), PrimeVue],
       directives: { tooltip: Tooltip },
     },
   });
