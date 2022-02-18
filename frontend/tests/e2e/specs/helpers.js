@@ -60,3 +60,45 @@ export function visitUrl(options) {
     }
   });
 }
+
+export function openEditEventModal() {
+  cy.intercept("GET", "/api/event/prevention_tool/?offset=0").as(
+    "eventPreventionTool",
+  );
+  cy.intercept("GET", "/api/event/remediation/?offset=0").as(
+    "eventRemediation",
+  );
+  cy.intercept("GET", "/api/event/risk_level/?offset=0").as("eventRiskLevel");
+  cy.intercept("GET", "/api/event/status/?offset=0").as("eventStatus");
+  cy.intercept("GET", "/api/event/type/?offset=0").as("eventType");
+  cy.intercept("GET", "/api/event/vector/?offset=0").as("eventVector");
+  cy.intercept("GET", "/api/node/threat_actor/?offset=0").as("nodeThreatActor");
+  cy.intercept("GET", "/api/node/threat/?offset=0").as("nodeThreat");
+  cy.intercept("GET", "/api/node/threat/type/?offset=0").as("nodeThreatType");
+  cy.intercept("GET", "/api/user/?offset=0").as("user");
+  cy.intercept("GET", "/api/event/*").as("event");
+
+  // Open the Edit Event modal
+  cy.get("[data-cy=edit-event-button]").click();
+
+  // Wait for all of the intercepted calls to complete
+  const intercepts = [
+    "@eventPreventionTool",
+    "@eventRemediation",
+    "@eventRiskLevel",
+    "@eventStatus",
+    "@eventType",
+    "@eventVector",
+    "@nodeThreatActor",
+    "@nodeThreat",
+    "@nodeThreatType",
+    "@user",
+    "@event",
+  ];
+
+  cy.wait(intercepts).then((interceptions) => {
+    for (let i = 0; i < interceptions.length; i++) {
+      cy.wrap(interceptions[i]).its("state").should("eq", "Complete");
+    }
+  });
+}

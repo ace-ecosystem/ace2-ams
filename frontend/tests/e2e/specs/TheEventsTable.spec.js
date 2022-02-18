@@ -1,4 +1,4 @@
-import { visitUrl } from "./helpers";
+import { openEditEventModal, visitUrl } from "./helpers";
 
 describe("TheEventsTable.vue", () => {
   before(() => {
@@ -333,6 +333,37 @@ describe("TheEventsTable.vue", () => {
         cy.get("tr").should("have.length", 2);
       });
   });
+});
+
+describe("TheEventsTable.vue - Remove Alerts", () => {
+  before(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Add a test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small_template.json",
+        alert_count: 6,
+        name: "Test Event 5",
+      },
+    });
+  });
+
+  beforeEach(() => {
+    // Intercept the API call that loads the default event table view
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
+    ).as("getEventsDefaultRows");
+
+    visitUrl({
+      url: "/manage_events",
+      extraIntercepts: ["@getEventsDefaultRows"],
+    });
+  });
 
   it("removes alerts from the event when Remove Alerts button is clicked", () => {
     cy.intercept("GET", "/api/alert/?event_uuid=*").as("getEventAlerts");
@@ -425,7 +456,8 @@ describe("TheEventsTable.vue - EditEventModal", () => {
   });
 
   it("opens edit event modal with expected buttons when open button is clicked", () => {
-    cy.get("[data-cy=edit-event-button]").click();
+    openEditEventModal();
+
     cy.get("[data-cy=edit-event-modal]").should("be.visible");
     cy.get(".p-dialog-header-close-icon").should("be.visible");
     cy.get(".p-dialog-header-close-icon").should("be.visible");
@@ -433,7 +465,8 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.get("[data-cy=nevermind-edit-event-button]").should("be.visible");
   });
   it("loads event data for each input when edit event modal is opened", () => {
-    cy.get("[data-cy=edit-event-button]").click();
+    openEditEventModal();
+
     // Check name
     cy.get("[data-cy=event-name-field] .field > input").should(
       "have.value",
@@ -459,7 +492,8 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     ).as("getEventsDefaultRows");
     cy.intercept("PATCH", "/api/event/").as("updateAlert");
 
-    cy.get("[data-cy=edit-event-button]").click();
+    openEditEventModal();
+
     cy.get("[data-cy=event-name-field]").click().clear().type("New Name");
     cy.get("[data-cy=save-edit-event-button]").click();
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
@@ -473,7 +507,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     ).as("getEventsDefaultRows");
     cy.intercept("PATCH", "/api/event/").as("updateAlert");
 
-    cy.get("[data-cy=edit-event-button]").click();
+    openEditEventModal();
 
     cy.get("[data-cy=event-owner-field] ").click();
     cy.get('[aria-label="Analyst"]').click();
@@ -491,7 +525,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     ).as("getEventsDefaultRows");
     cy.intercept("PATCH", "/api/event/").as("updateAlert");
 
-    cy.get("[data-cy=edit-event-button]").click();
+    openEditEventModal();
 
     cy.get("[data-cy=event-remediations-field]").click();
     cy.get(".p-multiselect-item ").eq(0).click();
@@ -508,7 +542,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     ).as("getEventsDefaultRows");
     cy.intercept("PATCH", "/api/event/").as("updateAlert");
 
-    cy.get("[data-cy=edit-event-button]").click();
+    openEditEventModal();
 
     cy.get("[data-cy=event-eventTime-field]").click().type("03/02/2022 12:00");
 
@@ -531,7 +565,8 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.get(".p-dialog-footer > .p-button").last().click();
 
     // Check that the comment field is set up correctly
-    cy.get("[data-cy=edit-event-button]").click();
+    openEditEventModal();
+
     cy.get("li.p-listbox-item > span").should(
       "include.text",
       "(Analyst) Test comment",
@@ -577,7 +612,8 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.intercept("PATCH", "/api/node/threat/*").as("updateThreat");
     cy.intercept("GET", "/api/node/threat/*").as("getThreats");
 
-    cy.get("[data-cy=edit-event-button]").click();
+    openEditEventModal();
+
     // Open new threat panel
     cy.get("[data-cy=new-threat-button]").click();
     cy.get("[data-cy=edit-threat-panel]").should("be.visible");
@@ -601,7 +637,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Reopen the panel
-    cy.get("[data-cy=edit-event-button]").click();
+    openEditEventModal();
 
     // Check that the panel gets initialized with correct values when editing
     cy.get("[data-cy=edit-threat-button] > .pi").click();
