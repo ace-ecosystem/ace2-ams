@@ -1,6 +1,7 @@
 .devcontainer
 .github
 coverage
+dist
 docs
 node_modules
 package.json
