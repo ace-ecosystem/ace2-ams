@@ -1,4 +1,9 @@
-import { alertReadPage, alertSummary, alertTreeRead } from "@/models/alert";
+import {
+  alertRead,
+  alertReadPage,
+  alertSummary,
+  alertTreeRead,
+} from "@/models/alert";
 import { analysisRead } from "@/models/analysis";
 
 export const mockAlert: alertTreeRead = {
@@ -539,7 +544,246 @@ export const mockAlert: alertTreeRead = {
   },
 };
 
-export const mockAlertReadA = Object.assign({}, mockAlert, { uuid: "uuid1" });
+export const mockAlertReadA: alertRead = {
+  version: "d3a68da8-2588-42af-9763-2a13c9f9896d",
+  description: null,
+  eventTime: new Date("2022-02-01T15:21:36.240541+00:00"),
+  insertTime: new Date("2022-02-01T15:21:36.240543+00:00"),
+  instructions: null,
+  queue: {
+    description: null,
+    value: "test_queue",
+    uuid: "5e490c53-9d48-434f-9acf-4f3b91e1de74",
+  },
+  owner: null,
+  nodeType: "alert",
+  uuid: "81d92d05-3b60-4ecf-931d-4525fc1113f3",
+  childTags: [
+    {
+      description: null,
+      value: "tag0",
+      uuid: "6b50c490-e84a-41b2-87a6-cff87f666a8c",
+    },
+    {
+      description: null,
+      value: "tag1",
+      uuid: "966badd3-bd77-4a7d-a8c3-a9f30a012f68",
+    },
+    {
+      description: null,
+      value: "tag2",
+      uuid: "3cab1ca5-0a36-4b91-b21c-ca5779d3da96",
+    },
+    {
+      description: null,
+      value: "tag3",
+      uuid: "daf63ad5-6226-439e-ac3e-bea5b6b5d0f8",
+    },
+    {
+      description: null,
+      value: "tag4",
+      uuid: "0f85d1cf-9ff2-46d9-bf90-c08b8242ad10",
+    },
+    {
+      description: null,
+      value: "tag5",
+      uuid: "3f86646f-97f1-4b7b-9e01-9283516588a9",
+    },
+    {
+      description: null,
+      value: "tag6",
+      uuid: "3a687aae-2293-439d-aacf-caa26321674e",
+    },
+  ],
+  childThreatActors: [],
+  childThreats: [],
+  comments: [],
+  disposition: null,
+  dispositionTime: null,
+  dispositionUser: null,
+  eventUuid: "2e1a0907-902f-411b-9059-37b09e2ffb0b",
+  name: "Manual Alert 0",
+  tags: [],
+  threatActors: [],
+  threats: [],
+  tool: {
+    description: null,
+    value: "test_tool",
+    uuid: "860f0c9d-692f-4cb1-addf-8c4d851e05d6",
+  },
+  toolInstance: {
+    description: null,
+    value: "test_tool_instance",
+    uuid: "7aa91552-47a2-49f2-8e06-02be6cb659ec",
+  },
+  type: {
+    description: null,
+    value: "test_type",
+    uuid: "6a6a0888-8bc2-4385-b9c6-0b06bb5a811f",
+  },
+};
+
+export const mockAlertReadB: alertRead = {
+  version: "ebce502c-d840-4665-a153-6e015dd6f9bd",
+  description: null,
+  eventTime: new Date("2022-02-01T15:21:37.627432+00:00"),
+  insertTime: new Date("2022-02-01T15:21:37.627435+00:00"),
+  instructions: null,
+  queue: {
+    description: null,
+    value: "test_queue",
+    uuid: "5e490c53-9d48-434f-9acf-4f3b91e1de74",
+  },
+  owner: null,
+  nodeType: "alert",
+  uuid: "b8a03b05-020d-4da7-b543-bb08137f862d",
+  childTags: [
+    {
+      description: null,
+      value: "tag0",
+      uuid: "6b50c490-e84a-41b2-87a6-cff87f666a8c",
+    },
+    {
+      description: null,
+      value: "tag1",
+      uuid: "966badd3-bd77-4a7d-a8c3-a9f30a012f68",
+    },
+    {
+      description: null,
+      value: "tag2",
+      uuid: "3cab1ca5-0a36-4b91-b21c-ca5779d3da96",
+    },
+    {
+      description: null,
+      value: "tag3",
+      uuid: "daf63ad5-6226-439e-ac3e-bea5b6b5d0f8",
+    },
+    {
+      description: null,
+      value: "tag4",
+      uuid: "0f85d1cf-9ff2-46d9-bf90-c08b8242ad10",
+    },
+    {
+      description: null,
+      value: "tag5",
+      uuid: "3f86646f-97f1-4b7b-9e01-9283516588a9",
+    },
+    {
+      description: null,
+      value: "tag6",
+      uuid: "3a687aae-2293-439d-aacf-caa26321674e",
+    },
+  ],
+  childThreatActors: [],
+  childThreats: [],
+  comments: [],
+  disposition: null,
+  dispositionTime: null,
+  dispositionUser: null,
+  eventUuid: "2e1a0907-902f-411b-9059-37b09e2ffb0b",
+  name: "Manual Alert 1",
+  tags: [],
+  threatActors: [],
+  threats: [],
+  tool: {
+    description: null,
+    value: "test_tool",
+    uuid: "860f0c9d-692f-4cb1-addf-8c4d851e05d6",
+  },
+  toolInstance: {
+    description: null,
+    value: "test_tool_instance",
+    uuid: "7aa91552-47a2-49f2-8e06-02be6cb659ec",
+  },
+  type: {
+    description: null,
+    value: "test_type",
+    uuid: "6a6a0888-8bc2-4385-b9c6-0b06bb5a811f",
+  },
+};
+
+export const mockAlertReadC: alertRead = {
+  version: "e35b5069-0547-4e7e-b1d5-516cfa1ee640",
+  description: null,
+  eventTime: new Date("2022-02-01T15:21:38.627432+00:00"),
+  insertTime: new Date("2022-02-01T15:21:38.627435+00:00"),
+  instructions: null,
+  queue: {
+    description: null,
+    value: "test_queue",
+    uuid: "5e490c53-9d48-434f-9acf-4f3b91e1de74",
+  },
+  owner: null,
+  nodeType: "alert",
+  uuid: "839e756b-39b7-407f-8e4a-513051ff4f53",
+  childTags: [
+    {
+      description: null,
+      value: "tag0",
+      uuid: "6b50c490-e84a-41b2-87a6-cff87f666a8c",
+    },
+    {
+      description: null,
+      value: "tag1",
+      uuid: "966badd3-bd77-4a7d-a8c3-a9f30a012f68",
+    },
+    {
+      description: null,
+      value: "tag2",
+      uuid: "3cab1ca5-0a36-4b91-b21c-ca5779d3da96",
+    },
+    {
+      description: null,
+      value: "tag3",
+      uuid: "daf63ad5-6226-439e-ac3e-bea5b6b5d0f8",
+    },
+    {
+      description: null,
+      value: "tag4",
+      uuid: "0f85d1cf-9ff2-46d9-bf90-c08b8242ad10",
+    },
+    {
+      description: null,
+      value: "tag5",
+      uuid: "3f86646f-97f1-4b7b-9e01-9283516588a9",
+    },
+    {
+      description: null,
+      value: "tag6",
+      uuid: "3a687aae-2293-439d-aacf-caa26321674e",
+    },
+  ],
+  childThreatActors: [],
+  childThreats: [],
+  comments: [],
+  disposition: null,
+  dispositionTime: null,
+  dispositionUser: null,
+  eventUuid: "2e1a0907-902f-411b-9059-37b09e2ffb0b",
+  name: "Manual Alert 2",
+  tags: [],
+  threatActors: [],
+  threats: [],
+  tool: {
+    description: null,
+    value: "test_tool",
+    uuid: "860f0c9d-692f-4cb1-addf-8c4d851e05d6",
+  },
+  toolInstance: {
+    description: null,
+    value: "test_tool_instance",
+    uuid: "7aa91552-47a2-49f2-8e06-02be6cb659ec",
+  },
+  type: {
+    description: null,
+    value: "test_type",
+    uuid: "6a6a0888-8bc2-4385-b9c6-0b06bb5a811f",
+  },
+};
+
+export const mockAlertTreeReadA = Object.assign({}, mockAlert, {
+  uuid: "uuid1",
+});
 export const mockAlertReadASummary: alertSummary = {
   childTags: [
     {
@@ -582,164 +826,7 @@ export const mockAlertReadASummary: alertSummary = {
 };
 
 export const mockAlertPage: alertReadPage = {
-  items: [
-    {
-      version: "d3a68da8-2588-42af-9763-2a13c9f9896d",
-      description: null,
-      eventTime: new Date("2022-02-01T15:21:36.240541+00:00"),
-      insertTime: new Date("2022-02-01T15:21:36.240543+00:00"),
-      instructions: null,
-      queue: {
-        description: null,
-        value: "test_queue",
-        uuid: "5e490c53-9d48-434f-9acf-4f3b91e1de74",
-      },
-      owner: null,
-      nodeType: "alert",
-      uuid: "81d92d05-3b60-4ecf-931d-4525fc1113f3",
-      childTags: [
-        {
-          description: null,
-          value: "tag0",
-          uuid: "6b50c490-e84a-41b2-87a6-cff87f666a8c",
-        },
-        {
-          description: null,
-          value: "tag1",
-          uuid: "966badd3-bd77-4a7d-a8c3-a9f30a012f68",
-        },
-        {
-          description: null,
-          value: "tag2",
-          uuid: "3cab1ca5-0a36-4b91-b21c-ca5779d3da96",
-        },
-        {
-          description: null,
-          value: "tag3",
-          uuid: "daf63ad5-6226-439e-ac3e-bea5b6b5d0f8",
-        },
-        {
-          description: null,
-          value: "tag4",
-          uuid: "0f85d1cf-9ff2-46d9-bf90-c08b8242ad10",
-        },
-        {
-          description: null,
-          value: "tag5",
-          uuid: "3f86646f-97f1-4b7b-9e01-9283516588a9",
-        },
-        {
-          description: null,
-          value: "tag6",
-          uuid: "3a687aae-2293-439d-aacf-caa26321674e",
-        },
-      ],
-      childThreatActors: [],
-      childThreats: [],
-      comments: [],
-      disposition: null,
-      dispositionTime: null,
-      dispositionUser: null,
-      eventUuid: "2e1a0907-902f-411b-9059-37b09e2ffb0b",
-      name: "Manual Alert 0",
-      tags: [],
-      threatActors: [],
-      threats: [],
-      tool: {
-        description: null,
-        value: "test_tool",
-        uuid: "860f0c9d-692f-4cb1-addf-8c4d851e05d6",
-      },
-      toolInstance: {
-        description: null,
-        value: "test_tool_instance",
-        uuid: "7aa91552-47a2-49f2-8e06-02be6cb659ec",
-      },
-      type: {
-        description: null,
-        value: "test_type",
-        uuid: "6a6a0888-8bc2-4385-b9c6-0b06bb5a811f",
-      },
-    },
-    {
-      version: "ebce502c-d840-4665-a153-6e015dd6f9bd",
-      description: null,
-      eventTime: new Date("2022-02-01T15:21:37.627432+00:00"),
-      insertTime: new Date("2022-02-01T15:21:37.627435+00:00"),
-      instructions: null,
-      queue: {
-        description: null,
-        value: "test_queue",
-        uuid: "5e490c53-9d48-434f-9acf-4f3b91e1de74",
-      },
-      owner: null,
-      nodeType: "alert",
-      uuid: "b8a03b05-020d-4da7-b543-bb08137f862d",
-      childTags: [
-        {
-          description: null,
-          value: "tag0",
-          uuid: "6b50c490-e84a-41b2-87a6-cff87f666a8c",
-        },
-        {
-          description: null,
-          value: "tag1",
-          uuid: "966badd3-bd77-4a7d-a8c3-a9f30a012f68",
-        },
-        {
-          description: null,
-          value: "tag2",
-          uuid: "3cab1ca5-0a36-4b91-b21c-ca5779d3da96",
-        },
-        {
-          description: null,
-          value: "tag3",
-          uuid: "daf63ad5-6226-439e-ac3e-bea5b6b5d0f8",
-        },
-        {
-          description: null,
-          value: "tag4",
-          uuid: "0f85d1cf-9ff2-46d9-bf90-c08b8242ad10",
-        },
-        {
-          description: null,
-          value: "tag5",
-          uuid: "3f86646f-97f1-4b7b-9e01-9283516588a9",
-        },
-        {
-          description: null,
-          value: "tag6",
-          uuid: "3a687aae-2293-439d-aacf-caa26321674e",
-        },
-      ],
-      childThreatActors: [],
-      childThreats: [],
-      comments: [],
-      disposition: null,
-      dispositionTime: null,
-      dispositionUser: null,
-      eventUuid: "2e1a0907-902f-411b-9059-37b09e2ffb0b",
-      name: "Manual Alert 1",
-      tags: [],
-      threatActors: [],
-      threats: [],
-      tool: {
-        description: null,
-        value: "test_tool",
-        uuid: "860f0c9d-692f-4cb1-addf-8c4d851e05d6",
-      },
-      toolInstance: {
-        description: null,
-        value: "test_tool_instance",
-        uuid: "7aa91552-47a2-49f2-8e06-02be6cb659ec",
-      },
-      type: {
-        description: null,
-        value: "test_type",
-        uuid: "6a6a0888-8bc2-4385-b9c6-0b06bb5a811f",
-      },
-    },
-  ],
+  items: [mockAlertReadA, mockAlertReadB],
   total: 2,
   limit: 50,
   offset: 0,

@@ -57,12 +57,16 @@ def test_update_alerts(client_valid_access_token, db):
     # Create a comment
     alert_tree = helpers.create_alert(db=db)
     comment = helpers.create_node_comment(node=alert_tree.node, username="johndoe", value="test", db=db)
+    original_time = comment.insert_time
     assert alert_tree.node.comments[0].value == "test"
+    assert comment.user.username == "johndoe"
 
     # Update it
     update = client_valid_access_token.patch(f"/api/node/comment/{comment.uuid}", json={"value": "updated"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.comments[0].value == "updated"
+    assert alert_tree.node.comments[0].user.username == "analyst"
+    assert alert_tree.node.comments[0].insert_time != original_time
 
     # Verify the history record
     history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
@@ -93,12 +97,16 @@ def test_update_events(client_valid_access_token, db):
     # Create a comment
     event = helpers.create_event(name="Test Event", db=db)
     comment = helpers.create_node_comment(node=event, username="johndoe", value="test", db=db)
+    original_time = comment.insert_time
     assert event.comments[0].value == "test"
+    assert comment.user.username == "johndoe"
 
     # Update it
     update = client_valid_access_token.patch(f"/api/node/comment/{comment.uuid}", json={"value": "updated"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert event.comments[0].value == "updated"
+    assert event.comments[0].user.username == "analyst"
+    assert event.comments[0].insert_time != original_time
 
     # Verify the history record
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
@@ -130,12 +138,16 @@ def test_update_observables(client_valid_access_token, db):
     alert_tree = helpers.create_alert(db=db)
     observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
     comment = helpers.create_node_comment(node=observable_tree.node, username="johndoe", value="test", db=db)
+    original_time = comment.insert_time
     assert observable_tree.node.comments[0].value == "test"
+    assert comment.user.username == "johndoe"
 
     # Update it
     update = client_valid_access_token.patch(f"/api/node/comment/{comment.uuid}", json={"value": "updated"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert observable_tree.node.comments[0].value == "updated"
+    assert observable_tree.node.comments[0].user.username == "analyst"
+    assert observable_tree.node.comments[0].insert_time != original_time
 
     # Verify the history record
     history = client_valid_access_token.get(f"/api/observable/{observable_tree.node_uuid}/history")

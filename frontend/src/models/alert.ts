@@ -92,7 +92,7 @@ export interface alertUpdate extends nodeUpdate {
   description?: string | null;
   disposition?: string;
   eventTime?: Date;
-  eventUuid?: UUID;
+  eventUuid?: UUID | null;
   insertTime?: Date;
   instructions?: string | null;
   owner?: string;

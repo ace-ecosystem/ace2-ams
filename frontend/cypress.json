@@ -6,5 +6,11 @@
   "videosFolder": "tests/e2e/videos",
   "supportFile": "tests/e2e/support/index.js",
   "testFiles": "**/*.spec.js",
-  "baseUrl": "http://ace2-ams:8080"
+  "baseUrl": "http://ace2-ams:8080",
+  "component": {
+    "componentFolder": "tests/component/",
+    "testFiles": "**/*.spec.ts"
+  },
+  "viewportWidth": 1280,
+  "viewportHeight": 720
 }

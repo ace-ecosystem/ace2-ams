@@ -7,7 +7,10 @@ import snakecaseKeys from "snakecase-keys";
 import { alertCreate } from "@/models/alert";
 import { useAlertStore } from "@/stores/alert";
 import { createTestingPinia } from "@pinia/testing";
-import { mockAlertReadA, mockAlertReadASummary } from "../../../mocks/alert";
+import {
+  mockAlertTreeReadA,
+  mockAlertReadASummary,
+} from "../../../mocks/alert";
 
 createTestingPinia();
 
@@ -46,7 +49,7 @@ describe("alert Actions", () => {
 
   it("will have openAlertSummary return the current openAlert summary if there is one, otherwise it will return null", () => {
     expect(store.openAlertSummary).toBeNull();
-    store.openAlert = mockAlertReadA;
+    store.openAlert = mockAlertTreeReadA;
     expect(store.openAlertSummary).toEqual(mockAlertReadASummary);
   });
 

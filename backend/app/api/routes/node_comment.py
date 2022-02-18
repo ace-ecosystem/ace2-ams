@@ -1,3 +1,4 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
 from typing import List
@@ -89,6 +90,10 @@ def update_node_comment(
 
     # Read the node from the database
     db_node: Node = crud.read(uuid=db_node_comment.node_uuid, db_table=Node, db=db)
+
+    # Update the user and timestamp on the comment
+    db_node_comment.user = crud.read_user_by_username(username=claims["sub"], db=db)
+    db_node_comment.insert_time = datetime.utcnow()
 
     # Set the new comment value
     diff = crud.Diff(field="comments", added_to_list=[node_comment.value], removed_from_list=[db_node_comment.value])

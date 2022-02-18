@@ -5,7 +5,7 @@ import {
   getAlertLink,
   getAllAlertTags,
 } from "@/etc/helpers";
-import { mockAlertReadA } from "../../../mocks/alert";
+import { mockAlertTreeReadA } from "../../../mocks/alert";
 import { alertFilterParams } from "@/models/alert";
 import { userRead } from "@/models/user";
 import { useObservableTypeStore } from "@/stores/observableType";
@@ -229,12 +229,12 @@ describe("formatNodeFiltersForAPI", () => {
   });
 
   it("getAlertLink correctly generates an alert link given an alert object", () => {
-    const result = getAlertLink(mockAlertReadA);
+    const result = getAlertLink(mockAlertTreeReadA);
     expect(result).toEqual("/alert/uuid1");
   });
 
   it("getAllAlertTags formats a given alert's tags into a sorted and dedup'd list of tags", () => {
-    const result = getAllAlertTags(mockAlertReadA);
+    const result = getAllAlertTags(mockAlertTreeReadA);
     expect(result).toEqual([
       {
         description: null,
