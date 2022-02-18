@@ -494,7 +494,10 @@ describe("TheEventsTable.vue - EditEventModal", () => {
 
     openEditEventModal();
 
-    cy.get("[data-cy=event-name-field]").click().clear().type("New Name");
+    cy.get("[data-cy=event-name-field]  [data-cy=property-input-value]")
+      .click()
+      .clear()
+      .type("New Name");
     cy.get("[data-cy=save-edit-event-button]").click();
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
@@ -509,7 +512,9 @@ describe("TheEventsTable.vue - EditEventModal", () => {
 
     openEditEventModal();
 
-    cy.get("[data-cy=event-owner-field] ").click();
+    cy.get(
+      "[data-cy=event-owner-field] [data-cy=property-input-value]",
+    ).click();
     cy.get('[aria-label="Analyst"]').click();
     cy.get("[data-cy=save-edit-event-button]").click();
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
@@ -527,7 +532,9 @@ describe("TheEventsTable.vue - EditEventModal", () => {
 
     openEditEventModal();
 
-    cy.get("[data-cy=event-remediations-field]").click();
+    cy.get(
+      "[data-cy=event-remediations-field]  [data-cy=property-input-value]",
+    ).click();
     cy.get(".p-multiselect-item ").eq(0).click();
     cy.get(".p-multiselect-item ").eq(1).click();
 
@@ -544,7 +551,9 @@ describe("TheEventsTable.vue - EditEventModal", () => {
 
     openEditEventModal();
 
-    cy.get("[data-cy=event-eventTime-field]").click().type("03/02/2022 12:00");
+    cy.get("[data-cy=event-eventTime-field]  [data-cy=property-input-value]")
+      .click()
+      .type("03/02/2022 12:00");
 
     cy.get("[data-cy=save-edit-event-button]").click();
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
