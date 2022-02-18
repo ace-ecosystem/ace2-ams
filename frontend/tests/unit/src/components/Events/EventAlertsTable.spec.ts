@@ -33,6 +33,11 @@ function factory(options: TestingOptions = {}, eventUuid = "uuid1") {
 
 describe("EventAlertsTable", () => {
   it("renders", async () => {
+    // Mock the API call used to fetch all of the alerts in the event
+    jest
+      .spyOn(Alert, "readAllPages")
+      .mockResolvedValueOnce([mockAlertReadA, mockAlertReadB, mockAlertReadC]);
+
     const { wrapper } = factory();
     expect(wrapper.exists()).toBe(true);
   });
