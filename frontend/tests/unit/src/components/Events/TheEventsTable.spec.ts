@@ -1,10 +1,11 @@
 import TheEventsTable from "@/components/Events/TheEventsTable.vue";
 import { shallowMount, VueWrapper } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
 import myNock from "@unit/services/api/nock";
+import { TestingOptions } from "@pinia/testing";
 
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
+import { createCustomPinia } from "@unit/helpers";
 
 import { mockAlertPage } from "../../../../mocks/alert";
 import { parseAlertSummary } from "@/etc/helpers";
@@ -15,7 +16,7 @@ function factory(options?: TestingOptions) {
 
   const wrapper: VueWrapper<any> = shallowMount(TheEventsTable, {
     global: {
-      plugins: [createTestingPinia(options), PrimeVue],
+      plugins: [createCustomPinia(options), PrimeVue],
     },
   });
 

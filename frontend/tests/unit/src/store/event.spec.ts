@@ -4,10 +4,10 @@
 
 import myNock from "@unit/services/api/nock";
 import { useEventStore } from "@/stores/event";
-import { createTestingPinia } from "@pinia/testing";
 import { eventReadFactory } from "../../../mocks/events";
+import { createCustomPinia } from "@unit/helpers";
 
-createTestingPinia();
+createCustomPinia();
 
 const store = useEventStore();
 

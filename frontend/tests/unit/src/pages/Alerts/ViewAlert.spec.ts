@@ -1,6 +1,6 @@
 import ViewAlert from "../../../../../src/pages/Alerts/ViewAlert.vue";
 import { flushPromises, shallowMount, VueWrapper } from "@vue/test-utils";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import { useAlertStore } from "@/stores/alert";
 import { useSelectedAlertStore } from "@/stores/selectedAlert";
 import myNock from "@unit/services/api/nock";
@@ -8,6 +8,7 @@ import { createRouterMock, getRouter, injectRouterMock } from "vue-router-mock";
 
 import { mockAlert, mockAlertReadDateStrings } from "../../../../mocks/alert";
 import nock from "nock";
+import { createCustomPinia } from "@unit/helpers";
 
 function factory(options?: TestingOptions) {
   myNock.get("/alert/uuid1").reply(200, mockAlert);
@@ -20,7 +21,7 @@ function factory(options?: TestingOptions) {
 
   const wrapper: VueWrapper<any> = shallowMount(ViewAlert, {
     global: {
-      plugins: [createTestingPinia(options)],
+      plugins: [createCustomPinia(options)],
     },
   });
 

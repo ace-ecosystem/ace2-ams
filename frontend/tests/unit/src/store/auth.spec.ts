@@ -1,8 +1,8 @@
-import { createTestingPinia } from "@pinia/testing";
 import { useAuthStore } from "@/stores/auth";
 import { userRead } from "@/models/user";
+import { createCustomPinia } from "@unit/helpers";
 
-createTestingPinia();
+createCustomPinia();
 
 const store = useAuthStore();
 

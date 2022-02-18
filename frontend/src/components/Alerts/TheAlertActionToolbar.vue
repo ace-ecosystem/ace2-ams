@@ -35,9 +35,9 @@
 
   import Button from "primevue/button";
 
-  import TheNodeActionToolbarVue from "../Node/TheNodeActionToolbar.vue";
-  import RemediationModal from "@/components/Modals/RemediateModal";
-  import DispositionModal from "@/components/Modals/DispositionModal";
+  import TheNodeActionToolbarVue from "@/components/Node/TheNodeActionToolbar.vue";
+  import RemediationModal from "@/components/Modals/RemediateModal.vue";
+  import DispositionModal from "@/components/Modals/DispositionModal.vue";
 
   import { useModalStore } from "@/stores/modal";
 

@@ -1,7 +1,7 @@
 import { mount, VueWrapper } from "@vue/test-utils";
 import myNock from "@unit/services/api/nock";
 import { FilterMatchMode } from "primevue/api";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 
 import InputText from "primevue/inputtext";
 import MultiSelect from "primevue/multiselect";
@@ -16,6 +16,7 @@ import { useSelectedAlertStore } from "@/stores/selectedAlert";
 import TheNodeTableVue from "@/components/Node/TheNodeTable.vue";
 import { useAlertTableStore } from "@/stores/alertTable";
 import { mockAlert } from "../../../../mocks/alert";
+import { createCustomPinia } from "@unit/helpers";
 
 const mockAlertReadA = Object.assign({}, mockAlert, { uuid: "uuid1" });
 const mockAlertReadB = Object.assign({}, mockAlert, { uuid: "uuid2" });
@@ -51,7 +52,7 @@ function factory(
 
   const wrapper: VueWrapper<any> = mount(TheNodeTableVue, {
     global: {
-      plugins: [createTestingPinia(options.piniaOptions)],
+      plugins: [createCustomPinia(options.piniaOptions)],
       provide: {
         nodeType: options.nodeType,
       },
@@ -236,7 +237,7 @@ describe("TheNodeTable data/creation", () => {
     const { wrapper } = factory();
 
     // we cant actually export the CSV in test so mock one of the dependency functions
-    window.URL.createObjectURL = jest.fn().mockReturnValueOnce("fakeURL");
+    window.URL.createObjectURL = vi.fn().mockReturnValueOnce("fakeURL");
     wrapper.vm.exportCSV();
   });
 

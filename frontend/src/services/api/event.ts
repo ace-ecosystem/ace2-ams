@@ -15,7 +15,7 @@ const api = new BaseApi();
 const endpoint = "/event/";
 
 export const Event = {
-  create: (data: eventCreate, getAfterCreate = false): Promise<void> => {
+  create: (data: eventCreate, getAfterCreate = false): Promise<eventRead | void> => {
     return api.create(endpoint, data, getAfterCreate);
   },
 

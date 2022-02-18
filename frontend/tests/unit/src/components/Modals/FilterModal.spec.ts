@@ -1,16 +1,17 @@
 import FilterModal from "@/components/Modals/FilterModal.vue";
 import { mount } from "@vue/test-utils";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 
 import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
 import { alertFilterParams } from "@/models/alert";
+import { createCustomPinia } from "@unit/helpers";
 
 function factory(args: {
   filters?: { nodeType: "alerts"; filters: alertFilterParams };
   options?: TestingOptions;
 }) {
-  const testingPinia = createTestingPinia(args.options);
+  const testingPinia = createCustomPinia(args.options);
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
 

@@ -1,7 +1,7 @@
 import NodeComment from "../../../../../src/components/Node/NodeComment.vue";
 import { mount } from "@vue/test-utils";
-import { createTestingPinia } from "@pinia/testing";
 import { commentReadFactory } from "../../../../mocks/comment";
+import { createCustomPinia } from "@unit/helpers";
 
 const mockComment = commentReadFactory();
 
@@ -13,7 +13,7 @@ function factory(includeTime = true, includeLineBreak = true) {
       includeLineBreak: includeLineBreak,
     },
     global: {
-      plugins: [createTestingPinia()],
+      plugins: [createCustomPinia()],
     },
   });
 
