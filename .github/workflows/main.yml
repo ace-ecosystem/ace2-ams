@@ -96,6 +96,9 @@ jobs:
       - name: Ensure GUI builds
         run: cd frontend && npm install && npm run build
 
+      - name: Remove the dist folder
+        run: cd frontend && rm -rf dist
+
       - name: Run environment
         run: docker-compose -f docker-compose.yml -f docker-compose-e2e.yml up
 
