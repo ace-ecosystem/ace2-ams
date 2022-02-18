@@ -55,7 +55,7 @@
     </DataTable>
 
     <Paginator
-      data-cy="table-pagination-options"
+      data-cy="event-alert-table-pagination-options"
       :rows="10"
       :rows-per-page-options="[5, 10, 50, 100]"
       :total-records="alerts.length"
