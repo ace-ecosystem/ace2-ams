@@ -6,7 +6,7 @@ import { parseAlertSummary } from "@/etc/helpers";
 import { createTestingPinia } from "@pinia/testing";
 import {
   mockAlert,
-  mockAlertReadA,
+  mockAlertTreeReadA,
   mockAlertReadASummary,
 } from "../../../mocks/alert";
 
@@ -113,7 +113,7 @@ const mockParams: alertFilterParams = { limit: 5, offset: 0 };
 
 describe("alertTable helpers", () => {
   it("will correctly parse an alert received from the backend using parseAlertSummary", () => {
-    const resA = parseAlertSummary(mockAlertReadA);
+    const resA = parseAlertSummary(mockAlertTreeReadA);
     const resB = parseAlertSummary(mockAlertReadC);
     expect(resA).toEqual(mockAlertReadASummary);
     expect(resB).toEqual(mockAlertReadCSummary);
@@ -127,7 +127,7 @@ describe("alertTable getters", () => {
 
   it("will correctly return  visibleQueriedItemSummaries", () => {
     store.visibleQueriedItems = [
-      mockAlertReadA,
+      mockAlertTreeReadA,
       mockAlertReadB,
       mockAlertReadC,
     ];
@@ -140,7 +140,7 @@ describe("alertTable getters", () => {
 
   it("will correctly return  visibleQueriedItemsUuids", () => {
     store.visibleQueriedItems = [
-      mockAlertReadA,
+      mockAlertTreeReadA,
       mockAlertReadB,
       mockAlertReadC,
     ];
@@ -149,11 +149,11 @@ describe("alertTable getters", () => {
 
   it("will correctly return  visibleQueriedItemById", () => {
     store.visibleQueriedItems = [
-      mockAlertReadA,
+      mockAlertTreeReadA,
       mockAlertReadB,
       mockAlertReadC,
     ];
-    expect(store.visibleQueriedItemById("uuid1")).toEqual(mockAlertReadA);
+    expect(store.visibleQueriedItemById("uuid1")).toEqual(mockAlertTreeReadA);
   });
 
   it("will correctly return sortFilter", () => {
@@ -169,14 +169,14 @@ describe("alertTable actions", () => {
   it("will request to read page of alerts with given params on readPage", async () => {
     const mockRequest = myNock.get("/alert/?limit=5&offset=0").reply(200, {
       total: 3,
-      items: [mockAlertReadA, mockAlertReadB, mockAlertReadC],
+      items: [mockAlertTreeReadA, mockAlertReadB, mockAlertReadC],
     });
 
     await store.readPage(mockParams);
 
     expect(mockRequest.isDone()).toEqual(true);
     expect(store.visibleQueriedItems).toEqual([
-      Object.assign({}, JSON.parse(JSON.stringify(mockAlertReadA)), {
+      Object.assign({}, JSON.parse(JSON.stringify(mockAlertTreeReadA)), {
         eventTime: "2021-12-18T00:59:43.570Z",
         insertTime: "2021-12-18T00:59:43.570Z",
         uuid: "uuid1",
