@@ -73,32 +73,8 @@ describe("TheEventsTable methods", () => {
     .reply(200, mockAlertPage)
     .persist();
 
-  it("correctly fetches alerts and sets alert summaries on getAlerts", async () => {
+  it("renders", async () => {
     const { wrapper } = factory();
-
-    const result = await wrapper.vm.getAlerts("uuid1");
-
-    expect(result.length).toStrictEqual(2);
-    expect(result[0].disposition).toStrictEqual("OPEN");
-    expect(result[1].name).toStrictEqual("Manual Alert 1");
-  });
-
-  it("correctly sets the alerts for a given eventUuid in eventAlerts on onRowExpand", async () => {
-    const { wrapper } = factory();
-
-    await wrapper.vm.onRowExpand({ data: { uuid: "uuid1" } });
-
-    const expected = mockAlertPage.items.map((x) => parseAlertSummary(x));
-    expect(wrapper.vm.eventAlerts).toStrictEqual({ uuid1: expected });
-  });
-
-  it("correctly deletes a given eventUuid from eventAlerts on onRowCollapse", () => {
-    const { wrapper } = factory();
-
-    wrapper.vm.eventAlerts = { uuid1: [], uuid2: [], uuid3: [] };
-
-    wrapper.vm.onRowCollapse({ data: { uuid: "uuid2" } });
-
-    expect(wrapper.vm.eventAlerts).toStrictEqual({ uuid1: [], uuid3: [] });
+    expect(wrapper.exists()).toBe(true);
   });
 });
