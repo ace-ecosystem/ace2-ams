@@ -2,7 +2,9 @@
 <!-- Contains logic and functionality for displaying a table of alerts inside of an event -->
 
 <template>
-  <div v-if="isLoading">Loading alerts, please hold...</div>
+  <div v-if="isLoading" id="loading-message">
+    Loading alerts, please hold...
+  </div>
   <div v-else>
     <DataTable
       :value="visibleAlerts"
