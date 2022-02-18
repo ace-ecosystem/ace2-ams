@@ -16,11 +16,11 @@
 <script setup>
   import { onMounted, provide, watch } from "vue";
 
-  import {
-    eventEditableProperties,
-    eventFilters,
-    eventRangeFilters,
-  } from "@/etc/constants";
+import {
+eventEditableProperties,
+eventFilters,
+eventRangeFilters
+} from "@/etc/constants/events";
 
   import TheNodeActionToolbarVue from "@/components/Node/TheNodeActionToolbar.vue";
   import TheFilterToolbar from "@/components/Filters/TheFilterToolbar";

@@ -16,7 +16,7 @@
 <script setup>
   import { onMounted, provide, watch } from "vue";
 
-  import { alertFilters, alertRangeFilters } from "@/etc/constants";
+import { alertFilters, alertRangeFilters } from "@/etc/constants/alerts";
 
   import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar";
   import TheFilterToolbar from "@/components/Filters/TheFilterToolbar";

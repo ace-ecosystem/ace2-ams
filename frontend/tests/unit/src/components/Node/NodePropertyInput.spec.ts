@@ -2,7 +2,7 @@ import { createTestingPinia, TestingOptions } from "@pinia/testing";
 
 import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
 import { mount } from "@vue/test-utils";
-import { filterTypes } from "@/etc/constants";
+import { filterTypes } from "@/etc/constants/alerts";
 import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
 import { observableTypeRead } from "@/models/observableType";

@@ -1,4 +1,4 @@
-import { alertFilters } from "@/etc/constants";
+import { alertFilters } from "@/etc/constants/alerts";
 import { formatNodeFiltersForAPI } from "@/etc/helpers";
 import {
   alertCreate,

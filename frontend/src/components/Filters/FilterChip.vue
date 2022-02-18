@@ -65,7 +65,8 @@
 
   import { useFilterStore } from "@/stores/filter";
 
-  import { alertFilters, eventFilters } from "@/etc/constants";
+import { eventFilters } from "@/etc/constants/events";
+import { alertFilters } from "@/etc/constants/alerts";
   import { isObject } from "@/etc/helpers";
   import Button from "primevue/button";
   import Chip from "primevue/chip";

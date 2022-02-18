@@ -69,7 +69,7 @@
   const modalStore = useModalStore();
 
   import { copyToClipboard, formatNodeFiltersForAPI } from "@/etc/helpers";
-  import { alertFilters, eventFilters } from "@/etc/constants";
+  import { alertFilters, eventFilters } from "@/etc/constants/alerts";
 
   const nodeType = inject("nodeType");
   const filterOptions = {

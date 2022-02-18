@@ -8,7 +8,7 @@ import {
 } from "@/models/event";
 import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
-import { eventFilters } from "@/etc/constants";
+import { eventFilters } from "@/etc/constants/events";
 import { eventHistoryReadPage } from "@/models/history";
 
 const api = new BaseApi();

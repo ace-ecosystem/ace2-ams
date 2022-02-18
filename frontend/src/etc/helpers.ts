@@ -25,7 +25,7 @@ import { useEventVectorStore } from "@/stores/eventVector";
 import { useNodeDirectiveStore } from "@/stores/nodeDirective";
 import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
-import { filterTypes } from "./constants";
+import { inputTypes } from "./constants/base";
 
 export const camelToSnakeCase = (str: string): string =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
@@ -188,7 +188,7 @@ export function parseFilters(
     let filterValueParsed = null; // the target filter value, might be an Object, Array, Date, or string
     // based on the filter type, parse/format the filter value
     switch (filterNameObject.type) {
-      case filterTypes.MULTISELECT:
+      case inputTypes.MULTISELECT:
         // look up each array item in store, add to filter value
         filterValueParsed = [];
         if (store && Array.isArray(filterValueUnparsed)) {
@@ -206,12 +206,12 @@ export function parseFilters(
         filterValueParsed = filterValueParsed.length ? filterValueParsed : null;
         break;
 
-      case filterTypes.CHIPS:
+      case inputTypes.CHIPS:
         // array of strings, handled in parseFormattedFilterString
         filterValueParsed = filterValueUnparsed;
         break;
 
-      case filterTypes.SELECT:
+      case inputTypes.SELECT:
         // look item up in store
         if (store) {
           filterValueParsed = store.allItems.find(
@@ -222,19 +222,19 @@ export function parseFilters(
         }
         break;
 
-      case filterTypes.DATE:
+      case inputTypes.DATE:
         // Date string, handled in parseFormattedFilterString
         filterValueParsed = isValidDate(filterValueUnparsed)
           ? filterValueUnparsed
           : null;
         break;
 
-      case filterTypes.INPUT_TEXT:
+      case inputTypes.INPUT_TEXT:
         // does not need parsing
         filterValueParsed = filterValueUnparsed;
         break;
 
-      case filterTypes.CATEGORIZED_VALUE:
+      case inputTypes.CATEGORIZED_VALUE:
         // look up category value in store, sub-value stays untouched
         if (store && isObject(filterValueUnparsed)) {
           const unparsedCategory = filterValueUnparsed.category;
