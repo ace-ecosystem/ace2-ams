@@ -332,7 +332,7 @@ describe("TheEventsTable.vue", () => {
       });
   });
 
-  it.only("removes alerts from the event when Remove Alerts button is clicked", () => {
+  it("removes alerts from the event when Remove Alerts button is clicked", () => {
     cy.intercept("GET", "/api/alert/?event_uuid=*").as("getEventAlerts");
     cy.intercept("PATCH", "/api/alert/").as("updateAlerts");
 
