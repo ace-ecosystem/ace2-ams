@@ -331,4 +331,63 @@ describe("TheEventsTable.vue", () => {
         cy.get("tr").should("have.length", 2);
       });
   });
+
+  it.only("removes alerts from the event when Remove Alerts button is clicked", () => {
+    cy.intercept("GET", "/api/alert/?event_uuid=*").as("getEventAlerts");
+    cy.intercept("PATCH", "/api/alert/").as("updateAlerts");
+
+    // Find the toggle button to expand and click on the first event
+    cy.get(".p-row-toggler").eq(0).click();
+    cy.wait("@getEventAlerts").its("state").should("eq", "Complete");
+
+    // There should be 6 alerts in the event
+    cy.get("[data-cy='event-alert-table-pagination-options']").should(
+      "contain.text",
+      "6 alerts in the event",
+    );
+
+    // Select the first alert
+    cy.get("[data-cy='expandedEvent']")
+      .eq(0)
+      .within(() => {
+        cy.get(".p-checkbox-box").eq(1).click();
+      });
+
+    // Click the Remove Alerts button
+    cy.get("[data-cy='remove-alerts-button']").click();
+
+    // Wait for the API call to remove the alert from the event
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+
+    // Wait for the API call to refetch the list of alerts in the event
+    cy.wait("@getEventAlerts").its("state").should("eq", "Complete");
+
+    // The event should only have 5 alerts now
+    cy.get("[data-cy='event-alert-table-pagination-options']").should(
+      "contain.text",
+      "5 alerts in the event",
+    );
+
+    // Select all of the alerts
+    cy.get("[data-cy='expandedEvent']")
+      .eq(0)
+      .within(() => {
+        cy.get(".p-checkbox-box").eq(0).click();
+      });
+
+    // Click the Remove Alerts button
+    cy.get("[data-cy='remove-alerts-button']").click();
+
+    // Wait for the API call to remove the alert from the event
+    cy.wait("@updateAlerts").its("state").should("eq", "Complete");
+
+    // Wait for the API call to refetch the list of alerts in the event
+    cy.wait("@getEventAlerts").its("state").should("eq", "Complete");
+
+    // The event should not have any alerts now
+    cy.get("[data-cy='event-alert-table-pagination-options']").should(
+      "contain.text",
+      "0 alerts in the event",
+    );
+  });
 });
