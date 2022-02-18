@@ -5,7 +5,7 @@ import {
   alertSummary,
   alertTreeRead,
 } from "@/models/alert";
-import { filterOption } from "@/models/base";
+import { propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
 import { nodeTagRead } from "@/models/nodeTag";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
@@ -145,7 +145,7 @@ export function dateParser(key: string, value: unknown): Date | unknown {
 
 export function parseFilters(
   queryFilters: Record<string, string>,
-  availableFilters: readonly filterOption[],
+  availableFilters: readonly propertyOption[],
 ): alertFilterParams | eventFilterParams {
   const parsedFilters: Record<string, unknown> = {};
 
@@ -266,7 +266,7 @@ export function parseFilters(
 }
 
 export function formatNodeFiltersForAPI(
-  availableFilters: readonly filterOption[],
+  availableFilters: readonly propertyOption[],
   params: alertFilterParams | eventFilterParams,
 ): Record<string, string> | Record<string, number> {
   const formattedParams = {} as alertFilterParams;

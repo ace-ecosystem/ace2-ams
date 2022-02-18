@@ -1,4 +1,4 @@
-import { filterOption } from "@/models/base";
+import { propertyOption } from "@/models/base";
 import { nodeThreatRead } from "@/models/nodeThreat";
 import { observableTypeRead } from "@/models/observableType";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
@@ -39,7 +39,7 @@ export const alertPropertyTypes: Record<string, string> = {
   TYPE_FILTER: "type",
 };
 
-export const alertFilters: readonly filterOption[] = [
+export const alertFilters: readonly propertyOption[] = [
   {
     name: alertPropertyTypes.DISPOSITION_FILTER,
     label: "Disposition",

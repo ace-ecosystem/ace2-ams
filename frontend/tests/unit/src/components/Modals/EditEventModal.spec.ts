@@ -1,7 +1,7 @@
 import { commentReadFactory } from "./../../../../mocks/comment";
 import { useEventStore } from "@/stores/event";
 import { eventReadFactory, mockEventUUID } from "./../../../../mocks/events";
-import { filterOption } from "@/models/base";
+import { propertyOption } from "@/models/base";
 import EditEventModal from "@/components/Modals/EditEventModal.vue";
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
 import { flushPromises, mount } from "@vue/test-utils";
@@ -13,24 +13,24 @@ import myNock from "@unit/services/api/nock";
 import { useModalStore } from "@/stores/modal";
 import { useUserStore } from "@/stores/user";
 
-const testNameField: filterOption = {
+const testNameField: propertyOption = {
   name: "name",
   label: "Name",
   type: "inputText",
 };
-const testOwnerField: filterOption = {
+const testOwnerField: propertyOption = {
   name: "owner",
   label: "Owner",
   type: "select",
   valueProperty: "username",
   optionProperty: "displayName",
 };
-const testCommentsField: filterOption = {
+const testCommentsField: propertyOption = {
   name: "comments",
   label: "Comments",
   type: "inputText",
 };
-const availableEditFields: readonly filterOption[] = [testNameField];
+const availableEditFields: readonly propertyOption[] = [testNameField];
 const mockEvent = eventReadFactory();
 
 function factory(options?: TestingOptions) {

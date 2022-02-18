@@ -38,7 +38,7 @@ export interface pageOptionParams {
   offset?: number;
   [key: string]: unknown;
 }
-export interface filterOption {
+export interface propertyOption {
   readonly name: string;
   readonly label: string;
   readonly type: string;

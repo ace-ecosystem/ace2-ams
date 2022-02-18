@@ -1,5 +1,5 @@
 import { eventRemediationRead } from "../../models/eventRemediation";
-import { filterOption } from "@/models/base";
+import { propertyOption } from "@/models/base";
 import { eventPreventionToolRead } from "@/models/eventPreventionTool";
 import { eventVectorRead } from "@/models/eventVector";
 import { nodeThreatRead } from "@/models/nodeThreat";
@@ -132,12 +132,12 @@ const eventRemediationProperty = {
     return valueString.split(",");
   },
 };
-const eventNameProperty: filterOption = {
+const eventNameProperty: propertyOption = {
   name: eventPropertyTypes.NAME_PROPERTY,
   label: "Name",
   type: inputTypes.INPUT_TEXT,
 };
-const eventOwnerProperty: filterOption = {
+const eventOwnerProperty: propertyOption = {
   name: eventPropertyTypes.OWNER_PROPERTY,
   label: "Owner",
   type: inputTypes.SELECT,
@@ -145,12 +145,12 @@ const eventOwnerProperty: filterOption = {
   optionProperty: "displayName",
   valueProperty: "username",
 };
-const eventCommentProperty: filterOption = {
+const eventCommentProperty: propertyOption = {
   name: eventPropertyTypes.COMMENTS_PROPERTY,
   label: "Comment",
   type: inputTypes.INPUT_TEXT,
 };
-const eventPreventionToolsProperty: filterOption = {
+const eventPreventionToolsProperty: propertyOption = {
   name: eventPropertyTypes.PREVENTION_TOOLS_PROPERTY,
   label: "Prevention Tools",
   type: inputTypes.MULTISELECT,
@@ -166,7 +166,7 @@ const eventPreventionToolsProperty: filterOption = {
     return valueString.split(",");
   },
 };
-const eventRiskLevelProperty: filterOption = {
+const eventRiskLevelProperty: propertyOption = {
   name: eventPropertyTypes.RISK_LEVEL_PROPERTY,
   label: "Risk Level",
   type: inputTypes.SELECT,
@@ -174,7 +174,7 @@ const eventRiskLevelProperty: filterOption = {
   optionProperty: "value",
   valueProperty: "value",
 };
-const eventStatusProperty: filterOption = {
+const eventStatusProperty: propertyOption = {
   name: eventPropertyTypes.STATUS_PROPERTY,
   label: "Status",
   type: inputTypes.SELECT,
@@ -182,7 +182,7 @@ const eventStatusProperty: filterOption = {
   optionProperty: "value",
   valueProperty: "value",
 };
-const eventThreatActorsProperty: filterOption = {
+const eventThreatActorsProperty: propertyOption = {
   name: eventPropertyTypes.THREAT_ACTORS_PROPERTY,
   label: "Threat Actors",
   type: inputTypes.MULTISELECT,
@@ -198,7 +198,7 @@ const eventThreatActorsProperty: filterOption = {
     return valueString.split(",");
   },
 };
-const eventThreatsProperty: filterOption = {
+const eventThreatsProperty: propertyOption = {
   name: eventPropertyTypes.THREATS_PROPERTY,
   label: "Threats",
   type: inputTypes.MULTISELECT,
@@ -214,7 +214,7 @@ const eventThreatsProperty: filterOption = {
     return valueString.split(",");
   },
 };
-const eventTypeProperty: filterOption = {
+const eventTypeProperty: propertyOption = {
   name: eventPropertyTypes.TYPE_PROPERTY,
   label: "Type",
   type: inputTypes.SELECT,
@@ -222,7 +222,7 @@ const eventTypeProperty: filterOption = {
   optionProperty: "value",
   valueProperty: "value",
 };
-const eventVectorsProperty: filterOption = {
+const eventVectorsProperty: propertyOption = {
   name: eventPropertyTypes.VECTORS_PROPERTY,
   label: "Vectors",
   type: inputTypes.MULTISELECT,
@@ -239,7 +239,7 @@ const eventVectorsProperty: filterOption = {
   },
 };
 
-export const eventEditableProperties: readonly filterOption[] = [
+export const eventEditableProperties: readonly propertyOption[] = [
   eventNameProperty,
   eventOwnerProperty,
   eventCommentProperty,
@@ -259,7 +259,7 @@ export const eventEditableProperties: readonly filterOption[] = [
   eventRemediationTimeProperty,
 ];
 
-export const eventFilters: readonly filterOption[] = [
+export const eventFilters: readonly propertyOption[] = [
   {
     name: eventPropertyTypes.CREATED_AFTER_PROPERTY,
     label: "Created After",
