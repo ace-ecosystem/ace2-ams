@@ -33,6 +33,7 @@ event_prevention_tool:
   - user
 event_queue:
   - default
+  - secondary_queue
 event_remediation:
   - cleaned manually
   - cleaned with antivirus

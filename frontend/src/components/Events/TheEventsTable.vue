@@ -4,6 +4,15 @@
 
 <template>
   <TheNodeTable :columns="columns">
+    <template #tableHeaderStart
+      ><Dropdown
+        v-model="currentUserSettingsStore.preferredEventQueue"
+        :options="eventQueueStore.items"
+        option-label="value"
+        style="margin-right: 2%;"
+      ></Dropdown
+    ></template>
+
     <template #rowCell="{ data, field }">
       <EventTableCell :data="data" :field="field"></EventTableCell>
     </template>
@@ -18,9 +27,16 @@
 <script setup>
   import { ref } from "vue";
 
+  import Dropdown from "primevue/dropdown";
+
   import TheNodeTable from "../Node/TheNodeTable";
   import EventTableCell from "./EventTableCell";
   import EventAlertsTable from "./EventAlertsTable.vue";
+
+  import { useEventQueueStore } from "@/stores/eventQueue";
+  import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
+  const eventQueueStore = useEventQueueStore();
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
 
   const columns = ref([
     {
