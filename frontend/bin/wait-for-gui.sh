@@ -32,4 +32,6 @@ until $(curl --output /dev/null --silent --fail http://ace2-ams:8080/login); do
     sleep 1
 done
 
+printf "\n"
+
 exit 0
