@@ -93,20 +93,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Ensure GUI builds
-        run: cd frontend && npm install && npm run build
-
-      - name: Remove the dist folder
-        run: cd frontend && rm -rf dist
-
       - name: Run environment
-        run: docker-compose -f docker-compose.yml -f docker-compose-e2e.yml up -d
+        run: docker-compose -f docker-compose.yml up -d
 
       - name: GUI logs
         run: docker logs ace2-ams-gui
 
+      - name: FastAPI logs
+        run: docker logs ace2-ams-api
+
+      - name: Frontend logs
+        run: docker logs ace2-ams-gui
+
       - name: Wait for the environment to be accessible
-        run: sleep 90s
+        run: bin/wait-for-gui.sh
         shell: bash
 
       - name: E2E tests
@@ -123,3 +123,18 @@ jobs:
 
       - name: Database logs
         run: docker logs ace2-ams-db
+
+  production-build:
+    name: Production Build
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_BUILDKIT: 0
+      COMPOSE_DOCKER_CLI_BUILD: 0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Ensure the GUI builds for production
+        run: cd frontend && npm install && npm run build
