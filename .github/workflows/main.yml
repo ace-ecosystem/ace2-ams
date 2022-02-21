@@ -106,6 +106,9 @@ jobs:
         run: sleep 90s
         shell: bash
 
+      - name: Temp
+        run: docker logs ace2-ams-gui
+
       # - name: Wait for API and GUI to be accessible
       #   run: bin/wait-for-gui.sh
 
