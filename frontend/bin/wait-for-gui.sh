@@ -2,7 +2,7 @@
 
 printf "Waiting for the API to be accessible"
 i=0
-until $(curl --output /dev/null --silent --fail http://localhost:8080/api/ping); do
+until $(curl --output /dev/null --silent --fail http://ace2-ams:8080/api/ping); do
     printf "."
     ((i=i+1))
 
@@ -19,7 +19,7 @@ printf "\n"
 
 printf "Waiting for the GUI to be accessible"
 i=0
-until $(curl --output /dev/null --silent --fail http://localhost:8080/login); do
+until $(curl --output /dev/null --silent --fail http://ace2-ams:8080/login); do
     printf "."
     ((i=i+1))
 

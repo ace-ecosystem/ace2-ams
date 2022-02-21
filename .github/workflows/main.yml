@@ -96,18 +96,8 @@ jobs:
       - name: Run environment
         run: docker-compose -f docker-compose.yml up -d
 
-      - name: GUI logs
-        run: docker logs ace2-ams-gui
-
-      - name: FastAPI logs
-        run: docker logs ace2-ams-api
-
-      - name: Frontend logs
-        run: docker logs ace2-ams-gui
-
       - name: Wait for the environment to be accessible
-        run: bin/wait-for-gui.sh
-        shell: bash
+        run: docker exec ace2-ams-gui bin/wait-for-gui.sh
 
       - name: E2E tests
         run: docker exec ace2-ams-gui xvfb-run cypress run --headed --browser chrome --config video=false,screenshotOnRunFailure=false

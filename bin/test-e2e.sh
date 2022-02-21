@@ -14,7 +14,7 @@ set +a
 docker-compose -f docker-compose.yml up -d
 
 # Wait for things to be ready
-/usr/bin/env bash bin/wait-for-gui.sh
+docker exec ace2-ams-gui bin/wait-for-gui.sh
 
 # Run Cypress
 docker exec ace2-ams-gui xvfb-run cypress run --headed --browser chrome
