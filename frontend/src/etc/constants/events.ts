@@ -393,35 +393,30 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
       sortable: false,
       default: false,
     },
-    { field: "type", header: "Type", sortable: true, default: true },
+    { field: "threats", header: "Threats", sortable: false, default: true },
+    { field: "type", header: "Type", sortable: true, default: false },
+    {
+      field: "riskLevel",
+      header: "Risk Level",
+      sortable: true,
+      default: true,
+    },
+    // dispo?
+    {
+      field: "preventionTools",
+      header: "Prevention Tools",
+      sortable: false,
+      default: true,
+    },
     {
       field: "remediations",
       header: "Remediation",
       sortable: true,
       default: true,
     },
-    { field: "threats", header: "Threats", sortable: false, default: false },
-    {
-      field: "riskLevel",
-      header: "Risk Level",
-      sortable: true,
-      default: true,
-    },
-    {
-      field: "preventionTools",
-      header: "Prevention Tools",
-      sortable: false,
-      default: false,
-    },
-    { field: "status", header: "Status", sortable: true, default: false },
+    { field: "status", header: "Status", sortable: true, default: true },
     { field: "owner", header: "Owner", sortable: true, default: true },
-    { field: "vectors", header: "Vectors", sortable: false, default: true },
-    {
-      field: "riskLevel",
-      header: "Risk Level",
-      sortable: true,
-      default: false,
-    },
+    { field: "vectors", header: "Vectors", sortable: false, default: false },
   ],
   secondary_queue: [
     {
@@ -432,16 +427,6 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     },
     { field: "createdTime", header: "Created", sortable: true, default: true },
     { field: "name", header: "Name", sortable: true, default: true },
-    { field: "type", header: "Type", sortable: true, default: true },
-    {
-      field: "remediations",
-      header: "Remediation",
-      sortable: true,
-      default: true,
-    },
-    { field: "status", header: "Status", sortable: true, default: false },
-    { field: "owner", header: "Owner", sortable: true, default: false },
-    { field: "vectors", header: "Vectors", sortable: false, default: false },
     {
       field: "threatActors",
       header: "Threat Actors",
@@ -449,6 +434,14 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
       default: false,
     },
     { field: "threats", header: "Threats", sortable: false, default: false },
+    { field: "type", header: "Type", sortable: true, default: true },
+    {
+      field: "riskLevel",
+      header: "Risk Level",
+      sortable: true,
+      default: false,
+    },
+    // dispo?
     {
       field: "preventionTools",
       header: "Prevention Tools",
@@ -456,10 +449,13 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
       default: false,
     },
     {
-      field: "riskLevel",
-      header: "Risk Level",
+      field: "remediations",
+      header: "Remediation",
       sortable: true,
-      default: false,
+      default: true,
     },
+    { field: "status", header: "Status", sortable: true, default: true },
+    { field: "owner", header: "Owner", sortable: true, default: false },
+    { field: "vectors", header: "Vectors", sortable: false, default: false },
   ],
 };
