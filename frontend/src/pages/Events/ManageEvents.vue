@@ -28,9 +28,7 @@
   import { useRoute, useRouter } from "vue-router";
 
   import { useFilterStore } from "@/stores/filter";
-  import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
   import { parseFilters, populateCommonStores } from "@/etc/helpers";
-  import { useAuthStore } from "@/stores/auth";
 
   const route = useRoute();
   const router = useRouter();
@@ -40,22 +38,13 @@
   provide("nodeType", "events");
   provide("rangeFilters", eventRangeFilters);
 
-  const authStore = useAuthStore();
   const filterStore = useFilterStore();
-  const currentUserSettingsStore = useCurrentUserSettingsStore();
 
   onMounted(async () => {
     if (Object.keys(route.query).length) {
       // Will need to load common stores in order to find filter values
       await populateCommonStores();
       loadRouteQuery();
-    }
-    if (
-      currentUserSettingsStore.preferredEventQueue !=
-      authStore.user.defaultEventQueue
-    ) {
-      currentUserSettingsStore.preferredEventQueue =
-        authStore.user.defaultEventQueue;
     }
   });
 
