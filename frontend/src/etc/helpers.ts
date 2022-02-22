@@ -104,6 +104,10 @@ export function setUserDefaults(nodeType = "all"): void {
   const filterStore = useFilterStore();
   const currentUserSettingsStore = useCurrentUserSettingsStore();
 
+  if (!authStore.user) {
+    return;
+  }
+
   if (nodeType === "all" || nodeType === "events") {
     // Set default event queue
     currentUserSettingsStore.preferredEventQueue =

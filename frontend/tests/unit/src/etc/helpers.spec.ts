@@ -1,16 +1,24 @@
-import { alertFilters } from "@/etc/constants/alerts";
+import { alertFilters } from "../../../../src/etc/constants/alerts";
 import {
   formatNodeFiltersForAPI,
   parseFilters,
   getAlertLink,
   getAllAlertTags,
-} from "@/etc/helpers";
+} from "../../../../src/etc/helpers";
 import { mockAlertTreeReadA } from "../../../mocks/alert";
-import { alertFilterParams } from "@/models/alert";
-import { userRead } from "@/models/user";
-import { useObservableTypeStore } from "@/stores/observableType";
-import { useUserStore } from "@/stores/user";
+import { alertFilterParams } from "../../../../src/models/alert";
+import { userRead } from "../../../../src/models/user";
+import { useObservableTypeStore } from "../../../../src/stores/observableType";
+import { useUserStore } from "../../../../src/stores/user";
 import { createTestingPinia } from "@pinia/testing";
+import { expect } from "vitest";
+import { vi } from "vitest";
+import { setUserDefaults } from "../../../../src/etc/helpers";
+import { useAuthStore } from "../../../../src/stores/auth";
+import { useCurrentUserSettingsStore } from "../../../../src/stores/currentUserSettings";
+import { useFilterStore } from "../../../../src/stores/filter";
+import { userReadFactory } from "../../../mocks/user";
+import { genericObjectReadFactory } from "../../../mocks/genericObject";
 
 describe("parseFilters", () => {
   createTestingPinia({ createSpy: vi.fn });
@@ -257,5 +265,73 @@ describe("formatNodeFiltersForAPI", () => {
         uuid: "c5d3321d-883c-4772-b511-489273e13fde",
       },
     ]);
+  });
+});
+
+describe("setUserDefaults", () => {
+  const authStore = useAuthStore();
+  const filterStore = useFilterStore();
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
+
+  const alertQueue = genericObjectReadFactory({ value: "alertQueue" });
+  const eventQueue = genericObjectReadFactory({ value: "eventQueue" });
+
+  beforeEach(() => {
+    authStore.user = userReadFactory({
+      defaultAlertQueue: alertQueue,
+      defaultEventQueue: eventQueue,
+    });
+    filterStore.$reset();
+    currentUserSettingsStore.$reset();
+  });
+
+  it("will do nothing when there is no authStore user set", () => {
+    authStore.user = null;
+    setUserDefaults();
+    expect(currentUserSettingsStore.preferredEventQueue).toBeNull();
+    expect(currentUserSettingsStore.preferredAlertQueue).toBeNull();
+
+    expect(filterStore.events).toEqual({});
+    expect(filterStore.alerts).toEqual({});
+  });
+
+  it("will correctly set all user defaults when nodeType == 'all'", () => {
+    setUserDefaults();
+    expect(currentUserSettingsStore.preferredEventQueue).toEqual(eventQueue);
+    expect(currentUserSettingsStore.preferredAlertQueue).toEqual(alertQueue);
+    expect(filterStore.events).toEqual({
+      queue: eventQueue,
+    });
+    expect(filterStore.alerts).toEqual({
+      queue: alertQueue,
+    });
+  });
+  it("will correctly set event user defaults when nodeType == 'events'", () => {
+    setUserDefaults("events");
+    expect(currentUserSettingsStore.preferredEventQueue).toEqual(eventQueue);
+    expect(currentUserSettingsStore.preferredAlertQueue).toBeNull();
+    expect(filterStore.events).toEqual({
+      queue: eventQueue,
+    });
+    expect(filterStore.alerts).toEqual({});
+  });
+  it("will correctly set alert user defaults when nodeType == 'alerts'", () => {
+    setUserDefaults("alerts");
+    expect(currentUserSettingsStore.preferredEventQueue).toBeNull();
+    expect(currentUserSettingsStore.preferredAlertQueue).toEqual(alertQueue);
+    expect(filterStore.events).toEqual({});
+    expect(filterStore.alerts).toEqual({
+      queue: alertQueue,
+    });
+  });
+
+  it("will not set any user defaults when nodeType is unknown", () => {
+    authStore.user = null;
+    setUserDefaults("unknown");
+    expect(currentUserSettingsStore.preferredEventQueue).toBeNull();
+    expect(currentUserSettingsStore.preferredAlertQueue).toBeNull();
+
+    expect(filterStore.events).toEqual({});
+    expect(filterStore.alerts).toEqual({});
   });
 });
