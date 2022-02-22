@@ -1,3 +1,6 @@
+import { useFilterStore } from "@/stores/filter";
+import { useAuthStore } from "@/stores/auth";
+import { useCurrentUserSettingsStore } from "./../stores/currentUserSettings";
 import { useEventRemediationStore } from "./../stores/eventRemediation";
 import {
   alertFilterParams,
@@ -93,6 +96,35 @@ export async function populateEventStores(): Promise<void> {
   ]).catch((error) => {
     throw error;
   });
+}
+
+// Sets default user filters and currentUserSettings
+export function setUserDefaults(nodeType = "all"): void {
+  const authStore = useAuthStore();
+  const filterStore = useFilterStore();
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
+
+  if (nodeType === "all" || nodeType === "events") {
+    // Set default event queue
+    currentUserSettingsStore.preferredEventQueue =
+      authStore.user.defaultEventQueue;
+    filterStore.setFilter({
+      nodeType: "events",
+      filterName: "queue",
+      filterValue: currentUserSettingsStore.preferredEventQueue,
+    });
+  }
+
+  if (nodeType === "all" || nodeType === "alerts") {
+    // Set default alert queue
+    currentUserSettingsStore.preferredAlertQueue =
+      authStore.user.defaultAlertQueue;
+    filterStore.setFilter({
+      nodeType: "alerts",
+      filterName: "queue",
+      filterValue: currentUserSettingsStore.preferredAlertQueue,
+    });
+  }
 }
 
 // https://stackoverflow.com/a/33928558
