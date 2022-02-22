@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-  import { ref } from "vue";
+  import { ref, onMounted } from "vue";
 
   import Dropdown from "primevue/dropdown";
 
@@ -46,18 +46,30 @@
   const columns = ref([]);
   const key = ref(0);
 
-  currentUserSettingsStore.$subscribe((mutation) => {
-    if (mutation.events.key === "preferredEventQueue") {
+  onMounted(() => {
+    setColumns();
+  });
+
+  const setColumns = () => {
+    if (currentUserSettingsStore.preferredEventQueue) {
       columns.value =
         columnMappings.value[
           currentUserSettingsStore.preferredEventQueue.value
         ];
+
       filterStore.setFilter({
         nodeType: "events",
         filterName: "queue",
         filterValue: currentUserSettingsStore.preferredEventQueue,
       });
+
       key.value += 1;
+    }
+  };
+
+  currentUserSettingsStore.$subscribe((mutation) => {
+    if (mutation.events.key === "preferredEventQueue") {
+      setColumns();
     }
   });
 </script>
