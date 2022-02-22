@@ -3,13 +3,13 @@
 <!-- The table where all currently filtered events are displayed, selected to take action, or link to an individual event page -->
 
 <template>
-  <TheNodeTable :columns="columns">
+  <TheNodeTable :key="key" :columns="columns">
     <template #tableHeaderStart
       ><Dropdown
         v-model="currentUserSettingsStore.preferredEventQueue"
         :options="eventQueueStore.items"
         option-label="value"
-        style="margin-right: 2%;"
+        style="margin-right: 2%"
       ></Dropdown
     ></template>
 
@@ -35,40 +35,29 @@
 
   import { useEventQueueStore } from "@/stores/eventQueue";
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
+  import { useFilterStore } from "@/stores/filter";
   const eventQueueStore = useEventQueueStore();
   const currentUserSettingsStore = useCurrentUserSettingsStore();
+  const filterStore = useFilterStore();
 
-  const columns = ref([
-    {
-      field: "edit",
-      header: "",
-      sortable: false,
-      required: true,
-    },
-    { field: "createdTime", header: "Created", sortable: true, default: true },
-    { field: "name", header: "Name", sortable: true, default: true },
-    { field: "owner", header: "Owner", sortable: true, default: true },
-    { field: "status", header: "Status", sortable: true, default: false },
-    { field: "type", header: "Type", sortable: true, default: true },
-    { field: "vectors", header: "Vectors", sortable: false, default: true },
-    {
-      field: "threatActors",
-      header: "Threat Actors",
-      sortable: false,
-      default: false,
-    },
-    { field: "threats", header: "Threats", sortable: false, default: false },
-    {
-      field: "preventionTools",
-      header: "Prevention Tools",
-      sortable: false,
-      default: false,
-    },
-    {
-      field: "riskLevel",
-      header: "Risk Level",
-      sortable: true,
-      default: false,
-    },
-  ]);
+  import { eventQueueColumnMappings } from "@/etc/constants/events";
+
+  const columnMappings = ref(eventQueueColumnMappings);
+  const columns = ref([]);
+  const key = ref(0);
+
+  currentUserSettingsStore.$subscribe((mutation) => {
+    if (mutation.events.key === "preferredEventQueue") {
+      columns.value =
+        columnMappings.value[
+          currentUserSettingsStore.preferredEventQueue.value
+        ];
+      filterStore.setFilter({
+        nodeType: "events",
+        filterName: "queue",
+        filterValue: currentUserSettingsStore.preferredEventQueue,
+      });
+      key.value += 1;
+    }
+  });
 </script>
