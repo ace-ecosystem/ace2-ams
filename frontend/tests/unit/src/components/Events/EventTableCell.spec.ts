@@ -3,12 +3,36 @@ import { useModalStore } from "@/stores/modal";
 import EventTableCell from "@/components/Events/EventTableCell.vue";
 import { shallowMount, VueWrapper } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
+import { nodeCommentRead } from "@/models/nodeComment";
+import { userRead } from "@/models/user";
+import { createCustomPinia } from "@unit/helpers";
+
+const mockUser: userRead = {
+  defaultAlertQueue: { description: null, uuid: "1", value: "default" },
+  defaultEventQueue: { description: null, uuid: "1", value: "default" },
+  displayName: "Test Analyst",
+  email: "analyst@test.com",
+  enabled: true,
+  roles: [],
+  timezone: "UTC",
+  training: false,
+  username: "test analyst",
+  uuid: "1",
+};
+
+const mockComment: nodeCommentRead = {
+  insertTime: new Date(),
+  nodeUuid: "uuid1",
+  user: mockUser,
+  uuid: "uuid1",
+  value: "Test comment",
+};
 
 function factory(
-  piniaOptions: TestingOptions = {},
+  piniaOptions?: TestingOptions,
   data = { name: "event" },
   field = "name",
 ) {
@@ -17,7 +41,7 @@ function factory(
 
   const wrapper: VueWrapper<any> = shallowMount(EventTableCell, {
     global: {
-      plugins: [createTestingPinia(piniaOptions), PrimeVue],
+      plugins: [createCustomPinia(piniaOptions), PrimeVue],
     },
     props: {
       data: data,

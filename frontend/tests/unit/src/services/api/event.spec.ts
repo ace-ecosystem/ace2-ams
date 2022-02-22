@@ -15,7 +15,7 @@ describe("Event calls", () => {
 
   it("will make a post to the /event endpoint with eventCreate data when 'create' is called", async () => {
     myNock.post("/event/").reply(200, "Create successful", {
-      "content-location": "http://test_app.com:1234/newItem",
+      "content-location": "/newItem",
     });
     const res = await api.create(eventCreateFactory());
     expect(res).toEqual("Create successful");
@@ -25,7 +25,7 @@ describe("Event calls", () => {
     myNock
       .post("/event/")
       .reply(200, "Create successful", {
-        "content-location": "http://test_app.com:1234/newItem",
+        "content-location": "/newItem",
       })
       .get("/newItem")
       .reply(200, "Read successful");

@@ -1,8 +1,9 @@
 import SaveToEventModal from "@/components/Modals/SaveToEventModal.vue";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import { flushPromises, mount } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
 import nock from "nock";
+import { createCustomPinia } from "@unit/helpers";
 
 import myNock from "@unit/services/api/nock";
 import { useAlertStore } from "@/stores/alert";
@@ -42,7 +43,7 @@ function factory(options?: TestingOptions) {
   const wrapper = mount(SaveToEventModal, {
     attachTo: document.body,
     global: {
-      plugins: [createTestingPinia(options), PrimeVue],
+      plugins: [createCustomPinia(options), PrimeVue],
     },
     props: { name: "SaveToEventModal" },
   });
@@ -158,10 +159,6 @@ describe("SaveToEventModal.vue", () => {
     expect(wrapper.vm.events).toEqual({});
     modalStore.openModals = ["SaveToEventModal"];
 
-    // this is defs unintuitive, but since there's nothing to actually await in this test (changing the modalStore is not async)
-    // we just have to set a timeout to make sure that code completes and the req is made :/
-    // (flushPromises and wrapper.vm.$nextTick() did not seem to work)
-    jest.setTimeout(30000);
     await new Promise((r) => setTimeout(r, 2000));
 
     expect(wrapper.vm.events).toEqual({
@@ -177,7 +174,6 @@ describe("SaveToEventModal.vue", () => {
       )
       .reply(201, NEW_EVENT);
 
-    myNock.options("/alert/").reply(200, "Success");
     const updateAlertsSuccess = myNock
       .patch(
         "/alert/",
@@ -203,7 +199,6 @@ describe("SaveToEventModal.vue", () => {
     expect(modalStore.close).toHaveBeenCalled();
   });
   it("correctly executes saveToEvent when an existing is selected and all reqs complete successfully", async () => {
-    myNock.options("/alert/").reply(200, "Success");
     const updateAlertsSuccess = myNock
       .patch(
         "/alert/",
@@ -242,7 +237,6 @@ describe("SaveToEventModal.vue", () => {
       )
       .reply(201);
 
-    myNock.options("/alert/").reply(200, "Success");
     const updateAlertsSuccess = myNock
       .patch(
         "/alert/",
@@ -304,7 +298,6 @@ describe("SaveToEventModal.vue", () => {
       )
       .reply(201, NEW_EVENT);
 
-    myNock.options("/alert/").reply(200, "Success");
     const updateAlertsFailure = myNock
       .patch(
         "/alert/",
@@ -331,7 +324,6 @@ describe("SaveToEventModal.vue", () => {
     expect(wrapper.vm.error).toEqual("Request failed with status code 500");
   });
   it("correctly executes saveToEvent when an existing is selected and and alert eventUuid update fails", async () => {
-    myNock.options("/alert/").reply(200, "Success");
     const updateAlertsFailure = myNock
       .patch(
         "/alert/",
@@ -371,7 +363,6 @@ describe("SaveToEventModal.vue", () => {
       )
       .reply(409);
 
-    myNock.options("/alert/").reply(200, "Success");
     const updateAlertsSuccess = myNock
       .patch(
         "/alert/",

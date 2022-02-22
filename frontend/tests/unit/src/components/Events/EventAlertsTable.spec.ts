@@ -1,7 +1,8 @@
 import EventAlertsTable from "@/components/Events/EventAlertsTable.vue";
 import { flushPromises, mount, VueWrapper } from "@vue/test-utils";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
+import { createCustomPinia } from "@unit/helpers";
 
 import { useFilterStore } from "@/stores/filter";
 
@@ -18,7 +19,7 @@ function factory(options: TestingOptions = {}, eventUuid = "uuid1") {
 
   const wrapper: VueWrapper<any> = mount(EventAlertsTable, {
     global: {
-      plugins: [createTestingPinia(options)],
+      plugins: [createCustomPinia(options)],
       provide: { nodeType: "events" },
     },
     props: {
@@ -34,9 +35,11 @@ function factory(options: TestingOptions = {}, eventUuid = "uuid1") {
 describe("EventAlertsTable", () => {
   it("renders", async () => {
     // Mock the API call used to fetch all of the alerts in the event
-    jest
-      .spyOn(Alert, "readAllPages")
-      .mockResolvedValueOnce([mockAlertReadA, mockAlertReadB, mockAlertReadC]);
+    vi.spyOn(Alert, "readAllPages").mockResolvedValueOnce([
+      mockAlertReadA,
+      mockAlertReadB,
+      mockAlertReadC,
+    ]);
 
     const { wrapper } = factory();
     expect(wrapper.exists()).toBe(true);
@@ -44,9 +47,11 @@ describe("EventAlertsTable", () => {
 
   it("loads list of alerts and can remove selected alerts", async () => {
     // Mock the API call used to fetch all of the alerts in the event
-    jest
-      .spyOn(Alert, "readAllPages")
-      .mockResolvedValueOnce([mockAlertReadA, mockAlertReadB, mockAlertReadC]);
+    vi.spyOn(Alert, "readAllPages").mockResolvedValueOnce([
+      mockAlertReadA,
+      mockAlertReadB,
+      mockAlertReadC,
+    ]);
 
     const { wrapper } = factory();
 
@@ -90,12 +95,13 @@ describe("EventAlertsTable", () => {
     wrapper.vm.selectedAlertStore.select(mockAlertReadA.uuid);
 
     // Mock the API call used to fetch the new list of alerts in the event
-    jest
-      .spyOn(Alert, "readAllPages")
-      .mockResolvedValueOnce([mockAlertReadB, mockAlertReadC]);
+    vi.spyOn(Alert, "readAllPages").mockResolvedValueOnce([
+      mockAlertReadB,
+      mockAlertReadC,
+    ]);
 
     // Mock the API call use to remove the alert from the event
-    jest.spyOn(Alert, "update").mockResolvedValueOnce();
+    vi.spyOn(Alert, "update").mockResolvedValueOnce();
 
     // Click the Remove Alerts button.
     wrapper.find("[data-cy=remove-alerts-button]").trigger("click");

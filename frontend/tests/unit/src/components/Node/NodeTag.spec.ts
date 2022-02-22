@@ -1,7 +1,8 @@
-import NodeTag from "../../../../../src/components/Node/NodeTag.vue";
+import NodeTag from "@/components/Node/NodeTag.vue";
 import { mount } from "@vue/test-utils";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
+import { createCustomPinia } from "@unit/helpers";
 
 const tagStub = { value: "my_tag" };
 
@@ -16,7 +17,7 @@ function factory(piniaOptions?: TestingOptions, nodeType = "alerts") {
       tag: tagStub,
     },
     global: {
-      plugins: [createTestingPinia(piniaOptions)],
+      plugins: [createCustomPinia(piniaOptions)],
       provide: {
         nodeType: nodeType,
       },

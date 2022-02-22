@@ -2,7 +2,7 @@ import { commentReadFactory } from "./../../../../mocks/comment";
 import { useNodeThreatTypeStore } from "@/stores/nodeThreatType";
 import NodeCommentEditor from "../../../../../src/components/Node/NodeCommentEditor.vue";
 import { mount } from "@vue/test-utils";
-import { createTestingPinia } from "@pinia/testing";
+import { createCustomPinia } from "@unit/helpers";
 import Tooltip from "primevue/tooltip";
 import PrimeVue from "primevue/config";
 
@@ -14,7 +14,7 @@ function factory() {
       modelValue: [commentReadFactory()],
     },
     global: {
-      plugins: [createTestingPinia(), PrimeVue],
+      plugins: [createCustomPinia(), PrimeVue],
     },
   });
 

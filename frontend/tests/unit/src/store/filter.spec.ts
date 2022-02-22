@@ -1,7 +1,7 @@
-import { createTestingPinia } from "@pinia/testing";
 import { useFilterStore, isEmpty } from "@/stores/filter";
+import { createCustomPinia } from "@unit/helpers";
 
-createTestingPinia();
+createCustomPinia();
 
 const store = useFilterStore();
 

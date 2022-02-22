@@ -1,4 +1,4 @@
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import { flushPromises, mount, VueWrapper } from "@vue/test-utils";
 
 import AssignModal from "@/components/Modals/AssignModal.vue";
@@ -16,6 +16,7 @@ import { useAlertStore } from "@/stores/alert";
 import { useModalStore } from "@/stores/modal";
 import { useAlertTableStore } from "@/stores/alertTable";
 import { useSelectedAlertStore } from "@/stores/selectedAlert";
+import { createCustomPinia } from "@unit/helpers";
 
 interface factoryOptions {
   piniaOptions?: TestingOptions;
@@ -41,7 +42,7 @@ function factory(
 
   const wrapper: VueWrapper<any> = mount(TheNodeActionToolbarVue, {
     global: {
-      plugins: [createTestingPinia(options.piniaOptions)],
+      plugins: [createCustomPinia(options.piniaOptions)],
       provide: {
         nodeType: options.nodeType,
       },

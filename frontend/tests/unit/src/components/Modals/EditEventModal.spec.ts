@@ -3,7 +3,8 @@ import { useEventStore } from "@/stores/event";
 import { eventReadFactory, mockEventUUID } from "./../../../../mocks/events";
 import { filterOption } from "@/models/base";
 import EditEventModal from "@/components/Modals/EditEventModal.vue";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
+import { createCustomPinia } from "@unit/helpers";
 import { flushPromises, mount } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
 import nock from "nock";
@@ -37,7 +38,7 @@ function factory(options?: TestingOptions) {
   const wrapper = mount(EditEventModal, {
     attachTo: document.body,
     global: {
-      plugins: [createTestingPinia(options), PrimeVue],
+      plugins: [createCustomPinia(options), PrimeVue],
       provide: { availableEditFields: availableEditFields },
       stubs: {
         NodePropertyInput: true,
@@ -75,7 +76,7 @@ describe("EditEventModal.vue", () => {
   });
 
   it("loads given event and populates event stores on initializeData", async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(helpers, "populateEventStores")
       .mockResolvedValueOnce(undefined);
     const { wrapper } = factory();
@@ -92,7 +93,7 @@ describe("EditEventModal.vue", () => {
     expect(wrapper.vm.isLoading).toBeFalsy();
   });
   it("will catch and set error if any are thrown in initializeData", async () => {
-    const spy = jest
+    const spy = vi
       .spyOn(helpers, "populateEventStores")
       .mockResolvedValueOnce(undefined);
     const { wrapper } = factory();
@@ -156,11 +157,7 @@ describe("EditEventModal.vue", () => {
     expect(modalStore.close).toHaveBeenCalled();
   });
   it("will attempt to save any comments if 'comments' is in the formFields on saveEvent", async () => {
-    const updateComment = myNock
-      .options(`/node/comment/commentUuid1`)
-      .reply(200)
-      .patch(`/node/comment/commentUuid1`)
-      .reply(200);
+    const updateComment = myNock.patch("/node/comment/commentUuid1").reply(200);
 
     const { wrapper, modalStore } = factory();
 
@@ -180,11 +177,7 @@ describe("EditEventModal.vue", () => {
     expect(modalStore.close).toHaveBeenCalled();
   });
   it("will attempt to update all comments in the formFields on saveEventComments", async () => {
-    const updateComment = myNock
-      .options(`/node/comment/commentUuid1`)
-      .reply(200)
-      .patch(`/node/comment/commentUuid1`)
-      .reply(200);
+    const updateComment = myNock.patch("/node/comment/commentUuid1").reply(200);
 
     const { wrapper } = factory();
 
@@ -207,7 +200,7 @@ describe("EditEventModal.vue", () => {
       name: { propertyType: "name", propertyValue: "New Name" },
     };
 
-    eventStore.update = jest.fn().mockImplementationOnce(() => {
+    eventStore.update = vi.fn().mockImplementationOnce(() => {
       throw new Error("Request failed");
     });
 

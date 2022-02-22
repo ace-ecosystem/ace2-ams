@@ -1,6 +1,7 @@
 import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
 import { mount, VueWrapper } from "@vue/test-utils";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
+import { createCustomPinia } from "@unit/helpers";
 
 import { useFilterStore } from "@/stores/filter";
 
@@ -16,7 +17,7 @@ function factory(
 ) {
   const wrapper: VueWrapper<any> = mount(AlertTableExpansion, {
     global: {
-      plugins: [createTestingPinia(options)],
+      plugins: [createCustomPinia(options)],
       provide: { nodeType: "alerts" },
     },
     props: {
