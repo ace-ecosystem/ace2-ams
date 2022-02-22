@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-  import { ref, onMounted } from "vue";
+  import { ref, onMounted, computed } from "vue";
 
   import Dropdown from "primevue/dropdown";
 
@@ -42,8 +42,10 @@
 
   import { eventQueueColumnMappings } from "@/etc/constants/events";
 
-  const columnMappings = ref(eventQueueColumnMappings);
   const columns = ref([]);
+
+  // This will cause the table to re-render,
+  // which is necessary to dynamically re-set columns
   const key = ref(0);
 
   onMounted(() => {
@@ -53,7 +55,7 @@
   const setColumns = () => {
     if (currentUserSettingsStore.preferredEventQueue) {
       columns.value =
-        columnMappings.value[
+        eventQueueColumnMappings[
           currentUserSettingsStore.preferredEventQueue.value
         ];
 
