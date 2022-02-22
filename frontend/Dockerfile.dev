@@ -4,12 +4,11 @@ WORKDIR /app
 
 COPY package*.json ./
 
-# RUN chown -R node:node /app
-
 RUN npm install
 
 COPY . .
 
+# Fixes the strange permission issues GitHub Actions was having. 
 RUN chmod -R 777 /app
 
 # Override the entrypoint of the cypress/included image
