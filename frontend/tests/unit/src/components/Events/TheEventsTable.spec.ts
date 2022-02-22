@@ -1,18 +1,12 @@
 import { genericObjectReadFactory } from "./../../../../mocks/genericObject";
-import { eventQueueColumnMappings } from "../../../../../src/etc/constants/events";
 import TheEventsTable from "@/components/Events/TheEventsTable.vue";
 import { shallowMount, VueWrapper } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
-import myNock from "../../services/api/nock";
 import { TestingOptions } from "@pinia/testing";
 
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
 import { createCustomPinia } from "../../helpers";
 
-import { mockAlertPage } from "../../../../mocks/alert";
-import { parseAlertSummary } from "../../../../../src/etc/helpers";
-import { expect, vi } from "vitest";
-import { constant } from "cypress/types/lodash";
 import { useCurrentUserSettingsStore } from "../../../../../src/stores/currentUserSettings";
 import { useFilterStore } from "../../../../../src/stores/filter";
 
