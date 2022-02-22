@@ -50,3 +50,11 @@ export interface propertyOption {
     filter: string,
   ) => string[] | Date | { category: string; value: string };
 }
+
+export interface columnOption {
+  field: string;
+  header: string;
+  sortable: boolean;
+  default?: boolean;
+  required?: boolean;
+}

@@ -1,3 +1,4 @@
+import { columnOption } from "./../../models/base";
 import { eventRemediationRead } from "../../models/eventRemediation";
 import { propertyOption } from "@/models/base";
 import { eventPreventionToolRead } from "@/models/eventPreventionTool";
@@ -50,7 +51,7 @@ export const eventPropertyTypes: Record<string, string> = {
   TYPE_PROPERTY: "type",
   VECTORS_PROPERTY: "vectors",
 };
-const eventEventTimeProperty = {
+const eventEventTimeProperty: propertyOption = {
   name: eventPropertyTypes.EVENT_TIME_PROPERTY,
   label: "Event TIme",
   type: inputTypes.DATE,
@@ -61,7 +62,7 @@ const eventEventTimeProperty = {
     return new Date(valueString);
   },
 };
-const eventAlertTimeProperty = {
+const eventAlertTimeProperty: propertyOption = {
   name: eventPropertyTypes.ALERT_TIME_PROPERTY,
   label: "Alert Time",
   type: inputTypes.DATE,
@@ -72,7 +73,7 @@ const eventAlertTimeProperty = {
     return new Date(valueString);
   },
 };
-const eventOwnershipTimeProperty = {
+const eventOwnershipTimeProperty: propertyOption = {
   name: eventPropertyTypes.OWNERSHIP_TIME_PROPERTY,
   label: "Ownership Time",
   type: inputTypes.DATE,
@@ -83,7 +84,7 @@ const eventOwnershipTimeProperty = {
     return new Date(valueString);
   },
 };
-const eventDispositionTimeProperty = {
+const eventDispositionTimeProperty: propertyOption = {
   name: eventPropertyTypes.DISPOSITION_TIME_PROPERTY,
   label: "Disposition Time",
   type: inputTypes.DATE,
@@ -94,7 +95,7 @@ const eventDispositionTimeProperty = {
     return new Date(valueString);
   },
 };
-const eventContainTimeProperty = {
+const eventContainTimeProperty: propertyOption = {
   name: eventPropertyTypes.CONTAIN_TIME_PROPERTY,
   label: "Contain Time",
   type: inputTypes.DATE,
@@ -105,7 +106,7 @@ const eventContainTimeProperty = {
     return new Date(valueString);
   },
 };
-const eventRemediationTimeProperty = {
+const eventRemediationTimeProperty: propertyOption = {
   name: eventPropertyTypes.REMEDIATION_TIME_PROPERTY,
   label: "Remediation Time",
   type: inputTypes.DATE,
@@ -116,7 +117,7 @@ const eventRemediationTimeProperty = {
     return new Date(valueString);
   },
 };
-const eventRemediationProperty = {
+const eventRemediationProperty: propertyOption = {
   name: eventPropertyTypes.REMEDIATIONS_PROPERTY,
   label: "Remediation",
   type: inputTypes.MULTISELECT,
@@ -372,4 +373,93 @@ export const eventRangeFilters = {
     start: eventPropertyTypes.CREATED_AFTER_PROPERTY,
     end: eventPropertyTypes.CREATED_BEFORE_PROPERTY,
   },
+};
+
+export const eventQueueOptions = ["default", "secondary_queue"];
+
+export const eventQueueColumnMappings: Record<string, columnOption[]> = {
+  default: [
+    {
+      field: "edit",
+      header: "",
+      sortable: false,
+      required: true,
+    },
+    { field: "createdTime", header: "Created", sortable: true, default: true },
+    { field: "name", header: "Name", sortable: true, default: true },
+    {
+      field: "threatActors",
+      header: "Threat Actors",
+      sortable: false,
+      default: false,
+    },
+    { field: "type", header: "Type", sortable: true, default: true },
+    {
+      field: "remediations",
+      header: "Remediation",
+      sortable: true,
+      default: true,
+    },
+    { field: "threats", header: "Threats", sortable: false, default: false },
+    {
+      field: "riskLevel",
+      header: "Risk Level",
+      sortable: true,
+      default: true,
+    },
+    {
+      field: "preventionTools",
+      header: "Prevention Tools",
+      sortable: false,
+      default: false,
+    },
+    { field: "status", header: "Status", sortable: true, default: false },
+    { field: "owner", header: "Owner", sortable: true, default: true },
+    { field: "vectors", header: "Vectors", sortable: false, default: true },
+    {
+      field: "riskLevel",
+      header: "Risk Level",
+      sortable: true,
+      default: false,
+    },
+  ],
+  secondary_queue: [
+    {
+      field: "edit",
+      header: "",
+      sortable: false,
+      required: true,
+    },
+    { field: "createdTime", header: "Created", sortable: true, default: true },
+    { field: "name", header: "Name", sortable: true, default: true },
+    { field: "type", header: "Type", sortable: true, default: true },
+    {
+      field: "remediations",
+      header: "Remediation",
+      sortable: true,
+      default: true,
+    },
+    { field: "status", header: "Status", sortable: true, default: false },
+    { field: "owner", header: "Owner", sortable: true, default: false },
+    { field: "vectors", header: "Vectors", sortable: false, default: false },
+    {
+      field: "threatActors",
+      header: "Threat Actors",
+      sortable: false,
+      default: false,
+    },
+    { field: "threats", header: "Threats", sortable: false, default: false },
+    {
+      field: "preventionTools",
+      header: "Prevention Tools",
+      sortable: false,
+      default: false,
+    },
+    {
+      field: "riskLevel",
+      header: "Risk Level",
+      sortable: true,
+      default: false,
+    },
+  ],
 };
