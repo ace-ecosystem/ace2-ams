@@ -65,9 +65,9 @@
 
   import { useFilterStore } from "@/stores/filter";
 
-import { eventFilters } from "@/etc/constants/events";
-import { alertFilters } from "@/etc/constants/alerts";
-  import { isObject } from "@/etc/helpers";
+  import { eventFilters } from "@/etc/constants/events";
+  import { alertFilters } from "@/etc/constants/alerts";
+  import { isObject } from "@/etc/validators";
   import Button from "primevue/button";
   import Chip from "primevue/chip";
   import OverlayPanel from "primevue/overlaypanel";

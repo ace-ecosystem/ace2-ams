@@ -9,7 +9,7 @@ import {
   eventFilterParams,
   eventFilterValues,
 } from "@/models/event";
-import { isValidDate } from "@/etc/helpers";
+import { isValidDate } from "@/etc/validators";
 
 export function isEmpty(value: unknown): boolean {
   if (value === null) {
