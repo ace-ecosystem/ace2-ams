@@ -18,9 +18,9 @@
 
 import { alertFilters, alertRangeFilters } from "@/etc/constants/alerts";
 
-  import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar";
-  import TheFilterToolbar from "@/components/Filters/TheFilterToolbar";
-  import TheAlertsTable from "@/components/Alerts/TheAlertsTable";
+  import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
+  import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
+  import TheAlertsTable from "@/components/Alerts/TheAlertsTable.vue";
   import { useRoute, useRouter } from "vue-router";
 
   import { useFilterStore } from "@/stores/filter";

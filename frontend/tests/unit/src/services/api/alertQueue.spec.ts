@@ -34,7 +34,7 @@ describe("AlertQueue API calls", () => {
     myNock
       .post("/alert/queue/", JSON.stringify(snakecaseKeys(mockObjectCreate)))
       .reply(200, successMessage, {
-        "content-location": "http://test_app.com:1234/newItem",
+        "content-location": "/newItem",
       });
 
     const res = await AlertQueue.create(mockObjectCreate, false);
@@ -54,7 +54,7 @@ describe("AlertQueue API calls", () => {
     myNock
       .post("/alert/queue/", JSON.stringify(snakecaseKeys(mockObjectCreate)))
       .reply(200, successMessage, {
-        "content-location": "http://test_app.com:1234/newItem",
+        "content-location": "/newItem",
       })
       .get("/newItem")
       .reply(200, secondSuccessMessage);

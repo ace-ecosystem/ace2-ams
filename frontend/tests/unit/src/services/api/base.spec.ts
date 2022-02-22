@@ -12,7 +12,7 @@ describe("BaseAPI calls", () => {
     myNock
       .post("/create")
       .reply(200, "Create successful", {
-        "content-location": "http://test_app.com:1234/newItem",
+        "content-location": "/newItem",
       })
       .get("/newItem")
       .reply(200, "Read successful");
@@ -28,7 +28,7 @@ describe("BaseAPI calls", () => {
 
   it("will make only a post request when getAfterCreate is false and there is a 'content-location' header", async () => {
     myNock.post("/create").reply(200, "Create successful", {
-      "content-location": "http://test_app.com:1234/newItem",
+      "content-location": "/newItem",
     });
     const res = await api.create("/create", {}, false);
     expect(res).toEqual("Create successful");

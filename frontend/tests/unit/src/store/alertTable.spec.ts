@@ -2,15 +2,15 @@
 import myNock from "@unit/services/api/nock";
 import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
 import { useAlertTableStore } from "@/stores/alertTable";
+import { createCustomPinia } from "@unit/helpers";
 import { parseAlertSummary } from "@/etc/helpers";
-import { createTestingPinia } from "@pinia/testing";
 import {
   mockAlert,
   mockAlertTreeReadA,
   mockAlertReadASummary,
 } from "../../../mocks/alert";
 
-createTestingPinia();
+createCustomPinia();
 const store = useAlertTableStore();
 
 const mockAlertReadB = Object.assign({}, mockAlert, { uuid: "uuid2" });

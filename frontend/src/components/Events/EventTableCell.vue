@@ -58,7 +58,7 @@
   import { defineProps } from "vue";
   import Button from "primevue/button";
 
-  import NodeTagVue from "../Node/NodeTag.vue";
+  import NodeTagVue from "@/components/Node/NodeTag.vue";
   import NodeComment from "../Node/NodeComment.vue";
   import EditEventModal from "../Modals/EditEventModal.vue";
 
@@ -76,7 +76,7 @@
   const formatDateTime = (dateTime) => {
     if (dateTime) {
       const d = new Date(dateTime);
-      return d.toLocaleString("en-US");
+      return d.toLocaleString("en-US", { timeZone: "UTC" });
     }
 
     return "None";

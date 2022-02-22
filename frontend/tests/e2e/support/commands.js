@@ -1,3 +1,5 @@
+// import { addUser } from "./helpers.js";
+
 Cypress.Commands.add("login", () => {
   cy.request({
     method: "POST",

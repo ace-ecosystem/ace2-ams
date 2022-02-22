@@ -72,7 +72,7 @@
   import Button from "primevue/button";
   import Message from "primevue/message";
 
-  import BaseModal from "@/components/Modals/BaseModal";
+  import BaseModal from "@/components/Modals/BaseModal.vue";
   import NodePropertyInput from "../Node/NodePropertyInput.vue";
   import NodeThreatSelector from "../Node/NodeThreatSelector.vue";
 

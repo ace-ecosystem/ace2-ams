@@ -1,10 +1,11 @@
 import TheAlertsTable from "@/components/Alerts/TheAlertsTable.vue";
 import { shallowMount, VueWrapper } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 
 import myNock from "@unit/services/api/nock";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
+import { createCustomPinia } from "@unit/helpers";
 
 function factory(options?: TestingOptions) {
   const router = createRouterMock();
@@ -12,7 +13,7 @@ function factory(options?: TestingOptions) {
 
   const wrapper: VueWrapper<any> = shallowMount(TheAlertsTable, {
     global: {
-      plugins: [createTestingPinia(options), PrimeVue],
+      plugins: [createCustomPinia(options), PrimeVue],
     },
   });
 

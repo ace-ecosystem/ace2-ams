@@ -69,9 +69,9 @@
   import Message from "primevue/message";
   import Toolbar from "primevue/toolbar";
 
-  import AssignModal from "@/components/Modals/AssignModal";
-  import CommentModal from "@/components/Modals/CommentModal";
-  import TagModal from "@/components/Modals/TagModal";
+  import AssignModal from "@/components/Modals/AssignModal.vue";
+  import CommentModal from "@/components/Modals/CommentModal.vue";
+  import TagModal from "@/components/Modals/TagModal.vue";
 
   import {
     nodeStores,

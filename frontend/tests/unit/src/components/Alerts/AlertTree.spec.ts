@@ -1,16 +1,17 @@
-import AlertTree from "../../../../../src/components/Alerts/AlertTree.vue";
+import AlertTree from "@/components/Alerts/AlertTree.vue";
 import { mount, VueWrapper } from "@vue/test-utils";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import { mockAlert, mockAnalysisRead } from "../../../../mocks/alert";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
 import { useAlertStore } from "@/stores/alert";
+import { createCustomPinia } from "@unit/helpers";
 
 describe("AlertTree.vue", () => {
   function factory(options?: TestingOptions) {
     const router = createRouterMock();
     injectRouterMock(router);
 
-    const pinia = createTestingPinia(options);
+    const pinia = createCustomPinia(options);
     const alertStore = useAlertStore();
     alertStore.openAlert = mockAlert;
 

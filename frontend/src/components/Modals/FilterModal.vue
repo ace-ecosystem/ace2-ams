@@ -50,8 +50,8 @@
 
   import Button from "primevue/button";
 
-  import BaseModal from "@/components/Modals/BaseModal";
   import NodePropertyInput from "../Node/NodePropertyInput.vue";
+  import BaseModal from "@/components/Modals/BaseModal.vue";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";

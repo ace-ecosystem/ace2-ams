@@ -29,9 +29,9 @@
 
   import Dropdown from "primevue/dropdown";
 
-  import TheNodeTable from "../Node/TheNodeTable";
-  import EventTableCell from "./EventTableCell";
   import EventAlertsTable from "./EventAlertsTable.vue";
+  import TheNodeTable from "@/components/Node/TheNodeTable.vue";
+  import EventTableCell from "@/components/Events/EventTableCell.vue";
 
   import { useEventQueueStore } from "@/stores/eventQueue";
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";

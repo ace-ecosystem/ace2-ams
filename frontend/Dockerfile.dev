@@ -1,4 +1,4 @@
-FROM cypress/included:9.3.1
+FROM cypress/included:9.5.0
 
 WORKDIR /app
 
@@ -6,9 +6,10 @@ COPY package*.json ./
 
 RUN npm install
 
-USER node
-
 COPY . .
 
+# Fixes the strange permission issues GitHub Actions was having. 
+RUN chmod -R 777 /app
+
 # Override the entrypoint of the cypress/included image
-ENTRYPOINT ["bash", "-c", "while !</dev/tcp/api/80; do sleep 1; done; npm run serve"]
+ENTRYPOINT ["bash", "-c", "while !</dev/tcp/api/80; do sleep 1; done; npm run dev"]

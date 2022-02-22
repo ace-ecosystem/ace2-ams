@@ -23,8 +23,8 @@
   } from "@/etc/constants/events";
 
   import TheNodeActionToolbarVue from "@/components/Node/TheNodeActionToolbar.vue";
-  import TheFilterToolbar from "@/components/Filters/TheFilterToolbar";
-  import TheEventsTable from "@/components/Events/TheEventsTable";
+  import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
+  import TheEventsTable from "@/components/Events/TheEventsTable.vue";
   import { useRoute, useRouter } from "vue-router";
 
   import { useFilterStore } from "@/stores/filter";

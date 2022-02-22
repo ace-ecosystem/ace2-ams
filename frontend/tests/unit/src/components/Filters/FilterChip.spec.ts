@@ -1,10 +1,10 @@
 import FilterChip from "@/components/Filters/FilterChip.vue";
 import { shallowMount, VueWrapper } from "@vue/test-utils";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
-import { filterTypes } from "@/etc/constants/alerts";
-import { alertFilters } from "@/etc/constants/alerts";
+import { alertFilters, filterTypes } from "@/etc/constants/alerts";
+import { createCustomPinia } from "@unit/helpers";
 
 describe("FilterChip.vue", () => {
   function factory(
@@ -18,7 +18,7 @@ describe("FilterChip.vue", () => {
     const wrapper: VueWrapper<any> = shallowMount(FilterChip, {
       props: props,
       global: {
-        plugins: [createTestingPinia(options)],
+        plugins: [createCustomPinia(options)],
         provide: {
           nodeType: nodeType,
         },

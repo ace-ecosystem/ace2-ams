@@ -1,17 +1,18 @@
 import CommentModal from "@/components/Modals/CommentModal.vue";
-import { createTestingPinia, TestingOptions } from "@pinia/testing";
+import { TestingOptions } from "@pinia/testing";
 import { mount } from "@vue/test-utils";
 import PrimeVue from "primevue/config";
 import nock from "nock";
 
 import myNock from "@unit/services/api/nock";
 import { useModalStore } from "@/stores/modal";
+import { createCustomPinia } from "@unit/helpers";
 
 function factory(options?: TestingOptions) {
   const wrapper = mount(CommentModal, {
     attachTo: document.body,
     global: {
-      plugins: [createTestingPinia(options), PrimeVue],
+      plugins: [createCustomPinia(options), PrimeVue],
       provide: { nodeType: "alerts" },
     },
     props: { name: "CommentModal" },
