@@ -1,9 +1,14 @@
 import { visitUrl } from "./helpers";
 
 describe("ViewAlert.vue", () => {
-  before(() => {
+  beforeEach(() => {
     cy.resetDatabase();
     cy.login();
+
+    // Intercept the API call that loads the alert data
+    cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "getAlert",
+    );
 
     // Add the test alert to the database
     cy.request({
@@ -14,13 +19,6 @@ describe("ViewAlert.vue", () => {
         count: 1,
       },
     });
-  });
-
-  beforeEach(() => {
-    // Intercept the API call that loads the alert data
-    cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "getAlert",
-    );
 
     visitUrl({
       url: "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a",
