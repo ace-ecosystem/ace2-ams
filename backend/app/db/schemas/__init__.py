@@ -34,9 +34,12 @@ from db.schemas.node_tag import NodeTag
 from db.schemas.node_tag_mapping import node_tag_mapping
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
+from db.schemas.node_threat_actor_queue_mapping import node_threat_actor_queue_mapping
 from db.schemas.node_threat_mapping import node_threat_mapping
 from db.schemas.node_threat_node_threat_type_mapping import node_threat_node_threat_type_mapping
+from db.schemas.node_threat_queue_mapping import node_threat_queue_mapping
 from db.schemas.node_threat_type import NodeThreatType
+from db.schemas.node_threat_type_queue_mapping import node_threat_type_queue_mapping
 from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType

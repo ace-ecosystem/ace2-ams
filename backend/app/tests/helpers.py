@@ -485,26 +485,46 @@ def create_node_tag(value: str, db: Session) -> NodeTag:
     return _create_basic_object(db_table=NodeTag, value=value, db=db)
 
 
-def create_node_threat_actor(value: str, db: Session) -> NodeThreatActor:
-    return _create_basic_object(db_table=NodeThreatActor, value=value, db=db)
+def create_node_threat_actor(value: str, db: Session, queues: List[str] = None) -> NodeThreatActor:
+    if queues is None:
+        queues = ["default"]
+
+    obj: NodeThreatActor = _create_basic_object(db_table=NodeThreatActor, value=value, db=db)
+    obj.queues = [create_queue(value=queue, db=db) for queue in queues]
+
+    return obj
 
 
-def create_node_threat(value: str, db: Session, types: List[str] = None) -> NodeThreat:
+def create_node_threat(value: str, db: Session, queues: List[str] = None, types: List[str] = None) -> NodeThreat:
     existing = crud.read_by_value(value=value, db_table=NodeThreat, db=db, err_on_not_found=False)
     if existing:
         return existing
 
+    if queues is None:
+        queues = ["default"]
+
     if types is None:
         types = ["test_type"]
 
-    obj = NodeThreat(value=value, types=[create_node_threat_type(value=t, db=db) for t in types], uuid=uuid.uuid4())
+    obj = NodeThreat(
+        value=value,
+        queues=[create_queue(value=q, db=db) for q in queues],
+        types=[create_node_threat_type(value=t, db=db, queues=queues) for t in types],
+        uuid=uuid.uuid4(),
+    )
     db.add(obj)
     crud.commit(db)
     return obj
 
 
-def create_node_threat_type(value: str, db: Session) -> NodeThreatType:
-    return _create_basic_object(db_table=NodeThreatType, value=value, db=db)
+def create_node_threat_type(value: str, db: Session, queues: List[str] = None) -> NodeThreatType:
+    if queues is None:
+        queues = ["default"]
+
+    obj: NodeThreatType = _create_basic_object(db_table=NodeThreatType, value=value, db=db)
+    obj.queues = [create_queue(value=queue, db=db) for queue in queues]
+
+    return obj
 
 
 def create_observable(

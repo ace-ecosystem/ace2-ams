@@ -13,6 +13,7 @@ from api.routes import helpers
 from db import crud
 from db.database import get_db
 from db.schemas.node_threat_actor import NodeThreatActor
+from db.schemas.queue import Queue
 
 
 router = APIRouter(
@@ -32,7 +33,9 @@ def create_node_threat_actor(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    obj: NodeThreatActor = crud.create(obj=create, db_table=NodeThreatActor, db=db)
+    queues = crud.read_by_values(values=create.queues, db_table=Queue, db=db)
+    obj: NodeThreatActor = crud.create(obj=create, db_table=NodeThreatActor, db=db, exclude=["queues"])
+    obj.queues = queues
 
     response.headers["Content-Location"] = request.url_for("get_node_threat_actor", uuid=obj.uuid)
 
@@ -64,12 +67,25 @@ helpers.api_route_read(router, get_node_threat_actor, NodeThreatActorRead)
 
 def update_node_threat_actor(
     uuid: UUID,
-    node_threat_actor: NodeThreatActorUpdate,
+    update: NodeThreatActorUpdate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    crud.update(uuid=uuid, obj=node_threat_actor, db_table=NodeThreatActor, db=db)
+    db_obj: NodeThreatActor = crud.read(uuid=uuid, db_table=NodeThreatActor, db=db)
+
+    update_data = update.dict(exclude_unset=True)
+
+    if "description" in update_data:
+        db_obj.description = update_data["description"]
+
+    if "queues" in update_data:
+        db_obj.queues = crud.read_by_values(values=update_data["queues"], db_table=Queue, db=db)
+
+    if "value" in update_data:
+        db_obj.value = update_data["value"]
+
+    crud.commit(db)
 
     response.headers["Content-Location"] = request.url_for("get_node_threat_actor", uuid=uuid)
 

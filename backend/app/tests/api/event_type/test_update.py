@@ -85,7 +85,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     assert getattr(obj, key) == updated_value
 
 
-def test_update_event_queue(client_valid_access_token, db):
+def test_update_queue(client_valid_access_token, db):
     helpers.create_queue(value="default", db=db)
     helpers.create_queue(value="updated", db=db)
 

@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: d978a26a0bce
+Revision ID: 0e67677dd8f7
 Revises: 
-Create Date: 2022-02-23 19:57:33.077952
+Create Date: 2022-02-23 21:13:46.127108
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'd978a26a0bce'
+revision = '0e67677dd8f7'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -298,6 +298,15 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_node_threat_actor_mapping_node_uuid'), 'node_threat_actor_mapping', ['node_uuid'], unique=False)
     op.create_index(op.f('ix_node_threat_actor_mapping_threat_actor_uuid'), 'node_threat_actor_mapping', ['threat_actor_uuid'], unique=False)
+    op.create_table('node_threat_actor_queue_mapping',
+    sa.Column('node_threat_actor_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.ForeignKeyConstraint(['node_threat_actor_uuid'], ['node_threat_actor.uuid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['queue_uuid'], ['queue.uuid'], ),
+    sa.PrimaryKeyConstraint('node_threat_actor_uuid', 'queue_uuid')
+    )
+    op.create_index(op.f('ix_node_threat_actor_queue_mapping_node_threat_actor_uuid'), 'node_threat_actor_queue_mapping', ['node_threat_actor_uuid'], unique=False)
+    op.create_index(op.f('ix_node_threat_actor_queue_mapping_queue_uuid'), 'node_threat_actor_queue_mapping', ['queue_uuid'], unique=False)
     op.create_table('node_threat_mapping',
     sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('threat_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -316,6 +325,24 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_node_threat_node_threat_type_mapping_node_threat_type_uuid'), 'node_threat_node_threat_type_mapping', ['node_threat_type_uuid'], unique=False)
     op.create_index(op.f('ix_node_threat_node_threat_type_mapping_node_threat_uuid'), 'node_threat_node_threat_type_mapping', ['node_threat_uuid'], unique=False)
+    op.create_table('node_threat_queue_mapping',
+    sa.Column('node_threat_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.ForeignKeyConstraint(['node_threat_uuid'], ['node_threat.uuid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['queue_uuid'], ['queue.uuid'], ),
+    sa.PrimaryKeyConstraint('node_threat_uuid', 'queue_uuid')
+    )
+    op.create_index(op.f('ix_node_threat_queue_mapping_node_threat_uuid'), 'node_threat_queue_mapping', ['node_threat_uuid'], unique=False)
+    op.create_index(op.f('ix_node_threat_queue_mapping_queue_uuid'), 'node_threat_queue_mapping', ['queue_uuid'], unique=False)
+    op.create_table('node_threat_type_queue_mapping',
+    sa.Column('node_threat_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.ForeignKeyConstraint(['node_threat_type_uuid'], ['node_threat_type.uuid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['queue_uuid'], ['queue.uuid'], ),
+    sa.PrimaryKeyConstraint('node_threat_type_uuid', 'queue_uuid')
+    )
+    op.create_index(op.f('ix_node_threat_type_queue_mapping_node_threat_type_uuid'), 'node_threat_type_queue_mapping', ['node_threat_type_uuid'], unique=False)
+    op.create_index(op.f('ix_node_threat_type_queue_mapping_queue_uuid'), 'node_threat_type_queue_mapping', ['queue_uuid'], unique=False)
     op.create_table('node_tree',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('node_metadata', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
@@ -607,12 +634,21 @@ def downgrade() -> None:
     op.drop_index('uix_root_node', table_name='node_tree', postgresql_where=sa.text('parent_tree_uuid IS NULL'))
     op.drop_index(op.f('ix_node_tree_root_node_uuid'), table_name='node_tree')
     op.drop_table('node_tree')
+    op.drop_index(op.f('ix_node_threat_type_queue_mapping_queue_uuid'), table_name='node_threat_type_queue_mapping')
+    op.drop_index(op.f('ix_node_threat_type_queue_mapping_node_threat_type_uuid'), table_name='node_threat_type_queue_mapping')
+    op.drop_table('node_threat_type_queue_mapping')
+    op.drop_index(op.f('ix_node_threat_queue_mapping_queue_uuid'), table_name='node_threat_queue_mapping')
+    op.drop_index(op.f('ix_node_threat_queue_mapping_node_threat_uuid'), table_name='node_threat_queue_mapping')
+    op.drop_table('node_threat_queue_mapping')
     op.drop_index(op.f('ix_node_threat_node_threat_type_mapping_node_threat_uuid'), table_name='node_threat_node_threat_type_mapping')
     op.drop_index(op.f('ix_node_threat_node_threat_type_mapping_node_threat_type_uuid'), table_name='node_threat_node_threat_type_mapping')
     op.drop_table('node_threat_node_threat_type_mapping')
     op.drop_index(op.f('ix_node_threat_mapping_threat_uuid'), table_name='node_threat_mapping')
     op.drop_index(op.f('ix_node_threat_mapping_node_uuid'), table_name='node_threat_mapping')
     op.drop_table('node_threat_mapping')
+    op.drop_index(op.f('ix_node_threat_actor_queue_mapping_queue_uuid'), table_name='node_threat_actor_queue_mapping')
+    op.drop_index(op.f('ix_node_threat_actor_queue_mapping_node_threat_actor_uuid'), table_name='node_threat_actor_queue_mapping')
+    op.drop_table('node_threat_actor_queue_mapping')
     op.drop_index(op.f('ix_node_threat_actor_mapping_threat_actor_uuid'), table_name='node_threat_actor_mapping')
     op.drop_index(op.f('ix_node_threat_actor_mapping_node_uuid'), table_name='node_threat_actor_mapping')
     op.drop_table('node_threat_actor_mapping')
