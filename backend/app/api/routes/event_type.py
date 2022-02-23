@@ -23,14 +23,14 @@ router = APIRouter(
 
 
 def create_event_type(
-    event_type: EventTypeCreate,
+    create: EventTypeCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=event_type, db_table=EventType, db=db)
+    obj: EventType = crud.create(obj=create, db_table=EventType, db=db)
 
-    response.headers["Content-Location"] = request.url_for("get_event_type", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_event_type", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_event_type)

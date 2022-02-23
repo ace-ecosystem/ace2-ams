@@ -27,14 +27,14 @@ router = APIRouter(
 
 
 def create_event_remediation(
-    event_remediation: EventRemediationCreate,
+    create: EventRemediationCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=event_remediation, db_table=EventRemediation, db=db)
+    obj: EventRemediation = crud.create(obj=create, db_table=EventRemediation, db=db)
 
-    response.headers["Content-Location"] = request.url_for("get_event_remediation", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_event_remediation", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_event_remediation)

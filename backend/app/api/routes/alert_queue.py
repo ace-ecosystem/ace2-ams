@@ -23,14 +23,14 @@ router = APIRouter(
 
 
 def create_alert_queue(
-    alert_queue: AlertQueueCreate,
+    create: AlertQueueCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=alert_queue, db_table=AlertQueue, db=db)
+    obj: AlertQueue = crud.create(obj=create, db_table=AlertQueue, db=db)
 
-    response.headers["Content-Location"] = request.url_for("get_alert_queue", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_alert_queue", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_alert_queue)

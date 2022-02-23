@@ -27,14 +27,14 @@ router = APIRouter(
 
 
 def create_node_threat_type(
-    node_threat_type: NodeThreatTypeCreate,
+    create: NodeThreatTypeCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=node_threat_type, db_table=NodeThreatType, db=db)
+    obj: NodeThreatType = crud.create(obj=create, db_table=NodeThreatType, db=db)
 
-    response.headers["Content-Location"] = request.url_for("get_node_threat_type", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_node_threat_type", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_node_threat_type)

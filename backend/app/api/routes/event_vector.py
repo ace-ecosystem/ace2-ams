@@ -27,14 +27,14 @@ router = APIRouter(
 
 
 def create_event_vector(
-    event_vector: EventVectorCreate,
+    create: EventVectorCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=event_vector, db_table=EventVector, db=db)
+    obj: EventVector = crud.create(obj=create, db_table=EventVector, db=db)
 
-    response.headers["Content-Location"] = request.url_for("get_event_vector", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_event_vector", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_event_vector)

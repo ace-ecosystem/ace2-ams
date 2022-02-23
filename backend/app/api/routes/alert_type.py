@@ -23,14 +23,14 @@ router = APIRouter(
 
 
 def create_alert_type(
-    alert_type: AlertTypeCreate,
+    create: AlertTypeCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=alert_type, db_table=AlertType, db=db)
+    obj: AlertType = crud.create(obj=create, db_table=AlertType, db=db)
 
-    response.headers["Content-Location"] = request.url_for("get_alert_type", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_alert_type", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_alert_type)

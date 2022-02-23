@@ -27,14 +27,14 @@ router = APIRouter(
 
 
 def create_event_source(
-    event_source: EventSourceCreate,
+    create: EventSourceCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=event_source, db_table=EventSource, db=db)
+    obj: EventSource = crud.create(obj=create, db_table=EventSource, db=db)
 
-    response.headers["Content-Location"] = request.url_for("get_event_source", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_event_source", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_event_source)

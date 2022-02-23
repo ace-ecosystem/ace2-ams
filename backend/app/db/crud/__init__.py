@@ -12,7 +12,7 @@ from sqlalchemy.orm import undefer, Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.sql.expression import join
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
 from api.models.alert import AlertRead
@@ -192,14 +192,17 @@ def auth(username: str, password: str, db: Session) -> Optional[User]:
 #
 
 
-def create(obj: BaseModel, db_table: DeclarativeMeta, db: Session) -> UUID:
+def create(obj: BaseModel, db_table: DeclarativeMeta, db: Session, exclude: Optional[List[str]] = None) -> Any:
     """Creates a new object in the given database table. Returns the new object's UUID.
     Designed to be called only by the API since it raises an HTTPException."""
 
-    new_obj = db_table(**obj.dict())
+    if exclude:
+        new_obj = db_table(**obj.dict(exclude=set(exclude)))
+    else:
+        new_obj = db_table(**obj.dict())
     db.add(new_obj)
     commit(db)
-    return new_obj.uuid
+    return new_obj
 
 
 def create_node_tree_leaf(

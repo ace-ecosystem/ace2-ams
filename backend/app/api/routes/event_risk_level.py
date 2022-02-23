@@ -27,14 +27,14 @@ router = APIRouter(
 
 
 def create_event_risk_level(
-    event_risk_level: EventRiskLevelCreate,
+    create: EventRiskLevelCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=event_risk_level, db_table=EventRiskLevel, db=db)
+    obj: EventRiskLevel = crud.create(obj=create, db_table=EventRiskLevel, db=db)
 
-    response.headers["Content-Location"] = request.url_for("get_event_risk_level", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_event_risk_level", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_event_risk_level)
