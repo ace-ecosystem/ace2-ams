@@ -597,7 +597,7 @@ describe("Manage Alerts Comment", () => {
 });
 
 // Tags will not change sort
-describe.only("Manage Alerts Tags", () => {
+describe("Manage Alerts Tags", () => {
   beforeEach(() => {
     cy.resetDatabase();
     cy.login();
@@ -624,7 +624,7 @@ describe.only("Manage Alerts Tags", () => {
     });
   });
 
-  it.only("will add given tags to an alert via the tag modal", () => {
+  it("will add given tags to an alert via the tag modal", () => {
     cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTags");
     cy.intercept("POST", "/api/node/tag").as("addTags");
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
