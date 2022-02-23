@@ -318,7 +318,7 @@ describe("ViewAlert.vue", () => {
     // Close the modal to finish
     cy.get(".p-dialog-header-icon").click();
   });
-  it.only("Correctly displays alert details content", () => {
+  it("Correctly displays alert details content", () => {
     // Check details card title and elements
     cy.get(".p-card-title").should("contain.text", "Small Alert");
     cy.get(".p-card-title > .p-button").should("be.visible");
@@ -378,7 +378,7 @@ describe("ViewAlert.vue", () => {
     cy.get(":nth-child(10) > .header-cell").should("contain.text", "Comments");
     cy.get(":nth-child(10) > .content-cell").should("contain.text", "None");
   });
-  it.only("collapses and expands the alert details when header is clicked", () => {
+  it("collapses and expands the alert details when header is clicked", () => {
     // Details table panel should start out open
     cy.get(":nth-child(1) > .header-cell").should("be.visible");
 
