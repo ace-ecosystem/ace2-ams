@@ -106,7 +106,7 @@ def test_create_invalid_node_fields(client_valid_access_token, key, values):
     ],
 )
 def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
@@ -121,7 +121,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
 
 
 def test_create_nonexistent_owner(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
@@ -133,7 +133,7 @@ def test_create_nonexistent_owner(client_valid_access_token, db):
 
 
 def test_create_nonexistent_prevention_tools(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
@@ -148,13 +148,15 @@ def test_create_nonexistent_queue(client_valid_access_token, db):
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
-    create = client_valid_access_token.post("/api/event/", json={"name": "test", "queue": "default", "status": "OPEN"})
+    create = client_valid_access_token.post(
+        "/api/event/", json={"name": "test", "queue": "nonexistent_queue", "status": "OPEN"}
+    )
     assert create.status_code == status.HTTP_404_NOT_FOUND
-    assert "event_queue" in create.text
+    assert "queue" in create.text
 
 
 def test_create_nonexistent_remediations(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
@@ -166,7 +168,7 @@ def test_create_nonexistent_remediations(client_valid_access_token, db):
 
 
 def test_create_nonexistent_risk_level(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
@@ -178,7 +180,7 @@ def test_create_nonexistent_risk_level(client_valid_access_token, db):
 
 
 def test_create_nonexistent_source(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
@@ -190,7 +192,7 @@ def test_create_nonexistent_source(client_valid_access_token, db):
 
 
 def test_create_nonexistent_status(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
 
     # Create an object
     create = client_valid_access_token.post("/api/event/", json={"name": "test", "queue": "default", "status": "OPEN"})
@@ -199,7 +201,7 @@ def test_create_nonexistent_status(client_valid_access_token, db):
 
 
 def test_create_nonexistent_type(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
@@ -211,7 +213,7 @@ def test_create_nonexistent_type(client_valid_access_token, db):
 
 
 def test_create_nonexistent_vectors(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
@@ -227,7 +229,7 @@ def test_create_nonexistent_vectors(client_valid_access_token, db):
     [("tags"), ("threat_actors"), ("threats")],
 )
 def test_create_nonexistent_node_fields(client_valid_access_token, db, key):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     create = client_valid_access_token.post(
@@ -243,7 +245,7 @@ def test_create_nonexistent_node_fields(client_valid_access_token, db, key):
 
 
 def test_create_verify_history(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     event_uuid = str(uuid.uuid4())
@@ -306,7 +308,7 @@ def test_create_verify_history(client_valid_access_token, db):
     ],
 )
 def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create the object
@@ -342,7 +344,7 @@ def test_create_valid_owner(client_valid_access_token, db):
 
 def test_create_valid_prevention_tools(client_valid_access_token, db):
     helpers.create_event_prevention_tool(value="test", db=db)
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Use the prevention tool to create a new event
@@ -357,7 +359,7 @@ def test_create_valid_prevention_tools(client_valid_access_token, db):
 
 
 def test_create_valid_remediations(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_remediation(value="test", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
@@ -373,7 +375,7 @@ def test_create_valid_remediations(client_valid_access_token, db):
 
 
 def test_create_valid_risk_level(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_risk_level(value="test", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
@@ -389,7 +391,7 @@ def test_create_valid_risk_level(client_valid_access_token, db):
 
 
 def test_create_valid_source(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_source(value="test", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
@@ -405,7 +407,7 @@ def test_create_valid_source(client_valid_access_token, db):
 
 
 def test_create_valid_type(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
     helpers.create_event_type(value="test", db=db)
 
@@ -421,7 +423,7 @@ def test_create_valid_type(client_valid_access_token, db):
 
 
 def test_create_valid_vectors(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
     helpers.create_event_vector(value="test", db=db)
 
@@ -437,7 +439,7 @@ def test_create_valid_vectors(client_valid_access_token, db):
 
 
 def test_create_valid_required_fields(client_valid_access_token, db):
-    helpers.create_event_queue(value="default", db=db)
+    helpers.create_queue(value="default", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create the object
@@ -464,7 +466,7 @@ def test_create_valid_node_fields(client_valid_access_token, db, key, value_list
         for value in value_list:
             helper_create_func(value=value, db=db)
 
-        helpers.create_event_queue(value="default", db=db)
+        helpers.create_queue(value="default", db=db)
         helpers.create_event_status(value="OPEN", db=db)
 
         create = client_valid_access_token.post(

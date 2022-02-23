@@ -12,6 +12,7 @@ from api.models.event_remediation import (
 from api.routes import helpers
 from db import crud
 from db.database import get_db
+from db.schemas.queue import Queue
 from db.schemas.event_remediation import EventRemediation
 
 
@@ -32,7 +33,9 @@ def create_event_remediation(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    obj: EventRemediation = crud.create(obj=create, db_table=EventRemediation, db=db)
+    queues = crud.read_by_values(values=create.queues, db_table=Queue, db=db)
+    obj: EventRemediation = crud.create(obj=create, db_table=EventRemediation, db=db, exclude=["queues"])
+    obj.queues = queues
 
     response.headers["Content-Location"] = request.url_for("get_event_remediation", uuid=obj.uuid)
 
@@ -64,12 +67,25 @@ helpers.api_route_read(router, get_event_remediation, EventRemediationRead)
 
 def update_event_remediation(
     uuid: UUID,
-    event_remediation: EventRemediationUpdate,
+    update: EventRemediationUpdate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    crud.update(uuid=uuid, obj=event_remediation, db_table=EventRemediation, db=db)
+    db_obj: EventRemediation = crud.read(uuid=uuid, db_table=EventRemediation, db=db)
+
+    update_data = update.dict(exclude_unset=True)
+
+    if "description" in update_data:
+        db_obj.description = update_data["description"]
+
+    if "queues" in update_data:
+        db_obj.queues = crud.read_by_values(values=update_data["queues"], db_table=Queue, db=db)
+
+    if "value" in update_data:
+        db_obj.value = update_data["value"]
+
+    crud.commit(db)
 
     response.headers["Content-Location"] = request.url_for("get_event_remediation", uuid=uuid)
 

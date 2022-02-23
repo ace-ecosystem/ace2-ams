@@ -58,9 +58,9 @@ class Event(Node):
 
     prevention_tools = relationship("EventPreventionTool", secondary=event_prevention_tool_mapping, lazy="selectin")
 
-    queue = relationship("EventQueue", lazy="selectin")
+    queue = relationship("Queue", lazy="selectin")
 
-    queue_uuid = Column(UUID(as_uuid=True), ForeignKey("event_queue.uuid"), nullable=False, index=True)
+    queue_uuid = Column(UUID(as_uuid=True), ForeignKey("queue.uuid"), nullable=False, index=True)
 
     # There isn't currently a way to automatically calculate this time
     remediation_time = Column(DateTime(timezone=True), index=True)

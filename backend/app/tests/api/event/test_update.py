@@ -250,7 +250,7 @@ def test_update_queue(client_valid_access_token, db):
     assert event.queue.value == "default"
 
     # Create an event queue
-    helpers.create_event_queue(value="updated_queue", db=db)
+    helpers.create_queue(value="updated_queue", db=db)
 
     # Update the event
     update = client_valid_access_token.patch("/api/event/", json=[{"queue": "updated_queue", "uuid": str(event.uuid)}])

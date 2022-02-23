@@ -11,12 +11,12 @@ from tests import helpers
 
 
 def test_get_invalid_uuid(client_valid_access_token):
-    get = client_valid_access_token.get("/api/event/queue/1")
+    get = client_valid_access_token.get("/api/queue/1")
     assert get.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_get_nonexistent_uuid(client_valid_access_token):
-    get = client_valid_access_token.get(f"/api/event/queue/{uuid.uuid4()}")
+    get = client_valid_access_token.get(f"/api/queue/{uuid.uuid4()}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -27,10 +27,10 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 
 def test_get_all(client_valid_access_token, db):
     # Create some objects
-    helpers.create_event_queue(value="test", db=db)
-    helpers.create_event_queue(value="test2", db=db)
+    helpers.create_queue(value="test", db=db)
+    helpers.create_queue(value="test2", db=db)
 
     # Read them back
-    get = client_valid_access_token.get("/api/event/queue/")
+    get = client_valid_access_token.get("/api/queue/")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["total"] == 3  # The default analyst user has a queue

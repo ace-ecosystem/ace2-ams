@@ -5,7 +5,6 @@ from uuid import uuid4
 
 from api.models import type_str, validators
 from api.models.alert_disposition import AlertDispositionRead
-from api.models.alert_queue import AlertQueueRead
 from api.models.alert_tool import AlertToolRead
 from api.models.alert_tool_instance import AlertToolInstanceRead
 from api.models.alert_type import AlertTypeRead
@@ -15,6 +14,7 @@ from api.models.node_tag import NodeTagRead
 from api.models.node_threat import NodeThreatRead
 from api.models.node_threat_actor import NodeThreatActorRead
 from api.models.observable import ObservableCreateWithAlert
+from api.models.queue import QueueRead
 from api.models.user import UserRead
 
 
@@ -88,7 +88,7 @@ class AlertRead(NodeRead, AlertBase):
 
     owner: Optional[UserRead] = Field(description="The user who has taken ownership of this alert")
 
-    queue: AlertQueueRead = Field(description="The alert queue containing this alert")
+    queue: QueueRead = Field(description="The queue containing this alert")
 
     tags: List[NodeTagRead] = Field(description="A list of tags added to the alert")
 

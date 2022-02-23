@@ -61,9 +61,9 @@ class Alert(Node):
 
     owner = relationship("User", foreign_keys=[owner_uuid], lazy="selectin")
 
-    queue = relationship("AlertQueue", lazy="selectin")
+    queue = relationship("Queue", lazy="selectin")
 
-    queue_uuid = Column(UUID(as_uuid=True), ForeignKey("alert_queue.uuid"), nullable=False, index=True)
+    queue_uuid = Column(UUID(as_uuid=True), ForeignKey("queue.uuid"), nullable=False, index=True)
 
     tool = relationship("AlertTool", lazy="selectin")
 
