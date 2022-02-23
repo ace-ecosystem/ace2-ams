@@ -375,8 +375,6 @@ export const eventRangeFilters = {
   },
 };
 
-export const eventQueueOptions = ["default", "secondary_queue"];
-
 export const eventQueueColumnMappings: Record<string, columnOption[]> = {
   default: [
     {
