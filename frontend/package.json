@@ -22,7 +22,7 @@
     "primeicons": "^5.0.0",
     "primevue": "^3.12.0",
     "snakecase-keys": "^5.1.2",
-    "v-calendar": "^3.0.0-alpha.8",
+    "v-calendar": "^3.0.0-alpha.6",
     "vue": "^3.2.31",
     "vue-router": "^4.0.12"
   },
