@@ -1,6 +1,5 @@
 import { UUID } from "./base";
-import { alertQueueRead } from "./alertQueue";
-import { eventQueueRead } from "./eventQueue";
+import { queueRead } from "./queue";
 import { userRoleRead } from "./userRole";
 
 export interface userCreate {
@@ -19,8 +18,8 @@ export interface userCreate {
 }
 
 export interface userRead {
-  defaultAlertQueue: alertQueueRead;
-  defaultEventQueue: eventQueueRead;
+  defaultAlertQueue: queueRead;
+  defaultEventQueue: queueRead;
   displayName: string;
   email: string;
   enabled: boolean;

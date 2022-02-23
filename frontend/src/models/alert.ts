@@ -1,7 +1,6 @@
 import { pageOptionParams, UUID } from "./base";
 import { nodeCreate, nodeRead, nodeReadPage, nodeUpdate } from "./node";
 import { alertDispositionRead } from "./alertDisposition";
-import { alertQueueRead } from "./alertQueue";
 import { alertToolRead } from "./alertTool";
 import { alertToolInstanceRead } from "./alertToolInstance";
 import { alertTypeRead } from "./alertType";
@@ -13,6 +12,7 @@ import { observableTreeRead } from "./observable";
 import { observableTypeRead } from "./observableType";
 import { nodeThreatActorRead } from "./nodeThreatActor";
 import { nodeThreatRead } from "./nodeThreat";
+import { queueRead } from "./queue";
 
 export interface alertCreate extends nodeCreate {
   description?: string;
@@ -47,7 +47,7 @@ export interface alertRead extends nodeRead {
   instructions: string | null;
   name: string;
   owner: userRead | null;
-  queue: alertQueueRead;
+  queue: queueRead;
   tags: nodeTagRead[];
   threatActors: nodeThreatActorRead[];
   threats: nodeThreatRead[];
@@ -119,7 +119,7 @@ export interface alertFilterParams extends pageOptionParams {
   observableTypes?: observableTypeRead[];
   observableValue?: string;
   owner?: userRead;
-  queue?: alertQueueRead;
+  queue?: queueRead;
   sort?: string;
   tags?: string[];
   threatActor?: nodeThreatActorRead;
@@ -144,7 +144,7 @@ export type alertFilterValues =
         }
       | alertDispositionRead
       | userRead
-      | alertQueueRead
+      | queueRead
       | nodeThreatActorRead
       | alertToolRead
       | alertToolInstanceRead

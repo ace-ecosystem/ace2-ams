@@ -1,7 +1,6 @@
 import { pageOptionParams, UUID } from "./base";
 import { alertDispositionRead } from "./alertDisposition";
 import { eventPreventionToolRead } from "./eventPreventionTool";
-import { eventQueueRead } from "./eventQueue";
 import { eventRemediationRead } from "./eventRemediation";
 import { eventRiskLevelRead } from "./eventRiskLevel";
 import { eventSourceRead } from "./eventSource";
@@ -14,6 +13,7 @@ import { nodeTagRead } from "./nodeTag";
 import { nodeThreatRead } from "./nodeThreat";
 import { nodeThreatActorRead } from "./nodeThreatActor";
 import { observableTypeRead } from "./observableType";
+import { queueRead } from "./queue";
 import { userRead } from "./user";
 
 // High-level event data that will be displayed in Manage Events
@@ -72,7 +72,7 @@ export interface eventRead extends nodeRead {
   owner: userRead | null;
   ownershipTime: Date | null;
   preventionTools: eventPreventionToolRead[];
-  queue: eventQueueRead;
+  queue: queueRead;
   remediations: eventRemediationRead[];
   remediationTime: Date | null;
   riskLevel: eventRiskLevelRead | null;
@@ -122,7 +122,7 @@ export interface eventFilterParams extends pageOptionParams {
   observableValue?: string;
   owner?: userRead;
   preventionTool?: eventPreventionToolRead;
-  queue?: eventQueueRead;
+  queue?: queueRead;
   riskLevel?: eventRiskLevelRead;
   status?: eventStatusRead;
   tags?: string[];
@@ -140,7 +140,7 @@ export type eventFilterValues =
       | alertDispositionRead
       | Date
       | eventPreventionToolRead
-      | eventQueueRead
+      | queueRead
       | eventRiskLevelRead
       | eventStatusRead
       | eventTypeRead
