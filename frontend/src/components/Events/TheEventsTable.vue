@@ -43,6 +43,7 @@
   import { eventQueueColumnMappings } from "@/etc/constants/events";
 
   const columns = ref([]);
+  const preferredEventQueue = ref(currentUserSettingsStore.preferredEventQueue);
 
   // This will cause the table to re-render,
   // which is necessary to dynamically re-set columns
@@ -53,24 +54,22 @@
   });
 
   const setColumns = () => {
-    if (currentUserSettingsStore.preferredEventQueue) {
-      columns.value =
-        eventQueueColumnMappings[
-          currentUserSettingsStore.preferredEventQueue.value
-        ];
+    if (preferredEventQueue.value) {
+      columns.value = eventQueueColumnMappings[preferredEventQueue.value.value];
 
       filterStore.setFilter({
         nodeType: "events",
         filterName: "queue",
-        filterValue: currentUserSettingsStore.preferredEventQueue,
+        filterValue: preferredEventQueue.value,
       });
 
       key.value += 1;
     }
   };
 
-  currentUserSettingsStore.$subscribe((mutation) => {
-    if (mutation.events.key === "preferredEventQueue") {
+  currentUserSettingsStore.$subscribe((_, state) => {
+    if (state.preferredEventQueue != preferredEventQueue.value) {
+      preferredEventQueue.value = state.preferredEventQueue;
       setColumns();
     }
   });
