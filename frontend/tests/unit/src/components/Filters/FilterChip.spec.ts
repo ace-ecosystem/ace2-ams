@@ -3,7 +3,7 @@ import { shallowMount, VueWrapper } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
 import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
-import { alertFilters, filterTypes } from "@/etc/constants/alerts";
+import { alertFilters, filterTypes } from "@/etc/configuration/alerts";
 import { createCustomPinia } from "@unit/helpers";
 
 describe("FilterChip.vue", () => {

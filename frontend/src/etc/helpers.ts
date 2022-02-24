@@ -28,8 +28,8 @@ import { useEventVectorStore } from "@/stores/eventVector";
 import { useNodeDirectiveStore } from "@/stores/nodeDirective";
 import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
-import { inputTypes } from "./constants/base";
-import { isValidDate, isObject } from "./validators";
+import { inputTypes } from "@/etc/constants/base";
+import { isValidDate, isObject } from "@/etc/validators";
 
 export const camelToSnakeCase = (str: string): string =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
@@ -301,7 +301,7 @@ export function formatNodeFiltersForAPI(
   for (const param in params) {
     let paramValue = params[param] as any;
 
-    //  check if the given param is specific to alerts and not pageOptionParams, i.e. disposition
+    //  check if the given param is specific to node and not pageOptionParams, i.e. disposition
     const filterType = availableFilters.find((filter) => {
       return filter.name === param;
     });

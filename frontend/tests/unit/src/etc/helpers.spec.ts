@@ -1,4 +1,4 @@
-import { alertFilters } from "../../../../src/etc/constants/alerts";
+import { alertFilters } from "../../../../src/etc/configuration/alerts";
 import {
   formatNodeFiltersForAPI,
   parseFilters,

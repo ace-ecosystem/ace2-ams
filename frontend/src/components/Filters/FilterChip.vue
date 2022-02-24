@@ -65,8 +65,6 @@
 
   import { useFilterStore } from "@/stores/filter";
 
-  import { eventFilters } from "@/etc/constants/events";
-  import { alertFilters } from "@/etc/constants/alerts";
   import { isObject } from "@/etc/validators";
   import Button from "primevue/button";
   import Chip from "primevue/chip";
@@ -75,6 +73,8 @@
   import NodePropertyInput from "../Node/NodePropertyInput.vue";
   const filterStore = useFilterStore();
   const nodeType = inject("nodeType");
+
+  const config = inject("config");
 
   const op = ref(null);
   const toggleQuickEditMenu = (event) => {
@@ -86,7 +86,10 @@
     filterValue: { type: [String, Object, Array, Date], required: true },
   });
 
-  const availableFilters = { alerts: alertFilters, events: eventFilters };
+  const availableFilters = {
+    alerts: config.alerts.alertFilters,
+    events: config.events.eventFilters,
+  };
   const filterOptions =
     nodeType in availableFilters ? availableFilters[nodeType] : [];
   const filterNameObject = filterOptions.find((filter) => {

@@ -7,8 +7,10 @@
 </template>
 
 <script setup>
-  import { onBeforeMount } from "vue";
+  import { onBeforeMount, provide } from "vue";
   import { useRoute, useRouter } from "vue-router";
+
+  import { config } from "./main";
 
   import {
     populateCommonStores,
@@ -19,6 +21,9 @@
   import authApi from "@/services/api/auth";
   import { useAuthStore } from "@/stores/auth";
   import { useFilterStore } from "@/stores/filter";
+
+
+  provide("config", config);
 
   const authStore = useAuthStore();
 

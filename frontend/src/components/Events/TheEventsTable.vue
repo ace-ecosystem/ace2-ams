@@ -40,7 +40,7 @@
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const filterStore = useFilterStore();
 
-  import { eventQueueColumnMappings } from "@/etc/constants/events";
+  import { eventQueueColumnMappings } from "@/etc/configuration/events";
 
   const columns = ref([]);
   const preferredEventQueue = ref(currentUserSettingsStore.preferredEventQueue);

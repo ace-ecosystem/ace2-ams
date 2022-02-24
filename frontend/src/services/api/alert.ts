@@ -1,4 +1,4 @@
-import { alertFilters } from "@/etc/constants/alerts";
+import { config } from "@/main";
 import { formatNodeFiltersForAPI } from "@/etc/helpers";
 import {
   alertCreate,
@@ -28,7 +28,10 @@ export const Alert = {
   readPage: (params?: alertFilterParams): Promise<alertReadPage> => {
     let formattedParams = {} as alertFilterParams;
     if (params) {
-      formattedParams = formatNodeFiltersForAPI(alertFilters, params);
+      formattedParams = formatNodeFiltersForAPI(
+        config.alerts.alertFilters,
+        params,
+      );
     }
 
     return api.read(endpoint, formattedParams);
@@ -37,7 +40,10 @@ export const Alert = {
   readAllPages: async (
     params: alertFilterParams,
   ): Promise<Array<alertRead>> => {
-    const formattedParams = formatNodeFiltersForAPI(alertFilters, params);
+    const formattedParams = formatNodeFiltersForAPI(
+      config.alerts.alertFilters,
+      params,
+    );
     return api.readAll(endpoint, formattedParams);
   },
 

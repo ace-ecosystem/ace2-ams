@@ -1,3 +1,4 @@
+import { config } from "@/main";
 import { formatNodeFiltersForAPI } from "@/etc/helpers";
 import {
   eventCreate,
@@ -8,7 +9,6 @@ import {
 } from "@/models/event";
 import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
-import { eventFilters } from "@/etc/constants/events";
 import { eventHistoryReadPage } from "@/models/history";
 
 const api = new BaseApi();
@@ -32,7 +32,10 @@ export const Event = {
   readPage: (params?: eventFilterParams): Promise<eventReadPage> => {
     let formattedParams = {} as eventFilterParams;
     if (params) {
-      formattedParams = formatNodeFiltersForAPI(eventFilters, params);
+      formattedParams = formatNodeFiltersForAPI(
+        config.events.eventFilters,
+        params,
+      );
     }
 
     return api.read(endpoint, formattedParams);
@@ -41,7 +44,10 @@ export const Event = {
   readAllPages: (params?: eventFilterParams): Promise<eventRead[]> => {
     let formattedParams = {} as eventFilterParams;
     if (params) {
-      formattedParams = formatNodeFiltersForAPI(eventFilters, params);
+      formattedParams = formatNodeFiltersForAPI(
+        config.events.eventFilters,
+        params,
+      );
     }
 
     return api.readAll(endpoint, formattedParams);
