@@ -8,6 +8,7 @@ import { useNodeThreatStore } from "@/stores/nodeThreat";
 import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
 import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
+import { useQueueStore } from "@/stores/queue";
 
 export const inputTypes = {
   MULTISELECT: "multiselect",
@@ -25,6 +26,7 @@ export const nodePropertyTypes: Record<string, string> = {
   OBSERVABLE_TYPES_PROPERTY: "observableTypes",
   OBSERVABLE_VALUE_PROPERTY: "observableValue",
   OWNER_PROPERTY: "owner",
+  QUEUE_PROPERTY: "queue",
   COMMENTS_PROPERTY: "comments",
   TAGS_PROPERTY: "tags",
   THREAT_ACTOR_PROPERTY: "threatActors",
@@ -127,4 +129,13 @@ export const nodeTagsProperty: propertyOption = {
   parseStringRepr: (valueString: string) => {
     return valueString.split(",");
   },
+};
+
+export const nodeQueueProperty: propertyOption = {
+  name: nodePropertyTypes.QUEUE_PROPERTY,
+  label: "Queue",
+  type: inputTypes.SELECT,
+  store: useQueueStore,
+  optionProperty: "value",
+  valueProperty: "value",
 };

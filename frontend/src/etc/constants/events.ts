@@ -12,9 +12,7 @@ import { useEventStatusStore } from "@/stores/eventStatus";
 import { useEventTypeStore } from "@/stores/eventType";
 import { useEventVectorStore } from "@/stores/eventVector";
 
-import {
-  inputTypes,
-} from "./base";
+import { inputTypes } from "./base";
 
 // ** Events ** //
 
@@ -29,7 +27,6 @@ export const eventPropertyTypes: Record<string, string> = {
   REMEDIATION_TIME_PROPERTY: "remediationTime",
   DISPOSITION_PROPERTY_PROPERTY: "disposition",
   PREVENTION_TOOLS_PROPERTY: "preventionTools",
-  QUEUE_PROPERTY: "queue",
   REMEDIATIONS_PROPERTY: "remediations",
   RISK_LEVEL_PROPERTY: "riskLevel",
   SOURCE_PROPERTY: "source",
@@ -208,14 +205,6 @@ export const eventDispositionProperty: propertyOption = {
   valueProperty: "value",
 };
 
-export const eventQueueProperty: propertyOption = {
-  name: eventPropertyTypes.QUEUE_PROPERTY,
-  label: "Queue",
-  type: inputTypes.SELECT,
-  store: useEventQueueStore,
-  optionProperty: "value",
-  valueProperty: "value",
-};
 export const eventSourceProperty: propertyOption = {
   name: eventPropertyTypes.SOURCE_PROPERTY,
   label: "Source",

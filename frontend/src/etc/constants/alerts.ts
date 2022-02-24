@@ -126,14 +126,6 @@ export const alertOwnerProperty: propertyOption = {
   optionProperty: "displayName",
   valueProperty: "username",
 };
-export const alertQueueProperty: propertyOption = {
-  name: alertPropertyTypes.QUEUE_PROPERTY,
-  label: "Queue",
-  type: inputTypes.SELECT,
-  store: useAlertQueueStore,
-  optionProperty: "value",
-  valueProperty: "value",
-};
 export const alertTagsProperty: propertyOption = {
   name: alertPropertyTypes.TAGS_PROPERTY,
   label: "Tags",
