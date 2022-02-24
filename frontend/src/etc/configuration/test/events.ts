@@ -9,6 +9,7 @@ import {
   nodeThreatActorProperty,
   nodeThreatsProperty,
   nodeCommentProperty,
+  nodeQueueProperty
 } from "@/etc/constants/base";
 import {
   eventPropertyTypes,
@@ -21,7 +22,6 @@ import {
   eventEventTimeProperty,
   eventOwnershipTimeProperty,
   eventPreventionToolsProperty,
-  eventQueueProperty,
   eventRemediationProperty,
   eventRemediationTimeProperty,
   eventRiskLevelProperty,
@@ -32,8 +32,6 @@ import {
 } from "@/etc/constants/events";
 
 export const eventFilters: readonly propertyOption[] = [
-  eventCreatedAfterProperty,
-  eventCreatedBeforeProperty,
   eventDispositionProperty,
   nodeNameProperty,
   nodeObservableProperty,
@@ -42,7 +40,7 @@ export const eventFilters: readonly propertyOption[] = [
   nodeObservableValueProperty,
   nodeOwnerProperty,
   eventPreventionToolsProperty,
-  eventQueueProperty,
+  nodeQueueProperty,
   eventRiskLevelProperty,
   eventSourceProperty,
   eventStatusProperty,

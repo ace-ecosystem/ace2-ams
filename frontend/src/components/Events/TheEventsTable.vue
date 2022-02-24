@@ -7,7 +7,7 @@
     <template #tableHeaderStart
       ><Dropdown
         v-model="currentUserSettingsStore.preferredEventQueue"
-        :options="eventQueueStore.items"
+        :options="queueStore.items"
         option-label="value"
         style="margin-right: 2%"
       ></Dropdown
@@ -33,10 +33,10 @@
   import TheNodeTable from "@/components/Node/TheNodeTable.vue";
   import EventTableCell from "@/components/Events/EventTableCell.vue";
 
-  import { useEventQueueStore } from "@/stores/eventQueue";
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
   import { useFilterStore } from "@/stores/filter";
-  const eventQueueStore = useEventQueueStore();
+import { useQueueStore } from "@/stores/queue";
+  const queueStore = useQueueStore();
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const filterStore = useFilterStore();
 

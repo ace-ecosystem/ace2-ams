@@ -4,7 +4,6 @@ import { eventPreventionToolRead } from "@/models/eventPreventionTool";
 import { eventVectorRead } from "@/models/eventVector";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
 import { useEventPreventionToolStore } from "@/stores/eventPreventionTool";
-import { useEventQueueStore } from "@/stores/eventQueue";
 import { useEventRemediationStore } from "@/stores/eventRemediation";
 import { useEventRiskLevelStore } from "@/stores/eventRiskLevel";
 import { useEventSourceStore } from "@/stores/eventSource";

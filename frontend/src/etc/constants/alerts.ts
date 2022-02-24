@@ -1,7 +1,6 @@
 import { propertyOption } from "@/models/base";
 import { nodeThreatRead } from "@/models/nodeThreat";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
-import { useAlertQueueStore } from "@/stores/alertQueue";
 import { useAlertToolStore } from "@/stores/alertTool";
 import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";

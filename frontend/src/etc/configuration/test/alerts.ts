@@ -9,7 +9,6 @@ import {
   alertEventTimeBeforeProperty,
   alertInsertTimeAfterProperty,
   alertInsertTimeBeforeProperty,
-  alertQueueProperty,
   alertToolInstanceProperty,
   alertToolProperty,
   alertTypeProperty,
@@ -23,6 +22,7 @@ import {
   nodeTagsProperty,
   nodeThreatActorProperty,
   nodeThreatsProperty,
+  nodeQueueProperty,
 } from "@/etc/constants/base";
 
 export const alertFilters: readonly propertyOption[] = [
@@ -39,7 +39,7 @@ export const alertFilters: readonly propertyOption[] = [
   nodeObservableTypesProperty,
   nodeObservableValueProperty,
   nodeOwnerProperty,
-  alertQueueProperty,
+  nodeQueueProperty,
   nodeTagsProperty,
   nodeThreatActorProperty,
   nodeThreatsProperty,
