@@ -18,7 +18,7 @@ import "snakecase-keys";
 import { configuration } from "@/etc/configuration/index";
 import { testConfiguration } from "@/etc/configuration/test/index";
 
-const testingModeEnabled = import.meta.env.VITE_TESTING;
+const testingModeEnabled = import.meta.env.VITE_TESTING_MODE;
 export const config =
   testingModeEnabled === "yes" ? testConfiguration : configuration;
 
