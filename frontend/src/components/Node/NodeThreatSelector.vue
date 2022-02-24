@@ -147,6 +147,7 @@
     } else {
       await nodeThreatStore.create({
         value: newThreatName.value,
+        queues: ["default"],
         types: newThreatTypes.value.map((x) => x.value),
       });
     }

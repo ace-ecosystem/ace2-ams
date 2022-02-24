@@ -13,6 +13,7 @@ from api.routes import helpers
 from db import crud
 from db.database import get_db
 from db.schemas.event_prevention_tool import EventPreventionTool
+from db.schemas.queue import Queue
 
 
 router = APIRouter(
@@ -27,14 +28,16 @@ router = APIRouter(
 
 
 def create_event_prevention_tool(
-    event_prevention_tool: EventPreventionToolCreate,
+    create: EventPreventionToolCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=event_prevention_tool, db_table=EventPreventionTool, db=db)
+    queues = crud.read_by_values(values=create.queues, db_table=Queue, db=db)
+    obj: EventPreventionTool = crud.create(obj=create, db_table=EventPreventionTool, db=db, exclude=["queues"])
+    obj.queues = queues
 
-    response.headers["Content-Location"] = request.url_for("get_event_prevention_tool", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_event_prevention_tool", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_event_prevention_tool)
@@ -64,12 +67,25 @@ helpers.api_route_read(router, get_event_prevention_tool, EventPreventionToolRea
 
 def update_event_prevention_tool(
     uuid: UUID,
-    event_prevention_tool: EventPreventionToolUpdate,
+    update: EventPreventionToolUpdate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    crud.update(uuid=uuid, obj=event_prevention_tool, db_table=EventPreventionTool, db=db)
+    db_obj: EventPreventionTool = crud.read(uuid=uuid, db_table=EventPreventionTool, db=db)
+
+    update_data = update.dict(exclude_unset=True)
+
+    if "description" in update_data:
+        db_obj.description = update_data["description"]
+
+    if "queues" in update_data:
+        db_obj.queues = crud.read_by_values(values=update_data["queues"], db_table=Queue, db=db)
+
+    if "value" in update_data:
+        db_obj.value = update_data["value"]
+
+    crud.commit(db)
 
     response.headers["Content-Location"] = request.url_for("get_event_prevention_tool", uuid=uuid)
 

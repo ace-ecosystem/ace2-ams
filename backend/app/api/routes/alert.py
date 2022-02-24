@@ -17,7 +17,6 @@ from db import crud
 from db.database import get_db
 from db.schemas.alert import Alert, AlertHistory
 from db.schemas.alert_disposition import AlertDisposition
-from db.schemas.alert_queue import AlertQueue
 from db.schemas.alert_tool import AlertTool
 from db.schemas.alert_tool_instance import AlertToolInstance
 from db.schemas.alert_type import AlertType
@@ -29,6 +28,7 @@ from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable, ObservableHistory
 from db.schemas.observable_type import ObservableType
+from db.schemas.queue import Queue
 from db.schemas.user import User
 
 
@@ -59,7 +59,7 @@ def create_alert(
     )
 
     # Set the required alert properties
-    new_alert.queue = crud.read_by_value(value=alert.queue, db_table=AlertQueue, db=db)
+    new_alert.queue = crud.read_by_value(value=alert.queue, db_table=Queue, db=db)
     new_alert.type = crud.read_by_value(value=alert.type, db_table=AlertType, db=db)
 
     # Set the various optional alert properties if they were given in the request.
@@ -279,7 +279,7 @@ def get_all_alerts(
         query = _join_as_subquery(query, owner_query)
 
     if queue:
-        queue_query = select(Alert).join(AlertQueue).where(AlertQueue.value == queue)
+        queue_query = select(Alert).join(Queue).where(Queue.value == queue)
         query = _join_as_subquery(query, queue_query)
 
     if tags:
@@ -384,9 +384,9 @@ def get_all_alerts(
         # Only sort by queue if we are not also filtering by queue
         elif sort_by.lower() == "queue" and not queue:
             if order == "asc":
-                query = query.join(AlertQueue).order_by(AlertQueue.value.asc())
+                query = query.join(Queue).order_by(Queue.value.asc())
             else:
-                query = query.join(AlertQueue).order_by(AlertQueue.value.desc())
+                query = query.join(Queue).order_by(Queue.value.desc())
 
         # Only sort by type if we are not also filtering by type
         elif sort_by.lower() == "type" and not type:
@@ -480,7 +480,7 @@ def update_alerts(
         if "queue" in update_data:
             diffs.append(crud.create_diff(field="queue", old=db_alert.queue.value, new=update_data["queue"]))
 
-            db_alert.queue = crud.read_by_value(value=update_data["queue"], db_table=AlertQueue, db=db)
+            db_alert.queue = crud.read_by_value(value=update_data["queue"], db_table=Queue, db=db)
 
         crud.commit(db)
 

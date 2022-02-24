@@ -27,14 +27,14 @@ router = APIRouter(
 
 
 def create_disposition(
-    disposition: AlertDispositionCreate,
+    create: AlertDispositionCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=disposition, db_table=AlertDisposition, db=db)
+    obj: AlertDisposition = crud.create(obj=create, db_table=AlertDisposition, db=db)
 
-    response.headers["Content-Location"] = request.url_for("get_disposition", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_disposition", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_disposition)

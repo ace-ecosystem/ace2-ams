@@ -1,8 +1,9 @@
 from pydantic import BaseModel, Field, UUID4
-from typing import Optional
+from typing import List, Optional
 from uuid import uuid4
 
-from api.models import type_str, validators
+from api.models import type_str, type_list_str, validators
+from api.models.queue import QueueRead
 
 
 class EventVectorBase(BaseModel):
@@ -14,17 +15,23 @@ class EventVectorBase(BaseModel):
 
 
 class EventVectorCreate(EventVectorBase):
+    queues: type_list_str = Field(description="The event queues where this vector is valid")
+
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the event vector")
 
 
 class EventVectorRead(EventVectorBase):
     uuid: UUID4 = Field(description="The UUID of the event vector")
 
+    queues: List[QueueRead] = Field(description="The event queues where this vector is valid")
+
     class Config:
         orm_mode = True
 
 
 class EventVectorUpdate(EventVectorBase):
+    queues: Optional[type_list_str] = Field(description="The event queues where this vector is valid")
+
     value: Optional[type_str] = Field(description="The value of the event vector")
 
-    _prevent_none: classmethod = validators.prevent_none("value")
+    _prevent_none: classmethod = validators.prevent_none("queues", "value")

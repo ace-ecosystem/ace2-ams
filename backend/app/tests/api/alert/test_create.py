@@ -98,7 +98,7 @@ def test_create_invalid_node_fields(client_valid_access_token, key, values):
     ],
 )
 def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
@@ -125,7 +125,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
 
 
 def test_create_nonexistent_observable_type(client_valid_access_token, db):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
 
     # Create an object
@@ -143,7 +143,7 @@ def test_create_nonexistent_observable_type(client_valid_access_token, db):
 
 
 def test_create_nonexistent_owner(client_valid_access_token, db):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
@@ -177,11 +177,11 @@ def test_create_nonexistent_queue(client_valid_access_token, db):
         },
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
-    assert "alert_queue" in create.text
+    assert "queue" in create.text
 
 
 def test_create_nonexistent_tool(client_valid_access_token, db):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
@@ -201,7 +201,7 @@ def test_create_nonexistent_tool(client_valid_access_token, db):
 
 
 def test_create_nonexistent_tool_instance(client_valid_access_token, db):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
@@ -221,7 +221,7 @@ def test_create_nonexistent_tool_instance(client_valid_access_token, db):
 
 
 def test_create_nonexistent_type(client_valid_access_token, db):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
     # Create an object
@@ -243,7 +243,7 @@ def test_create_nonexistent_type(client_valid_access_token, db):
     [("tags"), ("threat_actors"), ("threats")],
 )
 def test_create_nonexistent_node_fields(client_valid_access_token, db, key):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
@@ -267,7 +267,7 @@ def test_create_nonexistent_node_fields(client_valid_access_token, db, key):
 
 
 def test_create_verify_history(client_valid_access_token, db):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
@@ -321,7 +321,7 @@ def test_create_verify_history(client_valid_access_token, db):
     ],
 )
 def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
@@ -349,7 +349,7 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
 
 
 def test_create_valid_owner(client_valid_access_token, db):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
@@ -375,7 +375,7 @@ def test_create_valid_owner(client_valid_access_token, db):
 
 
 def test_create_valid_tool(client_valid_access_token, db):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
@@ -401,7 +401,7 @@ def test_create_valid_tool(client_valid_access_token, db):
 
 
 def test_create_valid_tool_instance(client_valid_access_token, db):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
@@ -427,7 +427,7 @@ def test_create_valid_tool_instance(client_valid_access_token, db):
 
 
 def test_create_valid_required_fields(client_valid_access_token, db):
-    helpers.create_alert_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
@@ -473,7 +473,7 @@ def test_create_valid_node_fields(client_valid_access_token, db, key, value_list
         for value in value_list:
             helper_create_func(value=value, db=db)
 
-        helpers.create_alert_queue(value="test_queue", db=db)
+        helpers.create_queue(value="test_queue", db=db)
         helpers.create_alert_type(value="test_type", db=db)
         helpers.create_observable_type(value="o_type", db=db)
 

@@ -98,7 +98,7 @@ def test_update_valid_alert_queue(client_valid_access_token, db):
     assert obj.default_alert_queue.value == "test_queue"
 
     # Create the new alert queue
-    helpers.create_alert_queue(value="test_queue2", db=db)
+    helpers.create_queue(value="test_queue2", db=db)
 
     # Update it
     update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={"default_alert_queue": "test_queue2"})
@@ -122,7 +122,7 @@ def test_update_valid_event_queue(client_valid_access_token, db):
     assert obj.default_event_queue.value == "test_queue"
 
     # Create the new event queue
-    helpers.create_event_queue(value="test_queue2", db=db)
+    helpers.create_queue(value="test_queue2", db=db)
 
     # Update it
     update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={"default_event_queue": "test_queue2"})

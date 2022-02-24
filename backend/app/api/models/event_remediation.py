@@ -1,8 +1,9 @@
 from pydantic import BaseModel, Field, UUID4
-from typing import Optional
+from typing import List, Optional
 from uuid import uuid4
 
-from api.models import type_str, validators
+from api.models import type_str, type_list_str, validators
+from api.models.queue import QueueRead
 
 
 class EventRemediationBase(BaseModel):
@@ -17,17 +18,23 @@ class EventRemediationBase(BaseModel):
 
 
 class EventRemediationCreate(EventRemediationBase):
+    queues: type_list_str = Field(description="The event queues where this remediation is valid")
+
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the event remediation")
 
 
 class EventRemediationRead(EventRemediationBase):
     uuid: UUID4 = Field(description="The UUID of the event remediation")
 
+    queues: List[QueueRead] = Field(description="The event queues where this remediation is valid")
+
     class Config:
         orm_mode = True
 
 
 class EventRemediationUpdate(EventRemediationBase):
+    queues: Optional[type_list_str] = Field(description="The event queues where this remediation is valid")
+
     value: Optional[type_str] = Field(description="The value of the event remediation")
 
-    _prevent_none: classmethod = validators.prevent_none("value")
+    _prevent_none: classmethod = validators.prevent_none("queues", "value")

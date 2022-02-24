@@ -1,9 +1,14 @@
 import { visitUrl } from "./helpers";
 
 describe("ViewAlert.vue", () => {
-  before(() => {
+  beforeEach(() => {
     cy.resetDatabase();
     cy.login();
+
+    // Intercept the API call that loads the alert data
+    cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+      "getAlert",
+    );
 
     // Add the test alert to the database
     cy.request({
@@ -14,13 +19,6 @@ describe("ViewAlert.vue", () => {
         count: 1,
       },
     });
-  });
-
-  beforeEach(() => {
-    // Intercept the API call that loads the alert data
-    cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
-      "getAlert",
-    );
 
     visitUrl({
       url: "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a",
@@ -318,7 +316,7 @@ describe("ViewAlert.vue", () => {
     // Close the modal to finish
     cy.get(".p-dialog-header-icon").click();
   });
-  it.only("Correctly displays alert details content", () => {
+  it("Correctly displays alert details content", () => {
     // Check details card title and elements
     cy.get(".p-card-title").should("contain.text", "Small Alert");
     cy.get(".p-card-title > .p-button").should("be.visible");
@@ -378,7 +376,7 @@ describe("ViewAlert.vue", () => {
     cy.get(":nth-child(10) > .header-cell").should("contain.text", "Comments");
     cy.get(":nth-child(10) > .content-cell").should("contain.text", "None");
   });
-  it.only("collapses and expands the alert details when header is clicked", () => {
+  it("collapses and expands the alert details when header is clicked", () => {
     // Details table panel should start out open
     cy.get(":nth-child(1) > .header-cell").should("be.visible");
 

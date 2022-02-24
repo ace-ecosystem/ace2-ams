@@ -256,7 +256,7 @@ def test_update_queue(client_valid_access_token, db):
     initial_alert_version = alert_tree.node.version
 
     # Create a new alert queue
-    helpers.create_alert_queue(value="test_queue2", db=db)
+    helpers.create_queue(value="test_queue2", db=db)
 
     # Update the queue
     update = client_valid_access_token.patch(
@@ -293,7 +293,7 @@ def test_update_valid_node_fields(client_valid_access_token, db, key, value_list
         for value in value_list:
             helper_create_func(value=value, db=db)
 
-        helpers.create_alert_queue(value="test_queue", db=db)
+        helpers.create_queue(value="test_queue", db=db)
         helpers.create_alert_type(value="test_type", db=db)
         helpers.create_observable_type(value="o_type", db=db)
 

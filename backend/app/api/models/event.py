@@ -6,7 +6,6 @@ from uuid import uuid4
 from api.models import type_str, validators
 from api.models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api.models.event_prevention_tool import EventPreventionToolRead
-from api.models.event_queue import EventQueueRead
 from api.models.event_remediation import EventRemediationRead
 from api.models.event_risk_level import EventRiskLevelRead
 from api.models.event_source import EventSourceRead
@@ -17,6 +16,7 @@ from api.models.node_comment import NodeCommentRead
 from api.models.node_tag import NodeTagRead
 from api.models.node_threat import NodeThreatRead
 from api.models.node_threat_actor import NodeThreatActorRead
+from api.models.queue import QueueRead
 from api.models.user import UserRead
 
 
@@ -110,7 +110,7 @@ class EventRead(NodeRead, EventBase):
         description="A list of prevention tools involved in the event"
     )
 
-    queue: EventQueueRead = Field(description="The event queue containing this event")
+    queue: QueueRead = Field(description="The queue containing this event")
 
     remediations: List[EventRemediationRead] = Field(
         description="A list of remediations performed to clean up the attack represented by the event"

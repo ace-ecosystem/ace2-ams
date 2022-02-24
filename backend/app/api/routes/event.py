@@ -18,7 +18,6 @@ from db.schemas.alert import Alert, AlertHistory
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.event import Event, EventHistory
 from db.schemas.event_prevention_tool import EventPreventionTool
-from db.schemas.event_queue import EventQueue
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_risk_level import EventRiskLevel
 from db.schemas.event_source import EventSource
@@ -35,6 +34,7 @@ from db.schemas.node_threat_actor_mapping import node_threat_actor_mapping
 from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
+from db.schemas.queue import Queue
 from db.schemas.user import User
 
 
@@ -60,7 +60,7 @@ def create_event(
     new_event: Event = create_node(node_create=event, db_node_type=Event, db=db, exclude={"alert_uuids"})
 
     # Set the required event properties
-    new_event.queue = crud.read_by_value(value=event.queue, db_table=EventQueue, db=db)
+    new_event.queue = crud.read_by_value(value=event.queue, db_table=Queue, db=db)
     new_event.status = crud.read_by_value(value=event.status, db_table=EventStatus, db=db)
 
     # Set the various optional event properties if they were given in the request.
@@ -295,7 +295,7 @@ def get_all_events(
         query = _join_as_subquery(query, prevention_tools_query)
 
     if queue:
-        queue_query = select(Event).join(EventQueue).where(EventQueue.value == queue)
+        queue_query = select(Event).join(Queue).where(Queue.value == queue)
         query = _join_as_subquery(query, queue_query)
 
     if remediation_time_after:
@@ -544,7 +544,7 @@ def update_events(
 
         if "queue" in update_data:
             diffs.append(crud.create_diff(field="queue", old=db_event.queue.value, new=update_data["queue"]))
-            db_event.queue = crud.read_by_value(value=update_data["queue"], db_table=EventQueue, db=db)
+            db_event.queue = crud.read_by_value(value=update_data["queue"], db_table=Queue, db=db)
 
         if "remediation_time" in update_data:
             diffs.append(

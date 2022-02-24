@@ -6,6 +6,7 @@ from db.database import Base
 from db.schemas.node_threat_node_threat_type_mapping import (
     node_threat_node_threat_type_mapping,
 )
+from db.schemas.node_threat_queue_mapping import node_threat_queue_mapping
 
 
 class NodeThreat(Base):
@@ -14,6 +15,8 @@ class NodeThreat(Base):
     uuid = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
 
     description = Column(String)
+
+    queues = relationship("Queue", secondary=node_threat_queue_mapping, lazy="selectin")
 
     types = relationship(
         "NodeThreatType",

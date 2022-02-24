@@ -3,8 +3,7 @@ from typing import List, Optional
 from uuid import uuid4
 
 from api.models import type_list_str, type_str, validators
-from api.models.alert_queue import AlertQueueRead
-from api.models.event_queue import EventQueueRead
+from api.models.queue import QueueRead
 from api.models.user_role import UserRoleRead
 
 
@@ -12,11 +11,11 @@ class UserBase(BaseModel):
     """Represents a user account within the application."""
 
     default_alert_queue: type_str = Field(
-        description="The default alert queue the user will see on the alert management page"
+        description="The default queue the user will see on the alert management page"
     )
 
     default_event_queue: type_str = Field(
-        description="The default event queue the user will see on the event management page"
+        description="The default queue the user will see on the event management page"
     )
 
     display_name: type_str = Field(description="The user's full name")
@@ -47,12 +46,12 @@ class UserCreate(UserBase):
 
 
 class UserRead(UserBase):
-    default_alert_queue: AlertQueueRead = Field(
-        description="The default alert queue the user will see on the alert management page"
+    default_alert_queue: QueueRead = Field(
+        description="The default queue the user will see on the alert management page"
     )
 
-    default_event_queue: EventQueueRead = Field(
-        description="The default event queue the user will see on the event management page"
+    default_event_queue: QueueRead = Field(
+        description="The default queue the user will see on the event management page"
     )
 
     roles: List[UserRoleRead] = Field(description="A list of roles assigned to the user")

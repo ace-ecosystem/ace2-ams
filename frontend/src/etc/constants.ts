@@ -7,12 +7,10 @@ import { nodeThreatActorRead } from "@/models/nodeThreatActor";
 import { observableTypeRead } from "@/models/observableType";
 
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
-import { useAlertQueueStore } from "@/stores/alertQueue";
 import { useAlertToolStore } from "@/stores/alertTool";
 import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";
 import { useEventPreventionToolStore } from "@/stores/eventPreventionTool";
-import { useEventQueueStore } from "@/stores/eventQueue";
 import { useEventRemediationStore } from "@/stores/eventRemediation";
 import { useEventRiskLevelStore } from "@/stores/eventRiskLevel";
 import { useEventSourceStore } from "@/stores/eventSource";
@@ -23,6 +21,7 @@ import { useNodeTagStore } from "@/stores/nodeTag";
 import { useNodeThreatStore } from "@/stores/nodeThreat";
 import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
 import { useObservableTypeStore } from "@/stores/observableType";
+import { useQueueStore } from "@/stores/queue";
 import { useUserStore } from "@/stores/user";
 
 // ** Base ** //
@@ -196,7 +195,7 @@ export const alertFilters: readonly filterOption[] = [
     name: alertPropertyTypes.QUEUE_FILTER,
     label: "Queue",
     type: filterTypes.SELECT,
-    store: useAlertQueueStore,
+    store: useQueueStore,
     optionProperty: "value",
     valueProperty: "value",
   },
@@ -599,7 +598,7 @@ export const eventFilters: readonly filterOption[] = [
     name: eventPropertyTypes.QUEUE_PROPERTY,
     label: "Queue",
     type: filterTypes.SELECT,
-    store: useEventQueueStore,
+    store: useQueueStore,
     optionProperty: "value",
     valueProperty: "value",
   },

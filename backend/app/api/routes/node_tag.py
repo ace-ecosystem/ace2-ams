@@ -23,14 +23,14 @@ router = APIRouter(
 
 
 def create_node_tag(
-    node_tag: NodeTagCreate,
+    create: NodeTagCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=node_tag, db_table=NodeTag, db=db)
+    obj: NodeTag = crud.create(obj=create, db_table=NodeTag, db=db)
 
-    response.headers["Content-Location"] = request.url_for("get_node_tag", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_node_tag", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_node_tag)

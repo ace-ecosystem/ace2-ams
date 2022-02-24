@@ -82,8 +82,7 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
     ],
 )
 def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
-    helpers.create_alert_queue(value="test_queue", db=db)
-    helpers.create_event_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_user_role(value="test_role", db=db)
 
     # Create an object
@@ -148,8 +147,7 @@ def test_create_missing_required_fields(client_valid_access_token, key):
 
 
 def test_create_verify_history(client_valid_access_token, db):
-    helpers.create_alert_queue(value="test_queue", db=db)
-    helpers.create_event_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_user_role(value="test_role", db=db)
 
     # Create the object
@@ -183,8 +181,7 @@ def test_create_verify_history(client_valid_access_token, db):
     [("enabled", False), ("timezone", "America/New_York"), ("training", False), ("uuid", str(uuid.uuid4()))],
 )
 def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
-    helpers.create_alert_queue(value="test_queue", db=db)
-    helpers.create_event_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_user_role(value="test_role", db=db)
 
     # Create the object
@@ -207,8 +204,7 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
 
 
 def test_create_valid_required_fields(client_valid_access_token, db):
-    helpers.create_alert_queue(value="test_queue", db=db)
-    helpers.create_event_queue(value="test_queue", db=db)
+    helpers.create_queue(value="test_queue", db=db)
     helpers.create_user_role(value="test_role", db=db)
 
     # Create the object

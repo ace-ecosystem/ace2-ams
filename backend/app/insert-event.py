@@ -51,7 +51,7 @@ if args.prevention_tools:
     ]
 
 if args.queue:
-    event.queue = helpers.create_event_queue(value=args.queue, db=db)
+    event.queue = helpers.create_queue(value=args.queue, db=db)
 
 if args.remediations:
     event.remediations = [helpers.create_event_remediation(value=r, db=db) for r in args.remediations.split(",")]

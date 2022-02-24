@@ -8,6 +8,7 @@ from api.models.event_type import EventTypeCreate, EventTypeRead, EventTypeUpdat
 from api.routes import helpers
 from db import crud
 from db.database import get_db
+from db.schemas.queue import Queue
 from db.schemas.event_type import EventType
 
 
@@ -23,14 +24,16 @@ router = APIRouter(
 
 
 def create_event_type(
-    event_type: EventTypeCreate,
+    create: EventTypeCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=event_type, db_table=EventType, db=db)
+    queues = crud.read_by_values(values=create.queues, db_table=Queue, db=db)
+    obj: EventType = crud.create(obj=create, db_table=EventType, db=db, exclude=["queues"])
+    obj.queues = queues
 
-    response.headers["Content-Location"] = request.url_for("get_event_type", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_event_type", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_event_type)
@@ -60,12 +63,25 @@ helpers.api_route_read(router, get_event_type, EventTypeRead)
 
 def update_event_type(
     uuid: UUID,
-    event_type: EventTypeUpdate,
+    update: EventTypeUpdate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    crud.update(uuid=uuid, obj=event_type, db_table=EventType, db=db)
+    db_obj: EventType = crud.read(uuid=uuid, db_table=EventType, db=db)
+
+    update_data = update.dict(exclude_unset=True)
+
+    if "description" in update_data:
+        db_obj.description = update_data["description"]
+
+    if "queues" in update_data:
+        db_obj.queues = crud.read_by_values(values=update_data["queues"], db_table=Queue, db=db)
+
+    if "value" in update_data:
+        db_obj.value = update_data["value"]
+
+    crud.commit(db)
 
     response.headers["Content-Location"] = request.url_for("get_event_type", uuid=uuid)
 

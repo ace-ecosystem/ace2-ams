@@ -338,6 +338,7 @@ describe("Manage Alerts Filter Actions", () => {
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Name']").click();
+    cy.get(".p-dropdown-items-wrapper").should("not.exist");
     cy.get(".field > .p-inputtext").should("be.visible");
 
     cy.get(
@@ -345,6 +346,7 @@ describe("Manage Alerts Filter Actions", () => {
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Observable']").click();
+    cy.get(".p-dropdown-items-wrapper").should("not.exist");
     cy.get(".col > :nth-child(1) > :nth-child(1) > .p-dropdown").should(
       "be.visible",
     );
@@ -355,6 +357,7 @@ describe("Manage Alerts Filter Actions", () => {
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Observable Types']").click();
+    cy.get(".p-dropdown-items-wrapper").should("not.exist");
     cy.get(".field > .p-multiselect > .p-multiselect-label-container").should(
       "be.visible",
     );
@@ -364,6 +367,7 @@ describe("Manage Alerts Filter Actions", () => {
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Tags']").click();
+    cy.get(".p-dropdown-items-wrapper").should("not.exist");
     cy.get(".p-chips-input-token").should("be.visible");
   });
 
@@ -597,7 +601,7 @@ describe("Manage Alerts Comment", () => {
 });
 
 // Tags will not change sort
-describe.only("Manage Alerts Tags", () => {
+describe("Manage Alerts Tags", () => {
   beforeEach(() => {
     cy.resetDatabase();
     cy.login();
@@ -624,7 +628,7 @@ describe.only("Manage Alerts Tags", () => {
     });
   });
 
-  it.only("will add given tags to an alert via the tag modal", () => {
+  it("will add given tags to an alert via the tag modal", () => {
     cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTags");
     cy.intercept("POST", "/api/node/tag").as("addTags");
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
