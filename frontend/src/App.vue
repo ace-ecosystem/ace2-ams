@@ -10,8 +10,6 @@
   import { onBeforeMount, provide } from "vue";
   import { useRoute, useRouter } from "vue-router";
 
-  import { config } from "./main";
-
   import {
     populateCommonStores,
     dateParser,
@@ -22,6 +20,12 @@
   import { useAuthStore } from "@/stores/auth";
   import { useFilterStore } from "@/stores/filter";
 
+  import { configuration } from "@/etc/configuration/index";
+  import { testConfiguration } from "@/etc/configuration/test/index";
+
+  const testingModeEnabled = import.meta.env.VITE_TESTING_MODE;
+  const config =
+    testingModeEnabled === "yes" ? testConfiguration : configuration;
 
   provide("config", config);
 

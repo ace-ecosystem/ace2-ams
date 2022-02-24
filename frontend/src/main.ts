@@ -15,12 +15,7 @@ import "primevue/resources/themes/saga-blue/theme.css";
 import "camelcase-keys";
 import "snakecase-keys";
 
-import { configuration } from "@/etc/configuration/index";
-import { testConfiguration } from "@/etc/configuration/test/index";
 
-const testingModeEnabled = import.meta.env.VITE_TESTING_MODE;
-export const config =
-  testingModeEnabled === "yes" ? testConfiguration : configuration;
 
 (async () => {
   const app = createApp(App).use(createPinia());
