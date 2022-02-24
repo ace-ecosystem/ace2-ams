@@ -12,6 +12,8 @@ import { useFilterStore } from "../../../../../src/stores/filter";
 
 import { testConfiguration } from "@/etc/configuration/test/index";
 
+import { vitest, expect } from "vitest";
+
 function factory(options?: TestingOptions) {
   const router = createRouterMock();
   injectRouterMock(router);
@@ -20,9 +22,8 @@ function factory(options?: TestingOptions) {
     global: {
       plugins: [createCustomPinia(options), PrimeVue],
       provide: {
-                            config: testConfiguration,
-
-        },
+        config: testConfiguration,
+      },
     },
   });
 
@@ -43,15 +44,19 @@ describe("TheEventsTable data/creation", () => {
     const { wrapper } = factory();
     expect(wrapper.vm.columns).toStrictEqual([]);
     expect(wrapper.vm.key).toStrictEqual(0);
+    expect(wrapper.vm.preferredEventQueue).toStrictEqual(null);
   });
 
-  it("will set columns and filter based on current user's preferred queue and increase the table key", () => {
+  it("will set columns and filter based on current user's preferred queue and increase the table key", async () => {
     const { wrapper, currentUserSettingsStore, filterStore } = factory();
     const defaultQueue = genericObjectReadFactory({ value: "default" });
 
     currentUserSettingsStore.preferredEventQueue = defaultQueue;
     wrapper.vm.setColumns();
 
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.vm.preferredEventQueue).toStrictEqual(defaultQueue);
     expect(wrapper.vm.columns).toHaveLength(12);
     expect(filterStore.setFilter).toHaveBeenCalledWith({
       nodeType: "events",
@@ -60,7 +65,7 @@ describe("TheEventsTable data/creation", () => {
     });
     expect(wrapper.vm.key).toStrictEqual(1);
   });
-  it("will call setColumns when currentUserSettingsSTore.preferredEventQueue changes", async () => {
+  it("will call setColumns when currentUserSettingsStore.preferredEventQueue changes", async () => {
     const { wrapper, currentUserSettingsStore, filterStore } = factory();
     const defaultQueue = genericObjectReadFactory({ value: "default" });
 
@@ -68,6 +73,7 @@ describe("TheEventsTable data/creation", () => {
 
     await wrapper.vm.$nextTick();
 
+    expect(wrapper.vm.preferredEventQueue).toStrictEqual(defaultQueue);
     expect(wrapper.vm.columns).toHaveLength(12);
     expect(filterStore.setFilter).toHaveBeenCalledWith({
       nodeType: "events",
@@ -75,5 +81,18 @@ describe("TheEventsTable data/creation", () => {
       filterValue: defaultQueue,
     });
     expect(wrapper.vm.key).toStrictEqual(1);
+  });
+  it("will not update anything if currentUserSettingsStore updates, but doesn't include preferredEventQueue", async () => {
+    const { wrapper, currentUserSettingsStore, filterStore } = factory();
+    const defaultQueue = genericObjectReadFactory({ value: "default" });
+
+    currentUserSettingsStore.preferredAlertQueue = defaultQueue;
+
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.vm.preferredEventQueue).toStrictEqual(null);
+    expect(wrapper.vm.columns).toHaveLength(0);
+    expect(filterStore.setFilter).toHaveBeenCalledTimes(0);
+    expect(wrapper.vm.key).toStrictEqual(0);
   });
 });

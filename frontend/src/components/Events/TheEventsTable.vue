@@ -35,7 +35,7 @@
 
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
   import { useFilterStore } from "@/stores/filter";
-import { useQueueStore } from "@/stores/queue";
+  import { useQueueStore } from "@/stores/queue";
   const queueStore = useQueueStore();
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const filterStore = useFilterStore();
@@ -55,7 +55,8 @@ import { useQueueStore } from "@/stores/queue";
 
   const setColumns = () => {
     if (preferredEventQueue.value) {
-      columns.value = config.events.eventQueueColumnMappings[preferredEventQueue.value.value];
+      columns.value =
+        config.events.eventQueueColumnMappings[preferredEventQueue.value.value];
 
       filterStore.setFilter({
         nodeType: "events",
