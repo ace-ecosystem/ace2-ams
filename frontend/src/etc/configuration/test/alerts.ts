@@ -1,35 +1,21 @@
 import { propertyOption } from "@/models/base";
 import {
   alertPropertyTypes,
-  alertDispositionProperty,
-  alertDispositionedAfterProperty,
-  alertDispositionedBeforeProperty,
-  alertDispositionUserProperty,
   alertEventTimeAfterProperty,
   alertEventTimeBeforeProperty,
   alertInsertTimeAfterProperty,
   alertInsertTimeBeforeProperty,
-  alertToolInstanceProperty,
-  alertToolProperty,
-  alertTypeProperty,
 } from "@/etc/constants/alerts";
 import {
   nodeNameProperty,
   nodeObservableProperty,
   nodeObservableTypesProperty,
-  nodeObservableValueProperty,
-  nodeOwnerProperty,
   nodeTagsProperty,
-  nodeThreatActorProperty,
-  nodeThreatsProperty,
   nodeQueueProperty,
+nodeOwnerProperty,
 } from "@/etc/constants/base";
 
 export const alertFilters: readonly propertyOption[] = [
-  alertDispositionProperty,
-  alertDispositionUserProperty,
-  alertDispositionedAfterProperty,
-  alertDispositionedBeforeProperty,
   alertEventTimeAfterProperty,
   alertEventTimeBeforeProperty,
   alertInsertTimeAfterProperty,
@@ -37,15 +23,9 @@ export const alertFilters: readonly propertyOption[] = [
   nodeNameProperty,
   nodeObservableProperty,
   nodeObservableTypesProperty,
-  nodeObservableValueProperty,
   nodeOwnerProperty,
   nodeQueueProperty,
   nodeTagsProperty,
-  nodeThreatActorProperty,
-  nodeThreatsProperty,
-  alertToolProperty,
-  alertToolInstanceProperty,
-  alertTypeProperty,
 ] as const;
 
 export const alertRangeFilters = {
@@ -56,9 +36,5 @@ export const alertRangeFilters = {
   "Insert Time": {
     start: alertPropertyTypes.INSERT_TIME_AFTER_PROPERTY,
     end: alertPropertyTypes.INSERT_TIME_BEFORE_PROPERTY,
-  },
-  "Disposition Time": {
-    start: alertPropertyTypes.DISPOSITIONED_AFTER_PROPERTY,
-    end: alertPropertyTypes.DISPOSITIONED_BEFORE_PROPERTY,
   },
 };
