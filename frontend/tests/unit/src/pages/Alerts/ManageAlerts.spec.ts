@@ -12,7 +12,6 @@ import * as helpers from "@/etc/helpers";
 import { createCustomPinia } from "@unit/helpers";
 import { testConfiguration } from "@/etc/configuration/test/index";
 
-
 function factory(
   initialLocation = "/manage_alerts",
   piniaOptions?: TestingOptions,

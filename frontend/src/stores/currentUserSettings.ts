@@ -1,4 +1,4 @@
-import { queueRead } from '@/models/queue';
+import { queueRead } from "@/models/queue";
 import { defineStore } from "pinia";
 
 export const useCurrentUserSettingsStore = defineStore({

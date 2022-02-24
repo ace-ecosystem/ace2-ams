@@ -15,8 +15,6 @@ import "primevue/resources/themes/saga-blue/theme.css";
 import "camelcase-keys";
 import "snakecase-keys";
 
-
-
 (async () => {
   const app = createApp(App).use(createPinia());
 

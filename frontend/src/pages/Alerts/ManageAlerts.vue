@@ -33,7 +33,7 @@
   provide("nodeType", "alerts");
   provide("rangeFilters", config.alerts.alertRangeFilters);
 
-  console.log(config.alerts.alertFilters)
+  console.log(config.alerts.alertFilters);
 
   const filterStore = useFilterStore();
 

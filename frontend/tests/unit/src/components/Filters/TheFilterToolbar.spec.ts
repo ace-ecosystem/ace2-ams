@@ -7,17 +7,14 @@ import { useModalStore } from "@/stores/modal";
 import { createCustomPinia } from "@unit/helpers";
 import { testConfiguration } from "@/etc/configuration/test/index";
 
-
 describe("TheFilterToolbar.vue", () => {
   function factory(options?: TestingOptions) {
     const wrapper: VueWrapper<any> = shallowMount(TheFilterToolbar, {
       global: {
-        
         plugins: [createCustomPinia(options)],
         provide: {
           nodeType: "alerts",
-                  config: testConfiguration,
-
+          config: testConfiguration,
         },
       },
     });

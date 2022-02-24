@@ -9,7 +9,7 @@ import {
   nodeThreatActorProperty,
   nodeThreatsProperty,
   nodeCommentProperty,
-  nodeQueueProperty
+  nodeQueueProperty,
 } from "@/etc/constants/base";
 import {
   eventPropertyTypes,

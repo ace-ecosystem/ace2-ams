@@ -23,8 +23,7 @@ describe("FilterChip.vue", () => {
         plugins: [createCustomPinia(options)],
         provide: {
           nodeType: nodeType,
-                            config: testConfiguration,
-
+          config: testConfiguration,
         },
       },
     });
