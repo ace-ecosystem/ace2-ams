@@ -16,7 +16,6 @@ from core.auth import hash_password
 from db import crud
 from db.schemas.alert import Alert, AlertHistory
 from db.schemas.alert_disposition import AlertDisposition
-from db.schemas.alert_queue import AlertQueue
 from db.schemas.alert_tool import AlertTool
 from db.schemas.alert_tool_instance import AlertToolInstance
 from db.schemas.alert_type import AlertType
@@ -24,7 +23,6 @@ from db.schemas.analysis import Analysis
 from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.event import Event, EventHistory
 from db.schemas.event_prevention_tool import EventPreventionTool
-from db.schemas.event_queue import EventQueue
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_risk_level import EventRiskLevel
 from db.schemas.event_source import EventSource
@@ -41,6 +39,7 @@ from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable, ObservableHistory
 from db.schemas.observable_type import ObservableType
+from db.schemas.queue import Queue
 from db.schemas.user import User, UserHistory
 from db.schemas.user_role import UserRole
 
@@ -72,10 +71,6 @@ def create_alert_disposition(value: str, db: Session, rank: Optional[int] = None
     db.add(disposition)
     crud.commit(db)
     return disposition
-
-
-def create_alert_queue(value: str, db: Session) -> AlertQueue:
-    return _create_basic_object(db_table=AlertQueue, value=value, db=db)
 
 
 def create_alert_tool(value: str, db: Session) -> AlertTool:
@@ -128,7 +123,7 @@ def create_alert(
         event_time=event_time,
         insert_time=insert_time,
         name=name,
-        queue=create_alert_queue(value=alert_queue, db=db),
+        queue=create_queue(value=alert_queue, db=db),
         tool=create_alert_tool(value=tool, db=db),
         tool_instance=create_alert_tool_instance(value=tool_instance, db=db),
         type=create_alert_type(value=alert_type, db=db),
@@ -324,7 +319,7 @@ def create_event(
 ) -> Event:
     obj = Event(
         name=name,
-        queue=create_event_queue(value=queue, db=db),
+        queue=create_queue(value=queue, db=db),
         status=create_event_status(value=status, db=db),
         uuid=uuid.uuid4(),
         version=uuid.uuid4(),
@@ -390,36 +385,74 @@ def create_event(
     return obj
 
 
-def create_event_prevention_tool(value: str, db: Session) -> EventPreventionTool:
-    return _create_basic_object(db_table=EventPreventionTool, value=value, db=db)
+def create_event_prevention_tool(value: str, db: Session, queues: List[str] = None) -> EventPreventionTool:
+    if queues is None:
+        queues = ["default"]
+
+    obj: EventPreventionTool = _create_basic_object(db_table=EventPreventionTool, value=value, db=db)
+    obj.queues = [create_queue(value=queue, db=db) for queue in queues]
+
+    return obj
 
 
-def create_event_queue(value: str, db: Session) -> EventQueue:
-    return _create_basic_object(db_table=EventQueue, value=value, db=db)
+def create_event_remediation(value: str, db: Session, queues: List[str] = None) -> EventRemediation:
+    if queues is None:
+        queues = ["default"]
+
+    obj: EventRemediation = _create_basic_object(db_table=EventRemediation, value=value, db=db)
+    obj.queues = [create_queue(value=queue, db=db) for queue in queues]
+
+    return obj
 
 
-def create_event_remediation(value: str, db: Session) -> EventRemediation:
-    return _create_basic_object(db_table=EventRemediation, value=value, db=db)
+def create_event_risk_level(value: str, db: Session, queues: List[str] = None) -> EventRiskLevel:
+    if queues is None:
+        queues = ["default"]
+
+    obj: EventRiskLevel = _create_basic_object(db_table=EventRiskLevel, value=value, db=db)
+    obj.queues = [create_queue(value=queue, db=db) for queue in queues]
+
+    return obj
 
 
-def create_event_risk_level(value: str, db: Session) -> EventRiskLevel:
-    return _create_basic_object(db_table=EventRiskLevel, value=value, db=db)
+def create_event_source(value: str, db: Session, queues: List[str] = None) -> EventSource:
+    if queues is None:
+        queues = ["default"]
+
+    obj: EventSource = _create_basic_object(db_table=EventSource, value=value, db=db)
+    obj.queues = [create_queue(value=queue, db=db) for queue in queues]
+
+    return obj
 
 
-def create_event_source(value: str, db: Session) -> EventSource:
-    return _create_basic_object(db_table=EventSource, value=value, db=db)
+def create_event_status(value: str, db: Session, queues: List[str] = None) -> EventStatus:
+    if queues is None:
+        queues = ["default"]
+
+    obj: EventStatus = _create_basic_object(db_table=EventStatus, value=value, db=db)
+    obj.queues = [create_queue(value=queue, db=db) for queue in queues]
+
+    return obj
 
 
-def create_event_status(value: str, db: Session) -> EventStatus:
-    return _create_basic_object(db_table=EventStatus, value=value, db=db)
+def create_event_type(value: str, db: Session, queues: List[str] = None) -> EventType:
+    if queues is None:
+        queues = ["default"]
+
+    obj: EventType = _create_basic_object(db_table=EventType, value=value, db=db)
+    obj.queues = [create_queue(value=queue, db=db) for queue in queues]
+
+    return obj
 
 
-def create_event_type(value: str, db: Session) -> EventType:
-    return _create_basic_object(db_table=EventType, value=value, db=db)
+def create_event_vector(value: str, db: Session, queues: List[str] = None) -> EventVector:
+    if queues is None:
+        queues = ["default"]
 
+    obj: EventVector = _create_basic_object(db_table=EventVector, value=value, db=db)
+    obj.queues = [create_queue(value=queue, db=db) for queue in queues]
 
-def create_event_vector(value: str, db: Session) -> EventVector:
-    return _create_basic_object(db_table=EventVector, value=value, db=db)
+    return obj
 
 
 def create_node_comment(
@@ -452,26 +485,46 @@ def create_node_tag(value: str, db: Session) -> NodeTag:
     return _create_basic_object(db_table=NodeTag, value=value, db=db)
 
 
-def create_node_threat_actor(value: str, db: Session) -> NodeThreatActor:
-    return _create_basic_object(db_table=NodeThreatActor, value=value, db=db)
+def create_node_threat_actor(value: str, db: Session, queues: List[str] = None) -> NodeThreatActor:
+    if queues is None:
+        queues = ["default"]
+
+    obj: NodeThreatActor = _create_basic_object(db_table=NodeThreatActor, value=value, db=db)
+    obj.queues = [create_queue(value=queue, db=db) for queue in queues]
+
+    return obj
 
 
-def create_node_threat(value: str, db: Session, types: List[str] = None) -> NodeThreat:
+def create_node_threat(value: str, db: Session, queues: List[str] = None, types: List[str] = None) -> NodeThreat:
     existing = crud.read_by_value(value=value, db_table=NodeThreat, db=db, err_on_not_found=False)
     if existing:
         return existing
 
+    if queues is None:
+        queues = ["default"]
+
     if types is None:
         types = ["test_type"]
 
-    obj = NodeThreat(value=value, types=[create_node_threat_type(value=t, db=db) for t in types], uuid=uuid.uuid4())
+    obj = NodeThreat(
+        value=value,
+        queues=[create_queue(value=q, db=db) for q in queues],
+        types=[create_node_threat_type(value=t, db=db, queues=queues) for t in types],
+        uuid=uuid.uuid4(),
+    )
     db.add(obj)
     crud.commit(db)
     return obj
 
 
-def create_node_threat_type(value: str, db: Session) -> NodeThreatType:
-    return _create_basic_object(db_table=NodeThreatType, value=value, db=db)
+def create_node_threat_type(value: str, db: Session, queues: List[str] = None) -> NodeThreatType:
+    if queues is None:
+        queues = ["default"]
+
+    obj: NodeThreatType = _create_basic_object(db_table=NodeThreatType, value=value, db=db)
+    obj.queues = [create_queue(value=queue, db=db) for queue in queues]
+
+    return obj
 
 
 def create_observable(
@@ -548,6 +601,10 @@ def create_observable_type(value: str, db: Session) -> ObservableType:
     return _create_basic_object(db_table=ObservableType, value=value, db=db)
 
 
+def create_queue(value: str, db: Session) -> Queue:
+    return _create_basic_object(db_table=Queue, value=value, db=db)
+
+
 def create_user(
     username: str,
     db: Session,
@@ -571,8 +628,8 @@ def create_user(
         roles = [create_user_role(value=r, db=db) for r in roles]
 
     obj = User(
-        default_alert_queue=create_alert_queue(value=alert_queue, db=db),
-        default_event_queue=create_event_queue(value=event_queue, db=db),
+        default_alert_queue=create_queue(value=alert_queue, db=db),
+        default_event_queue=create_queue(value=event_queue, db=db),
         display_name=display_name,
         email=email,
         password=hash_password(password),

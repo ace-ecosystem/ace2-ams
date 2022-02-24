@@ -16,6 +16,12 @@ from tests import helpers
     [
         ("description", 123),
         ("description", ""),
+        ("queues", None),
+        ("queues", "test_queue"),
+        ("queues", [123]),
+        ("queues", [None]),
+        ("queues", [""]),
+        ("queues", ["abc", 123]),
         ("value", 123),
         ("value", None),
         ("value", ""),
@@ -77,3 +83,16 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     update = client_valid_access_token.patch(f"/api/event/risk_level/{obj.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert getattr(obj, key) == updated_value
+
+
+def test_update_queue(client_valid_access_token, db):
+    helpers.create_queue(value="default", db=db)
+    helpers.create_queue(value="updated", db=db)
+
+    # Create the object
+    obj = helpers.create_event_risk_level(value="test", queues=["default"], db=db)
+
+    # Update it
+    update = client_valid_access_token.patch(f"/api/event/risk_level/{obj.uuid}", json={"queues": ["updated"]})
+    assert update.status_code == status.HTTP_204_NO_CONTENT
+    assert obj.queues[0].value == "updated"

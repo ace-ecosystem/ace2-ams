@@ -290,7 +290,6 @@ describe("TheEventsTable.vue", () => {
     // Table of alerts should now exist
     cy.get("tr.p-datatable-row-expansion").should("exist").should("be.visible");
     // Find and click the first tag in list
-    // #EventsTable > div.p-datatable.p-component.p-datatable-resizable.p-datatable-responsive-scroll > div.p-datatable-wrapper > table > tbody > tr.p-datatable-row-expansion > td > div > div.p-datatable-wrapper > table > tbody > tr:nth-child(1) > td:nth-child(2) > div > span:nth-child(3) > span:nth-child(1) > span > span
     cy.get("[data-cy='tags']").eq(1).contains("tag0").click();
     // Wait for the filtered view to be requested
     cy.wait("@filterURL");

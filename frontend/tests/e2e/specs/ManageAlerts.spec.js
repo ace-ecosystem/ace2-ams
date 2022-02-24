@@ -354,6 +354,7 @@ describe("Manage Alerts Filter Actions", () => {
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Name']").click();
+    cy.get(".p-dropdown-items-wrapper").should("not.exist");
     cy.get(".field > .p-inputtext").should("be.visible");
 
     cy.get(
@@ -361,6 +362,7 @@ describe("Manage Alerts Filter Actions", () => {
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Observable']").click({ force: true });
+    cy.get(".p-dropdown-items-wrapper").should("not.exist");
     cy.get(".col > :nth-child(1) > :nth-child(1) > .p-dropdown").should(
       "be.visible",
     );
@@ -371,6 +373,7 @@ describe("Manage Alerts Filter Actions", () => {
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Observable Types']").click();
+    cy.get(".p-dropdown-items-wrapper").should("not.exist");
     cy.get(".field > .p-multiselect > .p-multiselect-label-container").should(
       "be.visible",
     );
@@ -380,6 +383,7 @@ describe("Manage Alerts Filter Actions", () => {
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
     cy.get("[aria-label='Tags']").click();
+    cy.get(".p-dropdown-items-wrapper").should("not.exist");
     cy.get(".p-chips-input-token").should("be.visible");
   });
 

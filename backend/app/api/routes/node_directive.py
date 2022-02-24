@@ -27,14 +27,14 @@ router = APIRouter(
 
 
 def create_node_directive(
-    node_directive: NodeDirectiveCreate,
+    create: NodeDirectiveCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=node_directive, db_table=NodeDirective, db=db)
+    obj: NodeDirective = crud.create(obj=create, db_table=NodeDirective, db=db)
 
-    response.headers["Content-Location"] = request.url_for("get_node_directive", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_node_directive", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_node_directive)

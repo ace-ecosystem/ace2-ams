@@ -60,9 +60,9 @@
                 <label for="queue">Queue</label>
                 <Dropdown
                   id="queue"
-                  v-model="alertQueue"
+                  v-model="queue"
                   class="inputfield w-full"
-                  :options="alertQueueStore.items"
+                  :options="queueStore.items"
                   option-label="value"
                   option-value="value"
                 />
@@ -248,7 +248,7 @@
   import moment from "moment-timezone";
 
   import { useAlertStore } from "@/stores/alert";
-  import { useAlertQueueStore } from "@/stores/alertQueue";
+  import { useQueueStore } from "@/stores/queue";
   import { useAlertTypeStore } from "@/stores/alertType";
   import { useAuthStore } from "@/stores/auth";
   import { useNodeDirectiveStore } from "@/stores/nodeDirective";
@@ -257,19 +257,19 @@
   const router = useRouter();
 
   const alertStore = useAlertStore();
-  const alertQueueStore = useAlertQueueStore();
   const alertTypeStore = useAlertTypeStore();
   const authStore = useAuthStore();
   const nodeDirectiveStore = useNodeDirectiveStore();
   const observableTypeStore = useObservableTypeStore();
+  const queueStore = useQueueStore();
 
   const addingObservables = ref(false);
   const alertCreateLoading = ref(false);
   const alertDate = ref(new Date());
   const alertDescription = ref("Manual Alert");
   const alertDescriptionAppendString = ref("");
-  const alertQueue = ref("default");
   const alertType = ref("manual");
+  const queue = ref("default");
   const errors = ref([]);
   const splitButtonOptions = ref([
     {
@@ -372,7 +372,7 @@
     alertDescription.value = "Manual Alert";
     alertDescriptionAppendString.value = "";
     alertType.value = "manual";
-    alertQueue.value = "default";
+    queue.value = "default";
     errors.value = [];
     timezone.value = moment.tz.guess();
     observables.value = [];
@@ -418,7 +418,7 @@
       name: alertDescriptionFormatted.value,
       observables: observables,
       owner: authStore.user.username,
-      queue: alertQueue.value,
+      queue: queue.value,
       type: alertType.value,
     };
     try {

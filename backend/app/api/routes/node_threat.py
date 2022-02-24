@@ -10,6 +10,7 @@ from db import crud
 from db.database import get_db
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_type import NodeThreatType
+from db.schemas.queue import Queue
 
 
 router = APIRouter(
@@ -24,19 +25,18 @@ router = APIRouter(
 
 
 def create_node_threat(
-    node_threat: NodeThreatCreate,
+    create: NodeThreatCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    # Make sure that all the threat types that were given actually exist
-    db_threat_types = crud.read_by_values(values=node_threat.types, db_table=NodeThreatType, db=db)
+    queues = crud.read_by_values(values=create.queues, db_table=Queue, db=db)
+    threat_types = crud.read_by_values(values=create.types, db_table=NodeThreatType, db=db)
 
     # Create the new node threat
-    new_threat = NodeThreat(**node_threat.dict())
-
-    # Set the threat types on the new node threat
-    new_threat.types = db_threat_types
+    new_threat = NodeThreat(**create.dict(exclude={"queues"}))
+    new_threat.queues = queues
+    new_threat.types = threat_types
 
     # Save the new node threat to the database
     db.add(new_threat)
@@ -85,6 +85,9 @@ def update_node_threat(
 
     if "description" in update_data:
         db_node_threat.description = update_data["description"]
+
+    if "queues" in update_data:
+        db_node_threat.queues = crud.read_by_values(values=update_data["queues"], db_table=Queue, db=db)
 
     if "value" in update_data:
         db_node_threat.value = update_data["value"]

@@ -3,19 +3,19 @@
  */
 
 import snakecaseKeys from "snakecase-keys";
-import { AlertQueue } from "@/services/api/alertQueue";
+import { queue } from "@/services/api/queue";
 import myNock from "@unit/services/api/nock";
-import { alertQueueCreate, alertQueueRead } from "@/models/alertQueue";
+import { queueCreate, queueRead } from "@/models/queue";
 
-describe("AlertQueue API calls", () => {
+describe("queue API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: alertQueueCreate = {
+  const mockObjectCreate: queueCreate = {
     description: "This is an alert queue",
     value: "Test",
   };
-  const mockObjectRead: alertQueueRead = {
+  const mockObjectRead: queueRead = {
     uuid: "1",
     description: "This is an alert queue",
     value: "Test",
@@ -23,75 +23,75 @@ describe("AlertQueue API calls", () => {
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock
-      .post("/alert/queue/", JSON.stringify(snakecaseKeys(mockObjectCreate)))
+      .post("/queue/", JSON.stringify(snakecaseKeys(mockObjectCreate)))
       .reply(200, successMessage);
 
-    const res = await AlertQueue.create(mockObjectCreate, false);
+    const res = await queue.create(mockObjectCreate, false);
     expect(res).toEqual(successMessage);
   });
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is a content-location header", async () => {
     myNock
-      .post("/alert/queue/", JSON.stringify(snakecaseKeys(mockObjectCreate)))
+      .post("/queue/", JSON.stringify(snakecaseKeys(mockObjectCreate)))
       .reply(200, successMessage, {
         "content-location": "/newItem",
       });
 
-    const res = await AlertQueue.create(mockObjectCreate, false);
+    const res = await queue.create(mockObjectCreate, false);
     expect(res).toEqual(successMessage);
   });
 
   it("will make only a post request when create is called and return create results if getAfterCreate is true and there is NOT a content-location header", async () => {
     myNock
-      .post("/alert/queue/", JSON.stringify(snakecaseKeys(mockObjectCreate)))
+      .post("/queue/", JSON.stringify(snakecaseKeys(mockObjectCreate)))
       .reply(200, successMessage);
 
-    const res = await AlertQueue.create(mockObjectCreate);
+    const res = await queue.create(mockObjectCreate);
     expect(res).toEqual(successMessage);
   });
 
   it("will make a post and get request when create is called and return GET results if getAfterCreate is true and there is a content-location header", async () => {
     myNock
-      .post("/alert/queue/", JSON.stringify(snakecaseKeys(mockObjectCreate)))
+      .post("/queue/", JSON.stringify(snakecaseKeys(mockObjectCreate)))
       .reply(200, successMessage, {
         "content-location": "/newItem",
       })
       .get("/newItem")
       .reply(200, secondSuccessMessage);
 
-    const res = await AlertQueue.create(mockObjectCreate, true);
+    const res = await queue.create(mockObjectCreate, true);
     expect(res).toEqual(secondSuccessMessage);
   });
 
-  it("will make a get request to /alert/queue/{uuid} when getSingle is called", async () => {
-    myNock.get("/alert/queue/1").reply(200, successMessage);
+  it("will make a get request to /queue/{uuid} when getSingle is called", async () => {
+    myNock.get("/queue/1").reply(200, successMessage);
 
-    const res = await AlertQueue.read("1");
+    const res = await queue.read("1");
     expect(res).toEqual(successMessage);
   });
 
-  it("will make a get request to /alert/queue/ when readAll is called", async () => {
+  it("will make a get request to /queue/ when readAll is called", async () => {
     myNock
-      .get("/alert/queue/?offset=0")
+      .get("/queue/?offset=0")
       .reply(200, JSON.stringify({ items: [mockObjectRead, mockObjectRead] }));
 
-    const res = await AlertQueue.readAll();
+    const res = await queue.readAll();
     expect(res).toEqual([mockObjectRead, mockObjectRead]);
   });
 
-  it("will make a patch request to /alert/queue/{uuid} when updateSingle is called", async () => {
+  it("will make a patch request to /queue/{uuid} when updateSingle is called", async () => {
     myNock
-      .patch("/alert/queue/1", JSON.stringify({ value: "New Name" }))
+      .patch("/queue/1", JSON.stringify({ value: "New Name" }))
       .reply(200, successMessage);
 
-    const res = await AlertQueue.update("1", { value: "New Name" });
+    const res = await queue.update("1", { value: "New Name" });
     expect(res).toEqual(successMessage);
   });
 
   it("will throw an error if a request fails", async () => {
-    myNock.get("/alert/queue/1").reply(404, failureMessage);
+    myNock.get("/queue/1").reply(404, failureMessage);
 
-    await expect(AlertQueue.read("1")).rejects.toEqual(
+    await expect(queue.read("1")).rejects.toEqual(
       new Error("Request failed with status code 404"),
     );
   });

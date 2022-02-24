@@ -12,12 +12,10 @@ import { propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
 import { nodeTagRead } from "@/models/nodeTag";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
-import { useAlertQueueStore } from "@/stores/alertQueue";
 import { useAlertToolStore } from "@/stores/alertTool";
 import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";
 import { useEventPreventionToolStore } from "@/stores/eventPreventionTool";
-import { useEventQueueStore } from "@/stores/eventQueue";
 import { useEventRiskLevelStore } from "@/stores/eventRiskLevel";
 import { useEventStatusStore } from "@/stores/eventStatus";
 import { useEventTypeStore } from "@/stores/eventType";
@@ -27,6 +25,7 @@ import { useNodeThreatTypeStore } from "@/stores/nodeThreatType";
 import { useEventVectorStore } from "@/stores/eventVector";
 import { useNodeDirectiveStore } from "@/stores/nodeDirective";
 import { useObservableTypeStore } from "@/stores/observableType";
+import { useQueueStore } from "@/stores/queue";
 import { useUserStore } from "@/stores/user";
 import { inputTypes } from "@/etc/constants/base";
 import { isValidDate, isObject } from "@/etc/validators";
@@ -36,34 +35,32 @@ export const camelToSnakeCase = (str: string): string =>
 
 export async function populateCommonStores(): Promise<void> {
   const alertDispositionStore = useAlertDispositionStore();
-  const alertQueueStore = useAlertQueueStore();
   const alertTypeStore = useAlertTypeStore();
   const alertToolStore = useAlertToolStore();
   const alertToolInstanceStore = useAlertToolInstanceStore();
   const eventPreventionToolStore = useEventPreventionToolStore();
-  const eventQueueStore = useEventQueueStore();
   const eventRiskLevelStore = useEventRiskLevelStore();
   const eventStatusStore = useEventStatusStore();
   const eventTypeStore = useEventTypeStore();
   const eventVectorStore = useEventVectorStore();
   const nodeDirectiveStore = useNodeDirectiveStore();
   const observableTypeStore = useObservableTypeStore();
+  const queueStore = useQueueStore();
   const userStore = useUserStore();
 
   await Promise.all([
     alertDispositionStore.readAll(),
-    alertQueueStore.readAll(),
     alertTypeStore.readAll(),
     alertToolStore.readAll(),
     alertToolInstanceStore.readAll(),
     eventPreventionToolStore.readAll(),
-    eventQueueStore.readAll(),
     eventRiskLevelStore.readAll(),
     eventStatusStore.readAll(),
     eventTypeStore.readAll(),
     eventVectorStore.readAll(),
     nodeDirectiveStore.readAll(),
     observableTypeStore.readAll(),
+    queueStore.readAll(),
     userStore.readAll(),
   ]).catch((error) => {
     throw error;

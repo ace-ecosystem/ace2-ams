@@ -17,8 +17,6 @@ alert_disposition:
   - COMMAND_AND_CONTROL
   - EXFIL
   - DAMAGE
-alert_queue:
-  - default
 alert_type:
   - manual
 event_prevention_tool:
@@ -31,9 +29,6 @@ event_prevention_tool:
   - proxy
   - response team
   - user
-event_queue:
-  - default
-  - secondary_queue
 event_remediation:
   - cleaned manually
   - cleaned with antivirus
@@ -84,6 +79,9 @@ node_threat_type:
 observable_type:
   - file
   - ipv4
+queue:
+  - default
+  - secondary_queue
 user_role:
   - admin
   - analyst

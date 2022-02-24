@@ -9,10 +9,8 @@ from core.config import is_in_testing_mode
 from db import crud
 from db.database import get_db
 from db.schemas.alert_disposition import AlertDisposition
-from db.schemas.alert_queue import AlertQueue
 from db.schemas.alert_type import AlertType
 from db.schemas.event_prevention_tool import EventPreventionTool
-from db.schemas.event_queue import EventQueue
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_risk_level import EventRiskLevel
 from db.schemas.event_source import EventSource
@@ -21,6 +19,7 @@ from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
 from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.observable_type import ObservableType
+from db.schemas.queue import Queue
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
 
@@ -50,33 +49,19 @@ def seed(db: Session):
             db.add(AlertDisposition(rank=rank, value=value))
             print(f"Adding alert disposition: {rank}:{value}")
 
-    if not crud.read_all(db_table=AlertQueue, db=db):
-        if "alert_queue" in data:
+    if not crud.read_all(db_table=Queue, db=db):
+        if "queue" in data:
             # Make sure there is always a "default" queue
-            if "default" not in data["alert_queue"]:
-                data["alert_queue"].append("default")
+            if "default" not in data["queue"]:
+                data["queue"].append("default")
 
-            for value in data["alert_queue"]:
-                db.add(AlertQueue(value=value))
-                print(f"Adding alert queue: {value}")
+            for value in data["queue"]:
+                db.add(Queue(value=value))
+                print(f"Adding queue: {value}")
         else:
             # Make sure there is always a "default" queue
-            db.add(AlertQueue(value="default"))
-            print("Adding alert queue: default")
-
-    if not crud.read_all(db_table=EventQueue, db=db):
-        if "event_queue" in data:
-            # Make sure there is always a "default" queue
-            if "default" not in data["event_queue"]:
-                data["event_queue"].append("default")
-
-            for value in data["event_queue"]:
-                db.add(EventQueue(value=value))
-                print(f"Adding event queue: {value}")
-        else:
-            # Make sure there is always a "default" queue
-            db.add(EventQueue(value="default"))
-            print("Adding event queue: default")
+            db.add(Queue(value="default"))
+            print("Adding queue: default")
 
     if "alert_type" in data and not crud.read_all(db_table=AlertType, db=db):
         for value in data["alert_type"]:
@@ -149,8 +134,8 @@ def seed(db: Session):
 
         db.add(
             User(
-                default_alert_queue=crud.read_by_value(value="default", db_table=AlertQueue, db=db),
-                default_event_queue=crud.read_by_value(value="default", db_table=EventQueue, db=db),
+                default_alert_queue=crud.read_by_value(value="default", db_table=Queue, db=db),
+                default_event_queue=crud.read_by_value(value="default", db_table=Queue, db=db),
                 display_name="Analyst",
                 email="analyst@fake.com",
                 password=hash_password("analyst"),
@@ -160,8 +145,8 @@ def seed(db: Session):
         )
         db.add(
             User(
-                default_alert_queue=crud.read_by_value(value="default", db_table=AlertQueue, db=db),
-                default_event_queue=crud.read_by_value(value="secondary_queue", db_table=EventQueue, db=db),
+                default_alert_queue=crud.read_by_value(value="default", db_table=Queue, db=db),
+                default_event_queue=crud.read_by_value(value="secondary_queue", db_table=Queue, db=db),
                 display_name="Analyst Alice",
                 email="alice@alice.com",
                 password=hash_password("analyst"),
@@ -171,8 +156,8 @@ def seed(db: Session):
         )
         db.add(
             User(
-                default_alert_queue=crud.read_by_value(value="default", db_table=AlertQueue, db=db),
-                default_event_queue=crud.read_by_value(value="default", db_table=EventQueue, db=db),
+                default_alert_queue=crud.read_by_value(value="default", db_table=Queue, db=db),
+                default_event_queue=crud.read_by_value(value="default", db_table=Queue, db=db),
                 display_name="Analyst Bob",
                 email="bob@bob.com",
                 password=hash_password("analyst"),

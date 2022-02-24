@@ -23,14 +23,14 @@ router = APIRouter(
 
 
 def create_user_role(
-    user_role: UserRoleCreate,
+    create: UserRoleCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    uuid = crud.create(obj=user_role, db_table=UserRole, db=db)
+    obj: UserRole = crud.create(obj=create, db_table=UserRole, db=db)
 
-    response.headers["Content-Location"] = request.url_for("get_user_role", uuid=uuid)
+    response.headers["Content-Location"] = request.url_for("get_user_role", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_user_role)
