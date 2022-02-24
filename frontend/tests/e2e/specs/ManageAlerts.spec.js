@@ -317,7 +317,7 @@ describe("Manage Alerts Filter Actions", () => {
     cy.get(".flex").children().should("have.length", 0);
   });
 
-  it.only("will change the input box depending on the selected filter", () => {
+  it("will change the input box depending on the selected filter", () => {
     cy.get(".p-splitbutton-menubutton").click();
     cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-footer > :nth-child(2)").click();
