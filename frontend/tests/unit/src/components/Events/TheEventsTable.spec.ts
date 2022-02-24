@@ -10,6 +10,8 @@ import { createCustomPinia } from "../../helpers";
 import { useCurrentUserSettingsStore } from "../../../../../src/stores/currentUserSettings";
 import { useFilterStore } from "../../../../../src/stores/filter";
 
+import { testConfiguration } from "@/etc/configuration/test/index";
+
 function factory(options?: TestingOptions) {
   const router = createRouterMock();
   injectRouterMock(router);
@@ -17,6 +19,10 @@ function factory(options?: TestingOptions) {
   const wrapper: VueWrapper<any> = shallowMount(TheEventsTable, {
     global: {
       plugins: [createCustomPinia(options), PrimeVue],
+      provide: {
+                            config: testConfiguration,
+
+        },
     },
   });
 
