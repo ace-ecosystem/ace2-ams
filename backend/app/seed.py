@@ -51,17 +51,17 @@ def seed(db: Session):
 
     if not crud.read_all(db_table=Queue, db=db):
         if "queue" in data:
-            # Make sure there is always a "default" queue
-            if "default" not in data["queue"]:
-                data["queue"].append("default")
+            # Make sure there is always an "external" queue
+            if "external" not in data["queue"]:
+                data["queue"].append("external")
 
             for value in data["queue"]:
                 db.add(Queue(value=value))
                 print(f"Adding queue: {value}")
         else:
-            # Make sure there is always a "default" queue
-            db.add(Queue(value="default"))
-            print("Adding queue: default")
+            # Make sure there is always a "external" queue
+            db.add(Queue(value="external"))
+            print("Adding queue: external")
 
     if "alert_type" in data and not crud.read_all(db_table=AlertType, db=db):
         for value in data["alert_type"]:
