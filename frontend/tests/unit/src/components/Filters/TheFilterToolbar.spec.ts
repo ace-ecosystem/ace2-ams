@@ -5,6 +5,7 @@ import * as helpers from "@/etc/helpers";
 import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
 import { createCustomPinia } from "@unit/helpers";
+import { testConfiguration } from "@/etc/configuration/test/index";
 
 describe("TheFilterToolbar.vue", () => {
   function factory(options?: TestingOptions) {
@@ -13,6 +14,7 @@ describe("TheFilterToolbar.vue", () => {
         plugins: [createCustomPinia(options)],
         provide: {
           nodeType: "alerts",
+          config: testConfiguration,
         },
       },
     });

@@ -14,13 +14,7 @@
 </template>
 
 <script setup>
-  import { onMounted, provide, watch } from "vue";
-
-  import {
-    eventEditableProperties,
-    eventFilters,
-    eventRangeFilters,
-  } from "@/etc/constants";
+  import { onMounted, provide, inject, watch } from "vue";
 
   import TheNodeActionToolbarVue from "@/components/Node/TheNodeActionToolbar.vue";
   import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
@@ -33,10 +27,12 @@
   const route = useRoute();
   const router = useRouter();
 
-  provide("availableFilters", eventFilters);
-  provide("availableEditFields", eventEditableProperties);
+  const config = inject("config");
+
+  provide("availableFilters", config.events.eventFilters);
+  provide("availableEditFields", config.events.eventEditableProperties);
+  provide("rangeFilters", config.events.eventRangeFilters);
   provide("nodeType", "events");
-  provide("rangeFilters", eventRangeFilters);
 
   const filterStore = useFilterStore();
 
@@ -58,7 +54,7 @@
     // load filters given in route
     filterStore.bulkSetFilters({
       nodeType: "events",
-      filters: parseFilters(route.query, eventFilters),
+      filters: parseFilters(route.query, config.events.eventFilters),
     });
     // Reload page to clear URL params
     router.push("/manage_events");

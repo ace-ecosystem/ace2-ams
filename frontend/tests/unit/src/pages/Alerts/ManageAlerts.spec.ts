@@ -2,8 +2,7 @@ import ManageAlerts from "@/pages/Alerts/ManageAlerts.vue";
 import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
 import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
 import TheAlertsTable from "@/components/Alerts/TheAlertsTable.vue";
-import DateRangePicker from "@/components/UserInterface/DateRangePicker.vue";
-import { mount, VueWrapper } from "@vue/test-utils";
+import { mount } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
 import Tooltip from "primevue/tooltip";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
@@ -11,6 +10,7 @@ import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
 import * as helpers from "@/etc/helpers";
 import { createCustomPinia } from "@unit/helpers";
+import { testConfiguration } from "@/etc/configuration/test/index";
 
 function factory(
   initialLocation = "/manage_alerts",
@@ -27,6 +27,9 @@ function factory(
 
   const wrapper = mount(ManageAlerts, {
     global: {
+      provide: {
+        config: testConfiguration,
+      },
       plugins: [createCustomPinia(piniaOptions)],
       directives: { tooltip: Tooltip },
       stubs: ["TheAlertsTable", "TagModal", "FilterChipContainer"],

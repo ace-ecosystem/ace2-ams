@@ -38,7 +38,7 @@ export interface pageOptionParams {
   offset?: number;
   [key: string]: unknown;
 }
-export interface filterOption {
+export interface propertyOption {
   readonly name: string;
   readonly label: string;
   readonly type: string;
@@ -49,4 +49,12 @@ export interface filterOption {
   readonly parseStringRepr?: (
     filter: string,
   ) => string[] | Date | { category: string; value: string };
+}
+
+export interface columnOption {
+  field: string;
+  header: string;
+  sortable: boolean;
+  default?: boolean;
+  required?: boolean;
 }

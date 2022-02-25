@@ -8,11 +8,18 @@ import {
 } from "@/models/event";
 import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
-import { eventFilters } from "@/etc/constants";
 import { eventHistoryReadPage } from "@/models/history";
+import { configuration } from "@/etc/configuration";
+import { testConfiguration } from "@/etc/configuration/test";
 
 const api = new BaseApi();
 const endpoint = "/event/";
+
+const testingModeEnabled = import.meta.env.VITE_TESTING_MODE;
+const filters =
+  testingModeEnabled === "yes"
+    ? testConfiguration.events.eventFilters
+    : configuration.events.eventFilters;
 
 export const Event = {
   create: (
@@ -32,7 +39,7 @@ export const Event = {
   readPage: (params?: eventFilterParams): Promise<eventReadPage> => {
     let formattedParams = {} as eventFilterParams;
     if (params) {
-      formattedParams = formatNodeFiltersForAPI(eventFilters, params);
+      formattedParams = formatNodeFiltersForAPI(filters, params);
     }
 
     return api.read(endpoint, formattedParams);
@@ -41,7 +48,7 @@ export const Event = {
   readAllPages: (params?: eventFilterParams): Promise<eventRead[]> => {
     let formattedParams = {} as eventFilterParams;
     if (params) {
-      formattedParams = formatNodeFiltersForAPI(eventFilters, params);
+      formattedParams = formatNodeFiltersForAPI(filters, params);
     }
 
     return api.readAll(endpoint, formattedParams);

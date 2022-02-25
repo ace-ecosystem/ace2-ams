@@ -3,8 +3,10 @@ import { shallowMount, VueWrapper } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
 import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
-import { alertFilters, filterTypes } from "@/etc/constants";
+import { alertFilters } from "@/etc/configuration/test/alerts";
+import { inputTypes } from "@/etc/constants/base";
 import { createCustomPinia } from "@unit/helpers";
+import { testConfiguration } from "@/etc/configuration/test/index";
 
 describe("FilterChip.vue", () => {
   function factory(
@@ -21,6 +23,7 @@ describe("FilterChip.vue", () => {
         plugins: [createCustomPinia(options)],
         provide: {
           nodeType: nodeType,
+          config: testConfiguration,
         },
       },
     });
@@ -60,7 +63,7 @@ describe("FilterChip.vue", () => {
     expect(wrapper.vm.filterNameObject).toEqual({
       name: "name",
       label: "Name",
-      type: filterTypes.INPUT_TEXT,
+      type: inputTypes.INPUT_TEXT,
     });
   });
   it("correctly sets filterNameObject given an unknown filter", () => {

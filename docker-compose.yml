@@ -53,6 +53,7 @@ services:
     environment:
       - DATABASE_TEST_URL=${DATABASE_TEST_URL}
       - VITE_BACKEND_URL=http://ace2-ams:8080/api/
+      - VITE_TESTING_MODE=${TESTING:-no}
     volumes:
       - ./frontend:/app
       - /app/node_modules

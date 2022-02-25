@@ -69,12 +69,13 @@
   const modalStore = useModalStore();
 
   import { copyToClipboard, formatNodeFiltersForAPI } from "@/etc/helpers";
-  import { alertFilters, eventFilters } from "@/etc/constants";
+
+  const config = inject("config");
 
   const nodeType = inject("nodeType");
   const filterOptions = {
-    alerts: alertFilters,
-    events: eventFilters,
+    alerts: config.alerts.alertFilters,
+    events: config.events.eventFilters,
   };
 
   const clear = () => {

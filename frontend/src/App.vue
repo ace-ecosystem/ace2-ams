@@ -7,14 +7,27 @@
 </template>
 
 <script setup>
-  import { onBeforeMount } from "vue";
+  import { onBeforeMount, provide } from "vue";
   import { useRoute, useRouter } from "vue-router";
 
+  import {
+    populateCommonStores,
+    dateParser,
+    setUserDefaults,
+  } from "@/etc/helpers";
   import TheHeader from "@/components/UserInterface/TheHeader.vue";
-  import { populateCommonStores, dateParser } from "@/etc/helpers";
   import authApi from "@/services/api/auth";
   import { useAuthStore } from "@/stores/auth";
   import { useFilterStore } from "@/stores/filter";
+
+  import { configuration } from "@/etc/configuration/index";
+  import { testConfiguration } from "@/etc/configuration/test/index";
+
+  const testingModeEnabled = import.meta.env.VITE_TESTING_MODE;
+  const config =
+    testingModeEnabled === "yes" ? testConfiguration : configuration;
+
+  provide("config", config);
 
   const authStore = useAuthStore();
 
@@ -44,6 +57,7 @@
       );
 
       await populateCommonStores();
+      setUserDefaults();
     }
   });
 </script>

@@ -81,6 +81,7 @@ observable_type:
   - ipv4
 queue:
   - default
+  - secondary_queue
 user_role:
   - admin
   - analyst

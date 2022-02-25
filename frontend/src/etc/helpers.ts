@@ -1,3 +1,6 @@
+import { useFilterStore } from "@/stores/filter";
+import { useAuthStore } from "@/stores/auth";
+import { useCurrentUserSettingsStore } from "./../stores/currentUserSettings";
 import { useEventRemediationStore } from "./../stores/eventRemediation";
 import {
   alertFilterParams,
@@ -5,7 +8,7 @@ import {
   alertSummary,
   alertTreeRead,
 } from "@/models/alert";
-import { filterOption } from "@/models/base";
+import { propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
 import { nodeTagRead } from "@/models/nodeTag";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
@@ -24,7 +27,8 @@ import { useNodeDirectiveStore } from "@/stores/nodeDirective";
 import { useObservableTypeStore } from "@/stores/observableType";
 import { useQueueStore } from "@/stores/queue";
 import { useUserStore } from "@/stores/user";
-import { filterTypes } from "./constants";
+import { inputTypes } from "@/etc/constants/base";
+import { isValidDate, isObject } from "@/etc/validators";
 
 export const camelToSnakeCase = (str: string): string =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
@@ -91,6 +95,39 @@ export async function populateEventStores(): Promise<void> {
   });
 }
 
+// Sets default user filters and currentUserSettings
+export function setUserDefaults(nodeType = "all"): void {
+  const authStore = useAuthStore();
+  const filterStore = useFilterStore();
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
+
+  if (!authStore.user) {
+    return;
+  }
+
+  if (nodeType === "all" || nodeType === "events") {
+    // Set default event queue
+    currentUserSettingsStore.preferredEventQueue =
+      authStore.user.defaultEventQueue;
+    filterStore.setFilter({
+      nodeType: "events",
+      filterName: "queue",
+      filterValue: currentUserSettingsStore.preferredEventQueue,
+    });
+  }
+
+  if (nodeType === "all" || nodeType === "alerts") {
+    // Set default alert queue
+    currentUserSettingsStore.preferredAlertQueue =
+      authStore.user.defaultAlertQueue;
+    filterStore.setFilter({
+      nodeType: "alerts",
+      filterName: "queue",
+      filterValue: currentUserSettingsStore.preferredAlertQueue,
+    });
+  }
+}
+
 // https://stackoverflow.com/a/33928558
 export function copyToClipboard(text: string): void | boolean | string | null {
   if (
@@ -113,15 +150,6 @@ export function copyToClipboard(text: string): void | boolean | string | null {
   }
 }
 
-// https://stackoverflow.com/questions/1353684/detecting-an-invalid-date-date-instance-in-javascript
-export function isValidDate(d: unknown): d is Date {
-  return d instanceof Date && !isNaN(d.getTime());
-}
-
-export function isObject(o: unknown): o is Record<string, unknown> {
-  return typeof o === "object" && o !== null;
-}
-
 // https://weblog.west-wind.com/posts/2014/jan/06/javascript-json-date-parsing-and-real-dates
 export function dateParser(key: string, value: unknown): Date | unknown {
   const reISO =
@@ -142,7 +170,7 @@ export function dateParser(key: string, value: unknown): Date | unknown {
 
 export function parseFilters(
   queryFilters: Record<string, string>,
-  availableFilters: readonly filterOption[],
+  availableFilters: readonly propertyOption[],
 ): alertFilterParams | eventFilterParams {
   const parsedFilters: Record<string, unknown> = {};
 
@@ -185,7 +213,7 @@ export function parseFilters(
     let filterValueParsed = null; // the target filter value, might be an Object, Array, Date, or string
     // based on the filter type, parse/format the filter value
     switch (filterNameObject.type) {
-      case filterTypes.MULTISELECT:
+      case inputTypes.MULTISELECT:
         // look up each array item in store, add to filter value
         filterValueParsed = [];
         if (store && Array.isArray(filterValueUnparsed)) {
@@ -203,12 +231,12 @@ export function parseFilters(
         filterValueParsed = filterValueParsed.length ? filterValueParsed : null;
         break;
 
-      case filterTypes.CHIPS:
+      case inputTypes.CHIPS:
         // array of strings, handled in parseFormattedFilterString
         filterValueParsed = filterValueUnparsed;
         break;
 
-      case filterTypes.SELECT:
+      case inputTypes.SELECT:
         // look item up in store
         if (store) {
           filterValueParsed = store.allItems.find(
@@ -219,19 +247,19 @@ export function parseFilters(
         }
         break;
 
-      case filterTypes.DATE:
+      case inputTypes.DATE:
         // Date string, handled in parseFormattedFilterString
         filterValueParsed = isValidDate(filterValueUnparsed)
           ? filterValueUnparsed
           : null;
         break;
 
-      case filterTypes.INPUT_TEXT:
+      case inputTypes.INPUT_TEXT:
         // does not need parsing
         filterValueParsed = filterValueUnparsed;
         break;
 
-      case filterTypes.CATEGORIZED_VALUE:
+      case inputTypes.CATEGORIZED_VALUE:
         // look up category value in store, sub-value stays untouched
         if (store && isObject(filterValueUnparsed)) {
           const unparsedCategory = filterValueUnparsed.category;
@@ -263,14 +291,14 @@ export function parseFilters(
 }
 
 export function formatNodeFiltersForAPI(
-  availableFilters: readonly filterOption[],
+  availableFilters: readonly propertyOption[],
   params: alertFilterParams | eventFilterParams,
 ): Record<string, string> | Record<string, number> {
   const formattedParams = {} as alertFilterParams;
   for (const param in params) {
     let paramValue = params[param] as any;
 
-    //  check if the given param is specific to alerts and not pageOptionParams, i.e. disposition
+    //  check if the given param is specific to node and not pageOptionParams, i.e. disposition
     const filterType = availableFilters.find((filter) => {
       return filter.name === param;
     });

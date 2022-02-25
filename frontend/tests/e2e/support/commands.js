@@ -1,12 +1,12 @@
 // import { addUser } from "./helpers.js";
 
-Cypress.Commands.add("login", () => {
+Cypress.Commands.add("login", (username = "analyst") => {
   cy.request({
     method: "POST",
     url: "/api/auth",
     form: true,
     body: {
-      username: "analyst",
+      username: username,
       password: "analyst",
     },
   });

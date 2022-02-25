@@ -146,7 +146,7 @@ def seed(db: Session):
         db.add(
             User(
                 default_alert_queue=crud.read_by_value(value="default", db_table=Queue, db=db),
-                default_event_queue=crud.read_by_value(value="default", db_table=Queue, db=db),
+                default_event_queue=crud.read_by_value(value="secondary_queue", db_table=Queue, db=db),
                 display_name="Analyst Alice",
                 email="alice@alice.com",
                 password=hash_password("analyst"),
