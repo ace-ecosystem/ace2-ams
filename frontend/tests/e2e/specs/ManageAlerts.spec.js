@@ -343,7 +343,7 @@ describe("Manage Alerts Filter Actions", () => {
       ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
-    cy.get("[aria-label='Dispositioned After']").click();
+    cy.get("[aria-label='Event Time After']").click();
     cy.get(".p-dropdown-items-wrapper").should("not.exist");
     cy.get("div.inputfield > .p-inputgroup > .p-inputtext")
       .invoke("attr", "placeholder")
@@ -518,9 +518,11 @@ describe("Manage Alerts Filter Actions", () => {
     cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
 
     // Verify the form data
-    cy.get(".flex").children().should("have.length", 1);
-    cy.get(":nth-child(1) > .p-dropdown").should("have.text", "Name");
+    cy.get(".flex").children().should("have.length", 2);
+    cy.get(":nth-child(1) > .p-dropdown").eq(0).should("have.text", "Name");
     cy.get(".inputfield").should("have.value", "hello world");
+    cy.get(":nth-child(1) > .p-dropdown").eq(1).should("have.text", "Queue");
+    cy.get(":nth-child(1) > .p-dropdown").eq(2).should("have.text", "default");
 
     // Exit modal for end of test
     cy.get(".p-dialog-header-close-icon").click();
@@ -545,7 +547,7 @@ describe("Manage Alerts Filter Actions", () => {
     cy.get(".p-splitbutton-defaultbutton > .p-button-label").click();
     // Select "observable" type filter from the dropdown
     cy.get(".col-fixed > .p-dropdown > .p-dropdown-trigger").click();
-    cy.get(".p-dropdown-item:nth-child(10)").click();
+    cy.get("[aria-label='Observable']").click();
     // Select 'ipv4' type
     cy.get(
       ".col > :nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",

@@ -15,6 +15,7 @@ import {
   eventCreatedBeforeProperty,
   eventEventTimeProperty,
   eventRemediationProperty,
+  eventStatusProperty,
 } from "@/etc/constants/events";
 
 export const eventFilters: readonly propertyOption[] = [
@@ -24,8 +25,9 @@ export const eventFilters: readonly propertyOption[] = [
   nodeObservableProperty,
   nodeObservableTypesProperty,
   nodeOwnerProperty,
-  nodeQueueProperty,
+  nodeQueueProperty, // Required, do not delete
   nodeTagsProperty,
+  eventStatusProperty, // Required, do not delete
 ] as const;
 
 export const eventEditableProperties: readonly propertyOption[] = [
@@ -83,6 +85,7 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     { field: "status", header: "Status", sortable: true, default: true },
     { field: "owner", header: "Owner", sortable: true, default: true },
     { field: "vectors", header: "Vectors", sortable: false, default: false },
+    { field: "queue", header: "Queue", sortable: true, default: false },
   ],
   secondary_queue: [
     {
@@ -123,5 +126,47 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     { field: "status", header: "Status", sortable: true, default: false },
     { field: "owner", header: "Owner", sortable: true, default: false },
     { field: "vectors", header: "Vectors", sortable: false, default: false },
+    { field: "queue", header: "Queue", sortable: true, default: false },
+  ],
+  test_queue: [
+    {
+      field: "edit",
+      header: "",
+      sortable: false,
+      required: true,
+    },
+    { field: "createdTime", header: "Created", sortable: true, default: true },
+    { field: "name", header: "Name", sortable: true, default: true },
+    {
+      field: "threatActors",
+      header: "Threat Actors",
+      sortable: false,
+      default: false,
+    },
+    { field: "threats", header: "Threats", sortable: false, default: false },
+    { field: "type", header: "Type", sortable: true, default: true },
+    {
+      field: "riskLevel",
+      header: "Risk Level",
+      sortable: true,
+      default: false,
+    },
+    // dispo?
+    {
+      field: "preventionTools",
+      header: "Prevention Tools",
+      sortable: false,
+      default: false,
+    },
+    {
+      field: "remediations",
+      header: "Remediation",
+      sortable: true,
+      default: false,
+    },
+    { field: "status", header: "Status", sortable: true, default: false },
+    { field: "owner", header: "Owner", sortable: true, default: false },
+    { field: "vectors", header: "Vectors", sortable: false, default: false },
+    { field: "queue", header: "Queue", sortable: true, default: false },
   ],
 };

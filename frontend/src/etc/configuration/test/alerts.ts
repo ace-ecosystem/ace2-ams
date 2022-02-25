@@ -5,6 +5,7 @@ import {
   alertEventTimeBeforeProperty,
   alertInsertTimeAfterProperty,
   alertInsertTimeBeforeProperty,
+  alertDispositionProperty,
 } from "@/etc/constants/alerts";
 import {
   nodeNameProperty,
@@ -12,10 +13,11 @@ import {
   nodeObservableTypesProperty,
   nodeTagsProperty,
   nodeQueueProperty,
-nodeOwnerProperty,
+  nodeOwnerProperty,
 } from "@/etc/constants/base";
 
 export const alertFilters: readonly propertyOption[] = [
+  alertDispositionProperty,
   alertEventTimeAfterProperty,
   alertEventTimeBeforeProperty,
   alertInsertTimeAfterProperty,

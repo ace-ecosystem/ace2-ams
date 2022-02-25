@@ -40,6 +40,9 @@ describe("TheEventsTable.vue", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
+
+    // Remove default queue filter (irrelevant to this test suite)
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("renders", () => {
@@ -54,7 +57,7 @@ describe("TheEventsTable.vue", () => {
   it("has default columns visible", () => {
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Created, Name, Owner, Type, Vectors",
+      "Created, Name, Threats, Risk Level, Status, Owner",
     );
     // Edit event button column
     cy.get(".p-datatable-thead > tr > :nth-child(3)").should("have.text", "");
@@ -65,15 +68,19 @@ describe("TheEventsTable.vue", () => {
     );
     cy.get(".p-datatable-thead > tr > :nth-child(6)").should(
       "have.text",
-      "Owner",
+      "Threats",
     );
     cy.get(".p-datatable-thead > tr > :nth-child(7)").should(
       "have.text",
-      "Type",
+      "Risk Level",
     );
     cy.get(".p-datatable-thead > tr > :nth-child(8)").should(
       "have.text",
-      "Vectors",
+      "Status",
+    );
+    cy.get(".p-datatable-thead > tr > :nth-child(9)").should(
+      "have.text",
+      "Owner",
     );
   });
 
@@ -85,7 +92,7 @@ describe("TheEventsTable.vue", () => {
     // Test that all of the selected columns are there
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Created, Name, Owner, Status, Type, Vectors, Threat Actors, Threats, Prevention Tools, Risk Level",
+      "Created, Name, Threat Actors, Threats, Type, Risk Level, Prevention Tools, Remediation, Status, Owner, Vectors, Queue",
     );
     // Close the column multiselect
     cy.get(".p-multiselect-close").click();
@@ -97,7 +104,7 @@ describe("TheEventsTable.vue", () => {
     // Test that it's gone back to the normal columns
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Created, Name, Owner, Type, Vectors",
+      "Created, Name, Threats, Risk Level, Status, Owner",
     );
   });
 
@@ -185,7 +192,7 @@ describe("TheEventsTable.vue", () => {
     // Should start with default number of rows (header + 6 alerts)
     cy.get("tr").should("have.length", 7);
     // Change number of rows to 5 per page
-    cy.get(".p-dropdown-trigger").click();
+    cy.get('[data-cy="table-pagination-options"] .p-dropdown-trigger').click();
     cy.get('[aria-label="5"]').click();
     // Should reload with only 5 rows (+1 for header)
     cy.wait("@getEventsChangedRows").its("state").should("eq", "Complete");
@@ -289,6 +296,7 @@ describe("TheEventsTable.vue", () => {
     cy.wait("@getEventAlerts").its("state").should("eq", "Complete");
     // Table of alerts should now exist
     cy.get("tr.p-datatable-row-expansion").should("exist").should("be.visible");
+    cy.wait(300);
     // Find and click the first tag in list
     cy.get("[data-cy='tags']").eq(1).contains("tag0").click();
     // Wait for the filtered view to be requested
@@ -312,7 +320,11 @@ describe("TheEventsTable.vue", () => {
       });
 
     // Change number of rows to 5 per page
-    cy.get(".p-dropdown-trigger").eq(0).click();
+    cy.get(
+      '[data-cy="event-alert-table-pagination-options"] > .p-dropdown > .p-dropdown-trigger',
+    )
+      .eq(0)
+      .click();
     cy.get('[aria-label="5"]').click();
 
     // Should reload with only 5 rows (+1 for header) (but no API call is made)
@@ -362,6 +374,9 @@ describe("TheEventsTable.vue - Remove Alerts", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
+
+    // Remove default queue filter (irrelevant to this test suite)
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("removes alerts from the event when Remove Alerts button is clicked", () => {
@@ -452,6 +467,9 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
+
+    // Remove default queue filter (irrelevant to this test suite)
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("opens edit event modal with expected buttons when open button is clicked", () => {
@@ -518,7 +536,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.get("[data-cy=save-edit-event-button]").click();
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
-    cy.get(".p-datatable-tbody > tr > :nth-child(6) > span")
+    cy.get(".p-datatable-tbody > tr > :nth-child(9) > span")
       .invoke("text")
       .should("eq", "Analyst");
   });
