@@ -128,6 +128,33 @@ def test_auto_ownership_time(client_valid_access_token, db):
     assert parse(get.json()["auto_ownership_time"]) == alert_tree2.node.ownership_time_earliest
 
 
+def test_disposition(client_valid_access_token, db):
+    # Create some dispositions
+    helpers.create_alert_disposition(value="FALSE_POSITIVE", rank=1, db=db)
+    helpers.create_alert_disposition(value="DELIVERY", rank=2, db=db)
+
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The disposition should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert get.json()["disposition"] is None
+
+    # Add an alert to the event
+    helpers.create_alert(db=db, event=event, disposition="FALSE_POSITIVE")
+
+    # Verify the disposition
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert get.json()["disposition"]["value"] == "FALSE_POSITIVE"
+
+    # Add a second alert to the event with a higher disposition
+    helpers.create_alert(db=db, event=event, disposition="DELIVERY")
+
+    # Verify the new disposition
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert get.json()["disposition"]["value"] == "DELIVERY"
+
+
 def test_get_all_pagination(client_valid_access_token, db):
     # Create 11 events
     for i in range(11):

@@ -30,14 +30,14 @@ export default defineConfig({
         ws: true,
       },
     },
-    // watch: {
-    //   usePolling: true,
-    // },
-    // hmr: {
-    //   // Internal port
-    //   port: 8080,
-    //   // External port (Docker host)
-    //   clientPort: 8080,
-    // },
+    watch: {
+      usePolling: true,
+    },
+    hmr: {
+      // Internal port
+      port: 8080,
+      // External port (Docker host)
+      clientPort: 8080,
+    },
   },
 });
