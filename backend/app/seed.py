@@ -134,8 +134,8 @@ def seed(db: Session):
 
         db.add(
             User(
-                default_alert_queue=crud.read_by_value(value="default", db_table=Queue, db=db),
-                default_event_queue=crud.read_by_value(value="default", db_table=Queue, db=db),
+                default_alert_queue=crud.read_by_value(value="external", db_table=Queue, db=db),
+                default_event_queue=crud.read_by_value(value="external", db_table=Queue, db=db),
                 display_name="Analyst",
                 email="analyst@fake.com",
                 password=hash_password("analyst"),
@@ -145,8 +145,8 @@ def seed(db: Session):
         )
         db.add(
             User(
-                default_alert_queue=crud.read_by_value(value="default", db_table=Queue, db=db),
-                default_event_queue=crud.read_by_value(value="secondary_queue", db_table=Queue, db=db),
+                default_alert_queue=crud.read_by_value(value="external", db_table=Queue, db=db),
+                default_event_queue=crud.read_by_value(value="internal", db_table=Queue, db=db),
                 display_name="Analyst Alice",
                 email="alice@alice.com",
                 password=hash_password("analyst"),
@@ -156,8 +156,8 @@ def seed(db: Session):
         )
         db.add(
             User(
-                default_alert_queue=crud.read_by_value(value="default", db_table=Queue, db=db),
-                default_event_queue=crud.read_by_value(value="default", db_table=Queue, db=db),
+                default_alert_queue=crud.read_by_value(value="external", db_table=Queue, db=db),
+                default_event_queue=crud.read_by_value(value="external", db_table=Queue, db=db),
                 display_name="Analyst Bob",
                 email="bob@bob.com",
                 password=hash_password("analyst"),

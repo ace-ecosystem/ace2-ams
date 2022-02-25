@@ -11,11 +11,11 @@ describe("ManageEvents.vue UI Elements", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
-    ).as("getEventsDefaultRows");
+    ).as("getEventsDefaultRowsExternalQueue");
 
     visitUrl({
       url: "/manage_events",
-      extraIntercepts: ["@getEventsDefaultRows"],
+      extraIntercepts: ["@getEventsDefaultRowsExternalQueue"],
     });
 
     // Remove default queue filter (irrelevant to this test suite)
@@ -78,11 +78,11 @@ describe("ManageEvents.vue table functionality", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
-    ).as("getEventsDefaultRows");
+    ).as("getEventsDefaultRowsExternalQueue");
 
     visitUrl({
       url: "/manage_events",
-      extraIntercepts: ["@getEventsDefaultRows"],
+      extraIntercepts: ["@getEventsDefaultRowsExternalQueue"],
     });
 
     // Remove default queue filter (irrelevant to this test suite)
@@ -231,7 +231,7 @@ describe("ManageEvents.vue table functionality", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Casc&limit=10&offset=0",
-    ).as("getEventsDefaultRows");
+    ).as("getEventsDefaultRowsExternalQueue");
     cy.intercept("GET", "/api/event/?sort=name%7Casc&limit=10&offset=0").as(
       "getEventsNameAscending",
     );
@@ -249,7 +249,9 @@ describe("ManageEvents.vue table functionality", () => {
 
     // Click reset
     cy.get('[data-cy="reset-table-button"]').click();
-    cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
+    cy.wait("@getEventsDefaultRowsExternalQueue")
+      .its("state")
+      .should("eq", "Complete");
 
     // Check columns
     // Check default columns in column select
@@ -299,12 +301,19 @@ describe("ManageEvents.vue Filtering", () => {
     // Intercept the API call that loads the default event table view
     cy.intercept(
       "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&queue=external",
+    ).as("getEventsDefaultRowsExternalQueue");
+    cy.intercept(
+      "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
 
     visitUrl({
       url: "/manage_events",
-      extraIntercepts: ["@getEventsDefaultRows"],
+      extraIntercepts: [
+        "@getEventsDefaultRowsExternalQueue",
+        "@getEventsDefaultRows",
+      ],
     });
 
     // Remove default queue filter (irrelevant to this test suite)
@@ -565,8 +574,6 @@ describe("ManageEvents.vue Filtering", () => {
       .click()
       .type("2020-01-01")
       .type("{enter}");
-    // Click away from panel
-    cy.get("#FilterToolbar > .p-toolbar").click();
     cy.wait("@getEventsCreatedBeforeFilter")
       .its("state")
       .should("eq", "Complete");
@@ -607,11 +614,11 @@ describe("ManageEvents.vue Actions", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
-    ).as("getEventsDefaultRows");
+    ).as("getEventsDefaultRowsExternalQueue");
 
     visitUrl({
       url: "/manage_events",
-      extraIntercepts: ["@getEventsDefaultRows"],
+      extraIntercepts: ["@getEventsDefaultRowsExternalQueue"],
     });
 
     // Remove default queue filter (irrelevant to this test suite)
@@ -721,7 +728,9 @@ describe("ManageEvents.vue Actions", () => {
     cy.get(".p-inputtextarea").click().type("Test comment");
     cy.get(".p-dialog-footer > button ").eq(1).click();
     cy.wait("@createComment").its("state").should("eq", "Complete");
-    cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
+    cy.wait("@getEventsDefaultRowsExternalQueue")
+      .its("state")
+      .should("eq", "Complete");
 
     // Check for comment displayed
     cy.get('[data-cy="comments"]').should(
@@ -737,7 +746,9 @@ describe("ManageEvents.vue Actions", () => {
     cy.get(".p-selection-column > .p-checkbox ").click();
     cy.get('[data-cy="take-ownership-button"]').click();
     cy.wait("@takeOwnership").its("state").should("eq", "Complete");
-    cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
+    cy.wait("@getEventsDefaultRowsExternalQueue")
+      .its("state")
+      .should("eq", "Complete");
 
     // Check owner
     cy.get(".p-datatable-tbody > tr > :nth-child(9) > span").should(
@@ -757,7 +768,9 @@ describe("ManageEvents.vue Actions", () => {
     cy.get(".p-dropdown-item").eq(0).click();
     cy.get(".p-dialog-footer > button ").eq(1).click();
     cy.wait("@assign").its("state").should("eq", "Complete");
-    cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
+    cy.wait("@getEventsDefaultRowsExternalQueue")
+      .its("state")
+      .should("eq", "Complete");
 
     // Check owner
     cy.get(".p-datatable-tbody > tr > :nth-child(9) > span").should(
@@ -771,7 +784,7 @@ describe("ManageEvents.vue Actions", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
-    ).as("getEventsDefaultRows");
+    ).as("getEventsDefaultRowsExternalQueue");
 
     // Select an event
     cy.get(".p-selection-column > .p-checkbox ").click();
@@ -790,7 +803,9 @@ describe("ManageEvents.vue Actions", () => {
 
     cy.wait("@createTag").its("state").should("eq", "Complete");
     cy.wait("@createTag").its("state").should("eq", "Complete");
-    cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
+    cy.wait("@getEventsDefaultRowsExternalQueue")
+      .its("state")
+      .should("eq", "Complete");
 
     // Check for tags
     cy.get(" .p-tag").eq(0).should("have.text", "TestTag");

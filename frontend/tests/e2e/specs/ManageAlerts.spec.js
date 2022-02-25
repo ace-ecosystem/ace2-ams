@@ -11,8 +11,8 @@ describe("ManageAlerts.vue", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
-    ).as("getAlertsDefaultRowsDefaultQueue");
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
+    ).as("getAlertsDefaultRowsExternalQueue");
     cy.intercept(
       "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
@@ -20,7 +20,10 @@ describe("ManageAlerts.vue", () => {
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
+      extraIntercepts: [
+        "@getAlertsDefaultRowsExternalQueue",
+        "@getAlertsDefaultRows",
+      ],
     });
 
     // Remove the default queue filter so tests can complete normally
@@ -286,8 +289,8 @@ describe("Manage Alerts Filter Actions", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
-    ).as("getAlertsDefaultRowsDefaultQueue");
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
+    ).as("getAlertsDefaultRowsExternalQueue");
     cy.intercept(
       "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
@@ -295,7 +298,7 @@ describe("Manage Alerts Filter Actions", () => {
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
+      extraIntercepts: ["@getAlertsDefaultRowsExternalQueue"],
     });
 
     // Remove the default queue filter so tests can complete normally
@@ -522,7 +525,7 @@ describe("Manage Alerts Filter Actions", () => {
     cy.get(":nth-child(1) > .p-dropdown").eq(0).should("have.text", "Name");
     cy.get(".inputfield").should("have.value", "hello world");
     cy.get(":nth-child(1) > .p-dropdown").eq(1).should("have.text", "Queue");
-    cy.get(":nth-child(1) > .p-dropdown").eq(2).should("have.text", "default");
+    cy.get(":nth-child(1) > .p-dropdown").eq(2).should("have.text", "external");
 
     // Exit modal for end of test
     cy.get(".p-dialog-header-close-icon").click();
@@ -588,8 +591,8 @@ describe("Manage Alerts Comment", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
-    ).as("getAlertsDefaultRowsDefaultQueue");
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
+    ).as("getAlertsDefaultRowsExternalQueue");
     cy.intercept(
       "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
@@ -597,7 +600,7 @@ describe("Manage Alerts Comment", () => {
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
+      extraIntercepts: ["@getAlertsDefaultRowsExternalQueue"],
     });
 
     // Remove the default queue filter so tests can complete normally
@@ -645,8 +648,8 @@ describe("Manage Alerts Tags", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
-    ).as("getAlertsDefaultRowsDefaultQueue");
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
+    ).as("getAlertsDefaultRowsExternalQueue");
     cy.intercept(
       "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
@@ -654,7 +657,7 @@ describe("Manage Alerts Tags", () => {
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
+      extraIntercepts: ["@getAlertsDefaultRowsExternalQueue"],
     });
 
     // Remove the default queue filter so tests can complete normally
@@ -714,8 +717,8 @@ describe("Manage Alerts Take Ownership", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
-    ).as("getAlertsDefaultRowsDefaultQueue");
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
+    ).as("getAlertsDefaultRowsExternalQueue");
     cy.intercept(
       "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
@@ -723,7 +726,7 @@ describe("Manage Alerts Take Ownership", () => {
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
+      extraIntercepts: ["@getAlertsDefaultRowsExternalQueue"],
     });
 
     // Remove the default queue filter so tests can complete normally
@@ -773,8 +776,8 @@ describe("Manage Alerts Assign", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
-    ).as("getAlertsDefaultRowsDefaultQueue");
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
+    ).as("getAlertsDefaultRowsExternalQueue");
     cy.intercept(
       "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
@@ -782,7 +785,7 @@ describe("Manage Alerts Assign", () => {
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
+      extraIntercepts: ["@getAlertsDefaultRowsExternalQueue"],
     });
 
     // Remove the default queue filter so tests can complete normally
@@ -838,8 +841,8 @@ describe("Manage Alerts Disposition", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
-    ).as("getAlertsDefaultRowsDefaultQueue");
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
+    ).as("getAlertsDefaultRowsExternalQueue");
     cy.intercept(
       "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
@@ -847,7 +850,7 @@ describe("Manage Alerts Disposition", () => {
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
+      extraIntercepts: ["@getAlertsDefaultRowsExternalQueue"],
     });
 
     // Remove the default queue filter so tests can complete normally
@@ -934,8 +937,8 @@ describe("Manage Alerts - Save to Event", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
-    ).as("getAlertsDefaultRowsDefaultQueue");
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
+    ).as("getAlertsDefaultRowsExternalQueue");
     cy.intercept(
       "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
@@ -943,7 +946,7 @@ describe("Manage Alerts - Save to Event", () => {
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
+      extraIntercepts: ["@getAlertsDefaultRowsExternalQueue"],
     });
 
     // Remove the default queue filter so tests can complete normally
@@ -1425,8 +1428,8 @@ describe("Manage Alerts URL Param Filters", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
-    ).as("getAlertsDefaultRowsDefaultQueue");
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
+    ).as("getAlertsDefaultRowsExternalQueue");
     cy.intercept(
       "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
@@ -1434,7 +1437,7 @@ describe("Manage Alerts URL Param Filters", () => {
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
+      extraIntercepts: ["@getAlertsDefaultRowsExternalQueue"],
     });
 
     // Remove the default queue filter so tests can complete normally
@@ -1562,8 +1565,8 @@ describe("Manage Alerts Filters Chips", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
-    ).as("getAlertsDefaultRowsDefaultQueue");
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
+    ).as("getAlertsDefaultRowsExternalQueue");
     cy.intercept(
       "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
@@ -1571,7 +1574,7 @@ describe("Manage Alerts Filters Chips", () => {
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
+      extraIntercepts: ["@getAlertsDefaultRowsExternalQueue"],
     });
 
     // Remove the default queue filter so tests can complete normally

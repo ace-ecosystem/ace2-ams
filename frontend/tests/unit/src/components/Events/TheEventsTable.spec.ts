@@ -12,7 +12,7 @@ import { useFilterStore } from "../../../../../src/stores/filter";
 
 import { testConfiguration } from "@/etc/configuration/test/index";
 
-import { vitest, expect } from "vitest";
+import { expect } from "vitest";
 
 function factory(options?: TestingOptions) {
   const router = createRouterMock();
@@ -49,7 +49,7 @@ describe("TheEventsTable data/creation", () => {
 
   it("will set columns and filter based on current user's preferred queue and increase the table key", async () => {
     const { wrapper, currentUserSettingsStore, filterStore } = factory();
-    const defaultQueue = genericObjectReadFactory({ value: "default" });
+    const defaultQueue = genericObjectReadFactory({ value: "external" });
 
     currentUserSettingsStore.preferredEventQueue = defaultQueue;
     wrapper.vm.setColumns();
@@ -67,7 +67,7 @@ describe("TheEventsTable data/creation", () => {
   });
   it("will call setColumns when currentUserSettingsStore.preferredEventQueue changes", async () => {
     const { wrapper, currentUserSettingsStore, filterStore } = factory();
-    const defaultQueue = genericObjectReadFactory({ value: "default" });
+    const defaultQueue = genericObjectReadFactory({ value: "external" });
 
     currentUserSettingsStore.preferredEventQueue = defaultQueue;
 
@@ -84,7 +84,7 @@ describe("TheEventsTable data/creation", () => {
   });
   it("will not update anything if currentUserSettingsStore updates, but doesn't include preferredEventQueue", async () => {
     const { wrapper, currentUserSettingsStore, filterStore } = factory();
-    const defaultQueue = genericObjectReadFactory({ value: "default" });
+    const defaultQueue = genericObjectReadFactory({ value: "external" });
 
     currentUserSettingsStore.preferredAlertQueue = defaultQueue;
 

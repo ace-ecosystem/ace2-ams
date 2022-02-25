@@ -465,18 +465,18 @@ export const mockAlert: alertTreeRead = {
   instructions: null,
   queue: {
     description: null,
-    value: "test_queue",
+    value: "external",
     uuid: "a7adcd83-5c0e-4185-874a-c548fe8116e9",
   },
   owner: {
     defaultAlertQueue: {
       description: null,
-      value: "test_queue",
+      value: "external",
       uuid: "a7adcd83-5c0e-4185-874a-c548fe8116e9",
     },
     defaultEventQueue: {
       description: null,
-      value: "test_queue",
+      value: "external",
       uuid: "167b7210-f7d2-46eb-8c7a-61ce6c7e9ece",
     },
     displayName: "Analyst",
@@ -502,12 +502,12 @@ export const mockAlert: alertTreeRead = {
   dispositionUser: {
     defaultAlertQueue: {
       description: null,
-      value: "test_queue",
+      value: "external",
       uuid: "a7adcd83-5c0e-4185-874a-c548fe8116e9",
     },
     defaultEventQueue: {
       description: null,
-      value: "test_queue",
+      value: "external",
       uuid: "167b7210-f7d2-46eb-8c7a-61ce6c7e9ece",
     },
     displayName: "Analyst",
@@ -552,7 +552,7 @@ export const mockAlertReadA: alertRead = {
   instructions: null,
   queue: {
     description: null,
-    value: "test_queue",
+    value: "external",
     uuid: "5e490c53-9d48-434f-9acf-4f3b91e1de74",
   },
   owner: null,
@@ -631,7 +631,7 @@ export const mockAlertReadB: alertRead = {
   instructions: null,
   queue: {
     description: null,
-    value: "test_queue",
+    value: "external",
     uuid: "5e490c53-9d48-434f-9acf-4f3b91e1de74",
   },
   owner: null,
@@ -710,7 +710,7 @@ export const mockAlertReadC: alertRead = {
   instructions: null,
   queue: {
     description: null,
-    value: "test_queue",
+    value: "external",
     uuid: "5e490c53-9d48-434f-9acf-4f3b91e1de74",
   },
   owner: null,
@@ -817,7 +817,7 @@ export const mockAlertReadASummary: alertSummary = {
   insertTime: new Date("2021-12-18T00:59:43.570343+00:00"),
   name: "Small Alert",
   owner: "Analyst",
-  queue: "test_queue",
+  queue: "external",
   tags: [],
   tool: "test_tool",
   toolInstance: "test_tool_instance",

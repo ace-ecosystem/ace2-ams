@@ -80,8 +80,9 @@ observable_type:
   - file
   - ipv4
 queue:
-  - default
-  - secondary_queue
+  - external
+  - internal
+  - intel
 user_role:
   - admin
   - analyst

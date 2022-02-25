@@ -12,6 +12,7 @@ import {
   observableProperty,
   observableTypesProperty,
   nodeTagsProperty,
+  nodeThreatsProperty,
   queueProperty,
   ownerProperty,
 } from "@/etc/constants/base";
@@ -28,6 +29,7 @@ export const alertFilters: readonly propertyOption[] = [
   ownerProperty,
   queueProperty,
   nodeTagsProperty,
+  nodeThreatsProperty,
 ] as const;
 
 export const alertRangeFilters = {

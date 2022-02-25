@@ -80,7 +80,7 @@ const mockAlertReadBSummary: alertSummary = {
   insertTime: new Date("2021-12-18T00:59:43.570343+00:00"),
   name: "Small Alert",
   owner: "Analyst",
-  queue: "test_queue",
+  queue: "external",
   tags: [],
   tool: "test_tool",
   toolInstance: "test_tool_instance",
