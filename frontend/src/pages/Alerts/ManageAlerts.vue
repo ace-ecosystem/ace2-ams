@@ -33,8 +33,6 @@
   provide("nodeType", "alerts");
   provide("rangeFilters", config.alerts.alertRangeFilters);
 
-  console.log(config.alerts.alertFilters);
-
   const filterStore = useFilterStore();
 
   onMounted(async () => {
