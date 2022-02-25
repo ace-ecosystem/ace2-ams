@@ -17,6 +17,9 @@ describe("ManageEvents.vue UI Elements", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
+
+    // Remove default queue filter (irrelevant to this test suite)
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("renders page elments correctly", () => {
@@ -81,20 +84,24 @@ describe("ManageEvents.vue table functionality", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
+
+    // Remove default queue filter (irrelevant to this test suite)
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("sets up table columns elements correctly", () => {
     // Check default columns in column select
     cy.get('[data-cy="table-column-select"]').should(
       "have.text",
-      "Created, Name, Owner, Type, Vectors",
+      "Created, Name, Threats, Risk Level, Status, Owner",
     );
     // Check columns in table
     cy.get(".p-column-title").eq(0).should("have.text", "Created");
     cy.get(".p-column-title").eq(1).should("have.text", "Name");
-    cy.get(".p-column-title").eq(2).should("have.text", "Owner");
-    cy.get(".p-column-title").eq(3).should("have.text", "Type");
-    cy.get(".p-column-title").eq(4).should("have.text", "Vectors");
+    cy.get(".p-column-title").eq(2).should("have.text", "Threats");
+    cy.get(".p-column-title").eq(3).should("have.text", "Risk Level");
+    cy.get(".p-column-title").eq(4).should("have.text", "Status");
+    cy.get(".p-column-title").eq(5).should("have.text", "Owner");
 
     // Check default sort column, 'Created' has the sort style applied
     cy.get(".pi-sort-amount-down").should("have.length", 1);
@@ -117,18 +124,20 @@ describe("ManageEvents.vue table functionality", () => {
     // Check columns in table
     cy.get('[data-cy="table-column-select"]').should(
       "have.text",
-      "Created, Name, Owner, Status, Type, Vectors, Threat Actors, Threats, Prevention Tools, Risk Level",
+      "Created, Name, Threat Actors, Threats, Type, Risk Level, Prevention Tools, Remediation, Status, Owner, Vectors, Queue",
     );
     cy.get(".p-column-title").eq(0).should("have.text", "Created");
     cy.get(".p-column-title").eq(1).should("have.text", "Name");
-    cy.get(".p-column-title").eq(2).should("have.text", "Owner");
-    cy.get(".p-column-title").eq(3).should("have.text", "Status");
+    cy.get(".p-column-title").eq(2).should("have.text", "Threat Actors");
+    cy.get(".p-column-title").eq(3).should("have.text", "Threats");
     cy.get(".p-column-title").eq(4).should("have.text", "Type");
-    cy.get(".p-column-title").eq(5).should("have.text", "Vectors");
-    cy.get(".p-column-title").eq(6).should("have.text", "Threat Actors");
-    cy.get(".p-column-title").eq(7).should("have.text", "Threats");
-    cy.get(".p-column-title").eq(8).should("have.text", "Prevention Tools");
-    cy.get(".p-column-title").eq(9).should("have.text", "Risk Level");
+    cy.get(".p-column-title").eq(5).should("have.text", "Risk Level");
+    cy.get(".p-column-title").eq(6).should("have.text", "Prevention Tools");
+    cy.get(".p-column-title").eq(7).should("have.text", "Remediation");
+    cy.get(".p-column-title").eq(8).should("have.text", "Status");
+    cy.get(".p-column-title").eq(9).should("have.text", "Owner");
+    cy.get(".p-column-title").eq(10).should("have.text", "Vectors");
+    cy.get(".p-column-title").eq(11).should("have.text", "Queue");
 
     //   Clear all the columns
     cy.get(".p-multiselect-header > .p-checkbox > .p-checkbox-box").click();
@@ -246,14 +255,15 @@ describe("ManageEvents.vue table functionality", () => {
     // Check default columns in column select
     cy.get('[data-cy="table-column-select"]').should(
       "have.text",
-      "Created, Name, Owner, Type, Vectors",
+      "Created, Name, Threats, Risk Level, Status, Owner",
     );
     // Check columns in table
     cy.get(".p-column-title").eq(0).should("have.text", "Created");
     cy.get(".p-column-title").eq(1).should("have.text", "Name");
-    cy.get(".p-column-title").eq(2).should("have.text", "Owner");
-    cy.get(".p-column-title").eq(3).should("have.text", "Type");
-    cy.get(".p-column-title").eq(4).should("have.text", "Vectors");
+    cy.get(".p-column-title").eq(2).should("have.text", "Threats");
+    cy.get(".p-column-title").eq(3).should("have.text", "Risk Level");
+    cy.get(".p-column-title").eq(4).should("have.text", "Status");
+    cy.get(".p-column-title").eq(5).should("have.text", "Owner");
 
     // Check sort
     cy.get(".pi-sort-amount-down").should("have.length", 1);
@@ -296,6 +306,9 @@ describe("ManageEvents.vue Filtering", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
+
+    // Remove default queue filter (irrelevant to this test suite)
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("successfully adds a filter via the quick add filter", () => {
@@ -307,7 +320,7 @@ describe("ManageEvents.vue Filtering", () => {
     cy.get('[data-cy="edit-filter-button"]').click();
     cy.get('[data-cy="property-input-type"]').click();
     // Select the 'name' filter type
-    cy.get(".p-dropdown-item").eq(3).click();
+    cy.get("[aria-label='Name']").click();
     cy.get('[data-cy="property-input-type"]').should("have.text", "Name");
     cy.get('[data-cy="property-input-value"]').should("be.empty");
     cy.get('[data-cy="property-input-value"]').click().type("Test");
@@ -333,7 +346,7 @@ describe("ManageEvents.vue Filtering", () => {
     // Add filter
     cy.get('[data-cy="edit-filter-button"]').click();
     cy.get('[data-cy="property-input-type"]').click();
-    cy.get(".p-dropdown-item").eq(3).click();
+    cy.get("[aria-label='Name']").click();
     cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get('[data-cy="quick-add-filter-submit-button"]').click();
     cy.wait("@getEventsNameFilter").its("state").should("eq", "Complete");
@@ -367,7 +380,7 @@ describe("ManageEvents.vue Filtering", () => {
     // Add filter
     cy.get('[data-cy="edit-filter-button"]').click();
     cy.get('[data-cy="property-input-type"]').click();
-    cy.get(".p-dropdown-item").eq(3).click();
+    cy.get("[aria-label='Name']").click();
     cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get('[data-cy="quick-add-filter-submit-button"]').click();
     cy.wait("@getEventsNameFilter").its("state").should("eq", "Complete");
@@ -380,7 +393,7 @@ describe("ManageEvents.vue Filtering", () => {
     // Add filter
     cy.get('[data-cy="edit-filter-button"]').click();
     cy.get('[data-cy="property-input-type"]').click();
-    cy.get(".p-dropdown-item").eq(3).click();
+    cy.get("[aria-label='Name']").click();
     cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get('[data-cy="quick-add-filter-submit-button"]').click();
     cy.wait("@getEventsNameFilter").its("state").should("eq", "Complete");
@@ -412,7 +425,7 @@ describe("ManageEvents.vue Filtering", () => {
 
     // Add the filter
     cy.get('[data-cy="property-input-type"]').click();
-    cy.get(".p-dropdown-item").eq(3).click();
+    cy.get("[aria-label='Name']").click();
     cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get(".p-dialog-footer > button").eq(3).click();
     cy.wait("@getEventsNameFilter").its("state").should("eq", "Complete");
@@ -453,7 +466,7 @@ describe("ManageEvents.vue Filtering", () => {
 
     // Add the filter
     cy.get('[data-cy="property-input-type"]').click();
-    cy.get(".p-dropdown-item").eq(3).click();
+    cy.get("[aria-label='Name']").click();
     cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get(".p-dialog-footer > button").eq(3).click();
 
@@ -487,7 +500,7 @@ describe("ManageEvents.vue Filtering", () => {
 
     // Add the filter
     cy.get('[data-cy="property-input-type"]').click();
-    cy.get(".p-dropdown-item").eq(3).click();
+    cy.get("[aria-label='Name']").click();
     cy.get('[data-cy="property-input-value"]').click().type("Test");
     cy.get(".p-dialog-footer > button").eq(3).click();
 
@@ -600,6 +613,9 @@ describe("ManageEvents.vue Actions", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
+
+    // Remove default queue filter (irrelevant to this test suite)
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("will not allow submission of a comment unless an event is selected and comment value is provided", () => {
@@ -714,7 +730,7 @@ describe("ManageEvents.vue Actions", () => {
     );
   });
 
-  it("assign event owner to current user when take ownership button is clicked", () => {
+  it("will assign event owner to current user when take ownership button is clicked", () => {
     cy.intercept("PATCH", "/api/event/").as("takeOwnership");
 
     // Select an event and take ownership
@@ -724,7 +740,7 @@ describe("ManageEvents.vue Actions", () => {
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check owner
-    cy.get(".p-datatable-tbody > tr > :nth-child(6) > span").should(
+    cy.get(".p-datatable-tbody > tr > :nth-child(9) > span").should(
       "have.text",
       "Analyst",
     );
@@ -744,7 +760,7 @@ describe("ManageEvents.vue Actions", () => {
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check owner
-    cy.get(".p-datatable-tbody > tr > :nth-child(6) > span").should(
+    cy.get(".p-datatable-tbody > tr > :nth-child(9) > span").should(
       "have.text",
       "Analyst Alice",
     );

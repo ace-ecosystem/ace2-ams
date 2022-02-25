@@ -3,7 +3,17 @@
 <!-- The table where all currently filtered events are displayed, selected to take action, or link to an individual event page -->
 
 <template>
-  <TheNodeTable :columns="columns">
+  <TheNodeTable :key="key" :columns="columns">
+    <template #tableHeaderStart
+      ><div data-cy="event-queue-selector">
+        <Dropdown
+          v-model="currentUserSettingsStore.preferredEventQueue"
+          :options="queueStore.items"
+          option-label="value"
+          style="margin-right: 2%"
+        ></Dropdown></div
+    ></template>
+
     <template #rowCell="{ data, field }">
       <EventTableCell :data="data" :field="field"></EventTableCell>
     </template>
@@ -16,43 +26,53 @@
 </template>
 
 <script setup>
-  import { ref } from "vue";
+  import { ref, onMounted, inject } from "vue";
+
+  import Dropdown from "primevue/dropdown";
 
   import EventAlertsTable from "./EventAlertsTable.vue";
   import TheNodeTable from "@/components/Node/TheNodeTable.vue";
   import EventTableCell from "@/components/Events/EventTableCell.vue";
 
-  const columns = ref([
-    {
-      field: "edit",
-      header: "",
-      sortable: false,
-      required: true,
-    },
-    { field: "createdTime", header: "Created", sortable: true, default: true },
-    { field: "name", header: "Name", sortable: true, default: true },
-    { field: "owner", header: "Owner", sortable: true, default: true },
-    { field: "status", header: "Status", sortable: true, default: false },
-    { field: "type", header: "Type", sortable: true, default: true },
-    { field: "vectors", header: "Vectors", sortable: false, default: true },
-    {
-      field: "threatActors",
-      header: "Threat Actors",
-      sortable: false,
-      default: false,
-    },
-    { field: "threats", header: "Threats", sortable: false, default: false },
-    {
-      field: "preventionTools",
-      header: "Prevention Tools",
-      sortable: false,
-      default: false,
-    },
-    {
-      field: "riskLevel",
-      header: "Risk Level",
-      sortable: true,
-      default: false,
-    },
-  ]);
+  import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
+  import { useFilterStore } from "@/stores/filter";
+  import { useQueueStore } from "@/stores/queue";
+  const queueStore = useQueueStore();
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
+  const filterStore = useFilterStore();
+
+  const config = inject("config");
+
+  const columns = ref([]);
+  const preferredEventQueue = ref(currentUserSettingsStore.preferredEventQueue);
+
+  // This will cause the table to re-render,
+  // which is necessary to dynamically re-set columns
+  const key = ref(0);
+
+  onMounted(() => {
+    setColumns();
+  });
+
+  const setColumns = () => {
+    if (preferredEventQueue.value) {
+      columns.value =
+        config.events.eventQueueColumnMappings[preferredEventQueue.value.value];
+
+      filterStore.setFilter({
+        nodeType: "events",
+        filterName: "queue",
+        filterValue: preferredEventQueue.value,
+      });
+
+      key.value += 1;
+    }
+  };
+
+  currentUserSettingsStore.$subscribe((_, state) => {
+    if (state.preferredEventQueue != preferredEventQueue.value) {
+      preferredEventQueue.value = state.preferredEventQueue;
+      setColumns();
+    }
+  });
 </script>

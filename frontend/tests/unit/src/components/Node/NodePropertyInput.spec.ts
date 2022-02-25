@@ -2,7 +2,7 @@ import { TestingOptions } from "@pinia/testing";
 
 import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
 import { mount } from "@vue/test-utils";
-import { filterTypes } from "@/etc/constants";
+import { inputTypes } from "@/etc/constants/base";
 import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
 import { observableTypeRead } from "@/models/observableType";
@@ -13,12 +13,12 @@ const FILTERS_STUB = [
   {
     name: "name",
     label: "Name",
-    type: filterTypes.INPUT_TEXT,
+    type: inputTypes.INPUT_TEXT,
   },
   {
     name: "owner",
     label: "Owner",
-    type: filterTypes.SELECT,
+    type: inputTypes.SELECT,
     store: useUserStore,
     optionProperty: "displayName",
     optionValue: "username",
@@ -27,22 +27,22 @@ const FILTERS_STUB = [
     name: "observable",
     label: "Observable",
     store: useObservableTypeStore,
-    type: filterTypes.CATEGORIZED_VALUE,
+    type: inputTypes.CATEGORIZED_VALUE,
   },
   {
     name: "tags",
     label: "Tags",
-    type: filterTypes.CHIPS,
+    type: inputTypes.CHIPS,
   },
   {
     name: "observable_types",
     label: "Observable Types",
-    type: filterTypes.MULTISELECT,
+    type: inputTypes.MULTISELECT,
   },
   {
     name: "timeAfter",
     label: "After",
-    type: filterTypes.DATE,
+    type: inputTypes.DATE,
   },
 ];
 
@@ -253,7 +253,7 @@ describe("NodePropertyInput.vue", () => {
     expect(wrapper.vm.isInputText).toBeTruthy();
     expect(wrapper.vm.isDropdown).toBeFalsy();
     expect(wrapper.vm.isMultiSelect).toBeFalsy();
-    expect(wrapper.vm.inputType).toEqual(filterTypes.INPUT_TEXT);
+    expect(wrapper.vm.inputType).toEqual(inputTypes.INPUT_TEXT);
     expect(wrapper.vm.categorizedValueCategory).toBeNull();
     expect(wrapper.vm.categorizedValueValue).toBeNull();
     expect(wrapper.vm.categorizedValueObject).toEqual({
@@ -276,7 +276,7 @@ describe("NodePropertyInput.vue", () => {
     expect(wrapper.vm.isInputText).toBeFalsy();
     expect(wrapper.vm.isDropdown).toBeTruthy();
     expect(wrapper.vm.isMultiSelect).toBeFalsy();
-    expect(wrapper.vm.inputType).toEqual(filterTypes.SELECT);
+    expect(wrapper.vm.inputType).toEqual(inputTypes.SELECT);
     expect(wrapper.vm.categorizedValueCategory).toBeNull();
     expect(wrapper.vm.categorizedValueValue).toBeNull();
     expect(wrapper.vm.categorizedValueObject).toEqual({
@@ -304,7 +304,7 @@ describe("NodePropertyInput.vue", () => {
     expect(wrapper.vm.isInputText).toBeFalsy();
     expect(wrapper.vm.isDropdown).toBeFalsy();
     expect(wrapper.vm.isMultiSelect).toBeFalsy();
-    expect(wrapper.vm.inputType).toEqual(filterTypes.CATEGORIZED_VALUE);
+    expect(wrapper.vm.inputType).toEqual(inputTypes.CATEGORIZED_VALUE);
     expect(wrapper.vm.categorizedValueCategory).toEqual(
       OBSERVABLE_TYPES_STUB[0],
     );
@@ -329,7 +329,7 @@ describe("NodePropertyInput.vue", () => {
     expect(wrapper.vm.isInputText).toBeFalsy();
     expect(wrapper.vm.isDropdown).toBeFalsy();
     expect(wrapper.vm.isMultiSelect).toBeFalsy();
-    expect(wrapper.vm.inputType).toEqual(filterTypes.CHIPS);
+    expect(wrapper.vm.inputType).toEqual(inputTypes.CHIPS);
     expect(wrapper.vm.categorizedValueCategory).toBeNull();
     expect(wrapper.vm.categorizedValueValue).toBeNull();
     expect(wrapper.vm.categorizedValueObject).toEqual({
@@ -352,7 +352,7 @@ describe("NodePropertyInput.vue", () => {
     expect(wrapper.vm.isInputText).toBeFalsy();
     expect(wrapper.vm.isDropdown).toBeFalsy();
     expect(wrapper.vm.isMultiSelect).toBeTruthy();
-    expect(wrapper.vm.inputType).toEqual(filterTypes.MULTISELECT);
+    expect(wrapper.vm.inputType).toEqual(inputTypes.MULTISELECT);
     expect(wrapper.vm.categorizedValueCategory).toBeNull();
     expect(wrapper.vm.categorizedValueValue).toBeNull();
     expect(wrapper.vm.categorizedValueObject).toEqual({
@@ -374,7 +374,7 @@ describe("NodePropertyInput.vue", () => {
     expect(wrapper.vm.isInputText).toBeFalsy();
     expect(wrapper.vm.isDropdown).toBeFalsy();
     expect(wrapper.vm.isMultiSelect).toBeFalsy();
-    expect(wrapper.vm.inputType).toEqual(filterTypes.DATE);
+    expect(wrapper.vm.inputType).toEqual(inputTypes.DATE);
     expect(wrapper.vm.categorizedValueCategory).toBeNull();
     expect(wrapper.vm.categorizedValueValue).toBeNull();
     expect(wrapper.vm.categorizedValueObject).toEqual({

@@ -31,6 +31,7 @@
     <template v-if="tableToolbarRequired" #header>
       <Toolbar style="border: none">
         <template #start>
+          <slot name="tableHeaderStart" />
           <!-- COLUMN SELECT -->
           <MultiSelect
             v-if="columnSelect"
@@ -68,6 +69,7 @@
             icon="pi pi-download"
             @click="exportCSV($event)"
           />
+          <slot name="tableHeaderEnd" />
         </template>
       </Toolbar>
     </template>

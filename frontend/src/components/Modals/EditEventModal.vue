@@ -79,14 +79,13 @@
   import { Event } from "@/services/api/event";
   import { useEventStore } from "@/stores/event";
   import { useModalStore } from "@/stores/modal";
-  import { isObject, populateEventStores } from "@/etc/helpers";
+  import { populateEventStores } from "@/etc/helpers";
+  import { isObject } from "@/etc/validators";
   import NodeCommentEditor from "../Node/NodeCommentEditor.vue";
   import { NodeComment } from "@/services/api/nodeComment";
-  import { useAuthStore } from "@/stores/auth";
 
   const modalStore = useModalStore();
   const eventStore = useEventStore();
-  const authStore = useAuthStore();
 
   const props = defineProps({
     name: { type: String, required: true },

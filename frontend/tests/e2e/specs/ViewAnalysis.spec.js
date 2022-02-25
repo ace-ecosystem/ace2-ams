@@ -52,7 +52,7 @@ describe("ViewAnalysis.vue", () => {
   it("Will route to home (Manage Alerts) when home breadcrumb is clicked", () => {
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
     ).as("getAlerts");
 
     cy.get(".p-breadcrumb-home > .p-menuitem-link").click();

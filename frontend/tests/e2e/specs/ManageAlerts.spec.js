@@ -11,13 +11,21 @@ describe("ManageAlerts.vue", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
+    ).as("getAlertsDefaultRowsDefaultQueue");
+    cy.intercept(
+      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlertsDefaultRows");
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRows"],
+      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
     });
+
+    // Remove the default queue filter so tests can complete normally
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
+    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
   });
 
   it("renders", () => {
@@ -278,13 +286,21 @@ describe("Manage Alerts Filter Actions", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
+    ).as("getAlertsDefaultRowsDefaultQueue");
+    cy.intercept(
+      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlertsDefaultRows");
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRows"],
+      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
     });
+
+    // Remove the default queue filter so tests can complete normally
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
+    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
   });
 
   it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
@@ -327,7 +343,7 @@ describe("Manage Alerts Filter Actions", () => {
       ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
-    cy.get("[aria-label='Dispositioned After']").click();
+    cy.get("[aria-label='Event Time After']").click();
     cy.get(".p-dropdown-items-wrapper").should("not.exist");
     cy.get("div.inputfield > .p-inputgroup > .p-inputtext")
       .invoke("attr", "placeholder")
@@ -345,7 +361,7 @@ describe("Manage Alerts Filter Actions", () => {
       ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
     ).click();
     cy.get(".p-dropdown-items-wrapper").should("be.visible");
-    cy.get("[aria-label='Observable']").click();
+    cy.get("[aria-label='Observable']").click({ force: true });
     cy.get(".p-dropdown-items-wrapper").should("not.exist");
     cy.get(".col > :nth-child(1) > :nth-child(1) > .p-dropdown").should(
       "be.visible",
@@ -502,9 +518,11 @@ describe("Manage Alerts Filter Actions", () => {
     cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
 
     // Verify the form data
-    cy.get(".flex").children().should("have.length", 1);
-    cy.get(":nth-child(1) > .p-dropdown").should("have.text", "Name");
+    cy.get(".flex").children().should("have.length", 2);
+    cy.get(":nth-child(1) > .p-dropdown").eq(0).should("have.text", "Name");
     cy.get(".inputfield").should("have.value", "hello world");
+    cy.get(":nth-child(1) > .p-dropdown").eq(1).should("have.text", "Queue");
+    cy.get(":nth-child(1) > .p-dropdown").eq(2).should("have.text", "default");
 
     // Exit modal for end of test
     cy.get(".p-dialog-header-close-icon").click();
@@ -529,7 +547,7 @@ describe("Manage Alerts Filter Actions", () => {
     cy.get(".p-splitbutton-defaultbutton > .p-button-label").click();
     // Select "observable" type filter from the dropdown
     cy.get(".col-fixed > .p-dropdown > .p-dropdown-trigger").click();
-    cy.get(".p-dropdown-item:nth-child(10)").click();
+    cy.get("[aria-label='Observable']").click();
     // Select 'ipv4' type
     cy.get(
       ".col > :nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
@@ -570,13 +588,21 @@ describe("Manage Alerts Comment", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
+    ).as("getAlertsDefaultRowsDefaultQueue");
+    cy.intercept(
+      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlertsDefaultRows");
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRows"],
+      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
     });
+
+    // Remove the default queue filter so tests can complete normally
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
+    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
   });
 
   it("will add a given comment to an alert via the comment modal", () => {
@@ -619,13 +645,21 @@ describe("Manage Alerts Tags", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
+    ).as("getAlertsDefaultRowsDefaultQueue");
+    cy.intercept(
+      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlertsDefaultRows");
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRows"],
+      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
     });
+
+    // Remove the default queue filter so tests can complete normally
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
+    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
   });
 
   it("will add given tags to an alert via the tag modal", () => {
@@ -680,13 +714,21 @@ describe("Manage Alerts Take Ownership", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
+    ).as("getAlertsDefaultRowsDefaultQueue");
+    cy.intercept(
+      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlertsDefaultRows");
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRows"],
+      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
     });
+
+    // Remove the default queue filter so tests can complete normally
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
+    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
   });
 
   it("will set the owner via the take ownership button", () => {
@@ -731,13 +773,21 @@ describe("Manage Alerts Assign", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
+    ).as("getAlertsDefaultRowsDefaultQueue");
+    cy.intercept(
+      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlertsDefaultRows");
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRows"],
+      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
     });
+
+    // Remove the default queue filter so tests can complete normally
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
+    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
   });
 
   it("will set the owner via the assign modal", () => {
@@ -788,13 +838,21 @@ describe("Manage Alerts Disposition", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
+    ).as("getAlertsDefaultRowsDefaultQueue");
+    cy.intercept(
+      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlertsDefaultRows");
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRows"],
+      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
     });
+
+    // Remove the default queue filter so tests can complete normally
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
+    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
   });
 
   it("will set the disposition and disposition comment via disposition modal", () => {
@@ -876,13 +934,21 @@ describe("Manage Alerts - Save to Event", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
+    ).as("getAlertsDefaultRowsDefaultQueue");
+    cy.intercept(
+      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlertsDefaultRows");
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRows"],
+      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
     });
+
+    // Remove the default queue filter so tests can complete normally
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
+    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
   });
 
   it("will only allow submission of event when alert(s) are selected and either an existing event is selected or a new event is selected and given a name ", () => {
@@ -1359,13 +1425,21 @@ describe("Manage Alerts URL Param Filters", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
+    ).as("getAlertsDefaultRowsDefaultQueue");
+    cy.intercept(
+      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlertsDefaultRows");
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRows"],
+      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
     });
+
+    // Remove the default queue filter so tests can complete normally
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
+    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
   });
 
   // Can't test at the moment, no way to check clipboard data in insecure context
@@ -1443,7 +1517,9 @@ describe("Manage Alerts URL Param Filters", () => {
         count: 1,
       },
     });
-    visitUrl({ url: "/manage_alerts" });
+    visitUrl({
+      url: "/manage_alerts/?sort=event_time%7Cdesc&limit=10&offset=0",
+    });
 
     cy.intercept(
       "GET",
@@ -1486,13 +1562,21 @@ describe("Manage Alerts Filters Chips", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=default",
+    ).as("getAlertsDefaultRowsDefaultQueue");
+    cy.intercept(
+      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlertsDefaultRows");
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRows"],
+      extraIntercepts: ["@getAlertsDefaultRowsDefaultQueue"],
     });
+
+    // Remove the default queue filter so tests can complete normally
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
+    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
   });
 
   it("will display a set filter as chip in chips toolbar", () => {

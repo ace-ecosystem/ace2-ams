@@ -40,6 +40,9 @@ describe("TheEventsTable.vue", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
+
+    // Remove default queue filter (irrelevant to this test suite)
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("renders", () => {
@@ -54,7 +57,7 @@ describe("TheEventsTable.vue", () => {
   it("has default columns visible", () => {
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Created, Name, Owner, Type, Vectors",
+      "Created, Name, Threats, Risk Level, Status, Owner",
     );
     // Edit event button column
     cy.get(".p-datatable-thead > tr > :nth-child(3)").should("have.text", "");
@@ -65,15 +68,19 @@ describe("TheEventsTable.vue", () => {
     );
     cy.get(".p-datatable-thead > tr > :nth-child(6)").should(
       "have.text",
-      "Owner",
+      "Threats",
     );
     cy.get(".p-datatable-thead > tr > :nth-child(7)").should(
       "have.text",
-      "Type",
+      "Risk Level",
     );
     cy.get(".p-datatable-thead > tr > :nth-child(8)").should(
       "have.text",
-      "Vectors",
+      "Status",
+    );
+    cy.get(".p-datatable-thead > tr > :nth-child(9)").should(
+      "have.text",
+      "Owner",
     );
   });
 
@@ -85,7 +92,7 @@ describe("TheEventsTable.vue", () => {
     // Test that all of the selected columns are there
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Created, Name, Owner, Status, Type, Vectors, Threat Actors, Threats, Prevention Tools, Risk Level",
+      "Created, Name, Threat Actors, Threats, Type, Risk Level, Prevention Tools, Remediation, Status, Owner, Vectors, Queue",
     );
     // Close the column multiselect
     cy.get(".p-multiselect-close").click();
@@ -97,7 +104,7 @@ describe("TheEventsTable.vue", () => {
     // Test that it's gone back to the normal columns
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Created, Name, Owner, Type, Vectors",
+      "Created, Name, Threats, Risk Level, Status, Owner",
     );
   });
 
@@ -185,7 +192,7 @@ describe("TheEventsTable.vue", () => {
     // Should start with default number of rows (header + 6 alerts)
     cy.get("tr").should("have.length", 7);
     // Change number of rows to 5 per page
-    cy.get(".p-dropdown-trigger").click();
+    cy.get('[data-cy="table-pagination-options"] .p-dropdown-trigger').click();
     cy.get('[aria-label="5"]').click();
     // Should reload with only 5 rows (+1 for header)
     cy.wait("@getEventsChangedRows").its("state").should("eq", "Complete");
@@ -289,12 +296,14 @@ describe("TheEventsTable.vue", () => {
     cy.wait("@getEventAlerts").its("state").should("eq", "Complete");
     // Table of alerts should now exist
     cy.get("tr.p-datatable-row-expansion").should("exist").should("be.visible");
+    cy.waitFor('[data-cy="expandedEvent"] > .p-datatable-header');
     // Find and click the first tag in list
     cy.get("[data-cy='tags']").eq(1).contains("tag0").click();
     // Wait for the filtered view to be requested
     cy.wait("@filterURL");
-    // Check which event checkboxes are visible (should be 7, 1 header + 6 events that have the tag)
-    cy.get(".p-checkbox-box").should("have.length", 7);
+    cy.waitFor('[data-cy="expandedEvent"] > .p-datatable-header');
+    // Check which event checkboxes are visible (should be 7, 1 header + 6 events that have the tag, + 7 checkboxes from alerts in expanded event)
+    cy.get(".p-checkbox-box").should("have.length", 14);
   });
 
   it("pagination works correctly when a row is expanded", () => {
@@ -312,7 +321,11 @@ describe("TheEventsTable.vue", () => {
       });
 
     // Change number of rows to 5 per page
-    cy.get(".p-dropdown-trigger").eq(0).click();
+    cy.get(
+      '[data-cy="event-alert-table-pagination-options"] > .p-dropdown > .p-dropdown-trigger',
+    )
+      .eq(0)
+      .click();
     cy.get('[aria-label="5"]').click();
 
     // Should reload with only 5 rows (+1 for header) (but no API call is made)
@@ -362,6 +375,9 @@ describe("TheEventsTable.vue - Remove Alerts", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
+
+    // Remove default queue filter (irrelevant to this test suite)
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("removes alerts from the event when Remove Alerts button is clicked", () => {
@@ -424,9 +440,6 @@ describe("TheEventsTable.vue - Remove Alerts", () => {
   });
 });
 
-// These tests will depend heavily on what is configured to be editable options
-// The current idea is to test each type of input
-// However, we might want to look at creating test configuration to be used for E2E (and unit?) testing instead
 describe("TheEventsTable.vue - EditEventModal", () => {
   beforeEach(() => {
     cy.resetDatabase();
@@ -452,6 +465,9 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
+
+    // Remove default queue filter (irrelevant to this test suite)
+    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("opens edit event modal with expected buttons when open button is clicked", () => {
@@ -518,7 +534,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.get("[data-cy=save-edit-event-button]").click();
     cy.wait("@updateAlert").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
-    cy.get(".p-datatable-tbody > tr > :nth-child(6) > span")
+    cy.get(".p-datatable-tbody > tr > :nth-child(9) > span")
       .invoke("text")
       .should("eq", "Analyst");
   });
@@ -670,5 +686,140 @@ describe("TheEventsTable.vue - EditEventModal", () => {
 
     // Make sure that the threat was updated
     cy.wait("@updateThreat").its("state").should("eq", "Complete");
+  });
+});
+
+describe("TheEventsTable.vue - Queue Settings", () => {
+  beforeEach(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small_template.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
+
+    // Intercept the API call that loads the default event table view
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
+    ).as("getEventsDefaultRows");
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&queue=default",
+    ).as("getEventsDefaultQueueFilter");
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&queue=secondary_queue",
+    ).as("getEventsSecondaryQueueFilter");
+
+    visitUrl({
+      url: "/manage_events",
+      extraIntercepts: ["@getEventsDefaultQueueFilter"],
+    });
+  });
+
+  it("will auto-set the event queue filter and event table columns based on the auth'd users preferredEventQueue", () => {
+    //  Default queue filter should be there (check filter chip)
+    cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
+    cy.get('[data-cy="filter-chip-content"]').should("have.text", "default");
+    // Queue selector should have right value
+    cy.get(
+      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
+    ).should("have.text", "default");
+    // Correct columns should be showing
+    cy.get(".p-multiselect-label").should(
+      "have.text",
+      "Created, Name, Threats, Risk Level, Status, Owner",
+    );
+
+    // log out and log back in as 'alice', whose default event queue is 'secondary_queue'
+    cy.logout();
+    cy.login("alice");
+    // go to manage events
+    visitUrl({
+      url: "/manage_events",
+      extraIntercepts: ["@getEventsSecondaryQueueFilter"],
+    });
+
+    //  Default queue filter should be there (check filter chip)
+    cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
+    cy.get('[data-cy="filter-chip-content"]').should(
+      "have.text",
+      "secondary_queue",
+    );
+    // Queue selector should have right value
+    cy.get(
+      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
+    ).should("have.text", "secondary_queue");
+    // Correct columns should be showing
+    cy.get(".p-multiselect-label").should("have.text", "Created, Name, Type");
+  });
+  it("will update the event queue filter and event table columns when preferred event queue is changed", () => {
+    //  Default queue filter should be there (check filter chip)
+    cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
+    cy.get('[data-cy="filter-chip-content"]').should("have.text", "default");
+    // Queue selector should have right value
+    cy.get(
+      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
+    ).should("have.text", "default");
+    // Correct columns should be showing
+    cy.get(".p-multiselect-label").should(
+      "have.text",
+      "Created, Name, Threats, Risk Level, Status, Owner",
+    );
+
+    // Open queue selector and check options
+    cy.get(
+      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-trigger',
+    ).click();
+    cy.get(".p-dropdown-items").should("be.visible");
+    cy.get('[aria-label="default"]').should("be.visible");
+    cy.get('[aria-label="secondary_queue"]').should("be.visible");
+    cy.get('[aria-label="test_queue"]').should("be.visible");
+
+    // Switch to secondary queue and check data
+    cy.get('[aria-label="secondary_queue"]').click();
+    cy.wait("@getEventsSecondaryQueueFilter")
+      .its("state")
+      .should("eq", "Complete");
+    //  secondary queue filter should be there (check filter chip)
+    cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
+    cy.get('[data-cy="filter-chip-content"]').should(
+      "have.text",
+      "secondary_queue",
+    );
+    // Queue selector should have right value
+    cy.get(
+      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
+    ).should("have.text", "secondary_queue");
+    // Correct columns should be showing
+    cy.get(".p-multiselect-label").should("have.text", "Created, Name, Type");
+
+    // Switch back to default queue
+    cy.get(
+      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-trigger',
+    ).click();
+    cy.get('[aria-label="default"]').click();
+    cy.wait("@getEventsDefaultQueueFilter")
+      .its("state")
+      .should("eq", "Complete");
+    //  Default queue filter should be there (check filter chip)
+    cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
+    cy.get('[data-cy="filter-chip-content"]').should("have.text", "default");
+    // Queue selector should have right value
+    cy.get(
+      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
+    ).should("have.text", "default");
+    // Correct columns should be showing
+    cy.get(".p-multiselect-label").should(
+      "have.text",
+      "Created, Name, Threats, Risk Level, Status, Owner",
+    );
   });
 });

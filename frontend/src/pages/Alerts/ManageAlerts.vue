@@ -14,9 +14,7 @@
 </template>
 
 <script setup>
-  import { onMounted, provide, watch } from "vue";
-
-  import { alertFilters, alertRangeFilters } from "@/etc/constants";
+  import { onMounted, provide, inject, watch } from "vue";
 
   import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
   import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
@@ -28,11 +26,12 @@
 
   const route = useRoute();
   const router = useRouter();
+  const config = inject("config");
 
-  provide("availableFilters", alertFilters);
+  provide("availableFilters", config.alerts.alertFilters);
   provide("availableEditFields", []);
   provide("nodeType", "alerts");
-  provide("rangeFilters", alertRangeFilters);
+  provide("rangeFilters", config.alerts.alertRangeFilters);
 
   const filterStore = useFilterStore();
 
@@ -54,7 +53,7 @@
     // load filters given in route
     filterStore.bulkSetFilters({
       nodeType: "alerts",
-      filters: parseFilters(route.query, alertFilters),
+      filters: parseFilters(route.query, config.alerts.alertFilters),
     });
     // Reload page to clear URL params
     router.push("/manage_alerts");
