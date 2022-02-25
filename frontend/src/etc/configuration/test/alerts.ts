@@ -8,12 +8,12 @@ import {
   alertDispositionProperty,
 } from "@/etc/constants/alerts";
 import {
-  nodeNameProperty,
-  nodeObservableProperty,
-  nodeObservableTypesProperty,
+  nameProperty,
+  observableProperty,
+  observableTypesProperty,
   nodeTagsProperty,
-  nodeQueueProperty,
-  nodeOwnerProperty,
+  queueProperty,
+  ownerProperty,
 } from "@/etc/constants/base";
 
 export const alertFilters: readonly propertyOption[] = [
@@ -22,11 +22,11 @@ export const alertFilters: readonly propertyOption[] = [
   alertEventTimeBeforeProperty,
   alertInsertTimeAfterProperty,
   alertInsertTimeBeforeProperty,
-  nodeNameProperty,
-  nodeObservableProperty,
-  nodeObservableTypesProperty,
-  nodeOwnerProperty,
-  nodeQueueProperty,
+  nameProperty,
+  observableProperty,
+  observableTypesProperty,
+  ownerProperty,
+  queueProperty,
   nodeTagsProperty,
 ] as const;
 

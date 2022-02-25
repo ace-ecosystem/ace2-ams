@@ -19,8 +19,8 @@ export const inputTypes = {
   CATEGORIZED_VALUE: "categorizedValue",
 };
 
-// Property types common between node types
-export const nodePropertyTypes: Record<string, string> = {
+// Property types common between various resources or node types
+export const commonPropertyTypes: Record<string, string> = {
   NAME_PROPERTY: "name",
   OBSERVABLE_PROPERTY: "observable",
   OBSERVABLE_TYPES_PROPERTY: "observableTypes",
@@ -33,20 +33,20 @@ export const nodePropertyTypes: Record<string, string> = {
   THREATS_PROPERTY: "threats",
 };
 
-export const nodeNameProperty: propertyOption = {
-  name: nodePropertyTypes.NAME_PROPERTY,
+export const nameProperty: propertyOption = {
+  name: commonPropertyTypes.NAME_PROPERTY,
   label: "Name",
   type: inputTypes.INPUT_TEXT,
 };
 
 export const nodeCommentProperty: propertyOption = {
-  name: nodePropertyTypes.COMMENTS_PROPERTY,
+  name: commonPropertyTypes.COMMENTS_PROPERTY,
   label: "Comment",
   type: inputTypes.INPUT_TEXT,
 };
 
-export const nodeObservableProperty: propertyOption = {
-  name: nodePropertyTypes.OBSERVABLE_PROPERTY,
+export const observableProperty: propertyOption = {
+  name: commonPropertyTypes.OBSERVABLE_PROPERTY,
   label: "Observable",
   type: inputTypes.CATEGORIZED_VALUE,
   store: useObservableTypeStore,
@@ -59,8 +59,8 @@ export const nodeObservableProperty: propertyOption = {
   },
 };
 
-export const nodeObservableTypesProperty: propertyOption = {
-  name: nodePropertyTypes.OBSERVABLE_TYPES_PROPERTY,
+export const observableTypesProperty: propertyOption = {
+  name: commonPropertyTypes.OBSERVABLE_TYPES_PROPERTY,
   label: "Observable Types",
   type: inputTypes.MULTISELECT,
   store: useObservableTypeStore,
@@ -75,14 +75,14 @@ export const nodeObservableTypesProperty: propertyOption = {
     return valueString.split(",");
   },
 };
-export const nodeObservableValueProperty: propertyOption = {
-  name: nodePropertyTypes.OBSERVABLE_VALUE_PROPERTY,
+export const observableValueProperty: propertyOption = {
+  name: commonPropertyTypes.OBSERVABLE_VALUE_PROPERTY,
   label: "Observable Value",
   type: inputTypes.INPUT_TEXT,
 };
 
-export const nodeOwnerProperty: propertyOption = {
-  name: nodePropertyTypes.OWNER_PROPERTY,
+export const ownerProperty: propertyOption = {
+  name: commonPropertyTypes.OWNER_PROPERTY,
   label: "Owner",
   type: inputTypes.SELECT,
   store: useUserStore,
@@ -91,7 +91,7 @@ export const nodeOwnerProperty: propertyOption = {
 };
 
 export const nodeThreatActorProperty: propertyOption = {
-  name: nodePropertyTypes.THREAT_ACTOR_PROPERTY,
+  name: commonPropertyTypes.THREAT_ACTOR_PROPERTY,
   label: "Threat Actor",
   type: inputTypes.SELECT,
   store: useNodeThreatActorStore,
@@ -99,7 +99,7 @@ export const nodeThreatActorProperty: propertyOption = {
   valueProperty: "value",
 };
 export const nodeThreatsProperty: propertyOption = {
-  name: nodePropertyTypes.THREATS_PROPERTY,
+  name: commonPropertyTypes.THREATS_PROPERTY,
   label: "Threats",
   type: inputTypes.MULTISELECT,
   store: useNodeThreatStore,
@@ -115,7 +115,7 @@ export const nodeThreatsProperty: propertyOption = {
   },
 };
 export const nodeTagsProperty: propertyOption = {
-  name: nodePropertyTypes.TAGS_PROPERTY,
+  name: commonPropertyTypes.TAGS_PROPERTY,
   label: "Tags",
   type: inputTypes.CHIPS,
   store: useNodeTagStore,
@@ -131,8 +131,8 @@ export const nodeTagsProperty: propertyOption = {
   },
 };
 
-export const nodeQueueProperty: propertyOption = {
-  name: nodePropertyTypes.QUEUE_PROPERTY,
+export const queueProperty: propertyOption = {
+  name: commonPropertyTypes.QUEUE_PROPERTY,
   label: "Queue",
   type: inputTypes.SELECT,
   store: useQueueStore,

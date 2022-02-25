@@ -1,13 +1,13 @@
 import { propertyOption, columnOption } from "@/models/base";
 import {
-  nodeNameProperty,
-  nodeObservableProperty,
-  nodeObservableTypesProperty,
-  nodeOwnerProperty,
+  nameProperty,
+  observableProperty,
+  observableTypesProperty,
+  ownerProperty,
   nodeTagsProperty,
   nodeThreatsProperty,
   nodeCommentProperty,
-  nodeQueueProperty,
+  queueProperty,
 } from "@/etc/constants/base";
 import {
   eventPropertyTypes,
@@ -19,20 +19,20 @@ import {
 } from "@/etc/constants/events";
 
 export const eventFilters: readonly propertyOption[] = [
-  nodeNameProperty,
+  nameProperty,
   eventCreatedAfterProperty,
   eventCreatedBeforeProperty,
-  nodeObservableProperty,
-  nodeObservableTypesProperty,
-  nodeOwnerProperty,
-  nodeQueueProperty, // Required, do not delete
+  observableProperty,
+  observableTypesProperty,
+  ownerProperty,
+  queueProperty, // Required, do not delete
   nodeTagsProperty,
   eventStatusProperty, // Required, do not delete
 ] as const;
 
 export const eventEditableProperties: readonly propertyOption[] = [
-  nodeNameProperty,
-  nodeOwnerProperty,
+  nameProperty,
+  ownerProperty,
   nodeCommentProperty,
   eventRemediationProperty,
   nodeThreatsProperty,
