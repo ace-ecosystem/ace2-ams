@@ -296,13 +296,14 @@ describe("TheEventsTable.vue", () => {
     cy.wait("@getEventAlerts").its("state").should("eq", "Complete");
     // Table of alerts should now exist
     cy.get("tr.p-datatable-row-expansion").should("exist").should("be.visible");
-    cy.wait(300);
+    cy.waitFor('[data-cy="expandedEvent"] > .p-datatable-header');
     // Find and click the first tag in list
     cy.get("[data-cy='tags']").eq(1).contains("tag0").click();
     // Wait for the filtered view to be requested
     cy.wait("@filterURL");
-    // Check which event checkboxes are visible (should be 7, 1 header + 6 events that have the tag)
-    cy.get(".p-checkbox-box").should("have.length", 7);
+    cy.waitFor('[data-cy="expandedEvent"] > .p-datatable-header');
+    // Check which event checkboxes are visible (should be 7, 1 header + 6 events that have the tag, + 7 checkboxes from alerts in expanded event)
+    cy.get(".p-checkbox-box").should("have.length", 14);
   });
 
   it("pagination works correctly when a row is expanded", () => {
