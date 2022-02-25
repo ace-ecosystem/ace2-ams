@@ -20,6 +20,7 @@ export function parseEventSummary(event: eventRead): eventSummary {
     type: event.type ? event.type.value : "None",
     uuid: event.uuid,
     vectors: event.vectors.map((x) => x.value),
+    queue: event.queue ? event.queue.value : "None",
   };
 }
 
