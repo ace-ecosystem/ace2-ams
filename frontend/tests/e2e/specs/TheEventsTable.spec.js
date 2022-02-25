@@ -688,7 +688,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
   });
 });
 
-describe.only("TheEventsTable.vue - Queue Settings", () => {
+describe("TheEventsTable.vue - Queue Settings", () => {
   beforeEach(() => {
     cy.resetDatabase();
     cy.login();
