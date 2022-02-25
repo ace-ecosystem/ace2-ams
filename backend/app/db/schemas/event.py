@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 from typing import Optional
+from api.models.alert_disposition import AlertDispositionRead
 
 from api.models.event import EventRead
 from db.database import Base
@@ -120,4 +121,11 @@ class Event(Node):
             return sorted(self.alerts, key=lambda x: (x.ownership_time_earliest is None, x.ownership_time_earliest))[
                 0
             ].ownership_time_earliest
+        return None
+
+    @property
+    def disposition(self) -> Optional[AlertDispositionRead]:
+        """Returns the highest disposition used on the alerts in the event"""
+        if self.alerts:
+            return sorted(self.alerts, key=lambda x: x.disposition.rank)[-1].disposition
         return None

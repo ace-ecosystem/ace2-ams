@@ -4,7 +4,7 @@ from typing import List, Optional
 from uuid import uuid4
 
 from api.models import type_str, validators
-from api.models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
+from api.models.alert_disposition import AlertDispositionRead
 from api.models.event_prevention_tool import EventPreventionToolRead
 from api.models.event_remediation import EventRemediationRead
 from api.models.event_risk_level import EventRiskLevelRead
@@ -12,6 +12,7 @@ from api.models.event_source import EventSourceRead
 from api.models.event_status import EventStatusRead
 from api.models.event_type import EventTypeRead
 from api.models.event_vector import EventVectorRead
+from api.models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api.models.node_comment import NodeCommentRead
 from api.models.node_tag import NodeTagRead
 from api.models.node_threat import NodeThreatRead
@@ -103,6 +104,10 @@ class EventRead(NodeRead, EventBase):
     comments: List[NodeCommentRead] = Field(description="A list of comments added to the event")
 
     creation_time: datetime = Field(description="The time the event was created")
+
+    disposition: Optional[AlertDispositionRead] = Field(
+        description="The highest disposition used on the alerts in the event"
+    )
 
     owner: Optional[UserRead] = Field(description="The user who has taken ownership of this event")
 
