@@ -5,12 +5,13 @@
 <template>
   <TheNodeTable :key="key" :columns="columns">
     <template #tableHeaderStart
-      ><Dropdown
-        v-model="currentUserSettingsStore.preferredEventQueue"
-        :options="queueStore.items"
-        option-label="value"
-        style="margin-right: 2%"
-      ></Dropdown
+      ><div data-cy="event-queue-selector">
+        <Dropdown
+          v-model="currentUserSettingsStore.preferredEventQueue"
+          :options="queueStore.items"
+          option-label="value"
+          style="margin-right: 2%"
+        ></Dropdown></div
     ></template>
 
     <template #rowCell="{ data, field }">
