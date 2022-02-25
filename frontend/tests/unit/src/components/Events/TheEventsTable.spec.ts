@@ -57,7 +57,7 @@ describe("TheEventsTable data/creation", () => {
     await wrapper.vm.$nextTick();
 
     expect(wrapper.vm.preferredEventQueue).toStrictEqual(defaultQueue);
-    expect(wrapper.vm.columns).toHaveLength(12);
+    expect(wrapper.vm.columns).toHaveLength(13);
     expect(filterStore.setFilter).toHaveBeenCalledWith({
       nodeType: "events",
       filterName: "queue",
@@ -74,7 +74,7 @@ describe("TheEventsTable data/creation", () => {
     await wrapper.vm.$nextTick();
 
     expect(wrapper.vm.preferredEventQueue).toStrictEqual(defaultQueue);
-    expect(wrapper.vm.columns).toHaveLength(12);
+    expect(wrapper.vm.columns).toHaveLength(13);
     expect(filterStore.setFilter).toHaveBeenCalledWith({
       nodeType: "events",
       filterName: "queue",
