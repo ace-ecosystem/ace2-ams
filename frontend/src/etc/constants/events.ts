@@ -24,7 +24,7 @@ export const eventPropertyTypes: Record<string, string> = {
   OWNERSHIP_TIME_PROPERTY: "ownershipTime",
   DISPOSITION_TIME_PROPERTY: "dispositionTime",
   REMEDIATION_TIME_PROPERTY: "remediationTime",
-  DISPOSITION_PROPERTY_PROPERTY: "disposition",
+  DISPOSITION_PROPERTY: "disposition",
   PREVENTION_TOOLS_PROPERTY: "preventionTools",
   REMEDIATIONS_PROPERTY: "remediations",
   RISK_LEVEL_PROPERTY: "riskLevel",
