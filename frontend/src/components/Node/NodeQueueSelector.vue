@@ -26,16 +26,16 @@
   const preferredQueue = ref();
 
   if (props.nodeQueue === "alerts") {
-    preferredQueue.value = currentUserSettingsStore.preferredAlertQueue;
+    preferredQueue.value = currentUserSettingsStore.queues.alerts;
   } else if (props.nodeQueue === "events") {
-    preferredQueue.value = currentUserSettingsStore.preferredEventQueue;
+    preferredQueue.value = currentUserSettingsStore.queues.events;
   }
 
   watchEffect(() => {
     if (props.nodeQueue === "alerts") {
-      currentUserSettingsStore.preferredAlertQueue = preferredQueue.value;
+      currentUserSettingsStore.queues.alerts = preferredQueue.value;
     } else if (props.nodeQueue === "events") {
-      currentUserSettingsStore.preferredEventQueue = preferredQueue.value;
+      currentUserSettingsStore.queues.events = preferredQueue.value;
     }
   });
 </script>

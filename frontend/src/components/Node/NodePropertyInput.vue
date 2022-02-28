@@ -129,35 +129,26 @@
   import InputText from "primevue/inputtext";
   import Multiselect from "primevue/multiselect";
 
-  import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
   import { DatePicker } from "v-calendar";
 
-  const nodeType = inject("nodeType");
   const availableFilters = inject("availableFilters");
   const availableEditFields = inject("availableEditFields");
 
-  // Set up which queue to use for property values, if applicable
-  const currentUserSettingsStore = useCurrentUserSettingsStore();
-  const preferredQueues = ref({
-    alerts: currentUserSettingsStore.preferredAlertQueue,
-    events: currentUserSettingsStore.preferredEventQueue,
-  });
-  const preferredQueue = ref(preferredQueues.value[nodeType]);
-
-  const propertyTypeOptions =
-    props.formType == "filter"
-      ? availableFilters
-      : props.formType == "edit"
-      ? availableEditFields
-      : null;
-
   const emit = defineEmits(["update:modelValue", "deleteFormField"]);
   const props = defineProps({
+    queue: { type: String, required: true },
     modelValue: { type: Object, required: true },
     fixedPropertyType: { type: Boolean, required: false },
     allowDelete: { type: Boolean, required: false },
     formType: { type: String, required: true },
   });
+
+  const propertyTypeOptions =
+    props.formType == "filter"
+      ? availableFilters
+      : props.formType == "edit"
+      ? availableEditFields[props.queue]
+      : null;
 
   const getPropertyTypeObject = (propertyType) => {
     if (!propertyType) {
@@ -185,9 +176,7 @@
     if (propertyType.value && propertyType.value.store) {
       const store = propertyType.value.store();
       if (propertyType.value.queueDependent) {
-        return store.getItemsByQueue(
-          currentUserSettingsStore[preferredQueue.value.value],
-        );
+        return store.getItemsByQueue(props.queue);
       } else {
         return store.allItems;
       }
@@ -198,11 +187,13 @@
   onMounted(() => {
     // This will update the property to the default if one wasn't provided
     updateValue("propertyType", propertyType.value);
+
     // This will udpate the property value to the default (if available) if one wasn't provided
     if (!propertyValue.value) {
       clearPropertyValue();
       updateValue("propertyValue", propertyValue.value);
     }
+
     // we need to fill in the placeholder refs (see note above) for categorized value
     else if (isCategorizedValue.value) {
       categorizedValueCategory.value = propertyValue.value.category;

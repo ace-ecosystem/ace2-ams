@@ -15,6 +15,7 @@
         v-model="formFilters[index]"
         class="w-12"
         :allow-delete="true"
+        :queue="queue"
         form-type="filter"
         @deleteFormField="deleteFormFilter(index)"
       ></NodePropertyInput>
@@ -55,9 +56,11 @@
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
+  import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
 
   onMounted(() => {
     loadFormFilters();
@@ -77,6 +80,10 @@
   );
 
   const formFilters = ref([]);
+
+  const queue = computed(() => {
+    return currentUserSettingsStore.$state["queues"][nodeType].value;
+  });
 
   const submitFilters = computed(() => {
     let submitFilters = {};

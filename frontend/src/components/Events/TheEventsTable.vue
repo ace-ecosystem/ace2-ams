@@ -35,7 +35,7 @@
   const config = inject("config");
 
   const columns = ref([]);
-  const preferredEventQueue = ref(currentUserSettingsStore.preferredEventQueue);
+  const preferredEventQueue = ref(currentUserSettingsStore.queues.events);
 
   // This will cause the table to re-render,
   // which is necessary to dynamically re-set columns
@@ -61,8 +61,8 @@
   };
 
   currentUserSettingsStore.$subscribe((_, state) => {
-    if (state.preferredEventQueue != preferredEventQueue.value) {
-      preferredEventQueue.value = state.preferredEventQueue;
+    if (state.queues.events != preferredEventQueue.value) {
+      preferredEventQueue.value = state.queues.events;
       setColumns();
     }
   });

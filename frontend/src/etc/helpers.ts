@@ -107,23 +107,21 @@ export function setUserDefaults(nodeType = "all"): void {
 
   if (nodeType === "all" || nodeType === "events") {
     // Set default event queue
-    currentUserSettingsStore.preferredEventQueue =
-      authStore.user.defaultEventQueue;
+    currentUserSettingsStore.queues.events = authStore.user.defaultEventQueue;
     filterStore.setFilter({
       nodeType: "events",
       filterName: "queue",
-      filterValue: currentUserSettingsStore.preferredEventQueue,
+      filterValue: currentUserSettingsStore.queues.events,
     });
   }
 
   if (nodeType === "all" || nodeType === "alerts") {
     // Set default alert queue
-    currentUserSettingsStore.preferredAlertQueue =
-      authStore.user.defaultAlertQueue;
+    currentUserSettingsStore.queues.alerts = authStore.user.defaultAlertQueue;
     filterStore.setFilter({
       nodeType: "alerts",
       filterName: "queue",
-      filterValue: currentUserSettingsStore.preferredAlertQueue,
+      filterValue: currentUserSettingsStore.queues.alerts,
     });
   }
 }
