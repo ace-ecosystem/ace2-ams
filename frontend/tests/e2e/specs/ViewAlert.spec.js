@@ -366,7 +366,7 @@ describe("ViewAlert.vue", () => {
     cy.get(":nth-child(8) > .header-cell").should("contain.text", "Queue");
     cy.get(":nth-child(8) > .content-cell > span").should(
       "contain.text",
-      "test_queue",
+      "external",
     );
     cy.get(":nth-child(9) > .header-cell").should("contain.text", "Owner");
     cy.get(":nth-child(9) > .content-cell > span").should(

@@ -245,9 +245,9 @@ def test_update_prevention_tools(client_valid_access_token, db):
 
 def test_update_queue(client_valid_access_token, db):
     # Create an event
-    event = helpers.create_event(name="test", db=db)
+    event = helpers.create_event(name="test", queue="external", db=db)
     initial_event_version = event.version
-    assert event.queue.value == "default"
+    assert event.queue.value == "external"
 
     # Create an event queue
     helpers.create_queue(value="updated_queue", db=db)
@@ -264,7 +264,7 @@ def test_update_queue(client_valid_access_token, db):
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"
     assert history.json()["items"][1]["field"] == "queue"
-    assert history.json()["items"][1]["diff"]["old_value"] == "default"
+    assert history.json()["items"][1]["diff"]["old_value"] == "external"
     assert history.json()["items"][1]["diff"]["new_value"] == "updated_queue"
     assert history.json()["items"][1]["snapshot"]["queue"]["value"] == "updated_queue"
 

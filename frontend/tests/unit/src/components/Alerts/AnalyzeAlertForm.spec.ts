@@ -145,7 +145,7 @@ describe("AnalyzeAlertForm non-async methods", () => {
     expect(wrapper.vm.alertDate).toBeInstanceOf(Date);
     expect(wrapper.vm.alertDescription).toEqual("Manual Alert");
     expect(wrapper.vm.alertDescriptionAppendString).toEqual("");
-    expect(wrapper.vm.queue).toEqual("default");
+    expect(wrapper.vm.queue).toEqual("external");
     expect(wrapper.vm.alertType).toBe("manual");
     expect(wrapper.vm.errors).toStrictEqual([]);
     expect(wrapper.vm.observables).toStrictEqual([
@@ -283,7 +283,7 @@ describe("AnalyzeAlertForm async methods", () => {
     name: "Manual Alert",
     observables: [expectedObservableCreate],
     owner: "analyst",
-    queue: "default",
+    queue: "external",
     type: "manual",
   };
 

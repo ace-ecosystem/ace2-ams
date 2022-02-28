@@ -11,5 +11,4 @@ set +a
 docker-compose -f docker-compose.yml up -d
 
 printf "\nYou can now open Cypress on your host system\n"
-printf "You can optionally exit test mode when you are finished\n"
-printf "Example: bin/disable-test-mode.sh\n"
+printf "Exit test mode when you are finished: bin/disable-test-mode.sh\n"

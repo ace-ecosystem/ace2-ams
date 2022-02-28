@@ -711,63 +711,60 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     ).as("getEventsDefaultRows");
     cy.intercept(
       "GET",
-      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&queue=default",
-    ).as("getEventsDefaultQueueFilter");
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&queue=external",
+    ).as("getEventsExternalQueueFilter");
     cy.intercept(
       "GET",
-      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&queue=secondary_queue",
-    ).as("getEventsSecondaryQueueFilter");
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&queue=internal",
+    ).as("getEventsInternalQueueFilter");
 
     visitUrl({
       url: "/manage_events",
-      extraIntercepts: ["@getEventsDefaultQueueFilter"],
+      extraIntercepts: ["@getEventsExternalQueueFilter"],
     });
   });
 
   it("will auto-set the event queue filter and event table columns based on the auth'd users preferredEventQueue", () => {
-    //  Default queue filter should be there (check filter chip)
+    //  External queue filter should be there (check filter chip)
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
-    cy.get('[data-cy="filter-chip-content"]').should("have.text", "default");
+    cy.get('[data-cy="filter-chip-content"]').should("have.text", "external");
     // Queue selector should have right value
     cy.get(
       '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "default");
+    ).should("have.text", "external");
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should(
       "have.text",
       "Created, Name, Threats, Risk Level, Status, Owner",
     );
 
-    // log out and log back in as 'alice', whose default event queue is 'secondary_queue'
+    // log out and log back in as 'alice', whose default event queue is 'internal'
     cy.logout();
     cy.login("alice");
     // go to manage events
     visitUrl({
       url: "/manage_events",
-      extraIntercepts: ["@getEventsSecondaryQueueFilter"],
+      extraIntercepts: ["@getEventsInternalQueueFilter"],
     });
 
     //  Default queue filter should be there (check filter chip)
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
-    cy.get('[data-cy="filter-chip-content"]').should(
-      "have.text",
-      "secondary_queue",
-    );
+    cy.get('[data-cy="filter-chip-content"]').should("have.text", "internal");
     // Queue selector should have right value
     cy.get(
       '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "secondary_queue");
+    ).should("have.text", "internal");
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should("have.text", "Created, Name, Type");
   });
   it("will update the event queue filter and event table columns when preferred event queue is changed", () => {
     //  Default queue filter should be there (check filter chip)
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
-    cy.get('[data-cy="filter-chip-content"]').should("have.text", "default");
+    cy.get('[data-cy="filter-chip-content"]').should("have.text", "external");
     // Queue selector should have right value
     cy.get(
       '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "default");
+    ).should("have.text", "external");
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should(
       "have.text",
@@ -779,43 +776,40 @@ describe("TheEventsTable.vue - Queue Settings", () => {
       '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-trigger',
     ).click();
     cy.get(".p-dropdown-items").should("be.visible");
-    cy.get('[aria-label="default"]').should("be.visible");
-    cy.get('[aria-label="secondary_queue"]').should("be.visible");
-    cy.get('[aria-label="test_queue"]').should("be.visible");
+    cy.get('[aria-label="external"]').should("be.visible");
+    cy.get('[aria-label="internal"]').should("be.visible");
+    cy.get('[aria-label="intel"]').should("be.visible");
 
-    // Switch to secondary queue and check data
-    cy.get('[aria-label="secondary_queue"]').click();
-    cy.wait("@getEventsSecondaryQueueFilter")
+    // Switch to internal queue and check data
+    cy.get('[aria-label="internal"]').click();
+    cy.wait("@getEventsInternalQueueFilter")
       .its("state")
       .should("eq", "Complete");
-    //  secondary queue filter should be there (check filter chip)
+    // internal queue filter should be there (check filter chip)
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
-    cy.get('[data-cy="filter-chip-content"]').should(
-      "have.text",
-      "secondary_queue",
-    );
+    cy.get('[data-cy="filter-chip-content"]').should("have.text", "internal");
     // Queue selector should have right value
     cy.get(
       '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "secondary_queue");
+    ).should("have.text", "internal");
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should("have.text", "Created, Name, Type");
 
-    // Switch back to default queue
+    // Switch back to external queue
     cy.get(
       '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-trigger',
     ).click();
-    cy.get('[aria-label="default"]').click();
-    cy.wait("@getEventsDefaultQueueFilter")
+    cy.get('[aria-label="external"]').click();
+    cy.wait("@getEventsExternalQueueFilter")
       .its("state")
       .should("eq", "Complete");
-    //  Default queue filter should be there (check filter chip)
+    // External queue filter should be there (check filter chip)
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
-    cy.get('[data-cy="filter-chip-content"]').should("have.text", "default");
+    cy.get('[data-cy="filter-chip-content"]').should("have.text", "external");
     // Queue selector should have right value
     cy.get(
       '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "default");
+    ).should("have.text", "external");
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should(
       "have.text",

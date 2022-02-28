@@ -252,18 +252,18 @@ def test_update_owner(client_valid_access_token, db):
 
 
 def test_update_queue(client_valid_access_token, db):
-    alert_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(alert_queue="external", db=db)
     initial_alert_version = alert_tree.node.version
 
     # Create a new alert queue
-    helpers.create_queue(value="test_queue2", db=db)
+    helpers.create_queue(value="updated_queue", db=db)
 
     # Update the queue
     update = client_valid_access_token.patch(
-        "/api/alert/", json=[{"queue": "test_queue2", "uuid": str(alert_tree.node_uuid)}]
+        "/api/alert/", json=[{"queue": "updated_queue", "uuid": str(alert_tree.node_uuid)}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert alert_tree.node.queue.value == "test_queue2"
+    assert alert_tree.node.queue.value == "updated_queue"
     assert alert_tree.node.version != initial_alert_version
 
     # Verify the history
@@ -272,9 +272,9 @@ def test_update_queue(client_valid_access_token, db):
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"
     assert history.json()["items"][1]["field"] == "queue"
-    assert history.json()["items"][1]["diff"]["old_value"] == "test_queue"
-    assert history.json()["items"][1]["diff"]["new_value"] == "test_queue2"
-    assert history.json()["items"][1]["snapshot"]["queue"]["value"] == "test_queue2"
+    assert history.json()["items"][1]["diff"]["old_value"] == "external"
+    assert history.json()["items"][1]["diff"]["new_value"] == "updated_queue"
+    assert history.json()["items"][1]["snapshot"]["queue"]["value"] == "updated_queue"
 
 
 @pytest.mark.parametrize(

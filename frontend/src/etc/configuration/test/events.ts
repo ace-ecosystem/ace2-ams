@@ -46,7 +46,7 @@ export const eventRangeFilters = {
 };
 
 export const eventQueueColumnMappings: Record<string, columnOption[]> = {
-  default: [
+  external: [
     {
       field: "edit",
       header: "",
@@ -87,7 +87,7 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     { field: "vectors", header: "Vectors", sortable: false, default: false },
     { field: "queue", header: "Queue", sortable: true, default: false },
   ],
-  secondary_queue: [
+  internal: [
     {
       field: "edit",
       header: "",
@@ -128,7 +128,7 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     { field: "vectors", header: "Vectors", sortable: false, default: false },
     { field: "queue", header: "Queue", sortable: true, default: false },
   ],
-  test_queue: [
+  intel: [
     {
       field: "edit",
       header: "",
@@ -143,13 +143,13 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
       sortable: false,
       default: false,
     },
-    { field: "threats", header: "Threats", sortable: false, default: false },
-    { field: "type", header: "Type", sortable: true, default: true },
+    { field: "threats", header: "Threats", sortable: false, default: true },
+    { field: "type", header: "Type", sortable: true, default: false },
     {
       field: "riskLevel",
       header: "Risk Level",
-      sortable: true,
-      default: false,
+      sortable: false,
+      default: true,
     },
     // dispo?
     {
@@ -164,8 +164,8 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
       sortable: true,
       default: false,
     },
-    { field: "status", header: "Status", sortable: true, default: false },
-    { field: "owner", header: "Owner", sortable: true, default: false },
+    { field: "status", header: "Status", sortable: true, default: true },
+    { field: "owner", header: "Owner", sortable: true, default: true },
     { field: "vectors", header: "Vectors", sortable: false, default: false },
     { field: "queue", header: "Queue", sortable: true, default: false },
   ],
