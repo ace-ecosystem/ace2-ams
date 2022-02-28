@@ -147,7 +147,8 @@
     } else {
       await nodeThreatStore.create({
         value: newThreatName.value,
-        queues: ["default"],
+        // TODO: This needs to be based on the current user's preferred queue
+        queues: ["external"],
         types: newThreatTypes.value.map((x) => x.value),
       });
     }
