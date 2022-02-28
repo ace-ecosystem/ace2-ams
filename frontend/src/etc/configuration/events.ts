@@ -53,25 +53,43 @@ export const eventFilters: readonly propertyOption[] = [
   eventVectorsProperty,
 ] as const;
 
-export const eventEditableProperties: readonly propertyOption[] = [
-  nameProperty,
-  ownerProperty,
-  nodeCommentProperty,
-  eventRemediationProperty,
-  eventPreventionToolsProperty,
-  eventRiskLevelProperty,
-  eventStatusProperty,
-  nodeThreatActorProperty,
-  nodeThreatsProperty,
-  eventTypeProperty,
-  eventVectorsProperty,
-  eventEventTimeProperty,
-  eventAlertTimeProperty,
-  eventOwnershipTimeProperty,
-  eventDispositionTimeProperty,
-  eventContainTimeProperty,
-  eventRemediationTimeProperty,
-];
+export const eventEditableProperties: Record<string, propertyOption[]> = {
+  external: [
+    nameProperty,
+    ownerProperty,
+    nodeCommentProperty,
+    eventRemediationProperty,
+    eventPreventionToolsProperty,
+    eventRiskLevelProperty,
+    eventStatusProperty,
+    nodeThreatActorProperty,
+    nodeThreatsProperty,
+    eventTypeProperty,
+    eventVectorsProperty,
+    eventEventTimeProperty,
+    eventAlertTimeProperty,
+    eventOwnershipTimeProperty,
+    eventDispositionTimeProperty,
+    eventContainTimeProperty,
+    eventRemediationTimeProperty,
+  ],
+  internal: [
+    nameProperty,
+    ownerProperty,
+    nodeCommentProperty,
+    eventRemediationProperty,
+    eventStatusProperty,
+    nodeThreatsProperty,
+    eventTypeProperty,
+    eventEventTimeProperty,
+    eventAlertTimeProperty,
+    eventOwnershipTimeProperty,
+    eventDispositionTimeProperty,
+    eventContainTimeProperty,
+    eventRemediationTimeProperty,
+  ],
+};
+
 export const eventRangeFilters = {
   "Created Time": {
     start: eventPropertyTypes.CREATED_AFTER_PROPERTY,
