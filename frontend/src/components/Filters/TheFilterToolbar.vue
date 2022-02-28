@@ -27,8 +27,7 @@
           data-cy="filter-input"
           :allow-delete="false"
           form-type="filter"
-                  :queue="queue"
-
+          :queue="queue"
         >
         </NodePropertyInput>
         <Button
@@ -70,7 +69,7 @@
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
-    const currentUserSettingsStore = useCurrentUserSettingsStore();
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
 
   import { copyToClipboard, formatNodeFiltersForAPI } from "@/etc/helpers";
 
@@ -82,7 +81,7 @@
     events: config.events.eventFilters,
   };
 
-    const queue = computed(() => {
+  const queue = computed(() => {
     return currentUserSettingsStore.$state["queues"][nodeType].value;
   });
 

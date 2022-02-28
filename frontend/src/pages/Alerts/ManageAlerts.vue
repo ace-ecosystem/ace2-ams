@@ -29,7 +29,7 @@
   const config = inject("config");
 
   provide("availableFilters", config.alerts.alertFilters);
-  provide("availableEditFields", []);
+  provide("availableEditFields", {});
   provide("nodeType", "alerts");
   provide("rangeFilters", config.alerts.alertRangeFilters);
 

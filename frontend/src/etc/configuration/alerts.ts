@@ -25,7 +25,7 @@ import {
   queueProperty,
 } from "../constants/base";
 
-export const alertFilters: readonly propertyOption[] = [
+const defaultAlertFilters = [
   alertDispositionProperty,
   alertDispositionUserProperty,
   alertDispositionedAfterProperty,
@@ -46,7 +46,13 @@ export const alertFilters: readonly propertyOption[] = [
   alertToolProperty,
   alertToolInstanceProperty,
   alertTypeProperty,
-] as const;
+];
+
+export const alertFilters: Record<string, readonly propertyOption[]> = {
+  external: defaultAlertFilters,
+  intel: defaultAlertFilters,
+  internal: defaultAlertFilters,
+} as const;
 
 export const alertRangeFilters = {
   "Event Time": {

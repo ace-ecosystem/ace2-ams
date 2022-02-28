@@ -159,7 +159,7 @@ export const eventTypeProperty: propertyOption = {
   label: "Type",
   type: inputTypes.SELECT,
   store: useEventTypeStore,
-    queueDependent: true,
+  queueDependent: true,
 
   optionProperty: "value",
   valueProperty: "value",

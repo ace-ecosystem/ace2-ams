@@ -145,7 +145,7 @@
 
   const propertyTypeOptions =
     props.formType == "filter"
-      ? availableFilters
+      ? availableFilters[props.queue]
       : props.formType == "edit"
       ? availableEditFields[props.queue]
       : null;

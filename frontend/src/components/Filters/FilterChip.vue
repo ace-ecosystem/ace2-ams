@@ -73,7 +73,7 @@
   import OverlayPanel from "primevue/overlaypanel";
 
   import NodePropertyInput from "../Node/NodePropertyInput.vue";
-    const currentUserSettingsStore = useCurrentUserSettingsStore();
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
   const filterStore = useFilterStore();
   const nodeType = inject("nodeType");
 
@@ -98,7 +98,7 @@
     events: config.events.eventFilters,
   };
   const filterOptions =
-    nodeType in availableFilters ? availableFilters[nodeType] : [];
+    nodeType in availableFilters ? availableFilters[nodeType][queue.value] : [];
   const filterNameObject = filterOptions.find((filter) => {
     return filter.name === props.filterName;
   });
