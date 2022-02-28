@@ -18,3 +18,5 @@ docker exec ace2-ams-gui bin/wait-for-gui.sh
 
 # Run Cypress
 docker exec ace2-ams-gui xvfb-run cypress run --headed --browser chrome
+
+bin/disable-test-mode.sh

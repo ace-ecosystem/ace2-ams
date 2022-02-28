@@ -12,3 +12,5 @@ new_path=${1#backend/app/}
 
 docker-compose up -d
 docker exec -e SQL_ECHO=no ace2-ams-api pytest "$new_path" -vv
+
+bin/disable-test-mode.sh

@@ -87,7 +87,7 @@ def create_alert_type(value: str, db: Session) -> AlertType:
 
 def create_alert(
     db: Session,
-    alert_queue: str = "test_queue",
+    alert_queue: str = "external",
     alert_type: str = "test_type",
     alert_uuid: Optional[Union[str, UUID]] = None,
     disposition: Optional[str] = None,
@@ -305,7 +305,7 @@ def create_event(
     disposition_time: Optional[datetime] = None,
     owner: Optional[str] = None,
     prevention_tools: Optional[List[str]] = None,
-    queue: str = "default",
+    queue: str = "external",
     remediation_time: Optional[datetime] = None,
     remediations: Optional[List[str]] = None,
     risk_level: Optional[str] = None,
@@ -387,7 +387,7 @@ def create_event(
 
 def create_event_prevention_tool(value: str, db: Session, queues: List[str] = None) -> EventPreventionTool:
     if queues is None:
-        queues = ["default"]
+        queues = ["external"]
 
     obj: EventPreventionTool = _create_basic_object(db_table=EventPreventionTool, value=value, db=db)
     obj.queues = [create_queue(value=queue, db=db) for queue in queues]
@@ -397,7 +397,7 @@ def create_event_prevention_tool(value: str, db: Session, queues: List[str] = No
 
 def create_event_remediation(value: str, db: Session, queues: List[str] = None) -> EventRemediation:
     if queues is None:
-        queues = ["default"]
+        queues = ["external"]
 
     obj: EventRemediation = _create_basic_object(db_table=EventRemediation, value=value, db=db)
     obj.queues = [create_queue(value=queue, db=db) for queue in queues]
@@ -407,7 +407,7 @@ def create_event_remediation(value: str, db: Session, queues: List[str] = None) 
 
 def create_event_risk_level(value: str, db: Session, queues: List[str] = None) -> EventRiskLevel:
     if queues is None:
-        queues = ["default"]
+        queues = ["external"]
 
     obj: EventRiskLevel = _create_basic_object(db_table=EventRiskLevel, value=value, db=db)
     obj.queues = [create_queue(value=queue, db=db) for queue in queues]
@@ -417,7 +417,7 @@ def create_event_risk_level(value: str, db: Session, queues: List[str] = None) -
 
 def create_event_source(value: str, db: Session, queues: List[str] = None) -> EventSource:
     if queues is None:
-        queues = ["default"]
+        queues = ["external"]
 
     obj: EventSource = _create_basic_object(db_table=EventSource, value=value, db=db)
     obj.queues = [create_queue(value=queue, db=db) for queue in queues]
@@ -427,7 +427,7 @@ def create_event_source(value: str, db: Session, queues: List[str] = None) -> Ev
 
 def create_event_status(value: str, db: Session, queues: List[str] = None) -> EventStatus:
     if queues is None:
-        queues = ["default"]
+        queues = ["external"]
 
     obj: EventStatus = _create_basic_object(db_table=EventStatus, value=value, db=db)
     obj.queues = [create_queue(value=queue, db=db) for queue in queues]
@@ -437,7 +437,7 @@ def create_event_status(value: str, db: Session, queues: List[str] = None) -> Ev
 
 def create_event_type(value: str, db: Session, queues: List[str] = None) -> EventType:
     if queues is None:
-        queues = ["default"]
+        queues = ["external"]
 
     obj: EventType = _create_basic_object(db_table=EventType, value=value, db=db)
     obj.queues = [create_queue(value=queue, db=db) for queue in queues]
@@ -447,7 +447,7 @@ def create_event_type(value: str, db: Session, queues: List[str] = None) -> Even
 
 def create_event_vector(value: str, db: Session, queues: List[str] = None) -> EventVector:
     if queues is None:
-        queues = ["default"]
+        queues = ["external"]
 
     obj: EventVector = _create_basic_object(db_table=EventVector, value=value, db=db)
     obj.queues = [create_queue(value=queue, db=db) for queue in queues]
@@ -487,7 +487,7 @@ def create_node_tag(value: str, db: Session) -> NodeTag:
 
 def create_node_threat_actor(value: str, db: Session, queues: List[str] = None) -> NodeThreatActor:
     if queues is None:
-        queues = ["default"]
+        queues = ["external"]
 
     obj: NodeThreatActor = _create_basic_object(db_table=NodeThreatActor, value=value, db=db)
     obj.queues = [create_queue(value=queue, db=db) for queue in queues]
@@ -501,7 +501,7 @@ def create_node_threat(value: str, db: Session, queues: List[str] = None, types:
         return existing
 
     if queues is None:
-        queues = ["default"]
+        queues = ["external"]
 
     if types is None:
         types = ["test_type"]
@@ -519,7 +519,7 @@ def create_node_threat(value: str, db: Session, queues: List[str] = None, types:
 
 def create_node_threat_type(value: str, db: Session, queues: List[str] = None) -> NodeThreatType:
     if queues is None:
-        queues = ["default"]
+        queues = ["external"]
 
     obj: NodeThreatType = _create_basic_object(db_table=NodeThreatType, value=value, db=db)
     obj.queues = [create_queue(value=queue, db=db) for queue in queues]
@@ -608,10 +608,10 @@ def create_queue(value: str, db: Session) -> Queue:
 def create_user(
     username: str,
     db: Session,
-    alert_queue: str = "test_queue",
+    alert_queue: str = "external",
     display_name: str = "Analyst",
     email: Optional[str] = None,
-    event_queue: str = "test_queue",
+    event_queue: str = "external",
     password: str = "asdfasdf",
     roles: List[str] = None,
 ) -> User:
