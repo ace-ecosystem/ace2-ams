@@ -33,6 +33,7 @@
             v-else
             id="field.name"
             v-model="formFields[field.name]"
+            :queue="event.queue.value"
             :fixed-property-type="true"
             :allow-delete="false"
             form-type="edit"
@@ -94,7 +95,7 @@
 
   const emit = defineEmits(["requestReload"]);
 
-  const fieldOptions = inject("availableEditFields");
+  const availableEditFields = inject("availableEditFields");
 
   const error = ref(null);
   const event = ref(null);
@@ -102,8 +103,10 @@
   const formFields = ref({});
   const isLoading = ref(false);
 
-  onMounted(() => {
-    for (const option of fieldOptions) {
+  onMounted(async () => {
+    event.value = await Event.read(props.eventUuid);
+
+    for (const option of availableEditFields[event.value.queue.value]) {
       // Create a lookup by field/option name of all the fieldOptionObjects
       fieldOptionObjects.value[option.name] = option;
       // Set up all the form field objects (to be used in NodePropertyInput)
@@ -118,6 +121,14 @@
   watch(modalStore, async () => {
     if (modalStore.active === props.name) {
       await initializeData();
+    }
+  });
+
+  const fieldOptions = computed(() => {
+    if (event.value) {
+      return availableEditFields[event.value.queue.value];
+    } else {
+      return [];
     }
   });
 
@@ -143,7 +154,6 @@
   };
 
   const resetForm = async () => {
-    event.value = await Event.read(props.eventUuid);
     if (event.value) {
       fillFormFields();
     }
