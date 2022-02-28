@@ -253,12 +253,14 @@
   import { useAuthStore } from "@/stores/auth";
   import { useNodeDirectiveStore } from "@/stores/nodeDirective";
   import { useObservableTypeStore } from "@/stores/observableType";
+  import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
 
   const router = useRouter();
 
   const alertStore = useAlertStore();
   const alertTypeStore = useAlertTypeStore();
   const authStore = useAuthStore();
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
   const nodeDirectiveStore = useNodeDirectiveStore();
   const observableTypeStore = useObservableTypeStore();
   const queueStore = useQueueStore();
@@ -372,7 +374,7 @@
     alertDescription.value = "Manual Alert";
     alertDescriptionAppendString.value = "";
     alertType.value = "manual";
-    queue.value = "default";
+    queue.value = currentUserSettingsStore.preferredAlertQueue.value;
     errors.value = [];
     timezone.value = moment.tz.guess();
     observables.value = [];
