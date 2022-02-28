@@ -20,62 +20,105 @@ alert_disposition:
 alert_type:
   - manual
 event_prevention_tool:
-  - antivirus
-  - application whitelisting
-  - edr
-  - email filter
-  - fw
-  - ips
-  - proxy
-  - response team
-  - user
+  external:
+    - antivirus
+    - application whitelisting
+    - edr
+    - email filter
+    - fw
+    - ips
+    - proxy
+    - response team
+    - user
 event_remediation:
-  - cleaned manually
-  - cleaned with antivirus
-  - credentials reset
-  - domain takedown
-  - escalated
-  - network block
-  - not remediated
-  - reimaged
-  - removed from mailbox
+  external:
+    - cleaned manually
+    - cleaned with antivirus
+    - credentials reset
+    - domain takedown
+    - escalated
+    - network block
+    - not remediated
+    - reimaged
+    - removed from mailbox
+  internal:
+    - cleaned manually
+    - cleaned with antivirus
+    - credentials reset
+    - domain takedown
+    - escalated
+    - network block
+    - not remediated
+    - reimaged
+    - removed from mailbox
 event_risk_level:
-  - 0
-  - 1
-  - 2
-  - 3
+  external:
+    - 0
+    - 1
+    - 2
+    - 3
 event_source:
-  - internal
-  - osint
+  external:
+    - internal
+    - osint
+  internal:
+    - internal
+    - osint
 event_status:
-  - OPEN
-  - IGNORE
-  - CLOSED
+  external:
+    - OPEN
+    - IGNORE
+    - CLOSED
+  internal:
+    - OPEN
+    - IGNORE
+    - CLOSED
 event_type:
-  - credential compromise
-  - host compromise
-  - pentest
-  - phish
-  - recon
-  - third party
-  - web browsing
+  external:
+    - credential compromise
+    - host compromise
+    - pentest
+    - phish
+    - recon
+    - third party
+    - web browsing
+  internal:
+    - credential compromise
+    - host compromise
+    - pentest
+    - phish
+    - recon
+    - third party
+    - web browsing
 event_vector:
-  - business application
-  - compromised website
-  - corporate email
-  - unknown
-  - usb
-  - webmail
+  external:
+    - business application
+    - compromised website
+    - corporate email
+    - unknown
+    - usb
+    - webmail
 node_threat_type:
-  - botnet
-  - customer threat
-  - downloader
-  - fraud
-  - infostealer
-  - keylogger
-  - ransomware
-  - rat
-  - rootkit
+  external:
+    - botnet
+    - customer threat
+    - downloader
+    - fraud
+    - infostealer
+    - keylogger
+    - ransomware
+    - rat
+    - rootkit
+  internal:
+    - botnet
+    - customer threat
+    - downloader
+    - fraud
+    - infostealer
+    - keylogger
+    - ransomware
+    - rat
+    - rootkit
 observable_type:
   - file
   - ipv4
