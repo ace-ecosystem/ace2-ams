@@ -271,7 +271,7 @@
   const alertDescription = ref("Manual Alert");
   const alertDescriptionAppendString = ref("");
   const alertType = ref("manual");
-  const queue = ref("default");
+  const queue = ref();
   const errors = ref([]);
   const splitButtonOptions = ref([
     {
