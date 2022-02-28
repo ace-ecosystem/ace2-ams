@@ -29,7 +29,7 @@ from db.schemas.user_role import UserRole
 # docker logs ace2-gui-backend
 
 
-def add_queueable_values(db_table: DeclarativeMeta, data: dict, key: str, print_value: str):
+def add_queueable_values(db: Session, db_table: DeclarativeMeta, data: dict, key: str, print_value: str):
     created = []
     for queue in data[key]:
         db_queue = crud.read_by_value(value=queue, db_table=Queue, db=db)
@@ -92,31 +92,39 @@ def seed(db: Session):
 
     if "event_prevention_tool" in data and not crud.read_all(db_table=EventPreventionTool, db=db):
         add_queueable_values(
-            db_table=EventPreventionTool, data=data, key="event_prevention_tool", print_value="event prevention tool"
+            db=db,
+            db_table=EventPreventionTool,
+            data=data,
+            key="event_prevention_tool",
+            print_value="event prevention tool",
         )
 
     if "event_remediation" in data and not crud.read_all(db_table=EventRemediation, db=db):
         add_queueable_values(
-            db_table=EventRemediation, data=data, key="event_remediation", print_value="event remediation"
+            db=db, db_table=EventRemediation, data=data, key="event_remediation", print_value="event remediation"
         )
 
     if "event_risk_level" in data and not crud.read_all(db_table=EventRiskLevel, db=db):
-        add_queueable_values(db_table=EventRiskLevel, data=data, key="event_risk_level", print_value="event risk level")
+        add_queueable_values(
+            db=db, db_table=EventRiskLevel, data=data, key="event_risk_level", print_value="event risk level"
+        )
 
     if "event_source" in data and not crud.read_all(db_table=EventSource, db=db):
-        add_queueable_values(db_table=EventSource, data=data, key="event_source", print_value="event source")
+        add_queueable_values(db=db, db_table=EventSource, data=data, key="event_source", print_value="event source")
 
     if "event_status" in data and not crud.read_all(db_table=EventStatus, db=db):
-        add_queueable_values(db_table=EventStatus, data=data, key="event_status", print_value="event status")
+        add_queueable_values(db=db, db_table=EventStatus, data=data, key="event_status", print_value="event status")
 
     if "event_type" in data and not crud.read_all(db_table=EventType, db=db):
-        add_queueable_values(db_table=EventType, data=data, key="event_type", print_value="event type")
+        add_queueable_values(db=db, db_table=EventType, data=data, key="event_type", print_value="event type")
 
     if "event_vector" in data and not crud.read_all(db_table=EventVector, db=db):
-        add_queueable_values(db_table=EventVector, data=data, key="event_vector", print_value="event vector")
+        add_queueable_values(db=db, db_table=EventVector, data=data, key="event_vector", print_value="event vector")
 
     if "node_threat_type" in data and not crud.read_all(db_table=NodeThreatType, db=db):
-        add_queueable_values(db_table=NodeThreatType, data=data, key="node_threat_type", print_value="node threat type")
+        add_queueable_values(
+            db=db, db_table=NodeThreatType, data=data, key="node_threat_type", print_value="node threat type"
+        )
 
     if "observable_type" in data and not crud.read_all(db_table=ObservableType, db=db):
         for value in data["observable_type"]:
