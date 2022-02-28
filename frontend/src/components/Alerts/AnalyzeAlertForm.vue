@@ -374,7 +374,8 @@
     alertDescription.value = "Manual Alert";
     alertDescriptionAppendString.value = "";
     alertType.value = "manual";
-    queue.value = currentUserSettingsStore.preferredAlertQueue.value;
+    // TODO: This needs to be based on the current user's preferred queue
+    queue.value = "external";
     errors.value = [];
     timezone.value = moment.tz.guess();
     observables.value = [];
