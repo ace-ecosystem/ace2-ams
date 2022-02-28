@@ -45,6 +45,7 @@
         :fixed-property-type="true"
         :allow-delete="false"
         form-type="filter"
+        :queue="queue"
       >
       </NodePropertyInput>
       <Button
@@ -64,6 +65,7 @@
   import { inject, computed, defineProps, ref } from "vue";
 
   import { useFilterStore } from "@/stores/filter";
+  import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
 
   import { isObject } from "@/etc/validators";
   import Button from "primevue/button";
@@ -71,10 +73,15 @@
   import OverlayPanel from "primevue/overlaypanel";
 
   import NodePropertyInput from "../Node/NodePropertyInput.vue";
+    const currentUserSettingsStore = useCurrentUserSettingsStore();
   const filterStore = useFilterStore();
   const nodeType = inject("nodeType");
 
   const config = inject("config");
+
+  const queue = computed(() => {
+    return currentUserSettingsStore.$state["queues"][nodeType].value;
+  });
 
   const op = ref(null);
   const toggleQuickEditMenu = (event) => {

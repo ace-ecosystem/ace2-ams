@@ -27,6 +27,8 @@
           data-cy="filter-input"
           :allow-delete="false"
           form-type="filter"
+                  :queue="queue"
+
         >
         </NodePropertyInput>
         <Button
@@ -51,7 +53,7 @@
 </script>
 
 <script setup>
-  import { inject, ref } from "vue";
+  import { inject, computed, ref } from "vue";
 
   import Button from "primevue/button";
   import FilterChipContainer from "@/components/Filters/FilterChipContainer.vue";
@@ -64,9 +66,11 @@
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
+  import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
+    const currentUserSettingsStore = useCurrentUserSettingsStore();
 
   import { copyToClipboard, formatNodeFiltersForAPI } from "@/etc/helpers";
 
@@ -77,6 +81,10 @@
     alerts: config.alerts.alertFilters,
     events: config.events.eventFilters,
   };
+
+    const queue = computed(() => {
+    return currentUserSettingsStore.$state["queues"][nodeType].value;
+  });
 
   const clear = () => {
     filterStore.clearAll({ nodeType: nodeType });
