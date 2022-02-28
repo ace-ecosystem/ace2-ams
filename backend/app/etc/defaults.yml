@@ -51,6 +51,7 @@ event_remediation:
     - not remediated
     - reimaged
     - removed from mailbox
+    - some internal value
 event_risk_level:
   external:
     - 0
@@ -64,6 +65,7 @@ event_source:
   internal:
     - internal
     - osint
+    - some internal value
 event_status:
   external:
     - OPEN
@@ -73,6 +75,7 @@ event_status:
     - OPEN
     - IGNORE
     - CLOSED
+    - some internal value
 event_type:
   external:
     - credential compromise
@@ -90,6 +93,7 @@ event_type:
     - recon
     - third party
     - web browsing
+    - some internal value
 event_vector:
   external:
     - business application
@@ -119,6 +123,7 @@ node_threat_type:
     - ransomware
     - rat
     - rootkit
+    - some internal value
 observable_type:
   - file
   - ipv4
