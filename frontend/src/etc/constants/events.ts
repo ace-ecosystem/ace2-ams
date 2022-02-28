@@ -35,7 +35,7 @@ export const eventPropertyTypes: Record<string, string> = {
 };
 export const eventEventTimeProperty: propertyOption = {
   name: eventPropertyTypes.EVENT_TIME_PROPERTY,
-  label: "Event TIme",
+  label: "Event Time",
   type: inputTypes.DATE,
   stringRepr: (value: Date): string => {
     return value.toISOString();
