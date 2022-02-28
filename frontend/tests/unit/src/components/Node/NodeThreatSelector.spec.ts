@@ -112,7 +112,7 @@ describe("NodeThreatSelector.vue", () => {
 
     await wrapper.vm.submitNewThreat();
     expect(nodeThreatStore.create).toHaveBeenCalledWith({
-      queues: ["default"],
+      queues: ["external"],
       types: ["testThreatType"],
       value: "threatName",
     });
