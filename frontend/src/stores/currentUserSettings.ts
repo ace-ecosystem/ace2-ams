@@ -1,11 +1,14 @@
-import { queueRead } from "@/models/queue";
+import { useAuthStore } from "./auth";
 import { defineStore } from "pinia";
 
 export const useCurrentUserSettingsStore = defineStore({
   id: "currentUserSettingsStore",
 
-  state: () => ({
-    preferredEventQueue: null as unknown as queueRead,
-    preferredAlertQueue: null as unknown as queueRead,
-  }),
+  state: () => {
+    const authStore = useAuthStore();
+    return {
+      preferredEventQueue: authStore.user.defaultEventQueue,
+      preferredAlertQueue: authStore.user.defaultAlertQueue,
+    };
+  },
 });
