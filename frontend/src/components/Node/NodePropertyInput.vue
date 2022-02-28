@@ -129,10 +129,20 @@
   import InputText from "primevue/inputtext";
   import Multiselect from "primevue/multiselect";
 
+  import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
   import { DatePicker } from "v-calendar";
 
+  const nodeType = inject("nodeType");
   const availableFilters = inject("availableFilters");
   const availableEditFields = inject("availableEditFields");
+
+  // Set up which queue to use for property values, if applicable
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
+  const preferredQueues = ref({
+    alerts: currentUserSettingsStore.preferredAlertQueue,
+    events: currentUserSettingsStore.preferredEventQueue,
+  });
+  const preferredQueue = ref(preferredQueues.value[nodeType]);
 
   const propertyTypeOptions =
     props.formType == "filter"
@@ -174,7 +184,13 @@
   const propertyValueOptions = computed(() => {
     if (propertyType.value && propertyType.value.store) {
       const store = propertyType.value.store();
-      return store.allItems;
+      if (propertyType.value.queueDependent) {
+        return store.getItemsByQueue(
+          currentUserSettingsStore[preferredQueue.value.value],
+        );
+      } else {
+        return store.allItems;
+      }
     }
     return null;
   });

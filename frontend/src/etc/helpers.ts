@@ -8,7 +8,7 @@ import {
   alertSummary,
   alertTreeRead,
 } from "@/models/alert";
-import { propertyOption } from "@/models/base";
+import { genericObjectRead, propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
 import { nodeTagRead } from "@/models/nodeTag";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
@@ -358,4 +358,22 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
     type: alert.type.value,
     uuid: alert.uuid,
   };
+}
+
+export function groupItemsByQueue(
+  arr: genericObjectRead[],
+): Record<string, genericObjectRead[]> {
+  const itemsByQueue: Record<string, genericObjectRead[]> = {};
+  for (const item of arr) {
+    if (item.queues) {
+      for (const queue of item.queues) {
+        if (queue.value in itemsByQueue) {
+          itemsByQueue[queue.value].push(item);
+        } else {
+          itemsByQueue[queue.value] = [item];
+        }
+      }
+    }
+  }
+  return itemsByQueue;
 }

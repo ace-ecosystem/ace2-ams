@@ -104,6 +104,7 @@ export const eventRemediationProperty: propertyOption = {
   label: "Remediation",
   type: inputTypes.MULTISELECT,
   store: useEventRemediationStore,
+  queueDependent: true,
   stringRepr: (value: eventRemediationRead[]): string => {
     return value
       .map(function (elem) {
@@ -120,6 +121,8 @@ export const eventPreventionToolsProperty: propertyOption = {
   label: "Prevention Tools",
   type: inputTypes.MULTISELECT,
   store: useEventPreventionToolStore,
+  queueDependent: true,
+
   stringRepr: (value: eventPreventionToolRead[]) => {
     return value
       .map(function (elem) {
@@ -136,6 +139,8 @@ export const eventRiskLevelProperty: propertyOption = {
   label: "Risk Level",
   type: inputTypes.SELECT,
   store: useEventRiskLevelStore,
+  queueDependent: true,
+
   optionProperty: "value",
   valueProperty: "value",
 };
@@ -144,6 +149,8 @@ export const eventStatusProperty: propertyOption = {
   label: "Status",
   type: inputTypes.SELECT,
   store: useEventStatusStore,
+  queueDependent: true,
+
   optionProperty: "value",
   valueProperty: "value",
 };
@@ -152,6 +159,8 @@ export const eventTypeProperty: propertyOption = {
   label: "Type",
   type: inputTypes.SELECT,
   store: useEventTypeStore,
+    queueDependent: true,
+
   optionProperty: "value",
   valueProperty: "value",
 };
@@ -160,6 +169,8 @@ export const eventVectorsProperty: propertyOption = {
   label: "Vectors",
   type: inputTypes.MULTISELECT,
   store: useEventVectorStore,
+  queueDependent: true,
+
   stringRepr: (value: eventVectorRead[]) => {
     return value
       .map(function (elem) {
@@ -209,6 +220,7 @@ export const eventSourceProperty: propertyOption = {
   label: "Source",
   type: inputTypes.SELECT,
   store: useEventSourceStore,
+  queueDependent: true,
   optionProperty: "value",
   valueProperty: "value",
 };

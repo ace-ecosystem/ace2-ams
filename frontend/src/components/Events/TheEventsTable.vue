@@ -5,14 +5,8 @@
 <template>
   <TheNodeTable :key="key" :columns="columns">
     <template #tableHeaderStart
-      ><div data-cy="event-queue-selector">
-        <Dropdown
-          v-model="currentUserSettingsStore.preferredEventQueue"
-          :options="queueStore.items"
-          option-label="value"
-          style="margin-right: 2%"
-        ></Dropdown></div
-    ></template>
+      ><NodeQueueSelector node-queue="events"
+    /></template>
 
     <template #rowCell="{ data, field }">
       <EventTableCell :data="data" :field="field"></EventTableCell>
@@ -28,16 +22,13 @@
 <script setup>
   import { ref, onMounted, inject } from "vue";
 
-  import Dropdown from "primevue/dropdown";
-
   import EventAlertsTable from "./EventAlertsTable.vue";
   import TheNodeTable from "@/components/Node/TheNodeTable.vue";
+  import NodeQueueSelector from "@/components/Node/NodeQueueSelector.vue";
   import EventTableCell from "@/components/Events/EventTableCell.vue";
 
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
   import { useFilterStore } from "@/stores/filter";
-  import { useQueueStore } from "@/stores/queue";
-  const queueStore = useQueueStore();
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const filterStore = useFilterStore();
 
