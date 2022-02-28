@@ -102,8 +102,10 @@
   const formFields = ref({});
   const isLoading = ref(false);
 
-  onMounted(() => {
-    for (const option of fieldOptions) {
+  onMounted(async () => {
+    event.value = await Event.read(props.eventUuid);
+
+    for (const option of fieldOptions[event.value.queue.value]) {
       // Create a lookup by field/option name of all the fieldOptionObjects
       fieldOptionObjects.value[option.name] = option;
       // Set up all the form field objects (to be used in NodePropertyInput)
@@ -143,7 +145,6 @@
   };
 
   const resetForm = async () => {
-    event.value = await Event.read(props.eventUuid);
     if (event.value) {
       fillFormFields();
     }
