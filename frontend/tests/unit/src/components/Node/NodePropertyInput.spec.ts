@@ -11,42 +11,45 @@ import { createCustomPinia } from "@unit/helpers";
 import { genericObjectReadFactory } from "../../../../mocks/genericObject";
 import { userReadFactory } from "../../../../mocks/user";
 
-const FILTERS_STUB = {external: [
-  {
-    name: "name",
-    label: "Name",
-    type: inputTypes.INPUT_TEXT,
-  },
-  {
-    name: "owner",
-    label: "Owner",
-    type: inputTypes.SELECT,
-    store: useUserStore,
-    optionProperty: "displayName",
-    optionValue: "username",
-  },
-  {
-    name: "observable",
-    label: "Observable",
-    store: useObservableTypeStore,
-    type: inputTypes.CATEGORIZED_VALUE,
-  },
-  {
-    name: "tags",
-    label: "Tags",
-    type: inputTypes.CHIPS,
-  },
-  {
-    name: "observable_types",
-    label: "Observable Types",
-    type: inputTypes.MULTISELECT,
-  },
-  {
-    name: "timeAfter",
-    label: "After",
-    type: inputTypes.DATE,
-  },
-]};
+const FILTERS_STUB = {
+  external: [
+    {
+      name: "name",
+      label: "Name",
+      type: inputTypes.INPUT_TEXT,
+    },
+    {
+      name: "owner",
+      label: "Owner",
+      type: inputTypes.SELECT,
+      store: useUserStore,
+      optionProperty: "displayName",
+      optionValue: "username",
+    },
+    {
+      name: "observable",
+      label: "Observable",
+      store: useObservableTypeStore,
+      type: inputTypes.CATEGORIZED_VALUE,
+    },
+    {
+      name: "tags",
+      label: "Tags",
+      type: inputTypes.CHIPS,
+    },
+    {
+      name: "observable_types",
+      label: "Observable Types",
+      type: inputTypes.MULTISELECT,
+    },
+    {
+      name: "timeAfter",
+      label: "After",
+      type: inputTypes.DATE,
+    },
+  ],
+  internal: [],
+};
 
 const USERS_STUB: userRead[] = [
   {
@@ -122,7 +125,16 @@ function factory(
       provide: {
         nodeType: "alerts",
         availableFilters: FILTERS_STUB,
-        availableEditFields: {external: []},
+        availableEditFields: {
+          external: [],
+          internal: [
+            {
+              name: "name",
+              label: "Name",
+              type: inputTypes.INPUT_TEXT,
+            },
+          ],
+        },
       },
     },
   });
@@ -137,7 +149,7 @@ describe("NodePropertyInput.vue", () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  it("correctly sets propertyTypeOptions to availableFilters if formType is 'filter'", () => {
+  it("correctly computes propertyTypeOptions to availableFilters if formType is 'filter'", async () => {
     const { wrapper } = factory(
       { propertyType: null, propertyValue: null },
       {},
@@ -145,9 +157,12 @@ describe("NodePropertyInput.vue", () => {
     );
 
     expect(wrapper.vm.propertyTypeOptions).toEqual(FILTERS_STUB.external);
+    wrapper.setProps({ queue: "internal" });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.propertyTypeOptions).toEqual(FILTERS_STUB.internal);
   });
 
-  it("correctly sets propertyTypeOptions to availableEditFields if formType is 'edit'", () => {
+  it("correctly computes propertyTypeOptions to availableEditFields if formType is 'edit'", async () => {
     const { wrapper } = factory(
       { propertyType: null, propertyValue: null },
       {},
@@ -155,9 +170,18 @@ describe("NodePropertyInput.vue", () => {
     );
 
     expect(wrapper.vm.propertyTypeOptions).toEqual([]);
+    wrapper.setProps({ queue: "internal" });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.vm.propertyTypeOptions).toEqual([
+      {
+        name: "name",
+        label: "Name",
+        type: inputTypes.INPUT_TEXT,
+      },
+    ]);
   });
 
-  it("correctly sets propertyTypeOptions to null if formType is unknown", () => {
+  it("correctly computes propertyTypeOptions to null if formType is unknown", () => {
     const { wrapper } = factory(
       { propertyType: null, propertyValue: null },
       {},

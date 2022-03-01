@@ -1,5 +1,5 @@
 import FilterModal from "@/components/Modals/FilterModal.vue";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
 
 import { useFilterStore } from "@/stores/filter";
@@ -85,6 +85,18 @@ describe("FilterModal setup", () => {
 });
 
 describe("FilterModal computed properties", () => {
+  it("correctly computes current queue based on node type", () => {
+    const { wrapper } = factory({ options: { stubActions: false } });
+
+    expect(wrapper.vm.queue).toEqual("external");
+
+    wrapper.vm.currentUserSettingsStore.queues.alerts =
+      genericObjectReadFactory({
+        value: "internal",
+      });
+    expect(wrapper.vm.queue).toEqual("internal");
+  });
+
   it("contains expected computed data when no filters are set", () => {
     const { wrapper } = factory({});
 

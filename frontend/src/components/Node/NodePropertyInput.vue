@@ -143,18 +143,19 @@
     formType: { type: String, required: true },
   });
 
-  const propertyTypeOptions =
-    props.formType == "filter"
+  const propertyTypeOptions = computed(() => {
+    return props.formType == "filter"
       ? availableFilters[props.queue]
       : props.formType == "edit"
       ? availableEditFields[props.queue]
       : null;
+  });
 
   const getPropertyTypeObject = (propertyType) => {
     if (!propertyType) {
-      return propertyTypeOptions ? propertyTypeOptions[0] : null;
+      return propertyTypeOptions.value ? propertyTypeOptions.value[0] : null;
     }
-    let property = propertyTypeOptions.find((option) => {
+    let property = propertyTypeOptions.value.find((option) => {
       return option.name === propertyType;
     });
     property = property ? property : null;

@@ -107,7 +107,6 @@ import { eventDispositionTimeProperty } from "@/etc/constants/events";
   onMounted(async () => {
     event.value = await Event.read(props.eventUuid);
 
-    console.log(availableEditFields)
     for (const option of availableEditFields[event.value.queue.value]) {
       // Create a lookup by field/option name of all the fieldOptionObjects
       fieldOptionObjects.value[option.name] = option;
