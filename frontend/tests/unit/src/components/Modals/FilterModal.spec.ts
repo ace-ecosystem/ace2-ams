@@ -32,9 +32,6 @@ function factory(args: {
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
 
-  const authStore = useAuthStore();
-  authStore.user = userReadFactory();
-
   if (args.filters) {
     filterStore.bulkSetFilters(args.filters);
   }
