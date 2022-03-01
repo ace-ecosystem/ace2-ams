@@ -256,7 +256,7 @@ describe("ViewAlert.vue", () => {
     cy.wait("@getAlert").its("state").should("eq", "Complete");
   });
 
-  it.only("will reroute to the Manage Alerts page with tag filter applied when tag clicked", () => {
+  it("will reroute to the Manage Alerts page with tag filter applied when tag clicked", () => {
     // Find the recipient tag and click
     cy.get(
       '[data-cy="email_address: goodguy@company.com"] > :nth-child(1) > :nth-child(3) > :nth-child(1) > .p-tag',
