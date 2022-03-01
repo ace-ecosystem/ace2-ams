@@ -812,3 +812,176 @@ describe("ManageEvents.vue Actions", () => {
     cy.get(" .p-tag").eq(1).should("have.text", "AnotherOne");
   });
 });
+
+describe.only("ManageEvents.vue Filter Queues", () => {
+  beforeEach(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Add a test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
+    // Intercept the API call that loads the default event table view
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
+    ).as("getEventsDefaultRowsExternalQueue");
+
+    visitUrl({
+      url: "/manage_events?queue=external",
+      extraIntercepts: ["@getEventsDefaultRowsExternalQueue"],
+    });
+  });
+  it("will display queue's correct options filters in quick add filter panel", () => {
+    // Open quick add filter panel
+    cy.get('[data-cy="edit-filter-button"]').click();
+    // Open list of options
+    cy.get('[data-cy="property-input-type"]').click();
+    // There should be 9 options
+    cy.get(".p-dropdown-item").should("have.length", 9);
+    // Click out of the quick add panel
+    cy.get("#FilterToolbar > .p-toolbar").click();
+
+    // Switch the queue
+    cy.get('[data-cy="event-queue-selector"]').click();
+    cy.get('[aria-label="internal"]').click();
+    // Open quick add filter panel
+    cy.get('[data-cy="edit-filter-button"]').click();
+    // Open list of options
+    cy.get('[data-cy="property-input-type"]').click();
+    // There should be 7 options
+    cy.get(".p-dropdown-item").should("have.length", 7);
+    // Click out of the quick add panel
+    cy.get("#FilterToolbar > .p-toolbar").click();
+  });
+  it("will display queue's correct values for given filter filters in quick add filter panel", () => {
+    // Open quick add filter panel
+    cy.get('[data-cy="edit-filter-button"]').click();
+    // Open list of options
+    cy.get('[data-cy="property-input-type"]').click();
+    // Select the 'status' type filter
+    cy.get('[aria-label="Status"]').click();
+    // Open the filter value options
+    cy.get('[data-cy="property-input-value"] > .p-dropdown-label').click();
+    // Check that correct options are available
+    cy.get('[aria-label="OPEN"]').should("exist");
+    cy.get('[aria-label="IGNORE"]').should("exist");
+    cy.get('[aria-label="CLOSED"]').should("exist");
+    // Click out of the quick add panel
+    cy.get("#FilterToolbar > .p-toolbar").click();
+
+    // Switch the queue
+    cy.get('[data-cy="event-queue-selector"]').click();
+    cy.get('[aria-label="internal"]').click();
+    // Open quick add filter panel
+    cy.get('[data-cy="edit-filter-button"]').click();
+    // Open list of options
+    cy.get('[data-cy="property-input-type"]').click();
+    // Select the 'status' type filter
+    cy.get('[aria-label="Status"]').click();
+    // Open the filter value options
+    cy.get('[data-cy="property-input-value"] > .p-dropdown-label').click();
+    // Check that correct options are available
+    cy.get('[aria-label="CLOSED"]').should("exist");
+    cy.get('[aria-label="IGNORE"]').should("exist");
+    cy.get('[aria-label="some internal value"]').should("exist");
+  });
+  it("will display queue's correct values for given filter in filter chip edit panel", () => {
+    // Open quick add filter panel
+    cy.get('[data-cy="edit-filter-button"]').click();
+    // Open list of options
+    cy.get('[data-cy="property-input-type"]').click();
+    // Select the 'status' type filter
+    cy.get('[aria-label="Status"]').click();
+    // Open the filter value options
+    cy.get('[data-cy="property-input-value"] > .p-dropdown-label').click();
+    // Select a value and add the filter
+    cy.get('[aria-label="OPEN"]').click();
+    cy.get('[data-cy="quick-add-filter-submit-button"]').click();
+
+    // Open the filter chip quick edit panel
+    cy.get('[data-cy="filter-chip-edit-button"]').eq(1).click();
+    // Open the filter value options
+    cy.get('[data-cy="property-input-value"] > .p-dropdown-label').click();
+    // Check that correct options are available
+    cy.get('[aria-label="CLOSED"]').should("exist");
+    cy.get('[aria-label="IGNORE"]').should("exist");
+    cy.get('[aria-label="OPEN"]').should("exist");
+    // Switch the queue
+    cy.get('[data-cy="event-queue-selector"]').click();
+    cy.get('[aria-label="internal"]').click();
+
+    // Open quick add filter panel
+    cy.get('[data-cy="edit-filter-button"]').click();
+    // Open list of options
+    cy.get('[data-cy="property-input-type"]').click();
+    // Select the 'status' type filter
+    cy.get('[aria-label="Status"]').click();
+    // Open the filter value options
+    cy.get('[data-cy="property-input-value"] > .p-dropdown-label').click();
+    // Check that correct options are available
+    cy.get('[aria-label="CLOSED"]').should("exist");
+    cy.get('[aria-label="IGNORE"]').should("exist");
+    cy.get('[aria-label="some internal value"]').should("exist");
+  });
+
+  it("will display queue's correct options filters in filter modal", () => {
+    // Open edit filter modal
+    cy.get(".p-splitbutton > .p-button-icon-only").click();
+    cy.get(":nth-child(1) > .p-menuitem-link").click();
+
+    // Open list of options
+    cy.get('[data-cy="property-input-type"]').click();
+    // There should be 9 options
+    cy.get(".p-dropdown-item").should("have.length", 9);
+
+    // Switch the queue using the in-dialog selector
+    cy.get(
+      '.p-dialog-content > [data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-trigger > .p-dropdown-trigger-icon',
+    ).click();
+    cy.get('[aria-label="internal"]').click();
+
+    // Open list of options
+    cy.get('[data-cy="property-input-type"]').click();
+    // There should be 7 options
+    cy.get(".p-dropdown-item").should("have.length", 7);
+  });
+  it("will display queue's correct values for given filter filters in filter modal", () => {
+    // Open edit filter modal
+    cy.get(".p-splitbutton > .p-button-icon-only").click();
+    cy.get(":nth-child(1) > .p-menuitem-link").click();
+
+    // Open list of options
+    cy.get('[data-cy="property-input-type"]').click();
+    // Select the 'status' type filter
+    cy.get('[aria-label="Status"]').click();
+    // Open the filter value options
+    cy.get('[data-cy="property-input-value"] > .p-dropdown-label').click();
+    // Select a value and add the filter
+    cy.get('[aria-label="OPEN"]').click();
+
+    // Switch the queue using the in-dialog selector
+    cy.get(
+      '.p-dialog-content > [data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-trigger > .p-dropdown-trigger-icon',
+    ).click();
+    cy.get('[aria-label="internal"]').click();
+
+    // Open list of options
+    cy.get('[data-cy="property-input-type"]').click();
+    // Select the 'status' type filter
+    cy.get('[aria-label="Status"]').click();
+    // Open the filter value options
+    cy.get('[data-cy="property-input-value"] > .p-dropdown-label').click();
+    // Check that correct options are available
+    cy.get('[aria-label="CLOSED"]').should("exist");
+    cy.get('[aria-label="IGNORE"]').should("exist");
+    cy.get('[aria-label="some internal value"]').should("exist");
+  });
+});
