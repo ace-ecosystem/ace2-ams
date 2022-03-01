@@ -2,10 +2,12 @@ import FilterModal from "@/components/Modals/FilterModal.vue";
 import { mount } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
 
+import { useAuthStore } from "@/stores/auth";
 import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
 import { alertFilterParams } from "@/models/alert";
 import { createCustomPinia } from "@unit/helpers";
+import { userReadFactory } from "../../../../mocks/user";
 
 function factory(args: {
   filters?: { nodeType: "alerts"; filters: alertFilterParams };
@@ -14,6 +16,9 @@ function factory(args: {
   const testingPinia = createCustomPinia(args.options);
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
+
+  const authStore = useAuthStore();
+  authStore.user = userReadFactory();
 
   if (args.filters) {
     filterStore.bulkSetFilters(args.filters);

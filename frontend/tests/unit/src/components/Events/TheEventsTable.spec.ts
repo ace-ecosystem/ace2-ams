@@ -7,8 +7,10 @@ import { TestingOptions } from "@pinia/testing";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
 import { createCustomPinia } from "../../helpers";
 
-import { useCurrentUserSettingsStore } from "../../../../../src/stores/currentUserSettings";
-import { useFilterStore } from "../../../../../src/stores/filter";
+import { useAuthStore } from "@/stores/auth";
+import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
+import { useFilterStore } from "@/stores/filter";
+import { userReadFactory } from "../../../../mocks/user";
 
 import { testConfiguration } from "@/etc/configuration/test/index";
 
@@ -18,9 +20,14 @@ function factory(options?: TestingOptions) {
   const router = createRouterMock();
   injectRouterMock(router);
 
+  const testingPinia = createCustomPinia(options);
+
+  const authStore = useAuthStore();
+  authStore.user = userReadFactory();
+
   const wrapper: VueWrapper<any> = shallowMount(TheEventsTable, {
     global: {
-      plugins: [createCustomPinia(options), PrimeVue],
+      plugins: [testingPinia, PrimeVue],
       provide: {
         config: testConfiguration,
       },
@@ -51,7 +58,7 @@ describe("TheEventsTable data/creation", () => {
     const { wrapper, currentUserSettingsStore, filterStore } = factory();
     const defaultQueue = genericObjectReadFactory({ value: "external" });
 
-    currentUserSettingsStore.preferredEventQueue = defaultQueue;
+    currentUserSettingsStore.queues.events = defaultQueue;
     wrapper.vm.setColumns();
 
     await wrapper.vm.$nextTick();
@@ -65,11 +72,11 @@ describe("TheEventsTable data/creation", () => {
     });
     expect(wrapper.vm.key).toStrictEqual(1);
   });
-  it("will call setColumns when currentUserSettingsStore.preferredEventQueue changes", async () => {
+  it("will call setColumns when currentUserSettingsStore.queues.events changes", async () => {
     const { wrapper, currentUserSettingsStore, filterStore } = factory();
     const defaultQueue = genericObjectReadFactory({ value: "external" });
 
-    currentUserSettingsStore.preferredEventQueue = defaultQueue;
+    currentUserSettingsStore.queues.events = defaultQueue;
 
     await wrapper.vm.$nextTick();
 
@@ -86,7 +93,7 @@ describe("TheEventsTable data/creation", () => {
     const { wrapper, currentUserSettingsStore, filterStore } = factory();
     const defaultQueue = genericObjectReadFactory({ value: "external" });
 
-    currentUserSettingsStore.preferredAlertQueue = defaultQueue;
+    currentUserSettingsStore.queues.alerts = defaultQueue;
 
     await wrapper.vm.$nextTick();
 
