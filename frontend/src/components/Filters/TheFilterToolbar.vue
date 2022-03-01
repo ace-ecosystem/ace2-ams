@@ -66,6 +66,8 @@
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
+import { validAlertFilters } from "@/etc/constants/alerts";
+import { validEventFilters } from "@/etc/constants/events";
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
@@ -76,9 +78,9 @@
   const config = inject("config");
 
   const nodeType = inject("nodeType");
-  const filterOptions = {
-    alerts: config.alerts.alertFilters,
-    events: config.events.eventFilters,
+  const validFilterOptions = {
+    alerts: validAlertFilters,
+    events: validEventFilters,
   };
 
   const queue = computed(() => {
@@ -125,7 +127,7 @@
     // If there are filters set, build the link for it
     if (Object.keys(filterStore[nodeType]).length) {
       let urlParams = new URLSearchParams(
-        formatNodeFiltersForAPI(filterOptions[nodeType], filterStore[nodeType]),
+        formatNodeFiltersForAPI(validFilterOptions[nodeType], filterStore[nodeType]),
       );
       link = `${
         window.location.origin

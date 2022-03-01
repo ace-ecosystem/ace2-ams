@@ -14,7 +14,10 @@ describe("TheFilterToolbar.vue", () => {
   function factory(options?: TestingOptions) {
     const wrapper: VueWrapper<any> = shallowMount(TheFilterToolbar, {
       global: {
-        plugins: [createCustomPinia({...options, initialState: {
+        plugins: [
+          createCustomPinia({
+            ...options,
+            initialState: {
               authStore: {
                 user: userReadFactory({
                   defaultAlertQueue: genericObjectReadFactory({
@@ -24,7 +27,10 @@ describe("TheFilterToolbar.vue", () => {
                     value: "external",
                   }),
                 }),
-              }})],
+              },
+            },
+          }),
+        ],
         provide: {
           nodeType: "alerts",
           config: testConfiguration,

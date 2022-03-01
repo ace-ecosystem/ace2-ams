@@ -13,6 +13,8 @@ import * as helpers from "@/etc/helpers";
 import myNock from "@unit/services/api/nock";
 import { useModalStore } from "@/stores/modal";
 import { useUserStore } from "@/stores/user";
+import { genericObjectReadFactory } from "../../../../mocks/genericObject";
+import { values } from "cypress/types/lodash";
 
 const testNameField: propertyOption = {
   name: "name",
@@ -31,10 +33,15 @@ const testCommentsField: propertyOption = {
   label: "Comments",
   type: "inputText",
 };
-const availableEditFields: Record<string, readonly propertyOption[]> = {external: [testNameField]};
-const mockEvent = eventReadFactory();
+const testQueue = genericObjectReadFactory({ value: "external" });
+const availableEditFields: Record<string, readonly propertyOption[]> = {
+  external: [testNameField],
+};
+const mockEvent = eventReadFactory({ queue: testQueue });
 
 function factory(options?: TestingOptions) {
+  myNock.get(`/event/${mockEventUUID}`).reply(200, mockEvent);
+
   const wrapper = mount(EditEventModal, {
     attachTo: document.body,
     global: {
@@ -80,16 +87,11 @@ describe("EditEventModal.vue", () => {
       .spyOn(helpers, "populateEventStores")
       .mockResolvedValueOnce(undefined);
     const { wrapper } = factory();
-
-    const getEvent = myNock
-      .get(`/event/${mockEventUUID}`)
-      .reply(200, mockEvent);
-
+    
     await wrapper.vm.initializeData();
 
     // Check at least one of the stores in populateEventStores
     expect(spy).toHaveBeenCalled();
-    expect(getEvent.isDone()).toBe(true);
     expect(wrapper.vm.isLoading).toBeFalsy();
   });
   it("will catch and set error if any are thrown in initializeData", async () => {

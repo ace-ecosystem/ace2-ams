@@ -23,6 +23,7 @@
 
   import { useFilterStore } from "@/stores/filter";
   import { parseFilters, populateCommonStores } from "@/etc/helpers";
+  import { validEventFilters } from "@/etc/constants/events";
 
   const route = useRoute();
   const router = useRouter();
@@ -54,7 +55,7 @@
     // load filters given in route
     filterStore.bulkSetFilters({
       nodeType: "events",
-      filters: parseFilters(route.query, config.events.eventFilters),
+      filters: parseFilters(route.query, validEventFilters),
     });
     // Reload page to clear URL params
     router.push("/manage_events");

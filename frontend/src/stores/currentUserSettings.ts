@@ -9,8 +9,8 @@ export const useCurrentUserSettingsStore = defineStore({
     const authStore = useAuthStore();
     return {
       queues: {
-        alerts: authStore.user.defaultAlertQueue,
-        events: authStore.user.defaultEventQueue,
+        alerts: authStore.user ? authStore.user.defaultAlertQueue : null,
+        events: authStore.user ? authStore.user.defaultEventQueue : null,
       },
     };
   },
