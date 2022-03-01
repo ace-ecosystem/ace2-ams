@@ -59,7 +59,7 @@ export function visitUrl(options) {
   });
 }
 
-export function openEditEventModal() {
+export function openEditEventModal(eventNum = 0) {
   cy.intercept("GET", "/api/event/prevention_tool/?offset=0").as(
     "eventPreventionTool",
   );
@@ -77,7 +77,7 @@ export function openEditEventModal() {
   cy.intercept("GET", "/api/event/*").as("event");
 
   // Open the Edit Event modal
-  cy.get("[data-cy=edit-event-button]").click();
+  cy.get("[data-cy=edit-event-button]").eq(eventNum).click();
 
   // Wait for all of the intercepted calls to complete
   const intercepts = [
