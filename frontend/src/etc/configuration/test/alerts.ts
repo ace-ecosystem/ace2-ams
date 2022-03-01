@@ -38,7 +38,6 @@ export const alertFilters: Record<string, readonly propertyOption[]> = {
   internal: defaultAlertFilters,
 } as const;
 
-
 export const alertRangeFilters = {
   "Event Time": {
     start: alertPropertyTypes.EVENT_TIME_AFTER_PROPERTY,

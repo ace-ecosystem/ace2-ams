@@ -61,5 +61,4 @@ describe("NodeComment.vue", () => {
       );
     },
   );
-
 });

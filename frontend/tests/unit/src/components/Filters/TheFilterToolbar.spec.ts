@@ -49,8 +49,8 @@ describe("TheFilterToolbar.vue", () => {
 
     expect(wrapper.exists()).toBe(true);
   });
-    it("correctly computes current queue based on node type", () => {
-    const { wrapper } = factory({stubActions: false});
+  it("correctly computes current queue based on node type", () => {
+    const { wrapper } = factory({ stubActions: false });
 
     expect(wrapper.vm.queue).toEqual("external");
 
