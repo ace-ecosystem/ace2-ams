@@ -789,9 +789,10 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
     cy.get('[data-cy="filter-chip-content"]').should("have.text", "external");
     // Queue selector should have right value
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "external");
+    cy.get("#queue-dropdown > .p-dropdown-label").should(
+      "have.text",
+      "external",
+    );
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should(
       "have.text",
@@ -811,9 +812,10 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
     cy.get('[data-cy="filter-chip-content"]').should("have.text", "internal");
     // Queue selector should have right value
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "internal");
+    cy.get("#queue-dropdown > .p-dropdown-label").should(
+      "have.text",
+      "internal",
+    );
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should("have.text", "Created, Name, Type");
   });
@@ -822,9 +824,10 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
     cy.get('[data-cy="filter-chip-content"]').should("have.text", "external");
     // Queue selector should have right value
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "external");
+    cy.get("#queue-dropdown > .p-dropdown-label").should(
+      "have.text",
+      "external",
+    );
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should(
       "have.text",
@@ -832,9 +835,7 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     );
 
     // Open queue selector and check options
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-trigger',
-    ).click();
+    cy.get("#queue-dropdown > .p-dropdown-label").click();
     cy.get(".p-dropdown-items").should("be.visible");
     cy.get('[aria-label="external"]').should("be.visible");
     cy.get('[aria-label="internal"]').should("be.visible");
@@ -849,16 +850,15 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
     cy.get('[data-cy="filter-chip-content"]').should("have.text", "internal");
     // Queue selector should have right value
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "internal");
+    cy.get("#queue-dropdown > .p-dropdown-label").should(
+      "have.text",
+      "internal",
+    );
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should("have.text", "Created, Name, Type");
 
     // Switch back to external queue
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-trigger',
-    ).click();
+    cy.get("#queue-dropdown > .p-dropdown-label").click();
     cy.get('[aria-label="external"]').click();
     cy.wait("@getEventsExternalQueueFilter")
       .its("state")
@@ -867,9 +867,10 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
     cy.get('[data-cy="filter-chip-content"]').should("have.text", "external");
     // Queue selector should have right value
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "external");
+    cy.get("#queue-dropdown > .p-dropdown-label").should(
+      "have.text",
+      "external",
+    );
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should(
       "have.text",

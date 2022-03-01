@@ -813,7 +813,7 @@ describe("ManageEvents.vue Actions", () => {
   });
 });
 
-describe.only("ManageEvents.vue Filter Queues", () => {
+describe("ManageEvents.vue Filter Queues", () => {
   beforeEach(() => {
     cy.resetDatabase();
     cy.login();
@@ -942,9 +942,9 @@ describe.only("ManageEvents.vue Filter Queues", () => {
     // There should be 9 options
     cy.get(".p-dropdown-item").should("have.length", 9);
 
-    // Switch the queue using the in-dialog selector
+    // Switch the queue using the in-dialog selectorcy.get(
     cy.get(
-      '.p-dialog-content > [data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-trigger > .p-dropdown-trigger-icon',
+      '.p-dialog-content > [data-cy="event-queue-selector"] > .p-float-label > #queue-dropdown > .p-dropdown-label',
     ).click();
     cy.get('[aria-label="internal"]').click();
 
@@ -969,7 +969,7 @@ describe.only("ManageEvents.vue Filter Queues", () => {
 
     // Switch the queue using the in-dialog selector
     cy.get(
-      '.p-dialog-content > [data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-trigger > .p-dropdown-trigger-icon',
+      '.p-dialog-content > [data-cy="event-queue-selector"] > .p-float-label > #queue-dropdown > .p-dropdown-label',
     ).click();
     cy.get('[aria-label="internal"]').click();
 
