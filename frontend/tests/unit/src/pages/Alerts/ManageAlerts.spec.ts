@@ -2,7 +2,7 @@ import ManageAlerts from "@/pages/Alerts/ManageAlerts.vue";
 import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
 import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
 import TheAlertsTable from "@/components/Alerts/TheAlertsTable.vue";
-import { mount } from "@vue/test-utils";
+import { shallowMount } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
 import Tooltip from "primevue/tooltip";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
@@ -25,7 +25,7 @@ function factory(
   });
   injectRouterMock(router);
 
-  const wrapper = mount(ManageAlerts, {
+  const wrapper = shallowMount(ManageAlerts, {
     global: {
       provide: {
         config: testConfiguration,

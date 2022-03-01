@@ -243,7 +243,7 @@
   });
 
   watch(propertyType, async () => {
-    if (propertyType.value.store) {
+    if (propertyType.value && propertyType.value.store) {
       const store = propertyType.value.store();
       await store.readAll();
     }

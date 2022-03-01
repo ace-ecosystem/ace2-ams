@@ -97,6 +97,7 @@ function factory(
 ) {
   const wrapper = mount(NodePropertyInput, {
     props: {
+      queue: "external",
       modelValue: filter,
       formType: formType ? formType : "filter",
     },
@@ -121,7 +122,7 @@ function factory(
       provide: {
         nodeType: "alerts",
         availableFilters: FILTERS_STUB,
-        availableEditFields: {},
+        availableEditFields: {external: []},
       },
     },
   });
@@ -143,7 +144,7 @@ describe("NodePropertyInput.vue", () => {
       "filter",
     );
 
-    expect(wrapper.vm.propertyTypeOptions).toEqual(FILTERS_STUB);
+    expect(wrapper.vm.propertyTypeOptions).toEqual(FILTERS_STUB.external);
   });
 
   it("correctly sets propertyTypeOptions to availableEditFields if formType is 'edit'", () => {
@@ -181,7 +182,7 @@ describe("NodePropertyInput.vue", () => {
   it("sets up data correctly with no given property", () => {
     const { wrapper } = factory({ propertyType: null, propertyValue: null });
 
-    expect(wrapper.vm.propertyType).toEqual(FILTERS_STUB[0]);
+    expect(wrapper.vm.propertyType).toEqual(FILTERS_STUB.external[0]);
     expect(wrapper.vm.propertyValue).toBeNull();
   });
 
@@ -201,7 +202,7 @@ describe("NodePropertyInput.vue", () => {
       propertyValue: null,
     });
 
-    expect(wrapper.vm.propertyType).toEqual(FILTERS_STUB[1]);
+    expect(wrapper.vm.propertyType).toEqual(FILTERS_STUB.external[1]);
     // Attempts to set to default, however I can't get the userstore to load properly
     // so it ends up being undefined
     expect(wrapper.vm.propertyValue).toEqual(undefined);
@@ -219,7 +220,7 @@ describe("NodePropertyInput.vue", () => {
     const userStore = useUserStore();
     userStore.items = USERS_STUB;
 
-    expect(wrapper.vm.propertyType).toEqual(FILTERS_STUB[1]);
+    expect(wrapper.vm.propertyType).toEqual(FILTERS_STUB.external[1]);
     expect(wrapper.vm.propertyValueOptions).toEqual(USERS_STUB);
     expect(wrapper.vm.propertyValue).toEqual({
       displayName: "Test Analyst",
@@ -233,7 +234,7 @@ describe("NodePropertyInput.vue", () => {
       propertyValue: null,
     });
 
-    expect(wrapper.vm.propertyType).toEqual(FILTERS_STUB[2]);
+    expect(wrapper.vm.propertyType).toEqual(FILTERS_STUB.external[2]);
     expect(wrapper.vm.propertyValue).toEqual({
       category: undefined, // Attempted to set to default, but couldn't load store
       value: null,
@@ -252,7 +253,7 @@ describe("NodePropertyInput.vue", () => {
     const observableTypeStore = useObservableTypeStore();
     observableTypeStore.items = OBSERVABLE_TYPES_STUB;
 
-    expect(wrapper.vm.propertyType).toEqual(FILTERS_STUB[2]);
+    expect(wrapper.vm.propertyType).toEqual(FILTERS_STUB.external[2]);
     expect(wrapper.vm.propertyValueOptions).toEqual(OBSERVABLE_TYPES_STUB);
     expect(wrapper.vm.propertyValue).toEqual({
       category: OBSERVABLE_TYPES_STUB[1],
@@ -309,7 +310,7 @@ describe("NodePropertyInput.vue", () => {
     const observableTypeStore = useObservableTypeStore();
     observableTypeStore.items = OBSERVABLE_TYPES_STUB;
 
-    wrapper.vm.propertyType = FILTERS_STUB[2];
+    wrapper.vm.propertyType = FILTERS_STUB.external[2];
     wrapper.vm.propertyValue = { category: null, value: null };
 
     wrapper.vm.clearPropertyValue();
@@ -336,7 +337,7 @@ describe("NodePropertyInput.vue", () => {
   it("contains expected computed data when chips property is set", () => {
     const { wrapper } = factory({ propertyType: "owner", propertyValue: null });
 
-    wrapper.vm.propertyType = FILTERS_STUB[3];
+    wrapper.vm.propertyType = FILTERS_STUB.external[3];
     wrapper.vm.propertyValue = null;
 
     expect(wrapper.vm.propertyValueOptions).toBeNull();
@@ -359,7 +360,7 @@ describe("NodePropertyInput.vue", () => {
   it("contains expected computed data when multiselect property is set", () => {
     const { wrapper } = factory({ propertyType: "owner", propertyValue: null });
 
-    wrapper.vm.propertyType = FILTERS_STUB[4];
+    wrapper.vm.propertyType = FILTERS_STUB.external[4];
     wrapper.vm.propertyValue = null;
 
     expect(wrapper.vm.propertyValueOptions).toBeNull();
@@ -381,7 +382,7 @@ describe("NodePropertyInput.vue", () => {
   it("contains expected computed data when date property is set", () => {
     const { wrapper } = factory({ propertyType: "owner", propertyValue: null });
 
-    wrapper.vm.propertyType = FILTERS_STUB[5];
+    wrapper.vm.propertyType = FILTERS_STUB.external[5];
     wrapper.vm.propertyValue = null;
 
     expect(wrapper.vm.propertyValueOptions).toBeNull();
@@ -408,7 +409,7 @@ describe("NodePropertyInput.vue", () => {
     wrapper.vm.clearPropertyValue();
     expect(wrapper.vm.propertyValue).toBeNull();
 
-    wrapper.vm.propertyType = FILTERS_STUB[2];
+    wrapper.vm.propertyType = FILTERS_STUB.external[2];
     const observableTypeStore = useObservableTypeStore();
     observableTypeStore.items = OBSERVABLE_TYPES_STUB;
 
@@ -423,11 +424,11 @@ describe("NodePropertyInput.vue", () => {
     const { wrapper } = factory({ propertyType: null, propertyValue: null });
 
     let result = wrapper.vm.getPropertyTypeObject("tags");
-    expect(result).toEqual(FILTERS_STUB[3]);
+    expect(result).toEqual(FILTERS_STUB.external[3]);
     result = wrapper.vm.getPropertyTypeObject("made up");
     expect(result).toBeNull();
     result = wrapper.vm.getPropertyTypeObject(null);
-    expect(result).toEqual(FILTERS_STUB[0]);
+    expect(result).toEqual(FILTERS_STUB.external[0]);
   });
 
   it("executes updateValue as expected", async () => {
@@ -435,7 +436,7 @@ describe("NodePropertyInput.vue", () => {
 
     await wrapper.vm.$nextTick();
 
-    wrapper.vm.updateValue("propertyType", FILTERS_STUB[1]);
+    wrapper.vm.updateValue("propertyType", FILTERS_STUB.external[1]);
     await wrapper.vm.$nextTick();
     let result = wrapper.emitted()["update:modelValue"][2];
     expect(result).toEqual([{ propertyType: "owner", propertyValue: null }]);
