@@ -29,6 +29,7 @@ import { useQueueStore } from "@/stores/queue";
 import { useUserStore } from "@/stores/user";
 import { inputTypes } from "@/etc/constants/base";
 import { isValidDate, isObject } from "@/etc/validators";
+import { nodeThreatRead } from "@/models/nodeThreat";
 
 export const camelToSnakeCase = (str: string): string =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
@@ -358,10 +359,10 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
   };
 }
 
-export function groupItemsByQueue(
-  arr: genericObjectRead[],
-): Record<string, genericObjectRead[]> {
-  const itemsByQueue: Record<string, genericObjectRead[]> = {};
+export function groupItemsByQueue<T extends genericObjectRead>(
+  arr: T[],
+): Record<string, T[]> {
+  const itemsByQueue: Record<string, T[]> = {};
   for (const item of arr) {
     if (item.queues) {
       for (const queue of item.queues) {
