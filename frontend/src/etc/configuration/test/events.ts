@@ -16,6 +16,7 @@ import {
   eventEventTimeProperty,
   eventRemediationProperty,
   eventStatusProperty,
+  eventPreventionToolsProperty,
 } from "@/etc/constants/events";
 
 export const eventFilters: Record<string, readonly propertyOption[]> = {
@@ -46,6 +47,7 @@ export const eventEditableProperties: Record<string, propertyOption[]> = {
     nameProperty,
     ownerProperty,
     nodeCommentProperty,
+    eventPreventionToolsProperty,
     eventRemediationProperty,
     nodeThreatsProperty,
     eventEventTimeProperty,
@@ -54,6 +56,7 @@ export const eventEditableProperties: Record<string, propertyOption[]> = {
     nameProperty,
     ownerProperty,
     nodeCommentProperty,
+    eventPreventionToolsProperty,
     eventRemediationProperty,
     nodeThreatsProperty,
     eventEventTimeProperty,
