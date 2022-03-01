@@ -560,50 +560,61 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       "[data-cy=event-eventTime-field] [data-cy=property-input-value]",
     ).should("have.value", "");
   });
+
   it("successfully updates an 'input'-type field (ex. name)", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("PATCH", "/api/event/").as("updateAlert");
+    cy.intercept("PATCH", "/api/event/").as("updateEvent");
 
-    openEditEventModal();
+    // Edit the first event
+    openEditEventModal(0);
 
+    // Change the event's name
     cy.get("[data-cy=event-name-field]  [data-cy=property-input-value]")
       .click()
       .clear()
-      .type("New Name");
+      .type("Updated Name");
     cy.get("[data-cy=save-edit-event-button]").click();
-    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
-    cy.get("[data-cy=eventName]").invoke("text").should("eq", "New Name");
+    cy.get("[data-cy=eventName]")
+      .eq(0)
+      .invoke("text")
+      .should("eq", "Updated Name");
   });
+
   it("successfully updates an 'select'-type field (ex. owner)", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("PATCH", "/api/event/").as("updateAlert");
+    cy.intercept("PATCH", "/api/event/").as("updateEvent");
 
-    openEditEventModal();
+    // Edit the first event
+    openEditEventModal(0);
 
+    // Change the owner
     cy.get(
       "[data-cy=event-owner-field] [data-cy=property-input-value]",
     ).click();
     cy.get('[aria-label="Analyst"]').click();
     cy.get("[data-cy=save-edit-event-button]").click();
-    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
     cy.get(".p-datatable-tbody > tr > :nth-child(9) > span")
+      .eq(0)
       .invoke("text")
       .should("eq", "Analyst");
   });
+
   it("successfully updates an 'multiselect'-type field (ex. remediation)", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("PATCH", "/api/event/").as("updateAlert");
+    cy.intercept("PATCH", "/api/event/").as("updateEvent");
 
     openEditEventModal();
 
@@ -614,7 +625,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.get(".p-multiselect-item ").eq(1).click();
 
     cy.get("[data-cy=save-edit-event-button]").click();
-    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
   });
   it("successfully updates a 'date'-type field (ex. event time)", () => {
@@ -622,7 +633,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("PATCH", "/api/event/").as("updateAlert");
+    cy.intercept("PATCH", "/api/event/").as("updateEvent");
 
     openEditEventModal();
 
@@ -631,15 +642,18 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       .type("03/02/2022 12:00");
 
     cy.get("[data-cy=save-edit-event-button]").click();
-    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
   });
+
   it("successfully updates a comment using NodeCommentEditor", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("PATCH", "/api/event/").as("updateAlert");
+    cy.intercept("PATCH", "/api/event/").as("updateEvent");
+    cy.intercept("GET", "/api/event/*").as("getEvent");
+    cy.intercept("POST", "/api/node/comment/").as("createComment");
     cy.intercept("PATCH", "/api/node/comment/*").as("updateComment");
 
     // First add an initial comment
@@ -647,10 +661,13 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.get("[data-cy=comment-button]").click();
     cy.get(".p-inputtextarea").click().type("Test comment");
     cy.get(".p-dialog-footer > .p-button").last().click();
+    cy.wait("@createComment").its("state").should("eq", "Complete");
+
+    // Edit the first event
+    openEditEventModal(0);
+    cy.wait("@getEvent").its("state").should("eq", "Complete");
 
     // Check that the comment field is set up correctly
-    openEditEventModal();
-
     cy.get("li.p-listbox-item > span").should(
       "include.text",
       "(Analyst) Test comment",
@@ -673,25 +690,26 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       .clear()
       .type("Updated comment");
     cy.get("[data-cy=save-comment-button]").click();
-    cy.get("li.p-listbox-item > span").should(
-      "include.text",
-      "(Analyst) Updated comment",
-    );
+    cy.get("li.p-listbox-item > span")
+      .eq(0)
+      .should("include.text", "(Analyst) Updated comment");
     cy.get("[data-cy=save-edit-event-button]").click();
 
-    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@updateComment").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check comment value
-    cy.get(".p-mr-2 > span").should("have.text", "(Analyst) Updated comment");
+    cy.get(".p-mr-2 > span")
+      .eq(0)
+      .should("have.text", "(Analyst) Updated comment");
   });
   it("successfully creates a new threat or updates using NodeThreatSelector", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("PATCH", "/api/event/").as("updateAlert");
+    cy.intercept("PATCH", "/api/event/").as("updateEvent");
     cy.intercept("POST", "/api/node/threat/").as("createThreat");
     cy.intercept("PATCH", "/api/node/threat/*").as("updateThreat");
     cy.intercept("GET", "/api/node/threat/*").as("getThreats");
@@ -717,7 +735,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     // Select the new threat and save
     cy.get(".p-listbox-item > .align-items-center").click();
     cy.get("[data-cy=save-edit-event-button]").click();
-    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Reopen the panel
