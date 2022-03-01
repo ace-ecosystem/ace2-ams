@@ -8,6 +8,7 @@
     class="xl: w-5 lg:w-5 md:w-8"
     @dialogClose="loadFormFilters"
   >
+  <br>
     <NodeQueueSelector :node-queue="nodeType" /> <br />
     <div class="flex flex-wrap">
       <NodePropertyInput
