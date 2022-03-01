@@ -473,7 +473,7 @@ describe("Manage Alerts Filter Actions", () => {
 
     // Verify the form data
     cy.get(".flex").children().should("have.length", 1);
-    cy.get(":nth-child(1) > .p-dropdown").should("have.text", "Name");
+    cy.get(":nth-child(1) > .p-dropdown").eq(1).should("have.text", "Name");
     cy.get(".inputfield").should("have.value", "hello world");
 
     // Exit modal for end of test
@@ -522,10 +522,10 @@ describe("Manage Alerts Filter Actions", () => {
 
     // Verify the form data
     cy.get(".flex").children().should("have.length", 2);
-    cy.get(":nth-child(1) > .p-dropdown").eq(0).should("have.text", "Name");
+    cy.get(":nth-child(1) > .p-dropdown").eq(1).should("have.text", "Name");
     cy.get(".inputfield").should("have.value", "hello world");
-    cy.get(":nth-child(1) > .p-dropdown").eq(1).should("have.text", "Queue");
-    cy.get(":nth-child(1) > .p-dropdown").eq(2).should("have.text", "external");
+    cy.get(":nth-child(1) > .p-dropdown").eq(2).should("have.text", "Queue");
+    cy.get(":nth-child(1) > .p-dropdown").eq(3).should("have.text", "external");
 
     // Exit modal for end of test
     cy.get(".p-dialog-header-close-icon").click();

@@ -5,6 +5,7 @@
       :options="queueStore.items"
       option-label="value"
       style="margin-right: 2%"
+      @change="updateUserSettings"
     ></Dropdown>
   </div>
 </template>
@@ -30,4 +31,12 @@
   } else if (props.nodeQueue === "events") {
     preferredQueue.value = currentUserSettingsStore.queues.events;
   }
+
+  const updateUserSettings = () => {
+    if (props.nodeQueue === "alerts") {
+      currentUserSettingsStore.queues.alerts = preferredQueue.value;
+    } else if (props.nodeQueue === "events") {
+      currentUserSettingsStore.queues.events = preferredQueue.value;
+    }
+  };
 </script>

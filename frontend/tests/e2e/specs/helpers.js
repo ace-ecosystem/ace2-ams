@@ -91,7 +91,6 @@ export function openEditEventModal() {
     "@nodeThreat",
     "@nodeThreatType",
     "@user",
-    "@event",
   ];
 
   cy.wait(intercepts).then((interceptions) => {
