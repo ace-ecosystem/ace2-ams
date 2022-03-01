@@ -66,6 +66,8 @@
 
   import { useFilterStore } from "@/stores/filter";
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
+  import { validAlertFilters } from "@/etc/constants/alerts";
+  import { validEventFilters } from "@/etc/constants/events";
 
   import { isObject } from "@/etc/validators";
   import Button from "primevue/button";
@@ -77,10 +79,10 @@
   const filterStore = useFilterStore();
   const nodeType = inject("nodeType");
 
-  const config = inject("config");
-
   const queue = computed(() => {
-    return currentUserSettingsStore.$state["queues"][nodeType].value;
+    return currentUserSettingsStore.$state["queues"][nodeType]
+      ? currentUserSettingsStore.$state["queues"][nodeType].value
+      : null;
   });
 
   const op = ref(null);
@@ -93,15 +95,16 @@
     filterValue: { type: [String, Object, Array, Date], required: true },
   });
 
-  const availableFilters = {
-    alerts: config.alerts.alertFilters,
-    events: config.events.eventFilters,
+  const validFilters = {
+    alerts: validAlertFilters,
+    events: validEventFilters,
   };
-  const filterOptions =
-    nodeType in availableFilters ? availableFilters[nodeType][queue.value] : [];
-  const filterNameObject = filterOptions.find((filter) => {
-    return filter.name === props.filterName;
-  });
+
+  const filterNameObject = validFilters[nodeType]
+    ? validFilters[nodeType].find((filter) => {
+        return filter.name === props.filterName;
+      })
+    : null;
 
   const filterModel = ref({
     propertyType: props.filterName,

@@ -43,7 +43,18 @@ function factory(options?: TestingOptions) {
   const wrapper = mount(SaveToEventModal, {
     attachTo: document.body,
     global: {
-      plugins: [createCustomPinia(options), PrimeVue],
+      plugins: [createCustomPinia({...options, initialState: {
+            authStore: {
+              user: userReadFactory({
+                defaultAlertQueue: genericObjectReadFactory({
+                  value: "external",
+                }),
+                defaultEventQueue: genericObjectReadFactory({
+                  value: "external",
+                }),
+              }),
+            },
+          }}), PrimeVue],
     },
     props: { name: "SaveToEventModal" },
   });

@@ -6,12 +6,25 @@ import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
 import { createCustomPinia } from "@unit/helpers";
 import { testConfiguration } from "@/etc/configuration/test/index";
+import { vi } from "vitest";
+import { genericObjectReadFactory } from "../../../../mocks/genericObject";
+import { userReadFactory } from "../../../../mocks/user";
 
 describe("TheFilterToolbar.vue", () => {
   function factory(options?: TestingOptions) {
     const wrapper: VueWrapper<any> = shallowMount(TheFilterToolbar, {
       global: {
-        plugins: [createCustomPinia(options)],
+        plugins: [createCustomPinia({...options, initialState: {
+              authStore: {
+                user: userReadFactory({
+                  defaultAlertQueue: genericObjectReadFactory({
+                    value: "external",
+                  }),
+                  defaultEventQueue: genericObjectReadFactory({
+                    value: "external",
+                  }),
+                }),
+              }})],
         provide: {
           nodeType: "alerts",
           config: testConfiguration,

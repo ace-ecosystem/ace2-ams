@@ -13,6 +13,7 @@ import { useFilterStore } from "../../../../../src/stores/filter";
 import { testConfiguration } from "@/etc/configuration/test/index";
 
 import { expect } from "vitest";
+import { userReadFactory } from "../../../../mocks/user";
 
 function factory(options?: TestingOptions) {
   const router = createRouterMock();
@@ -20,7 +21,17 @@ function factory(options?: TestingOptions) {
 
   const wrapper: VueWrapper<any> = shallowMount(TheEventsTable, {
     global: {
-      plugins: [createCustomPinia(options), PrimeVue],
+      plugins: [createCustomPinia({...options,initialState: {
+              authStore: {
+                user: userReadFactory({
+                  defaultAlertQueue: genericObjectReadFactory({
+                    value: "external",
+                  }),
+                  defaultEventQueue: genericObjectReadFactory({
+                    value: "external",
+                  }),
+                }),
+              }}), PrimeVue],
       provide: {
         config: testConfiguration,
       },

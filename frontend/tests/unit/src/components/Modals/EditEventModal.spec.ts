@@ -31,7 +31,7 @@ const testCommentsField: propertyOption = {
   label: "Comments",
   type: "inputText",
 };
-const availableEditFields: readonly propertyOption[] = [testNameField];
+const availableEditFields: Record<string, readonly propertyOption[]> = {external: [testNameField]};
 const mockEvent = eventReadFactory();
 
 function factory(options?: TestingOptions) {

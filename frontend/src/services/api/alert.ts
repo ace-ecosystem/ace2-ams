@@ -16,11 +16,7 @@ import { BaseApi } from "./base";
 const api = new BaseApi();
 const endpoint = "/alert/";
 
-const testingModeEnabled = import.meta.env.VITE_TESTING_MODE;
-const filters =
-  testingModeEnabled === "yes"
-    ? testConfiguration.alerts.alertFilters
-    : configuration.alerts.alertFilters;
+import { validAlertFilters } from "@/etc/constants/alerts";
 
 export const Alert = {
   createAndRead: async (data: alertCreate): Promise<alertTreeRead> =>
@@ -35,7 +31,7 @@ export const Alert = {
   readPage: (params?: alertFilterParams): Promise<alertReadPage> => {
     let formattedParams = {} as alertFilterParams;
     if (params) {
-      formattedParams = formatNodeFiltersForAPI(filters, params);
+      formattedParams = formatNodeFiltersForAPI(validAlertFilters, params);
     }
 
     return api.read(endpoint, formattedParams);
@@ -44,7 +40,7 @@ export const Alert = {
   readAllPages: async (
     params: alertFilterParams,
   ): Promise<Array<alertRead>> => {
-    const formattedParams = formatNodeFiltersForAPI(filters, params);
+    const formattedParams = formatNodeFiltersForAPI(validAlertFilters, params);
     return api.readAll(endpoint, formattedParams);
   },
 

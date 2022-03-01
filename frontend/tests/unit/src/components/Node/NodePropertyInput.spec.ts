@@ -8,8 +8,10 @@ import { useUserStore } from "@/stores/user";
 import { observableTypeRead } from "@/models/observableType";
 import { userRead } from "@/models/user";
 import { createCustomPinia } from "@unit/helpers";
+import { genericObjectReadFactory } from "../../../../mocks/genericObject";
+import { userReadFactory } from "../../../../mocks/user";
 
-const FILTERS_STUB = [
+const FILTERS_STUB = {external: [
   {
     name: "name",
     label: "Name",
@@ -44,7 +46,7 @@ const FILTERS_STUB = [
     label: "After",
     type: inputTypes.DATE,
   },
-];
+]};
 
 const USERS_STUB: userRead[] = [
   {
@@ -99,11 +101,27 @@ function factory(
       formType: formType ? formType : "filter",
     },
     global: {
-      plugins: [createCustomPinia(options)],
+      plugins: [
+        createCustomPinia({
+          ...options,
+          initialState: {
+            authStore: {
+              user: userReadFactory({
+                defaultAlertQueue: genericObjectReadFactory({
+                  value: "external",
+                }),
+                defaultEventQueue: genericObjectReadFactory({
+                  value: "external",
+                }),
+              }),
+            },
+          },
+        }),
+      ],
       provide: {
         nodeType: "alerts",
         availableFilters: FILTERS_STUB,
-        availableEditFields: [],
+        availableEditFields: {},
       },
     },
   });
