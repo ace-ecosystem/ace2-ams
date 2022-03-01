@@ -15,7 +15,7 @@
 
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
   import { useQueueStore } from "@/stores/queue";
-  import { defineProps, ref, watchEffect } from "vue";
+  import { defineProps, ref } from "vue";
 
   const queueStore = useQueueStore();
 

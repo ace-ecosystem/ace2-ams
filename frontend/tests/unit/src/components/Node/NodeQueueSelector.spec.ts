@@ -61,4 +61,22 @@ describe("NodeComment.vue", () => {
       );
     },
   );
+  it.each([
+    ["alerts", "external"],
+    ["events", "internal"],
+  ])(
+    "correctly updates currentUserSettingsStore on updateUserSettings",
+   (nodeQueue, expected) => {
+      const { wrapper } = factory(nodeQueue);
+      wrapper.vm.preferredQueue = genericObjectReadFactory({
+        value: expected,
+      });
+      wrapper.vm.updateUserSettings();
+      expect(wrapper.vm.currentUserSettingsStore.queues[nodeQueue]).toEqual(
+        genericObjectReadFactory({
+          value: expected,
+        }),
+      );
+    },
+  );
 });
