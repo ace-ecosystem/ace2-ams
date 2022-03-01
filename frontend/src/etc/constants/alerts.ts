@@ -8,7 +8,7 @@ import { useNodeTagStore } from "@/stores/nodeTag";
 import { useNodeThreatStore } from "@/stores/nodeThreat";
 import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
 import { useUserStore } from "@/stores/user";
-import { inputTypes } from "./base";
+import { inputTypes, nameProperty, nodeTagsProperty, nodeThreatActorProperty, nodeThreatsProperty, observableProperty, observableTypesProperty, observableValueProperty, ownerProperty, queueProperty } from "./base";
 
 // ** Alerts ** //
 
@@ -193,3 +193,26 @@ export const alertTypeProperty: propertyOption = {
   optionProperty: "value",
   valueProperty: "value",
 };
+
+export const validAlertFilters: propertyOption[] = [
+  alertDispositionProperty,
+  alertDispositionUserProperty,
+  alertDispositionedAfterProperty,
+  alertDispositionedBeforeProperty,
+  alertEventTimeAfterProperty,
+  alertEventTimeBeforeProperty,
+  alertInsertTimeAfterProperty,
+  alertInsertTimeBeforeProperty,
+  nameProperty,
+  observableProperty,
+  observableTypesProperty,
+  observableValueProperty,
+  ownerProperty,
+  queueProperty,
+  nodeTagsProperty,
+  nodeThreatActorProperty,
+  nodeThreatsProperty,
+  alertToolProperty,
+  alertToolInstanceProperty,
+  alertTypeProperty,
+]

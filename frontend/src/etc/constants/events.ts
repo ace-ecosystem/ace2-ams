@@ -11,7 +11,7 @@ import { useEventStatusStore } from "@/stores/eventStatus";
 import { useEventTypeStore } from "@/stores/eventType";
 import { useEventVectorStore } from "@/stores/eventVector";
 
-import { inputTypes } from "./base";
+import { inputTypes, nameProperty, nodeTagsProperty, nodeThreatActorProperty, nodeThreatsProperty, observableProperty, observableTypesProperty, observableValueProperty, ownerProperty, queueProperty } from "./base";
 
 // ** Events ** //
 
@@ -24,7 +24,7 @@ export const eventPropertyTypes: Record<string, string> = {
   OWNERSHIP_TIME_PROPERTY: "ownershipTime",
   DISPOSITION_TIME_PROPERTY: "dispositionTime",
   REMEDIATION_TIME_PROPERTY: "remediationTime",
-  DISPOSITION_PROPERTY_PROPERTY: "disposition",
+  DISPOSITION_PROPERTY: "disposition",
   PREVENTION_TOOLS_PROPERTY: "preventionTools",
   REMEDIATIONS_PROPERTY: "remediations",
   RISK_LEVEL_PROPERTY: "riskLevel",
@@ -224,3 +224,26 @@ export const eventSourceProperty: propertyOption = {
   optionProperty: "value",
   valueProperty: "value",
 };
+
+
+export const validEventFilters: propertyOption[] = [
+    eventDispositionProperty,
+    nameProperty,
+    observableProperty,
+    eventCreatedAfterProperty,
+    eventCreatedBeforeProperty,
+    observableTypesProperty,
+    observableProperty,
+    observableValueProperty,
+    ownerProperty,
+    eventPreventionToolsProperty,
+    queueProperty,
+    eventRiskLevelProperty,
+    eventSourceProperty,
+    eventStatusProperty,
+    nodeTagsProperty,
+    nodeThreatActorProperty,
+    nodeThreatsProperty,
+    eventTypeProperty,
+    eventVectorsProperty,
+]

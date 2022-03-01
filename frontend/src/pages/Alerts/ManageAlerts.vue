@@ -23,13 +23,14 @@
 
   import { useFilterStore } from "@/stores/filter";
   import { parseFilters, populateCommonStores } from "@/etc/helpers";
+  import { validAlertFilters } from "@/etc/constants/alerts";
 
   const route = useRoute();
   const router = useRouter();
   const config = inject("config");
 
   provide("availableFilters", config.alerts.alertFilters);
-  provide("availableEditFields", []);
+  provide("availableEditFields", {});
   provide("nodeType", "alerts");
   provide("rangeFilters", config.alerts.alertRangeFilters);
 
@@ -53,7 +54,7 @@
     // load filters given in route
     filterStore.bulkSetFilters({
       nodeType: "alerts",
-      filters: parseFilters(route.query, config.alerts.alertFilters),
+      filters: parseFilters(route.query, validAlertFilters),
     });
     // Reload page to clear URL params
     router.push("/manage_alerts");

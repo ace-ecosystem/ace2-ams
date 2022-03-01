@@ -14,7 +14,7 @@ export interface genericObjectRead {
   description: string | null;
   uuid: UUID;
   value: string;
-  queues?: queueRead[]
+  queues?: queueRead[];
 }
 
 export interface genericObjectReadPage extends page {

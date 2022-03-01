@@ -7,13 +7,28 @@ import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
 import { alertFilterParams } from "@/models/alert";
 import { createCustomPinia } from "@unit/helpers";
+import { genericObjectReadFactory } from "../../../../mocks/genericObject";
 import { userReadFactory } from "../../../../mocks/user";
 
 function factory(args: {
   filters?: { nodeType: "alerts"; filters: alertFilterParams };
   options?: TestingOptions;
 }) {
-  const testingPinia = createCustomPinia(args.options);
+  const testingPinia = createCustomPinia({
+    ...args.options,
+    initialState: {
+      authStore: {
+        user: userReadFactory({
+          defaultAlertQueue: genericObjectReadFactory({
+            value: "external",
+          }),
+          defaultEventQueue: genericObjectReadFactory({
+            value: "external",
+          }),
+        }),
+      },
+    },
+  });
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
 

@@ -27,6 +27,7 @@
           data-cy="filter-input"
           :allow-delete="false"
           form-type="filter"
+          :queue="queue"
         >
         </NodePropertyInput>
         <Button
@@ -51,7 +52,7 @@
 </script>
 
 <script setup>
-  import { inject, ref } from "vue";
+  import { inject, computed, ref } from "vue";
 
   import Button from "primevue/button";
   import FilterChipContainer from "@/components/Filters/FilterChipContainer.vue";
@@ -64,19 +65,27 @@
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
+  import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
+import { validAlertFilters } from "@/etc/constants/alerts";
+import { validEventFilters } from "@/etc/constants/events";
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
 
   import { copyToClipboard, formatNodeFiltersForAPI } from "@/etc/helpers";
 
   const config = inject("config");
 
   const nodeType = inject("nodeType");
-  const filterOptions = {
-    alerts: config.alerts.alertFilters,
-    events: config.events.eventFilters,
+  const validFilterOptions = {
+    alerts: validAlertFilters,
+    events: validEventFilters,
   };
+
+  const queue = computed(() => {
+    return currentUserSettingsStore.$state["queues"][nodeType].value;
+  });
 
   const clear = () => {
     filterStore.clearAll({ nodeType: nodeType });
@@ -118,7 +127,7 @@
     // If there are filters set, build the link for it
     if (Object.keys(filterStore[nodeType]).length) {
       let urlParams = new URLSearchParams(
-        formatNodeFiltersForAPI(filterOptions[nodeType], filterStore[nodeType]),
+        formatNodeFiltersForAPI(validFilterOptions[nodeType], filterStore[nodeType]),
       );
       link = `${
         window.location.origin

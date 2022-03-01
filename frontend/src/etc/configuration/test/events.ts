@@ -18,7 +18,8 @@ import {
   eventStatusProperty,
 } from "@/etc/constants/events";
 
-export const eventFilters: readonly propertyOption[] = [
+export const eventFilters: Record<string, readonly propertyOption[]> = {
+  external: [
   nameProperty,
   eventCreatedAfterProperty,
   eventCreatedBeforeProperty,
@@ -28,7 +29,17 @@ export const eventFilters: readonly propertyOption[] = [
   queueProperty, // Required, do not delete
   nodeTagsProperty,
   eventStatusProperty, // Required, do not delete
-] as const;
+  ],
+  internal: [
+  nameProperty,
+  eventCreatedAfterProperty,
+  eventCreatedBeforeProperty,
+  observableProperty,
+  observableTypesProperty,
+  queueProperty, // Required, do not delete
+  eventStatusProperty, // Required, do not delete
+  ],
+} as const;
 
 export const eventEditableProperties: readonly propertyOption[] = [
   nameProperty,

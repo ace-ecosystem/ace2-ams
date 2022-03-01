@@ -31,7 +31,7 @@ describe("parseFilters", () => {
 
     const results = parseFilters(
       { observableTypes: "ipv4,file,fake" },
-      alertFilters,
+      alertFilters.external,
     );
 
     expect(results).toEqual({
@@ -43,7 +43,7 @@ describe("parseFilters", () => {
   });
 
   it("will correctly parse and add any chips filters", async () => {
-    const results = parseFilters({ tags: "tagA,tagB" }, alertFilters);
+    const results = parseFilters({ tags: "tagA,tagB" }, alertFilters.external);
 
     expect(results).toEqual({
       tags: ["tagA", "tagB"],
@@ -80,7 +80,7 @@ describe("parseFilters", () => {
     const userStore = useUserStore();
     userStore.items = [mockUserA, mockUserB];
 
-    const results = parseFilters({ owner: "analystB" }, alertFilters);
+    const results = parseFilters({ owner: "analystB" }, alertFilters.external);
 
     expect(results).toEqual({
       owner: mockUserB,
@@ -93,7 +93,7 @@ describe("parseFilters", () => {
         eventTimeBefore:
           "Sat Jan 08 2022 11:31:51 GMT-0500 (Eastern Standard Time)",
       },
-      alertFilters,
+      alertFilters.external,
     );
 
     expect(results).toEqual({
@@ -102,13 +102,13 @@ describe("parseFilters", () => {
   });
 
   it("will skip any date filters that fail to parse", async () => {
-    const results = parseFilters({ eventTimeBefore: "Bad Date" }, alertFilters);
+    const results = parseFilters({ eventTimeBefore: "Bad Date" }, alertFilters.external);
 
     expect(results).toEqual({});
   });
 
   it("will correctly parse and add any input text filters", async () => {
-    const results = parseFilters({ name: "test name" }, alertFilters);
+    const results = parseFilters({ name: "test name" }, alertFilters.external);
 
     expect(results).toEqual({
       name: "test name",
@@ -121,7 +121,7 @@ describe("parseFilters", () => {
       { value: "file", description: null, uuid: "2" },
     ];
 
-    const results = parseFilters({ observable: "ipv4|1.2.3.4" }, alertFilters);
+    const results = parseFilters({ observable: "ipv4|1.2.3.4" }, alertFilters.external);
 
     expect(results).toEqual({
       observable: {
@@ -177,7 +177,7 @@ describe("parseFilters", () => {
         owner: "analystB",
         tags: "tagA,tagB",
       },
-      alertFilters,
+      alertFilters.external,
     );
 
     expect(results).toEqual({
@@ -223,7 +223,7 @@ describe("formatNodeFiltersForAPI", () => {
     },
   };
   it("will correctly parse and add any multiselect filters", async () => {
-    const formattedFilters = formatNodeFiltersForAPI(alertFilters, MOCK_PARAMS);
+    const formattedFilters = formatNodeFiltersForAPI(alertFilters.external, MOCK_PARAMS);
     expect(formattedFilters).toEqual({
       limit: 10,
       offset: 10,
@@ -277,28 +277,28 @@ describe("setUserDefaults", () => {
   const eventQueue = genericObjectReadFactory({ value: "eventQueue" });
 
   beforeEach(() => {
-    authStore.user = userReadFactory({
-      defaultAlertQueue: alertQueue,
-      defaultEventQueue: eventQueue,
-    });
+    authStore.$reset();
     filterStore.$reset();
     currentUserSettingsStore.$reset();
   });
 
   it("will do nothing when there is no authStore user set", () => {
-    authStore.user = null;
     setUserDefaults();
-    expect(currentUserSettingsStore.preferredEventQueue).toBeNull();
-    expect(currentUserSettingsStore.preferredAlertQueue).toBeNull();
+    expect(currentUserSettingsStore.queues.events).toBeNull();
+    expect(currentUserSettingsStore.queues.alerts).toBeNull();
 
     expect(filterStore.events).toEqual({});
     expect(filterStore.alerts).toEqual({});
   });
 
   it("will correctly set all user defaults when nodeType == 'all'", () => {
+        authStore.user = userReadFactory({
+      defaultAlertQueue: alertQueue,
+      defaultEventQueue: eventQueue,
+    });
     setUserDefaults();
-    expect(currentUserSettingsStore.preferredEventQueue).toEqual(eventQueue);
-    expect(currentUserSettingsStore.preferredAlertQueue).toEqual(alertQueue);
+    expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
+    expect(currentUserSettingsStore.queues.alerts).toEqual(alertQueue);
     expect(filterStore.events).toEqual({
       queue: eventQueue,
     });
@@ -307,18 +307,26 @@ describe("setUserDefaults", () => {
     });
   });
   it("will correctly set event user defaults when nodeType == 'events'", () => {
+        authStore.user = userReadFactory({
+      defaultAlertQueue: alertQueue,
+      defaultEventQueue: eventQueue,
+    });
     setUserDefaults("events");
-    expect(currentUserSettingsStore.preferredEventQueue).toEqual(eventQueue);
-    expect(currentUserSettingsStore.preferredAlertQueue).toBeNull();
+    expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
+    expect(currentUserSettingsStore.queues.alerts).toBeNull();
     expect(filterStore.events).toEqual({
       queue: eventQueue,
     });
     expect(filterStore.alerts).toEqual({});
   });
   it("will correctly set alert user defaults when nodeType == 'alerts'", () => {
+        authStore.user = userReadFactory({
+      defaultAlertQueue: alertQueue,
+      defaultEventQueue: eventQueue,
+    });
     setUserDefaults("alerts");
-    expect(currentUserSettingsStore.preferredEventQueue).toBeNull();
-    expect(currentUserSettingsStore.preferredAlertQueue).toEqual(alertQueue);
+    expect(currentUserSettingsStore.queues.events).toBeNull();
+    expect(currentUserSettingsStore.queues.alerts).toEqual(alertQueue);
     expect(filterStore.events).toEqual({});
     expect(filterStore.alerts).toEqual({
       queue: alertQueue,
@@ -326,10 +334,9 @@ describe("setUserDefaults", () => {
   });
 
   it("will not set any user defaults when nodeType is unknown", () => {
-    authStore.user = null;
     setUserDefaults("unknown");
-    expect(currentUserSettingsStore.preferredEventQueue).toBeNull();
-    expect(currentUserSettingsStore.preferredAlertQueue).toBeNull();
+    expect(currentUserSettingsStore.queues.events).toBeNull();
+    expect(currentUserSettingsStore.queues.alerts).toBeNull();
 
     expect(filterStore.events).toEqual({});
     expect(filterStore.alerts).toEqual({});

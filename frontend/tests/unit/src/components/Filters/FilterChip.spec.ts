@@ -7,6 +7,8 @@ import { alertFilters } from "@/etc/configuration/test/alerts";
 import { inputTypes } from "@/etc/constants/base";
 import { createCustomPinia } from "@unit/helpers";
 import { testConfiguration } from "@/etc/configuration/test/index";
+import { userReadFactory } from "../../../../mocks/user";
+import { genericObjectReadFactory } from "../../../../mocks/genericObject";
 
 describe("FilterChip.vue", () => {
   function factory(
@@ -20,7 +22,29 @@ describe("FilterChip.vue", () => {
     const wrapper: VueWrapper<any> = shallowMount(FilterChip, {
       props: props,
       global: {
-        plugins: [createCustomPinia(options)],
+        plugins: [
+          createCustomPinia({
+            ...options,
+            initialState: {
+              authStore: {
+                user: userReadFactory({
+                  defaultAlertQueue: genericObjectReadFactory({
+                    value: "external",
+                  }),
+                  defaultEventQueue: genericObjectReadFactory({
+                    value: "external",
+                  }),
+                }),
+              },
+              currentUserSettingsStore: {
+                queues: {
+                  alerts: genericObjectReadFactory({ value: "external" }),
+                  events: genericObjectReadFactory({ value: "external" }),
+                },
+              },
+            },
+          }),
+        ],
         provide: {
           nodeType: nodeType,
           config: testConfiguration,
@@ -49,13 +73,13 @@ describe("FilterChip.vue", () => {
     const { wrapper } = factory();
     expect(wrapper.vm.nodeType).toEqual("alerts");
   });
-  it("correctly sets filterOptions using nodeType injection when nodeType is 'alerts'", () => {
+  it("correctly sets queue when nodeType is 'alerts'", () => {
     const { wrapper } = factory();
-    expect(wrapper.vm.filterOptions).toEqual(alertFilters);
+    expect(wrapper.vm.queue).toEqual("external");
   });
-  it("correctly sets filterOptions using nodeType injection when nodeType is unknown", () => {
+  it("correctly sets queue when nodeType is unknown", () => {
     const { wrapper } = factory(undefined, undefined, "unknown");
-    expect(wrapper.vm.filterOptions).toEqual([]);
+    expect(wrapper.vm.queue).toBeNull();
   });
   it("correctly sets filterNameObject given a valid filterName", () => {
     const { wrapper } = factory();

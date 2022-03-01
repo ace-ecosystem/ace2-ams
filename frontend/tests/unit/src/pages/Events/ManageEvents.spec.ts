@@ -2,7 +2,7 @@ import ManageEvents from "@/pages/Events/ManageEvents.vue";
 import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
 import TheEventsTable from "@/components/Events/TheEventsTable.vue";
 import TheNodeActionToolbarVue from "@/components/Node/TheNodeActionToolbar.vue";
-import { mount } from "@vue/test-utils";
+import { shallowMount } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
 import Tooltip from "primevue/tooltip";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
@@ -25,7 +25,7 @@ function factory(
   });
   injectRouterMock(router);
 
-  const wrapper = mount(ManageEvents, {
+  const wrapper = shallowMount(ManageEvents, {
     global: {
       provide: {
         config: testConfiguration,

@@ -15,11 +15,7 @@ import { testConfiguration } from "@/etc/configuration/test";
 const api = new BaseApi();
 const endpoint = "/event/";
 
-const testingModeEnabled = import.meta.env.VITE_TESTING_MODE;
-const filters =
-  testingModeEnabled === "yes"
-    ? testConfiguration.events.eventFilters
-    : configuration.events.eventFilters;
+import { validEventFilters } from "@/etc/constants/events";
 
 export const Event = {
   create: (
@@ -39,7 +35,7 @@ export const Event = {
   readPage: (params?: eventFilterParams): Promise<eventReadPage> => {
     let formattedParams = {} as eventFilterParams;
     if (params) {
-      formattedParams = formatNodeFiltersForAPI(filters, params);
+      formattedParams = formatNodeFiltersForAPI(validEventFilters, params);
     }
 
     return api.read(endpoint, formattedParams);
@@ -48,7 +44,7 @@ export const Event = {
   readAllPages: (params?: eventFilterParams): Promise<eventRead[]> => {
     let formattedParams = {} as eventFilterParams;
     if (params) {
-      formattedParams = formatNodeFiltersForAPI(filters, params);
+      formattedParams = formatNodeFiltersForAPI(validEventFilters, params);
     }
 
     return api.readAll(endpoint, formattedParams);

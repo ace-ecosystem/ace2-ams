@@ -12,9 +12,15 @@ createCustomPinia();
 const store = useEventTableStore();
 
 const mockEventReadA = eventReadFactory({ uuid: "uuid1" });
-const mockEventReadASummary = eventSummaryFactory({ uuid: "uuid1" });
+const mockEventReadASummary = eventSummaryFactory({
+  uuid: "uuid1",
+  queue: "testObject",
+});
 const mockEventReadB = eventReadFactory({ uuid: "uuid2" });
-const mockEventReadBSummary = eventSummaryFactory({ uuid: "uuid2" });
+const mockEventReadBSummary = eventSummaryFactory({
+  uuid: "uuid2",
+  queue: "testObject",
+});
 
 const mockOwner = userReadFactory();
 const mockPreventionTool = genericObjectReadFactory({
@@ -47,6 +53,7 @@ const mockEventReadCSummary = eventSummaryFactory({
   threats: ["nodeThreat"],
   type: "type",
   vectors: ["vector"],
+  queue: "testObject",
 });
 
 const mockParams: eventFilterParams = { limit: 5, offset: 0 };

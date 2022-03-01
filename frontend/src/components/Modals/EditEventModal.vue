@@ -84,6 +84,7 @@
   import { isObject } from "@/etc/validators";
   import NodeCommentEditor from "../Node/NodeCommentEditor.vue";
   import { NodeComment } from "@/services/api/nodeComment";
+import { eventDispositionTimeProperty } from "@/etc/constants/events";
 
   const modalStore = useModalStore();
   const eventStore = useEventStore();
@@ -106,6 +107,7 @@
   onMounted(async () => {
     event.value = await Event.read(props.eventUuid);
 
+    console.log(availableEditFields)
     for (const option of availableEditFields[event.value.queue.value]) {
       // Create a lookup by field/option name of all the fieldOptionObjects
       fieldOptionObjects.value[option.name] = option;
