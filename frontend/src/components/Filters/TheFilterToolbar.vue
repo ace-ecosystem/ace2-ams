@@ -66,8 +66,8 @@
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
-import { validAlertFilters } from "@/etc/constants/alerts";
-import { validEventFilters } from "@/etc/constants/events";
+  import { validAlertFilters } from "@/etc/constants/alerts";
+  import { validEventFilters } from "@/etc/constants/events";
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
@@ -127,7 +127,10 @@ import { validEventFilters } from "@/etc/constants/events";
     // If there are filters set, build the link for it
     if (Object.keys(filterStore[nodeType]).length) {
       let urlParams = new URLSearchParams(
-        formatNodeFiltersForAPI(validFilterOptions[nodeType], filterStore[nodeType]),
+        formatNodeFiltersForAPI(
+          validFilterOptions[nodeType],
+          filterStore[nodeType],
+        ),
       );
       link = `${
         window.location.origin

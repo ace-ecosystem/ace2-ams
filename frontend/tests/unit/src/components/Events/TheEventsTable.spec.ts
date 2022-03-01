@@ -60,10 +60,12 @@ describe("TheEventsTable data/creation", () => {
 
   it("initializes data as expected", () => {
     const { wrapper } = factory();
-        const defaultQueue = genericObjectReadFactory({ value: "external" });
+    const defaultQueue = genericObjectReadFactory({ value: "external" });
 
     // these will be set up on mount
-    expect(wrapper.vm.columns).toStrictEqual(testConfiguration.events.eventQueueColumnMappings.external);
+    expect(wrapper.vm.columns).toStrictEqual(
+      testConfiguration.events.eventQueueColumnMappings.external,
+    );
     expect(wrapper.vm.key).toStrictEqual(1);
     expect(wrapper.vm.preferredEventQueue).toStrictEqual(defaultQueue);
   });
@@ -87,7 +89,9 @@ describe("TheEventsTable data/creation", () => {
     expect(wrapper.vm.key).toStrictEqual(3);
   });
   it("will call setColumns when currentUserSettingsStore.preferredEventQueue changes", async () => {
-    const { wrapper, currentUserSettingsStore, filterStore } = factory({stubActions: false});
+    const { wrapper, currentUserSettingsStore, filterStore } = factory({
+      stubActions: false,
+    });
     const newQueue = genericObjectReadFactory({ value: "internal" });
 
     currentUserSettingsStore.queues.events = newQueue;

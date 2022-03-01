@@ -8,8 +8,7 @@
     class="xl: w-5 lg:w-5 md:w-8"
     @dialogClose="loadFormFilters"
   >
-  <NodeQueueSelector :node-queue="nodeType"
-    /> <br>
+    <NodeQueueSelector :node-queue="nodeType" /> <br />
     <div class="flex flex-wrap">
       <NodePropertyInput
         v-for="(filter, index) in formFilters"
@@ -55,8 +54,7 @@
 
   import NodePropertyInput from "../Node/NodePropertyInput.vue";
   import BaseModal from "@/components/Modals/BaseModal.vue";
-    import NodeQueueSelector from "@/components/Node/NodeQueueSelector.vue";
-
+  import NodeQueueSelector from "@/components/Node/NodeQueueSelector.vue";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";

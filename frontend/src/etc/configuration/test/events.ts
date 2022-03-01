@@ -20,24 +20,24 @@ import {
 
 export const eventFilters: Record<string, readonly propertyOption[]> = {
   external: [
-  nameProperty,
-  eventCreatedAfterProperty,
-  eventCreatedBeforeProperty,
-  observableProperty,
-  observableTypesProperty,
-  ownerProperty,
-  queueProperty, // Required, do not delete
-  nodeTagsProperty,
-  eventStatusProperty, // Required, do not delete
+    nameProperty,
+    eventCreatedAfterProperty,
+    eventCreatedBeforeProperty,
+    observableProperty,
+    observableTypesProperty,
+    ownerProperty,
+    queueProperty, // Required, do not delete
+    nodeTagsProperty,
+    eventStatusProperty, // Required, do not delete
   ],
   internal: [
-  nameProperty,
-  eventCreatedAfterProperty,
-  eventCreatedBeforeProperty,
-  observableProperty,
-  observableTypesProperty,
-  queueProperty, // Required, do not delete
-  eventStatusProperty, // Required, do not delete
+    nameProperty,
+    eventCreatedAfterProperty,
+    eventCreatedBeforeProperty,
+    observableProperty,
+    observableTypesProperty,
+    queueProperty, // Required, do not delete
+    eventStatusProperty, // Required, do not delete
   ],
 } as const;
 

@@ -76,7 +76,7 @@ describe("FilterChip.vue", () => {
   it("correctly sets queue when nodeType is 'alerts'", () => {
     const { wrapper } = factory();
     expect(wrapper.vm.queue).toEqual("external");
-        wrapper.vm.currentUserSettingsStore.queues.alerts =
+    wrapper.vm.currentUserSettingsStore.queues.alerts =
       genericObjectReadFactory({
         value: "internal",
       });
@@ -85,7 +85,7 @@ describe("FilterChip.vue", () => {
   it("correctly sets queue when nodeType is unknown", () => {
     const { wrapper } = factory(undefined, undefined, "unknown");
     expect(wrapper.vm.queue).toBeNull();
-        wrapper.vm.currentUserSettingsStore.queues.alerts =
+    wrapper.vm.currentUserSettingsStore.queues.alerts =
       genericObjectReadFactory({
         value: "internal",
       });

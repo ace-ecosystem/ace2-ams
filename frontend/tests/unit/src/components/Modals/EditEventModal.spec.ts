@@ -14,7 +14,6 @@ import myNock from "@unit/services/api/nock";
 import { useModalStore } from "@/stores/modal";
 import { useUserStore } from "@/stores/user";
 import { genericObjectReadFactory } from "../../../../mocks/genericObject";
-import { values } from "cypress/types/lodash";
 import { Event } from "../../../../../src/services/api/event";
 import { vi, expect } from "vitest";
 
@@ -91,7 +90,7 @@ describe("EditEventModal.vue", () => {
       .spyOn(helpers, "populateEventStores")
       .mockResolvedValueOnce(undefined);
     const { wrapper } = await factory();
-    
+
     await wrapper.vm.initializeData();
 
     // Check at least one of the stores in populateEventStores

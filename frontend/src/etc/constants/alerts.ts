@@ -8,7 +8,18 @@ import { useNodeTagStore } from "@/stores/nodeTag";
 import { useNodeThreatStore } from "@/stores/nodeThreat";
 import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
 import { useUserStore } from "@/stores/user";
-import { inputTypes, nameProperty, nodeTagsProperty, nodeThreatActorProperty, nodeThreatsProperty, observableProperty, observableTypesProperty, observableValueProperty, ownerProperty, queueProperty } from "./base";
+import {
+  inputTypes,
+  nameProperty,
+  nodeTagsProperty,
+  nodeThreatActorProperty,
+  nodeThreatsProperty,
+  observableProperty,
+  observableTypesProperty,
+  observableValueProperty,
+  ownerProperty,
+  queueProperty,
+} from "./base";
 
 // ** Alerts ** //
 
@@ -215,4 +226,4 @@ export const validAlertFilters: propertyOption[] = [
   alertToolProperty,
   alertToolInstanceProperty,
   alertTypeProperty,
-]
+];
