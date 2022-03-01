@@ -86,26 +86,31 @@ describe("EditEventModal.vue", () => {
   });
 
   it("loads given event and populates event stores on initializeData", async () => {
-    const spy = vi
+    const eventSpy = vi.spyOn(Event, "read").mockResolvedValueOnce(undefined);
+    const storeSpy = vi
       .spyOn(helpers, "populateEventStores")
       .mockResolvedValueOnce(undefined);
+
     const { wrapper } = await factory();
 
     await wrapper.vm.initializeData();
 
     // Check at least one of the stores in populateEventStores
-    expect(spy).toHaveBeenCalled();
+    expect(eventSpy).toHaveBeenCalled();
+    expect(storeSpy).toHaveBeenCalled();
     expect(wrapper.vm.isLoading).toBeFalsy();
   });
   it("will catch and set error if any are thrown in initializeData", async () => {
-    const spy = vi
+    const eventSpy = vi.spyOn(Event, "read").mockResolvedValueOnce(undefined);
+    const storeSpy = vi
       .spyOn(helpers, "populateEventStores")
       .mockRejectedValueOnce(new Error("Request failed with status code 403"));
     const { wrapper } = await factory();
     await wrapper.vm.initializeData();
 
     // Check at least one of the stores in populateEventStores
-    expect(spy).toHaveBeenCalled();
+    expect(eventSpy).toHaveBeenCalled();
+    expect(storeSpy).toHaveBeenCalled();
 
     expect(wrapper.vm.error).toEqual("Request failed with status code 403");
     expect(wrapper.vm.isLoading).toBeFalsy();
