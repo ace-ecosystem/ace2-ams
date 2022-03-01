@@ -256,7 +256,7 @@ describe("ViewAlert.vue", () => {
     cy.wait("@getAlert").its("state").should("eq", "Complete");
   });
 
-  it("will reroute to the Manage Alerts page with tag filter applied when tag clicked", () => {
+  it.only("will reroute to the Manage Alerts page with tag filter applied when tag clicked", () => {
     // Find the recipient tag and click
     cy.get(
       '[data-cy="email_address: goodguy@company.com"] > :nth-child(1) > :nth-child(3) > :nth-child(1) > .p-tag',
@@ -275,7 +275,7 @@ describe("ViewAlert.vue", () => {
     cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(":nth-child(1) > .p-dropdown > .p-dropdown-label")
-      .first()
+      .eq(1)
       .should("have.text", "Tags");
     cy.get(".p-chips-token").should("exist");
     cy.get(".p-chips-token").should("have.text", "recipient");
