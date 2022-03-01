@@ -6,7 +6,7 @@ export function visitUrl(options) {
   cy.intercept("GET", "/api/auth/refresh").as("authRefresh");
 
   // Intercept the call that fetches the event
-  cy.intercept("GET", "/api/event/*").as("getEvent");
+  // cy.intercept("GET", "/api/event/*").as("getEvent");
 
   // Intercept all of the populateCommonStores API calls
   cy.intercept("GET", "/api/alert/disposition/?offset=0").as(
@@ -35,7 +35,7 @@ export function visitUrl(options) {
   // Wait for all of the intercepted calls to complete
   const intercepts = [
     "@authRefresh",
-    "@getEvent",
+    // "@getEvent",
     "@alertDisposition",
     "@alertTool",
     "@alertToolInstance",
