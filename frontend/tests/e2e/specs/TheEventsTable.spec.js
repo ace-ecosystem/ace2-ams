@@ -829,11 +829,6 @@ describe("TheEventsTable.vue - Queue Settings", () => {
       "external",
     );
     // Correct columns should be showing
-    cy.get(".p-multiselect-label").should(
-      "have.text",
-      "Created, Name, Threats, Risk Level, Status, Owner",
-    );
-
     // Open queue selector and check options
     cy.get("#queue-dropdown > .p-dropdown-label").click();
     cy.get(".p-dropdown-items").should("be.visible");
