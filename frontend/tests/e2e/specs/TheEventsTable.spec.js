@@ -451,7 +451,19 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       body: {
         alert_template: "small_template.json",
         alert_count: 1,
-        name: "Test Event",
+        name: "External Event",
+        queue: "external",
+      },
+    });
+
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small_template.json",
+        alert_count: 1,
+        name: "Internal Event",
+        queue: "internal",
       },
     });
 
@@ -466,7 +478,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       extraIntercepts: ["@getEventsDefaultRows"],
     });
 
-    // Remove default queue filter (irrelevant to this test suite)
+    // Remove default queue filter
     cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
@@ -479,13 +491,61 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.get("[data-cy=nevermind-edit-event-button]").should("be.visible");
     cy.get("[data-cy=nevermind-edit-event-button]").should("be.visible");
   });
+
+  it("loads fields and values based on the event queue", () => {
+    // Open the modal for the internal event
+    cy.log("Internal Event");
+    openEditEventModal(0);
+
+    // Check name
+    cy.get("[data-cy=event-name-field] .field > input").should(
+      "have.value",
+      "Internal Event",
+    );
+
+    // Internal events should not have the Prevention Tools field
+    cy.get("[data-cy=event-preventionTools-field]").should("not.exist");
+
+    // The remediations field should have an internal queue specific value
+    cy.get(
+      "[data-cy=event-remediations-field] [data-cy=property-input-value]",
+    ).click();
+    cy.get(
+      ".p-multiselect-items-wrapper [aria-label='some internal value']",
+    ).should("exist");
+
+    // Close the modal
+    cy.get("[data-cy=nevermind-edit-event-button]").click();
+
+    // Open the modal for the external event
+    cy.log("External event");
+    openEditEventModal(1);
+
+    // Check name
+    cy.get("[data-cy=event-name-field] .field > input").should(
+      "have.value",
+      "External Event",
+    );
+
+    // External events should have the Prevention Tools field
+    cy.get("[data-cy=event-preventionTools-field]").should("exist");
+
+    // The remediations field should not have an internal queue specific value
+    cy.get(
+      "[data-cy=event-remediations-field] [data-cy=property-input-value]",
+    ).click();
+    cy.get(
+      ".p-multiselect-items-wrapper [aria-label='some internal value']",
+    ).should("not.exist");
+  });
+
   it("loads event data for each input when edit event modal is opened", () => {
     openEditEventModal();
 
     // Check name
     cy.get("[data-cy=event-name-field] .field > input").should(
       "have.value",
-      "Test Event",
+      "Internal Event",
     );
     // Check owner
     cy.get("[data-cy=event-owner-field] [data-cy=property-input-value]")
