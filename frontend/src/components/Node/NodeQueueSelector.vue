@@ -1,15 +1,15 @@
 <template>
   <div data-cy="event-queue-selector">
     <span class="p-float-label">
-    <Dropdown
-    id="queue-dropdown"
-      v-model="preferredQueue"
-      :options="queueStore.items"
-      option-label="value"
-      style="margin-right: 2%"
-      @change="updateUserSettings"
-    />
-    <label for="queue-dropdown">Queue</label>
+      <Dropdown
+        id="queue-dropdown"
+        v-model="preferredQueue"
+        :options="queueStore.items"
+        option-label="value"
+        style="margin-right: 2%"
+        @change="updateUserSettings"
+      />
+      <label for="queue-dropdown">Queue</label>
     </span>
   </div>
 </template>

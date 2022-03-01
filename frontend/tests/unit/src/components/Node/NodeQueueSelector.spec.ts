@@ -66,7 +66,7 @@ describe("NodeComment.vue", () => {
     ["events", "internal"],
   ])(
     "correctly updates currentUserSettingsStore on updateUserSettings",
-   (nodeQueue, expected) => {
+    (nodeQueue, expected) => {
       const { wrapper } = factory(nodeQueue);
       wrapper.vm.preferredQueue = genericObjectReadFactory({
         value: expected,
