@@ -49,6 +49,17 @@ describe("TheFilterToolbar.vue", () => {
 
     expect(wrapper.exists()).toBe(true);
   });
+    it("correctly computes current queue based on node type", () => {
+    const { wrapper } = factory({stubActions: false});
+
+    expect(wrapper.vm.queue).toEqual("external");
+
+    wrapper.vm.currentUserSettingsStore.queues.alerts =
+      genericObjectReadFactory({
+        value: "internal",
+      });
+    expect(wrapper.vm.queue).toEqual("internal");
+  });
   it("correctly opens EditFilterModal modal on openFilterModal", () => {
     const { wrapper, modalStore } = factory({ stubActions: false });
     wrapper.vm.openFilterModal();

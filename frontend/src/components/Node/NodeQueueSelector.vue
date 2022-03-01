@@ -30,12 +30,4 @@
   } else if (props.nodeQueue === "events") {
     preferredQueue.value = currentUserSettingsStore.queues.events;
   }
-
-  watchEffect(() => {
-    if (props.nodeQueue === "alerts") {
-      currentUserSettingsStore.queues.alerts = preferredQueue.value;
-    } else if (props.nodeQueue === "events") {
-      currentUserSettingsStore.queues.events = preferredQueue.value;
-    }
-  });
 </script>

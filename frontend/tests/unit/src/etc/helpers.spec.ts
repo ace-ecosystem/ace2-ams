@@ -4,6 +4,7 @@ import {
   parseFilters,
   getAlertLink,
   getAllAlertTags,
+  groupItemsByQueue,
 } from "../../../../src/etc/helpers";
 import { mockAlertTreeReadA } from "../../../mocks/alert";
 import { alertFilterParams } from "../../../../src/models/alert";
@@ -102,7 +103,10 @@ describe("parseFilters", () => {
   });
 
   it("will skip any date filters that fail to parse", async () => {
-    const results = parseFilters({ eventTimeBefore: "Bad Date" }, alertFilters.external);
+    const results = parseFilters(
+      { eventTimeBefore: "Bad Date" },
+      alertFilters.external,
+    );
 
     expect(results).toEqual({});
   });
@@ -121,7 +125,10 @@ describe("parseFilters", () => {
       { value: "file", description: null, uuid: "2" },
     ];
 
-    const results = parseFilters({ observable: "ipv4|1.2.3.4" }, alertFilters.external);
+    const results = parseFilters(
+      { observable: "ipv4|1.2.3.4" },
+      alertFilters.external,
+    );
 
     expect(results).toEqual({
       observable: {
@@ -223,7 +230,10 @@ describe("formatNodeFiltersForAPI", () => {
     },
   };
   it("will correctly parse and add any multiselect filters", async () => {
-    const formattedFilters = formatNodeFiltersForAPI(alertFilters.external, MOCK_PARAMS);
+    const formattedFilters = formatNodeFiltersForAPI(
+      alertFilters.external,
+      MOCK_PARAMS,
+    );
     expect(formattedFilters).toEqual({
       limit: 10,
       offset: 10,
@@ -292,7 +302,7 @@ describe("setUserDefaults", () => {
   });
 
   it("will correctly set all user defaults when nodeType == 'all'", () => {
-        authStore.user = userReadFactory({
+    authStore.user = userReadFactory({
       defaultAlertQueue: alertQueue,
       defaultEventQueue: eventQueue,
     });
@@ -307,7 +317,7 @@ describe("setUserDefaults", () => {
     });
   });
   it("will correctly set event user defaults when nodeType == 'events'", () => {
-        authStore.user = userReadFactory({
+    authStore.user = userReadFactory({
       defaultAlertQueue: alertQueue,
       defaultEventQueue: eventQueue,
     });
@@ -320,7 +330,7 @@ describe("setUserDefaults", () => {
     expect(filterStore.alerts).toEqual({});
   });
   it("will correctly set alert user defaults when nodeType == 'alerts'", () => {
-        authStore.user = userReadFactory({
+    authStore.user = userReadFactory({
       defaultAlertQueue: alertQueue,
       defaultEventQueue: eventQueue,
     });
@@ -340,5 +350,43 @@ describe("setUserDefaults", () => {
 
     expect(filterStore.events).toEqual({});
     expect(filterStore.alerts).toEqual({});
+  });
+});
+
+describe("groupItemsByQueue", () => {
+  it("correctly returns an object of items grouped by their 'queues' property, skipping any without it", () => {
+    const queueA = genericObjectReadFactory({ value: "A" });
+    const queueB = genericObjectReadFactory({ value: "B" });
+    const queueC = genericObjectReadFactory({ value: "C" });
+    const testData = [
+      { value: 1, queues: [queueA, queueB] },
+      { value: 2, queues: [queueB] },
+      { value: 3, queues: [queueA, queueC] },
+      { value: 4 },
+      { value: 5, queues: [queueA] },
+      { value: 6, queues: [queueB] },
+      { value: 7, queues: [queueB, queueC] },
+    ];
+
+    const expected = {
+      A: [
+        { value: 1, queues: [queueA, queueB] },
+        { value: 3, queues: [queueA, queueC] },
+        { value: 5, queues: [queueA] },
+      ],
+      B: [
+        { value: 1, queues: [queueA, queueB] },
+        { value: 2, queues: [queueB] },
+        { value: 6, queues: [queueB] },
+        { value: 7, queues: [queueB, queueC] },
+      ],
+      C: [
+        { value: 3, queues: [queueA, queueC] },
+        { value: 7, queues: [queueB, queueC] },
+      ],
+    };
+
+    const result = groupItemsByQueue(testData);
+    expect(result).toEqual(expected);
   });
 });
