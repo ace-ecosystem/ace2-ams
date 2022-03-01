@@ -2,6 +2,7 @@ import FilterModal from "@/components/Modals/FilterModal.vue";
 import { flushPromises, mount } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
 
+import { useAuthStore } from "@/stores/auth";
 import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
 import { alertFilterParams } from "@/models/alert";

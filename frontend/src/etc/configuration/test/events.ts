@@ -41,14 +41,33 @@ export const eventFilters: Record<string, readonly propertyOption[]> = {
   ],
 } as const;
 
-export const eventEditableProperties: readonly propertyOption[] = [
-  nameProperty,
-  ownerProperty,
-  nodeCommentProperty,
-  eventRemediationProperty,
-  nodeThreatsProperty,
-  eventEventTimeProperty,
-];
+export const eventEditableProperties: Record<string, propertyOption[]> = {
+  external: [
+    nameProperty,
+    ownerProperty,
+    nodeCommentProperty,
+    eventRemediationProperty,
+    nodeThreatsProperty,
+    eventEventTimeProperty,
+  ],
+  intel: [
+    nameProperty,
+    ownerProperty,
+    nodeCommentProperty,
+    eventRemediationProperty,
+    nodeThreatsProperty,
+    eventEventTimeProperty,
+  ],
+  internal: [
+    nameProperty,
+    ownerProperty,
+    nodeCommentProperty,
+    eventRemediationProperty,
+    nodeThreatsProperty,
+    eventEventTimeProperty,
+  ],
+};
+
 export const eventRangeFilters = {
   "Created Time": {
     start: eventPropertyTypes.CREATED_AFTER_PROPERTY,

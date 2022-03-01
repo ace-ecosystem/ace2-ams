@@ -84,7 +84,6 @@
   import { isObject } from "@/etc/validators";
   import NodeCommentEditor from "../Node/NodeCommentEditor.vue";
   import { NodeComment } from "@/services/api/nodeComment";
-  import { eventDispositionTimeProperty } from "@/etc/constants/events";
 
   const modalStore = useModalStore();
   const eventStore = useEventStore();

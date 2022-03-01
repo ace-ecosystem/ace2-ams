@@ -7,13 +7,13 @@ import { TestingOptions } from "@pinia/testing";
 import { createRouterMock, injectRouterMock } from "vue-router-mock";
 import { createCustomPinia } from "../../helpers";
 
-import { useCurrentUserSettingsStore } from "../../../../../src/stores/currentUserSettings";
-import { useFilterStore } from "../../../../../src/stores/filter";
+import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
+import { useFilterStore } from "@/stores/filter";
+import { userReadFactory } from "../../../../mocks/user";
 
 import { testConfiguration } from "@/etc/configuration/test/index";
 
 import { expect } from "vitest";
-import { userReadFactory } from "../../../../mocks/user";
 
 function factory(options?: TestingOptions) {
   const router = createRouterMock();
