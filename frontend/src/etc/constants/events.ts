@@ -11,7 +11,18 @@ import { useEventStatusStore } from "@/stores/eventStatus";
 import { useEventTypeStore } from "@/stores/eventType";
 import { useEventVectorStore } from "@/stores/eventVector";
 
-import { inputTypes } from "./base";
+import {
+  inputTypes,
+  nameProperty,
+  nodeTagsProperty,
+  nodeThreatActorProperty,
+  nodeThreatsProperty,
+  observableProperty,
+  observableTypesProperty,
+  observableValueProperty,
+  ownerProperty,
+  queueProperty,
+} from "./base";
 
 // ** Events ** //
 
@@ -24,7 +35,7 @@ export const eventPropertyTypes: Record<string, string> = {
   OWNERSHIP_TIME_PROPERTY: "ownershipTime",
   DISPOSITION_TIME_PROPERTY: "dispositionTime",
   REMEDIATION_TIME_PROPERTY: "remediationTime",
-  DISPOSITION_PROPERTY_PROPERTY: "disposition",
+  DISPOSITION_PROPERTY: "disposition",
   PREVENTION_TOOLS_PROPERTY: "preventionTools",
   REMEDIATIONS_PROPERTY: "remediations",
   RISK_LEVEL_PROPERTY: "riskLevel",
@@ -35,7 +46,7 @@ export const eventPropertyTypes: Record<string, string> = {
 };
 export const eventEventTimeProperty: propertyOption = {
   name: eventPropertyTypes.EVENT_TIME_PROPERTY,
-  label: "Event TIme",
+  label: "Event Time",
   type: inputTypes.DATE,
   stringRepr: (value: Date): string => {
     return value.toISOString();
@@ -104,6 +115,7 @@ export const eventRemediationProperty: propertyOption = {
   label: "Remediation",
   type: inputTypes.MULTISELECT,
   store: useEventRemediationStore,
+  queueDependent: true,
   stringRepr: (value: eventRemediationRead[]): string => {
     return value
       .map(function (elem) {
@@ -120,6 +132,8 @@ export const eventPreventionToolsProperty: propertyOption = {
   label: "Prevention Tools",
   type: inputTypes.MULTISELECT,
   store: useEventPreventionToolStore,
+  queueDependent: true,
+
   stringRepr: (value: eventPreventionToolRead[]) => {
     return value
       .map(function (elem) {
@@ -136,6 +150,8 @@ export const eventRiskLevelProperty: propertyOption = {
   label: "Risk Level",
   type: inputTypes.SELECT,
   store: useEventRiskLevelStore,
+  queueDependent: true,
+
   optionProperty: "value",
   valueProperty: "value",
 };
@@ -144,6 +160,8 @@ export const eventStatusProperty: propertyOption = {
   label: "Status",
   type: inputTypes.SELECT,
   store: useEventStatusStore,
+  queueDependent: true,
+
   optionProperty: "value",
   valueProperty: "value",
 };
@@ -152,6 +170,8 @@ export const eventTypeProperty: propertyOption = {
   label: "Type",
   type: inputTypes.SELECT,
   store: useEventTypeStore,
+  queueDependent: true,
+
   optionProperty: "value",
   valueProperty: "value",
 };
@@ -160,6 +180,8 @@ export const eventVectorsProperty: propertyOption = {
   label: "Vectors",
   type: inputTypes.MULTISELECT,
   store: useEventVectorStore,
+  queueDependent: true,
+
   stringRepr: (value: eventVectorRead[]) => {
     return value
       .map(function (elem) {
@@ -209,6 +231,29 @@ export const eventSourceProperty: propertyOption = {
   label: "Source",
   type: inputTypes.SELECT,
   store: useEventSourceStore,
+  queueDependent: true,
   optionProperty: "value",
   valueProperty: "value",
 };
+
+export const validEventFilters: propertyOption[] = [
+  eventDispositionProperty,
+  nameProperty,
+  observableProperty,
+  eventCreatedAfterProperty,
+  eventCreatedBeforeProperty,
+  observableTypesProperty,
+  observableProperty,
+  observableValueProperty,
+  ownerProperty,
+  eventPreventionToolsProperty,
+  queueProperty,
+  eventRiskLevelProperty,
+  eventSourceProperty,
+  eventStatusProperty,
+  nodeTagsProperty,
+  nodeThreatActorProperty,
+  nodeThreatsProperty,
+  eventTypeProperty,
+  eventVectorsProperty,
+];

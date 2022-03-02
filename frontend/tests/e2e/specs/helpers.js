@@ -5,6 +5,9 @@ export function visitUrl(options) {
   // Intercept the auth refresh call
   cy.intercept("GET", "/api/auth/refresh").as("authRefresh");
 
+  // Intercept the call that fetches the event
+  // cy.intercept("GET", "/api/event/*").as("getEvent");
+
   // Intercept all of the populateCommonStores API calls
   cy.intercept("GET", "/api/alert/disposition/?offset=0").as(
     "alertDisposition",
@@ -32,6 +35,7 @@ export function visitUrl(options) {
   // Wait for all of the intercepted calls to complete
   const intercepts = [
     "@authRefresh",
+    // "@getEvent",
     "@alertDisposition",
     "@alertTool",
     "@alertToolInstance",
@@ -59,7 +63,7 @@ export function visitUrl(options) {
   });
 }
 
-export function openEditEventModal() {
+export function openEditEventModal(eventNum = 0) {
   cy.intercept("GET", "/api/event/prevention_tool/?offset=0").as(
     "eventPreventionTool",
   );
@@ -77,7 +81,7 @@ export function openEditEventModal() {
   cy.intercept("GET", "/api/event/*").as("event");
 
   // Open the Edit Event modal
-  cy.get("[data-cy=edit-event-button]").click();
+  cy.get("[data-cy=edit-event-button]").eq(eventNum).click();
 
   // Wait for all of the intercepted calls to complete
   const intercepts = [
@@ -91,7 +95,6 @@ export function openEditEventModal() {
     "@nodeThreat",
     "@nodeThreatType",
     "@user",
-    "@event",
   ];
 
   cy.wait(intercepts).then((interceptions) => {

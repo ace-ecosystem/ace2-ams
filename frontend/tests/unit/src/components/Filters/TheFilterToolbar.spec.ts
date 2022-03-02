@@ -6,12 +6,31 @@ import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
 import { createCustomPinia } from "@unit/helpers";
 import { testConfiguration } from "@/etc/configuration/test/index";
+import { vi } from "vitest";
+import { genericObjectReadFactory } from "../../../../mocks/genericObject";
+import { userReadFactory } from "../../../../mocks/user";
 
 describe("TheFilterToolbar.vue", () => {
   function factory(options?: TestingOptions) {
     const wrapper: VueWrapper<any> = shallowMount(TheFilterToolbar, {
       global: {
-        plugins: [createCustomPinia(options)],
+        plugins: [
+          createCustomPinia({
+            ...options,
+            initialState: {
+              authStore: {
+                user: userReadFactory({
+                  defaultAlertQueue: genericObjectReadFactory({
+                    value: "external",
+                  }),
+                  defaultEventQueue: genericObjectReadFactory({
+                    value: "external",
+                  }),
+                }),
+              },
+            },
+          }),
+        ],
         provide: {
           nodeType: "alerts",
           config: testConfiguration,
@@ -29,6 +48,17 @@ describe("TheFilterToolbar.vue", () => {
     const { wrapper } = factory();
 
     expect(wrapper.exists()).toBe(true);
+  });
+  it("correctly computes current queue based on node type", () => {
+    const { wrapper } = factory({ stubActions: false });
+
+    expect(wrapper.vm.queue).toEqual("external");
+
+    wrapper.vm.currentUserSettingsStore.queues.alerts =
+      genericObjectReadFactory({
+        value: "internal",
+      });
+    expect(wrapper.vm.queue).toEqual("internal");
   });
   it("correctly opens EditFilterModal modal on openFilterModal", () => {
     const { wrapper, modalStore } = factory({ stubActions: false });

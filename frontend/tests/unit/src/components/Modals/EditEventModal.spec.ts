@@ -13,6 +13,9 @@ import * as helpers from "@/etc/helpers";
 import myNock from "@unit/services/api/nock";
 import { useModalStore } from "@/stores/modal";
 import { useUserStore } from "@/stores/user";
+import { genericObjectReadFactory } from "../../../../mocks/genericObject";
+import { Event } from "../../../../../src/services/api/event";
+import { vi, expect } from "vitest";
 
 const testNameField: propertyOption = {
   name: "name",
@@ -31,10 +34,15 @@ const testCommentsField: propertyOption = {
   label: "Comments",
   type: "inputText",
 };
-const availableEditFields: readonly propertyOption[] = [testNameField];
-const mockEvent = eventReadFactory();
+const testQueue = genericObjectReadFactory({ value: "external" });
+const availableEditFields: Record<string, readonly propertyOption[]> = {
+  external: [testNameField],
+};
+const mockEvent = eventReadFactory({ queue: testQueue });
 
-function factory(options?: TestingOptions) {
+async function factory(options?: TestingOptions) {
+  vi.spyOn(Event, "read").mockResolvedValueOnce(mockEvent);
+
   const wrapper = mount(EditEventModal, {
     attachTo: document.body,
     global: {
@@ -46,6 +54,8 @@ function factory(options?: TestingOptions) {
     },
     props: { name: "EditEventModal", eventUuid: mockEventUUID },
   });
+
+  await flushPromises();
 
   const modalStore = useModalStore();
   const userStore = useUserStore();
@@ -59,15 +69,15 @@ describe("EditEventModal.vue", () => {
     nock.cleanAll();
   });
 
-  it("renders", () => {
-    const { wrapper } = factory();
+  it("renders", async () => {
+    const { wrapper } = await factory();
     expect(wrapper.exists()).toBe(true);
   });
 
-  it("loads data as expected after onMounted hook", () => {
-    const { wrapper } = factory();
+  it("loads data as expected after onMounted hook", async () => {
+    const { wrapper } = await factory();
     expect(wrapper.vm.error).toBeNull();
-    expect(wrapper.vm.event).toBeNull();
+    expect(wrapper.vm.event).toEqual(mockEvent);
     expect(wrapper.vm.fieldOptionObjects).toEqual({ name: testNameField });
     expect(wrapper.vm.formFields).toEqual({
       name: { propertyType: "name", propertyValue: null },
@@ -76,43 +86,37 @@ describe("EditEventModal.vue", () => {
   });
 
   it("loads given event and populates event stores on initializeData", async () => {
-    const spy = vi
+    const eventSpy = vi.spyOn(Event, "read").mockResolvedValueOnce(undefined);
+    const storeSpy = vi
       .spyOn(helpers, "populateEventStores")
       .mockResolvedValueOnce(undefined);
-    const { wrapper } = factory();
 
-    const getEvent = myNock
-      .get(`/event/${mockEventUUID}`)
-      .reply(200, mockEvent);
+    const { wrapper } = await factory();
 
     await wrapper.vm.initializeData();
 
     // Check at least one of the stores in populateEventStores
-    expect(spy).toHaveBeenCalled();
-    expect(getEvent.isDone()).toBe(true);
+    expect(eventSpy).toHaveBeenCalled();
+    expect(storeSpy).toHaveBeenCalled();
     expect(wrapper.vm.isLoading).toBeFalsy();
   });
   it("will catch and set error if any are thrown in initializeData", async () => {
-    const spy = vi
+    const eventSpy = vi.spyOn(Event, "read").mockResolvedValueOnce(undefined);
+    const storeSpy = vi
       .spyOn(helpers, "populateEventStores")
-      .mockResolvedValueOnce(undefined);
-    const { wrapper } = factory();
-
-    const getEvent = myNock
-      .get(`/event/${mockEventUUID}`)
-      .reply(403, mockEvent);
-
+      .mockRejectedValueOnce(new Error("Request failed with status code 403"));
+    const { wrapper } = await factory();
     await wrapper.vm.initializeData();
 
     // Check at least one of the stores in populateEventStores
-    expect(spy).toHaveBeenCalled();
-    expect(getEvent.isDone()).toBe(true);
+    expect(eventSpy).toHaveBeenCalled();
+    expect(storeSpy).toHaveBeenCalled();
 
     expect(wrapper.vm.error).toEqual("Request failed with status code 403");
     expect(wrapper.vm.isLoading).toBeFalsy();
   });
-  it("correctly computes updateData", () => {
-    const { wrapper } = factory();
+  it("correctly computes updateData", async () => {
+    const { wrapper } = await factory();
     wrapper.vm.formFields = {
       name: { propertyType: "name", propertyValue: "test name" },
     };
@@ -121,19 +125,15 @@ describe("EditEventModal.vue", () => {
     ]);
   });
   it("will fetch event data and execute fillFormFields on resetForm", async () => {
-    const getEvent = myNock
-      .get(`/event/${mockEventUUID}`)
-      .reply(200, mockEvent);
-    const { wrapper } = factory();
+    const { wrapper } = await factory();
     await wrapper.vm.resetForm();
-    expect(getEvent.isDone()).toBe(true);
 
     expect(wrapper.vm.formFields).toEqual({
       name: { propertyType: "name", propertyValue: "Test Event" },
     });
   });
-  it("will fill form field propertyValues using data from event object", () => {
-    const { wrapper } = factory();
+  it("will fill form field propertyValues using data from event object", async () => {
+    const { wrapper } = await factory();
     wrapper.vm.event = mockEvent;
     wrapper.vm.fillFormFields();
     expect(wrapper.vm.formFields).toEqual({
@@ -141,7 +141,7 @@ describe("EditEventModal.vue", () => {
     });
   });
   it("will use updateData to make a call to update an event on saveEvent, closing the modal and requestingReload on completion", async () => {
-    const { wrapper, modalStore, eventStore } = factory();
+    const { wrapper, modalStore, eventStore } = await factory();
 
     wrapper.vm.formFields = {
       name: { propertyType: "name", propertyValue: "New Name" },
@@ -159,7 +159,7 @@ describe("EditEventModal.vue", () => {
   it("will attempt to save any comments if 'comments' is in the formFields on saveEvent", async () => {
     const updateComment = myNock.patch("/node/comment/commentUuid1").reply(200);
 
-    const { wrapper, modalStore } = factory();
+    const { wrapper, modalStore } = await factory();
 
     wrapper.vm.fieldOptionObjects = { comments: testCommentsField };
     wrapper.vm.formFields = {
@@ -179,7 +179,7 @@ describe("EditEventModal.vue", () => {
   it("will attempt to update all comments in the formFields on saveEventComments", async () => {
     const updateComment = myNock.patch("/node/comment/commentUuid1").reply(200);
 
-    const { wrapper } = factory();
+    const { wrapper } = await factory();
 
     wrapper.vm.fieldOptionObjects = { comments: testCommentsField };
     wrapper.vm.formFields = {
@@ -194,7 +194,7 @@ describe("EditEventModal.vue", () => {
     expect(updateComment.isDone()).toBe(true);
   });
   it("will use updateData to make a call to update an event on saveEvent, but won't close or emit anything if there is an error", async () => {
-    const { wrapper, modalStore, eventStore } = factory();
+    const { wrapper, modalStore, eventStore } = await factory();
 
     wrapper.vm.formFields = {
       name: { propertyType: "name", propertyValue: "New Name" },
@@ -229,22 +229,22 @@ describe("EditEventModal.vue", () => {
     ],
   ])(
     "will correctly format a value on formatValue",
-    (fieldOptionObjects, field, value, expected) => {
-      const { wrapper } = factory();
+    async (fieldOptionObjects, field, value, expected) => {
+      const { wrapper } = await factory();
       wrapper.vm.fieldOptionObjects = fieldOptionObjects;
       const result = wrapper.vm.formatValue(field, value);
       expect(result).toEqual(expected);
     },
   );
-  it("will clear the error value and execute close on handleError", () => {
-    const { wrapper, modalStore } = factory();
+  it("will clear the error value and execute close on handleError", async () => {
+    const { wrapper, modalStore } = await factory();
     wrapper.vm.error = "test error";
     wrapper.vm.handleError();
     expect(wrapper.vm.error).toBeNull();
     expect(modalStore.close).toHaveBeenCalledWith("EditEventModal");
   });
-  it("will close the modal in modalStore on close", () => {
-    const { wrapper, modalStore } = factory();
+  it("will close the modal in modalStore on close", async () => {
+    const { wrapper, modalStore } = await factory();
     wrapper.vm.close();
     expect(modalStore.close).toHaveBeenCalledWith("EditEventModal");
   });

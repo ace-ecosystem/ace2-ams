@@ -95,6 +95,8 @@ export const nodeThreatActorProperty: propertyOption = {
   label: "Threat Actor",
   type: inputTypes.SELECT,
   store: useNodeThreatActorStore,
+  queueDependent: true,
+
   optionProperty: "value",
   valueProperty: "value",
 };
@@ -103,6 +105,8 @@ export const nodeThreatsProperty: propertyOption = {
   label: "Threats",
   type: inputTypes.MULTISELECT,
   store: useNodeThreatStore,
+  queueDependent: true,
+
   stringRepr: (filter: nodeThreatRead[]) => {
     return filter
       .map(function (elem) {

@@ -134,26 +134,28 @@
   const availableFilters = inject("availableFilters");
   const availableEditFields = inject("availableEditFields");
 
-  const propertyTypeOptions =
-    props.formType == "filter"
-      ? availableFilters
-      : props.formType == "edit"
-      ? availableEditFields
-      : null;
-
   const emit = defineEmits(["update:modelValue", "deleteFormField"]);
   const props = defineProps({
+    queue: { type: String, required: true },
     modelValue: { type: Object, required: true },
     fixedPropertyType: { type: Boolean, required: false },
     allowDelete: { type: Boolean, required: false },
     formType: { type: String, required: true },
   });
 
+  const propertyTypeOptions = computed(() => {
+    return props.formType == "filter"
+      ? availableFilters[props.queue]
+      : props.formType == "edit"
+      ? availableEditFields[props.queue]
+      : null;
+  });
+
   const getPropertyTypeObject = (propertyType) => {
     if (!propertyType) {
-      return propertyTypeOptions ? propertyTypeOptions[0] : null;
+      return propertyTypeOptions.value ? propertyTypeOptions.value[0] : null;
     }
-    let property = propertyTypeOptions.find((option) => {
+    let property = propertyTypeOptions.value.find((option) => {
       return option.name === propertyType;
     });
     property = property ? property : null;
@@ -174,7 +176,11 @@
   const propertyValueOptions = computed(() => {
     if (propertyType.value && propertyType.value.store) {
       const store = propertyType.value.store();
-      return store.allItems;
+      if (propertyType.value.queueDependent) {
+        return store.getItemsByQueue(props.queue);
+      } else {
+        return store.allItems;
+      }
     }
     return null;
   });
@@ -182,11 +188,13 @@
   onMounted(() => {
     // This will update the property to the default if one wasn't provided
     updateValue("propertyType", propertyType.value);
+
     // This will udpate the property value to the default (if available) if one wasn't provided
     if (!propertyValue.value) {
       clearPropertyValue();
       updateValue("propertyValue", propertyValue.value);
     }
+
     // we need to fill in the placeholder refs (see note above) for categorized value
     else if (isCategorizedValue.value) {
       categorizedValueCategory.value = propertyValue.value.category;
@@ -236,7 +244,7 @@
   });
 
   watch(propertyType, async () => {
-    if (propertyType.value.store) {
+    if (propertyType.value && propertyType.value.store) {
       const store = propertyType.value.store();
       await store.readAll();
     }

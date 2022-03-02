@@ -16,28 +16,61 @@ import {
   eventEventTimeProperty,
   eventRemediationProperty,
   eventStatusProperty,
+  eventPreventionToolsProperty,
 } from "@/etc/constants/events";
 
-export const eventFilters: readonly propertyOption[] = [
-  nameProperty,
-  eventCreatedAfterProperty,
-  eventCreatedBeforeProperty,
-  observableProperty,
-  observableTypesProperty,
-  ownerProperty,
-  queueProperty, // Required, do not delete
-  nodeTagsProperty,
-  eventStatusProperty, // Required, do not delete
-] as const;
+export const eventFilters: Record<string, readonly propertyOption[]> = {
+  external: [
+    nameProperty,
+    eventCreatedAfterProperty,
+    eventCreatedBeforeProperty,
+    observableProperty,
+    observableTypesProperty,
+    ownerProperty,
+    queueProperty, // Required, do not delete
+    nodeTagsProperty,
+    eventStatusProperty, // Required, do not delete
+  ],
+  internal: [
+    nameProperty,
+    eventCreatedAfterProperty,
+    eventCreatedBeforeProperty,
+    observableProperty,
+    observableTypesProperty,
+    queueProperty, // Required, do not delete
+    eventStatusProperty, // Required, do not delete
+  ],
+} as const;
 
-export const eventEditableProperties: readonly propertyOption[] = [
-  nameProperty,
-  ownerProperty,
-  nodeCommentProperty,
-  eventRemediationProperty,
-  nodeThreatsProperty,
-  eventEventTimeProperty,
-];
+export const eventEditableProperties: Record<string, propertyOption[]> = {
+  external: [
+    nameProperty,
+    ownerProperty,
+    nodeCommentProperty,
+    eventPreventionToolsProperty,
+    eventRemediationProperty,
+    nodeThreatsProperty,
+    eventEventTimeProperty,
+  ],
+  intel: [
+    nameProperty,
+    ownerProperty,
+    nodeCommentProperty,
+    eventPreventionToolsProperty,
+    eventRemediationProperty,
+    nodeThreatsProperty,
+    eventEventTimeProperty,
+  ],
+  internal: [
+    nameProperty,
+    ownerProperty,
+    nodeCommentProperty,
+    eventRemediationProperty,
+    nodeThreatsProperty,
+    eventEventTimeProperty,
+  ],
+};
+
 export const eventRangeFilters = {
   "Created Time": {
     start: eventPropertyTypes.CREATED_AFTER_PROPERTY,

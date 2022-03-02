@@ -8,7 +8,7 @@ import {
   alertSummary,
   alertTreeRead,
 } from "@/models/alert";
-import { propertyOption } from "@/models/base";
+import { genericObjectRead, propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
 import { nodeTagRead } from "@/models/nodeTag";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
@@ -29,6 +29,7 @@ import { useQueueStore } from "@/stores/queue";
 import { useUserStore } from "@/stores/user";
 import { inputTypes } from "@/etc/constants/base";
 import { isValidDate, isObject } from "@/etc/validators";
+import { nodeThreatRead } from "@/models/nodeThreat";
 
 export const camelToSnakeCase = (str: string): string =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
@@ -107,23 +108,21 @@ export function setUserDefaults(nodeType = "all"): void {
 
   if (nodeType === "all" || nodeType === "events") {
     // Set default event queue
-    currentUserSettingsStore.preferredEventQueue =
-      authStore.user.defaultEventQueue;
+    currentUserSettingsStore.queues.events = authStore.user.defaultEventQueue;
     filterStore.setFilter({
       nodeType: "events",
       filterName: "queue",
-      filterValue: currentUserSettingsStore.preferredEventQueue,
+      filterValue: currentUserSettingsStore.queues.events,
     });
   }
 
   if (nodeType === "all" || nodeType === "alerts") {
     // Set default alert queue
-    currentUserSettingsStore.preferredAlertQueue =
-      authStore.user.defaultAlertQueue;
+    currentUserSettingsStore.queues.alerts = authStore.user.defaultAlertQueue;
     filterStore.setFilter({
       nodeType: "alerts",
       filterName: "queue",
-      filterValue: currentUserSettingsStore.preferredAlertQueue,
+      filterValue: currentUserSettingsStore.queues.alerts,
     });
   }
 }
@@ -358,4 +357,22 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
     type: alert.type.value,
     uuid: alert.uuid,
   };
+}
+
+export function groupItemsByQueue<T extends genericObjectRead>(
+  arr: T[],
+): Record<string, T[]> {
+  const itemsByQueue: Record<string, T[]> = {};
+  for (const item of arr) {
+    if (item.queues) {
+      for (const queue of item.queues) {
+        if (queue.value in itemsByQueue) {
+          itemsByQueue[queue.value].push(item);
+        } else {
+          itemsByQueue[queue.value] = [item];
+        }
+      }
+    }
+  }
+  return itemsByQueue;
 }

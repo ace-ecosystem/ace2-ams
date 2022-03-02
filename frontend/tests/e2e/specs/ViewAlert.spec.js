@@ -275,7 +275,7 @@ describe("ViewAlert.vue", () => {
     cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
     cy.get(".p-dialog-footer > :nth-child(2)").click();
     cy.get(":nth-child(1) > .p-dropdown > .p-dropdown-label")
-      .first()
+      .eq(1)
       .should("have.text", "Tags");
     cy.get(".p-chips-token").should("exist");
     cy.get(".p-chips-token").should("have.text", "recipient");

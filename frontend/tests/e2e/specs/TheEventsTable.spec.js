@@ -451,7 +451,19 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       body: {
         alert_template: "small_template.json",
         alert_count: 1,
-        name: "Test Event",
+        name: "External Event",
+        queue: "external",
+      },
+    });
+
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small_template.json",
+        alert_count: 1,
+        name: "Internal Event",
+        queue: "internal",
       },
     });
 
@@ -466,7 +478,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       extraIntercepts: ["@getEventsDefaultRows"],
     });
 
-    // Remove default queue filter (irrelevant to this test suite)
+    // Remove default queue filter
     cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
@@ -479,13 +491,61 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.get("[data-cy=nevermind-edit-event-button]").should("be.visible");
     cy.get("[data-cy=nevermind-edit-event-button]").should("be.visible");
   });
+
+  it("loads fields and values based on the event queue", () => {
+    // Open the modal for the internal event
+    cy.log("Internal Event");
+    openEditEventModal(0);
+
+    // Check name
+    cy.get("[data-cy=event-name-field] .field > input").should(
+      "have.value",
+      "Internal Event",
+    );
+
+    // Internal events should not have the Prevention Tools field
+    cy.get("[data-cy=event-preventionTools-field]").should("not.exist");
+
+    // The remediations field should have an internal queue specific value
+    cy.get(
+      "[data-cy=event-remediations-field] [data-cy=property-input-value]",
+    ).click();
+    cy.get(
+      ".p-multiselect-items-wrapper [aria-label='some internal value']",
+    ).should("exist");
+
+    // Close the modal
+    cy.get("[data-cy=nevermind-edit-event-button]").click();
+
+    // Open the modal for the external event
+    cy.log("External event");
+    openEditEventModal(1);
+
+    // Check name
+    cy.get("[data-cy=event-name-field] .field > input").should(
+      "have.value",
+      "External Event",
+    );
+
+    // External events should have the Prevention Tools field
+    cy.get("[data-cy=event-preventionTools-field]").should("exist");
+
+    // The remediations field should not have an internal queue specific value
+    cy.get(
+      "[data-cy=event-remediations-field] [data-cy=property-input-value]",
+    ).click();
+    cy.get(
+      ".p-multiselect-items-wrapper [aria-label='some internal value']",
+    ).should("not.exist");
+  });
+
   it("loads event data for each input when edit event modal is opened", () => {
     openEditEventModal();
 
     // Check name
     cy.get("[data-cy=event-name-field] .field > input").should(
       "have.value",
-      "Test Event",
+      "Internal Event",
     );
     // Check owner
     cy.get("[data-cy=event-owner-field] [data-cy=property-input-value]")
@@ -500,50 +560,61 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       "[data-cy=event-eventTime-field] [data-cy=property-input-value]",
     ).should("have.value", "");
   });
+
   it("successfully updates an 'input'-type field (ex. name)", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("PATCH", "/api/event/").as("updateAlert");
+    cy.intercept("PATCH", "/api/event/").as("updateEvent");
 
-    openEditEventModal();
+    // Edit the first event
+    openEditEventModal(0);
 
+    // Change the event's name
     cy.get("[data-cy=event-name-field]  [data-cy=property-input-value]")
       .click()
       .clear()
-      .type("New Name");
+      .type("Updated Name");
     cy.get("[data-cy=save-edit-event-button]").click();
-    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
-    cy.get("[data-cy=eventName]").invoke("text").should("eq", "New Name");
+    cy.get("[data-cy=eventName]")
+      .eq(0)
+      .invoke("text")
+      .should("eq", "Updated Name");
   });
+
   it("successfully updates an 'select'-type field (ex. owner)", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("PATCH", "/api/event/").as("updateAlert");
+    cy.intercept("PATCH", "/api/event/").as("updateEvent");
 
-    openEditEventModal();
+    // Edit the first event
+    openEditEventModal(0);
 
+    // Change the owner
     cy.get(
       "[data-cy=event-owner-field] [data-cy=property-input-value]",
     ).click();
     cy.get('[aria-label="Analyst"]').click();
     cy.get("[data-cy=save-edit-event-button]").click();
-    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
     cy.get(".p-datatable-tbody > tr > :nth-child(9) > span")
+      .eq(0)
       .invoke("text")
       .should("eq", "Analyst");
   });
+
   it("successfully updates an 'multiselect'-type field (ex. remediation)", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("PATCH", "/api/event/").as("updateAlert");
+    cy.intercept("PATCH", "/api/event/").as("updateEvent");
 
     openEditEventModal();
 
@@ -554,7 +625,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.get(".p-multiselect-item ").eq(1).click();
 
     cy.get("[data-cy=save-edit-event-button]").click();
-    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
   });
   it("successfully updates a 'date'-type field (ex. event time)", () => {
@@ -562,7 +633,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("PATCH", "/api/event/").as("updateAlert");
+    cy.intercept("PATCH", "/api/event/").as("updateEvent");
 
     openEditEventModal();
 
@@ -571,15 +642,18 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       .type("03/02/2022 12:00");
 
     cy.get("[data-cy=save-edit-event-button]").click();
-    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
   });
+
   it("successfully updates a comment using NodeCommentEditor", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("PATCH", "/api/event/").as("updateAlert");
+    cy.intercept("PATCH", "/api/event/").as("updateEvent");
+    cy.intercept("GET", "/api/event/*").as("getEvent");
+    cy.intercept("POST", "/api/node/comment/").as("createComment");
     cy.intercept("PATCH", "/api/node/comment/*").as("updateComment");
 
     // First add an initial comment
@@ -587,10 +661,13 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.get("[data-cy=comment-button]").click();
     cy.get(".p-inputtextarea").click().type("Test comment");
     cy.get(".p-dialog-footer > .p-button").last().click();
+    cy.wait("@createComment").its("state").should("eq", "Complete");
+
+    // Edit the first event
+    openEditEventModal(0);
+    cy.wait("@getEvent").its("state").should("eq", "Complete");
 
     // Check that the comment field is set up correctly
-    openEditEventModal();
-
     cy.get("li.p-listbox-item > span").should(
       "include.text",
       "(Analyst) Test comment",
@@ -613,25 +690,26 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       .clear()
       .type("Updated comment");
     cy.get("[data-cy=save-comment-button]").click();
-    cy.get("li.p-listbox-item > span").should(
-      "include.text",
-      "(Analyst) Updated comment",
-    );
+    cy.get("li.p-listbox-item > span")
+      .eq(0)
+      .should("include.text", "(Analyst) Updated comment");
     cy.get("[data-cy=save-edit-event-button]").click();
 
-    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@updateComment").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check comment value
-    cy.get(".p-mr-2 > span").should("have.text", "(Analyst) Updated comment");
+    cy.get(".p-mr-2 > span")
+      .eq(0)
+      .should("have.text", "(Analyst) Updated comment");
   });
   it("successfully creates a new threat or updates using NodeThreatSelector", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("PATCH", "/api/event/").as("updateAlert");
+    cy.intercept("PATCH", "/api/event/").as("updateEvent");
     cy.intercept("POST", "/api/node/threat/").as("createThreat");
     cy.intercept("PATCH", "/api/node/threat/*").as("updateThreat");
     cy.intercept("GET", "/api/node/threat/*").as("getThreats");
@@ -657,7 +735,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     // Select the new threat and save
     cy.get(".p-listbox-item > .align-items-center").click();
     cy.get("[data-cy=save-edit-event-button]").click();
-    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Reopen the panel
@@ -729,9 +807,10 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
     cy.get('[data-cy="filter-chip-content"]').should("have.text", "external");
     // Queue selector should have right value
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "external");
+    cy.get("#queue-dropdown > .p-dropdown-label").should(
+      "have.text",
+      "external",
+    );
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should(
       "have.text",
@@ -751,9 +830,10 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
     cy.get('[data-cy="filter-chip-content"]').should("have.text", "internal");
     // Queue selector should have right value
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "internal");
+    cy.get("#queue-dropdown > .p-dropdown-label").should(
+      "have.text",
+      "internal",
+    );
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should("have.text", "Created, Name, Type");
   });
@@ -762,19 +842,13 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
     cy.get('[data-cy="filter-chip-content"]').should("have.text", "external");
     // Queue selector should have right value
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "external");
-    // Correct columns should be showing
-    cy.get(".p-multiselect-label").should(
+    cy.get("#queue-dropdown > .p-dropdown-label").should(
       "have.text",
-      "Created, Name, Threats, Risk Level, Status, Owner",
+      "external",
     );
-
+    // Correct columns should be showing
     // Open queue selector and check options
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-trigger',
-    ).click();
+    cy.get("#queue-dropdown > .p-dropdown-label").click();
     cy.get(".p-dropdown-items").should("be.visible");
     cy.get('[aria-label="external"]').should("be.visible");
     cy.get('[aria-label="internal"]').should("be.visible");
@@ -789,16 +863,15 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
     cy.get('[data-cy="filter-chip-content"]').should("have.text", "internal");
     // Queue selector should have right value
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "internal");
+    cy.get("#queue-dropdown > .p-dropdown-label").should(
+      "have.text",
+      "internal",
+    );
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should("have.text", "Created, Name, Type");
 
     // Switch back to external queue
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-trigger',
-    ).click();
+    cy.get("#queue-dropdown > .p-dropdown-label").click();
     cy.get('[aria-label="external"]').click();
     cy.wait("@getEventsExternalQueueFilter")
       .its("state")
@@ -807,9 +880,10 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
     cy.get('[data-cy="filter-chip-content"]').should("have.text", "external");
     // Queue selector should have right value
-    cy.get(
-      '[data-cy="event-queue-selector"] > .p-dropdown > .p-dropdown-label',
-    ).should("have.text", "external");
+    cy.get("#queue-dropdown > .p-dropdown-label").should(
+      "have.text",
+      "external",
+    );
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should(
       "have.text",

@@ -17,7 +17,7 @@ import {
   ownerProperty,
 } from "@/etc/constants/base";
 
-export const alertFilters: readonly propertyOption[] = [
+const defaultAlertFilters = [
   alertDispositionProperty,
   alertEventTimeAfterProperty,
   alertEventTimeBeforeProperty,
@@ -30,7 +30,13 @@ export const alertFilters: readonly propertyOption[] = [
   queueProperty,
   nodeTagsProperty,
   nodeThreatsProperty,
-] as const;
+];
+
+export const alertFilters: Record<string, readonly propertyOption[]> = {
+  external: defaultAlertFilters,
+  intel: defaultAlertFilters,
+  internal: defaultAlertFilters,
+} as const;
 
 export const alertRangeFilters = {
   "Event Time": {

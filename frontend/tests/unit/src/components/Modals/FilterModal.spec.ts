@@ -1,17 +1,34 @@
 import FilterModal from "@/components/Modals/FilterModal.vue";
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
 
+import { useAuthStore } from "@/stores/auth";
 import { useFilterStore } from "@/stores/filter";
 import { useModalStore } from "@/stores/modal";
 import { alertFilterParams } from "@/models/alert";
 import { createCustomPinia } from "@unit/helpers";
+import { genericObjectReadFactory } from "../../../../mocks/genericObject";
+import { userReadFactory } from "../../../../mocks/user";
 
 function factory(args: {
   filters?: { nodeType: "alerts"; filters: alertFilterParams };
   options?: TestingOptions;
 }) {
-  const testingPinia = createCustomPinia(args.options);
+  const testingPinia = createCustomPinia({
+    ...args.options,
+    initialState: {
+      authStore: {
+        user: userReadFactory({
+          defaultAlertQueue: genericObjectReadFactory({
+            value: "external",
+          }),
+          defaultEventQueue: genericObjectReadFactory({
+            value: "external",
+          }),
+        }),
+      },
+    },
+  });
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
 
@@ -69,6 +86,18 @@ describe("FilterModal setup", () => {
 });
 
 describe("FilterModal computed properties", () => {
+  it("correctly computes current queue based on node type", () => {
+    const { wrapper } = factory({ options: { stubActions: false } });
+
+    expect(wrapper.vm.queue).toEqual("external");
+
+    wrapper.vm.currentUserSettingsStore.queues.alerts =
+      genericObjectReadFactory({
+        value: "internal",
+      });
+    expect(wrapper.vm.queue).toEqual("internal");
+  });
+
   it("contains expected computed data when no filters are set", () => {
     const { wrapper } = factory({});
 

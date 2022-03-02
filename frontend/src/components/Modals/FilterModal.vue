@@ -8,6 +8,8 @@
     class="xl: w-5 lg:w-5 md:w-8"
     @dialogClose="loadFormFilters"
   >
+    <br />
+    <NodeQueueSelector :node-queue="nodeType" /> <br />
     <div class="flex flex-wrap">
       <NodePropertyInput
         v-for="(filter, index) in formFilters"
@@ -15,6 +17,7 @@
         v-model="formFilters[index]"
         class="w-12"
         :allow-delete="true"
+        :queue="queue"
         form-type="filter"
         @deleteFormField="deleteFormFilter(index)"
       ></NodePropertyInput>
@@ -52,12 +55,15 @@
 
   import NodePropertyInput from "../Node/NodePropertyInput.vue";
   import BaseModal from "@/components/Modals/BaseModal.vue";
+  import NodeQueueSelector from "@/components/Node/NodeQueueSelector.vue";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
+  import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
 
   onMounted(() => {
     loadFormFilters();
@@ -77,6 +83,10 @@
   );
 
   const formFilters = ref([]);
+
+  const queue = computed(() => {
+    return currentUserSettingsStore.$state["queues"][nodeType].value;
+  });
 
   const submitFilters = computed(() => {
     let submitFilters = {};
