@@ -67,6 +67,7 @@
 
   const props = defineProps({
     name: { type: String, required: true },
+    reloadObject: { type: String, required: true },
   });
 
   const newTags = ref([]);
@@ -102,8 +103,13 @@
   }
 
   function newNodeTags(uuid, tags) {
-    const node = tableStore.visibleQueriedItemById(uuid);
-    const nodeTags = node ? node.tags : [];
+    let nodeTags = [];
+    if (props.reloadObject == "table") {
+      const node = tableStore.visibleQueriedItemById(uuid);
+      nodeTags = node ? node.tags : [];
+    } else if (props.reloadObject == "node") {
+      nodeTags = nodeStore.open.tags;
+    }
     return tagValues(nodeTags).concat(tags);
   }
 

@@ -13,7 +13,7 @@ describe("AlertTree.vue", () => {
 
     const pinia = createCustomPinia(options);
     const alertStore = useAlertStore();
-    alertStore.openAlert = mockAlert;
+    alertStore.open = mockAlert;
 
     const wrapper: VueWrapper<any> = mount(AlertTree, {
       props: {

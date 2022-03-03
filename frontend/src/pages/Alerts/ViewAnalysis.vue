@@ -30,14 +30,14 @@
 
   async function initPage(analysisID, alertID) {
     analysis.value = await Analysis.read(analysisID);
-    if (!alertStore.openAlert) {
+    if (!alertStore.open) {
       await alertStore.read(alertID);
     }
   }
 
   const alertName = computed(() => {
-    if (alertStore.openAlert) {
-      return alertStore.openAlert.name;
+    if (alertStore.open) {
+      return alertStore.open.name;
     }
     return "Unknown Alert";
   });

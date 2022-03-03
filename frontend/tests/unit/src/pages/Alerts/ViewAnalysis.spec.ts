@@ -42,7 +42,7 @@ describe("ViewAnalysis.vue", () => {
     const alertStore = useAlertStore();
     await wrapper.vm.initPage("uuid2", "uuid1");
     expect(wrapper.vm.analysis).toEqual(mockAnalysisRead);
-    expect(alertStore.openAlert).toEqual(mockAlertReadDateStrings);
+    expect(alertStore.open).toEqual(mockAlertReadDateStrings);
   });
   it("correctly computes alertName", async () => {
     await wrapper.vm.initPage("uuid2", "uuid1");
