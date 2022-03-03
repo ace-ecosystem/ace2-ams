@@ -211,6 +211,7 @@ def create_analysis(
     amt_required_directives: List[str] = None,
     amt_required_tags: List[str] = None,
     amt_version: str = "1.0.0",
+    details: Optional[dict] = None,
     node_metadata: Optional[Dict[str, object]] = None,
 ) -> NodeTree:
     if amt_value:
@@ -228,11 +229,12 @@ def create_analysis(
 
         obj = Analysis(
             analysis_module_type=analysis_module_type,
+            details=details,
             uuid=uuid.uuid4(),
             version=uuid.uuid4(),
         )
     else:
-        obj = Analysis(uuid=uuid.uuid4(), version=uuid.uuid4())
+        obj = Analysis(details=details, uuid=uuid.uuid4(), version=uuid.uuid4())
 
     db.add(obj)
     crud.commit(db)
@@ -658,6 +660,10 @@ def create_user_role(value: str, db: Session) -> UserRole:
 
 def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) -> NodeTree:
     def _create_analysis(a, parent_tree: NodeTree):
+        details = None
+        if "details" in a:
+            details = a["details"]
+
         observable_types = None
         if "observable_types" in a:
             observable_types = a["observable_types"]
@@ -682,6 +688,7 @@ def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) ->
             amt_observable_types=observable_types,
             amt_required_directives=required_directives,
             amt_required_tags=required_tags,
+            details=details,
         )
 
         if "observables" in a:
