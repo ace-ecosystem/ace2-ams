@@ -7,7 +7,16 @@
       "tags": ["<TAG>", "<TAG>", "<TAG>"],
       "analyses": [
         {
-          "type": "<A_TYPE> Analysis",
+          "type": "Email Analysis",
+          "details": {
+            "from": "<O_VALUE>@evil.com",
+            "to": "<O_VALUE>@company.com",
+            "subject": "<O_VALUE>",
+            "message_id": "<O_VALUE>@evil.com",
+            "attachments": [],
+            "headers": "blah",
+            "body_text": "Here, download this malware."
+          },
           "observables": [
             {
               "type": "<O_TYPE>",
