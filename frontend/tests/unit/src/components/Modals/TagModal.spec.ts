@@ -171,8 +171,7 @@ describe("TagModal.vue", () => {
       .reply(200, { items: [{ value: "tag1" }, { value: "tag3" }] });
     const { wrapper } = factory({ stubActions: false }, "node");
 
-    wrapper.vm.nodeStore.open = 
-      { uuid: "uuid1", tags: [{ value: "tag1" }] };
+    wrapper.vm.nodeStore.open = { uuid: "uuid1", tags: [{ value: "tag1" }] };
 
     const res2 = wrapper.vm.newNodeTags("uuid1", ["tag2", "tag3"]);
 

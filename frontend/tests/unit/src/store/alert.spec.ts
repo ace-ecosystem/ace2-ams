@@ -49,7 +49,7 @@ describe("alert Actions", () => {
 
   it("will have openAlertSummary return the current opensummary if there is one, otherwise it will return null", () => {
     expect(store.openAlertSummary).toBeNull();
-    store.open= mockAlertTreeReadA;
+    store.open = mockAlertTreeReadA;
     expect(store.openAlertSummary).toEqual(mockAlertReadASummary);
   });
 
