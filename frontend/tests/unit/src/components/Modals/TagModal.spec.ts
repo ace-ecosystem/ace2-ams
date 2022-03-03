@@ -16,7 +16,7 @@ function factory(options?: TestingOptions) {
       plugins: [createCustomPinia(options), PrimeVue],
       provide: { nodeType: "alerts" },
     },
-    props: { name: "TagModal" },
+    props: { name: "TagModal", reloadObject: "table" },
   });
 
   const modalStore = useModalStore();
