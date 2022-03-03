@@ -60,6 +60,7 @@ export interface eventCreate extends nodeCreate {
 export interface eventRead extends nodeRead {
   alertTime: Date | null;
   alertUuids: UUID[];
+  analysisTypes: string[];
   autoAlertTime: Date | null;
   autoDispositionTime: Date | null;
   autoEventTime: Date | null;
