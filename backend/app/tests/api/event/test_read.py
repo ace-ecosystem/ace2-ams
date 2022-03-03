@@ -28,6 +28,34 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 
 
+def test_analysis_module_types(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The list of analysis types should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert get.json()["analysis_types"] == []
+
+    # Add some alerts with analyses to the event
+    alert_tree1 = helpers.create_alert(db=db, event=event)
+    alert1_o1 = helpers.create_observable(type="url", value="https://127.0.0.1", parent_tree=alert_tree1, db=db)
+    alert1_a1 = helpers.create_analysis(db=db, parent_tree=alert1_o1, amt_value="URL Analysis")
+    alert1_o2 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert1_a1, db=db)
+    helpers.create_analysis(db=db, parent_tree=alert1_o2, amt_value="IP Analysis")
+
+    alert_tree2 = helpers.create_alert(db=db, event=event)
+    alert2_o1 = helpers.create_observable(
+        type="url", value="https://127.0.0.1/malware.exe", parent_tree=alert_tree2, db=db
+    )
+    alert2_a1 = helpers.create_analysis(db=db, parent_tree=alert2_o1, amt_value="URL Analysis")
+    alert2_o2 = helpers.create_observable(type="uri_path", value="/malware.exe", parent_tree=alert2_a1, db=db)
+    helpers.create_analysis(db=db, parent_tree=alert2_o2, amt_value="URI Path Analysis")
+
+    # The list of analysis types should now have some entries
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    assert get.json()["analysis_types"] == ["IP Analysis", "URI Path Analysis", "URL Analysis"]
+
+
 def test_auto_alert_time(client_valid_access_token, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
