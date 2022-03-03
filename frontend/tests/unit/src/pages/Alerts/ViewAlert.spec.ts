@@ -61,7 +61,7 @@ describe("ViewAlert.vue", () => {
     const alertStore = useAlertStore();
     await wrapper.vm.initPage("uuid1");
     expect(selectedAlertStore.selected).toEqual(["uuid1"]);
-    expect(alertStore.openAlert).toEqual(mockAlertReadDateStrings);
+    expect(alertStore.open).toEqual(mockAlertReadDateStrings);
   });
   it("unselects all selected alerts when umounted", async () => {
     const { wrapper } = factory({ stubActions: false });

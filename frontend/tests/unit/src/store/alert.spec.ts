@@ -47,13 +47,13 @@ describe("alert Actions", () => {
     store.$reset();
   });
 
-  it("will have openAlertSummary return the current openAlert summary if there is one, otherwise it will return null", () => {
+  it("will have openAlertSummary return the current opensummary if there is one, otherwise it will return null", () => {
     expect(store.openAlertSummary).toBeNull();
-    store.openAlert = mockAlertTreeReadA;
+    store.open = mockAlertTreeReadA;
     expect(store.openAlertSummary).toEqual(mockAlertReadASummary);
   });
 
-  it("will request to create an alert with a given AlertCreate object, and set the openAlert to result on success", async () => {
+  it("will request to create an alert with a given AlertCreate object, and set the opento result on success", async () => {
     const mockRequest = myNock
       .post("/alert/", JSON.stringify(snakecaseKeys(mockAlertCreate)))
       .reply(200, mockAlert);
@@ -61,7 +61,7 @@ describe("alert Actions", () => {
     await store.create(mockAlertCreate);
 
     expect(mockRequest.isDone()).toEqual(true);
-    expect(store.openAlert).toEqual(mockAlert);
+    expect(store.open).toEqual(mockAlert);
   });
 
   it("will fetch alert data given an alert ID", async () => {
@@ -70,7 +70,7 @@ describe("alert Actions", () => {
 
     expect(mockRequest.isDone()).toEqual(true);
 
-    expect(store.openAlert).toEqual(mockAlert);
+    expect(store.open).toEqual(mockAlert);
   });
 
   it("will make a request to update an alert given the UUID and update data upon the updateAlert action", async () => {
@@ -79,7 +79,7 @@ describe("alert Actions", () => {
 
     expect(mockRequest.isDone()).toEqual(true);
     // None of these should be changed
-    expect(store.openAlert).toBeNull();
+    expect(store.open).toBeNull();
   });
 
   it("will throw an error when a request fails in any action", async () => {
