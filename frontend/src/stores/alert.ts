@@ -14,7 +14,7 @@ export const useAlertStore = defineStore({
   id: "alertStore",
 
   state: () => ({
-    openAlert: null as unknown as alertTreeRead,
+    open: null as unknown as alertTreeRead,
 
     // whether the alert should be reloaded
     requestReload: false,
@@ -22,8 +22,8 @@ export const useAlertStore = defineStore({
 
   getters: {
     openAlertSummary(): alertSummary | null {
-      if (this.openAlert) {
-        return parseAlertSummary(this.openAlert);
+      if (this.open) {
+        return parseAlertSummary(this.open);
       }
       return null;
     },
@@ -33,7 +33,7 @@ export const useAlertStore = defineStore({
     async create(newAlert: alertCreate) {
       await Alert.createAndRead(newAlert)
         .then((alert) => {
-          this.openAlert = alert;
+          this.open = alert;
         })
         .catch((error) => {
           throw error;
@@ -43,7 +43,7 @@ export const useAlertStore = defineStore({
     async read(uuid: UUID) {
       await Alert.read(uuid)
         .then((alert) => {
-          this.openAlert = alert;
+          this.open = alert;
         })
         .catch((error) => {
           throw error;

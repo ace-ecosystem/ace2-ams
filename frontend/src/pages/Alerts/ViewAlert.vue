@@ -2,13 +2,13 @@
 
 <template>
   <TheAlertActionToolbar reload-object="node" />
-  <div v-if="alertStore.openAlert">
+  <div v-if="alertStore.open">
     <TheAlertDetails />
     <br />
     <Card>
       <template #content>
         <div class="p-tree p-component p-tree-wrapper" style="border: none">
-          <AlertTree id="alert-tree" :items="alertStore.openAlert.children" />
+          <AlertTree id="alert-tree" :items="alertStore.open.children" />
         </div>
       </template>
     </Card>
