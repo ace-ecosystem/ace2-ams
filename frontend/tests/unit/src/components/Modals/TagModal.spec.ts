@@ -9,14 +9,14 @@ import { useModalStore } from "@/stores/modal";
 import { useUserStore } from "@/stores/user";
 import { createCustomPinia } from "@unit/helpers";
 
-function factory(options?: TestingOptions) {
+function factory(options?: TestingOptions, reloadObject = "table") {
   const wrapper = mount(TagModal, {
     attachTo: document.body,
     global: {
       plugins: [createCustomPinia(options), PrimeVue],
       provide: { nodeType: "alerts" },
     },
-    props: { name: "TagModal", reloadObject: "table" },
+    props: { name: "TagModal", reloadObject: reloadObject },
   });
 
   const modalStore = useModalStore();
@@ -143,7 +143,7 @@ describe("TagModal.vue", () => {
     expect(wrapper.vm.newTags).toEqual(["tag1"]);
   });
 
-  it("will correctly combine existing alert tags with new tags on newNodeTags", () => {
+  it("will correctly combine existing alert tags with new tags on newNodeTags when reloadObject is 'table'", () => {
     myNock
       .get("/node/tag/?offset=0")
       .twice()
@@ -162,6 +162,21 @@ describe("TagModal.vue", () => {
     expect(res1).toEqual(["tag2", "tag3"]);
     expect(res2).toEqual(["tag1", "tag2", "tag3"]);
     expect(res3).toEqual(["tag2", "tag3"]);
+  });
+
+  it("will correctly combine existing alert tags with new tags on newNodeTags when reloadObject is 'node'", () => {
+    myNock
+      .get("/node/tag/?offset=0")
+      .twice()
+      .reply(200, { items: [{ value: "tag1" }, { value: "tag3" }] });
+    const { wrapper } = factory({ stubActions: false }, "node");
+
+    wrapper.vm.nodeStore.open = 
+      { uuid: "uuid1", tags: [{ value: "tag1" }] };
+
+    const res2 = wrapper.vm.newNodeTags("uuid1", ["tag2", "tag3"]);
+
+    expect(res2).toEqual(["tag1", "tag2", "tag3"]);
   });
 
   it("will close the modal when addTags has successfully finished", async () => {
