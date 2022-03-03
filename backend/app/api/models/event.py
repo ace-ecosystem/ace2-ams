@@ -85,6 +85,10 @@ class EventCreate(NodeCreate, EventBase):
 class EventRead(NodeRead, EventBase):
     alert_uuids: List[UUID4] = Field(default_factory=list, description="A list of alert UUIDs contained in the event")
 
+    analysis_types: List[str] = Field(
+        description="A deduplicated list of analysis module types that exist within the event", default_factory=list
+    )
+
     auto_alert_time: Optional[datetime] = Field(
         description="The automatically calculated time of the earliest insert time from the alerts in the event"
     )

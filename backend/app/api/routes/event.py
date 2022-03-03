@@ -16,6 +16,8 @@ from db import crud
 from db.database import get_db
 from db.schemas.alert import Alert, AlertHistory
 from db.schemas.alert_disposition import AlertDisposition
+from db.schemas.analysis import Analysis
+from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.event import Event, EventHistory
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_remediation import EventRemediation
@@ -458,7 +460,25 @@ def get_all_events(
 
 
 def get_event(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read(uuid=uuid, db_table=Event, db=db)
+    event: Event = crud.read(uuid=uuid, db_table=Event, db=db)
+
+    # Figure out which analysis types are in the event
+    query = (
+        select(AnalysisModuleType)
+        .join(Analysis, onclause=Analysis.analysis_module_type_uuid == AnalysisModuleType.uuid)
+        .join(NodeTree, onclause=NodeTree.node_uuid == Analysis.uuid)
+        .join(Alert, onclause=Alert.uuid == NodeTree.root_node_uuid)
+        .where(Alert.event_uuid == uuid)
+        .distinct()
+        .order_by(AnalysisModuleType.value)
+    )
+
+    results: List[AnalysisModuleType] = db.execute(query).scalars().all()
+
+    # Inject the analysis type values into the event object
+    event.analysis_types = [x.value for x in results]
+
+    return event
 
 
 def get_event_history(uuid: UUID, db: Session = Depends(get_db)):
