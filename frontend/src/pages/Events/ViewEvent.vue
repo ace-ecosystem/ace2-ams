@@ -1,0 +1,123 @@
+<!-- ViewEvent.vue -->
+
+<template>
+  <br />
+  <div v-if="eventStore.open">
+    <EventDetailsMenuBar
+      :event-uuid="route.params.eventID"
+      @section-clicked="updateSection"
+    ></EventDetailsMenuBar>
+    <br />
+    <Card>
+      <template #title>
+        {{ eventStore.open.name }}
+        <Button
+          icon="pi pi-link"
+          class="p-button-secondary p-button-outlined p-button-sm"
+          @click="copyLink"
+        />
+        <NodeTagVue
+          v-for="tag in eventStore.open.tags"
+          :key="tag.uuid"
+          :tag="tag"
+        ></NodeTagVue>
+      </template>
+      <template #content>
+        <component :is="currentComponent" :section="currentSection"></component>
+      </template>
+    </Card>
+  </div>
+</template>
+
+<script setup>
+  import {
+    inject,
+    onBeforeMount,
+    onUnmounted,
+    provide,
+    ref,
+    shallowRef,
+  } from "vue";
+  import { useRoute } from "vue-router";
+
+  import Button from "primevue/button";
+  import Card from "primevue/card";
+
+  import AnalysisDetailsBase from "@/components/Analysis/AnalysisDetailsBase.vue";
+  import EventDetailsMenuBar from "@/components/Events/EventDetailsMenuBar.vue";
+  import EventSummary from "@/components/Events/EventSummary.vue";
+  import NodeTagVue from "@/components/Node/NodeTag.vue";
+
+  import { useEventStore } from "@/stores/event";
+  import { useSelectedEventStore } from "@/stores/selectedEvent";
+
+  import { defaultEventDetailsSections } from "@/etc/constants/events";
+  import { copyToClipboard } from "@/etc/helpers";
+
+  const route = useRoute();
+  const eventStore = useEventStore();
+  const selectedEventStore = useSelectedEventStore();
+
+  const config = inject("config");
+  const componentMapping = config.analysis.analysisModuleComponents;
+
+  const currentSection = ref("Event Summary");
+  const currentComponent = shallowRef(EventSummary);
+
+  provide("nodeType", "events");
+  provide("availableFilters", config.events.eventFilters);
+  provide("availableEditFields", config.events.eventEditableProperties);
+
+  onBeforeMount(async () => {
+    await initPage(route.params.eventID);
+  });
+
+  onUnmounted(() => {
+    selectedEventStore.unselectAll();
+  });
+
+  eventStore.$subscribe(async (_, state) => {
+    if (state.requestReload) {
+      await reloadPage(route.params.eventID);
+    }
+  });
+
+  function copyLink() {
+    copyToClipboard(window.location);
+  }
+
+  function updateSection(section) {
+    currentSection.value = section;
+    if (section in componentMapping) {
+      currentComponent.value = componentMapping[section];
+    } else if (section in defaultEventDetailsSections) {
+      currentComponent.value = defaultEventDetailsSections[section];
+    } else {
+      currentComponent.value = AnalysisDetailsBase;
+    }
+  }
+
+  async function reloadPage() {
+    eventStore.$reset();
+    await eventStore.read(route.params.eventID);
+  }
+
+  async function initPage(eventID) {
+    selectedEventStore.unselectAll();
+    selectedEventStore.select(eventID);
+    eventStore.$reset();
+    await eventStore.read(eventID);
+  }
+</script>
+
+<style>
+  .p-tree-container {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    overflow: auto;
+  }
+  .p-tree-wrapper {
+    overflow: auto;
+  }
+</style>
