@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import AnalyzeAlert from "@/pages/Alerts/AnalyzeAlert.vue";
 import ViewAlert from "@/pages/Alerts/ViewAlert.vue";
+import ViewEvent from "@/pages/Events/ViewEvent.vue";
 import ViewAnalysis from "@/pages/Alerts/ViewAnalysis.vue";
 import ManageAlerts from "@/pages/Alerts/ManageAlerts.vue";
 import ManageEvents from "@/pages/Events/ManageEvents.vue";
@@ -32,6 +33,11 @@ const routes: Array<RouteRecordRaw> = [
     path: "/alert/:alertID",
     name: "View Alert",
     component: ViewAlert,
+  },
+  {
+    path: "/event/:eventID",
+    name: "View Event",
+    component: ViewEvent,
   },
   {
     path: "/alert/:alertID/:analysisID",
