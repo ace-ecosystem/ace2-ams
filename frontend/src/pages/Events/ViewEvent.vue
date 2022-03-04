@@ -44,7 +44,7 @@
   import Card from "primevue/card";
 
   import AnalysisDetailsBase from "@/components/Analysis/AnalysisDetailsBase.vue";
-  import EventDetailsMenuBar from "@/components/Events/EventDetailsMenuBar.vue";
+  import EventDetailsMenuBar from "@/components/Events/TheEventDetailsMenuBar.vue";
   import EventSummary from "@/components/Events/EventSummary.vue";
   import NodeTagVue from "@/components/Node/NodeTag.vue";
 
