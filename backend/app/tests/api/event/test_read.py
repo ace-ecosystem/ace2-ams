@@ -28,6 +28,73 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 
 
+def test_summary_observable(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The observable summary should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
+    assert get.json() == []
+
+    # Add some alerts with analyses to the event
+    #
+    # alert1
+    #   o1
+    #     a1
+    #       o2 - 127.0.0.1
+    #         a2 - FA Q
+    #   o3 - 127.0.0.1
+    #     a3 - FA Q
+    #
+    # alert2
+    #  o1 - 127.0.0.1
+    #    a1 - FA Q
+    #  o2 - 192.168.1.1
+    #    a2 - FA Q
+    alert_tree1 = helpers.create_alert(db=db, event=event)
+    alert1_o1 = helpers.create_observable(type="fqdn", value="localhost.localdomain", parent_tree=alert_tree1, db=db)
+    alert1_a1 = helpers.create_analysis(db=db, parent_tree=alert1_o1, amt_value="FQDN Analysis")
+    alert1_o2 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert1_a1, db=db)
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert1_o2,
+        amt_value="FA Queue Analysis",
+        details={"gui_link": "https://url.to.search/query=asdf", "hits": 10},
+    )
+    alert1_o3 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree1, db=db)
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert1_o3,
+        amt_value="FA Queue Analysis",
+        details={"gui_link": "https://url.to.search/query=asdf", "hits": 10},
+    )
+
+    alert_tree2 = helpers.create_alert(db=db, event=event)
+    alert2_o1 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree2, db=db)
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert2_o1,
+        amt_value="FA Queue Analysis",
+        details={"gui_link": "https://url.to.search/query=asdf", "hits": 10},
+    )
+    alert2_o2 = helpers.create_observable(type="ipv4", value="192.168.1.1", parent_tree=alert_tree2, db=db)
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert2_o2,
+        amt_value="FA Queue Analysis",
+        details={"gui_link": "https://url.to.search/query=asdf", "hits": 100},
+    )
+
+    # The observable summary should now have two entries in it. Even though the 127.0.0.1 observable was repeated three
+    # times across the two alerts, its FA Queue Analysis is going to be the same for each, so it appears once in the summary.
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
+    assert len(get.json()) == 2
+    assert get.json()[0]["value"] == "127.0.0.1"
+    assert get.json()[0]["hits"] == 10
+    assert get.json()[1]["value"] == "192.168.1.1"
+    assert get.json()[1]["hits"] == 100
+
+
 def test_analysis_module_types(client_valid_access_token, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
