@@ -23,6 +23,7 @@ import {
   ownerProperty,
   queueProperty,
 } from "./base";
+import EventSummaryVue from "@/components/Events/EventSummary.vue";
 
 // ** Events ** //
 
@@ -257,3 +258,7 @@ export const validEventFilters: propertyOption[] = [
   eventTypeProperty,
   eventVectorsProperty,
 ];
+
+export const defaultEventDetailsSections = {
+  "Event Summary": EventSummaryVue,
+};
