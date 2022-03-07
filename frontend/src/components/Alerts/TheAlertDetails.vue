@@ -3,14 +3,14 @@
 <template>
   <Card>
     <template #title>
-      {{ alertStore.openAlert.name }}
+      {{ alertStore.open.name }}
       <Button
         icon="pi pi-link"
         class="p-button-secondary p-button-outlined p-button-sm"
         @click="copyLink"
       />
       <NodeTagVue
-        v-for="tag in getAllAlertTags(alertStore.openAlert)"
+        v-for="tag in getAllAlertTags(alertStore.open)"
         :key="tag.uuid"
         :tag="tag"
       ></NodeTagVue>

@@ -230,13 +230,32 @@ describe("ViewAlert.vue", () => {
   });
 
   // Tag
-  it("should make a request to update tags and get updated alert when owner is set", () => {
+  it("should make a request to update tags and get updated alert when tag added through modal", () => {
     cy.intercept("PATCH", "/api/alert/").as("updateAlert");
     cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
       "getAlert",
     );
     cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTags");
 
+    // Open tag modal
+    cy.get("[data-cy=tag-button]").click();
+
+    cy.get(".p-dialog-content").should("be.visible");
+    cy.wait("@getNodeTags").its("state").should("eq", "Complete");
+    // Type a tag
+    cy.get(".p-chips > .p-inputtext").click().type("TestTag").type("{enter}");
+    // Select a tag from the dropdown
+    cy.get(".p-fluid > .p-dropdown > .p-dropdown-label").click();
+    cy.get('[aria-label="scan_me"]').click();
+    // Submit
+    cy.get(".p-dialog-footer > :nth-child(2)").should("be.visible");
+    cy.get(".p-dialog-footer > :nth-child(2)").click();
+    cy.get(".p-dialog-content").should("not.exist");
+
+    cy.wait("@updateAlert").its("state").should("eq", "Complete");
+    cy.wait("@getAlert").its("state").should("eq", "Complete");
+
+    // Add another tag, make sure that any existing tags are not overwritten
     // Open tag modal
     cy.get("[data-cy=tag-button]").click();
 

@@ -53,7 +53,11 @@
           @click="open('TagModal')"
           @requestReload="requestReload"
         />
-        <TagModal name="TagModal" @requestReload="requestReload" />
+        <TagModal
+          name="TagModal"
+          @requestReload="requestReload"
+          :reload-object="props.reloadObject"
+        />
       </div>
     </template>
     <template #end>

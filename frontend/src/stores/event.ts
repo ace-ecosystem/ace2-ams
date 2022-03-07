@@ -7,7 +7,7 @@ export const useEventStore = defineStore({
   id: "eventStore",
 
   state: () => ({
-    openEvent: null as unknown as eventRead,
+    open: null as unknown as eventRead,
 
     // whether the event should be reloaded
     requestReload: false,
@@ -17,7 +17,7 @@ export const useEventStore = defineStore({
     async read(uuid: UUID) {
       await Event.read(uuid)
         .then((event) => {
-          this.openEvent = event;
+          this.open = event;
         })
         .catch((error) => {
           throw error;

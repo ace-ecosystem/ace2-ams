@@ -24,8 +24,8 @@ describe("event Actions", () => {
 
     expect(mockRequest.isDone()).toEqual(true);
 
-    // The openEvent is not parsed at all when received, so any dates will be in string format
-    expect(store.openEvent).toEqual(JSON.parse(JSON.stringify(mockEvent)));
+    // The open is not parsed at all when received, so any dates will be in string format
+    expect(store.open).toEqual(JSON.parse(JSON.stringify(mockEvent)));
   });
 
   it("will throw an error if read fails", async () => {
@@ -41,7 +41,7 @@ describe("event Actions", () => {
 
     expect(mockRequest.isDone()).toEqual(true);
     // None of these should be changed
-    expect(store.openEvent).toBeNull();
+    expect(store.open).toBeNull();
   });
 
   it("will throw an error if update fails", async () => {
@@ -52,6 +52,6 @@ describe("event Actions", () => {
 
     expect(mockRequest.isDone()).toEqual(true);
     // None of these should be changed
-    expect(store.openEvent).toBeNull();
+    expect(store.open).toBeNull();
   });
 });

@@ -20,10 +20,18 @@ Cypress.Commands.add("logout", () => {
 });
 
 Cypress.Commands.add("resetDatabase", () => {
-  cy.request({
-    method: "POST",
-    url: "/api/test/reset_database",
-  });
+  try {
+    cy.request({
+      method: "POST",
+      url: "/api/test/reset_database",
+    });
+  } catch {
+    cy.wait(500);
+    cy.request({
+      method: "POST",
+      url: "/api/test/reset_database",
+    });
+  }
 });
 
 Cypress.Commands.add("addFormObservable", () => {

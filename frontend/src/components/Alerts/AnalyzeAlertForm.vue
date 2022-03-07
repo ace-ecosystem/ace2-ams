@@ -385,7 +385,7 @@
   };
 
   const routeToNewAlert = () => {
-    router.push({ path: `/alert/${alertStore.openAlert.uuid}` });
+    router.push({ path: `/alert/${alertStore.open.uuid}` });
   };
 
   // Given a multi-observable object, expand into a list of single observable objects for each sub-value
