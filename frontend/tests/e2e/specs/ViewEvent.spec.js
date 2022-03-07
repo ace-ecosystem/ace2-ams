@@ -1,7 +1,7 @@
 import { visitUrl } from "./helpers";
 
 describe("ViewEvent.vue", () => {
-  beforeEach(() => {
+  before(() => {
     cy.resetDatabase();
     cy.login();
 
@@ -19,8 +19,8 @@ describe("ViewEvent.vue", () => {
       url: "/api/test/add_event",
       body: {
         alert_template: "small_template.json",
-        alert_count: 6,
-        name: "Test Event 5",
+        alert_count: 1,
+        name: "Test Event",
       },
     });
 
@@ -32,10 +32,6 @@ describe("ViewEvent.vue", () => {
     cy.wait("@getEvent").its("state").should("eq", "Complete");
   });
 
-  afterEach(() => {
-    cy.logout();
-  });
-
   it("View Event page renders", () => {
     cy.get('[data-cy="event-details-menu"]').should("be.visible");
     cy.get('[aria-haspopup="true"]').eq(0).should("have.text", "Actions");
@@ -43,7 +39,7 @@ describe("ViewEvent.vue", () => {
     cy.get('[aria-haspopup="true"]').eq(2).should("have.text", "Analysis");
     cy.get('[data-cy="event-details-card"]').should("be.visible");
     cy.get('[data-cy="event-details-header"]').should("be.visible");
-    cy.get('[data-cy="event-title"]').should("have.text", "Test Event 5");
+    cy.get('[data-cy="event-title"]').should("have.text", "Test Event");
     cy.get('[data-cy="event-details-link"]').should("be.visible");
     cy.get('[data-cy="event-details-content"]').should("be.visible");
     cy.get('[data-cy="event-details-content"]').should(
@@ -72,6 +68,44 @@ describe("ViewEvent.vue", () => {
       " Event Summary ",
     );
   });
+});
+
+describe("ViewEvent.vue actions", () => {
+  beforeEach(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Intercept the API call that loads the event data
+    cy.intercept("GET", "/api/event/*").as("getEvent");
+
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
+    ).as("getEventsDefaultRows");
+
+    // Add the test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small_template.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
+
+    visitUrl({
+      url: "/manage_events",
+      extraIntercepts: ["@getEventsDefaultRows"],
+    });
+    cy.get('[data-cy="eventName"] > a').click();
+    cy.wait("@getEvent").its("state").should("eq", "Complete");
+  });
+
+  afterEach(() => {
+    cy.logout();
+  });
+
   it("Correctly adds comment via comment modal and reloads page", () => {
     cy.intercept("POST", "/api/node/comment/").as("addComment");
 
