@@ -3,6 +3,23 @@
 
 <template>
   <h3>Event Summary</h3>
+  <!-- Event Timeline -->
+  <Timeline :value="timelineEvents" layout="horizontal" align="bottom">
+    <template #marker="slotProps">
+      <span class="custom-marker">
+        <i :class="slotProps.item.icon"></i>
+      </span>
+    </template>
+    <template #opposite="slotProps">
+      <small class="p-text-secondary">{{
+        formatDatetime(slotProps.item.datetime)
+      }}</small>
+    </template>
+    <template #content="slotProps">
+      {{ slotProps.item.label }}
+    </template>
+  </Timeline>
+  <!-- Event Details Table -->
   <DataTable
     :value="[parseEventSummary(eventStore.open)]"
     :resizable-columns="true"
@@ -52,19 +69,69 @@
 </template>
 
 <script setup>
-  import { ref, inject } from "vue";
+  import { ref, inject, computed } from "vue";
 
+  import { useEventStore } from "@/stores/event";
   import Button from "primevue/button";
   import Column from "primevue/column";
   import DataTable from "primevue/datatable";
+  import EventTableCell from "./EventTableCell.vue";
   import MultiSelect from "primevue/multiselect";
   import Toolbar from "primevue/toolbar";
-  import EventTableCell from "./EventTableCell.vue";
-  import { useEventStore } from "@/stores/event";
+  import Timeline from "primevue/timeline";
 
   import { parseEventSummary } from "@/stores/eventTable";
 
   const eventStore = useEventStore();
+
+  const eventTimes = [
+    {
+      label: "Event",
+      datetime: eventStore.open.eventTime || eventStore.open.autoEventTime,
+      icon: "pi pi-map-marker",
+    },
+    {
+      label: "Alert",
+      datetime: eventStore.open.alertTime || eventStore.open.autoAlertTime,
+      icon: "pi pi-exclamation-triangle",
+    },
+    {
+      label: "Ownership",
+      datetime:
+        eventStore.open.ownershipTime || eventStore.open.autoOwnershipTime,
+      icon: "pi pi-user-plus",
+    },
+    {
+      label: "Disposition",
+      datetime:
+        eventStore.open.dispositionTime ||
+        eventStore.open.autoDispositionTime ||
+        "TBD",
+      icon: "pi pi-flag",
+    },
+    {
+      label: "Contain",
+      datetime: eventStore.open.containTime || "TBD",
+      icon: "pi pi-shield",
+    },
+    {
+      label: "Remediation",
+      datetime: eventStore.open.remediationTime || "TBD",
+      icon: "pi pi-check-circle",
+    },
+  ];
+
+  const formatDatetime = (datetime) => {
+    if (datetime != "TBD") {
+      const d = new Date(datetime);
+      return d.toLocaleString("en-US");
+    }
+    return datetime;
+  };
+
+  const timelineEvents = computed(() => {
+    return [...eventTimes.filter((event) => event.datetime)];
+  });
 
   const config = inject("config");
   const columns = ref(
