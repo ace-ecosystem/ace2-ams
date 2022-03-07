@@ -70,10 +70,10 @@
     }
   }
 
-  const analysisLinks = computed(() => {
-    let analysisLinks = [];
+  const analysisMenuItems = computed(() => {
+    let analysisMenuItems = [];
     if (eventStore.open) {
-      analysisLinks = eventStore.open.analysisTypes.map((analysisType) => ({
+      analysisMenuItems = eventStore.open.analysisTypes.map((analysisType) => ({
         label: analysisType,
         command: () => {
           emit("sectionClicked", analysisType);
@@ -87,7 +87,7 @@
         [
           {
             label: "Analysis Details",
-            items: analysisLinks,
+            items: analysisMenuItems,
           },
         ],
       ],
@@ -193,10 +193,10 @@
     },
   ]);
 
-  const menuItems = ref([...defaultItems.value, analysisLinks.value]);
+  const menuItems = ref([...defaultItems.value, analysisMenuItems.value]);
   // For whatever reason, PrimeVue menu objects will not auto-reload using a computed value
   // So we have to manually update menuItems using a watcher instead
   watch(eventStore, () => {
-    menuItems.value = [...defaultItems.value, analysisLinks.value];
+    menuItems.value = [...defaultItems.value, analysisMenuItems.value];
   });
 </script>
