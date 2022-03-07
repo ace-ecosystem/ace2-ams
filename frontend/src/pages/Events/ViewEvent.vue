@@ -12,22 +12,26 @@
       <template #title>
         <div data-cy="event-details-header">
           <span data-cy="event-title">{{ eventStore.open.name }}</span>
-        
-        <Button
-        data-cy="event-details-link"
-          icon="pi pi-link"
-          class="p-button-secondary p-button-outlined p-button-sm"
-          @click="copyLink"
-        />
-        <NodeTagVue
-          v-for="tag in eventStore.open.tags"
-          :key="tag.uuid"
-          :tag="tag"
-        ></NodeTagVue>
+
+          <Button
+            data-cy="event-details-link"
+            icon="pi pi-link"
+            class="p-button-secondary p-button-outlined p-button-sm"
+            @click="copyLink"
+          />
+          <NodeTagVue
+            v-for="tag in eventStore.open.tags"
+            :key="tag.uuid"
+            :tag="tag"
+          ></NodeTagVue>
         </div>
       </template>
       <template #content>
-        <component :is="currentComponent" :section="currentSection" data-cy="event-details-content"></component>
+        <component
+          :is="currentComponent"
+          :section="currentSection"
+          data-cy="event-details-content"
+        ></component>
       </template>
     </Card>
   </div>

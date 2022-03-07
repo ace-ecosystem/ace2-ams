@@ -13,7 +13,7 @@ import myNock from "@unit/services/api/nock";
 import nock from "nock";
 import ViewEvent from "@/pages/Events/ViewEvent.vue";
 
-const mockEvent = eventReadFactory()
+const mockEvent = eventReadFactory();
 
 function factory(options?: TestingOptions) {
   myNock.get("/event/uuid1").reply(200, mockEvent);
@@ -86,13 +86,13 @@ describe("ViewEvent.vue", () => {
 
     myNock.get("/event/uuid1").reply(200, mockEvent);
 
-    expect(wrapper.vm.currentSection).toEqual("Event Summary")
-    expect(wrapper.vm.currentComponent).toEqual(EventSummaryVue)
-    wrapper.vm.updateSection("Unknown section")
-    expect(wrapper.vm.currentSection).toEqual("Unknown section")
-    expect(wrapper.vm.currentComponent).toEqual(AnalysisDetailsBaseVue)
-    wrapper.vm.updateSection("Event Summary")
-    expect(wrapper.vm.currentSection).toEqual("Event Summary")
-    expect(wrapper.vm.currentComponent).toEqual(EventSummaryVue)
+    expect(wrapper.vm.currentSection).toEqual("Event Summary");
+    expect(wrapper.vm.currentComponent).toEqual(EventSummaryVue);
+    wrapper.vm.updateSection("Unknown section");
+    expect(wrapper.vm.currentSection).toEqual("Unknown section");
+    expect(wrapper.vm.currentComponent).toEqual(AnalysisDetailsBaseVue);
+    wrapper.vm.updateSection("Event Summary");
+    expect(wrapper.vm.currentSection).toEqual("Event Summary");
+    expect(wrapper.vm.currentComponent).toEqual(EventSummaryVue);
   });
 });

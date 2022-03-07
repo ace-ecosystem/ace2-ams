@@ -3,7 +3,11 @@
 <!-- to controlling what section of event details is currently displayed -->
 
 <template>
-  <MegaMenu v-if="eventStore.open" :model="menuItems" data-cy="event-details-menu"/>
+  <MegaMenu
+    v-if="eventStore.open"
+    :model="menuItems"
+    data-cy="event-details-menu"
+  />
   <CommentModal name="CommentModal" @request-reload="requestReload" />
   <AssignModal name="AssignModal" @request-reload="requestReload" />
   <TagModal
