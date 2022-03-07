@@ -4,7 +4,6 @@
 ACE2_ENV_PATH="$HOME/.ace2.env"
 set -a
 source "$ACE2_ENV_PATH"
-export TESTING=yes
 set +a
 
 docker-compose up -d
