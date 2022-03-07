@@ -8,10 +8,13 @@
       @section-clicked="updateSection"
     ></EventDetailsMenuBar>
     <br />
-    <Card>
+    <Card data-cy="event-details-card">
       <template #title>
-        {{ eventStore.open.name }}
+        <div data-cy="event-details-header">
+          <span data-cy="event-title">{{ eventStore.open.name }}</span>
+        
         <Button
+        data-cy="event-details-link"
           icon="pi pi-link"
           class="p-button-secondary p-button-outlined p-button-sm"
           @click="copyLink"
@@ -21,9 +24,10 @@
           :key="tag.uuid"
           :tag="tag"
         ></NodeTagVue>
+        </div>
       </template>
       <template #content>
-        <component :is="currentComponent" :section="currentSection"></component>
+        <component :is="currentComponent" :section="currentSection" data-cy="event-details-content"></component>
       </template>
     </Card>
   </div>
