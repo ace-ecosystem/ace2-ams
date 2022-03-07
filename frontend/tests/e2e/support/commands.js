@@ -21,16 +21,16 @@ Cypress.Commands.add("logout", () => {
 
 Cypress.Commands.add("resetDatabase", () => {
   try {
-  cy.request({
-    method: "POST",
-    url: "/api/test/reset_database",
-  });
+    cy.request({
+      method: "POST",
+      url: "/api/test/reset_database",
+    });
   } catch {
-    cy.wait(500)
-      cy.request({
-    method: "POST",
-    url: "/api/test/reset_database",
-  });
+    cy.wait(500);
+    cy.request({
+      method: "POST",
+      url: "/api/test/reset_database",
+    });
   }
 });
 
