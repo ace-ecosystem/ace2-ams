@@ -21,6 +21,7 @@ export function parseEventSummary(event: eventRead): eventSummary {
     uuid: event.uuid,
     vectors: event.vectors.map((x) => x.value),
     queue: event.queue ? event.queue.value : "None",
+    remediations: event.remediations.map((x) => x.value),
   };
 }
 

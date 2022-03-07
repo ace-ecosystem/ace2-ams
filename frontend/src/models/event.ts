@@ -33,6 +33,7 @@ export interface eventSummary {
   uuid: UUID;
   vectors: string[];
   queue: string;
+  remediations: string[];
 }
 
 export interface eventCreate extends nodeCreate {
