@@ -102,8 +102,12 @@ describe("ViewEvent.vue actions", () => {
     cy.wait("@getEvent").its("state").should("eq", "Complete");
   });
 
+  // Have to log out and manually leave event page
+  // BC when database resets it will try to get the old event with old uuid
+  // And will cause an error
   afterEach(() => {
     cy.logout();
+    cy.visit("/login");
   });
 
   it("Correctly adds comment via comment modal and reloads page", () => {
