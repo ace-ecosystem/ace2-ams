@@ -170,6 +170,7 @@ export const eventSummaryFactory = ({
   uuid = mockEventUUID,
   vectors = [],
   queue = "None",
+  remediations = [],
 }: Partial<eventSummary> = {}): eventSummary => ({
   comments: comments,
   createdTime: createdTime,
@@ -185,4 +186,5 @@ export const eventSummaryFactory = ({
   uuid: uuid,
   vectors: vectors,
   queue: queue,
+  remediations: remediations,
 });
