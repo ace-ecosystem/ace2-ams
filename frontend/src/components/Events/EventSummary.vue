@@ -20,10 +20,7 @@
     </template>
   </Timeline>
   <!-- Event Details Table -->
-  <DataTable
-    :value="[parseEventSummary(eventStore.open)]"
-    :resizable-columns="true"
-  >
+  <DataTable :value="eventTableData" :resizable-columns="true">
     <!-- TABLE TOOLBAR-->
     <template #header>
       <Toolbar style="border: none">
@@ -43,7 +40,7 @@
             data-cy="reset-table-button"
             icon="pi pi-refresh"
             class="p-button-rounded p-m-1"
-            @click="reset()"
+            @click="resetColumns()"
           />
         </template>
       </Toolbar>
@@ -69,7 +66,7 @@
 </template>
 
 <script setup>
-  import { ref, inject, computed } from "vue";
+  import { ref, inject, computed, onMounted } from "vue";
 
   import { useEventStore } from "@/stores/event";
   import Button from "primevue/button";
@@ -84,61 +81,35 @@
 
   const eventStore = useEventStore();
 
-  const eventTimes = [
-    {
-      label: "Event",
-      datetime: eventStore.open.eventTime || eventStore.open.autoEventTime,
-      icon: "pi pi-map-marker",
-    },
-    {
-      label: "Alert",
-      datetime: eventStore.open.alertTime || eventStore.open.autoAlertTime,
-      icon: "pi pi-exclamation-triangle",
-    },
-    {
-      label: "Ownership",
-      datetime:
-        eventStore.open.ownershipTime || eventStore.open.autoOwnershipTime,
-      icon: "pi pi-user-plus",
-    },
-    {
-      label: "Disposition",
-      datetime:
-        eventStore.open.dispositionTime ||
-        eventStore.open.autoDispositionTime ||
-        "TBD",
-      icon: "pi pi-flag",
-    },
-    {
-      label: "Contain",
-      datetime: eventStore.open.containTime || "TBD",
-      icon: "pi pi-shield",
-    },
-    {
-      label: "Remediation",
-      datetime: eventStore.open.remediationTime || "TBD",
-      icon: "pi pi-check-circle",
-    },
-  ];
+  const config = inject("config");
 
-  const formatDatetime = (datetime) => {
-    if (datetime != "TBD") {
-      const d = new Date(datetime);
-      return d.toLocaleString("en-US");
+  const eventTableData = ref(
+    eventStore.open ? [parseEventSummary(eventStore.open)] : [],
+  );
+  const eventTimes = ref([]);
+  const columns = ref([]);
+  const columnOptions = ref([]);
+  const selectedColumns = ref([]);
+
+  onMounted(() => {
+    if (eventStore.open) {
+      initData();
+      resetColumns();
     }
-    return datetime;
-  };
-
-  const timelineEvents = computed(() => {
-    return [...eventTimes.filter((event) => event.datetime)];
   });
 
-  const config = inject("config");
-  const columns = ref(
-    config.events.eventQueueColumnMappings[eventStore.open.queue.value],
-  );
-  const columnOptions = columns.value.filter((col) => !col.required);
-  const selectedColumns = ref(columns.value.filter((col) => col.default));
+  const timelineEvents = computed(() => {
+    // Eventually, more things will be added to this array and sorted by time
+    return [...eventTimes.value];
+  });
+
+  const formatDatetime = (datetime) => {
+    if (datetime == "TBD") {
+      return datetime;
+    }
+    const d = new Date(datetime);
+    return d.toLocaleString("en-US", { timeZone: "UTC" });
+  };
 
   const onColumnToggle = (val) => {
     // Toggles selected columns to display
@@ -146,7 +117,51 @@
     selectedColumns.value = columns.value.filter((col) => val.includes(col));
   };
 
-  const reset = () => {
+  const initData = () => {
+    columns.value =
+      config.events.eventQueueColumnMappings[eventStore.open.queue.value];
+    columnOptions.value = columns.value.filter((col) => !col.required);
+    eventTimes.value = [
+      {
+        label: "Event",
+        datetime: eventStore.open.eventTime || eventStore.open.autoEventTime,
+        icon: "pi pi-map-marker",
+      },
+      {
+        label: "Alert",
+        datetime: eventStore.open.alertTime || eventStore.open.autoAlertTime,
+        icon: "pi pi-exclamation-triangle",
+      },
+      {
+        label: "Ownership",
+        datetime:
+          eventStore.open.ownershipTime ||
+          eventStore.open.autoOwnershipTime ||
+          "TBD",
+        icon: "pi pi-user-plus",
+      },
+      {
+        label: "Disposition",
+        datetime:
+          eventStore.open.dispositionTime ||
+          eventStore.open.autoDispositionTime ||
+          "TBD",
+        icon: "pi pi-flag",
+      },
+      {
+        label: "Contain",
+        datetime: eventStore.open.containTime || "TBD",
+        icon: "pi pi-shield",
+      },
+      {
+        label: "Remediation",
+        datetime: eventStore.open.remediationTime || "TBD",
+        icon: "pi pi-check-circle",
+      },
+    ];
+  };
+
+  const resetColumns = () => {
     selectedColumns.value = columns.value.filter((col) => col.default);
   };
 </script>
