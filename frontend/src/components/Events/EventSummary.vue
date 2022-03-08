@@ -2,67 +2,75 @@
 <!-- "Event Summary" section on Event Details page -->
 
 <template>
-  <h3>Event Summary</h3>
+  <h3 id="event-section-title">Event Summary</h3>
   <!-- Event Timeline -->
-  <Timeline :value="timelineEvents" layout="horizontal" align="bottom">
-    <template #marker="slotProps">
-      <span class="custom-marker">
-        <i :class="slotProps.item.icon"></i>
-      </span>
-    </template>
-    <template #opposite="slotProps">
-      <small class="p-text-secondary">{{
-        formatDatetime(slotProps.item.datetime)
-      }}</small>
-    </template>
-    <template #content="slotProps">
-      {{ slotProps.item.label }}
-    </template>
-  </Timeline>
-  <!-- Event Details Table -->
-  <DataTable :value="eventTableData" :resizable-columns="true">
-    <!-- TABLE TOOLBAR-->
-    <template #header>
-      <Toolbar style="border: none">
-        <template #start>
-          <!-- COLUMN SELECT -->
-          <MultiSelect
-            :model-value="selectedColumns"
-            :options="columnOptions"
-            data-cy="table-column-select"
-            option-label="header"
-            placeholder="Select Columns"
-            @update:model-value="onColumnToggle"
-          />
-        </template>
-        <template #end>
-          <Button
-            data-cy="reset-table-button"
-            icon="pi pi-refresh"
-            class="p-button-rounded p-m-1"
-            @click="resetColumns()"
-          />
-        </template>
-      </Toolbar>
-    </template>
-
-    <!-- DATA COLUMNS -->
-    <Column
-      v-for="(col, index) of selectedColumns"
-      :key="col.field + '_' + index"
-      :field="col.field"
-      :header="col.header"
-    >
-      <!-- DATA COLUMN CELL BODIES-->
-      <template #body="{ data, field }">
-        <EventTableCell
-          :data="data"
-          :field="field"
-          :show-tags="false"
-        ></EventTableCell>
+  <div id="event-summary-timeline">
+    <Timeline :value="timelineEvents" layout="horizontal" align="bottom">
+      <template #marker="slotProps">
+        <span class="custom-marker" data-cy="event-summary-timeline-icon">
+          <i :class="slotProps.item.icon"></i>
+        </span>
       </template>
-    </Column>
-  </DataTable>
+      <template #opposite="slotProps">
+        <small
+          class="p-text-secondary"
+          data-cy="event-summary-timeline-datetime"
+          >{{ formatDatetime(slotProps.item.datetime) }}</small
+        >
+      </template>
+      <template #content="slotProps">
+        <span data-cy="event-summary-timeline-label">{{
+          slotProps.item.label
+        }}</span>
+      </template>
+    </Timeline>
+  </div>
+  <!-- Event Details Table -->
+  <div id="event-summary-table">
+    <DataTable :value="eventTableData" :resizable-columns="true">
+      <!-- TABLE TOOLBAR-->
+      <template #header>
+        <Toolbar style="border: none">
+          <template #start>
+            <!-- COLUMN SELECT -->
+            <MultiSelect
+              :model-value="selectedColumns"
+              :options="columnOptions"
+              data-cy="table-column-select"
+              option-label="header"
+              placeholder="Select Columns"
+              @update:model-value="onColumnToggle"
+            />
+          </template>
+          <template #end>
+            <Button
+              data-cy="reset-table-button"
+              icon="pi pi-refresh"
+              class="p-button-rounded p-m-1"
+              @click="resetColumns()"
+            />
+          </template>
+        </Toolbar>
+      </template>
+
+      <!-- DATA COLUMNS -->
+      <Column
+        v-for="(col, index) of selectedColumns"
+        :key="col.field + '_' + index"
+        :field="col.field"
+        :header="col.header"
+      >
+        <!-- DATA COLUMN CELL BODIES-->
+        <template #body="{ data, field }">
+          <EventTableCell
+            :data="data"
+            :field="field"
+            :show-tags="false"
+          ></EventTableCell>
+        </template>
+      </Column>
+    </DataTable>
+  </div>
 </template>
 
 <script setup>

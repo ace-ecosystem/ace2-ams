@@ -27,11 +27,12 @@
         </div>
       </template>
       <template #content>
-        <component
-          :is="currentComponent"
-          :section="currentSection"
-          data-cy="event-details-content"
-        ></component>
+        <div data-cy="event-details-content">
+          <component
+            :is="currentComponent"
+            :section="currentSection"
+          ></component>
+        </div>
       </template>
     </Card>
   </div>
