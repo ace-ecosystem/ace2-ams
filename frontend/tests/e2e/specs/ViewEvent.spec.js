@@ -42,10 +42,7 @@ describe("ViewEvent.vue", () => {
     cy.get('[data-cy="event-title"]').should("have.text", "Test Event");
     cy.get('[data-cy="event-details-link"]').should("be.visible");
     cy.get('[data-cy="event-details-content"]').should("be.visible");
-    cy.get('#event-section-title').should(
-      "contain.text",
-      "Event Summary",
-    );
+    cy.get("#event-section-title").should("contain.text", "Event Summary");
   });
 
   it("Switches the component / details section when selected from dropdown", () => {
@@ -63,10 +60,7 @@ describe("ViewEvent.vue", () => {
     // Switch back to the event summary section and check content
     cy.get('[aria-haspopup="true"]').eq(1).click();
     cy.get("span").contains("Event Summary").click();
-    cy.get('#event-section-title').should(
-      "contain.text",
-      "Event Summary",
-    );
+    cy.get("#event-section-title").should("contain.text", "Event Summary");
   });
 });
 
