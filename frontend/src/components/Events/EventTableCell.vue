@@ -10,7 +10,7 @@
       }}</router-link></span
     >
     <!-- Event Tags -->
-    <span data-cy="tags">
+    <span v-if="props.showTags" data-cy="tags">
       <NodeTagVue
         v-for="tag in props.data.tags"
         :key="tag.uuid"
@@ -33,7 +33,10 @@
   >
   <!-- Any event property that uses a list -->
   <span v-else-if="Array.isArray(props.data[props.field])">
-    {{ joinStringArray(props.data[props.field]) }}
+    <span v-if="props.data[props.field].length">
+      {{ joinStringArray(props.data[props.field]) }}
+    </span>
+    <span v-else> None </span>
   </span>
   <!-- Edit event cell -->
   <span v-else-if="props.field === 'edit'">
@@ -71,6 +74,7 @@
   const props = defineProps({
     data: { type: Object, required: true },
     field: { type: String, required: true },
+    showTags: { type: Boolean, required: true, default: true },
   });
 
   const formatDateTime = (dateTime) => {

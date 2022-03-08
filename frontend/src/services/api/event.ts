@@ -9,8 +9,6 @@ import {
 import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
 import { eventHistoryReadPage } from "@/models/history";
-import { configuration } from "@/etc/configuration";
-import { testConfiguration } from "@/etc/configuration/test";
 
 const api = new BaseApi();
 const endpoint = "/event/";
