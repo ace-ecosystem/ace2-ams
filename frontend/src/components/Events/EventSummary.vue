@@ -72,6 +72,12 @@
   </div>
 </template>
 
+<script>
+  export default {
+    inheritAttrs: false,
+  };
+</script>
+
 <script setup>
   import { ref, inject, computed, onMounted } from "vue";
 
