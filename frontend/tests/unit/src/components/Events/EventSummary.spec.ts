@@ -1,5 +1,5 @@
 import EventSummary from "@/components/Events/EventSummary.vue";
-import { mount, VueWrapper } from "@vue/test-utils";
+import { shallowMount, VueWrapper } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
 import { createCustomPinia } from "@unit/helpers";
 import { testConfiguration } from "@/etc/configuration/test/index";
@@ -43,7 +43,7 @@ const mockEventAutoTimes = eventReadFactory({
 });
 
 function factory(options: TestingOptions = {}, openEvent = null) {
-  const wrapper: VueWrapper<any> = mount(EventSummary, {
+  const wrapper: VueWrapper<any> = shallowMount(EventSummary, {
     global: {
       plugins: [
         createCustomPinia({
