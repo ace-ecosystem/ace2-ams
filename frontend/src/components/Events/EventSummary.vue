@@ -2,7 +2,6 @@
 <!-- "Event Summary" section on Event Details page -->
 
 <template>
-  <h3 id="event-section-title">Event Summary</h3>
   <!-- Event Timeline -->
   <div id="event-summary-timeline">
     <Timeline :value="timelineEvents" layout="horizontal" align="bottom">

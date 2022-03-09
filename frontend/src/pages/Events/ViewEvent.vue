@@ -28,6 +28,7 @@
       </template>
       <template #content>
         <div data-cy="event-details-content">
+          <h3 id="event-section-title">{{ currentSection }}</h3>
           <component
             :is="currentComponent"
             :section="currentSection"
