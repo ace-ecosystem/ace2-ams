@@ -96,12 +96,13 @@ describe("ViewEvent.vue actions", () => {
     cy.wait("@getEvent").its("state").should("eq", "Complete");
   });
 
-  // Have to log out and manually leave event page
+  // Have to  manually leave event page
   // BC when database resets it will try to get the old event with old uuid
   // And will cause an error
   afterEach(() => {
-    cy.logout();
-    cy.visit("/login");
+    visitUrl({
+      url: "/manage_alerts",
+    });
   });
 
   it("Correctly adds comment via comment modal and reloads page", () => {
@@ -426,9 +427,6 @@ describe("Event Summary Details", () => {
 });
 
 describe("Alert Summary Details", () => {
-  let now;
-  let nowString;
-
   before(() => {
     cy.resetDatabase();
     cy.login();
@@ -441,8 +439,6 @@ describe("Alert Summary Details", () => {
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
 
-    now = new Date();
-    nowString = now.toLocaleString("en-US", { timeZone: "UTC" }).slice(0, -9);
     // Add the test event to the database
     cy.request({
       method: "POST",
