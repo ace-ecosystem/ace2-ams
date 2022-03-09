@@ -10,7 +10,7 @@
       :value="visibleAlerts"
       :selection="selectedRows"
       responsive-layout="scroll"
-      data-cy="expandedEvent"
+      data-cy="event-alerts-table"
       @rowSelect="selectedAlertStore.select($event.data.uuid)"
       @rowUnselect="selectedAlertStore.unselect($event.data.uuid)"
       @rowSelect-all="selectedAlertStore.selectAll(visibleAlertUuids)"

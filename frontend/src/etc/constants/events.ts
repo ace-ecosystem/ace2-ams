@@ -24,6 +24,7 @@ import {
   queueProperty,
 } from "./base";
 import EventSummaryVue from "@/components/Events/EventSummary.vue";
+import EventAlertsTableVue from "@/components/Events/EventAlertsTable.vue";
 
 // ** Events ** //
 
@@ -261,4 +262,5 @@ export const validEventFilters: propertyOption[] = [
 
 export const defaultEventDetailsSections = {
   "Event Summary": EventSummaryVue,
+  "Alert Summary": EventAlertsTableVue,
 };

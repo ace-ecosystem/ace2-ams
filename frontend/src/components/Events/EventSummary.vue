@@ -2,7 +2,6 @@
 <!-- "Event Summary" section on Event Details page -->
 
 <template>
-  <h3 id="event-section-title">Event Summary</h3>
   <!-- Event Timeline -->
   <div id="event-summary-timeline">
     <Timeline :value="timelineEvents" layout="horizontal" align="bottom">
@@ -72,6 +71,12 @@
     </DataTable>
   </div>
 </template>
+
+<script>
+  export default {
+    inheritAttrs: false,
+  };
+</script>
 
 <script setup>
   import { ref, inject, computed, onMounted } from "vue";
