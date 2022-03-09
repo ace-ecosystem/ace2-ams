@@ -32,6 +32,7 @@
           <component
             :is="currentComponent"
             :event-uuid="route.params.eventID"
+            :event-alert-uuids="eventStore.open.alertUuids"
           ></component>
         </div>
       </template>

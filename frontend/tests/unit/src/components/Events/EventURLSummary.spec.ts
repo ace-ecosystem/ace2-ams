@@ -2,18 +2,10 @@ import EventURLSummary from "@/components/Events/EventURLSummary.vue";
 import { shallowMount, VueWrapper, flushPromises } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
 import { createCustomPinia } from "@unit/helpers";
-import { testConfiguration } from "@/etc/configuration/test/index";
-import { eventReadFactory } from "./../../../../mocks/events";
 import { expect } from "vitest";
 import { genericObjectReadFactory } from "../../../../mocks/genericObject";
-import { Alert } from "@/services/api/alert";
 import { NodeTree } from "@/services/api/nodeTree";
 import { observableReadFactory } from "../../../../mocks/observable.ts";
-import {
-  mockAlertReadA,
-  mockAlertReadB,
-  mockAlertReadC,
-} from "../../../../mocks/alert";
 
 const mockObservableTypeURL = genericObjectReadFactory({ value: "url" });
 const mockObservableTypeIPV4 = genericObjectReadFactory({ value: "ipv4" });
@@ -40,9 +32,6 @@ const filteredAndSortedObservables = [
 ];
 
 async function factory(options: TestingOptions = {}) {
-  const readAllPagesSpy = vi
-    .spyOn(Alert, "readAllPages")
-    .mockResolvedValueOnce([mockAlertReadA, mockAlertReadB, mockAlertReadC]);
   const readNodesOfNodeTreeSpy = vi
     .spyOn(NodeTree, "readNodesOfNodeTree")
     .mockResolvedValueOnce(allObservables);
@@ -52,16 +41,16 @@ async function factory(options: TestingOptions = {}) {
       plugins: [createCustomPinia(options)],
     },
     props: {
-      eventUuid: "uuid",
+      eventAlertUuids: [
+        "81d92d05-3b60-4ecf-931d-4525fc1113f3",
+        "b8a03b05-020d-4da7-b543-bb08137f862d",
+        "839e756b-39b7-407f-8e4a-513051ff4f53",
+      ],
     },
   });
 
   await flushPromises();
 
-  expect(readAllPagesSpy).toHaveBeenCalledWith({
-    eventUuid: "uuid",
-    sort: "event_time|asc",
-  });
   expect(readNodesOfNodeTreeSpy.mock.calls[0]).toEqual([
     [
       "81d92d05-3b60-4ecf-931d-4525fc1113f3",
@@ -84,9 +73,6 @@ describe("EventURLSummary", () => {
     );
   });
   it("correctly returns all observables for an event on getAllObservables", async () => {
-    const readAllPagesSpy = vi
-      .spyOn(Alert, "readAllPages")
-      .mockResolvedValueOnce([mockAlertReadA, mockAlertReadB, mockAlertReadC]);
     const readNodesOfNodeTreeSpy = vi
       .spyOn(NodeTree, "readNodesOfNodeTree")
       .mockResolvedValueOnce(allObservables);
@@ -94,10 +80,6 @@ describe("EventURLSummary", () => {
 
     wrapper.vm.getAllObservables();
     await flushPromises();
-    expect(readAllPagesSpy).toHaveBeenCalledWith({
-      eventUuid: "uuid",
-      sort: "event_time|asc",
-    });
     expect(readNodesOfNodeTreeSpy.mock.calls[0]).toEqual([
       [
         "81d92d05-3b60-4ecf-931d-4525fc1113f3",

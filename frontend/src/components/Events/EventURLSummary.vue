@@ -1,5 +1,5 @@
 <!-- EventURLSummary.vue -->
-<!-- A simple list of all URLs contained in the given event uuid or open event (whichever is given) -->
+<!-- A simple list of all URLs contained in the given alert UUIDs -->
 
 <template>
   <Listbox
@@ -17,12 +17,11 @@
 <script setup>
   import { defineProps, ref, onMounted } from "vue";
   import Listbox from "primevue/listbox";
-  import { Alert } from "@/services/api/alert";
   import { NodeTree } from "@/services/api/nodeTree";
   import { copyToClipboard } from "@/etc/helpers";
 
   const props = defineProps({
-    eventUuid: { type: String, required: true },
+    eventAlertUuids: { type: Array, required: true },
   });
 
   const selectedURL = ref(null);
@@ -34,13 +33,8 @@
   });
 
   const getAllObservables = async () => {
-    const allAlerts = await Alert.readAllPages({
-      eventUuid: props.eventUuid,
-      sort: "event_time|asc",
-    });
-
     const allObservables = await NodeTree.readNodesOfNodeTree(
-      allAlerts.map((alert) => alert.uuid),
+      props.eventAlertUuids,
       "observable",
     );
     return allObservables;
