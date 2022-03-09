@@ -27,11 +27,13 @@
         </div>
       </template>
       <template #content>
-        <component
-          :is="currentComponent"
-          :section="currentSection"
-          data-cy="event-details-content"
-        ></component>
+        <div data-cy="event-details-content">
+          <h3 id="event-section-title">{{ currentSection }}</h3>
+          <component
+            :is="currentComponent"
+            :event-uuid="route.params.eventID"
+          ></component>
+        </div>
       </template>
     </Card>
   </div>

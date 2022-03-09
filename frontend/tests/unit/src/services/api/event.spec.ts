@@ -1,7 +1,3 @@
-/**
- * @jest-environment node
- */
-
 import { eventFilterParams } from "@/models/event";
 import { Event } from "@/services/api/event";
 import myNock from "@unit/services/api/nock";
