@@ -1,4 +1,4 @@
-from sqlalchemy import func, Boolean, Column, String, UniqueConstraint
+from sqlalchemy import func, Boolean, Column, Index, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
@@ -41,4 +41,12 @@ class AnalysisModuleType(Base):
 
     version = Column(String, nullable=False, index=True)
 
-    __table_args__ = (UniqueConstraint("value", "version", name="value_version_uc"),)
+    __table_args__ = (
+        Index(
+            "amt_value_trgm",
+            value,
+            postgresql_ops={"value": "gin_trgm_ops"},
+            postgresql_using="gin",
+        ),
+        UniqueConstraint("value", "version", name="value_version_uc"),
+    )

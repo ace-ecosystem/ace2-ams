@@ -32,13 +32,13 @@ describe("ViewAlert.vue", () => {
 
   it("Renders the expected number of nodes", () => {
     // Total number of nodes
-    cy.get(".p-treenode-content").should("have.length", 20);
+    cy.get(".p-treenode-content").should("have.length", 27);
 
     // Number of expandable nodes
-    cy.get(".p-tree-toggler-icon").should("have.length", 14);
+    cy.get(".p-tree-toggler-icon").should("have.length", 18);
 
     // Number of expanded nodes
-    cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 13);
+    cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 17);
     // Number of collapsed nodes
     cy.get(".p-treenode-content .pi-chevron-right").should("have.length", 1);
   });
@@ -95,7 +95,7 @@ describe("ViewAlert.vue", () => {
 
     // Only that icon should have changed
     // Number of expanded nodes
-    cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 15);
+    cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 19);
     // Number of collapsed nodes
     cy.get(".p-treenode-content .pi-chevron-right").should("not.exist");
 
@@ -128,7 +128,7 @@ describe("ViewAlert.vue", () => {
 
     // Node counts back to original
     // Number of expanded nodes
-    cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 13);
+    cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 17);
     // Number of collapsed nodes
     cy.get(".p-treenode-content .pi-chevron-right").should("have.length", 1);
   });
@@ -276,6 +276,12 @@ describe("ViewAlert.vue", () => {
   });
 
   it("will reroute to the Manage Alerts page with tag filter applied when tag clicked", () => {
+    // Intercept the API call that loads the alerts
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=recipient",
+    ).as("getAlerts");
+
     // Find the recipient tag and click
     cy.get(
       '[data-cy="email_address: goodguy@company.com"] > :nth-child(1) > :nth-child(3) > :nth-child(1) > .p-tag',
@@ -286,8 +292,11 @@ describe("ViewAlert.vue", () => {
     // Should have been rerouted
     cy.url().should("contain", "/manage_alerts");
 
-    // Check which alerts are visible (should be none (1 checkbox visible for the header row))
-    cy.get(".p-checkbox-box").should("have.length", 1);
+    // Wait for the API call to fetch the alerts to finish
+    cy.wait("@getAlerts").its("state").should("eq", "Complete");
+
+    // Check which alerts are visible (should be 1 (1 checkbox visible for the header row))
+    cy.get(".p-checkbox-box").should("have.length", 2);
 
     // Verify in the filter modal that the correct filter is set
     cy.get(".p-splitbutton-menubutton").click();
@@ -304,6 +313,12 @@ describe("ViewAlert.vue", () => {
   });
 
   it("will reroute to the Manage Alerts page with observable filter applied when observable clicked", () => {
+    // Intercept the API call that loads the alerts
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&observable=email_subject%7CHello",
+    ).as("getAlerts");
+
     // Find the email subject observable and click
     cy.get(
       '[data-cy="email_subject: Hello"] > .p-treenode-content > .treenode-text',
@@ -312,8 +327,11 @@ describe("ViewAlert.vue", () => {
     // Should have been rerouted
     cy.url().should("contain", "/manage_alerts");
 
-    // Check which alerts are visible (should be none (1 checkbox visible for the header row))
-    cy.get(".p-checkbox-box").should("have.length", 1);
+    // Wait for the API call to fetch the alerts to finish
+    cy.wait("@getAlerts").its("state").should("eq", "Complete");
+
+    // Check which alerts are visible (should be 1 (1 checkbox visible for the header row))
+    cy.get(".p-checkbox-box").should("have.length", 2);
 
     // Verify in the filter modal that the correct filter is set
     cy.get(".p-splitbutton-menubutton").click();

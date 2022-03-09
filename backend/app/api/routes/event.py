@@ -8,8 +8,10 @@ from typing import List, Optional
 from uuid import UUID
 
 from api.models.event import EventCreate, EventRead, EventUpdateMultiple
+from api.models.event_summaries import ObservableSummary
 from api.models.history import EventHistoryRead
 from api.routes import helpers
+from api.routes.event_summaries import get_observable_summary
 from api.routes.node import create_node, update_node
 from core.auth import validate_access_token
 from db import crud
@@ -648,3 +650,10 @@ helpers.api_route_update(router, update_events, path="/")
 
 
 # We currently do not support deleting any Nodes.
+
+
+#
+# SUMMARIES
+#
+
+helpers.api_route_read(router, get_observable_summary, List[ObservableSummary], path="/{uuid}/summary/observable")
