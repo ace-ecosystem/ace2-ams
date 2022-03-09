@@ -4,7 +4,7 @@
 <template>
   <Listbox
     v-model="selectedURL"
-    :options="urlObservables"
+    :options="sortedUrlObservables"
     option-value="value"
     option-label="value"
     data-key="uuid"
@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-  import { defineProps, ref, onBeforeMount } from "vue";
+  import { defineProps, ref, onMounted } from "vue";
   import Listbox from "primevue/listbox";
   import { Alert } from "@/services/api/alert";
   import { NodeTree } from "@/services/api/nodeTree";
@@ -25,11 +25,11 @@
   });
 
   const selectedURL = ref(null);
-  const urlObservables = ref([]);
+  const sortedUrlObservables = ref([]);
 
-  onBeforeMount(async () => {
+  onMounted(async () => {
     const observables = await getAllObservables();
-    getURLObservables(observables);
+    sortedUrlObservables.value = getURLObservables(observables);
   });
 
   const getAllObservables = async () => {
@@ -46,11 +46,11 @@
   };
 
   const getURLObservables = (allObservables) => {
-    urlObservables.value = allObservables.filter(
+    const urlObservables = allObservables.filter(
       (observable) => observable.type.value == "url",
     );
 
-    urlObservables.value = urlObservables.value.sort((a, b) => {
+    return urlObservables.sort((a, b) => {
       if (a.type.value === b.type.value) {
         return a.value < b.value ? -1 : 1;
       } else {
