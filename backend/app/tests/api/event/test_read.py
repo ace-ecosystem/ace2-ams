@@ -58,15 +58,15 @@ def test_summary_observable(client_valid_access_token, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert1_o2,
-        amt_value="FA Queue Analysis",
-        details={"gui_link": "https://url.to.search/query=asdf", "hits": 10},
+        amt_value="FA Queue Type 1",
+        details={"link": "https://url.to.search/query=asdf", "hits": 10},
     )
     alert1_o3 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree1, db=db)
     helpers.create_analysis(
         db=db,
         parent_tree=alert1_o3,
-        amt_value="FA Queue Analysis",
-        details={"gui_link": "https://url.to.search/query=asdf", "hits": 10},
+        amt_value="FA Queue Type 1",
+        details={"link": "https://url.to.search/query=asdf", "hits": 10},
     )
 
     alert_tree2 = helpers.create_alert(db=db, event=event)
@@ -74,25 +74,36 @@ def test_summary_observable(client_valid_access_token, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert2_o1,
-        amt_value="FA Queue Analysis",
-        details={"gui_link": "https://url.to.search/query=asdf", "hits": 10},
+        amt_value="FA Queue Type 1",
+        details={"link": "https://url.to.search/query=asdf", "hits": 10},
     )
     alert2_o2 = helpers.create_observable(type="ipv4", value="192.168.1.1", parent_tree=alert_tree2, db=db)
     helpers.create_analysis(
         db=db,
         parent_tree=alert2_o2,
-        amt_value="FA Queue Analysis",
-        details={"gui_link": "https://url.to.search/query=asdf", "hits": 100},
+        amt_value="FA Queue Type 2",
+        details={"link": "https://url.to.search/query=asdf", "hits": 100},
+    )
+
+    # Add a third alert that is not part of the event
+    alert_tree3 = helpers.create_alert(db=db)
+    alert3_o1 = helpers.create_observable(type="ipv4", value="172.16.1.1", parent_tree=alert_tree3, db=db)
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert3_o1,
+        amt_value="FA Queue Type 1",
+        details={"link": "https://url.to.search/query=asdf", "hits": 0},
     )
 
     # The observable summary should now have two entries in it. Even though the 127.0.0.1 observable was repeated three
     # times across the two alerts, its FA Queue Analysis is going to be the same for each, so it appears once in the summary.
+    # Additionally, the results should be sorted by their type then value.
     get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
     assert len(get.json()) == 2
     assert get.json()[0]["value"] == "127.0.0.1"
-    assert get.json()[0]["hits"] == 10
+    assert get.json()[0]["faqueue_hits"] == 10
     assert get.json()[1]["value"] == "192.168.1.1"
-    assert get.json()[1]["hits"] == 100
+    assert get.json()[1]["faqueue_hits"] == 100
 
 
 def test_analysis_module_types(client_valid_access_token, db):
