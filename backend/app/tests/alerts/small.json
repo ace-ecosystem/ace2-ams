@@ -34,12 +34,26 @@
               "tags": ["from_address"],
               "analyses": [
                 {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "gui_link": "https://url.to.search/query=asdf",
+                    "hits": 5
+                  }
+                },
+                {
                   "type": "Email Address Analysis",
                   "observables": [
                     {
                       "type": "fqdn",
                       "value": "evil.com",
                       "analyses": [
+                        {
+                          "type": "FA Queue Analysis",
+                          "details": {
+                            "gui_link": "https://url.to.search/query=asdf",
+                            "hits": 10
+                          }
+                        },
                         {
                           "type": "Test Analysis",
                           "observables": [
@@ -65,7 +79,16 @@
             },
             {
               "type": "email_subject",
-              "value": "Hello"
+              "value": "Hello",
+              "analyses": [
+                {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "gui_link": "https://url.to.search/query=asdf",
+                    "hits": 100
+                  }
+                }
+              ]
             },
             {
               "type": "file",
@@ -84,12 +107,26 @@
                       "value": "http://evil.com/malware.exe",
                       "analyses": [
                         {
+                          "type": "FA Queue Analysis",
+                          "details": {
+                            "gui_link": "https://url.to.search/query=asdf",
+                            "hits": 5
+                          }
+                        },
+                        {
                           "type": "URL Parse Analysis",
                           "observables": [
                             {
                               "type": "fqdn",
                               "value": "evil.com",
                               "analyses": [
+                                {
+                                  "type": "FA Queue Analysis",
+                                  "details": {
+                                    "gui_link": "https://url.to.search/query=asdf",
+                                    "hits": 10
+                                  }
+                                },
                                 {
                                   "type": "Test Analysis",
                                   "observables": [
@@ -103,7 +140,16 @@
                             },
                             {
                               "type": "uri_path",
-                              "value": "/malware.exe"
+                              "value": "/malware.exe",
+                              "analyses": [
+                                {
+                                  "type": "FA Queue Analysis",
+                                  "details": {
+                                    "gui_link": "https://url.to.search/query=asdf",
+                                    "hits": 20
+                                  }
+                                }
+                              ]
                             }
                           ]
                         }
@@ -120,7 +166,16 @@
           "observables": [
             {
               "type": "md5",
-              "value": "912ec803b2ce49e4a541068d495ab570"
+              "value": "912ec803b2ce49e4a541068d495ab570",
+              "analyses": [
+                {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "gui_link": "https://url.to.search/query=asdf",
+                    "hits": 0
+                  }
+                }
+              ]
             }
           ]
         }
@@ -135,7 +190,16 @@
           "type": "private ip address",
           "value": "localhost"
         }
-      }
+      },
+      "analyses": [
+        {
+          "type": "FA Queue Analysis",
+          "details": {
+            "gui_link": "https://url.to.search/query=asdf",
+            "hits": 1000
+          }
+        }
+      ]
     }
   ]
 }

@@ -24,6 +24,13 @@
               "tags": ["<TAG>"],
               "analyses": [
                 {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "gui_link": "https://url.to.search/query=asdf",
+                    "hits": 5
+                  }
+                },
+                {
                   "type": "<A_TYPE> Analysis",
                   "observables": [{ "type": "<O_TYPE>", "value": "<O_VALUE>" }]
                 }
@@ -35,6 +42,13 @@
               "tags": ["<TAG>"],
               "analyses": [
                 {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "gui_link": "https://url.to.search/query=asdf",
+                    "hits": 10
+                  }
+                },
+                {
                   "type": "<A_TYPE> Analysis",
                   "observables": [{ "type": "<O_TYPE>", "value": "<O_VALUE>" }]
                 }
@@ -42,12 +56,28 @@
             },
             {
               "type": "<O_TYPE>",
-              "value": "<O_VALUE>"
+              "value": "<O_VALUE>",
+              "analyses": [
+                {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "gui_link": "https://url.to.search/query=asdf",
+                    "hits": 15
+                  }
+                }
+              ]
             },
             {
               "type": "<O_TYPE>",
               "value": "<O_VALUE>",
               "analyses": [
+                {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "gui_link": "https://url.to.search/query=asdf",
+                    "hits": 100
+                  }
+                },
                 {
                   "type": "<A_TYPE> Analysis",
                   "observables": [
@@ -56,15 +86,40 @@
                       "value": "<O_VALUE>",
                       "analyses": [
                         {
+                          "type": "FA Queue Analysis",
+                          "details": {
+                            "gui_link": "https://url.to.search/query=asdf",
+                            "hits": 10
+                          }
+                        },
+                        {
                           "type": "<A_TYPE> Analysis",
                           "observables": [
                             {
                               "type": "<O_TYPE>",
-                              "value": "<O_VALUE>"
+                              "value": "<O_VALUE>",
+                              "analyses": [
+                                {
+                                  "type": "FA Queue Analysis",
+                                  "details": {
+                                    "gui_link": "https://url.to.search/query=asdf",
+                                    "hits": 0
+                                  }
+                                }
+                              ]
                             },
                             {
                               "type": "<O_TYPE>",
-                              "value": "<O_VALUE>"
+                              "value": "<O_VALUE>",
+                              "analyses": [
+                                {
+                                  "type": "FA Queue Analysis",
+                                  "details": {
+                                    "gui_link": "https://url.to.search/query=asdf",
+                                    "hits": 1000
+                                  }
+                                }
+                              ]
                             }
                           ]
                         }
