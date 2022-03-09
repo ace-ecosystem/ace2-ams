@@ -424,3 +424,57 @@ describe("Event Summary Details", () => {
       .should("have.text", "None");
   });
 });
+
+describe("Alert Summary Details", () => {
+  let now;
+  let nowString;
+
+  before(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Intercept the API call that loads the event data
+    cy.intercept("GET", "/api/event/*").as("getEvent");
+
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
+    ).as("getEventsDefaultRows");
+
+    now = new Date();
+    nowString = now.toLocaleString("en-US", { timeZone: "UTC" }).slice(0, -9);
+    // Add the test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small_template.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
+
+    visitUrl({
+      url: "/manage_events",
+      extraIntercepts: ["@getEventsDefaultRows"],
+    });
+    cy.get('[data-cy="eventName"] > a').click();
+    cy.wait("@getEvent").its("state").should("eq", "Complete");
+
+    // Switch to alert summary view
+    cy.get('[aria-haspopup="true"]').eq(1).click();
+    // Select first available analysis type
+    cy.get("span").contains("Alert Summary").click();
+  });
+
+  it("renders section correctly", () => {
+    // Check title
+    cy.get("#event-section-title").should("contain.text", "Alert Summary");
+    // EventAlertsTable should be there
+    cy.get('[data-cy="event-alerts-table"]').should("be.visible");
+    // Check that correct alert is there (and there is only one)
+    cy.get('[data-cy="alertName"] > a').should("have.text", "Manual Alert 0");
+  });
+
+  // Other event alerts table tests are covered in EventTable E2E tests
+});
