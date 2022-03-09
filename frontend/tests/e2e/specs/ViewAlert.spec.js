@@ -276,6 +276,12 @@ describe("ViewAlert.vue", () => {
   });
 
   it("will reroute to the Manage Alerts page with tag filter applied when tag clicked", () => {
+    // Intercept the API call that loads the alerts
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=recipient",
+    ).as("getAlerts");
+
     // Find the recipient tag and click
     cy.get(
       '[data-cy="email_address: goodguy@company.com"] > :nth-child(1) > :nth-child(3) > :nth-child(1) > .p-tag',
@@ -285,6 +291,9 @@ describe("ViewAlert.vue", () => {
 
     // Should have been rerouted
     cy.url().should("contain", "/manage_alerts");
+
+    // Wait for the API call to fetch the alerts to finish
+    cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
     // Check which alerts are visible (should be 1 (1 checkbox visible for the header row))
     cy.get(".p-checkbox-box").should("have.length", 2);
@@ -303,7 +312,13 @@ describe("ViewAlert.vue", () => {
     cy.get(".p-dialog-header-icon").click();
   });
 
-  it.only("will reroute to the Manage Alerts page with observable filter applied when observable clicked", () => {
+  it("will reroute to the Manage Alerts page with observable filter applied when observable clicked", () => {
+    // Intercept the API call that loads the alerts
+    cy.intercept(
+      "GET",
+      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&observable=email_subject%7CHello",
+    ).as("getAlerts");
+
     // Find the email subject observable and click
     cy.get(
       '[data-cy="email_subject: Hello"] > .p-treenode-content > .treenode-text',
@@ -311,6 +326,9 @@ describe("ViewAlert.vue", () => {
 
     // Should have been rerouted
     cy.url().should("contain", "/manage_alerts");
+
+    // Wait for the API call to fetch the alerts to finish
+    cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
     // Check which alerts are visible (should be 1 (1 checkbox visible for the header row))
     cy.get(".p-checkbox-box").should("have.length", 2);
