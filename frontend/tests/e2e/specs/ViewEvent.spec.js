@@ -474,3 +474,85 @@ describe("Alert Summary Details", () => {
 
   // Other event alerts table tests are covered in EventTable E2E tests
 });
+
+describe("URL Summary Details", () => {
+  before(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Intercept the API call that loads the event data
+    cy.intercept("GET", "/api/event/*").as("getEvent");
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
+    ).as("getEventsDefaultRows");
+    cy.intercept("GET", "/api/alert/?event_uuid=*").as("getEventAlerts");
+    cy.intercept("POST", "/api/node/tree/observable").as("getObservables");
+
+    // Add the test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "smallWithUrls.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
+
+    visitUrl({
+      url: "/manage_events",
+      extraIntercepts: ["@getEventsDefaultRows"],
+    });
+    cy.get('[data-cy="eventName"] > a').click();
+    cy.wait("@getEvent").its("state").should("eq", "Complete");
+
+    // Switch to alert summary view
+    cy.get('[aria-haspopup="true"]').eq(1).click();
+    // Select first available analysis type
+    cy.get("span").contains("URL Summary").click();
+
+    cy.wait("@getEventAlerts").its("state").should("eq", "Complete");
+    cy.wait("@getObservables").its("state").should("eq", "Complete");
+  });
+
+  it("renders section correctly", () => {
+    // Check title
+    cy.get("#event-section-title").should("contain.text", "URL Summary");
+    // url list should be there
+    cy.get('[data-cy="url-observable-listbox"]').should("be.visible");
+    // Check that url observables are there in correct order
+    cy.get(".p-listbox-item").should("have.length", 3);
+    cy.get(".p-listbox-item").eq(0).should("have.text", "http://amazon.com/");
+    cy.get(".p-listbox-item")
+      .eq(1)
+      .should("have.text", "http://evil.com/malware.exe");
+    cy.get(".p-listbox-item")
+      .eq(2)
+      .should("have.text", "http://notEvil.com/safe.exe");
+  });
+  it("selects and highlights last clicked url observable", () => {
+    // None highlighted to start
+    cy.get(".p-listbox-item").eq(0).should("not.have.class", "p-highlight");
+    cy.get(".p-listbox-item").eq(1).should("not.have.class", "p-highlight");
+    cy.get(".p-listbox-item").eq(2).should("not.have.class", "p-highlight");
+
+    // Click the first
+    cy.get(".p-listbox-item").eq(0).click();
+    cy.get(".p-listbox-item").eq(0).should("have.class", "p-highlight");
+    cy.get(".p-listbox-item").eq(1).should("not.have.class", "p-highlight");
+    cy.get(".p-listbox-item").eq(2).should("not.have.class", "p-highlight");
+
+    // Click the second
+    cy.get(".p-listbox-item").eq(1).click();
+    cy.get(".p-listbox-item").eq(0).should("not.have.class", "p-highlight");
+    cy.get(".p-listbox-item").eq(1).should("have.class", "p-highlight");
+    cy.get(".p-listbox-item").eq(2).should("not.have.class", "p-highlight");
+
+    // Click the third
+    cy.get(".p-listbox-item").eq(2).click();
+    cy.get(".p-listbox-item").eq(0).should("not.have.class", "p-highlight");
+    cy.get(".p-listbox-item").eq(1).should("not.have.class", "p-highlight");
+    cy.get(".p-listbox-item").eq(2).should("have.class", "p-highlight");
+  });
+});
