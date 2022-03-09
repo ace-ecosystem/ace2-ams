@@ -127,6 +127,7 @@ node_threat_type:
 observable_type:
   - file
   - ipv4
+  - url
 queue:
   - external
   - internal
