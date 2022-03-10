@@ -257,3 +257,8 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     { field: "vectors", header: "Vectors", sortable: false, default: false },
   ],
 };
+
+export const faqueue = {
+  lowHits: 1,
+  mediumHits: 500,
+};
