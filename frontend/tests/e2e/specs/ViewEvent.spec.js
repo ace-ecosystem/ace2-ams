@@ -486,7 +486,6 @@ describe("URL Summary Details", () => {
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("GET", "/api/alert/?event_uuid=*").as("getEventAlerts");
     cy.intercept("POST", "/api/node/tree/observable").as("getObservables");
 
     // Add the test event to the database
@@ -512,7 +511,6 @@ describe("URL Summary Details", () => {
     // Select first available analysis type
     cy.get("span").contains("URL Summary").click();
 
-    cy.wait("@getEventAlerts").its("state").should("eq", "Complete");
     cy.wait("@getObservables").its("state").should("eq", "Complete");
   });
 
