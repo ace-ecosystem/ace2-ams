@@ -55,9 +55,15 @@ def get_observable_summary(uuid: UUID, db: Session = Depends(get_db)):
     # Loop over the FA Queue analyses and inject their results into the observables.
     results = set()
     for parent_uuid, faqueue_analysis in node_tree_and_faqueue.items():
-        node_tree_and_observables[parent_uuid].faqueue_hits = faqueue_analysis.details["hits"]
-        node_tree_and_observables[parent_uuid].faqueue_link = faqueue_analysis.details["link"]
-        results.add(node_tree_and_observables[parent_uuid])
+        if "hits" in faqueue_analysis.details:
+            node_tree_and_observables[parent_uuid].faqueue_hits = faqueue_analysis.details["hits"]
+
+            if "link" in faqueue_analysis.details:
+                node_tree_and_observables[parent_uuid].faqueue_link = faqueue_analysis.details["link"]
+            else:
+                node_tree_and_observables[parent_uuid].faqueue_link = ""
+
+            results.add(node_tree_and_observables[parent_uuid])
 
     # Return the observables sorted by their type then value
     return sorted(results, key=lambda x: (x.type.value, x.value))

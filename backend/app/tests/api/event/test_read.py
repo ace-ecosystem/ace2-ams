@@ -106,6 +106,46 @@ def test_summary_observable(client_valid_access_token, db):
     assert get.json()[1]["faqueue_hits"] == 100
 
 
+def test_summary_observable_incorrect_details(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The observable summary should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
+    assert get.json() == []
+
+    # Add an alert with FA Queue analysis with the wrong details hits keys
+    alert_tree = helpers.create_alert(db=db, event=event)
+    alert_o1 = helpers.create_observable(type="fqdn", value="localhost.localdomain", parent_tree=alert_tree, db=db)
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert_o1,
+        amt_value="FA Queue Type 1",
+        details={"link": "https://url.to.search/query=asdf", "faqueue_hits": 10},
+    )
+
+    # The observable summary should still be empty since the FA Queue analysis details has the wrong "hits" key
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
+    assert get.json() == []
+
+    # Add an alert with FA Queue analysis with the wrong details link keys
+    alert_tree = helpers.create_alert(db=db, event=event)
+    alert_o1 = helpers.create_observable(type="fqdn", value="localhost.localdomain", parent_tree=alert_tree, db=db)
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert_o1,
+        amt_value="FA Queue Type 1",
+        details={"gui_link": "https://url.to.search/query=asdf", "hits": 10},
+    )
+
+    # The observable summary should have one entry, but its faqueue_link property should be an empty string
+    # since the FA Queue analysis details has the wrong "link" key
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
+    assert len(get.json()) == 1
+    assert get.json()[0]["faqueue_hits"] == 10
+    assert get.json()[0]["faqueue_link"] == ""
+
+
 def test_analysis_module_types(client_valid_access_token, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
