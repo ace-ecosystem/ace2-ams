@@ -46,6 +46,7 @@
                     {
                       "type": "fqdn",
                       "value": "evil.com",
+                      "for_detection": true,
                       "analyses": [
                         {
                           "type": "FA Queue Analysis",

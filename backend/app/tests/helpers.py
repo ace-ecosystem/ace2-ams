@@ -704,12 +704,17 @@ def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) ->
         if "tags" in o:
             tags = o["tags"]
 
+        for_detection = False
+        if "for_detection" in o:
+            for_detection = o["for_detection"]
+
         leaf = create_observable(
             db=db,
             node_metadata=node_metadata,
             parent_tree=parent_tree,
             type=o["type"],
             value=o["value"],
+            for_detection=for_detection,
             tags=tags,
         )
 
