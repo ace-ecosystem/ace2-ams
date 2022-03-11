@@ -25,6 +25,7 @@
     <template #header>
       <div>
         <Button
+          id="save-detection-status-button"
           label="Save Detection Status"
           icon="pi pi-save"
           :loading="isLoading"
@@ -33,6 +34,7 @@
       </div>
     </template>
     <Column
+      id="selection-column"
       selection-mode="multiple"
       header="For Detection"
       :show-filter-menu="false"
@@ -41,6 +43,7 @@
       <template #filter>
         <div style="padding-left: 1em">
           <Button
+            id="select-low-hits-button"
             class="p-button-sm"
             label="Select low hits"
             icon="pi pi-check-square"
@@ -49,6 +52,7 @@
           ></Button>
 
           <Button
+            id="reset-selected-observables-button"
             class="p-button-sm"
             icon="pi pi-undo"
             label="Reset"
@@ -66,6 +70,7 @@
     >
       <template #filter>
         <Button
+          id="toggle-max-hits-button"
           class="p-button-sm"
           :icon="toggleShowMaxHitsButtonIcon"
           :label="toggleShowMaxHitsButtonText"
@@ -75,14 +80,18 @@
       </template>
       <template #body="slotProps">
         <div class="flex align-content-evenly">
-          <span class="flex align-items-center justify-content-center">{{
-            slotProps.data.faqueueHits
-          }}</span>
+          <span
+            class="flex align-items-center justify-content-center"
+            data-cy="faqueue-hits-count"
+            style="width: 2em"
+            >{{ slotProps.data.faqueueHits }}</span
+          >
           <span class="flex align-items-center justify-content-center"
             ><a :href="slotProps.data.faqueueLink" style="text-decoration: none"
               ><Button
                 icon="pi pi-external-link"
                 class="p-button-rounded p-button-text"
+                data-cy="faqueue-external-link"
             /></a>
           </span>
         </div>
@@ -102,6 +111,7 @@
           option-value="value"
           placeholder="Any"
           class="p-column-filter"
+          data-cy="observable-type-filter-multiselect"
           @change="filterCallback()"
         >
         </MultiSelect>
@@ -114,6 +124,7 @@
           type="text"
           class="p-column-filter"
           :placeholder="`Search by value`"
+          data-cy="observable-value-filter-input"
           @keyup="filterCallback()"
         />
       </template>
