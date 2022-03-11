@@ -1,3 +1,34 @@
+queue:
+  - external
+  - internal
+  - intel
+
+user:
+  - username: analyst
+    default_alert_queue: external
+    default_event_queue: external
+    display_name: Analyst
+    email: analyst@fake.com
+    password: analyst
+    roles:
+      - admin
+  - username: alice
+    default_alert_queue: external
+    default_event_queue: internal
+    display_name: Analyst Alice
+    email: alice@fake.com
+    password: analyst
+    roles:
+      - admin
+  - username: bob
+    default_alert_queue: external
+    default_event_queue: external
+    display_name: Analyst Bob
+    email: bob@fake.com
+    password: analyst
+    roles:
+      - admin
+
 # Dispositions added here will receive an automated rank number based on the order they appear.
 # Example: The first disposition listed here will receive rank 0 and will appear first when shown in the GUI.
 alert_disposition:
@@ -128,10 +159,6 @@ observable_type:
   - file
   - ipv4
   - url
-queue:
-  - external
-  - internal
-  - intel
 user_role:
   - admin
   - analyst
