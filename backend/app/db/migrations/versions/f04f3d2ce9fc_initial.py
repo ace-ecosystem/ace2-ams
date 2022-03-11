@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 9dac6f40a0d3
+Revision ID: f04f3d2ce9fc
 Revises: 
-Create Date: 2022-03-09 20:33:25.335488
+Create Date: 2022-03-11 19:20:47.897900
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '9dac6f40a0d3'
+revision = 'f04f3d2ce9fc'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -164,6 +164,12 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_queue_value'), 'queue', ['value'], unique=True)
+    op.create_table('seed',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('seed_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_seed_seed_time'), 'seed', ['seed_time'], unique=False)
     op.create_table('user_role',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -692,6 +698,8 @@ def downgrade() -> None:
     op.drop_table('analysis')
     op.drop_index(op.f('ix_user_role_value'), table_name='user_role')
     op.drop_table('user_role')
+    op.drop_index(op.f('ix_seed_seed_time'), table_name='seed')
+    op.drop_table('seed')
     op.drop_index(op.f('ix_queue_value'), table_name='queue')
     op.drop_table('queue')
     op.drop_index(op.f('ix_observable_type_value'), table_name='observable_type')
