@@ -1,38 +1,61 @@
-<!-- EventURLSummary.vue -->
-<!-- A simple list of all URLs contained in the given alert UUIDs -->
+<!-- EventObservableSummary.vue -->
+<!-- A table containing all observables in an event as well as FAQueue analysis info for each -->
+<!-- Also includes controls for managing whether an observable should be enabled for detection  -->
 
 <template>
   <DataTable
-    ref="dt"
-    v-model:selection="modifiedEnabledForDetection"
     v-model:filters="filters"
-    :value="visibleObservables"
-    responsive-layout="scroll"
-    data-key="uuid"
-    :paginator="true"
-    :rows="50"
-    paginator-template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-    :rows-per-page-options="[10, 20, 50]"
-    current-page-report-template="Showing {first} to {last} of {totalRecords}"
-    filter-display="row"
+    v-model:selection="modifiedEnabledForDetection"
+    class="p-datatable-sm"
     :loading="isLoading"
+    :paginator="true"
+    :rows-per-page-options="[10, 20, 50]"
+    :rows="50"
+    :value="visibleObservables"
+    current-page-report-template="Showing {first} to {last} of {totalRecords}"
+    data-cy="observables-table"
+    data-key="uuid"
+    filter-display="row"
+    :row-class="rowClass"
+    paginator-template="CurrentPageReport FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+    responsive-layout="scroll"
   >
+    <template #empty> No observables found. </template>
+    <template #loading> Loading observables... Just a sec. </template>
     <template #header>
       <div>
-        <Button @click="updateDetectionStatuses">Save Detection Status</Button>
+        <Button
+          label="Save Detection Status"
+          icon="pi pi-save"
+          :loading="isLoading"
+          @click="updateDetectionStatuses"
+        ></Button>
       </div>
     </template>
-    <template #empty> No observables found. </template>
-    <template #loading> Loading customers data. Please wait. </template>
     <Column
       selection-mode="multiple"
       header="For Detection"
-      header-style="width: 3em"
       :show-filter-menu="false"
+      style="width: 24em"
     >
       <template #filter>
-        <Button @click="selectLowHitObservables">Select all low hits</Button>
-        <Button @click="resetSelectedObservables">Reset Selection</Button>
+        <div style="padding-left: 1em">
+          <Button
+            class="p-button-sm"
+            label="Select low hits"
+            icon="pi pi-check-square"
+            style="width: 12em; margin: 0.5em"
+            @click="selectLowHitObservables"
+          ></Button>
+
+          <Button
+            class="p-button-sm"
+            icon="pi pi-undo"
+            label="Reset"
+            style="width: 12em; margin: 0.5em"
+            @click="resetSelectedObservables"
+          ></Button>
+        </div>
       </template>
     </Column>
     <Column
@@ -43,18 +66,28 @@
     >
       <template #filter>
         <Button
+          class="p-button-sm"
+          :icon="toggleShowMaxHitsButtonIcon"
           :label="toggleShowMaxHitsButtonText"
+          style="width: 10em"
           @click="toggleShowMaxHits"
         ></Button>
       </template>
       <template #body="slotProps">
-        <span>{{ slotProps.data.faqueueHits }}</span>
-        <a :href="slotProps.data.faqueueLink" style="text-decoration: none"
-          ><Button
-            icon="pi pi-external-link"
-            class="p-button-rounded p-button-text"
-        /></a> </template
-    ></Column>
+        <div class="flex align-content-evenly">
+          <span class="flex align-items-center justify-content-center">{{
+            slotProps.data.faqueueHits
+          }}</span>
+          <span class="flex align-items-center justify-content-center"
+            ><a :href="slotProps.data.faqueueLink" style="text-decoration: none"
+              ><Button
+                icon="pi pi-external-link"
+                class="p-button-rounded p-button-text"
+            /></a>
+          </span>
+        </div>
+      </template>
+    </Column>
     <Column
       field="type.value"
       header="Type"
@@ -82,37 +115,39 @@
           class="p-column-filter"
           :placeholder="`Search by value`"
           @keyup="filterCallback()"
-        /> </template
-    ></Column>
+        />
+      </template>
+    </Column>
   </DataTable>
 </template>
 
 <script setup>
   import { defineProps, computed, ref, onMounted, inject } from "vue";
+  import { FilterMatchMode } from "primevue/api";
   import Button from "primevue/button";
+  import Column from "primevue/column";
   import DataTable from "primevue/datatable";
   import InputText from "primevue/inputtext";
-  import Column from "primevue/column";
   import MultiSelect from "primevue/multiselect";
-  import { Event } from "@/services/api/event";
-  import { FilterMatchMode } from "primevue/api";
 
+  import { Event } from "@/services/api/event";
   import { ObservableInstance } from "@/services/api/observable";
 
   import { useObservableTypeStore } from "@/stores/observableType";
-  const observableTypeStore = useObservableTypeStore();
 
   const config = inject("config");
-  const maxHits = ref(config.events.faqueue.mediumHits);
-  const lowHits = ref(config.events.faqueue.lowHits);
-
   const props = defineProps({
     eventUuid: { type: String, required: true },
   });
 
+  const observableTypeStore = useObservableTypeStore();
+
+  const maxHits = ref(config.events.faqueue.mediumHits);
+  const lowHits = ref(config.events.faqueue.lowHits);
   const isLoading = ref(false);
   const isShowingMaxHits = ref(true);
   const toggleShowMaxHitsButtonText = ref("Hide Max Hits");
+  const toggleShowMaxHitsButtonIcon = ref("pi pi-eye-slash");
   const observables = ref([]);
   const modifiedEnabledForDetection = ref([]);
   const currentlyEnabledForDetection = ref([]);
@@ -123,13 +158,6 @@
     isLoading.value = false;
   });
 
-  const visibleObservables = computed(() => {
-    if (isShowingMaxHits.value) {
-      return observables.value;
-    }
-    return observables.value.filter((obs) => obs.faqueueHits < maxHits.value);
-  });
-
   const initData = async () => {
     observables.value = await Event.readObservableSummary(props.eventUuid);
     currentlyEnabledForDetection.value = observables.value.filter(
@@ -137,6 +165,12 @@
     );
     modifiedEnabledForDetection.value = currentlyEnabledForDetection.value;
   };
+  const visibleObservables = computed(() => {
+    if (isShowingMaxHits.value) {
+      return observables.value;
+    }
+    return observables.value.filter((obs) => obs.faqueueHits < maxHits.value);
+  });
 
   const resetSelectedObservables = () => {
     modifiedEnabledForDetection.value = currentlyEnabledForDetection.value;
@@ -152,16 +186,13 @@
   const toggleShowMaxHits = () => {
     if (isShowingMaxHits.value) {
       toggleShowMaxHitsButtonText.value = "Show Max Hits";
+      toggleShowMaxHitsButtonIcon.value = "pi pi-eye";
     } else {
       toggleShowMaxHitsButtonText.value = "Hide Max Hits";
+      toggleShowMaxHitsButtonIcon.value = "pi pi-eye-slash";
     }
     isShowingMaxHits.value = !isShowingMaxHits.value;
   };
-
-  const filters = ref({
-    value: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-    "type.value": { value: null, matchMode: FilterMatchMode.IN },
-  });
 
   const updateDetectionStatuses = async () => {
     isLoading.value = true;
@@ -184,10 +215,22 @@
   const updateObservableDetectionStatus = async (uuid, forDetection) => {
     await ObservableInstance.update(uuid, { forDetection: forDetection });
   };
+
+  const rowClass = (data) => {
+    return data.faqueueHits <= lowHits.value ? "low-hits" : null;
+  };
+
+  const filters = ref({
+    value: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    "type.value": { value: null, matchMode: FilterMatchMode.IN },
+  });
 </script>
 
 <style scoped>
-  /deep/ .p-datatable-thead .p-checkbox .p-checkbox-box {
+  ::v-deep(.p-datatable-thead .p-checkbox .p-checkbox-box) {
     display: none !important;
+  }
+  ::v-deep(.low-hits) {
+    background: #d4f0de !important;
   }
 </style>
