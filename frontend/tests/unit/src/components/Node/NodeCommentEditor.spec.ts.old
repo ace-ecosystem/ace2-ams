@@ -1,4 +1,4 @@
-import { commentReadFactory } from "./../../../../mocks/comment";
+import { commentReadFactory } from "../../../../mocks/comment";
 import { useNodeThreatTypeStore } from "@/stores/nodeThreatType";
 import NodeCommentEditor from "../../../../../src/components/Node/NodeCommentEditor.vue";
 import { mount } from "@vue/test-utils";

@@ -1,6 +1,6 @@
-import { commentReadFactory } from "./../../../../mocks/comment";
+import { commentReadFactory } from "../../../../mocks/comment";
 import { useEventStore } from "@/stores/event";
-import { eventReadFactory, mockEventUUID } from "./../../../../mocks/events";
+import { eventReadFactory, mockEventUUID } from "../../../../mocks/events";
 import { propertyOption } from "@/models/base";
 import EditEventModal from "@/components/Modals/EditEventModal.vue";
 import { TestingOptions } from "@pinia/testing";
