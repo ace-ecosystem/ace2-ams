@@ -44,6 +44,7 @@ from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
+from db.schemas.seed import Seed
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
 from db.schemas.user_role_mapping import user_role_mapping
