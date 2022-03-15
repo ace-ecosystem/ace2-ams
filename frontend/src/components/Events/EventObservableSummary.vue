@@ -129,6 +129,16 @@
         />
       </template>
     </Column>
+    <Column field="tags" header="Tags">
+      <template #body="slotProps">
+        <NodeTagVue
+          v-for="tag of slotProps.data.tags"
+          :key="tag.value"
+          :tag="tag"
+          override-node-type="alerts"
+        />
+      </template>
+    </Column>
   </DataTable>
 </template>
 
@@ -140,6 +150,7 @@
   import DataTable from "primevue/datatable";
   import InputText from "primevue/inputtext";
   import MultiSelect from "primevue/multiselect";
+  import NodeTagVue from "@/components/Node/NodeTag.vue";
 
   import { Event } from "@/services/api/event";
   import { ObservableInstance } from "@/services/api/observable";
