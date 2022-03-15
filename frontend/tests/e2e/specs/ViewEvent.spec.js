@@ -867,12 +867,12 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get(".p-datatable-tbody > > :nth-child(5)")
       .eq(6)
       .should("have.text", "");
-    
+
     // Check that the tags themselves are formatted as tags
-    cy.get('.p-tag').should('have.length', 3)
-    cy.get('.p-tag').eq(0).should('have.text', 'from_address')
-    cy.get('.p-tag').eq(1).should('have.text', 'c2')
-    cy.get('.p-tag').eq(2).should('have.text', 'contacted_host')
+    cy.get(".p-tag").should("have.length", 3);
+    cy.get(".p-tag").eq(0).should("have.text", "from_address");
+    cy.get(".p-tag").eq(1).should("have.text", "c2");
+    cy.get(".p-tag").eq(2).should("have.text", "contacted_host");
   });
   it("correctly selects observables with low hits when 'Select low hits' button clicked ", () => {
     cy.get("#select-low-hits-button").click();
