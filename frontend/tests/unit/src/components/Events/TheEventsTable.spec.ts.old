@@ -1,4 +1,4 @@
-import { genericObjectReadFactory } from "./../../../../mocks/genericObject";
+import { genericObjectReadFactory } from "../../../../mocks/genericObject";
 import TheEventsTable from "@/components/Events/TheEventsTable.vue";
 import { shallowMount, VueWrapper } from "@vue/test-utils";
 import PrimeVue from "primevue/config";

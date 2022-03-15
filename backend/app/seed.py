@@ -4,6 +4,7 @@ import yaml
 
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
+from typing import Dict, List
 
 from core.auth import hash_password
 from core.config import is_in_testing_mode
@@ -21,6 +22,7 @@ from db.schemas.event_vector import EventVector
 from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
+from db.schemas.seed import Seed
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
 
@@ -29,30 +31,38 @@ from db.schemas.user_role import UserRole
 # docker logs ace2-gui-backend
 
 
-def add_queueable_values(db: Session, db_table: DeclarativeMeta, data: dict, key: str, print_value: str):
-    created = []
-    for queue in data[key]:
-        db_queue = crud.read_by_value(value=queue, db_table=Queue, db=db)
-        for value in data[key][queue]:
-            # Add the value to the database if it is new
-            if value not in created:
-                db.add(db_table(value=str(value)))
-                created.append(value)
-                crud.commit(db)
-                print(f"Adding {print_value}: {value}")
+def add_queueable_values(db: Session, db_table: DeclarativeMeta, queues: dict, data: dict, key: str, print_value: str):
+    # Transform the data into a dictionary where the keys are the individual values from the config
+    # and the values are lists of which queue they belong to.
+    transformed_data: Dict[str, List[str]] = dict()
 
-            # Associate it with its queue
-            db_value = crud.read_by_value(value=str(value), db_table=db_table, db=db)
-            if db_value:
-                db_value.queues.append(db_queue)
+    for queue in data[key]:
+        for value in data[key][queue]:
+            if value not in transformed_data:
+                transformed_data[value] = []
+
+            transformed_data[value].append(queue)
+
+    for value in transformed_data:
+        db_obj = db_table(value=str(value))
+        for queue in transformed_data[value]:
+            db_obj.queues.append(queues[queue])
+            print(f"Adding {print_value} for {queue} queue: {value}")
+        db.add(db_obj)
 
 
 def seed(db: Session):
+    # Quit early if the database was already seeded
+    if crud.read_all(db_table=Seed, db=db):
+        print("The database was already seeded!")
+        sys.exit()
+
     # Quit early if the config file does not exist
     if not os.path.exists("etc/defaults.yml"):
         print("etc/defaults.yml does not exist!")
         sys.exit()
 
+    # Load the data from the config file
     data = None
     with open("etc/defaults.yml", "r") as yamlfile:
         data = yaml.load(yamlfile, Loader=yaml.FullLoader)
@@ -63,127 +73,114 @@ def seed(db: Session):
         sys.exit()
 
     # Add the queues to the database
-    if not crud.read_all(db_table=Queue, db=db):
-        if "queue" in data:
-            # Make sure there is always an "external" queue
-            if "external" not in data["queue"]:
-                data["queue"].append("external")
+    queues = dict()
+    if "queue" in data:
+        for value in data["queue"]:
+            queues[value] = Queue(value=value)
+            db.add(queues[value])
+            print(f"Adding queue: {value}")
 
-            for value in data["queue"]:
-                db.add(Queue(value=value))
-                print(f"Adding queue: {value}")
-        else:
-            # Make sure there is always a "external" queue
-            db.add(Queue(value="external"))
-            print("Adding queue: external")
-
-        crud.commit(db)
-
-    # Add the objects to the database but only if their respective tables do not have any items already.
-    if "alert_disposition" in data and not crud.read_all(db_table=AlertDisposition, db=db):
+    # Add the rest of the objects from the config into the database
+    if "alert_disposition" in data:
         for rank, value in enumerate(data["alert_disposition"]):
             db.add(AlertDisposition(rank=rank, value=value))
             print(f"Adding alert disposition: {rank}:{value}")
 
-    if "alert_type" in data and not crud.read_all(db_table=AlertType, db=db):
+    if "alert_type" in data:
         for value in data["alert_type"]:
             db.add(AlertType(value=value))
             print(f"Adding alert type: {value}")
 
-    if "event_prevention_tool" in data and not crud.read_all(db_table=EventPreventionTool, db=db):
+    if "event_prevention_tool" in data:
         add_queueable_values(
             db=db,
             db_table=EventPreventionTool,
+            queues=queues,
             data=data,
             key="event_prevention_tool",
             print_value="event prevention tool",
         )
 
-    if "event_remediation" in data and not crud.read_all(db_table=EventRemediation, db=db):
+    if "event_remediation" in data:
         add_queueable_values(
-            db=db, db_table=EventRemediation, data=data, key="event_remediation", print_value="event remediation"
+            db=db,
+            db_table=EventRemediation,
+            queues=queues,
+            data=data,
+            key="event_remediation",
+            print_value="event remediation",
         )
 
-    if "event_risk_level" in data and not crud.read_all(db_table=EventRiskLevel, db=db):
+    if "event_risk_level" in data:
         add_queueable_values(
-            db=db, db_table=EventRiskLevel, data=data, key="event_risk_level", print_value="event risk level"
+            db=db,
+            db_table=EventRiskLevel,
+            queues=queues,
+            data=data,
+            key="event_risk_level",
+            print_value="event risk level",
         )
 
-    if "event_source" in data and not crud.read_all(db_table=EventSource, db=db):
-        add_queueable_values(db=db, db_table=EventSource, data=data, key="event_source", print_value="event source")
-
-    if "event_status" in data and not crud.read_all(db_table=EventStatus, db=db):
-        add_queueable_values(db=db, db_table=EventStatus, data=data, key="event_status", print_value="event status")
-
-    if "event_type" in data and not crud.read_all(db_table=EventType, db=db):
-        add_queueable_values(db=db, db_table=EventType, data=data, key="event_type", print_value="event type")
-
-    if "event_vector" in data and not crud.read_all(db_table=EventVector, db=db):
-        add_queueable_values(db=db, db_table=EventVector, data=data, key="event_vector", print_value="event vector")
-
-    if "node_threat_type" in data and not crud.read_all(db_table=NodeThreatType, db=db):
+    if "event_source" in data:
         add_queueable_values(
-            db=db, db_table=NodeThreatType, data=data, key="node_threat_type", print_value="node threat type"
+            db=db, db_table=EventSource, queues=queues, data=data, key="event_source", print_value="event source"
         )
 
-    if "observable_type" in data and not crud.read_all(db_table=ObservableType, db=db):
+    if "event_status" in data:
+        add_queueable_values(
+            db=db, db_table=EventStatus, queues=queues, data=data, key="event_status", print_value="event status"
+        )
+
+    if "event_type" in data:
+        add_queueable_values(
+            db=db, db_table=EventType, queues=queues, data=data, key="event_type", print_value="event type"
+        )
+
+    if "event_vector" in data:
+        add_queueable_values(
+            db=db, db_table=EventVector, queues=queues, data=data, key="event_vector", print_value="event vector"
+        )
+
+    if "node_threat_type" in data:
+        add_queueable_values(
+            db=db,
+            db_table=NodeThreatType,
+            queues=queues,
+            data=data,
+            key="node_threat_type",
+            print_value="node threat type",
+        )
+
+    if "observable_type" in data:
         for value in data["observable_type"]:
             db.add(ObservableType(value=value))
             print(f"Adding observable type: {value}")
 
-    if not crud.read_all(db_table=UserRole, db=db):
-        if "user_role" in data:
-            # Make sure there is always an "admin" role
-            if "admin" not in data["user_role"]:
-                data["user_role"].append("admin")
+    user_roles = dict()
+    if "user_role" in data:
+        for value in data["user_role"]:
+            user_roles[value] = UserRole(value=value)
+            db.add(user_roles[value])
+            print(f"Adding user role: {value}")
 
-            for value in data["user_role"]:
-                db.add(UserRole(value=value))
-                print(f"Adding user role: {value}")
-        else:
-            # Make sure there is always an "admin" role
-            db.add(UserRole(value="admin"))
-            print("Adding user role: admin")
+    if "user" in data:
+        for user in data["user"]:
+            db_user = User(
+                default_alert_queue=queues[user["default_alert_queue"]],
+                default_event_queue=queues[user["default_event_queue"]],
+                display_name=user["display_name"],
+                email=user["email"],
+                password=hash_password(user["password"]),
+                username=user["username"],
+            )
+            for user_role in user["roles"]:
+                db_user.roles.append(user_roles[user_role])
 
-    # Add an "analyst" user if there are no existing users
-    if not crud.read_all(db_table=User, db=db):
-        # Commit the database changes so that they can be used to create the analyst user
-        crud.commit(db)
+            db.add(db_user)
+            print(f"Adding user: {user['username']}")
 
-        db.add(
-            User(
-                default_alert_queue=crud.read_by_value(value="external", db_table=Queue, db=db),
-                default_event_queue=crud.read_by_value(value="external", db_table=Queue, db=db),
-                display_name="Analyst",
-                email="analyst@fake.com",
-                password=hash_password("analyst"),
-                roles=crud.read_by_values(values=["admin"], db_table=UserRole, db=db),
-                username="analyst",
-            )
-        )
-        db.add(
-            User(
-                default_alert_queue=crud.read_by_value(value="external", db_table=Queue, db=db),
-                default_event_queue=crud.read_by_value(value="internal", db_table=Queue, db=db),
-                display_name="Analyst Alice",
-                email="alice@alice.com",
-                password=hash_password("analyst"),
-                roles=crud.read_by_values(values=["admin"], db_table=UserRole, db=db),
-                username="alice",
-            )
-        )
-        db.add(
-            User(
-                default_alert_queue=crud.read_by_value(value="external", db_table=Queue, db=db),
-                default_event_queue=crud.read_by_value(value="external", db_table=Queue, db=db),
-                display_name="Analyst Bob",
-                email="bob@bob.com",
-                password=hash_password("analyst"),
-                roles=crud.read_by_values(values=["admin"], db_table=UserRole, db=db),
-                username="bob",
-            )
-        )
-        print("Adding user: analyst")
+    # Add a record saying the database was seeded
+    db.add(Seed())
 
     # Commit all of the changes
     crud.commit(db)
