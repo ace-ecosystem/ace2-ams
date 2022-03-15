@@ -36,7 +36,7 @@
                 {
                   "type": "FA Queue Analysis",
                   "details": {
-                    "gui_link": "https://url.to.search/query=asdf",
+                    "link": "https://url.to.search/query=asdf",
                     "hits": 5
                   }
                 },
@@ -46,11 +46,12 @@
                     {
                       "type": "fqdn",
                       "value": "evil.com",
+                      "for_detection": true,
                       "analyses": [
                         {
                           "type": "FA Queue Analysis",
                           "details": {
-                            "gui_link": "https://url.to.search/query=asdf",
+                            "link": "https://url.to.search/query=asdf",
                             "hits": 10
                           }
                         },
@@ -84,7 +85,7 @@
                 {
                   "type": "FA Queue Analysis",
                   "details": {
-                    "gui_link": "https://url.to.search/query=asdf",
+                    "link": "https://url.to.search/query=asdf",
                     "hits": 100
                   }
                 }
@@ -109,7 +110,7 @@
                         {
                           "type": "FA Queue Analysis",
                           "details": {
-                            "gui_link": "https://url.to.search/query=asdf",
+                            "link": "https://url.to.search/query=asdf",
                             "hits": 5
                           }
                         },
@@ -123,7 +124,7 @@
                                 {
                                   "type": "FA Queue Analysis",
                                   "details": {
-                                    "gui_link": "https://url.to.search/query=asdf",
+                                    "link": "https://url.to.search/query=asdf",
                                     "hits": 10
                                   }
                                 },
@@ -145,7 +146,7 @@
                                 {
                                   "type": "FA Queue Analysis",
                                   "details": {
-                                    "gui_link": "https://url.to.search/query=asdf",
+                                    "link": "https://url.to.search/query=asdf",
                                     "hits": 20
                                   }
                                 }
@@ -171,7 +172,7 @@
                 {
                   "type": "FA Queue Analysis",
                   "details": {
-                    "gui_link": "https://url.to.search/query=asdf",
+                    "link": "https://url.to.search/query=asdf",
                     "hits": 0
                   }
                 }
@@ -195,7 +196,7 @@
         {
           "type": "FA Queue Analysis",
           "details": {
-            "gui_link": "https://url.to.search/query=asdf",
+            "link": "https://url.to.search/query=asdf",
             "hits": 1000
           }
         }

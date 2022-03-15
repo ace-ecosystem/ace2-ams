@@ -6,6 +6,7 @@ import {
   eventReadPage,
   eventUpdate,
 } from "@/models/event";
+import { observableSummary } from "@/models/eventSummaries";
 import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
 import { eventHistoryReadPage } from "@/models/history";
@@ -29,6 +30,9 @@ export const Event = {
 
   readHistory: async (uuid: UUID): Promise<eventHistoryReadPage> =>
     await api.read(`${endpoint}${uuid}/history`),
+
+  readObservableSummary: async (uuid: UUID): Promise<observableSummary[]> =>
+    await api.read(`${endpoint}${uuid}/summary/observable`),
 
   readPage: (params?: eventFilterParams): Promise<eventReadPage> => {
     let formattedParams = {} as eventFilterParams;

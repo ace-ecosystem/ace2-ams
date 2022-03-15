@@ -203,3 +203,8 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     { field: "queue", header: "Queue", sortable: true, default: false },
   ],
 };
+
+export const faqueue = {
+  lowHits: 1,
+  mediumHits: 500,
+};

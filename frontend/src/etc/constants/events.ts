@@ -26,6 +26,7 @@ import {
 import EventSummaryVue from "@/components/Events/EventSummary.vue";
 import EventAlertsTableVue from "@/components/Events/EventAlertsTable.vue";
 import EventURLSummaryVue from "@/components/Events/EventURLSummary.vue";
+import EventObservableSummaryVue from "@/components/Events/EventObservableSummary.vue";
 
 // ** Events ** //
 
@@ -265,4 +266,5 @@ export const defaultEventDetailsSections = {
   "Event Summary": EventSummaryVue,
   "Alert Summary": EventAlertsTableVue,
   "URL Summary": EventURLSummaryVue,
+  "Observable Summary": EventObservableSummaryVue,
 };
