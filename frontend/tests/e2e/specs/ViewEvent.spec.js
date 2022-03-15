@@ -709,11 +709,12 @@ describe("Observable Summary Details - Don't Affect State", () => {
 
     // Check table
     cy.get('[data-cy="observables-table"]').should("be.visible");
-    cy.get(".p-column-title").should("have.length", 4);
+    cy.get(".p-column-title").should("have.length", 5);
     cy.get(".p-column-title").eq(0).should("have.text", "For Detection");
     cy.get(".p-column-title").eq(1).should("have.text", "FAQueue Hits");
     cy.get(".p-column-title").eq(2).should("have.text", "Type");
     cy.get(".p-column-title").eq(3).should("have.text", "Value");
+    cy.get(".p-column-title").eq(4).should("have.text", "Tags");
     cy.get(".p-paginator").should("be.visible");
 
     // Check all buttons / filters are visible
@@ -842,6 +843,36 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get(".p-datatable-tbody > > :nth-child(4)")
       .eq(6)
       .should("have.text", "http://evil.com/malware.exe");
+
+    // Check Tags column
+    cy.get(".p-datatable-tbody > > :nth-child(5)").should("have.length", 7);
+    cy.get(".p-datatable-tbody > > :nth-child(5)")
+      .eq(0)
+      .should("have.text", "from_address");
+    cy.get(".p-datatable-tbody > > :nth-child(5)")
+      .eq(1)
+      .should("have.text", "");
+    cy.get(".p-datatable-tbody > > :nth-child(5)")
+      .eq(2)
+      .should("have.text", "");
+    cy.get(".p-datatable-tbody > > :nth-child(5)")
+      .eq(3)
+      .should("have.text", "c2contacted_host");
+    cy.get(".p-datatable-tbody > > :nth-child(5)")
+      .eq(4)
+      .should("have.text", "");
+    cy.get(".p-datatable-tbody > > :nth-child(5)")
+      .eq(5)
+      .should("have.text", "");
+    cy.get(".p-datatable-tbody > > :nth-child(5)")
+      .eq(6)
+      .should("have.text", "");
+
+    // Check that the tags themselves are formatted as tags
+    cy.get(".p-tag").should("have.length", 3);
+    cy.get(".p-tag").eq(0).should("have.text", "from_address");
+    cy.get(".p-tag").eq(1).should("have.text", "c2");
+    cy.get(".p-tag").eq(2).should("have.text", "contacted_host");
   });
   it("correctly selects observables with low hits when 'Select low hits' button clicked ", () => {
     cy.get("#select-low-hits-button").click();

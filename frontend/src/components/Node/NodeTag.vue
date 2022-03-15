@@ -15,18 +15,21 @@
   import { useRouter } from "vue-router";
   const router = useRouter();
   const nodeType = inject("nodeType");
+  const nodeRoutes = {
+    alerts: "/manage_alerts",
+    events: "/manage_events",
+  };
 
   const props = defineProps({
     tag: { type: Object, required: true },
+    overrideNodeType: { type: String, required: false, default: null },
   });
 
   function filterByTags() {
-    // Determine what page to route to, right now only option is alerts - Manage Alerts
-    const nodeRoutes = {
-      alerts: "/manage_alerts",
-      events: "/manage_events",
-    };
-    const route = nodeRoutes[nodeType];
+    const preferredNodeType = props.overrideNodeType
+      ? props.overrideNodeType
+      : nodeType;
+    const route = nodeRoutes[preferredNodeType];
     if (route) {
       // Route to given page with query for filtering by this tag's value
       router.replace({ path: route, query: { tags: props.tag.value } });
