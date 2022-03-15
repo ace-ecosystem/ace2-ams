@@ -106,6 +106,110 @@ def test_summary_observable(client_valid_access_token, db):
     assert get.json()[1]["faqueue_hits"] == 100
 
 
+def test_summary_user(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The user summary should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
+    assert get.json() == []
+
+    # Add some alerts with analyses to the event
+    #
+    # alert1
+    #   o1
+    #     a1 - user1 analysis
+    #   o2
+    #     a2 - user1 analysis
+    #
+    # alert2
+    #  o1
+    #    a1 - user2 analysis
+
+    alert_tree1 = helpers.create_alert(db=db, event=event)
+    alert1_o1 = helpers.create_observable(
+        type="email_address", value="goodguy@company.com", parent_tree=alert_tree1, db=db
+    )
+    alert1_a1 = helpers.create_analysis(
+        db=db,
+        parent_tree=alert1_o1,
+        amt_value="User Analysis",
+        details={
+            "user_id": "12345",
+            "email": "goodguy@company.com",
+            "company": "Company Inc.",
+            "division": "R&D",
+            "department": "Widgets",
+            "title": "Director",
+            "manager_email": "ceo@company.com",
+        },
+    )
+    alert1_o2 = helpers.create_observable(
+        type="email_address", value="otherguy@company.com", parent_tree=alert1_a1, db=db
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert1_o2,
+        amt_value="User Analysis",
+        details={
+            "user_id": "12345",
+            "email": "goodguy@company.com",
+            "company": "Company Inc.",
+            "division": "R&D",
+            "department": "Widgets",
+            "title": "Director",
+            "manager_email": "ceo@company.com",
+        },
+    )
+
+    alert_tree2 = helpers.create_alert(db=db, event=event)
+    alert2_o1 = helpers.create_observable(
+        type="email_address", value="goodguy@company.com", parent_tree=alert_tree2, db=db
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert2_o1,
+        amt_value="User Analysis",
+        details={
+            "user_id": "98765",
+            "email": "otherguy@company.com",
+            "company": "Company Inc.",
+            "division": "R&D",
+            "department": "Widgets",
+            "title": "Engineer",
+            "manager_email": "goodguy@company.com",
+        },
+    )
+
+    # Add a third alert that is not part of the event
+    alert_tree3 = helpers.create_alert(db=db)
+    alert3_o1 = helpers.create_observable(
+        type="email_address", value="dude@company.com", parent_tree=alert_tree3, db=db
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert3_o1,
+        amt_value="User Analysis",
+        details={
+            "user_id": "abcde",
+            "email": "dude@company.com",
+            "company": "Company Inc.",
+            "division": "Finance",
+            "department": "Widgets",
+            "title": "Accountant",
+            "manager_email": "manager@company.com",
+        },
+    )
+
+    # The user summary should now have two entries in it. Even though one user's analysis was repeated two
+    # times across the alerts, its User Analysis is going to be the same for each, so it appears once in the summary.
+    # Additionally, the results should be sorted by their email.
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
+    assert len(get.json()) == 2
+    assert get.json()[0]["email"] == "goodguy@company.com"
+    assert get.json()[1]["email"] == "otherguy@company.com"
+
+
 def test_summary_observable_incorrect_details(client_valid_access_token, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
