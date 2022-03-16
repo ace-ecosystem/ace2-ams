@@ -44,7 +44,7 @@
       data-cy="edit-event-button"
       class="p-button-sm"
       icon="pi pi-pencil"
-      @click="open(`EditEventModal-${props.data.uuid}`)"
+      @click="open(editEventModalName)"
     />
     <EditEventModal
       :id="props.data.uuid"
@@ -58,7 +58,7 @@
 </template>
 
 <script setup>
-  import { defineProps } from "vue";
+  import { computed, defineProps } from "vue";
   import Button from "primevue/button";
 
   import NodeTagVue from "@/components/Node/NodeTag.vue";
@@ -75,6 +75,10 @@
     data: { type: Object, required: true },
     field: { type: String, required: true },
     showTags: { type: Boolean, required: false, default: true },
+  });
+
+  const editEventModalName = computed(() => {
+    return `EditEventModal-${props.data.uuid}`;
   });
 
   const formatDateTime = (dateTime) => {

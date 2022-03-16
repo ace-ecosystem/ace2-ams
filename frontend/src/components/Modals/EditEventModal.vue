@@ -60,15 +60,7 @@
 </template>
 
 <script setup>
-  import {
-    computed,
-    defineEmits,
-    defineProps,
-    onMounted,
-    ref,
-    inject,
-    watch,
-  } from "vue";
+  import { computed, defineEmits, defineProps, ref, inject, watch } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -102,20 +94,6 @@
   const fieldOptionObjects = ref({});
   const formFields = ref({});
   const isLoading = ref(false);
-
-  onMounted(async () => {
-    await fetchEvent();
-
-    for (const option of availableEditFields[event.value.queue.value]) {
-      // Create a lookup by field/option name of all the fieldOptionObjects
-      fieldOptionObjects.value[option.name] = option;
-      // Set up all the form field objects (to be used in NodePropertyInput)
-      formFields.value[option.name] = {
-        propertyType: option.name,
-        propertyValue: null,
-      };
-    }
-  });
 
   // Load event data only when modal becomes active
   watch(modalStore, async () => {
@@ -151,6 +129,17 @@
     try {
       await fetchEvent();
       await populateEventStores();
+
+      for (const option of availableEditFields[event.value.queue.value]) {
+        // Create a lookup by field/option name of all the fieldOptionObjects
+        fieldOptionObjects.value[option.name] = option;
+        // Set up all the form field objects (to be used in NodePropertyInput)
+        formFields.value[option.name] = {
+          propertyType: option.name,
+          propertyValue: null,
+        };
+      }
+
       await resetForm();
     } catch (err) {
       error.value = err.message;
