@@ -1306,10 +1306,21 @@ describe("Manage Alerts - Save to Event", () => {
         "contain.text",
         "(Analyst) disposition comment",
       );
-      cy.get(".p-datatable-tbody > tr > :nth-child(4) .p-mr-2").should(
-        "contain.text",
-        "(Analyst) new event comment",
-      );
+
+      // Check the event comment (need to visit the Manage Events page)
+      cy.intercept(
+        "GET",
+        "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&queue=external",
+      ).as("getEvents");
+
+      visitUrl({
+        url: "/manage_events",
+        extraIntercepts: ["@getEvents"],
+      });
+
+      cy.get(
+        ".p-datatable-tbody > :nth-child(1) > :nth-child(5) .p-mr-2",
+      ).should("contain.text", "(Analyst) new event comment");
     });
   });
 });
