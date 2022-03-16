@@ -5,9 +5,13 @@ export interface observableSummary extends observableRead {
   faqueueLink: string;
 }
 
-export interface urlDomainSummary {
+interface urlDomainSummaryIndividual {
   domain: string;
   count: number;
+}
+
+export interface urlDomainSummary {
+  domains: urlDomainSummaryIndividual[];
   total: number;
 }
 

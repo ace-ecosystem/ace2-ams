@@ -658,4 +658,4 @@ helpers.api_route_update(router, update_events, path="/")
 
 helpers.api_route_read(router, get_observable_summary, List[ObservableSummary], path="/{uuid}/summary/observable")
 helpers.api_route_read(router, get_user_summary, List[UserSummary], path="/{uuid}/summary/user")
-helpers.api_route_read(router, get_url_domain_summary, List[URLDomainSummary], path="/{uuid}/summary/url_domain")
+helpers.api_route_read(router, get_url_domain_summary, URLDomainSummary, path="/{uuid}/summary/url_domain")

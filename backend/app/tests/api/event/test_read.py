@@ -112,7 +112,7 @@ def test_summary_url_domains(client_valid_access_token, db):
 
     # The URL domains summary should be empty
     get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/url_domain")
-    assert get.json() == []
+    assert get.json() == {"domains": [], "total": 0}
 
     # Add some alerts with analyses to the event
     #
@@ -145,16 +145,14 @@ def test_summary_url_domains(client_valid_access_token, db):
     #
     # Results: example.com (2), example2.com (1), example3.com (1)
     get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/url_domain")
-    assert len(get.json()) == 3
-    assert get.json()[0]["domain"] == "example.com"
-    assert get.json()[0]["count"] == 2
-    assert get.json()[0]["total"] == 4
-    assert get.json()[1]["domain"] == "example2.com"
-    assert get.json()[1]["count"] == 1
-    assert get.json()[1]["total"] == 4
-    assert get.json()[2]["domain"] == "example3.com"
-    assert get.json()[2]["count"] == 1
-    assert get.json()[2]["total"] == 4
+    assert get.json()["total"] == 4
+    assert len(get.json()["domains"]) == 3
+    assert get.json()["domains"][0]["domain"] == "example.com"
+    assert get.json()["domains"][0]["count"] == 2
+    assert get.json()["domains"][1]["domain"] == "example2.com"
+    assert get.json()["domains"][1]["count"] == 1
+    assert get.json()["domains"][2]["domain"] == "example3.com"
+    assert get.json()["domains"][2]["count"] == 1
 
 
 def test_summary_user(client_valid_access_token, db):

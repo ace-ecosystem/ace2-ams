@@ -6,7 +6,7 @@ from typing import Dict, List
 from urllib.parse import urlparse
 from uuid import UUID
 
-from api.models.event_summaries import URLDomainSummary
+from api.models.event_summaries import URLDomainSummaryIndividual
 from db import crud
 from db.database import get_db
 from db.schemas.analysis import Analysis
@@ -91,12 +91,12 @@ def get_url_domain_summary(uuid: UUID, db: Session = Depends(get_db)):
     # Loop through the URL observables to count the domains. The key is the URL, and the value is
     # a URLDomainSummary object.
     # NOTE: This assumes the URL values are validated as they are added to the database.
-    domain_count: Dict[str, URLDomainSummary] = dict()
+    domain_count: Dict[str, URLDomainSummaryIndividual] = dict()
     for url in urls:
         parsed_url = urlparse(url.value)
         if parsed_url.hostname not in domain_count:
             domain_count[parsed_url.hostname] = 1
-            domain_count[parsed_url.hostname] = URLDomainSummary(domain=parsed_url.hostname, count=1, total=len(urls))
+            domain_count[parsed_url.hostname] = URLDomainSummaryIndividual(domain=parsed_url.hostname, count=1)
         else:
             domain_count[parsed_url.hostname].count += 1
 
@@ -104,7 +104,9 @@ def get_url_domain_summary(uuid: UUID, db: Session = Depends(get_db)):
     # There isn't a built-in way to do this type of sort, so first sort by the secondary value (the domain).
     # Then sort by the primary value (the count).
     sorted_results = sorted(domain_count.values(), key=lambda x: x.domain)
-    return sorted(sorted_results, key=lambda x: x.count, reverse=True)
+    sorted_results = sorted(sorted_results, key=lambda x: x.count, reverse=True)
+
+    return {"domains": sorted_results, "total": len(urls)}
 
 
 def get_user_summary(uuid: UUID, db: Session = Depends(get_db)):
