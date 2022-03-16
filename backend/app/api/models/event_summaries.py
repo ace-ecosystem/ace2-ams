@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import List, Optional
 
 from api.models import type_str
 from api.models.observable import ObservableRead
@@ -11,6 +11,24 @@ class ObservableSummary(ObservableRead):
     faqueue_hits: int = Field(description="The number of hits found by FA Queue Analysis for this observable")
 
     faqueue_link: str = Field(description="An optional link to view the FA Queue search")
+
+
+class URLDomainSummaryIndividual(BaseModel):
+    """Represents an individual URL domain summary."""
+
+    domain: type_str = Field(description="The domain from the URL observables")
+
+    count: int = Field(description="The number of times the domain occurred in unique URL observables")
+
+
+class URLDomainSummary(BaseModel):
+    """Represents a URL domain summary as used on the event pages."""
+
+    domains: List[URLDomainSummaryIndividual] = Field(description="The domain from the URL observables")
+
+    total: int = Field(
+        description="The cumulative total of all the counts. count/total gives the ratio of this domain's occurrences."
+    )
 
 
 class UserSummary(BaseModel):

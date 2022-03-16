@@ -106,6 +106,55 @@ def test_summary_observable(client_valid_access_token, db):
     assert get.json()[1]["faqueue_hits"] == 100
 
 
+def test_summary_url_domains(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The URL domains summary should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/url_domain")
+    assert get.json() == {"domains": [], "total": 0}
+
+    # Add some alerts with analyses to the event
+    #
+    # alert1
+    #   o1 - https://example.com
+    #     a1
+    #       o2 - https://example2.com
+    #       o3 - https://example.com
+    #
+    # alert2
+    #  o1 - https://example.com/index.html
+    #  o2 - https://example3.com
+    alert_tree1 = helpers.create_alert(db=db, event=event)
+    alert1_o1 = helpers.create_observable(type="url", value="https://example.com", parent_tree=alert_tree1, db=db)
+    alert1_a1 = helpers.create_analysis(db=db, parent_tree=alert1_o1, amt_value="URL Analysis")
+    helpers.create_observable(type="url", value="https://example2.com", parent_tree=alert1_a1, db=db)
+    helpers.create_observable(type="url", value="https://example.com", parent_tree=alert1_a1, db=db)
+
+    alert_tree2 = helpers.create_alert(db=db, event=event)
+    helpers.create_observable(type="url", value="https://example.com/index.html", parent_tree=alert_tree2, db=db)
+    helpers.create_observable(type="url", value="https://example3.com", parent_tree=alert_tree2, db=db)
+
+    # Add a third alert that is not part of the event
+    alert_tree3 = helpers.create_alert(db=db)
+    helpers.create_observable(type="url", value="https://example4.com", parent_tree=alert_tree3, db=db)
+
+    # The URL domain summary should now have three entries in it. The https://example.com URL is repeated, so it
+    # only counts once for the purposes of the summary.
+    # Additionally, the results should be sorted by the number of times the domains appeared then by the domain.
+    #
+    # Results: example.com (2), example2.com (1), example3.com (1)
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/url_domain")
+    assert get.json()["total"] == 4
+    assert len(get.json()["domains"]) == 3
+    assert get.json()["domains"][0]["domain"] == "example.com"
+    assert get.json()["domains"][0]["count"] == 2
+    assert get.json()["domains"][1]["domain"] == "example2.com"
+    assert get.json()["domains"][1]["count"] == 1
+    assert get.json()["domains"][2]["domain"] == "example3.com"
+    assert get.json()["domains"][2]["count"] == 1
+
+
 def test_summary_user(client_valid_access_token, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
@@ -248,6 +297,48 @@ def test_summary_observable_incorrect_details(client_valid_access_token, db):
     assert len(get.json()) == 1
     assert get.json()[0]["faqueue_hits"] == 10
     assert get.json()[0]["faqueue_link"] == ""
+
+
+def test_summary_user_incorrect_details(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The user summary should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
+    assert get.json() == []
+
+    # The required keys are "user_id" and "email". The others are optional.
+    # Add an alert with user analysis with the wrong user_id key.
+    alert_tree = helpers.create_alert(db=db, event=event)
+    alert_o1 = helpers.create_observable(
+        type="email_address", value="goodguy@company.com", parent_tree=alert_tree, db=db
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert_o1,
+        amt_value="User Analysis",
+        details={"username": "goodguy", "email": "goodguy@company.com"},
+    )
+
+    # The user summary should still be empty since the analysis details has the wrong "user_id" key
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
+    assert get.json() == []
+
+    # Add an alert with FA Queue analysis with the wrong details email keys
+    alert_tree = helpers.create_alert(db=db, event=event)
+    alert_o1 = helpers.create_observable(
+        type="email_address", value="goodguy@company.com", parent_tree=alert_tree, db=db
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert_o1,
+        amt_value="User Analysis",
+        details={"user_id": "goodguy", "email_address": "goodguy@company.com"},
+    )
+
+    # The user summary should still be empty since the analysis details has the wrong "user_id" key
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
+    assert get.json() == []
 
 
 def test_analysis_module_types(client_valid_access_token, db):
