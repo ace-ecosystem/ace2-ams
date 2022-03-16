@@ -13,6 +13,18 @@ class ObservableSummary(ObservableRead):
     faqueue_link: str = Field(description="An optional link to view the FA Queue search")
 
 
+class URLDomainSummary(BaseModel):
+    """Represents a URL domain summary as used on the event pages."""
+
+    domain: type_str = Field(description="The domain from the URL observables")
+
+    count: int = Field(description="The number of times the domain occurred in unique URL observables")
+
+    total: int = Field(
+        description="The cumulative total of all the counts. count/total gives the ratio of this domain's occurrences."
+    )
+
+
 class UserSummary(BaseModel):
     """Represents a user summary as used on the event pages."""
 
