@@ -250,6 +250,48 @@ def test_summary_observable_incorrect_details(client_valid_access_token, db):
     assert get.json()[0]["faqueue_link"] == ""
 
 
+def test_summary_user_incorrect_details(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The user summary should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
+    assert get.json() == []
+
+    # The required keys are "user_id" and "email". The others are optional.
+    # Add an alert with user analysis with the wrong user_id key.
+    alert_tree = helpers.create_alert(db=db, event=event)
+    alert_o1 = helpers.create_observable(
+        type="email_address", value="goodguy@company.com", parent_tree=alert_tree, db=db
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert_o1,
+        amt_value="User Analysis",
+        details={"username": "goodguy", "email": "goodguy@company.com"},
+    )
+
+    # The user summary should still be empty since the analysis details has the wrong "user_id" key
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
+    assert get.json() == []
+
+    # Add an alert with FA Queue analysis with the wrong details email keys
+    alert_tree = helpers.create_alert(db=db, event=event)
+    alert_o1 = helpers.create_observable(
+        type="email_address", value="goodguy@company.com", parent_tree=alert_tree, db=db
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert_o1,
+        amt_value="User Analysis",
+        details={"user_id": "goodguy", "email_address": "goodguy@company.com"},
+    )
+
+    # The user summary should still be empty since the analysis details has the wrong "user_id" key
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
+    assert get.json() == []
+
+
 def test_analysis_module_types(client_valid_access_token, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)

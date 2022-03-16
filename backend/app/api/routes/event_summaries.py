@@ -89,6 +89,10 @@ def get_user_summary(uuid: UUID, db: Session = Depends(get_db)):
     unique_emails = set()
     results = []
     for user_analysis in user_analyses:
+        # Skip this analysis if it does not have the required fields
+        if "user_id" not in user_analysis.details or "email" not in user_analysis.details:
+            continue
+
         if user_analysis.details["email"] in unique_emails:
             continue
 
