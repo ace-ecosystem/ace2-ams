@@ -6,7 +6,11 @@ import {
   eventReadPage,
   eventUpdate,
 } from "@/models/event";
-import { observableSummary, userSummary, urlDomainSummary  } from "@/models/eventSummaries";
+import {
+  observableSummary,
+  userSummary,
+  urlDomainSummary,
+} from "@/models/eventSummaries";
 import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
 import { eventHistoryReadPage } from "@/models/history";
