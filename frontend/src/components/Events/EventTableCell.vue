@@ -74,7 +74,7 @@
   const props = defineProps({
     data: { type: Object, required: true },
     field: { type: String, required: true },
-    showTags: { type: Boolean, required: true, default: true },
+    showTags: { type: Boolean, required: false, default: true },
   });
 
   const formatDateTime = (dateTime) => {
