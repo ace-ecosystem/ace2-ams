@@ -1,12 +1,13 @@
+from deepdiff import DeepHash
 from fastapi import Depends
 from sqlalchemy import and_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Load, Session
 from sqlalchemy.sql.expression import join, select
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from urllib.parse import urlparse
 from uuid import UUID
 
-from api.models.event_summaries import URLDomainSummaryIndividual
+from api.models.event_summaries import EmailSummary, URLDomainSummaryIndividual
 from db import crud
 from db.database import get_db
 from db.schemas.analysis import Analysis
@@ -18,9 +19,42 @@ from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 
 
-#
-# OBSERVABLE
-#
+def get_email_summary(uuid: UUID, db: Session = Depends(get_db)):
+    # Get the event from the database
+    event: Event = crud.read(uuid=uuid, db_table=Event, db=db)
+
+    # Get all the email analyses (and their root Node UUIDs) performed in the event.
+    query = (
+        select([NodeTree.root_node_uuid, Analysis])
+        .select_from(join(NodeTree, Node, NodeTree.node_uuid == Node.uuid))
+        .join(
+            Analysis,
+            onclause=and_(
+                Node.node_type == "analysis",
+                Analysis.uuid == NodeTree.node_uuid,
+                Analysis.analysis_module_type.has(AnalysisModuleType.value == "Email Analysis"),
+            ),
+        )
+        .options(Load(Analysis).undefer("details"))
+        .where(NodeTree.root_node_uuid.in_(event.alert_uuids))
+    )
+
+    alert_uuid_and_analysis: List[Tuple[UUID, Analysis]] = db.execute(query).unique().fetchall()
+
+    results: List[EmailSummary] = []
+    unique_emails = []
+    for alert_uuid, analysis in alert_uuid_and_analysis:
+        # Skip this email if it is a duplicate
+        details_hash = DeepHash(analysis.details)[analysis.details]
+        if details_hash in unique_emails:
+            continue
+        else:
+            unique_emails.append(details_hash)
+
+        results.append(EmailSummary(**analysis.details, alert_uuid=alert_uuid))
+
+    # Return the summaries by the email time
+    return sorted(results, key=lambda x: x.time)
 
 
 def get_observable_summary(uuid: UUID, db: Session = Depends(get_db)):
