@@ -1,5 +1,16 @@
 import { observableRead } from "./observable";
 
+export interface emailSummary {
+  attachments: string[];
+  ccAddresses: string[];
+  fromAddress: string;
+  messageId: string;
+  replyToAddress: string | null;
+  subject: string | null;
+  time: Date;
+  toAddress: string;
+}
+
 export interface observableSummary extends observableRead {
   faqueueHits: number;
   faqueueLink: string;
