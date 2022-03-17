@@ -1,5 +1,5 @@
-<!-- EventURLSummary.vue -->
-<!-- A simple list of all URLs contained in the given alert UUIDs -->
+<!-- EventURLDomainSummary.vue -->
+<!-- A simple table and chart of all URL domains in an event and their frequency -->
 
 <template>
   <div class="flex justify-content-evenly">
