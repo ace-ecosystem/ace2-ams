@@ -54,7 +54,7 @@
   import Button from "primevue/button";
   import InputText from "primevue/inputtext";
 
-  import { populateCommonStores, setUserDefaults } from "@/etc/helpers";
+  import { populateCommonStores } from "@/etc/helpers";
   import authApi from "@/services/api/auth";
 
   const router = useRouter();
@@ -81,7 +81,6 @@
         // And then populate some of the stores with items from the API that
         // will be used throughout the application.
         await populateCommonStores();
-        setUserDefaults();
       })
       .catch(() => {
         console.error("Invalid username or password");
