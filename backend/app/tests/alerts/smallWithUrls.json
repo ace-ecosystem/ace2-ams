@@ -1,8 +1,5 @@
 {
-  "alert_uuid": "02f8299b-2a24-400f-9751-7dd9164daf6a",
-  "disposition_user": "alice",
-  "name": "Small Alert",
-  "owner": "bob",
+  "name": "Small Alert with URLs",
   "observables": [
     {
       "type": "file",
@@ -132,8 +129,8 @@
                                   "type": "Test Analysis",
                                   "observables": [
                                     {
-                                      "type": "test_type",
-                                      "value": "test_value"
+                                      "type": "url",
+                                      "value": "http://notEvil.com/safe.exe"
                                     }
                                   ]
                                 }
@@ -166,8 +163,8 @@
           "type": "File Analysis",
           "observables": [
             {
-              "type": "md5",
-              "value": "912ec803b2ce49e4a541068d495ab570",
+              "type": "url",
+              "value": "http://amazon.com/",
               "analyses": [
                 {
                   "type": "FA Queue Analysis",

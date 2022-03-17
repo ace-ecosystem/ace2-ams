@@ -56,7 +56,7 @@ describe("EventAlertsTable", () => {
     const { wrapper } = factory();
 
     // The DataTable should not exist at first
-    expect(wrapper.find("[data-cy=expandedEvent]").exists()).toBe(false);
+    expect(wrapper.find("[data-cy=event-alerts-table]").exists()).toBe(false);
 
     // The loading message should be present
     expect(
@@ -72,7 +72,7 @@ describe("EventAlertsTable", () => {
 
     // Now the DataTable should have replaced the loading message
     expect(wrapper.find("#loading-message").exists()).toBe(false);
-    expect(wrapper.find("[data-cy=expandedEvent]").exists()).toBe(true);
+    expect(wrapper.find("[data-cy=event-alerts-table]").exists()).toBe(true);
 
     // The DataTable should have three rows for the alerts
     let rows = wrapper.findAll("tbody > tr");

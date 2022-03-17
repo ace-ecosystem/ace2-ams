@@ -296,12 +296,12 @@ describe("TheEventsTable.vue", () => {
     cy.wait("@getEventAlerts").its("state").should("eq", "Complete");
     // Table of alerts should now exist
     cy.get("tr.p-datatable-row-expansion").should("exist").should("be.visible");
-    cy.waitFor('[data-cy="expandedEvent"] > .p-datatable-header');
+    cy.waitFor('[data-cy="event-alerts-table"] > .p-datatable-header');
     // Find and click the first tag in list
     cy.get("[data-cy='tags']").eq(1).contains("tag0").click();
     // Wait for the filtered view to be requested
     cy.wait("@filterURL");
-    cy.waitFor('[data-cy="expandedEvent"] > .p-datatable-header');
+    cy.waitFor('[data-cy="event-alerts-table"] > .p-datatable-header');
     // Check which event checkboxes are visible (should be 7, 1 header + 6 events that have the tag, + 7 checkboxes from alerts in expanded event)
     cy.get(".p-checkbox-box").should("have.length", 14);
   });
@@ -314,7 +314,7 @@ describe("TheEventsTable.vue", () => {
     // Table of alerts should now exist
     cy.get("tr.p-datatable-row-expansion").should("exist").should("be.visible");
     // There should be 7 rows in the table (header + 6 alerts)
-    cy.get("[data-cy='expandedEvent']")
+    cy.get("[data-cy='event-alerts-table']")
       .eq(0)
       .within(() => {
         cy.get("tr").should("have.length", 7);
@@ -329,7 +329,7 @@ describe("TheEventsTable.vue", () => {
     cy.get('[aria-label="5"]').click();
 
     // Should reload with only 5 rows (+1 for header) (but no API call is made)
-    cy.get("[data-cy='expandedEvent']")
+    cy.get("[data-cy='event-alerts-table']")
       .eq(0)
       .within(() => {
         cy.get("tr").should("have.length", 6);
@@ -339,7 +339,7 @@ describe("TheEventsTable.vue", () => {
     cy.get(".p-paginator-pages > :nth-child(2)").click();
 
     // One row for header, one row for alert
-    cy.get("[data-cy='expandedEvent']")
+    cy.get("[data-cy='event-alerts-table']")
       .eq(0)
       .within(() => {
         cy.get("tr").should("have.length", 2);
@@ -395,7 +395,7 @@ describe("TheEventsTable.vue - Remove Alerts", () => {
     );
 
     // Select the first alert
-    cy.get("[data-cy='expandedEvent']")
+    cy.get("[data-cy='event-alerts-table']")
       .eq(0)
       .within(() => {
         cy.get(".p-checkbox-box").eq(1).click();
@@ -417,7 +417,7 @@ describe("TheEventsTable.vue - Remove Alerts", () => {
     );
 
     // Select all of the alerts
-    cy.get("[data-cy='expandedEvent']")
+    cy.get("[data-cy='event-alerts-table']")
       .eq(0)
       .within(() => {
         cy.get(".p-checkbox-box").eq(0).click();

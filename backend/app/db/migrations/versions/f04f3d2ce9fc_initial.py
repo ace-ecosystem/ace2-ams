@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 0e67677dd8f7
+Revision ID: f04f3d2ce9fc
 Revises: 
-Create Date: 2022-02-23 21:13:46.127108
+Create Date: 2022-03-11 19:20:47.897900
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '0e67677dd8f7'
+revision = 'f04f3d2ce9fc'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -57,6 +57,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid'),
     sa.UniqueConstraint('value', 'version', name='value_version_uc')
     )
+    op.create_index('amt_value_trgm', 'analysis_module_type', ['value'], unique=False, postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.create_index(op.f('ix_analysis_module_type_value'), 'analysis_module_type', ['value'], unique=False)
     op.create_index(op.f('ix_analysis_module_type_version'), 'analysis_module_type', ['version'], unique=False)
     op.create_table('event_prevention_tool',
@@ -163,6 +164,12 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_queue_value'), 'queue', ['value'], unique=True)
+    op.create_table('seed',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('seed_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_seed_seed_time'), 'seed', ['seed_time'], unique=False)
     op.create_table('user_role',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -691,6 +698,8 @@ def downgrade() -> None:
     op.drop_table('analysis')
     op.drop_index(op.f('ix_user_role_value'), table_name='user_role')
     op.drop_table('user_role')
+    op.drop_index(op.f('ix_seed_seed_time'), table_name='seed')
+    op.drop_table('seed')
     op.drop_index(op.f('ix_queue_value'), table_name='queue')
     op.drop_table('queue')
     op.drop_index(op.f('ix_observable_type_value'), table_name='observable_type')
@@ -722,6 +731,7 @@ def downgrade() -> None:
     op.drop_table('event_prevention_tool')
     op.drop_index(op.f('ix_analysis_module_type_version'), table_name='analysis_module_type')
     op.drop_index(op.f('ix_analysis_module_type_value'), table_name='analysis_module_type')
+    op.drop_index('amt_value_trgm', table_name='analysis_module_type', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_table('analysis_module_type')
     op.drop_index(op.f('ix_alert_type_value'), table_name='alert_type')
     op.drop_table('alert_type')

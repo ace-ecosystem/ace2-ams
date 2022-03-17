@@ -1,6 +1,6 @@
 import { useNodeThreatTypeStore } from "@/stores/nodeThreatType";
-import { nodeThreatReadFactory } from "./../../../../mocks/nodeThreat";
-import { genericObjectReadFactory } from "./../../../../mocks/genericObject";
+import { nodeThreatReadFactory } from "../../../../mocks/nodeThreat";
+import { genericObjectReadFactory } from "../../../../mocks/genericObject";
 import NodeThreatSelector from "../../../../../src/components/Node/NodeThreatSelector.vue";
 import { mount } from "@vue/test-utils";
 import { createCustomPinia } from "@unit/helpers";

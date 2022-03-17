@@ -44,7 +44,7 @@
                   rows="5"
                   cols="30"
                 />
-                <label for="newEventComment">Disposition Comment</label>
+                <label for="newEventComment">Event Comment</label>
               </span>
             </div>
           </div>
@@ -206,10 +206,13 @@
 
       // Add any comments if necessary
       if (commentData.value) {
-        const newCommentData = selectedAlertStore.selected.map((uuid) => ({
-          nodeUuid: uuid,
-          ...commentData.value,
-        }));
+        const newCommentData = [
+          {
+            nodeUuid: eventUuid,
+            ...commentData.value,
+          },
+        ];
+
         try {
           await NodeComment.create(newCommentData);
         } catch (err) {
