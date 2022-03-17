@@ -185,6 +185,12 @@
                 },
               },
               {
+                label: "URL Domain Summary",
+                command: () => {
+                  emit("sectionClicked", "URL Domain Summary");
+                },
+              },
+              {
                 label: "Observable Summary",
                 command: () => {
                   emit("sectionClicked", "Observable Summary");
