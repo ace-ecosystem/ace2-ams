@@ -1122,3 +1122,83 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get("tr").should("have.length", 9);
   });
 });
+
+describe("User Summary Details", () => {
+  before(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Intercept the API call that loads the event data
+    cy.intercept("GET", "/api/event/*").as("getEvent");
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
+    ).as("getEventsDefaultRows");
+    cy.intercept("GET", "/api/event/*/summary/user").as("getUserSummary");
+
+    // Add the test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "smallWithUsers.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
+
+    visitUrl({
+      url: "/manage_events",
+      extraIntercepts: ["@getEventsDefaultRows"],
+    });
+    cy.get('[data-cy="eventName"] > a').click();
+    cy.wait("@getEvent").its("state").should("eq", "Complete");
+
+    // Switch to user analysis view
+    cy.get('[aria-haspopup="true"]').eq(2).click();
+    cy.get("span").contains("User Analysis").click();
+
+    cy.wait("@getUserSummary").its("state").should("eq", "Complete");
+  });
+
+  it("renders section correctly", () => {
+    // Check title
+    cy.get("#event-section-title").should("contain.text", "User Analysis");
+    // url list should be there
+    cy.get('[data-cy="user-analysis-table"]').should("be.visible");
+    // Should be 3 rows, one header and two users
+    cy.get("tr").should("have.length", 3);
+    // Check headers
+    cy.get(".p-column-title").eq(0).should("have.text", "User ID");
+    cy.get(".p-column-title").eq(1).should("have.text", "Email");
+    cy.get(".p-column-title").eq(2).should("have.text", "Company");
+    cy.get(".p-column-title").eq(3).should("have.text", "Division");
+    cy.get(".p-column-title").eq(4).should("have.text", "Department");
+    cy.get(".p-column-title").eq(5).should("have.text", "Title");
+    cy.get(".p-column-title").eq(6).should("have.text", "Manager Email");
+    // Check values of first row
+    // If this row looks good, we can reliably say any other rows will load correctly
+    // AKA don't need to check second row
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(0)
+      .should("have.text", "12345");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(1)
+      .should("have.text", "goodguy@company.com");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(2)
+      .should("have.text", "Company Inc.");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(3)
+      .should("have.text", "R&D");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(4)
+      .should("have.text", "Widgets");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(5)
+      .should("have.text", "Director");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(6)
+      .should("have.text", "ceo@company.com");
+  });
+});

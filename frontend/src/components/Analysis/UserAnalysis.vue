@@ -1,7 +1,11 @@
 <!-- UserAnalysis.vue -->
 
 <template>
-  <DataTable :value="users" responsive-layout="scroll">
+  <DataTable
+    :value="users"
+    responsive-layout="scroll"
+    data-cy="user-analysis-table"
+  >
     <Column field="userId" header="User ID" :sortable="true"></Column>
     <Column field="email" header="Email" :sortable="true"></Column>
     <Column field="company" header="Company" :sortable="true"></Column>
