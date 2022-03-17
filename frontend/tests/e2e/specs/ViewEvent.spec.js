@@ -1202,3 +1202,67 @@ describe("User Summary Details", () => {
       .should("have.text", "ceo@company.com");
   });
 });
+
+describe("URL Domain Summary Details", () => {
+  before(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Intercept the API call that loads the event data
+    cy.intercept("GET", "/api/event/*").as("getEvent");
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
+    ).as("getEventsDefaultRows");
+    cy.intercept("GET", "/api/event/*/summary/url_domain").as(
+      "getUrlDomainSummary",
+    );
+
+    // Add the test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "smallWithUrls.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
+
+    visitUrl({
+      url: "/manage_events",
+      extraIntercepts: ["@getEventsDefaultRows"],
+    });
+    cy.get('[data-cy="eventName"] > a').click();
+    cy.wait("@getEvent").its("state").should("eq", "Complete");
+
+    // Switch to user analysis view
+    cy.get('[aria-haspopup="true"]').eq(1).click();
+    cy.get("span").contains("URL Domain Summary").click();
+
+    cy.wait("@getUrlDomainSummary").its("state").should("eq", "Complete");
+  });
+
+  it("renders section correctly", () => {
+    // Check title
+    cy.get("#event-section-title").should("contain.text", "URL Domain Summary");
+    // pie chart should be there
+    cy.get('[data-cy="url-domain-pie-chart"]').should("be.visible");
+    // table should be there
+    cy.get('[data-cy="url-domain-summary-table"]');
+    // Should be 4 rows, one header and three domains
+    cy.get("tr").should("have.length", 4);
+    // Check headers
+    cy.get(".p-column-title").eq(0).should("have.text", "Domain");
+    cy.get(".p-column-title").eq(1).should("have.text", "Count");
+    // Check values of first row
+    // If this row looks good, we can reliably say any other rows will load correctly
+    // AKA don't need to check second row
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(0)
+      .should("have.text", "amazon.com");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(1)
+      .should("have.text", "1");
+  });
+});
