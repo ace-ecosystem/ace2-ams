@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 from uuid import UUID
 
 from api.models.analysis import AnalysisCreate, AnalysisRead, AnalysisUpdate
+from api.models.analysis_details import EmailAnalysisDetails
 from api.routes import helpers
 from api.routes.node import create_node, update_node
 from db import crud
@@ -39,12 +40,18 @@ def create_analysis(
 
     # If an analysis module type was given, get it from the database to use with the new analysis
     if analysis.analysis_module_type:
-        new_analysis.analysis_module_type = crud.read(
+        analysis_module_type: AnalysisModuleType = crud.read(
             uuid=analysis.analysis_module_type, db_table=AnalysisModuleType, db=db
         )
+        new_analysis.analysis_module_type = analysis_module_type
 
         # TODO: Do we want to verify certain types of analysis details here?
         # For example, the analysis details the GUI depends upon to show the event pages.
+        if analysis_module_type.value == "Email Analysis":
+            try:
+                EmailAnalysisDetails(**analysis.details)
+            except:
+                raise HTTPException(status_code=400, detail=f"The Email Analysis details are invalid")
 
     db.add(new_analysis)
     crud.commit(db)
