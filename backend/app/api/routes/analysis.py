@@ -43,6 +43,9 @@ def create_analysis(
             uuid=analysis.analysis_module_type, db_table=AnalysisModuleType, db=db
         )
 
+        # TODO: Do we want to verify certain types of analysis details here?
+        # For example, the analysis details the GUI depends upon to show the event pages.
+
     db.add(new_analysis)
     crud.commit(db)
 
