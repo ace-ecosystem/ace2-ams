@@ -1,4 +1,17 @@
+import { UUID } from "./base";
 import { observableRead } from "./observable";
+
+export interface emailSummary {
+  alertUuid: UUID;
+  attachments: string[];
+  ccAddresses: string[];
+  fromAddress: string;
+  messageId: string;
+  replyToAddress: string | null;
+  subject: string | null;
+  time: Date;
+  toAddress: string;
+}
 
 export interface observableSummary extends observableRead {
   faqueueHits: number;

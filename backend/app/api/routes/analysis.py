@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 from uuid import UUID
 
 from api.models.analysis import AnalysisCreate, AnalysisRead, AnalysisUpdate
+from api.models.analysis_details import EmailAnalysisDetails, FAQueueAnalysisDetails, UserAnalysisDetails
 from api.routes import helpers
 from api.routes.node import create_node, update_node
 from db import crud
@@ -39,9 +40,40 @@ def create_analysis(
 
     # If an analysis module type was given, get it from the database to use with the new analysis
     if analysis.analysis_module_type:
-        new_analysis.analysis_module_type = crud.read(
+        analysis_module_type: AnalysisModuleType = crud.read(
             uuid=analysis.analysis_module_type, db_table=AnalysisModuleType, db=db
         )
+        new_analysis.analysis_module_type = analysis_module_type
+
+        # Validate certain types of analysis details. The GUI depends on specific analysis details
+        # when showing event pages. Because of this, we want to ensure that these details conform
+        # to what the GUI expects.
+        if analysis_module_type.value == "Email Analysis":
+            try:
+                EmailAnalysisDetails(**analysis.details)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"The Email Analysis details for alert {analysis.node_tree.root_node_uuid} are invalid: {e}",
+                )
+
+        elif analysis_module_type.value.startswith("FA Queue"):
+            try:
+                FAQueueAnalysisDetails(**analysis.details)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"The FA Queue Analysis details for alert {analysis.node_tree.root_node_uuid} are invalid: {e}",
+                )
+
+        elif analysis_module_type.value == "User Analysis":
+            try:
+                UserAnalysisDetails(**analysis.details)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"The User Analysis details for alert {analysis.node_tree.root_node_uuid} are invalid: {e}",
+                )
 
     db.add(new_analysis)
     crud.commit(db)

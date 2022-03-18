@@ -2,6 +2,7 @@ import json
 import pytest
 import uuid
 
+from datetime import datetime
 from fastapi import status
 
 from tests import helpers
@@ -84,6 +85,68 @@ def test_create_nonexistent_analysis_module_type(client_valid_access_token, db):
         },
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
+
+
+def test_create_invalid_email_analysis(client_valid_access_token, db):
+    node_tree = helpers.create_alert(db=db)
+    analysis_module_type = helpers.create_analysis_module_type(value="Email Analysis", db=db)
+
+    # Create the analysis - it is missing the required "from_address" key
+    create = client_valid_access_token.post(
+        "/api/analysis/",
+        json={
+            "analysis_module_type": str(analysis_module_type.uuid),
+            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+            "details": json.dumps(
+                {
+                    "attachments": [],
+                    "cc_addresses": [],
+                    "headers": "blah",
+                    "message_id": "<abcd1234@evil.com>",
+                    "subject": "Hello",
+                    "time": datetime.now().isoformat(),
+                    "to_address": "goodguy@company.com",
+                    "extra_field": "extra_value",
+                }
+            ),
+        },
+    )
+
+    assert create.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_create_invalid_faqueue_analysis(client_valid_access_token, db):
+    node_tree = helpers.create_alert(db=db)
+    analysis_module_type = helpers.create_analysis_module_type(value="FA Queue Analysis", db=db)
+
+    # Create the analysis - it is missing the required "hits" key
+    create = client_valid_access_token.post(
+        "/api/analysis/",
+        json={
+            "analysis_module_type": str(analysis_module_type.uuid),
+            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+            "details": json.dumps({"faqueue_hits": 100, "link": "https://example.com"}),
+        },
+    )
+
+    assert create.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_create_invalid_user_analysis(client_valid_access_token, db):
+    node_tree = helpers.create_alert(db=db)
+    analysis_module_type = helpers.create_analysis_module_type(value="User Analysis", db=db)
+
+    # Create the analysis - it is missing the required "user_id" key
+    create = client_valid_access_token.post(
+        "/api/analysis/",
+        json={
+            "analysis_module_type": str(analysis_module_type.uuid),
+            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+            "details": json.dumps({"username": "goodguy", "email": "goodguy@company.com"}),
+        },
+    )
+
+    assert create.status_code == status.HTTP_400_BAD_REQUEST
 
 
 #
