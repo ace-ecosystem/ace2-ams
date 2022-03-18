@@ -5,6 +5,14 @@ from typing import List, Optional
 from api.models import type_str
 
 
+class EmailAnalysisDetailsHeaderBody(BaseModel):
+    body_html: Optional[type_str] = Field(description="The HTML body of the email")
+
+    body_text: Optional[type_str] = Field(description="The plaintext body of the email")
+
+    headers: type_str = Field(description="The headers of the email")
+
+
 class EmailAnalysisDetailsBase(BaseModel):
     attachments: List[type_str] = Field(description="A list of the email attachment names")
 
@@ -23,14 +31,10 @@ class EmailAnalysisDetailsBase(BaseModel):
     to_address: type_str = Field(description="The recipient's email address")
 
 
-class EmailAnalysisDetails(EmailAnalysisDetailsBase):
+class EmailAnalysisDetails(EmailAnalysisDetailsBase, EmailAnalysisDetailsHeaderBody):
     """Represents the minimum fields in Email Analysis details that the frontend expects for event pages."""
 
-    body_html: Optional[type_str] = Field(description="The HTML body of the email")
-
-    body_text: Optional[type_str] = Field(description="The plaintext body of the email")
-
-    headers: type_str = Field(description="The headers of the email")
+    pass
 
 
 class FAQueueAnalysisDetails(BaseModel):

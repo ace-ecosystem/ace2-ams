@@ -1,6 +1,13 @@
 import { UUID } from "./base";
 import { observableRead } from "./observable";
 
+export interface EmailHeadersBody {
+  alertUuid: UUID;
+  bodyHtml: string | null;
+  bodyText: string | null;
+  headers: string;
+}
+
 export interface emailSummary {
   alertUuid: UUID;
   attachments: string[];
