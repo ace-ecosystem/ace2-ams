@@ -153,6 +153,107 @@ def test_summary_email(client_valid_access_token, db):
     assert get.json()[1]["message_id"] == "<1234abcd@evil.com>"
 
 
+def test_summary_email_headers_body(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The email headers/body summary should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/email_headers_body")
+    assert get.json() is None
+
+    # Add some alerts with analysis to the event
+    #
+    # alert1
+    #   o1
+    #     a1 - email analysis 1
+    #
+    # alert2
+    #  o1
+    #    a1 - email analysis 2
+    alert_tree1 = helpers.create_alert(db=db, event=event)
+    alert1_o1 = helpers.create_observable(
+        type="file",
+        value="6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        parent_tree=alert_tree1,
+        db=db,
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert1_o1,
+        amt_value="Email Analysis",
+        details={
+            "attachments": [],
+            "body_html": "<p>body1</p>",
+            "body_text": "body1",
+            "cc_addresses": [],
+            "from_address": "badguy@evil.com",
+            "headers": "headers1",
+            "message_id": "<abcd1234@evil.com>",
+            "subject": "Hello",
+            "time": datetime.now().isoformat(),
+            "to_address": "goodguy@company.com",
+        },
+    )
+
+    # The second alert's email has an earlier time
+    alert_tree2 = helpers.create_alert(db=db, event=event)
+    alert2_o1 = helpers.create_observable(
+        type="file",
+        value="d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        parent_tree=alert_tree2,
+        db=db,
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert2_o1,
+        amt_value="Email Analysis",
+        details={
+            "attachments": [],
+            "body_html": "<p>body2</p>",
+            "body_text": "body2",
+            "cc_addresses": [],
+            "from_address": "badguy@evil.com",
+            "headers": "headers2",
+            "message_id": "<1234abcd@evil.com>",
+            "subject": "Hello",
+            "time": (datetime.now() - timedelta(days=1)).isoformat(),
+            "to_address": "otherguy@company.com",
+        },
+    )
+
+    # Add an alert that is not part of the event
+    alert_tree3 = helpers.create_alert(db=db)
+    alert3_o1 = helpers.create_observable(
+        type="file",
+        value="4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+        parent_tree=alert_tree3,
+        db=db,
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert3_o1,
+        amt_value="Email Analysis",
+        details={
+            "attachments": [],
+            "cc_addresses": [],
+            "from_address": "neutralguy@okay.com",
+            "headers": "blah",
+            "message_id": "<1234abcd@okay.com>",
+            "subject": "Hi",
+            "time": datetime.now().isoformat(),
+            "to_address": "goodguy@company.com",
+        },
+    )
+
+    # The email headers/body summary should now have the details of the second alert's email
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/email_headers_body")
+    print(get.json())
+    assert get.json()["alert_uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["headers"] == "headers2"
+    assert get.json()["body_html"] == "<p>body2</p>"
+    assert get.json()["body_text"] == "body2"
+
+
 def test_summary_observable(client_valid_access_token, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)

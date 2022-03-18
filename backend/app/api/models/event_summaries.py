@@ -2,8 +2,14 @@ from pydantic import BaseModel, Field, UUID4
 from typing import List, Optional
 
 from api.models import type_str
-from api.models.analysis_details import EmailAnalysisDetailsBase, UserAnalysisDetails
+from api.models.analysis_details import EmailAnalysisDetailsBase, EmailAnalysisDetailsHeaderBody, UserAnalysisDetails
 from api.models.observable import ObservableRead
+
+
+class EmailHeadersBody(EmailAnalysisDetailsHeaderBody):
+    """Represents the fields in Email Analysis details that the frontend expects for event pages."""
+
+    alert_uuid: UUID4 = Field(description="The UUID of the alert to which this email belongs")
 
 
 class EmailSummary(EmailAnalysisDetailsBase):
