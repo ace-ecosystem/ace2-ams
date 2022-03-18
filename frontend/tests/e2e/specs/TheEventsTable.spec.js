@@ -40,7 +40,6 @@ describe("TheEventsTable.vue", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
-
   });
 
   it("renders", () => {
@@ -373,7 +372,6 @@ describe("TheEventsTable.vue - Remove Alerts", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
-
   });
 
   it("removes alerts from the event when Remove Alerts button is clicked", () => {
@@ -473,7 +471,6 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
-
   });
 
   it("opens edit event modal with expected buttons when open button is clicked", () => {
@@ -815,7 +812,6 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     visitUrl({
       url: "/manage_events",
     });
-;
     // Queue selector should have right value
     cy.get("#queue-dropdown > .p-dropdown-label").should(
       "have.text",

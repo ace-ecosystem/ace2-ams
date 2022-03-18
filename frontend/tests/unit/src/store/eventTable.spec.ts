@@ -111,7 +111,7 @@ describe("eventTable getters", () => {
     expect(store.sortFilter).toBeNull();
   });
 
-    it("will correctly return allFiltersLoaded", () => {
+  it("will correctly return allFiltersLoaded", () => {
     expect(store.allFiltersLoaded).toBeFalsy();
     store.stateFiltersLoaded = true;
     expect(store.allFiltersLoaded).toBeFalsy();

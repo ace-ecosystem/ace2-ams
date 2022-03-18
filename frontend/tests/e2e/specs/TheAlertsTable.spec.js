@@ -27,7 +27,6 @@ describe("TheAlertsTable.vue", () => {
       url: "/manage_alerts",
       extraIntercepts: ["@getAlertsDefaultRows"],
     });
-
   });
 
   it("renders", () => {

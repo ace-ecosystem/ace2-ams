@@ -15,7 +15,6 @@
   import authApi from "@/services/api/auth";
   import { useAuthStore } from "@/stores/auth";
 
-
   import { configuration } from "@/etc/configuration/index";
   import { testConfiguration } from "@/etc/configuration/test/index";
 

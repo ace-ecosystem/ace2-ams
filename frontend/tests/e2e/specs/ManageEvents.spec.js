@@ -17,7 +17,6 @@ describe("ManageEvents.vue UI Elements", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRowsExternalQueue"],
     });
-
   });
 
   it("renders page elments correctly", () => {
@@ -82,7 +81,6 @@ describe("ManageEvents.vue table functionality", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRowsExternalQueue"],
     });
-
   });
 
   it("sets up table columns elements correctly", () => {
@@ -303,11 +301,8 @@ describe("ManageEvents.vue Filtering", () => {
 
     visitUrl({
       url: "/manage_events",
-      extraIntercepts: [
-        "@getEventsDefaultRows",
-      ],
+      extraIntercepts: ["@getEventsDefaultRows"],
     });
-
   });
 
   it("successfully adds a filter via the quick add filter", () => {
@@ -715,9 +710,7 @@ describe("ManageEvents.vue Actions", () => {
     cy.get(".p-inputtextarea").click().type("Test comment");
     cy.get(".p-dialog-footer > button ").eq(1).click();
     cy.wait("@createComment").its("state").should("eq", "Complete");
-    cy.wait("@getEventsDefaultRows")
-      .its("state")
-      .should("eq", "Complete");
+    cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check for comment displayed
     cy.get('[data-cy="comments"]').should(
@@ -733,9 +726,7 @@ describe("ManageEvents.vue Actions", () => {
     cy.get(".p-selection-column > .p-checkbox ").click();
     cy.get('[data-cy="take-ownership-button"]').click();
     cy.wait("@takeOwnership").its("state").should("eq", "Complete");
-    cy.wait("@getEventsDefaultRows")
-      .its("state")
-      .should("eq", "Complete");
+    cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check owner
     cy.get(".p-datatable-tbody > tr > :nth-child(9) > span").should(
@@ -755,9 +746,7 @@ describe("ManageEvents.vue Actions", () => {
     cy.get(".p-dropdown-item").eq(0).click();
     cy.get(".p-dialog-footer > button ").eq(1).click();
     cy.wait("@assign").its("state").should("eq", "Complete");
-    cy.wait("@getEventsDefaultRows")
-      .its("state")
-      .should("eq", "Complete");
+    cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check owner
     cy.get(".p-datatable-tbody > tr > :nth-child(9) > span").should(
@@ -790,9 +779,7 @@ describe("ManageEvents.vue Actions", () => {
 
     cy.wait("@createTag").its("state").should("eq", "Complete");
     cy.wait("@createTag").its("state").should("eq", "Complete");
-    cy.wait("@getEventsDefaultRows")
-      .its("state")
-      .should("eq", "Complete");
+    cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check for tags
     cy.get(" .p-tag").eq(0).should("have.text", "TestTag");
