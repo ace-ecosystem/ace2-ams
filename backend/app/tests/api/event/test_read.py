@@ -23,48 +23,6 @@ def test_get_nonexistent_uuid(client_valid_access_token):
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_summary_user_incorrect_details(client_valid_access_token, db):
-    # Create an event
-    event = helpers.create_event(name="test event", db=db)
-
-    # The user summary should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
-    assert get.json() == []
-
-    # The required keys are "user_id" and "email". The others are optional.
-    # Add an alert with user analysis with the wrong user_id key.
-    alert_tree = helpers.create_alert(db=db, event=event)
-    alert_o1 = helpers.create_observable(
-        type="email_address", value="goodguy@company.com", parent_tree=alert_tree, db=db
-    )
-    helpers.create_analysis(
-        db=db,
-        parent_tree=alert_o1,
-        amt_value="User Analysis",
-        details={"username": "goodguy", "email": "goodguy@company.com"},
-    )
-
-    # The user summary should still be empty since the analysis details has the wrong "user_id" key
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
-    assert get.json() == []
-
-    # Add an alert with FA Queue analysis with the wrong details email keys
-    alert_tree = helpers.create_alert(db=db, event=event)
-    alert_o1 = helpers.create_observable(
-        type="email_address", value="goodguy@company.com", parent_tree=alert_tree, db=db
-    )
-    helpers.create_analysis(
-        db=db,
-        parent_tree=alert_o1,
-        amt_value="User Analysis",
-        details={"user_id": "goodguy", "email_address": "goodguy@company.com"},
-    )
-
-    # The user summary should still be empty since the analysis details has the wrong "user_id" key
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
-    assert get.json() == []
-
-
 #
 # VALID TESTS
 #
@@ -347,6 +305,7 @@ def test_summary_user(client_valid_access_token, db):
     alert1_o1 = helpers.create_observable(
         type="email_address", value="goodguy@company.com", parent_tree=alert_tree1, db=db
     )
+    # This analysis is missing the optional "manager_email" key
     alert1_a1 = helpers.create_analysis(
         db=db,
         parent_tree=alert1_o1,
@@ -358,12 +317,12 @@ def test_summary_user(client_valid_access_token, db):
             "division": "R&D",
             "department": "Widgets",
             "title": "Director",
-            "manager_email": "ceo@company.com",
         },
     )
     alert1_o2 = helpers.create_observable(
         type="email_address", value="otherguy@company.com", parent_tree=alert1_a1, db=db
     )
+    # This analysis is missing the optional "manager_email" key
     helpers.create_analysis(
         db=db,
         parent_tree=alert1_o2,
@@ -375,7 +334,6 @@ def test_summary_user(client_valid_access_token, db):
             "division": "R&D",
             "department": "Widgets",
             "title": "Director",
-            "manager_email": "ceo@company.com",
         },
     )
 
@@ -424,6 +382,7 @@ def test_summary_user(client_valid_access_token, db):
     get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
     assert len(get.json()) == 2
     assert get.json()[0]["email"] == "goodguy@company.com"
+    assert get.json()[0]["manager_email"] is None
     assert get.json()[1]["email"] == "otherguy@company.com"
 
 

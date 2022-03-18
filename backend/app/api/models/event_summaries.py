@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, UUID4
 from typing import List, Optional
 
 from api.models import type_str
-from api.models.analysis_details import EmailAnalysisDetailsBase
+from api.models.analysis_details import EmailAnalysisDetailsBase, UserAnalysisDetails
 from api.models.observable import ObservableRead
 
 
@@ -38,19 +38,7 @@ class URLDomainSummary(BaseModel):
     )
 
 
-class UserSummary(BaseModel):
+class UserSummary(UserAnalysisDetails):
     """Represents a user summary as used on the event pages."""
 
-    company: Optional[type_str] = Field(description="The company to which the user belongs")
-
-    department: Optional[type_str] = Field(description="The department to which the user belongs")
-
-    division: Optional[type_str] = Field(description="The division to which the user belongs")
-
-    email: type_str = Field(description="The user's email address")
-
-    manager_email: Optional[type_str] = Field(description="The email address of the user's manager")
-
-    title: Optional[type_str] = Field(description="The user's job title")
-
-    user_id: type_str = Field(description="The user's user ID")
+    pass

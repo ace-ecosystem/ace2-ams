@@ -8,7 +8,7 @@ from urllib.parse import urlparse
 from uuid import UUID
 
 from api.models.analysis_details import FAQueueAnalysisDetails
-from api.models.event_summaries import EmailSummary, URLDomainSummaryIndividual
+from api.models.event_summaries import EmailSummary, URLDomainSummaryIndividual, UserSummary
 from db import crud
 from db.database import get_db
 from db.schemas.analysis import Analysis
@@ -160,15 +160,12 @@ def get_user_summary(uuid: UUID, db: Session = Depends(get_db)):
     unique_emails = set()
     results = []
     for user_analysis in user_analyses:
-        # Skip this analysis if it does not have the required fields
-        if "user_id" not in user_analysis.details or "email" not in user_analysis.details:
-            continue
-
         if user_analysis.details["email"] in unique_emails:
             continue
+        else:
+            unique_emails.add(user_analysis.details["email"])
 
-        unique_emails.add(user_analysis.details["email"])
-        results.append(user_analysis.details)
+        results.append(UserSummary(**user_analysis.details))
 
     # Return the analysis details sorted by the email addresses
-    return sorted(results, key=lambda x: (x["email"]))
+    return sorted(results, key=lambda x: (x.email))

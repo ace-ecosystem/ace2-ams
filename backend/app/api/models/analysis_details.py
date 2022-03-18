@@ -39,3 +39,21 @@ class FAQueueAnalysisDetails(BaseModel):
     hits: int = Field(description="The number of hits produced by the FA Queue search for the observable")
 
     link: Optional[type_str] = Field(description="A link (such as to Splunk) where the FA Queue search can be viewed")
+
+
+class UserAnalysisDetails(BaseModel):
+    """Represents the minimum fields in User Analysis details that the frontend expects for event pages."""
+
+    company: Optional[type_str] = Field(description="The company to which the user belongs")
+
+    department: Optional[type_str] = Field(description="The department to which the user belongs")
+
+    division: Optional[type_str] = Field(description="The division to which the user belongs")
+
+    email: type_str = Field(description="The user's email address")
+
+    manager_email: Optional[type_str] = Field(description="The email address of the user's manager")
+
+    title: Optional[type_str] = Field(description="The user's job title")
+
+    user_id: type_str = Field(description="The user's user ID")

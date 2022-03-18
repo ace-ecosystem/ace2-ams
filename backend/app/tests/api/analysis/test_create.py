@@ -132,6 +132,23 @@ def test_create_invalid_faqueue_analysis(client_valid_access_token, db):
     assert create.status_code == status.HTTP_400_BAD_REQUEST
 
 
+def test_create_invalid_user_analysis(client_valid_access_token, db):
+    node_tree = helpers.create_alert(db=db)
+    analysis_module_type = helpers.create_analysis_module_type(value="User Analysis", db=db)
+
+    # Create the analysis - it is missing the required "user_id" key
+    create = client_valid_access_token.post(
+        "/api/analysis/",
+        json={
+            "analysis_module_type": str(analysis_module_type.uuid),
+            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+            "details": json.dumps({"username": "goodguy", "email": "goodguy@company.com"}),
+        },
+    )
+
+    assert create.status_code == status.HTTP_400_BAD_REQUEST
+
+
 #
 # VALID TESTS
 #
