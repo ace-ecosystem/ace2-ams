@@ -24,10 +24,18 @@ class EmailAnalysisDetailsBase(BaseModel):
 
 
 class EmailAnalysisDetails(EmailAnalysisDetailsBase):
-    """Represents the fields in Email Analysis details that the frontend expects for event pages."""
+    """Represents the minimum fields in Email Analysis details that the frontend expects for event pages."""
 
     body_html: Optional[type_str] = Field(description="The HTML body of the email")
 
     body_text: Optional[type_str] = Field(description="The plaintext body of the email")
 
     headers: type_str = Field(description="The headers of the email")
+
+
+class FAQueueAnalysisDetails(BaseModel):
+    """Represents the minimum fields in FA Queue Analysis details that the frontend expects for event pages."""
+
+    hits: int = Field(description="The number of hits produced by the FA Queue search for the observable")
+
+    link: Optional[type_str] = Field(description="A link (such as to Splunk) where the FA Queue search can be viewed")

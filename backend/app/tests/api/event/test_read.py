@@ -23,46 +23,6 @@ def test_get_nonexistent_uuid(client_valid_access_token):
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_summary_observable_incorrect_details(client_valid_access_token, db):
-    # Create an event
-    event = helpers.create_event(name="test event", db=db)
-
-    # The observable summary should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
-    assert get.json() == []
-
-    # Add an alert with FA Queue analysis with the wrong details hits keys
-    alert_tree = helpers.create_alert(db=db, event=event)
-    alert_o1 = helpers.create_observable(type="fqdn", value="localhost.localdomain", parent_tree=alert_tree, db=db)
-    helpers.create_analysis(
-        db=db,
-        parent_tree=alert_o1,
-        amt_value="FA Queue Type 1",
-        details={"link": "https://url.to.search/query=asdf", "faqueue_hits": 10},
-    )
-
-    # The observable summary should still be empty since the FA Queue analysis details has the wrong "hits" key
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
-    assert get.json() == []
-
-    # Add an alert with FA Queue analysis with the wrong details link keys
-    alert_tree = helpers.create_alert(db=db, event=event)
-    alert_o1 = helpers.create_observable(type="fqdn", value="localhost.localdomain", parent_tree=alert_tree, db=db)
-    helpers.create_analysis(
-        db=db,
-        parent_tree=alert_o1,
-        amt_value="FA Queue Type 1",
-        details={"gui_link": "https://url.to.search/query=asdf", "hits": 10},
-    )
-
-    # The observable summary should have one entry, but its faqueue_link property should be an empty string
-    # since the FA Queue analysis details has the wrong "link" key
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
-    assert len(get.json()) == 1
-    assert get.json()[0]["faqueue_hits"] == 10
-    assert get.json()[0]["faqueue_link"] == ""
-
-
 def test_summary_user_incorrect_details(client_valid_access_token, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
@@ -285,11 +245,12 @@ def test_summary_observable(client_valid_access_token, db):
         details={"link": "https://url.to.search/query=asdf", "hits": 10},
     )
     alert2_o2 = helpers.create_observable(type="ipv4", value="192.168.1.1", parent_tree=alert_tree2, db=db)
+    # This FA Queue analysis doesn't have a "link" field
     helpers.create_analysis(
         db=db,
         parent_tree=alert2_o2,
         amt_value="FA Queue Type 2",
-        details={"link": "https://url.to.search/query=asdf", "hits": 100},
+        details={"hits": 100},
     )
 
     # Add a third alert that is not part of the event

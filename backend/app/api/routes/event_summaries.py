@@ -7,6 +7,7 @@ from typing import Dict, List, Tuple
 from urllib.parse import urlparse
 from uuid import UUID
 
+from api.models.analysis_details import FAQueueAnalysisDetails
 from api.models.event_summaries import EmailSummary, URLDomainSummaryIndividual
 from db import crud
 from db.database import get_db
@@ -93,15 +94,10 @@ def get_observable_summary(uuid: UUID, db: Session = Depends(get_db)):
     # Loop over the FA Queue analyses and inject their results into the observables.
     results = set()
     for parent_uuid, faqueue_analysis in node_tree_and_faqueue.items():
-        if "hits" in faqueue_analysis.details:
-            node_tree_and_observables[parent_uuid].faqueue_hits = faqueue_analysis.details["hits"]
-
-            if "link" in faqueue_analysis.details:
-                node_tree_and_observables[parent_uuid].faqueue_link = faqueue_analysis.details["link"]
-            else:
-                node_tree_and_observables[parent_uuid].faqueue_link = ""
-
-            results.add(node_tree_and_observables[parent_uuid])
+        analysis_details = FAQueueAnalysisDetails(**faqueue_analysis.details)
+        node_tree_and_observables[parent_uuid].faqueue_hits = analysis_details.hits
+        node_tree_and_observables[parent_uuid].faqueue_link = analysis_details.link
+        results.add(node_tree_and_observables[parent_uuid])
 
     # Return the observables sorted by their type then value
     return sorted(results, key=lambda x: (x.type.value, x.value))

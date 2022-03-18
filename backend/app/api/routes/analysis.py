@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 
 from api.models.analysis import AnalysisCreate, AnalysisRead, AnalysisUpdate
-from api.models.analysis_details import EmailAnalysisDetails
+from api.models.analysis_details import EmailAnalysisDetails, FAQueueAnalysisDetails
 from api.routes import helpers
 from api.routes.node import create_node, update_node
 from db import crud
@@ -55,6 +55,15 @@ def create_analysis(
                 raise HTTPException(
                     status_code=400,
                     detail=f"The Email Analysis details for alert {analysis.node_tree.root_node_uuid} are invalid: {e}",
+                )
+
+        elif analysis_module_type.value.startswith("FA Queue"):
+            try:
+                FAQueueAnalysisDetails(**analysis.details)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"The FA Queue Analysis details for alert {analysis.node_tree.root_node_uuid} are invalid: {e}",
                 )
 
     db.add(new_analysis)
