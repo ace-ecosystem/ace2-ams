@@ -28,9 +28,7 @@
   import EventTableCell from "@/components/Events/EventTableCell.vue";
 
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
-  import { useFilterStore } from "@/stores/filter";
   const currentUserSettingsStore = useCurrentUserSettingsStore();
-  const filterStore = useFilterStore();
 
   const config = inject("config");
 
@@ -49,12 +47,6 @@
     if (preferredEventQueue.value) {
       columns.value =
         config.events.eventQueueColumnMappings[preferredEventQueue.value.value];
-
-      filterStore.setFilter({
-        nodeType: "events",
-        filterName: "queue",
-        filterValue: preferredEventQueue.value,
-      });
 
       key.value += 1;
     }
