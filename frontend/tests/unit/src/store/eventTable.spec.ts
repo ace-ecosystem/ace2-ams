@@ -110,6 +110,17 @@ describe("eventTable getters", () => {
     store.sortOrder = null;
     expect(store.sortFilter).toBeNull();
   });
+
+    it("will correctly return allFiltersLoaded", () => {
+    expect(store.allFiltersLoaded).toBeFalsy();
+    store.stateFiltersLoaded = true;
+    expect(store.allFiltersLoaded).toBeFalsy();
+    store.stateFiltersLoaded = false;
+    store.routeFiltersLoaded = true;
+    expect(store.allFiltersLoaded).toBeFalsy();
+    store.stateFiltersLoaded = true;
+    expect(store.allFiltersLoaded).toBeTruthy();
+  });
 });
 
 describe("eventTable actions", () => {

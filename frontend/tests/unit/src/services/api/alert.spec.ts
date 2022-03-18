@@ -1,7 +1,3 @@
-/**
- * @jest-environment node
- */
-
 import { alertCreate, alertFilterParams, alertUpdate } from "@/models/alert";
 import { Alert } from "@/services/api/alert";
 import myNock from "@unit/services/api/nock";

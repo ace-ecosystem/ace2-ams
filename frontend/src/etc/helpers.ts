@@ -29,8 +29,6 @@ import { useQueueStore } from "@/stores/queue";
 import { useUserStore } from "@/stores/user";
 import { inputTypes } from "@/etc/constants/base";
 import { isValidDate, isObject } from "@/etc/validators";
-import { nodeThreatRead } from "@/models/nodeThreat";
-import { useFilterStore } from "@/stores/filter";
 import { useAlertTableStore } from "@/stores/alertTable";
 import { useEventTableStore } from "@/stores/eventTable";
 
