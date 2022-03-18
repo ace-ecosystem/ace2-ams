@@ -1,5 +1,3 @@
-import { configuration } from "@/etc/configuration/index";
-import { testConfiguration } from "@/etc/configuration/test/index";
 import { formatNodeFiltersForAPI } from "@/etc/helpers";
 import {
   alertCreate,

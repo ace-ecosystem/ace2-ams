@@ -29,7 +29,8 @@ import { useQueueStore } from "@/stores/queue";
 import { useUserStore } from "@/stores/user";
 import { inputTypes } from "@/etc/constants/base";
 import { isValidDate, isObject } from "@/etc/validators";
-import { nodeThreatRead } from "@/models/nodeThreat";
+import { useAlertTableStore } from "@/stores/alertTable";
+import { useEventTableStore } from "@/stores/eventTable";
 
 export const camelToSnakeCase = (str: string): string =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
@@ -125,6 +126,18 @@ export function setUserDefaults(nodeType = "all"): void {
       filterValue: currentUserSettingsStore.queues.alerts,
     });
   }
+}
+
+export function loadFiltersFromStorage(): void {
+  const filterStore = useFilterStore();
+  const alertTableStore = useAlertTableStore();
+  const eventTableStore = useEventTableStore();
+  filterStore.$state = JSON.parse(
+    localStorage.getItem("aceFilters") || "{}",
+    dateParser,
+  );
+  alertTableStore.stateFiltersLoaded = true;
+  eventTableStore.stateFiltersLoaded = true;
 }
 
 // https://stackoverflow.com/a/33928558

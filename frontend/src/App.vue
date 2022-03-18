@@ -10,15 +10,10 @@
   import { onBeforeMount, provide } from "vue";
   import { useRoute, useRouter } from "vue-router";
 
-  import {
-    populateCommonStores,
-    dateParser,
-    setUserDefaults,
-  } from "@/etc/helpers";
+  import { populateCommonStores } from "@/etc/helpers";
   import TheHeader from "@/components/UserInterface/TheHeader.vue";
   import authApi from "@/services/api/auth";
   import { useAuthStore } from "@/stores/auth";
-  import { useFilterStore } from "@/stores/filter";
 
   import { configuration } from "@/etc/configuration/index";
   import { testConfiguration } from "@/etc/configuration/test/index";
@@ -50,14 +45,7 @@
     // localStorage and populate some of the stores with items from
     // the API that will be used throughout the application.
     if (authStore.isAuthenticated) {
-      const filterStore = useFilterStore();
-      filterStore.$state = JSON.parse(
-        localStorage.getItem("aceFilters"),
-        dateParser,
-      );
-
       await populateCommonStores();
-      setUserDefaults();
     }
   });
 </script>

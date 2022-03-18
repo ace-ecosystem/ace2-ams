@@ -5,6 +5,7 @@ import {
   getAlertLink,
   getAllAlertTags,
   groupItemsByQueue,
+  loadFiltersFromStorage,
 } from "../../../../src/etc/helpers";
 import { mockAlertTreeReadA } from "../../../mocks/alert";
 import { alertFilterParams } from "../../../../src/models/alert";
@@ -18,6 +19,8 @@ import { setUserDefaults } from "../../../../src/etc/helpers";
 import { useAuthStore } from "../../../../src/stores/auth";
 import { useCurrentUserSettingsStore } from "../../../../src/stores/currentUserSettings";
 import { useFilterStore } from "../../../../src/stores/filter";
+import { useAlertTableStore } from "../../../../src/stores/alertTable";
+import { useEventTableStore } from "../../../../src/stores/eventTable";
 import { userReadFactory } from "../../../mocks/user";
 import { genericObjectReadFactory } from "../../../mocks/genericObject";
 
@@ -388,5 +391,34 @@ describe("groupItemsByQueue", () => {
 
     const result = groupItemsByQueue(testData);
     expect(result).toEqual(expected);
+  });
+});
+
+describe("loadFiltersFromStorage", () => {
+  it("correctly sets filters from storage and sets table store stateFiltersLoaded values to true", () => {
+    const filterStore = useFilterStore();
+    const alertTableStore = useAlertTableStore();
+    const eventTableStore = useEventTableStore();
+
+    localStorage.setItem(
+      "aceFilters",
+      JSON.stringify({
+        alerts: {},
+        events: {
+          queue: { description: null, value: "external", uuid: "uuid1" },
+        },
+      }),
+    );
+
+    loadFiltersFromStorage();
+
+    expect(filterStore.$state).toStrictEqual({
+      alerts: {},
+      events: {
+        queue: { description: null, value: "external", uuid: "uuid1" },
+      },
+    });
+    expect(alertTableStore.stateFiltersLoaded).toBeTruthy();
+    expect(eventTableStore.stateFiltersLoaded).toBeTruthy();
   });
 });

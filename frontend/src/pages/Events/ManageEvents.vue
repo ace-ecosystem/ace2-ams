@@ -22,6 +22,7 @@
   import { useRoute, useRouter } from "vue-router";
 
   import { useFilterStore } from "@/stores/filter";
+  import { useEventTableStore } from "@/stores/eventTable";
   import { parseFilters, populateCommonStores } from "@/etc/helpers";
   import { validEventFilters } from "@/etc/constants/events";
 
@@ -36,6 +37,7 @@
   provide("nodeType", "events");
 
   const filterStore = useFilterStore();
+  const eventTableStore = useEventTableStore();
 
   onMounted(async () => {
     if (Object.keys(route.query).length) {
@@ -43,6 +45,7 @@
       await populateCommonStores();
       loadRouteQuery();
     }
+    eventTableStore.routeFiltersLoaded = true;
   });
 
   watch(route, () => {

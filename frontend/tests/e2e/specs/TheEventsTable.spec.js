@@ -40,9 +40,6 @@ describe("TheEventsTable.vue", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
-
-    // Remove default queue filter (irrelevant to this test suite)
-    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("renders", () => {
@@ -375,9 +372,6 @@ describe("TheEventsTable.vue - Remove Alerts", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
-
-    // Remove default queue filter (irrelevant to this test suite)
-    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("removes alerts from the event when Remove Alerts button is clicked", () => {
@@ -477,9 +471,6 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRows"],
     });
-
-    // Remove default queue filter
-    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("opens edit event modal with expected buttons when open button is clicked", () => {
@@ -798,14 +789,11 @@ describe("TheEventsTable.vue - Queue Settings", () => {
 
     visitUrl({
       url: "/manage_events",
-      extraIntercepts: ["@getEventsExternalQueueFilter"],
+      extraIntercepts: ["@getEventsDefaultRows"],
     });
   });
 
   it("will auto-set the event queue filter and event table columns based on the auth'd users preferredEventQueue", () => {
-    //  External queue filter should be there (check filter chip)
-    cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
-    cy.get('[data-cy="filter-chip-content"]').should("have.text", "external");
     // Queue selector should have right value
     cy.get("#queue-dropdown > .p-dropdown-label").should(
       "have.text",
@@ -823,12 +811,7 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     // go to manage events
     visitUrl({
       url: "/manage_events",
-      extraIntercepts: ["@getEventsInternalQueueFilter"],
     });
-
-    //  Default queue filter should be there (check filter chip)
-    cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
-    cy.get('[data-cy="filter-chip-content"]').should("have.text", "internal");
     // Queue selector should have right value
     cy.get("#queue-dropdown > .p-dropdown-label").should(
       "have.text",
@@ -838,9 +821,6 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     cy.get(".p-multiselect-label").should("have.text", "Created, Name, Type");
   });
   it("will update the event queue filter and event table columns when preferred event queue is changed", () => {
-    //  Default queue filter should be there (check filter chip)
-    cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
-    cy.get('[data-cy="filter-chip-content"]').should("have.text", "external");
     // Queue selector should have right value
     cy.get("#queue-dropdown > .p-dropdown-label").should(
       "have.text",
@@ -859,9 +839,6 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     cy.wait("@getEventsInternalQueueFilter")
       .its("state")
       .should("eq", "Complete");
-    // internal queue filter should be there (check filter chip)
-    cy.get(".p-chip .filter-name-text").should("have.text", "Queue:");
-    cy.get('[data-cy="filter-chip-content"]').should("have.text", "internal");
     // Queue selector should have right value
     cy.get("#queue-dropdown > .p-dropdown-label").should(
       "have.text",
