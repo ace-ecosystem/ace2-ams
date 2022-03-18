@@ -45,8 +45,9 @@ def create_analysis(
         )
         new_analysis.analysis_module_type = analysis_module_type
 
-        # TODO: Do we want to verify certain types of analysis details here?
-        # For example, the analysis details the GUI depends upon to show the event pages.
+        # Validate certain types of analysis details. The GUI depends on specific analysis details
+        # when showing event pages. Because of this, we want to ensure that these details conform
+        # to what the GUI expects.
         if analysis_module_type.value == "Email Analysis":
             try:
                 EmailAnalysisDetails(**analysis.details)
