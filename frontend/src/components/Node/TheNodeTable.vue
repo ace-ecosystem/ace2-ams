@@ -145,6 +145,8 @@
   import { useFilterStore } from "@/stores/filter";
   import { nodeSelectedStores, nodeTableStores } from "@/stores/index";
 
+  import { loadFiltersFromStorage } from "@/etc/helpers";
+
   const props = defineProps({
     columns: { type: Array, required: true },
     columnSelect: { type: Boolean, default: true },
@@ -185,7 +187,9 @@
 
   filterStore.$subscribe(
     async () => {
-      await loadNodes();
+      if (tableStore.allFiltersLoaded) {
+        await loadNodes();
+      }
     },
     { deep: true },
   );
@@ -198,6 +202,9 @@
 
   onMounted(async () => {
     initNodeTable();
+    if (!tableStore.allFiltersLoaded) {
+      loadFiltersFromStorage();
+    }
     await loadNodes();
   });
 
