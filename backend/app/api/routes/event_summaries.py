@@ -41,6 +41,7 @@ def get_email_summary(uuid: UUID, db: Session = Depends(get_db)):
 
     alert_uuid_and_analysis: List[Tuple[UUID, Analysis]] = db.execute(query).unique().fetchall()
 
+    # Build a list of EmailSummary objects from the unique email analyses
     results: List[EmailSummary] = []
     unique_emails = []
     for alert_uuid, analysis in alert_uuid_and_analysis:
