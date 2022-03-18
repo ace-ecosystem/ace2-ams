@@ -3,7 +3,7 @@
 <!-- The table where all currently filtered events are displayed, selected to take action, or link to an individual event page -->
 
 <template>
-  <TheNodeTable :key="key" :columns="columns">
+  <TheNodeTable v-if="columns.length" :key="key" :columns="columns">
     <template #tableHeaderStart
       ><NodeQueueSelector node-queue="events"
     /></template>
