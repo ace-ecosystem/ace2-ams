@@ -28,8 +28,6 @@ describe("TheAlertsTable.vue", () => {
       extraIntercepts: ["@getAlertsDefaultRows"],
     });
 
-    // Remove default queue filter (irrelevant to this test suite)
-    cy.get('[data-cy="filter-chip-remove-button"]').click();
   });
 
   it("renders", () => {

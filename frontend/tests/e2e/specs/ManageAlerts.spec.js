@@ -21,24 +21,13 @@ describe("Manage Alerts - No Database Changes", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
-    ).as("getAlertsDefaultRowsExternalQueue");
-    cy.intercept(
-      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlertsDefaultRows");
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: [
-        "@getAlertsDefaultRowsExternalQueue",
-        "@getAlertsDefaultRows",
-      ],
+      extraIntercepts: ["@getAlertsDefaultRows"],
     });
-
-    // Remove the default queue filter so tests can complete normally
-    cy.get('[data-cy="filter-chip-remove-button"]').click();
-    cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
   });
 
   describe("Date Ranges", () => {
@@ -509,14 +498,9 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
 
       // Verify the form data
-      cy.get(".flex").children().should("have.length", 2);
+      cy.get(".flex").children().should("have.length", 1);
       cy.get(":nth-child(1) > .p-dropdown").eq(1).should("have.text", "Name");
       cy.get(".inputfield").should("have.value", "hello world");
-      cy.get(":nth-child(1) > .p-dropdown").eq(2).should("have.text", "Queue");
-      cy.get(":nth-child(1) > .p-dropdown")
-        .eq(3)
-        .should("have.text", "external");
-
       // Exit modal for end of test
       cy.get(".p-dialog-header-close-icon").click();
     });
@@ -730,16 +714,12 @@ describe("Manage Alerts - Single Alert Tests", () => {
     // Intercept the API call that loads the default alert table view
     cy.intercept(
       "GET",
-      "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
-    ).as("getAlertsDefaultRowsExternalQueue");
-    cy.intercept(
-      "GET",
       "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
     ).as("getAlertsDefaultRows");
 
     visitUrl({
       url: "/manage_alerts",
-      extraIntercepts: ["@getAlertsDefaultRowsExternalQueue"],
+      extraIntercepts: ["@getAlertsDefaultRows"],
     });
   });
 
@@ -954,16 +934,12 @@ describe("Manage Alerts - Save to Event", () => {
       // Intercept the API call that loads the default alert table view
       cy.intercept(
         "GET",
-        "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
-      ).as("getAlertsDefaultRowsExternalQueue");
-      cy.intercept(
-        "GET",
         "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
       ).as("getAlertsDefaultRows");
 
       visitUrl({
         url: "/manage_alerts",
-        extraIntercepts: ["@getAlertsDefaultRowsExternalQueue"],
+        extraIntercepts: ["@getAlertsDefaultRows"],
       });
     });
 
@@ -1188,16 +1164,12 @@ describe("Manage Alerts - Save to Event", () => {
       // Intercept the API call that loads the default alert table view
       cy.intercept(
         "GET",
-        "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&queue=external",
-      ).as("getAlertsDefaultRowsExternalQueue");
-      cy.intercept(
-        "GET",
         "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
       ).as("getAlertsDefaultRows");
 
       visitUrl({
         url: "/manage_alerts",
-        extraIntercepts: ["@getAlertsDefaultRowsExternalQueue"],
+        extraIntercepts: ["@getAlertsDefaultRows"],
       });
     });
 
@@ -1310,7 +1282,7 @@ describe("Manage Alerts - Save to Event", () => {
       // Check the event comment (need to visit the Manage Events page)
       cy.intercept(
         "GET",
-        "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&queue=external",
+        "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
       ).as("getEvents");
 
       visitUrl({
