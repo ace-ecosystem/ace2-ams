@@ -46,9 +46,19 @@ export const useEventTableStore = defineStore({
 
     // current page size
     pageSize: 10,
+
+    // whether event filters have been loaded from saved state
+    stateFiltersLoaded: false,
+
+    // whether event filters have been loaded from route query
+    routeFiltersLoaded: false,
   }),
 
   getters: {
+    allFiltersLoaded(): boolean {
+      return this.stateFiltersLoaded && this.routeFiltersLoaded;
+    },
+
     visibleQueriedItemSummaries(): eventSummary[] {
       return this.visibleQueriedItems.map((x) => parseEventSummary(x));
     },

@@ -7,11 +7,7 @@ import { useAuthStore } from "@/stores/auth";
 import { useFilterStore } from "@/stores/filter";
 import { createCustomPinia } from "@unit/helpers";
 
-function factory(args: {
-  authenticated?: boolean;
-  filters?: Record<string, unknown>;
-  options?: TestingOptions;
-}) {
+function factory(args: { authenticated?: boolean; options?: TestingOptions }) {
   const testingPinia = createCustomPinia(args.options);
   const authStore = useAuthStore();
   const filterStore = useFilterStore();
@@ -43,11 +39,6 @@ function factory(args: {
     };
   }
 
-  // If filters were given, place them in localStorage
-  if (args.filters) {
-    localStorage.setItem("aceFilters", JSON.stringify(args.filters));
-  }
-
   const wrapper = mount(App, {
     attachTo: document.body,
     global: {
@@ -63,28 +54,5 @@ describe("App setup", () => {
     const { wrapper } = factory({});
 
     expect(wrapper.exists()).toBe(true);
-  });
-
-  it("hydrates the filter store from localStorage if the user is authenticated", () => {
-    const { filterStore } = factory({
-      authenticated: true,
-      filters: {
-        alerts: { tags: ["tag1"], eventTimeBefore: new Date("01/01/2022") },
-      },
-    });
-
-    expect(filterStore.$state).toEqual({
-      alerts: { tags: ["tag1"], eventTimeBefore: new Date("01/01/2022") },
-      events: {},
-    });
-  });
-
-  it("will not hydrate the filter store from localStorage if the user is not authenticated", () => {
-    const { filterStore } = factory({
-      authenticated: false,
-      filters: { alerts: { tags: ["tag1"] } },
-    });
-
-    expect(filterStore.$state).toEqual({ alerts: {}, events: {} });
   });
 });

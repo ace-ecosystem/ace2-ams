@@ -159,6 +159,17 @@ describe("alertTable getters", () => {
   it("will correctly return sortFilter", () => {
     expect(store.sortFilter).toEqual("event_time|desc");
   });
+
+  it("will correctly return allFiltersLoaded", () => {
+    expect(store.allFiltersLoaded).toBeFalsy();
+    store.stateFiltersLoaded = true;
+    expect(store.allFiltersLoaded).toBeFalsy();
+    store.stateFiltersLoaded = false;
+    store.routeFiltersLoaded = true;
+    expect(store.allFiltersLoaded).toBeFalsy();
+    store.stateFiltersLoaded = true;
+    expect(store.allFiltersLoaded).toBeTruthy();
+  });
 });
 
 describe("alertTable actions", () => {

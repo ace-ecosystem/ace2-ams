@@ -1,7 +1,3 @@
-/**
- * @jest-environment node
- */
-
 import myNock from "@unit/services/api/nock";
 import snakecaseKeys from "snakecase-keys";
 import { alertCreate } from "@/models/alert";
