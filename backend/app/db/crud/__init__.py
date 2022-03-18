@@ -100,7 +100,7 @@ def record_create_history(
     commit(db)
 
 
-def record_comment_history(record_node: Node, action_by: User, diff: Diff, db: Session):
+def record_node_update_history(record_node: Node, action_by: User, diff: Diff, db: Session):
     if record_node.node_type == "alert":
         record_update_histories(
             history_table=AlertHistory,

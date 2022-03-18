@@ -469,7 +469,7 @@ def create_node_comment(
     db.add(obj)
     crud.commit(db)
 
-    crud.record_comment_history(
+    crud.record_node_update_history(
         record_node=node,
         action_by=create_user(username=username, display_name=username, db=db),
         diff=crud.Diff(field="comments", added_to_list=[obj.value]),
