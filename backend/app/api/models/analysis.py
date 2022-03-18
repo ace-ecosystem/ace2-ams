@@ -1,10 +1,11 @@
 from pydantic import Field, Json, UUID4
-from typing import Optional
+from typing import List, Optional
 from uuid import uuid4
 
 from api.models import type_str
 from api.models.analysis_module_type import AnalysisModuleTypeNodeTreeRead, AnalysisModuleTypeRead
 from api.models.node import NodeBase, NodeCreate, NodeRead, NodeTreeCreateWithNode, NodeTreeItemRead, NodeUpdate
+from api.models.node_detection_point import NodeDetectionPointRead
 
 
 class AnalysisBase(NodeBase):
@@ -49,6 +50,10 @@ class AnalysisRead(NodeRead, AnalysisBase):
     )
 
     details: Optional[dict] = Field(description="A JSON representation of the details produced by the analysis")
+
+    detection_points: List[NodeDetectionPointRead] = Field(
+        description="A list of detection points added to the analysis"
+    )
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
 

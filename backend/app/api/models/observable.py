@@ -6,6 +6,7 @@ from uuid import uuid4
 from api.models import type_str, validators
 from api.models.node import NodeBase, NodeCreate, NodeRead, NodeTreeCreateWithNode, NodeTreeItemRead, NodeUpdate
 from api.models.node_comment import NodeCommentRead
+from api.models.node_detection_point import NodeDetectionPointRead
 from api.models.node_directive import NodeDirectiveRead
 from api.models.node_tag import NodeTagRead
 from api.models.node_threat import NodeThreatRead
@@ -68,6 +69,10 @@ class ObservableCreate(ObservableCreateBase):
 
 class ObservableRead(NodeRead, ObservableBase):
     comments: List[NodeCommentRead] = Field(description="A list of comments added to the observable")
+
+    detection_points: List[NodeDetectionPointRead] = Field(
+        description="A list of detection points added to the observable"
+    )
 
     directives: List[NodeDirectiveRead] = Field(description="A list of directives added to the observable")
 
