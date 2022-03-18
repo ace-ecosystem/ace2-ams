@@ -47,10 +47,10 @@ export const useEventTableStore = defineStore({
     // current page size
     pageSize: 10,
 
-    // whether alert filters have been loaded from saved state
+    // whether event filters have been loaded from saved state
     stateFiltersLoaded: false,
 
-    // whether alert filters have been loaded from route query
+    // whether event filters have been loaded from route query
     routeFiltersLoaded: false,
   }),
 
