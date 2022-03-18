@@ -50,8 +50,11 @@ def create_analysis(
         if analysis_module_type.value == "Email Analysis":
             try:
                 EmailAnalysisDetails(**analysis.details)
-            except:
-                raise HTTPException(status_code=400, detail=f"The Email Analysis details are invalid")
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"The Email Analysis details for alert {analysis.node_tree.root_node_uuid} are invalid: {e}",
+                )
 
     db.add(new_analysis)
     crud.commit(db)
