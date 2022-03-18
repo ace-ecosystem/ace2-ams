@@ -15,6 +15,8 @@
   import authApi from "@/services/api/auth";
   import { useAuthStore } from "@/stores/auth";
   import { useFilterStore } from "@/stores/filter";
+  import { useAlertTableStore } from "@/stores/alertTable";
+  import { useEventTableStore } from "@/stores/eventTable";
 
   import { configuration } from "@/etc/configuration/index";
   import { testConfiguration } from "@/etc/configuration/test/index";
@@ -47,10 +49,14 @@
     // the API that will be used throughout the application.
     if (authStore.isAuthenticated) {
       const filterStore = useFilterStore();
+      const alertTableStore = useAlertTableStore();
+      const eventTableStore = useEventTableStore();
       filterStore.$state = JSON.parse(
         localStorage.getItem("aceFilters"),
         dateParser,
       );
+      alertTableStore.stateFiltersLoaded = true;
+      eventTableStore.stateFiltersLoaded = true;
 
       await populateCommonStores();
     }

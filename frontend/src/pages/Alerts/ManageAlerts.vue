@@ -22,6 +22,7 @@
   import { useRoute, useRouter } from "vue-router";
 
   import { useFilterStore } from "@/stores/filter";
+  import { useAlertTableStore } from "@/stores/alertTable";
   import { parseFilters, populateCommonStores } from "@/etc/helpers";
   import { validAlertFilters } from "@/etc/constants/alerts";
 
@@ -35,6 +36,7 @@
   provide("rangeFilters", config.alerts.alertRangeFilters);
 
   const filterStore = useFilterStore();
+  const alertTableStore = useAlertTableStore();
 
   onMounted(async () => {
     if (Object.keys(route.query).length) {
@@ -42,6 +44,7 @@
       await populateCommonStores();
       loadRouteQuery();
     }
+    alertTableStore.routeFiltersLoaded = true;
   });
 
   watch(route, () => {

@@ -14,9 +14,6 @@ export const useAlertTableStore = defineStore({
     // total number of alerts from all pages
     totalItems: 0,
 
-    // whether the alert table should be reloaded
-    requestReload: false,
-
     // current sort field
     sortField: "eventTime" as string | null,
 
@@ -25,9 +22,22 @@ export const useAlertTableStore = defineStore({
 
     // current page size
     pageSize: 10,
+
+    // whether the alert table should be reloaded
+    requestReload: false,
+
+    // whether alert filters have been loaded from saved state
+    stateFiltersLoaded: false,
+
+    // whether alert filters have been loaded from route query
+    routeFiltersLoaded: false,
   }),
 
   getters: {
+    allFiltersLoaded(): boolean {
+      return this.stateFiltersLoaded && this.routeFiltersLoaded;
+    },
+
     visibleQueriedItemSummaries(): alertSummary[] {
       return this.visibleQueriedItems.map((x) => parseAlertSummary(x));
     },
