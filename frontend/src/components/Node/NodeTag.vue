@@ -19,6 +19,9 @@
     alerts: "/manage_alerts",
     events: "/manage_events",
   };
+  import { useFilterStore } from "@/stores/filter";
+
+  const filterStore = useFilterStore();
 
   const props = defineProps({
     tag: { type: Object, required: true },
@@ -31,8 +34,14 @@
       : nodeType;
     const route = nodeRoutes[preferredNodeType];
     if (route) {
+      filterStore.bulkSetFilters({
+        nodeType: nodeType,
+        filters: {
+          tags: [props.tag.value],
+        },
+      });
       // Route to given page with query for filtering by this tag's value
-      router.replace({ path: route, query: { tags: props.tag.value } });
+      router.replace({ path: route });
     }
   }
 </script>
