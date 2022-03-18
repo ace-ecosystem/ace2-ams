@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: f04f3d2ce9fc
+Revision ID: ff77f773ba60
 Revises: 
-Create Date: 2022-03-11 19:20:47.897900
+Create Date: 2022-03-18 20:07:17.475184
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'f04f3d2ce9fc'
+revision = 'ff77f773ba60'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -278,6 +278,17 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_event_vector_queue_mapping_event_vector_uuid'), 'event_vector_queue_mapping', ['event_vector_uuid'], unique=False)
     op.create_index(op.f('ix_event_vector_queue_mapping_queue_uuid'), 'event_vector_queue_mapping', ['queue_uuid'], unique=False)
+    op.create_table('node_detection_point',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('insert_time', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
+    sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['node_uuid'], ['node.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid'),
+    sa.UniqueConstraint('node_uuid', 'value', name='node_detection_point_value_uc')
+    )
+    op.create_index(op.f('ix_node_detection_point_node_uuid'), 'node_detection_point', ['node_uuid'], unique=False)
+    op.create_index('value_trgm', 'node_detection_point', ['value'], unique=False, postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.create_table('node_directive_mapping',
     sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('directive_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -665,6 +676,9 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_node_directive_mapping_node_uuid'), table_name='node_directive_mapping')
     op.drop_index(op.f('ix_node_directive_mapping_directive_uuid'), table_name='node_directive_mapping')
     op.drop_table('node_directive_mapping')
+    op.drop_index('value_trgm', table_name='node_detection_point', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
+    op.drop_index(op.f('ix_node_detection_point_node_uuid'), table_name='node_detection_point')
+    op.drop_table('node_detection_point')
     op.drop_index(op.f('ix_event_vector_queue_mapping_queue_uuid'), table_name='event_vector_queue_mapping')
     op.drop_index(op.f('ix_event_vector_queue_mapping_event_vector_uuid'), table_name='event_vector_queue_mapping')
     op.drop_table('event_vector_queue_mapping')
