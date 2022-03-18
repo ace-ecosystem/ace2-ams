@@ -14,9 +14,9 @@ class EmailAnalysisDetailsBase(BaseModel):
 
     message_id: type_str = Field(description="The email's message-id")
 
-    reply_to_address: Optional[str] = Field(description="The reply-to email address")
+    reply_to_address: Optional[type_str] = Field(description="The reply-to email address")
 
-    subject: Optional[str] = Field(description="The email's subject")
+    subject: Optional[type_str] = Field(description="The email's subject")
 
     time: datetime = Field(description="The time the email was received")
 
@@ -26,8 +26,8 @@ class EmailAnalysisDetailsBase(BaseModel):
 class EmailAnalysisDetails(EmailAnalysisDetailsBase):
     """Represents the fields in Email Analysis details that the frontend expects for event pages."""
 
-    body_html: Optional[str] = Field(description="The HTML body of the email")
+    body_html: Optional[type_str] = Field(description="The HTML body of the email")
 
-    body_text: Optional[str] = Field(description="The plaintext body of the email")
+    body_text: Optional[type_str] = Field(description="The plaintext body of the email")
 
     headers: type_str = Field(description="The headers of the email")
