@@ -25,12 +25,6 @@ class AnalysisBase(NodeBase):
 
 
 class AnalysisCreate(NodeCreate, AnalysisBase):
-    # TODO - save for the end, still need to flesh out this functionality
-    # event_summary: Optional[AnalysisEventSummary] = Field(
-    #     description="""Optional summary information to display on an event page if this analysis is ever added to an
-    #     event"""
-    # )
-
     node_tree: NodeTreeCreateWithNode = Field(description="This defines where in a Node Tree this analysis fits")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
@@ -66,11 +60,5 @@ class AnalysisUpdate(NodeUpdate, AnalysisBase):
     details: Optional[Json] = Field(description="A JSON representation of the details produced by the analysis")
 
     error_message: Optional[type_str] = Field(description="An optional error message that occurred during analysis")
-
-    # TODO - save for the end, still need to flesh out this functionality
-    # event_summary: Optional[AnalysisEventSummary] = Field(
-    #     description="""Optional summary information to display on an event page if this analysis is ever added to an
-    #     event"""
-    # )
 
     stack_trace: Optional[type_str] = Field(description="An optional stack trace that occurred during analysis")

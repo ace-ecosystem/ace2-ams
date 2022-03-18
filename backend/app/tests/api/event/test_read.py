@@ -28,6 +28,131 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 
 
+def test_summary_email(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The email summary should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/email")
+    assert get.json() == []
+
+    # Add some alerts with analysis to the event
+    #
+    # alert1
+    #   o1
+    #     a1 - email analysis 1
+    #
+    # alert2
+    #  o1
+    #    a1 - email analysis 2
+    #
+    # alert3
+    #  o1
+    #    a1 - email analysis 2
+    alert_tree1 = helpers.create_alert(db=db, event=event)
+    alert1_o1 = helpers.create_observable(
+        type="file",
+        value="6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+        parent_tree=alert_tree1,
+        db=db,
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert1_o1,
+        amt_value="Email Analysis",
+        details={
+            "attachments": [],
+            "cc_addresses": [],
+            "from_address": "badguy@evil.com",
+            "headers": "blah",
+            "message_id": "<abcd1234@evil.com>",
+            "subject": "Hello",
+            "time": datetime.now().isoformat(),
+            "to_address": "goodguy@company.com",
+        },
+    )
+
+    alert_tree2 = helpers.create_alert(db=db, event=event)
+    alert2_o1 = helpers.create_observable(
+        type="file",
+        value="d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        parent_tree=alert_tree2,
+        db=db,
+    )
+    time = datetime.now().isoformat()
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert2_o1,
+        amt_value="Email Analysis",
+        details={
+            "attachments": [],
+            "cc_addresses": [],
+            "from_address": "badguy@evil.com",
+            "headers": "blah",
+            "message_id": "<1234abcd@evil.com>",
+            "subject": "Hello",
+            "time": time,
+            "to_address": "otherguy@company.com",
+        },
+    )
+
+    # Add a third alert that has the exact same analysis as one of the others
+    alert_tree3 = helpers.create_alert(db=db, event=event)
+    alert3_o1 = helpers.create_observable(
+        type="file",
+        value="d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
+        parent_tree=alert_tree3,
+        db=db,
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert3_o1,
+        amt_value="Email Analysis",
+        details={
+            "attachments": [],
+            "cc_addresses": [],
+            "from_address": "badguy@evil.com",
+            "headers": "blah",
+            "message_id": "<1234abcd@evil.com>",
+            "subject": "Hello",
+            "time": time,
+            "to_address": "otherguy@company.com",
+        },
+    )
+
+    # Add a fourth alert that is not part of the event
+    alert_tree4 = helpers.create_alert(db=db)
+    alert4_o1 = helpers.create_observable(
+        type="file",
+        value="4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
+        parent_tree=alert_tree4,
+        db=db,
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert4_o1,
+        amt_value="Email Analysis",
+        details={
+            "attachments": [],
+            "cc_addresses": [],
+            "from_address": "neutralguy@okay.com",
+            "headers": "blah",
+            "message_id": "<1234abcd@okay.com>",
+            "subject": "Hi",
+            "time": datetime.now().isoformat(),
+            "to_address": "goodguy@company.com",
+        },
+    )
+
+    # The email summary should now have two entries in it. Even though one of the emails was repeated two
+    # times across the alerts, its Email Analysis is going to be the same for each, so it appears once in the summary.
+    # Additionally, the results should be sorted by the email time.
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/email")
+    assert len(get.json()) == 2
+    assert get.json()[0]["message_id"] == "<abcd1234@evil.com>"
+    assert get.json()[1]["message_id"] == "<1234abcd@evil.com>"
+
+
 def test_summary_observable(client_valid_access_token, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
@@ -78,11 +203,12 @@ def test_summary_observable(client_valid_access_token, db):
         details={"link": "https://url.to.search/query=asdf", "hits": 10},
     )
     alert2_o2 = helpers.create_observable(type="ipv4", value="192.168.1.1", parent_tree=alert_tree2, db=db)
+    # This FA Queue analysis doesn't have a "link" field
     helpers.create_analysis(
         db=db,
         parent_tree=alert2_o2,
         amt_value="FA Queue Type 2",
-        details={"link": "https://url.to.search/query=asdf", "hits": 100},
+        details={"hits": 100},
     )
 
     # Add a third alert that is not part of the event
@@ -179,6 +305,7 @@ def test_summary_user(client_valid_access_token, db):
     alert1_o1 = helpers.create_observable(
         type="email_address", value="goodguy@company.com", parent_tree=alert_tree1, db=db
     )
+    # This analysis is missing the optional "manager_email" key
     alert1_a1 = helpers.create_analysis(
         db=db,
         parent_tree=alert1_o1,
@@ -190,12 +317,12 @@ def test_summary_user(client_valid_access_token, db):
             "division": "R&D",
             "department": "Widgets",
             "title": "Director",
-            "manager_email": "ceo@company.com",
         },
     )
     alert1_o2 = helpers.create_observable(
         type="email_address", value="otherguy@company.com", parent_tree=alert1_a1, db=db
     )
+    # This analysis is missing the optional "manager_email" key
     helpers.create_analysis(
         db=db,
         parent_tree=alert1_o2,
@@ -207,7 +334,6 @@ def test_summary_user(client_valid_access_token, db):
             "division": "R&D",
             "department": "Widgets",
             "title": "Director",
-            "manager_email": "ceo@company.com",
         },
     )
 
@@ -256,89 +382,8 @@ def test_summary_user(client_valid_access_token, db):
     get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
     assert len(get.json()) == 2
     assert get.json()[0]["email"] == "goodguy@company.com"
+    assert get.json()[0]["manager_email"] is None
     assert get.json()[1]["email"] == "otherguy@company.com"
-
-
-def test_summary_observable_incorrect_details(client_valid_access_token, db):
-    # Create an event
-    event = helpers.create_event(name="test event", db=db)
-
-    # The observable summary should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
-    assert get.json() == []
-
-    # Add an alert with FA Queue analysis with the wrong details hits keys
-    alert_tree = helpers.create_alert(db=db, event=event)
-    alert_o1 = helpers.create_observable(type="fqdn", value="localhost.localdomain", parent_tree=alert_tree, db=db)
-    helpers.create_analysis(
-        db=db,
-        parent_tree=alert_o1,
-        amt_value="FA Queue Type 1",
-        details={"link": "https://url.to.search/query=asdf", "faqueue_hits": 10},
-    )
-
-    # The observable summary should still be empty since the FA Queue analysis details has the wrong "hits" key
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
-    assert get.json() == []
-
-    # Add an alert with FA Queue analysis with the wrong details link keys
-    alert_tree = helpers.create_alert(db=db, event=event)
-    alert_o1 = helpers.create_observable(type="fqdn", value="localhost.localdomain", parent_tree=alert_tree, db=db)
-    helpers.create_analysis(
-        db=db,
-        parent_tree=alert_o1,
-        amt_value="FA Queue Type 1",
-        details={"gui_link": "https://url.to.search/query=asdf", "hits": 10},
-    )
-
-    # The observable summary should have one entry, but its faqueue_link property should be an empty string
-    # since the FA Queue analysis details has the wrong "link" key
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
-    assert len(get.json()) == 1
-    assert get.json()[0]["faqueue_hits"] == 10
-    assert get.json()[0]["faqueue_link"] == ""
-
-
-def test_summary_user_incorrect_details(client_valid_access_token, db):
-    # Create an event
-    event = helpers.create_event(name="test event", db=db)
-
-    # The user summary should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
-    assert get.json() == []
-
-    # The required keys are "user_id" and "email". The others are optional.
-    # Add an alert with user analysis with the wrong user_id key.
-    alert_tree = helpers.create_alert(db=db, event=event)
-    alert_o1 = helpers.create_observable(
-        type="email_address", value="goodguy@company.com", parent_tree=alert_tree, db=db
-    )
-    helpers.create_analysis(
-        db=db,
-        parent_tree=alert_o1,
-        amt_value="User Analysis",
-        details={"username": "goodguy", "email": "goodguy@company.com"},
-    )
-
-    # The user summary should still be empty since the analysis details has the wrong "user_id" key
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
-    assert get.json() == []
-
-    # Add an alert with FA Queue analysis with the wrong details email keys
-    alert_tree = helpers.create_alert(db=db, event=event)
-    alert_o1 = helpers.create_observable(
-        type="email_address", value="goodguy@company.com", parent_tree=alert_tree, db=db
-    )
-    helpers.create_analysis(
-        db=db,
-        parent_tree=alert_o1,
-        amt_value="User Analysis",
-        details={"user_id": "goodguy", "email_address": "goodguy@company.com"},
-    )
-
-    # The user summary should still be empty since the analysis details has the wrong "user_id" key
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
-    assert get.json() == []
 
 
 def test_analysis_module_types(client_valid_access_token, db):

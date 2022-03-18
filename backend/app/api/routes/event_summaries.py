@@ -1,12 +1,14 @@
+from deepdiff import DeepHash
 from fastapi import Depends
 from sqlalchemy import and_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Load, Session
 from sqlalchemy.sql.expression import join, select
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from urllib.parse import urlparse
 from uuid import UUID
 
-from api.models.event_summaries import URLDomainSummaryIndividual
+from api.models.analysis_details import FAQueueAnalysisDetails
+from api.models.event_summaries import EmailSummary, URLDomainSummaryIndividual, UserSummary
 from db import crud
 from db.database import get_db
 from db.schemas.analysis import Analysis
@@ -18,9 +20,43 @@ from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 
 
-#
-# OBSERVABLE
-#
+def get_email_summary(uuid: UUID, db: Session = Depends(get_db)):
+    # Get the event from the database
+    event: Event = crud.read(uuid=uuid, db_table=Event, db=db)
+
+    # Get all the email analyses (and their root Node UUIDs) performed in the event.
+    query = (
+        select([NodeTree.root_node_uuid, Analysis])
+        .select_from(join(NodeTree, Node, NodeTree.node_uuid == Node.uuid))
+        .join(
+            Analysis,
+            onclause=and_(
+                Node.node_type == "analysis",
+                Analysis.uuid == NodeTree.node_uuid,
+                Analysis.analysis_module_type.has(AnalysisModuleType.value == "Email Analysis"),
+            ),
+        )
+        .options(Load(Analysis).undefer("details"))
+        .where(NodeTree.root_node_uuid.in_(event.alert_uuids))
+    )
+
+    alert_uuid_and_analysis: List[Tuple[UUID, Analysis]] = db.execute(query).unique().fetchall()
+
+    # Build a list of EmailSummary objects from the unique email analyses
+    results: List[EmailSummary] = []
+    unique_emails = []
+    for alert_uuid, analysis in alert_uuid_and_analysis:
+        # Skip this email if it is a duplicate
+        details_hash = DeepHash(analysis.details)[analysis.details]
+        if details_hash in unique_emails:
+            continue
+        else:
+            unique_emails.append(details_hash)
+
+        results.append(EmailSummary(**analysis.details, alert_uuid=alert_uuid))
+
+    # Return the summaries by the email time
+    return sorted(results, key=lambda x: x.time)
 
 
 def get_observable_summary(uuid: UUID, db: Session = Depends(get_db)):
@@ -58,15 +94,10 @@ def get_observable_summary(uuid: UUID, db: Session = Depends(get_db)):
     # Loop over the FA Queue analyses and inject their results into the observables.
     results = set()
     for parent_uuid, faqueue_analysis in node_tree_and_faqueue.items():
-        if "hits" in faqueue_analysis.details:
-            node_tree_and_observables[parent_uuid].faqueue_hits = faqueue_analysis.details["hits"]
-
-            if "link" in faqueue_analysis.details:
-                node_tree_and_observables[parent_uuid].faqueue_link = faqueue_analysis.details["link"]
-            else:
-                node_tree_and_observables[parent_uuid].faqueue_link = ""
-
-            results.add(node_tree_and_observables[parent_uuid])
+        analysis_details = FAQueueAnalysisDetails(**faqueue_analysis.details)
+        node_tree_and_observables[parent_uuid].faqueue_hits = analysis_details.hits
+        node_tree_and_observables[parent_uuid].faqueue_link = analysis_details.link
+        results.add(node_tree_and_observables[parent_uuid])
 
     # Return the observables sorted by their type then value
     return sorted(results, key=lambda x: (x.type.value, x.value))
@@ -129,15 +160,12 @@ def get_user_summary(uuid: UUID, db: Session = Depends(get_db)):
     unique_emails = set()
     results = []
     for user_analysis in user_analyses:
-        # Skip this analysis if it does not have the required fields
-        if "user_id" not in user_analysis.details or "email" not in user_analysis.details:
-            continue
-
         if user_analysis.details["email"] in unique_emails:
             continue
+        else:
+            unique_emails.add(user_analysis.details["email"])
 
-        unique_emails.add(user_analysis.details["email"])
-        results.append(user_analysis.details)
+        results.append(UserSummary(**user_analysis.details))
 
     # Return the analysis details sorted by the email addresses
-    return sorted(results, key=lambda x: (x["email"]))
+    return sorted(results, key=lambda x: (x.email))

@@ -1,8 +1,15 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, UUID4
 from typing import List, Optional
 
 from api.models import type_str
+from api.models.analysis_details import EmailAnalysisDetailsBase, UserAnalysisDetails
 from api.models.observable import ObservableRead
+
+
+class EmailSummary(EmailAnalysisDetailsBase):
+    """Represents the fields in Email Analysis details that the frontend expects for event pages."""
+
+    alert_uuid: UUID4 = Field(description="The UUID of the alert to which this email belongs")
 
 
 class ObservableSummary(ObservableRead):
@@ -10,7 +17,7 @@ class ObservableSummary(ObservableRead):
 
     faqueue_hits: int = Field(description="The number of hits found by FA Queue Analysis for this observable")
 
-    faqueue_link: str = Field(description="An optional link to view the FA Queue search")
+    faqueue_link: Optional[type_str] = Field(description="An optional link to view the FA Queue search")
 
 
 class URLDomainSummaryIndividual(BaseModel):
@@ -31,19 +38,7 @@ class URLDomainSummary(BaseModel):
     )
 
 
-class UserSummary(BaseModel):
+class UserSummary(UserAnalysisDetails):
     """Represents a user summary as used on the event pages."""
 
-    company: Optional[str] = Field(description="The company to which the user belongs")
-
-    department: Optional[str] = Field(description="The department to which the user belongs")
-
-    division: Optional[str] = Field(description="The division to which the user belongs")
-
-    email: type_str = Field(description="The user's email address")
-
-    manager_email: Optional[str] = Field(description="The email address of the user's manager")
-
-    title: Optional[str] = Field(description="The user's job title")
-
-    user_id: type_str = Field(description="The user's user ID")
+    pass
