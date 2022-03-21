@@ -1,23 +1,38 @@
 <!-- EmailAnalysis.vue -->
 
 <template>
-  <h5>Email Details</h5>
   <div v-if="isLoading">Loading...</div>
   <div v-else-if="emailHeadersBody">
-    <Panel header="Headers" :toggleable="true">
+    <span>
+      <h5>
+        Email Details
+        <router-link :to="`/alert/${emailHeadersBody.alertUuid}`" exact
+          >(Alert)</router-link
+        >
+      </h5>
+    </span>
+    <Panel id="email-headers-panel" header="Headers" :toggleable="true">
       <div style="width: 100%">
         <pre>{{ emailHeadersBody.headers }}</pre>
       </div>
     </Panel>
     <br />
-    <Panel header="Body" :toggleable="true">
+    <Panel id="email-body-panel" header="Body" :toggleable="true">
       <div class="flex">
-        <div v-if="emailHeadersBody.bodyText" class="panel-content">
+        <div
+          v-if="emailHeadersBody.bodyText"
+          id="body-text"
+          class="panel-content"
+        >
           <h5>Body Text</h5>
           <pre>{{ emailHeadersBody.bodyText }}</pre>
         </div>
         <Divider layout="vertical" />
-        <div v-if="emailHeadersBody.bodyHtml" class="panel-content">
+        <div
+          v-if="emailHeadersBody.bodyHtml"
+          id="body-html"
+          class="panel-content"
+        >
           <h5>Body HTML</h5>
           <pre class="pre-panel">{{ emailHeadersBody.bodyHtml }}</pre>
         </div>
