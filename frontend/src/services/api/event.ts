@@ -7,6 +7,8 @@ import {
   eventUpdate,
 } from "@/models/event";
 import {
+  emailSummary,
+  emailHeadersBody,
   observableSummary,
   userSummary,
   urlDomainSummary,
@@ -43,6 +45,12 @@ export const Event = {
 
   readUrlDomainSummary: async (uuid: UUID): Promise<urlDomainSummary[]> =>
     await api.read(`${endpoint}${uuid}/summary/url_domain`),
+
+  readEmailSummary: async (uuid: UUID): Promise<emailSummary[]> =>
+    await api.read(`${endpoint}${uuid}/summary/email`),
+
+  readEmailHeadersAndBody: async (uuid: UUID): Promise<emailHeadersBody[]> =>
+    await api.read(`${endpoint}${uuid}/summary/email_headers_body`),
 
   readPage: (params?: eventFilterParams): Promise<eventReadPage> => {
     let formattedParams = {} as eventFilterParams;

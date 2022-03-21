@@ -58,6 +58,20 @@ describe("Event calls", () => {
     expect(res).toEqual("Read successful");
   });
 
+  it("will make a get request to the /event/{uuid}/summary/email endpoint when 'readEmailSummary' is called with a given UUID", async () => {
+    myNock.get("/event/uuid/summary/email").reply(200, "Read successful");
+    const res = await api.readEmailSummary("uuid");
+    expect(res).toEqual("Read successful");
+  });
+
+  it("will make a get request to the /event/{uuid}/summary/email_headers_body endpoint when 'readEmailHeadersAndBody' is called with a given UUID", async () => {
+    myNock
+      .get("/event/uuid/summary/email_headers_body")
+      .reply(200, "Read successful");
+    const res = await api.readEmailHeadersAndBody("uuid");
+    expect(res).toEqual("Read successful");
+  });
+
   it("will make a get request to the /event/ endpoint when 'readPage' is called with no params, if none given", async () => {
     myNock.get("/event/").reply(200, "Read successful");
     const res = await api.readPage();
