@@ -18,6 +18,7 @@ from api.routes.event_type import router as event_type_router
 from api.routes.event_vector import router as event_vector_router
 from api.routes.node import router as node_router
 from api.routes.node_comment import router as node_comment_router
+from api.routes.node_detection_point import router as node_detection_point_router
 from api.routes.node_directive import router as node_directive_router
 from api.routes.node_tag import router as node_tag_router
 from api.routes.node_threat import router as node_threat_router
@@ -53,6 +54,7 @@ router.include_router(event_type_router)
 router.include_router(event_vector_router)
 router.include_router(node_router)
 router.include_router(node_comment_router)
+router.include_router(node_detection_point_router)
 router.include_router(node_directive_router)
 router.include_router(node_tag_router)
 router.include_router(node_threat_router)

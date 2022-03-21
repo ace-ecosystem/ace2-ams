@@ -68,6 +68,8 @@ class Node(Base):
 
     comments = relationship("NodeComment", lazy="selectin")
 
+    detection_points = relationship("NodeDetectionPoint", lazy="selectin")
+
     directives = relationship("NodeDirective", secondary=node_directive_mapping, lazy="selectin")
 
     node_type = Column(String)

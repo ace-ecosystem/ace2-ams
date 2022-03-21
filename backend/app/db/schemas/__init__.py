@@ -28,6 +28,7 @@ from db.schemas.event_vector_queue_mapping import event_vector_queue_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
 from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment
+from db.schemas.node_detection_point import NodeDetectionPoint
 from db.schemas.node_directive import NodeDirective
 from db.schemas.node_directive_mapping import node_directive_mapping
 from db.schemas.node_tag import NodeTag

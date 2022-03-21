@@ -100,7 +100,7 @@ def record_create_history(
     commit(db)
 
 
-def record_comment_history(record_node: Node, action_by: User, diff: Diff, db: Session):
+def record_node_update_history(record_node: Node, action_by: User, diff: Diff, db: Session):
     if record_node.node_type == "alert":
         record_update_histories(
             history_table=AlertHistory,
@@ -525,6 +525,24 @@ def update(uuid: UUID, obj: BaseModel, db_table: DeclarativeMeta, db: Session):
             status_code=status.HTTP_409_CONFLICT,
             detail=f"Got an IntegrityError while updating UUID {uuid}.",
         )
+
+
+def update_node_version(node: Node, db: Session):
+    """Updates the given Node's version as well as the root Node's version if it is part of a tree."""
+
+    # Update the given Node's version
+    node.version = uuid4()
+
+    # Find any root Nodes for the given Node
+    root_node_uuids = select(NodeTree.root_node_uuid).where(NodeTree.node_uuid == node.uuid)
+    root_nodes = db.execute(select(Node).where(Node.uuid.in_(root_node_uuids))).scalars().unique().fetchall()
+
+    # Update each root Node's version
+    for root_node in root_nodes:
+        root_node.version = uuid4()
+
+    # Save the changes
+    commit(db)
 
 
 #
