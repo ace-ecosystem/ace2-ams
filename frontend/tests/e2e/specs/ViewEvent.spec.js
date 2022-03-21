@@ -1272,24 +1272,25 @@ describe("Email Analysis Details", () => {
     cy.resetDatabase();
     cy.login();
 
-    // Intercept the API call that loads the event data
+    // Add the test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "smallWithHeadersBody.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
+  });
+
+  beforeEach(() => {
     cy.intercept("GET", "/api/event/*").as("getEvent");
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
     cy.intercept("GET", "/api/event/*/summary/email").as("getEmailAnalysis");
-
-    // Add the test event to the database
-    cy.request({
-      method: "POST",
-      url: "/api/test/add_event",
-      body: {
-        alert_template: "small.json",
-        alert_count: 1,
-        name: "Test Event",
-      },
-    });
 
     visitUrl({
       url: "/manage_events",
@@ -1303,11 +1304,13 @@ describe("Email Analysis Details", () => {
     cy.get("span").contains("Email Analysis").click();
 
     cy.wait("@getEmailAnalysis").its("state").should("eq", "Complete");
-  });
-
-  it("renders section correctly", () => {
     // Check title
     cy.get("#event-section-title").should("contain.text", "Email Analysis");
+  });
+
+  it("renders Email Summary section correctly", () => {
+    // Check title
+    cy.get("h5").eq(0).should("contain.text", "Email Summary");
     // table should be there
     cy.get('[data-cy="email-analysis-table"]').should("be.visible");
     // Should be 2 rows, one header and one email
@@ -1355,6 +1358,44 @@ describe("Email Analysis Details", () => {
 
     // Check link to alert
     cy.get(".p-datatable-tbody > tr > :nth-child(1) > span").click();
+    cy.url().should("include", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a");
+  });
+  it("renders Email Details section correctly", () => {
+    // Check title
+    cy.get("h5").eq(1).should("contain.text", "Email Details");
+
+    // Check Headers Panel
+    cy.get("#email-headers-panel").should("be.visible");
+    cy.get("#email-headers-panel .p-panel-title").should(
+      "have.text",
+      "Headers",
+    );
+    // Check a sample from the headers
+    cy.get("#email-headers-panel pre").should(
+      "contain.text",
+      "Return-Path: <badguy@evil.com>",
+    );
+
+    // Check Body Panel
+    cy.get("#email-body-panel ").should("be.visible");
+    cy.get("#email-body-panel .p-panel-title").should("have.text", "Body");
+    cy.get("#body-text > h5").should("have.text", "Body Text");
+    cy.get("#body-html > h5").should("have.text", "Body HTML");
+
+    // Check samples from each of the body text and html
+    cy.get("#body-text").should("be.visible");
+    cy.get("#body-text pre").should(
+      "contain.text",
+      "Pellentesque habitant morbi",
+    );
+    cy.get("#body-html").should("be.visible");
+    cy.get("#body-html pre").should(
+      "contain.text",
+      "<p>Pellentesque habitant morbi",
+    );
+
+    // Check link to alert
+    cy.get("h5 > a").click();
     cy.url().should("include", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a");
   });
 });
