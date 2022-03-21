@@ -124,37 +124,48 @@ def test_create_verify_history_observables(client_valid_access_token, db):
 
 def test_create_multiple(client_valid_access_token, db):
     alert_tree1 = helpers.create_alert(db=db)
+    obs_tree1 = helpers.create_observable(type="test_type", value="test_value1", parent_tree=alert_tree1, db=db)
     initial_alert1_version = alert_tree1.node.version
+    initial_obs1_version = obs_tree1.node.version
 
     alert_tree2 = helpers.create_alert(db=db)
+    obs_tree2 = helpers.create_observable(type="test_type", value="test_value2", parent_tree=alert_tree2, db=db)
     initial_alert2_version = alert_tree2.node.version
+    initial_obs2_version = obs_tree2.node.version
 
     alert_tree3 = helpers.create_alert(db=db)
+    obs_tree3 = helpers.create_observable(type="test_type", value="test_value3", parent_tree=alert_tree3, db=db)
     initial_alert3_version = alert_tree3.node.version
+    initial_obs3_version = obs_tree3.node.version
 
-    assert alert_tree1.node.detection_points == []
-    assert alert_tree2.node.detection_points == []
-    assert alert_tree3.node.detection_points == []
+    assert obs_tree1.node.detection_points == []
+    assert obs_tree2.node.detection_points == []
+    assert obs_tree3.node.detection_points == []
 
-    # Add a detection point to each node at once
+    # Add a detection point to each observable at once
     create_json = [
-        {"node_uuid": str(alert_tree1.node_uuid), "value": "test1"},
-        {"node_uuid": str(alert_tree2.node_uuid), "value": "test2"},
-        {"node_uuid": str(alert_tree3.node_uuid), "value": "test3"},
+        {"node_uuid": str(obs_tree1.node_uuid), "value": "test1"},
+        {"node_uuid": str(obs_tree2.node_uuid), "value": "test2"},
+        {"node_uuid": str(obs_tree3.node_uuid), "value": "test3"},
     ]
     create = client_valid_access_token.post("/api/node/detection_point/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
-    assert len(alert_tree1.node.detection_points) == 1
-    assert alert_tree1.node.detection_points[0].value == "test1"
+    # The observables should each have a detection point and a new version.
+    # The alerts (the root nodes) should also have a new version.
+    assert len(obs_tree1.node.detection_points) == 1
+    assert obs_tree1.node.detection_points[0].value == "test1"
+    assert obs_tree1.node.version != initial_obs1_version
     assert alert_tree1.node.version != initial_alert1_version
 
-    assert len(alert_tree2.node.detection_points) == 1
-    assert alert_tree2.node.detection_points[0].value == "test2"
+    assert len(obs_tree2.node.detection_points) == 1
+    assert obs_tree2.node.detection_points[0].value == "test2"
+    assert obs_tree2.node.version != initial_obs2_version
     assert alert_tree2.node.version != initial_alert2_version
 
-    assert len(alert_tree3.node.detection_points) == 1
-    assert alert_tree3.node.detection_points[0].value == "test3"
+    assert len(obs_tree3.node.detection_points) == 1
+    assert obs_tree3.node.detection_points[0].value == "test3"
+    assert obs_tree3.node.version != initial_obs3_version
     assert alert_tree3.node.version != initial_alert3_version
 
 
