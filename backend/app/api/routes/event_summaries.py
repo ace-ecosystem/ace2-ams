@@ -7,8 +7,8 @@ from typing import Dict, List, Tuple
 from urllib.parse import urlparse
 from uuid import UUID
 
-from api.models.analysis_details import FAQueueAnalysisDetails
-from api.models.event_summaries import EmailSummary, URLDomainSummaryIndividual, UserSummary
+from api.models.analysis_details import EmailAnalysisDetails, FAQueueAnalysisDetails
+from api.models.event_summaries import EmailHeadersBody, EmailSummary, URLDomainSummaryIndividual, UserSummary
 from db import crud
 from db.database import get_db
 from db.schemas.analysis import Analysis
@@ -18,6 +18,34 @@ from db.schemas.node import Node
 from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
+
+
+def get_email_headers_body_summary(uuid: UUID, db: Session = Depends(get_db)):
+    # Get the event from the database
+    event: Event = crud.read(uuid=uuid, db_table=Event, db=db)
+
+    # Get all the email analyses (and their root Node UUIDs) performed in the event.
+    query = (
+        select([NodeTree.root_node_uuid, Analysis])
+        .select_from(join(NodeTree, Node, NodeTree.node_uuid == Node.uuid))
+        .join(
+            Analysis,
+            onclause=and_(
+                Node.node_type == "analysis",
+                Analysis.uuid == NodeTree.node_uuid,
+                Analysis.analysis_module_type.has(AnalysisModuleType.value == "Email Analysis"),
+                NodeTree.root_node_uuid.in_(event.alert_uuids),
+            ),
+        )
+        .options(Load(Analysis).undefer("details"))
+    )
+
+    alert_uuid_and_analysis: List[Tuple[UUID, Analysis]] = db.execute(query).unique().fetchall()
+
+    # Return the headers and body of the earliest email in the event
+    if alert_uuid_and_analysis:
+        sorted_alert_and_analysis = sorted(alert_uuid_and_analysis, key=lambda x: x[1].details["time"])
+        return EmailHeadersBody(**sorted_alert_and_analysis[0][1].details, alert_uuid=sorted_alert_and_analysis[0][0])
 
 
 def get_email_summary(uuid: UUID, db: Session = Depends(get_db)):
@@ -34,10 +62,10 @@ def get_email_summary(uuid: UUID, db: Session = Depends(get_db)):
                 Node.node_type == "analysis",
                 Analysis.uuid == NodeTree.node_uuid,
                 Analysis.analysis_module_type.has(AnalysisModuleType.value == "Email Analysis"),
+                NodeTree.root_node_uuid.in_(event.alert_uuids),
             ),
         )
         .options(Load(Analysis).undefer("details"))
-        .where(NodeTree.root_node_uuid.in_(event.alert_uuids))
     )
 
     alert_uuid_and_analysis: List[Tuple[UUID, Analysis]] = db.execute(query).unique().fetchall()
@@ -74,9 +102,9 @@ def get_observable_summary(uuid: UUID, db: Session = Depends(get_db)):
                 Node.node_type == "analysis",
                 Analysis.uuid == NodeTree.node_uuid,
                 Analysis.analysis_module_type.has(AnalysisModuleType.value.startswith("FA Queue")),
+                NodeTree.root_node_uuid.in_(event.alert_uuids),
             ),
         )
-        .where(NodeTree.root_node_uuid.in_(event.alert_uuids))
     )
 
     node_tree_and_faqueue: Dict[UUID, Analysis] = dict(db.execute(query).unique().fetchall())
