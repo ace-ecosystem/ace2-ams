@@ -17,12 +17,12 @@ are in place in order to account for this.
 
 
 def test_delete_invalid_uuid(client_valid_access_token):
-    delete = client_valid_access_token.delete("/api/node/comment/1")
+    delete = client_valid_access_token.delete("/api/node/detection_point/1")
     assert delete.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_delete_nonexistent_uuid(client_valid_access_token):
-    delete = client_valid_access_token.delete(f"/api/node/comment/{uuid.uuid4()}")
+    delete = client_valid_access_token.delete(f"/api/node/detection_point/{uuid.uuid4()}")
     assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -31,93 +31,31 @@ def test_delete_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_delete_alerts(client_valid_access_token, db):
-    # Create a comment
+def test_delete(client_valid_access_token, db):
+    # Create a detection point
     alert_tree = helpers.create_alert(db=db)
-    comment = helpers.create_node_comment(node=alert_tree.node, username="johndoe", value="test", db=db)
-    assert alert_tree.node.comments[0].value == "test"
+    observable = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
+    detection_point = helpers.create_node_detection_point(node=observable.node, username="analyst", value="test", db=db)
+    assert observable.node.detection_points[0].value == "test"
 
     # Delete it
-    delete = client_valid_access_token.delete(f"/api/node/comment/{comment.uuid}")
+    delete = client_valid_access_token.delete(f"/api/node/detection_point/{detection_point.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
-    get = client_valid_access_token.get(f"/api/node/comment/{comment.uuid}")
+    get = client_valid_access_token.get(f"/api/node/detection_point/{detection_point.uuid}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
-    # And make sure the node no longer shows the comment
-    assert len(alert_tree.node.comments) == 0
+    # And make sure the node no longer shows the detection point
+    assert len(observable.node.detection_points) == 0
 
     # Verify the history record
-    history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    history = client_valid_access_token.get(f"/api/observable/{observable.node_uuid}/history")
     assert history.json()["total"] == 3
     assert history.json()["items"][2]["action"] == "UPDATE"
     assert history.json()["items"][2]["action_by"]["username"] == "analyst"
-    assert history.json()["items"][2]["record_uuid"] == str(alert_tree.node_uuid)
-    assert history.json()["items"][2]["field"] == "comments"
-    assert history.json()["items"][2]["diff"]["old_value"] is None
-    assert history.json()["items"][2]["diff"]["new_value"] is None
-    assert history.json()["items"][2]["diff"]["added_to_list"] is None
-    assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
-    assert history.json()["items"][2]["snapshot"]["name"] == "Test Alert"
-
-
-def test_delete_events(client_valid_access_token, db):
-    # Create a comment
-    event = helpers.create_event(name="Test Event", db=db)
-    comment = helpers.create_node_comment(node=event, username="johndoe", value="test", db=db)
-    assert event.comments[0].value == "test"
-
-    # Delete it
-    delete = client_valid_access_token.delete(f"/api/node/comment/{comment.uuid}")
-    assert delete.status_code == status.HTTP_204_NO_CONTENT
-
-    # Make sure it is gone
-    get = client_valid_access_token.get(f"/api/node/comment/{comment.uuid}")
-    assert get.status_code == status.HTTP_404_NOT_FOUND
-
-    # And make sure the node no longer shows the comment
-    assert len(event.comments) == 0
-
-    # Verify the history record
-    history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    assert history.json()["total"] == 3
-    assert history.json()["items"][2]["action"] == "UPDATE"
-    assert history.json()["items"][2]["action_by"]["username"] == "analyst"
-    assert history.json()["items"][2]["record_uuid"] == str(event.uuid)
-    assert history.json()["items"][2]["field"] == "comments"
-    assert history.json()["items"][2]["diff"]["old_value"] is None
-    assert history.json()["items"][2]["diff"]["new_value"] is None
-    assert history.json()["items"][2]["diff"]["added_to_list"] is None
-    assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
-    assert history.json()["items"][2]["snapshot"]["name"] == "Test Event"
-
-
-def test_delete_observables(client_valid_access_token, db):
-    # Create a comment
-    alert_tree = helpers.create_alert(db=db)
-    observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
-    comment = helpers.create_node_comment(node=observable_tree.node, username="johndoe", value="test", db=db)
-    assert observable_tree.node.comments[0].value == "test"
-
-    # Delete it
-    delete = client_valid_access_token.delete(f"/api/node/comment/{comment.uuid}")
-    assert delete.status_code == status.HTTP_204_NO_CONTENT
-
-    # Make sure it is gone
-    get = client_valid_access_token.get(f"/api/node/comment/{comment.uuid}")
-    assert get.status_code == status.HTTP_404_NOT_FOUND
-
-    # And make sure the node no longer shows the comment
-    assert len(alert_tree.node.comments) == 0
-
-    # Verify the history record
-    history = client_valid_access_token.get(f"/api/observable/{observable_tree.node_uuid}/history")
-    assert history.json()["total"] == 3
-    assert history.json()["items"][2]["action"] == "UPDATE"
-    assert history.json()["items"][2]["action_by"]["username"] == "analyst"
-    assert history.json()["items"][2]["record_uuid"] == str(observable_tree.node_uuid)
-    assert history.json()["items"][2]["field"] == "comments"
+    assert history.json()["items"][2]["record_uuid"] == str(observable.node_uuid)
+    assert history.json()["items"][2]["field"] == "detection_points"
     assert history.json()["items"][2]["diff"]["old_value"] is None
     assert history.json()["items"][2]["diff"]["new_value"] is None
     assert history.json()["items"][2]["diff"]["added_to_list"] is None
