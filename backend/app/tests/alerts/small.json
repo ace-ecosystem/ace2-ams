@@ -11,10 +11,12 @@
         {
           "type": "Email Analysis",
           "details": {
-            "from": "badguy@evil.com",
-            "to": "goodguy@company.com",
+            "from_address": "badguy@evil.com",
+            "to_address": "goodguy@company.com",
+            "cc_addresses": ["otherguy@company.com"],
             "subject": "Hello",
             "message_id": "<123abc@evil.com>",
+            "time": "2022-03-18T12:00:00.000Z",
             "attachments": [],
             "headers": "blah",
             "body_text": "Here, download this malware."

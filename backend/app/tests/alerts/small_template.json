@@ -9,10 +9,12 @@
         {
           "type": "Email Analysis",
           "details": {
-            "from": "<O_VALUE>@evil.com",
-            "to": "<O_VALUE>@company.com",
+            "from_address": "<O_VALUE>@evil.com",
+            "to_address": "<O_VALUE>@company.com",
+            "cc_addresses": ["<O_VALUE>@company.com"],
             "subject": "<O_VALUE>",
             "message_id": "<O_VALUE>@evil.com",
+            "time": "2022-03-18T12:00:00.000Z",
             "attachments": [],
             "headers": "blah",
             "body_text": "Here, download this malware."
