@@ -1,7 +1,7 @@
 import { UUID } from "./base";
 import { observableRead } from "./observable";
 
-export interface EmailHeadersBody {
+export interface emailHeadersBody {
   alertUuid: UUID;
   bodyHtml: string | null;
   bodyText: string | null;
