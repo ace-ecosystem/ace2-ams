@@ -31,6 +31,7 @@ from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
 from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment
+from db.schemas.node_detection_point import NodeDetectionPoint
 from db.schemas.node_directive import NodeDirective
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
@@ -473,6 +474,26 @@ def create_node_comment(
         record_node=node,
         action_by=create_user(username=username, display_name=username, db=db),
         diff=crud.Diff(field="comments", added_to_list=[obj.value]),
+        db=db,
+    )
+
+    return obj
+
+
+def create_node_detection_point(
+    node: Node, username: str, value: str, db: Session, insert_time: Optional[datetime] = None
+) -> NodeDetectionPoint:
+    if insert_time is None:
+        insert_time = datetime.utcnow()
+
+    obj = NodeDetectionPoint(insert_time=insert_time, node_uuid=node.uuid, uuid=uuid.uuid4(), value=value)
+    db.add(obj)
+    crud.commit(db)
+
+    crud.record_node_update_history(
+        record_node=node,
+        action_by=create_user(username=username, display_name=username, db=db),
+        diff=crud.Diff(field="detection_points", added_to_list=[obj.value]),
         db=db,
     )
 
