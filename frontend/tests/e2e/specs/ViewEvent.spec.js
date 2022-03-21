@@ -1358,7 +1358,7 @@ describe("Email Analysis Details", () => {
 
     // Check link to alert
     cy.get(".p-datatable-tbody > tr > :nth-child(1) > span").click();
-    cy.url().should("include", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a");
+    cy.url().should("include", "/alert/6d3e764a-f565-430d-9208-308d3a69e219");
   });
   it("renders Email Details section correctly", () => {
     // Check title
@@ -1396,6 +1396,6 @@ describe("Email Analysis Details", () => {
 
     // Check link to alert
     cy.get("h5 > a").click();
-    cy.url().should("include", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a");
+    cy.url().should("include", "/alert/6d3e764a-f565-430d-9208-308d3a69e219");
   });
 });
