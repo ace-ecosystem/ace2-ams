@@ -39,7 +39,7 @@ def create_node_detection_points(
         db_node: Node = crud.read(uuid=node_detection_point.node_uuid, db_table=Node, db=db)
 
         # This counts a modifying the node, so it should receive a new version.
-        db_node.version = uuid4()
+        crud.update_node_version(node=db_node, db=db)
 
         # Save the new detection point to the database
         db.add(new_detection_point)
@@ -103,10 +103,10 @@ def update_node_detection_point(
     )
     db_node_detection_point.value = node_detection_point.value
 
-    # Modifying the detection point counts as modifying the node, so it should receive a new version
-    db_node.version = uuid4()
-
     crud.commit(db)
+
+    # Modifying the detection point counts as modifying the node, so it should receive a new version
+    crud.update_node_version(node=db_node, db=db)
 
     # Add an entry to the correct history table based on the node_type.
     crud.record_node_update_history(
@@ -128,12 +128,15 @@ def delete_node_detection_point(
     uuid: UUID, db: Session = Depends(get_db), claims: dict = Depends(validate_access_token)
 ):
     # Read the current node detection point from the database to get its value
-    db_node_detection_point: NodeDetectionPoint = crud.read(uuid=uuid, db_table=NodeDetectionPoint, db=db)
+    db_node: NodeDetectionPoint = crud.read(uuid=uuid, db_table=NodeDetectionPoint, db=db)
+
+    # Update any root node versions
+    crud.update_node_version(node=db_node, db=db)
 
     # Add an entry to the correct history table based on the node_type.
-    diff = crud.Diff(field="detection_points", removed_from_list=[db_node_detection_point.value])
+    diff = crud.Diff(field="detection_points", removed_from_list=[db_node.value])
     crud.record_node_update_history(
-        record_node=db_node_detection_point.node,
+        record_node=db_node.node,
         action_by=crud.read_user_by_username(username=claims["sub"], db=db),
         diff=diff,
         db=db,

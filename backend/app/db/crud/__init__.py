@@ -527,6 +527,24 @@ def update(uuid: UUID, obj: BaseModel, db_table: DeclarativeMeta, db: Session):
         )
 
 
+def update_node_version(node: Node, db: Session):
+    """Updates the given Node's version as well as the root Node's version if it is part of a tree."""
+
+    # Update the given Node's version
+    node.version = uuid4()
+
+    # Find any root Nodes for the given Node
+    root_node_uuids = select(NodeTree.root_node_uuid).where(NodeTree.node_uuid == node.uuid)
+    root_nodes = db.execute(select(Node).where(Node.uuid.in_(root_node_uuids))).scalars().unique().fetchall()
+
+    # Update each root Node's version
+    for root_node in root_nodes:
+        root_node.version = uuid4()
+
+    # Save the changes
+    commit(db)
+
+
 #
 # DELETE
 #

@@ -100,7 +100,7 @@ def update_node(
         db_node.threats = crud.read_by_values(values=update_data["threats"], db_table=NodeThreat, db=db)
 
     # Update the node version
-    db_node.version = uuid4()
+    crud.update_node_version(node=db_node, db=db)
 
     return db_node, diffs
 
