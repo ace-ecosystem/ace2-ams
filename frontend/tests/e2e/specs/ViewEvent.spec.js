@@ -1266,3 +1266,95 @@ describe("URL Domain Summary Details", () => {
       .should("have.text", "1");
   });
 });
+
+describe("Email Analysis Details", () => {
+  before(() => {
+    cy.resetDatabase();
+    cy.login();
+
+    // Intercept the API call that loads the event data
+    cy.intercept("GET", "/api/event/*").as("getEvent");
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
+    ).as("getEventsDefaultRows");
+    cy.intercept("GET", "/api/event/*/summary/email").as("getEmailAnalysis");
+
+    // Add the test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
+
+    visitUrl({
+      url: "/manage_events",
+      extraIntercepts: ["@getEventsDefaultRows"],
+    });
+    cy.get('[data-cy="eventName"] > a').click();
+    cy.wait("@getEvent").its("state").should("eq", "Complete");
+
+    // Switch to user analysis view
+    cy.get('[aria-haspopup="true"]').eq(2).click();
+    cy.get("span").contains("Email Analysis").click();
+
+    cy.wait("@getEmailAnalysis").its("state").should("eq", "Complete");
+  });
+
+  it("renders section correctly", () => {
+    // Check title
+    cy.get("#event-section-title").should("contain.text", "Email Analysis");
+    // table should be there
+    cy.get('[data-cy="email-analysis-table"]').should("be.visible");
+    // Should be 2 rows, one header and one email
+    cy.get("tr").should("have.length", 2);
+    // Check headers
+    cy.get(".p-column-title").eq(0).should("have.text", "URL");
+    cy.get(".p-column-title").eq(1).should("have.text", "Time");
+    cy.get(".p-column-title").eq(2).should("have.text", "From");
+    cy.get(".p-column-title").eq(3).should("have.text", "To");
+    cy.get(".p-column-title").eq(4).should("have.text", "Subject");
+    cy.get(".p-column-title").eq(5).should("have.text", "Attachments");
+    cy.get(".p-column-title").eq(6).should("have.text", "CC");
+    cy.get(".p-column-title").eq(7).should("have.text", "Reply-To");
+    cy.get(".p-column-title").eq(8).should("have.text", "Message-ID");
+    // Check values of first row
+    // If this row looks good, we can reliably say any other rows will load correctly
+    // AKA don't need to check second row
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(0)
+      .should("have.text", "Alert");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(1)
+      .should("have.text", "3/18/2022, 12:00:00 PM");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(2)
+      .should("have.text", "badguy@evil.com");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(3)
+      .should("have.text", "goodguy@company.com");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(4)
+      .should("have.text", "Hello");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(5)
+      .should("have.text", "None");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(6)
+      .should("have.text", "otherguy@company.com");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(7)
+      .should("have.text", "None");
+    cy.get(".p-datatable-tbody > :nth-child(1) > td")
+      .eq(8)
+      .should("have.text", "<123abc@evil.com>");
+
+    // Check link to alert
+    cy.get(".p-datatable-tbody > tr > :nth-child(1) > span").click();
+    cy.url().should("include", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a");
+  });
+});
