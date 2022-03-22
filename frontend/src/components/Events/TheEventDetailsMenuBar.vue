@@ -176,7 +176,6 @@
                 command: () => {
                   emit("sectionClicked", "Detection Summary");
                 },
-                disabled: true,
               },
               {
                 label: "URL Summary",
