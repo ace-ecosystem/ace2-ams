@@ -18,17 +18,25 @@
               style="width: 4em"
               >{{ slotProps.data.value }}</span
             >
-          <span class="flex align-items-center justify-content-center"
-            ><a :href="`/alert/${slotProps.data.alertUuid}`" style="text-decoration: none"
-              ><Button
-                icon="pi pi-external-link"
-                class="p-button-rounded p-button-text"
-                data-cy="faqueue-external-link"
-            /></a>
-          </span>
+            <span class="flex align-items-center justify-content-center"
+              ><a
+                :href="`/alert/${slotProps.data.alertUuid}`"
+                style="text-decoration: none"
+                ><Button
+                  icon="pi pi-external-link"
+                  class="p-button-rounded p-button-text"
+                  data-cy="detection-point-alert-link"
+              /></a>
+            </span>
           </div> </template
       ></Column>
-      <Column field="count" header="Count" :sortable="true" style="width: 20%"></Column>
+      <Column
+        field="count"
+        header="Count"
+        :sortable="true"
+        style="width: 20%"
+      ></Column>
+      <template #empty>No detection points found.</template>
     </DataTable>
   </div>
 </template>
@@ -45,7 +53,7 @@
   });
 
   const isLoading = ref(false);
-  const detections = ref([{value: "example", count: 2, alertUuid: "madeUpUuid"}]);
+  const detections = ref([]);
 
   onMounted(async () => {
     isLoading.value = true;
