@@ -17,7 +17,9 @@
               data-cy="detection-value"
               >{{ slotProps.data.value }}</span
             >
-            <span class="flex align-items-left justify-content-center" style="width: 10%"
+            <span
+              class="flex align-items-left justify-content-center"
+              style="width: 10%"
               ><a
                 :href="`/alert/${slotProps.data.alertUuid}`"
                 style="text-decoration: none"
