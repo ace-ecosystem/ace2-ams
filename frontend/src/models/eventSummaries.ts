@@ -1,5 +1,11 @@
 import { UUID } from "./base";
+import { nodeDetectionPointRead } from "./nodeDetectionPoint";
 import { observableRead } from "./observable";
+
+export interface detectionPointSummary extends nodeDetectionPointRead {
+  alertUuid: UUID;
+  count: number;
+}
 
 export interface emailHeadersBody {
   alertUuid: UUID;

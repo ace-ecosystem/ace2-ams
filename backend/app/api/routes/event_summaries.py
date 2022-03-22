@@ -7,17 +7,57 @@ from typing import Dict, List, Tuple
 from urllib.parse import urlparse
 from uuid import UUID
 
-from api.models.analysis_details import EmailAnalysisDetails, FAQueueAnalysisDetails
-from api.models.event_summaries import EmailHeadersBody, EmailSummary, URLDomainSummaryIndividual, UserSummary
+from api.models.analysis_details import FAQueueAnalysisDetails
+from api.models.event_summaries import (
+    EmailHeadersBody,
+    EmailSummary,
+    URLDomainSummaryIndividual,
+    UserSummary,
+)
 from db import crud
 from db.database import get_db
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.event import Event
 from db.schemas.node import Node
+from db.schemas.node_detection_point import NodeDetectionPoint
 from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
+
+
+def get_detection_point_summary(uuid: UUID, db: Session = Depends(get_db)):
+    # Get the event from the database
+    event: Event = crud.read(uuid=uuid, db_table=Event, db=db)
+
+    # Get all the detection points (and their parent NodeTree UUIDs) performed in the event.
+    # The query results are turned into a dictionary with the parent NodeTree UUID as the key.
+    query = (
+        select([NodeTree.root_node_uuid, NodeDetectionPoint])
+        .select_from(join(NodeTree, Node, NodeTree.node_uuid == Node.uuid))
+        .join(
+            NodeDetectionPoint,
+            onclause=and_(
+                NodeDetectionPoint.node_uuid == NodeTree.node_uuid,
+                NodeTree.root_node_uuid.in_(event.alert_uuids),
+            ),
+        )
+    )
+
+    alert_uuid_and_detection: List[Tuple[UUID, NodeDetectionPoint]] = db.execute(query).unique().fetchall()
+
+    # Loop through the database results to count the number of times each detection point value occurred
+    results: Dict[str, NodeDetectionPoint] = dict()
+    for alert_uuid, detection_point in alert_uuid_and_detection:
+        if detection_point.value not in results:
+            results[detection_point.value] = detection_point
+            results[detection_point.value].count = 1
+            results[detection_point.value].alert_uuid = alert_uuid
+        else:
+            results[detection_point.value].count += 1
+
+    # Return the summaries sorted by their values
+    return sorted(results.values(), key=lambda x: x.value)
 
 
 def get_email_headers_body_summary(uuid: UUID, db: Session = Depends(get_db)):
