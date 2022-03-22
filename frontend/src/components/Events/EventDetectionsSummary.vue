@@ -49,7 +49,7 @@
 
   onMounted(async () => {
     isLoading.value = true;
-    // detections.value = await Event.readUrlDomainSummary(props.eventUuid);
+    detections.value = await Event.readDetectionSummary(props.eventUuid);
     isLoading.value = false;
   });
 </script>
