@@ -71,7 +71,7 @@ describe("Event calls", () => {
     const res = await api.readEmailHeadersAndBody("uuid");
     expect(res).toEqual("Read successful");
   });
-  
+
   it("will make a get request to the /event/{uuid}/summary/detection_point endpoint when 'readDetectionSummary' is called with a given UUID", async () => {
     myNock
       .get("/event/uuid/summary/detection_point")

@@ -54,7 +54,7 @@ export const Event = {
     await api.read(`${endpoint}${uuid}/summary/email_headers_body`),
 
   readDetectionSummary: async (uuid: UUID): Promise<detectionPointSummary[]> =>
-  await api.read(`${endpoint}${uuid}/summary/detection_point`),
+    await api.read(`${endpoint}${uuid}/summary/detection_point`),
 
   readPage: (params?: eventFilterParams): Promise<eventReadPage> => {
     let formattedParams = {} as eventFilterParams;
