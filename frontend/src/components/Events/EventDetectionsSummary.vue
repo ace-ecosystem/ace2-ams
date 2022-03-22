@@ -13,12 +13,11 @@
         <template #body="slotProps">
           <div class="flex align-content-evenly">
             <span
-              class="flex align-items-center justify-content-center"
+              class="flex align-items-left justify-content-center"
               data-cy="detection-value"
-              style="width: 4em"
               >{{ slotProps.data.value }}</span
             >
-            <span class="flex align-items-center justify-content-center"
+            <span class="flex align-items-left justify-content-center" style="width: 10%"
               ><a
                 :href="`/alert/${slotProps.data.alertUuid}`"
                 style="text-decoration: none"
