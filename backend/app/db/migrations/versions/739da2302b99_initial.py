@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: ff77f773ba60
+Revision ID: 739da2302b99
 Revises: 
-Create Date: 2022-03-18 20:07:17.475184
+Create Date: 2022-03-22 14:30:53.455822
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'ff77f773ba60'
+revision = '739da2302b99'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -122,6 +122,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_node_directive_value'), 'node_directive', ['value'], unique=True)
+    op.create_table('node_relationship',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_node_relationship_value'), 'node_relationship', ['value'], unique=True)
     op.create_table('node_tag',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -726,6 +733,8 @@ def downgrade() -> None:
     op.drop_table('node_threat')
     op.drop_index(op.f('ix_node_tag_value'), table_name='node_tag')
     op.drop_table('node_tag')
+    op.drop_index(op.f('ix_node_relationship_value'), table_name='node_relationship')
+    op.drop_table('node_relationship')
     op.drop_index(op.f('ix_node_directive_value'), table_name='node_directive')
     op.drop_table('node_directive')
     op.drop_table('node')
