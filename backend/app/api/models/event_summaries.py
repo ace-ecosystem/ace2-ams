@@ -3,7 +3,16 @@ from typing import List, Optional
 
 from api.models import type_str
 from api.models.analysis_details import EmailAnalysisDetailsBase, EmailAnalysisDetailsHeaderBody, UserAnalysisDetails
+from api.models.node_detection_point import NodeDetectionPointRead
 from api.models.observable import ObservableRead
+
+
+class DetectionSummary(NodeDetectionPointRead):
+    """Represents an individual detection point found in an event."""
+
+    alert_uuid: UUID4 = Field(description="An alert UUID in which this detection point was found")
+
+    count: int = Field(description="The number of times this detection point value was found in the event")
 
 
 class EmailHeadersBody(EmailAnalysisDetailsHeaderBody):

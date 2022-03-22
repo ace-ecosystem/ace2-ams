@@ -28,6 +28,58 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 
 
+def test_summary_detection_point(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The detection point summary should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/detection_point")
+    assert get.json() == []
+
+    # Add some alerts with detection points to the event
+    #
+    # alert1
+    #   o1
+    #     a1 - detection point 1, detection point 2
+    #
+    # alert2
+    #  o1 - detection point 2, detection point 3
+    alert_tree1 = helpers.create_alert(db=db, event=event)
+    alert1_o1 = helpers.create_observable(
+        type="test_type",
+        value="test_value",
+        parent_tree=alert_tree1,
+        db=db,
+    )
+    analysis_tree1 = helpers.create_analysis(db=db, parent_tree=alert1_o1)
+    helpers.create_node_detection_point(node=analysis_tree1.node, username="analyst", value="detection point 1", db=db)
+    helpers.create_node_detection_point(node=analysis_tree1.node, username="analyst", value="detection point 2", db=db)
+
+    alert_tree2 = helpers.create_alert(db=db, event=event)
+    alert2_o1 = helpers.create_observable(
+        type="test_type",
+        value="test_value2",
+        parent_tree=alert_tree2,
+        db=db,
+    )
+    helpers.create_node_detection_point(node=alert2_o1.node, username="analyst", value="detection point 2", db=db)
+    helpers.create_node_detection_point(node=alert2_o1.node, username="analyst", value="detection point 3", db=db)
+
+    # The detection point summary should now have 3 entries (since one detection point was repeated).
+    # They should be sorted by the detection point values
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/detection_point")
+    assert len(get.json()) == 3
+    assert get.json()[0]["count"] == 1
+    assert get.json()[0]["alert_uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()[0]["value"] == "detection point 1"
+    assert get.json()[1]["count"] == 2
+    assert get.json()[1]["alert_uuid"]
+    assert get.json()[1]["value"] == "detection point 2"
+    assert get.json()[2]["count"] == 1
+    assert get.json()[2]["alert_uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()[2]["value"] == "detection point 3"
+
+
 def test_summary_email(client_valid_access_token, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
