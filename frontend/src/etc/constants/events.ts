@@ -28,6 +28,7 @@ import EventAlertsTableVue from "@/components/Events/EventAlertsTable.vue";
 import EventURLSummaryVue from "@/components/Events/EventURLSummary.vue";
 import EventURLDomainSummaryVue from "@/components/Events/EventURLDomainSummary.vue";
 import EventObservableSummaryVue from "@/components/Events/EventObservableSummary.vue";
+import EventDetectionsSummaryVue from "@/components/Events/EventDetectionsSummary.vue";
 
 // ** Events ** //
 
@@ -266,6 +267,7 @@ export const validEventFilters: propertyOption[] = [
 export const defaultEventDetailsSections = {
   "Event Summary": EventSummaryVue,
   "Alert Summary": EventAlertsTableVue,
+  "Detection Summary": EventDetectionsSummaryVue,
   "URL Summary": EventURLSummaryVue,
   "URL Domain Summary": EventURLDomainSummaryVue,
   "Observable Summary": EventObservableSummaryVue,

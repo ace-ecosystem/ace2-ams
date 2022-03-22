@@ -9,6 +9,7 @@ import {
 import {
   emailSummary,
   emailHeadersBody,
+  detectionPointSummary,
   observableSummary,
   userSummary,
   urlDomainSummary,
@@ -51,6 +52,9 @@ export const Event = {
 
   readEmailHeadersAndBody: async (uuid: UUID): Promise<emailHeadersBody[]> =>
     await api.read(`${endpoint}${uuid}/summary/email_headers_body`),
+
+  readDetectionSummary: async (uuid: UUID): Promise<detectionPointSummary[]> =>
+    await api.read(`${endpoint}${uuid}/summary/detection_point`),
 
   readPage: (params?: eventFilterParams): Promise<eventReadPage> => {
     let formattedParams = {} as eventFilterParams;
