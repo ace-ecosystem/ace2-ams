@@ -33,6 +33,7 @@ from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment
 from db.schemas.node_detection_point import NodeDetectionPoint
 from db.schemas.node_directive import NodeDirective
+from db.schemas.node_relationship import NodeRelationship
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
@@ -502,6 +503,10 @@ def create_node_detection_point(
 
 def create_node_directive(value: str, db: Session) -> NodeDirective:
     return _create_basic_object(db_table=NodeDirective, value=value, db=db)
+
+
+def create_node_relationship(value: str, db: Session) -> NodeRelationship:
+    return _create_basic_object(db_table=NodeRelationship, value=value, db=db)
 
 
 def create_node_tag(value: str, db: Session) -> NodeTag:

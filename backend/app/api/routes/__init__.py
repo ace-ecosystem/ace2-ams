@@ -20,6 +20,7 @@ from api.routes.node import router as node_router
 from api.routes.node_comment import router as node_comment_router
 from api.routes.node_detection_point import router as node_detection_point_router
 from api.routes.node_directive import router as node_directive_router
+from api.routes.node_relationship import router as node_relationship_router
 from api.routes.node_tag import router as node_tag_router
 from api.routes.node_threat import router as node_threat_router
 from api.routes.node_threat_actor import router as node_threat_actor_router
@@ -56,6 +57,7 @@ router.include_router(node_router)
 router.include_router(node_comment_router)
 router.include_router(node_detection_point_router)
 router.include_router(node_directive_router)
+router.include_router(node_relationship_router)
 router.include_router(node_tag_router)
 router.include_router(node_threat_router)
 router.include_router(node_threat_actor_router)
