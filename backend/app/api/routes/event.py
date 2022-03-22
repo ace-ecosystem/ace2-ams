@@ -8,10 +8,18 @@ from typing import List, Optional
 from uuid import UUID
 
 from api.models.event import EventCreate, EventRead, EventUpdateMultiple
-from api.models.event_summaries import EmailHeadersBody, EmailSummary, ObservableSummary, URLDomainSummary, UserSummary
+from api.models.event_summaries import (
+    DetectionSummary,
+    EmailHeadersBody,
+    EmailSummary,
+    ObservableSummary,
+    URLDomainSummary,
+    UserSummary,
+)
 from api.models.history import EventHistoryRead
 from api.routes import helpers
 from api.routes.event_summaries import (
+    get_detection_point_summary,
     get_email_headers_body_summary,
     get_email_summary,
     get_observable_summary,
@@ -662,6 +670,9 @@ helpers.api_route_update(router, update_events, path="/")
 # SUMMARIES
 #
 
+helpers.api_route_read(
+    router, get_detection_point_summary, List[DetectionSummary], path="/{uuid}/summary/detection_point"
+)
 helpers.api_route_read(
     router, get_email_headers_body_summary, Optional[EmailHeadersBody], path="/{uuid}/summary/email_headers_body"
 )
