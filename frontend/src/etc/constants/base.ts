@@ -1,4 +1,3 @@
-
 export const inputTypes = {
   MULTISELECT: "multiselect",
   CHIPS: "chips",
