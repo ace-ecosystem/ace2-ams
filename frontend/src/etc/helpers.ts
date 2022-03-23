@@ -8,8 +8,7 @@ import { genericObjectRead, propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
 import { nodeTagRead } from "@/models/nodeTag";
 import { isValidDate, isObject } from "@/etc/validators";
-import { useAlertTableStore } from "@/stores/alertTable";
-import { useEventTableStore } from "@/stores/eventTable";
+import { inputTypes } from "@/etc/constants/base";
 
 export const camelToSnakeCase = (str: string): string =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);

@@ -8,7 +8,7 @@ import {
   nodeThreatsProperty,
   nodeCommentProperty,
   queueProperty,
-} from "@/etc/constants/base";
+} from "@/etc/constants/common";
 import {
   eventPropertyTypes,
   eventCreatedAfterProperty,

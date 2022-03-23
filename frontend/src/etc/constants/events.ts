@@ -12,7 +12,6 @@ import { useEventTypeStore } from "@/stores/eventType";
 import { useEventVectorStore } from "@/stores/eventVector";
 
 import {
-  inputTypes,
   nameProperty,
   nodeTagsProperty,
   nodeThreatActorProperty,
@@ -22,7 +21,8 @@ import {
   observableValueProperty,
   ownerProperty,
   queueProperty,
-} from "./base";
+} from "./common";
+import { inputTypes } from "./base";
 import EventSummaryVue from "@/components/Events/EventSummary.vue";
 import EventAlertsTableVue from "@/components/Events/EventAlertsTable.vue";
 import EventURLSummaryVue from "@/components/Events/EventURLSummary.vue";
