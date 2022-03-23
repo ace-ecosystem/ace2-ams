@@ -10,7 +10,7 @@
   import { onBeforeMount, provide } from "vue";
   import { useRoute, useRouter } from "vue-router";
 
-  import { populateCommonStores } from "@/etc/helpers";
+  import { populateCommonStores } from "@/stores/helpers";
   import TheHeader from "@/components/UserInterface/TheHeader.vue";
   import authApi from "@/services/api/auth";
   import { useAuthStore } from "@/stores/auth";

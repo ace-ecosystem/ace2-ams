@@ -1,7 +1,3 @@
-import { useFilterStore } from "@/stores/filter";
-import { useAuthStore } from "@/stores/auth";
-import { useCurrentUserSettingsStore } from "./../stores/currentUserSettings";
-import { useEventRemediationStore } from "./../stores/eventRemediation";
 import {
   alertFilterParams,
   alertRead,
@@ -11,134 +7,12 @@ import {
 import { genericObjectRead, propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
 import { nodeTagRead } from "@/models/nodeTag";
-import { useAlertDispositionStore } from "@/stores/alertDisposition";
-import { useAlertToolStore } from "@/stores/alertTool";
-import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
-import { useAlertTypeStore } from "@/stores/alertType";
-import { useEventPreventionToolStore } from "@/stores/eventPreventionTool";
-import { useEventRiskLevelStore } from "@/stores/eventRiskLevel";
-import { useEventStatusStore } from "@/stores/eventStatus";
-import { useEventTypeStore } from "@/stores/eventType";
-import { useNodeThreatStore } from "@/stores/nodeThreat";
-import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
-import { useNodeThreatTypeStore } from "@/stores/nodeThreatType";
-import { useEventVectorStore } from "@/stores/eventVector";
-import { useNodeDirectiveStore } from "@/stores/nodeDirective";
-import { useObservableTypeStore } from "@/stores/observableType";
-import { useQueueStore } from "@/stores/queue";
-import { useUserStore } from "@/stores/user";
-import { inputTypes } from "@/etc/constants/base";
 import { isValidDate, isObject } from "@/etc/validators";
 import { useAlertTableStore } from "@/stores/alertTable";
 import { useEventTableStore } from "@/stores/eventTable";
 
 export const camelToSnakeCase = (str: string): string =>
   str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-
-export async function populateCommonStores(): Promise<void> {
-  const alertDispositionStore = useAlertDispositionStore();
-  const alertTypeStore = useAlertTypeStore();
-  const alertToolStore = useAlertToolStore();
-  const alertToolInstanceStore = useAlertToolInstanceStore();
-  const eventPreventionToolStore = useEventPreventionToolStore();
-  const eventRiskLevelStore = useEventRiskLevelStore();
-  const eventStatusStore = useEventStatusStore();
-  const eventTypeStore = useEventTypeStore();
-  const eventVectorStore = useEventVectorStore();
-  const nodeDirectiveStore = useNodeDirectiveStore();
-  const observableTypeStore = useObservableTypeStore();
-  const queueStore = useQueueStore();
-  const userStore = useUserStore();
-
-  await Promise.all([
-    alertDispositionStore.readAll(),
-    alertTypeStore.readAll(),
-    alertToolStore.readAll(),
-    alertToolInstanceStore.readAll(),
-    eventPreventionToolStore.readAll(),
-    eventRiskLevelStore.readAll(),
-    eventStatusStore.readAll(),
-    eventTypeStore.readAll(),
-    eventVectorStore.readAll(),
-    nodeDirectiveStore.readAll(),
-    observableTypeStore.readAll(),
-    queueStore.readAll(),
-    userStore.readAll(),
-  ]).catch((error) => {
-    throw error;
-  });
-}
-
-export async function populateEventStores(): Promise<void> {
-  const eventPreventionToolStore = useEventPreventionToolStore();
-  const eventRemediationStore = useEventRemediationStore();
-  const eventRiskLevelStore = useEventRiskLevelStore();
-  const eventStatusStore = useEventStatusStore();
-  const eventTypeStore = useEventTypeStore();
-  const nodeThreatActorStore = useNodeThreatActorStore();
-  const nodeThreatStore = useNodeThreatStore();
-  const nodeThreatTypeStore = useNodeThreatTypeStore();
-  const userStore = useUserStore();
-  const eventVectorStore = useEventVectorStore();
-
-  await Promise.all([
-    eventPreventionToolStore.readAll(),
-    eventRiskLevelStore.readAll(),
-    eventRemediationStore.readAll(),
-    eventStatusStore.readAll(),
-    eventTypeStore.readAll(),
-    nodeThreatActorStore.readAll(),
-    nodeThreatStore.readAll(),
-    nodeThreatTypeStore.readAll(),
-    eventVectorStore.readAll(),
-    userStore.readAll(),
-  ]).catch((error) => {
-    throw error;
-  });
-}
-
-// Sets default user filters and currentUserSettings
-export function setUserDefaults(nodeType = "all"): void {
-  const authStore = useAuthStore();
-  const filterStore = useFilterStore();
-  const currentUserSettingsStore = useCurrentUserSettingsStore();
-
-  if (!authStore.user) {
-    return;
-  }
-
-  if (nodeType === "all" || nodeType === "events") {
-    // Set default event queue
-    currentUserSettingsStore.queues.events = authStore.user.defaultEventQueue;
-    filterStore.setFilter({
-      nodeType: "events",
-      filterName: "queue",
-      filterValue: currentUserSettingsStore.queues.events,
-    });
-  }
-
-  if (nodeType === "all" || nodeType === "alerts") {
-    // Set default alert queue
-    currentUserSettingsStore.queues.alerts = authStore.user.defaultAlertQueue;
-    filterStore.setFilter({
-      nodeType: "alerts",
-      filterName: "queue",
-      filterValue: currentUserSettingsStore.queues.alerts,
-    });
-  }
-}
-
-export function loadFiltersFromStorage(): void {
-  const filterStore = useFilterStore();
-  const alertTableStore = useAlertTableStore();
-  const eventTableStore = useEventTableStore();
-  filterStore.$state = JSON.parse(
-    localStorage.getItem("aceFilters") || "{}",
-    dateParser,
-  );
-  alertTableStore.stateFiltersLoaded = true;
-  eventTableStore.stateFiltersLoaded = true;
-}
 
 // https://stackoverflow.com/a/33928558
 export function copyToClipboard(text: string): void | boolean | string | null {
