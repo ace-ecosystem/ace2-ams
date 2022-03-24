@@ -9,7 +9,6 @@ import { useNodeThreatStore } from "@/stores/nodeThreat";
 import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
 import { useUserStore } from "@/stores/user";
 import {
-  inputTypes,
   nameProperty,
   nodeTagsProperty,
   nodeThreatActorProperty,
@@ -19,7 +18,8 @@ import {
   observableValueProperty,
   ownerProperty,
   queueProperty,
-} from "./base";
+} from "./common";
+import { inputTypes } from "./base";
 
 // ** Alerts ** //
 

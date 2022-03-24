@@ -23,7 +23,8 @@
 
   import { useFilterStore } from "@/stores/filter";
   import { useAlertTableStore } from "@/stores/alertTable";
-  import { parseFilters, populateCommonStores } from "@/etc/helpers";
+  import { parseFilters } from "@/etc/helpers";
+  import { populateCommonStores } from "@/stores/helpers";
   import { validAlertFilters } from "@/etc/constants/alerts";
 
   const route = useRoute();

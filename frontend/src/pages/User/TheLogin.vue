@@ -54,7 +54,7 @@
   import Button from "primevue/button";
   import InputText from "primevue/inputtext";
 
-  import { populateCommonStores, setUserDefaults } from "@/etc/helpers";
+  import { populateCommonStores, setUserDefaults } from "@/stores/helpers";
   import authApi from "@/services/api/auth";
 
   const router = useRouter();

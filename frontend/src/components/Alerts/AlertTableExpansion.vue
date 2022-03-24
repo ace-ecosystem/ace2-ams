@@ -26,6 +26,7 @@
   import { computed, defineProps } from "vue";
   import Skeleton from "primevue/skeleton";
 
+  import { useFilterStore } from "@/stores/filter";
   import NodeTagVue from "@/components/Node/NodeTag.vue";
 
   const props = defineProps({
@@ -40,7 +41,6 @@
     return `${observable.type.value} : ${observable.value}`;
   };
 
-  import { useFilterStore } from "@/stores/filter";
   const filterStore = useFilterStore();
   const filterByObservable = (observable) => {
     filterStore.bulkSetFilters({

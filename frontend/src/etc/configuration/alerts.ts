@@ -23,7 +23,7 @@ import {
   nodeThreatActorProperty,
   nodeThreatsProperty,
   queueProperty,
-} from "../constants/base";
+} from "../constants/common";
 
 const defaultAlertFilters = [
   alertDispositionProperty,

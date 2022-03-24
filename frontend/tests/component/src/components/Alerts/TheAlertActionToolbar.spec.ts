@@ -1,0 +1,28 @@
+// Example Cypress Vue component test that we might use one day
+// NOTE: This test is not fully functional at this point.
+
+import { mount } from "@cypress/vue";
+import { createPinia } from "pinia";
+
+import PrimeVue from "primevue/config";
+
+import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
+import router from "@/router/index";
+
+const props = {
+  reloadObject: "node",
+};
+
+describe("TheAlertActionToolbar", () => {
+  it("renders", () => {
+    mount(TheAlertActionToolbar, {
+      global: {
+        plugins: [PrimeVue, createPinia(), router],
+        provide: {
+          nodeType: "alerts",
+        },
+      },
+      propsData: props,
+    });
+  });
+});

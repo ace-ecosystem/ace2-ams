@@ -1,5 +1,4 @@
 import { StoreDefinition } from "pinia";
-import { queueRead } from "./queue";
 
 export type UUID = string;
 
@@ -14,7 +13,7 @@ export interface genericObjectRead {
   description: string | null;
   uuid: UUID;
   value: string;
-  queues?: queueRead[];
+  queues?: genericObjectRead[];
 }
 
 export interface genericObjectReadPage extends page {
