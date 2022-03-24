@@ -13,13 +13,14 @@
 
   import { defineProps, inject } from "vue";
   import { useRouter } from "vue-router";
+    import { useFilterStore } from "@/stores/filter";
+    
   const router = useRouter();
   const nodeType = inject("nodeType");
   const nodeRoutes = {
     alerts: "/manage_alerts",
     events: "/manage_events",
   };
-  import { useFilterStore } from "@/stores/filter";
 
   const filterStore = useFilterStore();
 
