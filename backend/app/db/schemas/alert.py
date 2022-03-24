@@ -1,13 +1,15 @@
+import json
+
 from datetime import datetime
 from sqlalchemy import Column, DateTime, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from typing import Optional
 
-from api.models.alert import AlertTreeRead
+from api.models.alert import AlertRead, AlertTreeRead
 from db.database import Base
 from db.schemas.helpers import utcnow
-from db.schemas.history import HistoryMixin
+from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.node import Node
 
 
@@ -17,7 +19,7 @@ class AlertHistory(Base, HistoryMixin):
     record_uuid = Column(UUID(as_uuid=True), ForeignKey("alert.uuid"), index=True, nullable=False)
 
 
-class Alert(Node):
+class Alert(Node, HasHistory):
     __tablename__ = "alert"
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
@@ -90,6 +92,10 @@ class Alert(Node):
 
     def serialize_for_node_tree(self) -> AlertTreeRead:
         return AlertTreeRead(**self.__dict__)
+
+    @property
+    def history_snapshot(self):
+        return json.loads(AlertRead(**self.__dict__).json())
 
     @property
     def disposition_time_earliest(self) -> Optional[datetime]:

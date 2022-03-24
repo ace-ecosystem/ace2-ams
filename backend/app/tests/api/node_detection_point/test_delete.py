@@ -58,6 +58,6 @@ def test_delete(client_valid_access_token, db):
     assert history.json()["items"][2]["field"] == "detection_points"
     assert history.json()["items"][2]["diff"]["old_value"] is None
     assert history.json()["items"][2]["diff"]["new_value"] is None
-    assert history.json()["items"][2]["diff"]["added_to_list"] is None
+    assert history.json()["items"][2]["diff"]["added_to_list"] == []
     assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
     assert history.json()["items"][2]["snapshot"]["value"] == "test_value"

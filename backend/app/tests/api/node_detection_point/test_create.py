@@ -118,7 +118,7 @@ def test_create_verify_history_observables(client_valid_access_token, db):
     assert history.json()["items"][1]["diff"]["old_value"] is None
     assert history.json()["items"][1]["diff"]["new_value"] is None
     assert history.json()["items"][1]["diff"]["added_to_list"] == ["test"]
-    assert history.json()["items"][1]["diff"]["removed_from_list"] is None
+    assert history.json()["items"][1]["diff"]["removed_from_list"] == []
     assert history.json()["items"][1]["snapshot"]["value"] == "test_value"
 
 

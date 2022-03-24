@@ -59,9 +59,7 @@ def create_user(
     crud.record_create_history(
         history_table=UserHistory,
         action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-        record_read_model=UserRead,
-        record_table=User,
-        record_uuid=new_user.uuid,
+        record=new_user,
         db=db,
     )
 
@@ -176,12 +174,10 @@ def update_user(
     crud.commit(db)
 
     # Add the entries to the history table
-    crud.record_update_histories(
+    crud.record_update_history(
         history_table=UserHistory,
         action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-        record_read_model=UserRead,
-        record_table=User,
-        record_uuid=db_user.uuid,
+        record=db_user,
         diffs=diffs,
         db=db,
     )
