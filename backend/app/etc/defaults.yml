@@ -155,6 +155,12 @@ node_threat_type:
     - rat
     - rootkit
     - some internal value
+node_relationship_type:
+  - DOWNLOADED_FROM
+  - EXECUTED_ON
+  - IS_HASH_OF
+  - LOGGED_INTO
+  - REDIRECTED_FROM
 observable_type:
   - file
   - ipv4
