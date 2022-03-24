@@ -146,7 +146,10 @@ jobs:
       - name: Run environment
         run: docker-compose -f docker-compose.yml up -d
 
-      - name: Component (unit) tests
+      - name: Wait for the environment to be accessible
+        run: docker exec ace2-ams-gui bin/wait-for-gui.sh
+
+      - name: E2E tests
         run: docker exec ace2-ams-gui xvfb-run cypress run-ct --headed --browser chrome --config video=false,screenshotOnRunFailure=false
 
   production-build:
