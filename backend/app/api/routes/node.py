@@ -21,6 +21,11 @@ router = APIRouter(
 )
 
 
+#
+# CREATE
+#
+
+
 def create_node(
     node_create: NodeCreate,
     db_node_type: DeclarativeMeta,
@@ -46,6 +51,11 @@ def create_node(
         db_node.threats = crud.read_by_values(values=node_create.threats, db_table=NodeThreat, db=db)
 
     return db_node
+
+
+#
+# UPDATE
+#
 
 
 def update_node(

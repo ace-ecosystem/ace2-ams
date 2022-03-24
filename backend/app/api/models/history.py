@@ -16,10 +16,12 @@ class Diff(BaseModel):
 
     new_value: Optional[Union[type_str, bool]] = Field(description="The string value of the field after to the action")
 
-    added_to_list: Optional[List[type_str]] = Field(description="A list of strings that were added to the field")
+    added_to_list: List[type_str] = Field(
+        description="A list of strings that were added to the field", default_factory=list
+    )
 
-    removed_from_list: Optional[List[type_str]] = Field(
-        description="A list of strings that were removed from the field"
+    removed_from_list: List[type_str] = Field(
+        description="A list of strings that were removed from the field", default_factory=list
     )
 
 

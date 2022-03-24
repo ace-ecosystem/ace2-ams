@@ -74,7 +74,7 @@ class AlertRead(NodeRead, AlertBase):
         description="A list of threats added to child Nodes in the alert's tree"
     )
 
-    comments: List[NodeCommentRead] = Field(description="A list of comments added to the alert")
+    comments: List[NodeCommentRead] = Field(description="A list of comments added to the alert", default_factory=list)
 
     disposition: Optional[AlertDispositionRead] = Field(description="The disposition assigned to this alert")
 

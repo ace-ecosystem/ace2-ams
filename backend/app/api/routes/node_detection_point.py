@@ -48,9 +48,13 @@ def create_node_detection_points(
         # Add an entry to the correct history table based on the node_type.
         # Even though this is creating a detection point, we treat it as though it is
         # modifying the node for history tracking purposes.
-        diff = crud.Diff(field="detection_points", added_to_list=[node_detection_point.value])
         crud.record_node_update_history(
-            record_node=db_node, action_by=crud.read_user_by_username(username=claims["sub"], db=db), diff=diff, db=db
+            record_node=db_node,
+            action_by=crud.read_user_by_username(username=claims["sub"], db=db),
+            diffs=[
+                crud.Diff(field="detection_points", added_to_list=[node_detection_point.value], removed_from_list=[])
+            ],
+            db=db,
         )
 
         response.headers["Content-Location"] = request.url_for(
@@ -110,7 +114,7 @@ def update_node_detection_point(
 
     # Add an entry to the correct history table based on the node_type.
     crud.record_node_update_history(
-        record_node=db_node, action_by=crud.read_user_by_username(username=claims["sub"], db=db), diff=diff, db=db
+        record_node=db_node, action_by=crud.read_user_by_username(username=claims["sub"], db=db), diffs=[diff], db=db
     )
 
     response.headers["Content-Location"] = request.url_for("get_node_detection_point", uuid=uuid)
@@ -134,11 +138,10 @@ def delete_node_detection_point(
     crud.update_node_version(node=db_node, db=db)
 
     # Add an entry to the correct history table based on the node_type.
-    diff = crud.Diff(field="detection_points", removed_from_list=[db_node.value])
     crud.record_node_update_history(
         record_node=db_node.node,
         action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-        diff=diff,
+        diffs=[crud.Diff(field="detection_points", added_to_list=[], removed_from_list=[db_node.value])],
         db=db,
     )
 

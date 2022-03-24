@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: ff77f773ba60
+Revision ID: 2d952cc05bfc
 Revises: 
-Create Date: 2022-03-18 20:07:17.475184
+Create Date: 2022-03-23 15:58:55.973087
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'ff77f773ba60'
+revision = '2d952cc05bfc'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -122,6 +122,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_node_directive_value'), 'node_directive', ['value'], unique=True)
+    op.create_table('node_relationship_type',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_node_relationship_type_value'), 'node_relationship_type', ['value'], unique=True)
     op.create_table('node_tag',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -298,6 +305,18 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_node_directive_mapping_directive_uuid'), 'node_directive_mapping', ['directive_uuid'], unique=False)
     op.create_index(op.f('ix_node_directive_mapping_node_uuid'), 'node_directive_mapping', ['node_uuid'], unique=False)
+    op.create_table('node_relationship',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('related_node_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.ForeignKeyConstraint(['node_uuid'], ['node.uuid'], ),
+    sa.ForeignKeyConstraint(['related_node_uuid'], ['node.uuid'], ),
+    sa.ForeignKeyConstraint(['type_uuid'], ['node_relationship_type.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid'),
+    sa.UniqueConstraint('node_uuid', 'related_node_uuid', 'type_uuid', name='node_related_type_uc')
+    )
+    op.create_index(op.f('ix_node_relationship_node_uuid'), 'node_relationship', ['node_uuid'], unique=False)
     op.create_table('node_tag_mapping',
     sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('tag_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -673,6 +692,8 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_node_tag_mapping_tag_uuid'), table_name='node_tag_mapping')
     op.drop_index(op.f('ix_node_tag_mapping_node_uuid'), table_name='node_tag_mapping')
     op.drop_table('node_tag_mapping')
+    op.drop_index(op.f('ix_node_relationship_node_uuid'), table_name='node_relationship')
+    op.drop_table('node_relationship')
     op.drop_index(op.f('ix_node_directive_mapping_node_uuid'), table_name='node_directive_mapping')
     op.drop_index(op.f('ix_node_directive_mapping_directive_uuid'), table_name='node_directive_mapping')
     op.drop_table('node_directive_mapping')
@@ -726,6 +747,8 @@ def downgrade() -> None:
     op.drop_table('node_threat')
     op.drop_index(op.f('ix_node_tag_value'), table_name='node_tag')
     op.drop_table('node_tag')
+    op.drop_index(op.f('ix_node_relationship_type_value'), table_name='node_relationship_type')
+    op.drop_table('node_relationship_type')
     op.drop_index(op.f('ix_node_directive_value'), table_name='node_directive')
     op.drop_table('node_directive')
     op.drop_table('node')

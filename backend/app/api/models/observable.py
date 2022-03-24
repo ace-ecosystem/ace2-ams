@@ -8,6 +8,7 @@ from api.models.node import NodeBase, NodeCreate, NodeRead, NodeTreeCreateWithNo
 from api.models.node_comment import NodeCommentRead
 from api.models.node_detection_point import NodeDetectionPointRead
 from api.models.node_directive import NodeDirectiveRead
+from api.models.node_relationship import NodeRelationshipRead
 from api.models.node_tag import NodeTagRead
 from api.models.node_threat import NodeThreatRead
 from api.models.node_threat_actor import NodeThreatActorRead
@@ -68,13 +69,19 @@ class ObservableCreate(ObservableCreateBase):
 
 
 class ObservableRead(NodeRead, ObservableBase):
-    comments: List[NodeCommentRead] = Field(description="A list of comments added to the observable")
+    comments: List[NodeCommentRead] = Field(
+        description="A list of comments added to the observable", default_factory=list
+    )
 
     detection_points: List[NodeDetectionPointRead] = Field(
-        description="A list of detection points added to the observable"
+        description="A list of detection points added to the observable", default_factory=list
     )
 
     directives: List[NodeDirectiveRead] = Field(description="A list of directives added to the observable")
+
+    observable_relationships: List["ObservableRelationshipRead"] = Field(
+        description="A list of observable relationships for this observable"
+    )
 
     tags: List[NodeTagRead] = Field(description="A list of tags added to the observable")
 
@@ -119,3 +126,12 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
     _prevent_none: classmethod = validators.prevent_none(
         "directives", "for_detection", "tags", "threat_actors", "threats", "time", "type", "value"
     )
+
+
+class ObservableRelationshipRead(NodeRelationshipRead):
+    related_node: ObservableRead = Field(description="The related observable")
+
+
+# This is needed for the circular relationship between ObservableRead and ObservableRelationshipRead
+ObservableRead.update_forward_refs()
+ObservableNodeTreeRead.update_forward_refs()

@@ -105,7 +105,7 @@ class EventRead(NodeRead, EventBase):
         description="The automatically calculated earliest time an analyst took ownership of one of the alerts"
     )
 
-    comments: List[NodeCommentRead] = Field(description="A list of comments added to the event")
+    comments: List[NodeCommentRead] = Field(description="A list of comments added to the event", default_factory=list)
 
     creation_time: datetime = Field(description="The time the event was created")
 
