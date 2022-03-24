@@ -5,7 +5,6 @@ import {
   getAlertLink,
   getAllAlertTags,
   groupItemsByQueue,
-  loadFiltersFromStorage,
 } from "../../../../src/etc/helpers";
 import { mockAlertTreeReadA } from "../../../mocks/alert";
 import { alertFilterParams } from "../../../../src/models/alert";
@@ -14,18 +13,12 @@ import { useObservableTypeStore } from "../../../../src/stores/observableType";
 import { useUserStore } from "../../../../src/stores/user";
 import { createTestingPinia } from "@pinia/testing";
 import { expect } from "vitest";
-import { vi } from "vitest";
-import { setUserDefaults } from "../../../../src/etc/helpers";
-import { useAuthStore } from "../../../../src/stores/auth";
-import { useCurrentUserSettingsStore } from "../../../../src/stores/currentUserSettings";
-import { useFilterStore } from "../../../../src/stores/filter";
-import { useAlertTableStore } from "../../../../src/stores/alertTable";
-import { useEventTableStore } from "../../../../src/stores/eventTable";
-import { userReadFactory } from "../../../mocks/user";
+import { vi, describe, it } from "vitest";
 import { genericObjectReadFactory } from "../../../mocks/genericObject";
 
+createTestingPinia({ createSpy: vi.fn });
+
 describe("parseFilters", () => {
-  createTestingPinia({ createSpy: vi.fn });
   it("will correctly parse and add any multiselect filters", async () => {
     const observableTypeStore = useObservableTypeStore();
     observableTypeStore.items = [
@@ -281,81 +274,6 @@ describe("formatNodeFiltersForAPI", () => {
   });
 });
 
-describe("setUserDefaults", () => {
-  const authStore = useAuthStore();
-  const filterStore = useFilterStore();
-  const currentUserSettingsStore = useCurrentUserSettingsStore();
-
-  const alertQueue = genericObjectReadFactory({ value: "alertQueue" });
-  const eventQueue = genericObjectReadFactory({ value: "eventQueue" });
-
-  beforeEach(() => {
-    authStore.$reset();
-    filterStore.$reset();
-    currentUserSettingsStore.$reset();
-  });
-
-  it("will do nothing when there is no authStore user set", () => {
-    setUserDefaults();
-    expect(currentUserSettingsStore.queues.events).toBeNull();
-    expect(currentUserSettingsStore.queues.alerts).toBeNull();
-
-    expect(filterStore.events).toEqual({});
-    expect(filterStore.alerts).toEqual({});
-  });
-
-  it("will correctly set all user defaults when nodeType == 'all'", () => {
-    authStore.user = userReadFactory({
-      defaultAlertQueue: alertQueue,
-      defaultEventQueue: eventQueue,
-    });
-    setUserDefaults();
-    expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
-    expect(currentUserSettingsStore.queues.alerts).toEqual(alertQueue);
-    expect(filterStore.events).toEqual({
-      queue: eventQueue,
-    });
-    expect(filterStore.alerts).toEqual({
-      queue: alertQueue,
-    });
-  });
-  it("will correctly set event user defaults when nodeType == 'events'", () => {
-    authStore.user = userReadFactory({
-      defaultAlertQueue: alertQueue,
-      defaultEventQueue: eventQueue,
-    });
-    setUserDefaults("events");
-    expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
-    expect(currentUserSettingsStore.queues.alerts).toBeNull();
-    expect(filterStore.events).toEqual({
-      queue: eventQueue,
-    });
-    expect(filterStore.alerts).toEqual({});
-  });
-  it("will correctly set alert user defaults when nodeType == 'alerts'", () => {
-    authStore.user = userReadFactory({
-      defaultAlertQueue: alertQueue,
-      defaultEventQueue: eventQueue,
-    });
-    setUserDefaults("alerts");
-    expect(currentUserSettingsStore.queues.events).toBeNull();
-    expect(currentUserSettingsStore.queues.alerts).toEqual(alertQueue);
-    expect(filterStore.events).toEqual({});
-    expect(filterStore.alerts).toEqual({
-      queue: alertQueue,
-    });
-  });
-
-  it("will not set any user defaults when nodeType is unknown", () => {
-    setUserDefaults("unknown");
-    expect(currentUserSettingsStore.queues.events).toBeNull();
-    expect(currentUserSettingsStore.queues.alerts).toBeNull();
-
-    expect(filterStore.events).toEqual({});
-    expect(filterStore.alerts).toEqual({});
-  });
-});
-
 describe("groupItemsByQueue", () => {
   it("correctly returns an object of items grouped by their 'queues' property, skipping any without it", () => {
     const queueA = genericObjectReadFactory({ value: "A" });
@@ -391,34 +309,5 @@ describe("groupItemsByQueue", () => {
 
     const result = groupItemsByQueue(testData);
     expect(result).toEqual(expected);
-  });
-});
-
-describe("loadFiltersFromStorage", () => {
-  it("correctly sets filters from storage and sets table store stateFiltersLoaded values to true", () => {
-    const filterStore = useFilterStore();
-    const alertTableStore = useAlertTableStore();
-    const eventTableStore = useEventTableStore();
-
-    localStorage.setItem(
-      "aceFilters",
-      JSON.stringify({
-        alerts: {},
-        events: {
-          queue: { description: null, value: "external", uuid: "uuid1" },
-        },
-      }),
-    );
-
-    loadFiltersFromStorage();
-
-    expect(filterStore.$state).toStrictEqual({
-      alerts: {},
-      events: {
-        queue: { description: null, value: "external", uuid: "uuid1" },
-      },
-    });
-    expect(alertTableStore.stateFiltersLoaded).toBeTruthy();
-    expect(eventTableStore.stateFiltersLoaded).toBeTruthy();
   });
 });
