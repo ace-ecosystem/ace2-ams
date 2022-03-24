@@ -31,6 +31,13 @@ import {
   eventVectorsProperty,
 } from "@/etc/constants/events";
 
+import EventSummaryVue from "@/components/Events/EventSummary.vue";
+import EventAlertsTableVue from "@/components/Events/EventAlertsTable.vue";
+import EventURLSummaryVue from "@/components/Events/EventURLSummary.vue";
+import EventURLDomainSummaryVue from "@/components/Events/EventURLDomainSummary.vue";
+import EventObservableSummaryVue from "@/components/Events/EventObservableSummary.vue";
+import EventDetectionsSummaryVue from "@/components/Events/EventDetectionsSummary.vue";
+
 export const eventFilters: Record<string, readonly propertyOption[]> = {
   external: [
     eventDispositionProperty,
@@ -261,4 +268,13 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
 export const faqueue = {
   lowHits: 1,
   mediumHits: 500,
+};
+
+export const defaultEventDetailsSections = {
+  "Event Summary": EventSummaryVue,
+  "Alert Summary": EventAlertsTableVue,
+  "Detection Summary": EventDetectionsSummaryVue,
+  "URL Summary": EventURLSummaryVue,
+  "URL Domain Summary": EventURLDomainSummaryVue,
+  "Observable Summary": EventObservableSummaryVue,
 };
