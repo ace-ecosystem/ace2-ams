@@ -70,7 +70,7 @@ jobs:
         run: cd frontend && npx eslint .
 
       - name: Check for circular dependencies
-        run: cd frontend && npx madge --ts-config tsconfig.json  --extensions ts,vue --circular src/*
+        run: cd frontend && npx madge --ts-config tsconfig.json  --extensions ts,vue --circular --exclude models/* src/*
 
       - name: Unit tests
         run: cd frontend && npm run test:unit
