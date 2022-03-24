@@ -33,3 +33,10 @@ class HistoryMixin:
     @declared_attr
     def action_by(cls):
         return relationship("User", primaryjoin="User.uuid == %s.action_by_user_uuid" % cls.__name__)
+
+
+class HasHistory:
+    @property
+    def history_snapshot(self):
+        """Returns the JSON view of the database object that will be saved as the snapshot in the history table"""
+        raise NotImplementedError()

@@ -8,20 +8,16 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 from typing import Dict, List, Optional, Union
 from uuid import UUID
 
-from api.models.alert import AlertRead
-from api.models.event import EventRead
-from api.models.observable import ObservableRead
-from api.models.user import UserRead
 from core.auth import hash_password
 from db import crud
-from db.schemas.alert import Alert, AlertHistory
+from db.schemas.alert import Alert
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.alert_tool import AlertTool
 from db.schemas.alert_tool_instance import AlertToolInstance
 from db.schemas.alert_type import AlertType
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_module_type import AnalysisModuleType
-from db.schemas.event import Event, EventHistory
+from db.schemas.event import Event
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_risk_level import EventRiskLevel
@@ -33,12 +29,14 @@ from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment
 from db.schemas.node_detection_point import NodeDetectionPoint
 from db.schemas.node_directive import NodeDirective
+from db.schemas.node_relationship import NodeRelationship
+from db.schemas.node_relationship_type import NodeRelationshipType
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.node_tree import NodeTree
-from db.schemas.observable import Observable, ObservableHistory
+from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.user import User, UserHistory
@@ -177,23 +175,17 @@ def create_alert(
     crud.commit(db)
 
     # Add an entry to the history table
-    crud.record_create_history(
-        history_table=AlertHistory,
+    crud.record_node_create_history(
+        record_node=alert,
         action_by=create_user(username="analyst", db=db),
-        record_read_model=AlertRead,
-        record_table=Alert,
-        record_uuid=alert.uuid,
         db=db,
     )
 
     if diffs and updated_by_user:
-        crud.record_update_histories(
-            history_table=AlertHistory,
+        crud.record_node_update_history(
+            record_node=alert,
             action_by=create_user(username=updated_by_user, db=db),
             action_time=update_time,
-            record_read_model=AlertRead,
-            record_table=Alert,
-            record_uuid=alert.uuid,
             diffs=diffs,
             db=db,
         )
@@ -376,12 +368,9 @@ def create_event(
     db.add(obj)
     crud.commit(db)
 
-    crud.record_create_history(
-        history_table=EventHistory,
+    crud.record_node_create_history(
+        record_node=obj,
         action_by=create_user(username="analyst", db=db),
-        record_read_model=EventRead,
-        record_table=Event,
-        record_uuid=obj.uuid,
         db=db,
     )
 
@@ -473,7 +462,8 @@ def create_node_comment(
     crud.record_node_update_history(
         record_node=node,
         action_by=create_user(username=username, display_name=username, db=db),
-        diff=crud.Diff(field="comments", added_to_list=[obj.value]),
+        action_time=insert_time,
+        diffs=[crud.Diff(field="comments", added_to_list=[obj.value], removed_from_list=[])],
         db=db,
     )
 
@@ -493,7 +483,8 @@ def create_node_detection_point(
     crud.record_node_update_history(
         record_node=node,
         action_by=create_user(username=username, display_name=username, db=db),
-        diff=crud.Diff(field="detection_points", added_to_list=[obj.value]),
+        action_time=insert_time,
+        diffs=[crud.Diff(field="detection_points", added_to_list=[obj.value], removed_from_list=[])],
         db=db,
     )
 
@@ -502,6 +493,19 @@ def create_node_detection_point(
 
 def create_node_directive(value: str, db: Session) -> NodeDirective:
     return _create_basic_object(db_table=NodeDirective, value=value, db=db)
+
+
+def create_node_relationship(node: Node, related_node: Node, type: str, db: Session) -> NodeRelationship:
+    obj = NodeRelationship(
+        node_uuid=node.uuid, related_node=related_node, type=create_node_relationship_type(value=type, db=db)
+    )
+    db.add(obj)
+    crud.commit(db)
+    return obj
+
+
+def create_node_relationship_type(value: str, db: Session) -> NodeRelationshipType:
+    return _create_basic_object(db_table=NodeRelationshipType, value=value, db=db)
 
 
 def create_node_tag(value: str, db: Session) -> NodeTag:
@@ -608,12 +612,9 @@ def create_observable(
 
     crud.commit(db)
 
-    crud.record_create_history(
-        history_table=ObservableHistory,
+    crud.record_node_create_history(
+        record_node=obj,
         action_by=create_user(username="analyst", db=db),
-        record_read_model=ObservableRead,
-        record_table=Observable,
-        record_uuid=obj.uuid,
         db=db,
     )
 
@@ -666,9 +667,7 @@ def create_user(
     crud.record_create_history(
         history_table=UserHistory,
         action_by=obj,
-        record_read_model=UserRead,
-        record_table=User,
-        record_uuid=obj.uuid,
+        record=obj,
         db=db,
     )
 

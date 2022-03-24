@@ -1,3 +1,5 @@
+import json
+
 from datetime import datetime
 from sqlalchemy import Column, DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -12,7 +14,7 @@ from db.schemas.event_prevention_tool_mapping import event_prevention_tool_mappi
 from db.schemas.event_remediation_mapping import event_remediation_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
 from db.schemas.helpers import utcnow
-from db.schemas.history import HistoryMixin
+from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.node import Node
 
 
@@ -22,7 +24,7 @@ class EventHistory(Base, HistoryMixin):
     record_uuid = Column(UUID(as_uuid=True), ForeignKey("event.uuid"), index=True, nullable=False)
 
 
-class Event(Node):
+class Event(Node, HasHistory):
     __tablename__ = "event"
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
@@ -90,6 +92,10 @@ class Event(Node):
 
     def serialize_for_node_tree(self) -> EventRead:
         return EventRead(**self.__dict__)
+
+    @property
+    def history_snapshot(self):
+        return json.loads(EventRead(**self.__dict__).json())
 
     @property
     def auto_alert_time(self) -> Optional[datetime]:

@@ -1,5 +1,3 @@
-import json
-
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from fastapi import HTTPException, status
@@ -15,13 +13,11 @@ from sqlalchemy.sql.expression import join
 from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
-from api.models.alert import AlertRead
-from api.models.event import EventRead
 from api.models.node import NodeRead, NodeTreeMetadata
-from api.models.observable import ObservableRead
 from core.auth import verify_password
-from db.schemas.alert import Alert, AlertHistory
-from db.schemas.event import Event, EventHistory
+from db.schemas.alert import AlertHistory
+from db.schemas.event import EventHistory
+from db.schemas.history import HasHistory
 from db.schemas.node import Node
 from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable, ObservableHistory
@@ -65,7 +61,7 @@ def create_diff(
         removed = sorted(set([x for x in old if x not in new]))
         return Diff(field=field, added_to_list=added, removed_from_list=removed)
 
-    return Diff(field=field, old_value=old, new_value=new)
+    return Diff(field=field, old_value=old, new_value=new, added_to_list=[], removed_from_list=[])
 
 
 def read_history_records(history_table: DeclarativeMeta, record_uuid: UUID, db: Session):
@@ -78,74 +74,96 @@ def read_history_records(history_table: DeclarativeMeta, record_uuid: UUID, db: 
     return paginate(db, query)
 
 
+def record_node_create_history(
+    record_node: Union[Node, HasHistory],
+    action_by: User,
+    db: Session,
+):
+    if record_node.node_type == "alert":
+        record_create_history(
+            history_table=AlertHistory,
+            action_by=action_by,
+            record=record_node,
+            db=db,
+        )
+    elif record_node.node_type == "event":
+        record_create_history(
+            history_table=EventHistory,
+            action_by=action_by,
+            record=record_node,
+            db=db,
+        )
+    elif record_node.node_type == "observable":
+        record_create_history(
+            history_table=ObservableHistory,
+            action_by=action_by,
+            record=record_node,
+            db=db,
+        )
+
+
 def record_create_history(
     history_table: DeclarativeMeta,
     action_by: User,
-    record_read_model: BaseModel,
-    record_table: DeclarativeMeta,
-    record_uuid: UUID,
+    record: Union[Node, User, HasHistory],
     db: Session,
 ):
-    db_obj = read(uuid=record_uuid, db_table=record_table, db=db)
-    snapshot = json.loads(record_read_model(**db_obj.__dict__).json())
     db.add(
         history_table(
             action="CREATE",
             action_by=action_by,
             action_time=datetime.utcnow(),
-            record_uuid=record_uuid,
-            snapshot=snapshot,
+            record_uuid=record.uuid,
+            snapshot=record.history_snapshot,
         )
     )
     commit(db)
 
 
-def record_node_update_history(record_node: Node, action_by: User, diff: Diff, db: Session):
+def record_node_update_history(
+    record_node: Union[Node, HasHistory],
+    action_by: User,
+    diffs: List[Diff],
+    db: Session,
+    action_time: Optional[datetime] = None,
+):
     if record_node.node_type == "alert":
-        record_update_histories(
+        record_update_history(
             history_table=AlertHistory,
             action_by=action_by,
-            record_read_model=AlertRead,
-            record_table=Alert,
-            record_uuid=record_node.uuid,
-            diffs=[diff],
+            action_time=action_time,
+            record=record_node,
+            diffs=diffs,
             db=db,
         )
     elif record_node.node_type == "event":
-        record_update_histories(
+        record_update_history(
             history_table=EventHistory,
             action_by=action_by,
-            record_read_model=EventRead,
-            record_table=Event,
-            record_uuid=record_node.uuid,
-            diffs=[diff],
+            action_time=action_time,
+            record=record_node,
+            diffs=diffs,
             db=db,
         )
     elif record_node.node_type == "observable":
-        record_update_histories(
+        record_update_history(
             history_table=ObservableHistory,
             action_by=action_by,
-            record_read_model=ObservableRead,
-            record_table=Observable,
-            record_uuid=record_node.uuid,
-            diffs=[diff],
+            action_time=action_time,
+            record=record_node,
+            diffs=diffs,
             db=db,
         )
 
 
-def record_update_histories(
+def record_update_history(
     history_table: DeclarativeMeta,
     action_by: User,
-    record_read_model: BaseModel,
-    record_table: DeclarativeMeta,
-    record_uuid: UUID,
+    record: Union[Node, User, HasHistory],
     diffs: list[Diff],
     db: Session,
     action_time: Optional[datetime] = None,
 ):
-    db_obj = read(uuid=record_uuid, db_table=record_table, db=db)
-    snapshot = json.loads(record_read_model(**db_obj.__dict__).json())
-
     if action_time is None:
         action_time = datetime.utcnow()
 
@@ -156,7 +174,7 @@ def record_update_histories(
                     action="UPDATE",
                     action_by=action_by,
                     action_time=action_time,
-                    record_uuid=record_uuid,
+                    record_uuid=record.uuid,
                     field=diff.field,
                     diff={
                         "old_value": diff.old_value,
@@ -164,7 +182,7 @@ def record_update_histories(
                         "added_to_list": diff.added_to_list,
                         "removed_from_list": diff.removed_from_list,
                     },
-                    snapshot=snapshot,
+                    snapshot=record.history_snapshot,
                 )
             )
 

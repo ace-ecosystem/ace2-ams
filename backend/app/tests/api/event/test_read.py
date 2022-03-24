@@ -299,7 +299,6 @@ def test_summary_email_headers_body(client_valid_access_token, db):
 
     # The email headers/body summary should now have the details of the second alert's email
     get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/email_headers_body")
-    print(get.json())
     assert get.json()["alert_uuid"] == str(alert_tree2.node_uuid)
     assert get.json()["headers"] == "headers2"
     assert get.json()["body_html"] == "<p>body2</p>"

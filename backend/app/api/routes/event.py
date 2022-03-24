@@ -112,12 +112,9 @@ def create_event(
     crud.commit(db)
 
     # Add an entry to the history table
-    crud.record_create_history(
-        history_table=EventHistory,
+    crud.record_node_create_history(
+        record_node=new_event,
         action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-        record_read_model=EventRead,
-        record_table=Event,
-        record_uuid=new_event.uuid,
         db=db,
     )
 
@@ -642,12 +639,9 @@ def update_events(
         crud.commit(db)
 
         # Add the entries to the history table
-        crud.record_update_histories(
-            history_table=EventHistory,
+        crud.record_node_update_history(
+            record_node=db_event,
             action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-            record_read_model=EventRead,
-            record_table=Event,
-            record_uuid=event.uuid,
             diffs=diffs,
             db=db,
         )
