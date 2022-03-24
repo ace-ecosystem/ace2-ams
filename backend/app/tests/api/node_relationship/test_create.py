@@ -162,7 +162,7 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     assert get.json()["type"]["value"] == "test_rel"
 
 
-def test_create_verify_observable_history(client_valid_access_token, db):
+def test_create_verify_observable(client_valid_access_token, db):
     # Create some nodes with relationships
     #
     # alert
@@ -175,6 +175,7 @@ def test_create_verify_observable_history(client_valid_access_token, db):
     observable_tree2 = helpers.create_observable(
         type="test_type", value="test_value2", parent_tree=analysis_tree, db=db
     )
+    initial_version = observable_tree2.node.version
     helpers.create_node_relationship_type(value="IS_HASH_OF", db=db)
 
     # Create the node relationship
@@ -186,6 +187,9 @@ def test_create_verify_observable_history(client_valid_access_token, db):
 
     create = client_valid_access_token.post("/api/node/relationship/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
+
+    # Adding a relationship counts as modifying the node, so it should have a new version
+    assert observable_tree2.node.version != initial_version
 
     # Verify the observable history. The first record is for creating the observable, and
     # the second record is from adding the node relationship.

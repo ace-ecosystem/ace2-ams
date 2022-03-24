@@ -42,6 +42,9 @@ def create_node_relationship(
     db.add(obj)
     crud.commit(db)
 
+    # Adding the relationship counts as modifying the node, so update its version
+    crud.update_node_version(node=node, db=db)
+
     # Add the node history record
     crud.record_node_update_history(
         record_node=node,
