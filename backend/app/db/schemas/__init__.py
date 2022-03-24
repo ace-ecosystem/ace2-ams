@@ -32,6 +32,7 @@ from db.schemas.node_detection_point import NodeDetectionPoint
 from db.schemas.node_directive import NodeDirective
 from db.schemas.node_directive_mapping import node_directive_mapping
 from db.schemas.node_relationship import NodeRelationship
+from db.schemas.node_relationship_type import NodeRelationshipType
 from db.schemas.node_tag import NodeTag
 from db.schemas.node_tag_mapping import node_tag_mapping
 from db.schemas.node_threat import NodeThreat
