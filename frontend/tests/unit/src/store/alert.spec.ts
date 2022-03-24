@@ -8,7 +8,7 @@ import {
   alertTreeReadFactory,
   alertReadFactory,
   alertSummaryFactory,
-} from "../../../mocks/alert";
+} from "@mocks/alert";
 
 createCustomPinia();
 

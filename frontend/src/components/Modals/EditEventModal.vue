@@ -66,15 +66,15 @@
   import Message from "primevue/message";
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
-  import NodePropertyInput from "../Node/NodePropertyInput.vue";
-  import NodeThreatSelector from "../Node/NodeThreatSelector.vue";
+  import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
+  import NodeThreatSelector from "@/components/Node/NodeThreatSelector.vue";
 
   import { Event } from "@/services/api/event";
   import { useEventStore } from "@/stores/event";
   import { useModalStore } from "@/stores/modal";
   import { populateEventStores } from "@/stores/helpers";
   import { isObject } from "@/etc/validators";
-  import NodeCommentEditor from "../Node/NodeCommentEditor.vue";
+  import NodeCommentEditor from "@/components/Node/NodeCommentEditor.vue";
   import { NodeComment } from "@/services/api/nodeComment";
 
   const modalStore = useModalStore();

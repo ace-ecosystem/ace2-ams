@@ -1,20 +1,20 @@
-import { alertFilters } from "../../../../src/etc/configuration/alerts";
+import { alertFilters } from "@/etc/configuration/alerts";
 import {
   formatNodeFiltersForAPI,
   parseFilters,
   getAlertLink,
   getAllAlertTags,
   groupItemsByQueue,
-} from "../../../../src/etc/helpers";
-import { alertTreeReadFactory } from "../../../mocks/alert";
-import { alertFilterParams } from "../../../../src/models/alert";
-import { userRead } from "../../../../src/models/user";
-import { useObservableTypeStore } from "../../../../src/stores/observableType";
-import { useUserStore } from "../../../../src/stores/user";
+} from "@/etc/helpers";
+import { alertTreeReadFactory } from "@mocks/alert";
+import { alertFilterParams } from "@/models/alert";
+import { userRead } from "@/models/user";
+import { useObservableTypeStore } from "@/stores/observableType";
+import { useUserStore } from "@/stores/user";
 import { createTestingPinia } from "@pinia/testing";
 import { expect } from "vitest";
 import { vi, describe, it } from "vitest";
-import { genericObjectReadFactory } from "../../../mocks/genericObject";
+import { genericObjectReadFactory } from "@mocks/genericObject";
 
 createTestingPinia({ createSpy: vi.fn });
 

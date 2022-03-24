@@ -8,7 +8,7 @@ import {
   alertTreeReadFactory,
   alertSummaryFactory,
   alertReadPageFactory,
-} from "../../../mocks/alert";
+} from "@mocks/alert";
 
 import { describe, it, expect, beforeEach } from "vitest";
 

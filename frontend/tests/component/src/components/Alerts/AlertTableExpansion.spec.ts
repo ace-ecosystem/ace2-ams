@@ -8,7 +8,7 @@ import PrimeVue from "primevue/config";
 
 import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
 import router from "@/router/index";
-import { observableReadFactory } from "../../../../mocks/observable";
+import { observableReadFactory } from "@mocks/observable";
 
 const props = {
   observables: [observableReadFactory()],

@@ -5,7 +5,7 @@ import { mount } from "@cypress/vue";
 import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 
-import { commentReadFactory } from "../../../../mocks/comment";
+import { commentReadFactory } from "@mocks/comment";
 
 import NodeComment from "@/components/Node/NodeComment.vue";
 

@@ -1,6 +1,6 @@
 import { Analysis } from "@/services/api/analysis";
 import myNock from "@unit/services/api/nock";
-import { analysisReadFactory } from "../../../../mocks/analysis";
+import { analysisReadFactory } from "@mocks/analysis";
 
 describe("Analysis API calls", () => {
   it("will make a get request to /alert/queue/{uuid} when getSingle is called", async () => {

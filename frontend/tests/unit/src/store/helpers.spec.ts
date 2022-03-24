@@ -1,15 +1,15 @@
 import {
   setUserDefaults,
   loadFiltersFromStorage,
-} from "../../../../src/stores/helpers";
+} from "@/stores/helpers";
 import { beforeEach, expect } from "vitest";
-import { useAlertTableStore } from "../../../../src/stores/alertTable";
-import { useAuthStore } from "../../../../src/stores/auth";
-import { useCurrentUserSettingsStore } from "../../../../src/stores/currentUserSettings";
-import { useEventTableStore } from "../../../../src/stores/eventTable";
-import { useFilterStore } from "../../../../src/stores/filter";
-import { genericObjectReadFactory } from "../../../mocks/genericObject";
-import { userReadFactory } from "../../../mocks/user";
+import { useAlertTableStore } from "@/stores/alertTable";
+import { useAuthStore } from "@/stores/auth";
+import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
+import { useEventTableStore } from "@/stores/eventTable";
+import { useFilterStore } from "@/stores/filter";
+import { genericObjectReadFactory } from "@mocks/genericObject";
+import { userReadFactory } from "@mocks/user";
 import { vi, describe, it } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
 

@@ -4,7 +4,7 @@ import myNock from "@unit/services/api/nock";
 import {
   eventCreateFactory,
   eventUpdateFactory,
-} from "../../../../mocks/events";
+} from "@mocks/events";
 
 describe("Event calls", () => {
   const api = Event;

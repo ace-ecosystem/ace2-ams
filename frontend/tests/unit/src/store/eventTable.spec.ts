@@ -2,10 +2,10 @@
 import myNock from "@unit/services/api/nock";
 import { eventFilterParams } from "@/models/event";
 import { parseEventSummary, useEventTableStore } from "@/stores/eventTable";
-import { eventReadFactory, eventSummaryFactory } from "../../../mocks/events";
-import { genericObjectReadFactory } from "../../../mocks/genericObject";
-import { nodeThreatReadFactory } from "../../../mocks/nodeThreat";
-import { userReadFactory } from "../../../mocks/user";
+import { eventReadFactory, eventSummaryFactory } from "@mocks/events";
+import { genericObjectReadFactory } from "@mocks/genericObject";
+import { nodeThreatReadFactory } from "@mocks/nodeThreat";
+import { userReadFactory } from "@mocks/user";
 import { createCustomPinia } from "@unit/helpers";
 
 createCustomPinia();
