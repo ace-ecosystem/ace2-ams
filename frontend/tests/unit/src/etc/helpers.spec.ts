@@ -6,7 +6,7 @@ import {
   getAllAlertTags,
   groupItemsByQueue,
 } from "../../../../src/etc/helpers";
-import { mockAlertTreeReadA } from "../../../mocks/alert";
+import { alertTreeReadFactory } from "../../../mocks/alert";
 import { alertFilterParams } from "../../../../src/models/alert";
 import { userRead } from "../../../../src/models/user";
 import { useObservableTypeStore } from "../../../../src/stores/observableType";
@@ -17,6 +17,37 @@ import { vi, describe, it } from "vitest";
 import { genericObjectReadFactory } from "../../../mocks/genericObject";
 
 createTestingPinia({ createSpy: vi.fn });
+
+const mockAlertTreeRead = alertTreeReadFactory({
+  tags: [
+    genericObjectReadFactory({
+      value: "from_address",
+      uuid: "uuid3",
+      description: null,
+    }),
+    genericObjectReadFactory({
+      value: "contacted_host",
+      uuid: "uuid2",
+      description: null,
+    }),
+    genericObjectReadFactory({
+      value: "contacted_host",
+      uuid: "uuid2",
+      description: null,
+    }),
+    genericObjectReadFactory({
+      value: "contacted_host",
+      uuid: "uuid2",
+      description: null,
+    }),
+    genericObjectReadFactory({ value: "c2", uuid: "uuid1", description: null }),
+    genericObjectReadFactory({
+      value: "recipient",
+      uuid: "uuid4",
+      description: null,
+    }),
+  ],
+});
 
 describe("parseFilters", () => {
   it("will correctly parse and add any multiselect filters", async () => {
@@ -243,32 +274,32 @@ describe("formatNodeFiltersForAPI", () => {
   });
 
   it("getAlertLink correctly generates an alert link given an alert object", () => {
-    const result = getAlertLink(mockAlertTreeReadA);
-    expect(result).toEqual("/alert/uuid1");
+    const result = getAlertLink(mockAlertTreeRead);
+    expect(result).toEqual("/alert/testAlertUuid");
   });
 
   it("getAllAlertTags formats a given alert's tags into a sorted and dedup'd list of tags", () => {
-    const result = getAllAlertTags(mockAlertTreeReadA);
+    const result = getAllAlertTags(mockAlertTreeRead);
     expect(result).toEqual([
       {
         description: null,
         value: "c2",
-        uuid: "a0b2d514-c544-4a8f-a059-b6151b9f1dd6",
+        uuid: "uuid1",
       },
       {
         description: null,
         value: "contacted_host",
-        uuid: "3c1ca637-48d1-4d47-aeee-0962bc32d96d",
+        uuid: "uuid2",
       },
       {
         description: null,
         value: "from_address",
-        uuid: "f9081b70-c2bf-4a7d-ba90-a675e8a929d2",
+        uuid: "uuid3",
       },
       {
         description: null,
         value: "recipient",
-        uuid: "c5d3321d-883c-4772-b511-489273e13fde",
+        uuid: "uuid4",
       },
     ]);
   });
