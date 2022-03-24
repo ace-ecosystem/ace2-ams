@@ -12,6 +12,9 @@ class NodeRelationship(Base):
 
     node_uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), index=True)
 
+    # The node relationship is not loaded automatically
+    node = relationship("Node", foreign_keys=[node_uuid])
+
     related_node_uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"))
 
     related_node = relationship("Node", foreign_keys=[related_node_uuid], lazy="selectin")

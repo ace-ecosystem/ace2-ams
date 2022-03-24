@@ -198,9 +198,6 @@ def update_observable(
     crud.record_node_update_history(
         record_node=db_observable,
         action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-        # record_read_model=ObservableRead,
-        # record_table=Observable,
-        # record_uuid=db_observable.uuid,
         diffs=diffs,
         db=db,
     )
