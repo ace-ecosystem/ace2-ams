@@ -69,13 +69,12 @@
   import { validAlertFilters } from "@/etc/constants/alerts";
   import { validEventFilters } from "@/etc/constants/events";
 
+  import { copyToClipboard, formatNodeFiltersForAPI } from "@/etc/helpers";
+
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
   const currentUserSettingsStore = useCurrentUserSettingsStore();
 
-  import { copyToClipboard, formatNodeFiltersForAPI } from "@/etc/helpers";
-
-  const config = inject("config");
 
   const nodeType = inject("nodeType");
   const validFilterOptions = {
