@@ -1,7 +1,4 @@
-import {
-  setUserDefaults,
-  loadFiltersFromStorage,
-} from "@/stores/helpers";
+import { setUserDefaults, loadFiltersFromStorage } from "@/stores/helpers";
 import { beforeEach, expect } from "vitest";
 import { useAlertTableStore } from "@/stores/alertTable";
 import { useAuthStore } from "@/stores/auth";

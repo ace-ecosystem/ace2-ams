@@ -1,7 +1,4 @@
-import {
-  observableRead,
-  observableTreeRead,
-} from "@/models/observable";
+import { observableRead, observableTreeRead } from "@/models/observable";
 import { genericObjectReadFactory } from "./genericObject";
 
 export const observableReadFactory = ({
