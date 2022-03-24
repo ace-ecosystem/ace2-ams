@@ -3,6 +3,8 @@ import uuid
 
 from fastapi import status
 
+from tests import helpers
+
 
 #
 # INVALID TESTS
@@ -12,21 +14,27 @@ from fastapi import status
 @pytest.mark.parametrize(
     "key,value",
     [
-        ("description", 123),
-        ("description", ""),
+        ("node_uuid", None),
+        ("node_uuid", 1),
+        ("node_uuid", "abc"),
+        ("node_uuid", ""),
+        ("related_node_uuid", None),
+        ("related_node_uuid", 1),
+        ("related_node_uuid", "abc"),
+        ("related_node_uuid", ""),
+        ("type", 123),
+        ("type", None),
+        ("type", ""),
         ("uuid", None),
         ("uuid", 1),
         ("uuid", "abc"),
         ("uuid", ""),
-        ("value", 123),
-        ("value", None),
-        ("value", ""),
     ],
 )
 def test_create_invalid_fields(client_valid_access_token, key, value):
-    create_json = {"value": "test"}
+    create_json = {"node_uuid": str(uuid.uuid4()), "related_node_uuid": str(uuid.uuid4()), "type": "test"}
     create_json[key] = value
-    create = client_valid_access_token.post("/api/node/relationship/", json=create_json)
+    create = client_valid_access_token.post("/api/node/relationship/type/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -34,16 +42,33 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
     "key",
     [
         ("uuid"),
-        ("value"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, key):
-    # Create an object
-    create1_json = {"uuid": str(uuid.uuid4()), "value": "test"}
+def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
+    # Create two nodes
+    alert_tree1 = helpers.create_alert(db=db)
+    alert_tree2 = helpers.create_alert(db=db)
+
+    # Create some node relationship types
+    helpers.create_node_relationship_type(value="test_rel", db=db)
+    helpers.create_node_relationship_type(value="test_rel2", db=db)
+
+    # Create a node relationship
+    create1_json = {
+        "uuid": str(uuid.uuid4()),
+        "node_uuid": str(alert_tree1.node_uuid),
+        "related_node_uuid": str(alert_tree2.node_uuid),
+        "type": "test_rel",
+    }
     client_valid_access_token.post("/api/node/relationship/", json=create1_json)
 
-    # Ensure you cannot create another object with the same unique field value
-    create2_json = {"value": "test2"}
+    # Ensure you cannot create another relationship with the same unique field value
+    create2_json = {
+        "uuid": str(uuid.uuid4()),
+        "node_uuid": str(alert_tree1.node_uuid),
+        "related_node_uuid": str(alert_tree2.node_uuid),
+        "type": "test_rel2",
+    }
     create2_json[key] = create1_json[key]
     create2 = client_valid_access_token.post("/api/node/relationship/", json=create2_json)
     assert create2.status_code == status.HTTP_409_CONFLICT
@@ -52,11 +77,27 @@ def test_create_duplicate_unique_fields(client_valid_access_token, key):
 @pytest.mark.parametrize(
     "key",
     [
-        ("value"),
+        ("node_uuid"),
+        ("related_node_uuid"),
+        ("type"),
     ],
 )
-def test_create_missing_required_fields(client_valid_access_token, key):
-    create_json = {"value": "test"}
+def test_create_missing_required_fields(client_valid_access_token, db, key):
+    # Create two nodes
+    alert_tree1 = helpers.create_alert(db=db)
+    alert_tree2 = helpers.create_alert(db=db)
+
+    # Create some node relationship types
+    helpers.create_node_relationship_type(value="test_rel", db=db)
+    helpers.create_node_relationship_type(value="test_rel2", db=db)
+
+    # Create a node relationship
+    create_json = {
+        "node_uuid": str(alert_tree1.node_uuid),
+        "related_node_uuid": str(alert_tree2.node_uuid),
+        "type": "test_rel",
+    }
+
     del create_json[key]
     create = client_valid_access_token.post("/api/node/relationship/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -69,11 +110,26 @@ def test_create_missing_required_fields(client_valid_access_token, key):
 
 @pytest.mark.parametrize(
     "key,value",
-    [("description", None), ("description", "test"), ("uuid", str(uuid.uuid4()))],
+    [("uuid", str(uuid.uuid4()))],
 )
-def test_create_valid_optional_fields(client_valid_access_token, key, value):
+def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
+    # Create two nodes
+    alert_tree1 = helpers.create_alert(db=db)
+    alert_tree2 = helpers.create_alert(db=db)
+
+    # Create a node relationship type
+    helpers.create_node_relationship_type(value="test_rel", db=db)
+
+    # Create a node relationship
+    create_json = {
+        "node_uuid": str(alert_tree1.node_uuid),
+        "related_node_uuid": str(alert_tree2.node_uuid),
+        "type": "test_rel",
+    }
+    create_json[key] = value
+
     # Create the object
-    create = client_valid_access_token.post("/api/node/relationship/", json={key: value, "value": "test"})
+    create = client_valid_access_token.post("/api/node/relationship/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
@@ -81,11 +137,68 @@ def test_create_valid_optional_fields(client_valid_access_token, key, value):
     assert get.json()[key] == value
 
 
-def test_create_valid_required_fields(client_valid_access_token):
-    # Create the object
-    create = client_valid_access_token.post("/api/node/relationship/", json={"value": "test"})
+def test_create_valid_required_fields(client_valid_access_token, db):
+    # Create two nodes
+    alert_tree1 = helpers.create_alert(db=db)
+    alert_tree2 = helpers.create_alert(db=db)
+
+    # Create a node relationship type
+    helpers.create_node_relationship_type(value="test_rel", db=db)
+
+    # Create a node relationship
+    create_json = {
+        "node_uuid": str(alert_tree1.node_uuid),
+        "related_node_uuid": str(alert_tree2.node_uuid),
+        "type": "test_rel",
+    }
+
+    create = client_valid_access_token.post("/api/node/relationship/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
     get = client_valid_access_token.get(create.headers["Content-Location"])
-    assert get.json()["value"] == "test"
+    assert get.json()["node_uuid"] == str(alert_tree1.node_uuid)
+    assert get.json()["related_node"]["uuid"] == str(alert_tree2.node_uuid)
+    assert get.json()["type"]["value"] == "test_rel"
+
+
+def test_create_verify_observable_history(client_valid_access_token, db):
+    # Create some nodes with relationships
+    #
+    # alert
+    #   analysis
+    #     o1
+    #     o2 - IS_HASH_OF o1
+    alert_tree = helpers.create_alert(db=db)
+    analysis_tree = helpers.create_analysis(db=db, parent_tree=alert_tree)
+    observable_tree1 = helpers.create_observable(type="test_type", value="test_value", parent_tree=analysis_tree, db=db)
+    observable_tree2 = helpers.create_observable(
+        type="test_type", value="test_value2", parent_tree=analysis_tree, db=db
+    )
+    helpers.create_node_relationship_type(value="IS_HASH_OF", db=db)
+
+    # Create the node relationship
+    create_json = {
+        "node_uuid": str(observable_tree2.node_uuid),
+        "related_node_uuid": str(observable_tree1.node_uuid),
+        "type": "IS_HASH_OF",
+    }
+
+    create = client_valid_access_token.post("/api/node/relationship/", json=create_json)
+    assert create.status_code == status.HTTP_201_CREATED
+
+    # Verify the observable history. The first record is for creating the observable, and
+    # the second record is from adding the node relationship.
+    history = client_valid_access_token.get(f"/api/observable/{observable_tree2.node_uuid}/history")
+    assert len(history.json()["items"]) == 2
+    assert history.json()["items"][1]["action"] == "UPDATE"
+    assert history.json()["items"][1]["action_by"]["username"] == "analyst"
+    assert history.json()["items"][1]["record_uuid"] == str(observable_tree2.node_uuid)
+    assert history.json()["items"][1]["field"] == "relationships"
+    assert history.json()["items"][1]["diff"]["old_value"] is None
+    assert history.json()["items"][1]["diff"]["new_value"] is None
+    assert history.json()["items"][1]["diff"]["added_to_list"] == [str(observable_tree1.node_uuid)]
+    assert history.json()["items"][1]["diff"]["removed_from_list"] == []
+    assert history.json()["items"][1]["snapshot"]["observable_relationships"][0]["related_node"]["uuid"] == str(
+        observable_tree1.node_uuid
+    )
