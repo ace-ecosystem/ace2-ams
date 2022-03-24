@@ -7,10 +7,8 @@ import PrimeVue from "primevue/config";
 
 import BaseModal from "@/components/Modals/BaseModal.vue";
 
-
 describe("BaseModal", () => {
   it("renders", () => {
-
     mount(BaseModal, {
       global: {
         plugins: [PrimeVue, createPinia()],

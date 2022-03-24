@@ -8,7 +8,7 @@ import PrimeVue from "primevue/config";
 import TheNodeActionToolbar from "@/components/Node/TheNodeActionToolbar.vue";
 
 const props = {
-    reloadObject: {value: "node"},
+  reloadObject: { value: "node" },
 };
 
 describe("TheNodeActionToolbar", () => {
@@ -16,7 +16,7 @@ describe("TheNodeActionToolbar", () => {
     mount(TheNodeActionToolbar, {
       global: {
         plugins: [PrimeVue, createPinia()],
-        provide: {nodeType: "alerts"}
+        provide: { nodeType: "alerts" },
       },
       propsData: props,
     });

@@ -16,7 +16,7 @@ describe("TheFilterToolbar", () => {
   it("renders", () => {
     mount(TheFilterToolbar, {
       global: {
-        directives: {tooltip: Tooltip},
+        directives: { tooltip: Tooltip },
         plugins: [
           PrimeVue,
           createCustomCypressPinia({

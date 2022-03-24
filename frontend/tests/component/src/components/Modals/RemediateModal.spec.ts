@@ -7,10 +7,8 @@ import PrimeVue from "primevue/config";
 
 import RemediateModal from "@/components/Modals/RemediateModal.vue";
 
-
 describe("RemediateModal", () => {
   it("renders", () => {
-
     mount(RemediateModal, {
       global: {
         plugins: [PrimeVue, createPinia()],

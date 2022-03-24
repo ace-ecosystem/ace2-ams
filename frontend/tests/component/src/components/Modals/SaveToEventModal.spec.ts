@@ -7,10 +7,8 @@ import PrimeVue from "primevue/config";
 
 import SaveToEventModal from "@/components/Modals/SaveToEventModal.vue";
 
-
 describe("SaveToEventModal", () => {
   it("renders", () => {
-
     mount(SaveToEventModal, {
       global: {
         plugins: [PrimeVue, createPinia()],

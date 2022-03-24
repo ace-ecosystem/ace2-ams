@@ -7,10 +7,8 @@ import PrimeVue from "primevue/config";
 
 import DispositionModal from "@/components/Modals/DispositionModal.vue";
 
-
 describe("DispositionModal", () => {
   it("renders", () => {
-
     mount(DispositionModal, {
       global: {
         plugins: [PrimeVue, createPinia()],

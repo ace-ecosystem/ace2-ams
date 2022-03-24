@@ -7,10 +7,8 @@ import PrimeVue from "primevue/config";
 
 import AssignModal from "@/components/Modals/AssignModal.vue";
 
-
 describe("AssignModal", () => {
   it("renders", () => {
-
     mount(AssignModal, {
       global: {
         plugins: [PrimeVue, createPinia()],

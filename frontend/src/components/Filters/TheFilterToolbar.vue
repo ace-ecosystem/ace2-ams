@@ -75,7 +75,6 @@
   const modalStore = useModalStore();
   const currentUserSettingsStore = useCurrentUserSettingsStore();
 
-
   const nodeType = inject("nodeType");
   const validFilterOptions = {
     alerts: validAlertFilters,

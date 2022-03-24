@@ -10,7 +10,7 @@ import { testConfiguration } from "@/etc/configuration/test/index";
 import TheNodeTable from "@/components/Node/TheNodeTable.vue";
 
 const props = {
-    columns: [{ field: "name", header: "Name", sortable: true, default: true }],
+  columns: [{ field: "name", header: "Name", sortable: true, default: true }],
 };
 
 describe("TheNodeTable", () => {
@@ -18,7 +18,7 @@ describe("TheNodeTable", () => {
     mount(TheNodeTable, {
       global: {
         plugins: [PrimeVue, createPinia()],
-        provide: {nodeType: "alerts"}
+        provide: { nodeType: "alerts" },
       },
       propsData: props,
     });

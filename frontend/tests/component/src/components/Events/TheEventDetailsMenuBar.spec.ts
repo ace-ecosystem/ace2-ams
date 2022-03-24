@@ -9,7 +9,6 @@ import PrimeVue from "primevue/config";
 import TheEventDetailsMenuBar from "@/components/Events/TheEventDetailsMenuBar.vue";
 import router from "@/router/index";
 
-
 import { testConfiguration } from "@/etc/configuration/test/index";
 
 const props = {
@@ -24,7 +23,9 @@ describe("TheEventDetailsMenuBar", () => {
           nodeType: "events",
           availableEditFields: testConfiguration.events.eventEditableProperties,
         },
-        plugins: [PrimeVue, createCustomCypressPinia({
+        plugins: [
+          PrimeVue,
+          createCustomCypressPinia({
             initialState: {
               eventStore: {
                 open: {
@@ -36,12 +37,14 @@ describe("TheEventDetailsMenuBar", () => {
                   uuid: "test",
                   queue: { value: "test" },
                   type: { value: "test" },
-                  analysisTypes: []
+                  analysisTypes: [],
                 },
                 requestReload: false,
               },
             },
-          }), router],
+          }),
+          router,
+        ],
       },
       propsData: props,
     });

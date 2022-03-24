@@ -24,7 +24,6 @@ import {
 } from "./common";
 import { inputTypes } from "./base";
 
-
 // ** Events ** //
 
 export const eventPropertyTypes: Record<string, string> = {

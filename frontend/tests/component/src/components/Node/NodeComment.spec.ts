@@ -10,12 +10,11 @@ import { commentReadFactory } from "../../../../mocks/comment";
 import NodeComment from "@/components/Node/NodeComment.vue";
 
 const props = {
-    comment: commentReadFactory(),
-  };
+  comment: commentReadFactory(),
+};
 
 describe("NodeComment", () => {
   it("renders", () => {
-
     mount(NodeComment, {
       global: {
         plugins: [PrimeVue, createPinia()],

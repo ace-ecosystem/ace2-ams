@@ -12,16 +12,19 @@ import { testConfiguration } from "@/etc/configuration/test/index";
 import DateRangePicker from "@/components/UserInterface/DateRangePicker.vue";
 
 const props = {
-    columns: [{ field: "name", header: "Name", sortable: true, default: true }],
+  columns: [{ field: "name", header: "Name", sortable: true, default: true }],
 };
 
 describe("DateRangePicker", () => {
   it("renders", () => {
     mount(DateRangePicker, {
       global: {
-          directives: {tooltip: Tooltip},
+        directives: { tooltip: Tooltip },
         plugins: [PrimeVue, createPinia()],
-        provide: {nodeType: "alerts", rangeFilters: testConfiguration.alerts.alertRangeFilters}
+        provide: {
+          nodeType: "alerts",
+          rangeFilters: testConfiguration.alerts.alertRangeFilters,
+        },
       },
     });
   });

@@ -10,7 +10,6 @@ import { Event } from "@/services/api/event";
 import { eventReadFactory, mockEventUUID } from "./../../../../mocks/events";
 import { testConfiguration } from "@/etc/configuration/test/index";
 
-
 describe("EventAlertsTable", () => {
   it("renders", () => {
     cy.stub(Event, "read").returns(eventReadFactory());

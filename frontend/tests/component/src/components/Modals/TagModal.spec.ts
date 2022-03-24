@@ -7,10 +7,8 @@ import PrimeVue from "primevue/config";
 
 import TagModal from "@/components/Modals/TagModal.vue";
 
-
 describe("TagModal", () => {
   it("renders", () => {
-
     mount(TagModal, {
       global: {
         plugins: [PrimeVue, createPinia()],

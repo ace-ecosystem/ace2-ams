@@ -8,7 +8,7 @@ import PrimeVue from "primevue/config";
 import NodeTag from "@/components/Node/NodeTag.vue";
 
 const props = {
-    tag: {value: "testTag"},
+  tag: { value: "testTag" },
 };
 
 describe("NodeTag", () => {
@@ -16,7 +16,7 @@ describe("NodeTag", () => {
     mount(NodeTag, {
       global: {
         plugins: [PrimeVue, createPinia()],
-        provide: {nodeType: "alerts"}
+        provide: { nodeType: "alerts" },
       },
       propsData: props,
     });

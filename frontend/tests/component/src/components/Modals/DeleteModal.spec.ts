@@ -7,10 +7,8 @@ import PrimeVue from "primevue/config";
 
 import DeleteModal from "@/components/Modals/DeleteModal.vue";
 
-
 describe("DeleteModal", () => {
   it("renders", () => {
-
     mount(DeleteModal, {
       global: {
         plugins: [PrimeVue, createPinia()],

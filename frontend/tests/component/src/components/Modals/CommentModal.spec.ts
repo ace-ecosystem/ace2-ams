@@ -7,10 +7,8 @@ import PrimeVue from "primevue/config";
 
 import CommentModal from "@/components/Modals/CommentModal.vue";
 
-
 describe("CommentModal", () => {
   it("renders", () => {
-
     mount(CommentModal, {
       global: {
         plugins: [PrimeVue, createPinia()],
