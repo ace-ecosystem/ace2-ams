@@ -24,15 +24,13 @@
     "./src/**/*.ts",
     "./src/**/*.d.ts",
     "./src/**/*.tsx",
-    "./src/**/*.vue"
+    "./src/**/*.vue",
+    "./tests/**/*.ts"
   ],
   "exclude": [
     "node_modules",
     "./node_modules",
     "./node_modules/*",
-    "./node_modules/@types/node/index.d.ts",
-    "tests/component/**/*",
-    "./tests/**/*.ts",
-    "./tests/**/*.tsx"
+    "./node_modules/@types/node/index.d.ts"
   ]
 }
