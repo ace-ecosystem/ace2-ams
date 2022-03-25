@@ -138,9 +138,9 @@
   const props = defineProps({
     queue: { type: String, required: true },
     modelValue: { type: Object, required: true },
+    formType: { type: String, required: true },
     fixedPropertyType: { type: Boolean, required: false },
     allowDelete: { type: Boolean, required: false },
-    formType: { type: String, required: true },
   });
 
   const propertyTypeOptions = computed(() => {

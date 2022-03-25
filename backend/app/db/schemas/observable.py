@@ -1,3 +1,5 @@
+import json
+
 from sqlalchemy import (
     Boolean,
     Column,
@@ -9,12 +11,14 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from typing import List
 
-from api.models.observable import ObservableNodeTreeRead
+from api.models.observable import ObservableNodeTreeRead, ObservableRead, ObservableRelationshipRead
 from db.database import Base
 from db.schemas.helpers import utcnow
-from db.schemas.history import HistoryMixin
+from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.node import Node
+from db.schemas.node_relationship import NodeRelationship
 
 
 class ObservableHistory(Base, HistoryMixin):
@@ -23,7 +27,7 @@ class ObservableHistory(Base, HistoryMixin):
     record_uuid = Column(UUID(as_uuid=True), ForeignKey("observable.uuid"), index=True, nullable=False)
 
 
-class Observable(Node):
+class Observable(Node, HasHistory):
     __tablename__ = "observable"
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
@@ -69,4 +73,22 @@ class Observable(Node):
     )
 
     def serialize_for_node_tree(self) -> ObservableNodeTreeRead:
-        return ObservableNodeTreeRead(**self.__dict__)
+        return ObservableNodeTreeRead(**self.to_dict())
+
+    def to_dict(self):
+        values_dict = self.__dict__
+        values_dict["observable_relationships"] = self.observable_relationships
+        return values_dict
+
+    @property
+    def history_snapshot(self):
+        return json.loads(ObservableRead(**self.to_dict()).json())
+
+    @property
+    def observable_relationships(self) -> List[ObservableRelationshipRead]:
+        """Returns the list of observable relationships for this observable sorted by the
+        related observable's type then value"""
+
+        results: List[NodeRelationship] = [r for r in self.relationships if isinstance(r.related_node, Observable)]
+
+        return sorted(results, key=lambda x: (x.related_node.type.value, x.related_node.value))

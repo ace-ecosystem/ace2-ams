@@ -178,6 +178,31 @@
               ]
             }
           ]
+        },
+        {
+          "type": "File Analysis",
+          "observables": [
+            {
+              "type": "md5",
+              "value": "912ec803b2ce49e4a541068d495ab570",
+              "analyses": [
+                {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "link": "https://url.to.search/query=asdf",
+                    "hits": 0
+                  }
+                }
+              ],
+              "observable_relationships": [
+                {
+                  "type": "IS_HASH_OF",
+                  "o_type": "file",
+                  "o_value": "email.rfc822"
+                }
+              ]
+            }
+          ]
         }
       ]
     },

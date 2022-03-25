@@ -57,9 +57,11 @@
 </template>
 
 <script setup>
+  import { useRouter } from "vue-router";
   import NodeTagVue from "@/components/Node/NodeTag.vue";
   import { onBeforeMount, defineProps, ref } from "vue";
   import { useAlertStore } from "@/stores/alert";
+
   const alertStore = useAlertStore();
   const openAlertId = ref(alertStore.open.uuid);
 
@@ -96,7 +98,6 @@
     ];
   }
 
-  import { useRouter } from "vue-router";
   const router = useRouter();
   function viewAnalysisRoute(item) {
     return {

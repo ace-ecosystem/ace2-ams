@@ -8,19 +8,13 @@ import router from "@/router";
 
 import EventAlertsTable from "@/components/Events/EventAlertsTable.vue";
 import { Alert } from "@/services/api/alert";
-import {
-  mockAlertReadA,
-  mockAlertReadB,
-  mockAlertReadC,
-} from "../../../../mocks/alert";
+import { alertReadFactory } from "../../../../mocks/alert";
+
+const mockAlert = alertReadFactory();
 
 describe("EventAlertsTable", () => {
   it("renders", () => {
-    cy.stub(Alert, "readAllPages").returns([
-      mockAlertReadA,
-      mockAlertReadB,
-      mockAlertReadC,
-    ]);
+    cy.stub(Alert, "readAllPages").returns([mockAlert, mockAlert, mockAlert]);
 
     mount(EventAlertsTable, {
       global: {

@@ -1,9 +1,12 @@
+import json
+
 from sqlalchemy import Boolean, Column, ForeignKey, func, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
+from api.models.user import UserRead
 from db.database import Base
-from db.schemas.history import HistoryMixin
+from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.user_role_mapping import user_role_mapping
 
 
@@ -13,7 +16,7 @@ class UserHistory(Base, HistoryMixin):
     record_uuid = Column(UUID(as_uuid=True), ForeignKey("user.uuid"), index=True, nullable=False)
 
 
-class User(Base):
+class User(Base, HasHistory):
     __tablename__ = "user"
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
@@ -50,3 +53,7 @@ class User(Base):
     username = Column(String, unique=True, nullable=False)
 
     refresh_token = Column(String)
+
+    @property
+    def history_snapshot(self):
+        return json.loads(UserRead(**self.__dict__).json())

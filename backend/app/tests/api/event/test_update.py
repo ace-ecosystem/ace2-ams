@@ -495,7 +495,6 @@ def test_update_vectors(client_valid_access_token, db):
 
     # Verify the history
     history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
-    print(history.json())
     assert history.json()["total"] == 3
     assert history.json()["items"][2]["action"] == "UPDATE"
     assert history.json()["items"][2]["action_by"]["username"] == "analyst"

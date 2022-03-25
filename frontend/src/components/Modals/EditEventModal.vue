@@ -72,7 +72,7 @@
   import { Event } from "@/services/api/event";
   import { useEventStore } from "@/stores/event";
   import { useModalStore } from "@/stores/modal";
-  import { populateEventStores } from "@/etc/helpers";
+  import { populateEventStores } from "@/stores/helpers";
   import { isObject } from "@/etc/validators";
   import NodeCommentEditor from "../Node/NodeCommentEditor.vue";
   import { NodeComment } from "@/services/api/nodeComment";

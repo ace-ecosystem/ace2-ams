@@ -62,7 +62,6 @@
   import { useEventStore } from "@/stores/event";
   import { useSelectedEventStore } from "@/stores/selectedEvent";
 
-  import { defaultEventDetailsSections } from "@/etc/constants/events";
   import { copyToClipboard } from "@/etc/helpers";
 
   const route = useRoute();
@@ -70,7 +69,10 @@
   const selectedEventStore = useSelectedEventStore();
 
   const config = inject("config");
-  const componentMapping = config.analysis.analysisModuleComponents;
+  const componentMapping = {
+    ...config.analysis.analysisModuleComponents,
+    ...config.events.defaultEventDetailsSections,
+  };
 
   const currentSection = ref("Event Summary");
   const currentComponent = shallowRef(EventSummary);
@@ -101,8 +103,6 @@
     currentSection.value = section;
     if (section in componentMapping) {
       currentComponent.value = componentMapping[section];
-    } else if (section in defaultEventDetailsSections) {
-      currentComponent.value = defaultEventDetailsSections[section];
     } else {
       currentComponent.value = AnalysisDetailsBase;
     }

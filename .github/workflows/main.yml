@@ -69,6 +69,9 @@ jobs:
       - name: ESLint
         run: cd frontend && npx eslint .
 
+      - name: Check for circular dependencies
+        run: cd frontend && npx madge --ts-config tsconfig.json  --extensions ts,vue --circular --exclude models/* src/*
+
       - name: Unit tests
         run: cd frontend && npm run test:unit
 
@@ -117,6 +120,40 @@ jobs:
 
       - name: Database logs
         run: docker logs ace2-ams-db
+
+  component:
+    name: Component tests
+    runs-on: ubuntu-latest
+
+    env:
+      ACE_DEV: true
+      DOCKER_BUILDKIT: 0
+      COMPOSE_DOCKER_CLI_BUILD: 0
+      COOKIES_SAMESITE: lax
+      COOKIES_SECURE: False
+      JWT_ACCESS_EXPIRE_SECONDS: 900
+      JWT_ALGORITHM: HS256
+      JWT_REFRESH_EXPIRE_SECONDS: 43200
+      JWT_SECRET: supersecret
+      POSTGRES_DB: ace
+      POSTGRES_USER: ace
+      POSTGRES_PASSWORD: supersecret
+      DATABASE_URL: postgresql://ace:supersecret@db:5432/ace
+      DATABASE_TEST_URL: postgresql://ace:supersecret@db:5432/ace_test
+      TESTING: yes
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run environment
+        run: docker-compose -f docker-compose.yml up -d
+
+      - name: Wait for the environment to be accessible
+        run: docker exec ace2-ams-gui bin/wait-for-gui.sh
+
+      - name: Component Tests
+        run: docker exec ace2-ams-gui xvfb-run cypress run-ct --headed --browser chrome --config video=false,screenshotOnRunFailure=false
 
   production-build:
     name: Production Build

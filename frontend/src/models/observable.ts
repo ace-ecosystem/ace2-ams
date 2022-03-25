@@ -9,6 +9,7 @@ import {
 } from "./node";
 import { nodeCommentRead } from "./nodeComment";
 import { nodeDirectiveRead } from "./nodeDirective";
+import { nodeRelationshipRead } from "./nodeRelationship";
 import { nodeTagRead } from "./nodeTag";
 import { nodeThreatRead } from "./nodeThreat";
 import { nodeThreatActorRead } from "./nodeThreatActor";
@@ -36,6 +37,7 @@ export interface observableRead extends nodeRead {
   directives: nodeDirectiveRead[];
   expiresOn: Date | null;
   forDetection: boolean;
+  observableRelationships: observableRelationshipRead[];
   redirectionUuid: UUID | null;
   tags: nodeTagRead[];
   threatActors: nodeThreatActorRead[];
@@ -73,4 +75,8 @@ export interface observableUpdate extends nodeUpdate {
   type?: string;
   value?: string;
   [key: string]: unknown;
+}
+
+export interface observableRelationshipRead extends nodeRelationshipRead {
+  relatedNode: observableRead;
 }

@@ -54,7 +54,7 @@
   import { defineProps } from "vue";
 
   import NodeTagVue from "@/components/Node/NodeTag.vue";
-  import NodeComment from "../Node/NodeComment.vue";
+  import NodeComment from "@/components/Node/NodeComment.vue";
 
   import { getAllAlertTags, getAlertLink } from "@/etc/helpers";
 
