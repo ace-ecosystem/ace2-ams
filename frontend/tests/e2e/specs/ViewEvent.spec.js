@@ -249,6 +249,7 @@ describe("Event Summary Details", () => {
     cy.get("#event-summary-table").should("be.visible");
     cy.get("#event-section-title").should("contain.text", "Event Summary");
   });
+
   it("renders timeline correctly", () => {
     cy.get("#event-summary-timeline").should("be.visible");
     cy.get('[data-cy="event-summary-timeline-label"]')
@@ -288,6 +289,7 @@ describe("Event Summary Details", () => {
       .eq(5)
       .should("have.text", "TBD");
   });
+
   it("renders table correctly", () => {
     cy.get("#event-summary-table").should("be.visible");
     cy.get('[data-cy="table-column-select"]').should("be.visible");
@@ -333,6 +335,7 @@ describe("Event Summary Details", () => {
       .eq(5)
       .should("have.text", "None");
   });
+
   it("allows user to change and reset columns in details table", () => {
     // Open columns selector and select a new column
     cy.get(".p-multiselect-label").click();
@@ -611,7 +614,7 @@ describe("Observable Summary Details - Affect State", () => {
     cy.wait("@updateObservable").its("state").should("eq", "Complete");
     cy.wait("@updateObservable").its("state").should("eq", "Complete");
 
-    // CAll to update the table
+    // Call to update the table
     cy.wait("@getObservableSummary").its("state").should("eq", "Complete");
 
     // Check classes
@@ -624,6 +627,7 @@ describe("Observable Summary Details - Affect State", () => {
     cy.get("tr").eq(6).should("not.have.class", "p-highlight");
     cy.get("tr").eq(7).should("not.have.class", "p-highlight");
     cy.get("tr").eq(8).should("not.have.class", "p-highlight");
+    cy.get("tr").eq(9).should("not.have.class", "p-highlight");
 
     cy.get("tr").eq(0).should("not.have.class", "low-hits");
     cy.get("tr").eq(1).should("not.have.class", "low-hits");
@@ -631,9 +635,10 @@ describe("Observable Summary Details - Affect State", () => {
     cy.get("tr").eq(3).should("not.have.class", "low-hits");
     cy.get("tr").eq(4).should("not.have.class", "low-hits");
     cy.get("tr").eq(5).should("not.have.class", "low-hits");
-    cy.get("tr").eq(6).should("not.have.class", "low-hits");
-    cy.get("tr").eq(7).should("have.class", "low-hits");
-    cy.get("tr").eq(8).should("not.have.class", "low-hits");
+    cy.get("tr").eq(6).should("have.class", "low-hits");
+    cy.get("tr").eq(7).should("not.have.class", "low-hits");
+    cy.get("tr").eq(8).should("have.class", "low-hits");
+    cy.get("tr").eq(9).should("not.have.class", "low-hits");
 
     // Check checkboxes
     cy.get(".p-datatable-thead .p-checkbox .p-checkbox-box").should(
@@ -660,8 +665,12 @@ describe("Observable Summary Details - Affect State", () => {
     cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
       .eq(6)
       .should("have.attr", "aria-checked", "false");
+    cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
+      .eq(7)
+      .should("have.attr", "aria-checked", "false");
   });
 });
+
 describe("Observable Summary Details - Don't Affect State", () => {
   before(() => {
     cy.resetDatabase();
@@ -703,18 +712,23 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.wait("@getObservableSummary").its("state").should("eq", "Complete");
   });
 
+  afterEach(() => {
+    cy.get("#reset-selected-observables-button").click();
+  });
+
   it("renders section correctly", () => {
     // Check title
     cy.get("#event-section-title").should("contain.text", "Observable Summary");
 
     // Check table
     cy.get('[data-cy="observables-table"]').should("be.visible");
-    cy.get(".p-column-title").should("have.length", 5);
+    cy.get(".p-column-title").should("have.length", 6);
     cy.get(".p-column-title").eq(0).should("have.text", "For Detection");
     cy.get(".p-column-title").eq(1).should("have.text", "FAQueue Hits");
     cy.get(".p-column-title").eq(2).should("have.text", "Type");
     cy.get(".p-column-title").eq(3).should("have.text", "Value");
-    cy.get(".p-column-title").eq(4).should("have.text", "Tags");
+    cy.get(".p-column-title").eq(4).should("have.text", "Relationships");
+    cy.get(".p-column-title").eq(5).should("have.text", "Tags");
     cy.get(".p-paginator").should("be.visible");
 
     // Check all buttons / filters are visible
@@ -738,7 +752,7 @@ describe("Observable Summary Details - Don't Affect State", () => {
     // Check table content
 
     // Check there are the right number of rows and they are styled correctly
-    cy.get("tr").should("have.length", 9); //  1 header row + 1 filter/button row + 7 observable rows
+    cy.get("tr").should("have.length", 10); //  1 header row + 1 filter/button row + 8 observable rows
     cy.get("tr").eq(0).should("not.have.class", "p-highlight");
     cy.get("tr").eq(1).should("not.have.class", "p-highlight");
     cy.get("tr").eq(2).should("not.have.class", "p-highlight");
@@ -748,6 +762,7 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get("tr").eq(6).should("not.have.class", "p-highlight");
     cy.get("tr").eq(7).should("not.have.class", "p-highlight");
     cy.get("tr").eq(8).should("not.have.class", "p-highlight");
+    cy.get("tr").eq(9).should("not.have.class", "p-highlight");
 
     cy.get("tr").eq(0).should("not.have.class", "low-hits");
     cy.get("tr").eq(1).should("not.have.class", "low-hits");
@@ -755,9 +770,10 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get("tr").eq(3).should("not.have.class", "low-hits");
     cy.get("tr").eq(4).should("not.have.class", "low-hits");
     cy.get("tr").eq(5).should("not.have.class", "low-hits");
-    cy.get("tr").eq(6).should("not.have.class", "low-hits");
-    cy.get("tr").eq(7).should("have.class", "low-hits");
-    cy.get("tr").eq(8).should("not.have.class", "low-hits");
+    cy.get("tr").eq(6).should("have.class", "low-hits");
+    cy.get("tr").eq(7).should("not.have.class", "low-hits");
+    cy.get("tr").eq(8).should("have.class", "low-hits");
+    cy.get("tr").eq(9).should("not.have.class", "low-hits");
 
     // Check checkboxes
     cy.get(".p-datatable-thead .p-checkbox .p-checkbox-box").should(
@@ -784,20 +800,24 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
       .eq(6)
       .should("have.attr", "aria-checked", "false");
+    cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
+      .eq(7)
+      .should("have.attr", "aria-checked", "false");
 
     // Check FAQueue Hits column
-    cy.get('[data-cy="faqueue-hits-count"]').should("have.length", 7);
-    cy.get('[data-cy="faqueue-external-link"]').should("have.length", 7);
+    cy.get('[data-cy="faqueue-hits-count"]').should("have.length", 8);
+    cy.get('[data-cy="faqueue-external-link"]').should("have.length", 8);
     cy.get('[data-cy="faqueue-hits-count"]').eq(0).should("have.text", 5);
     cy.get('[data-cy="faqueue-hits-count"]').eq(1).should("have.text", 100);
     cy.get('[data-cy="faqueue-hits-count"]').eq(2).should("have.text", 10);
     cy.get('[data-cy="faqueue-hits-count"]').eq(3).should("have.text", 1000);
-    cy.get('[data-cy="faqueue-hits-count"]').eq(4).should("have.text", 20);
-    cy.get('[data-cy="faqueue-hits-count"]').eq(5).should("have.text", 0);
-    cy.get('[data-cy="faqueue-hits-count"]').eq(6).should("have.text", 5);
+    cy.get('[data-cy="faqueue-hits-count"]').eq(4).should("have.text", 0);
+    cy.get('[data-cy="faqueue-hits-count"]').eq(5).should("have.text", 20);
+    cy.get('[data-cy="faqueue-hits-count"]').eq(6).should("have.text", 0);
+    cy.get('[data-cy="faqueue-hits-count"]').eq(7).should("have.text", 5);
 
     // Check Type column
-    cy.get(".p-datatable-tbody > > :nth-child(3)").should("have.length", 7);
+    cy.get(".p-datatable-tbody > > :nth-child(3)").should("have.length", 8);
     cy.get(".p-datatable-tbody > > :nth-child(3)")
       .eq(0)
       .should("have.text", "email_address");
@@ -812,16 +832,19 @@ describe("Observable Summary Details - Don't Affect State", () => {
       .should("have.text", "ipv4");
     cy.get(".p-datatable-tbody > > :nth-child(3)")
       .eq(4)
-      .should("have.text", "uri_path");
+      .should("have.text", "md5");
     cy.get(".p-datatable-tbody > > :nth-child(3)")
       .eq(5)
-      .should("have.text", "url");
+      .should("have.text", "uri_path");
     cy.get(".p-datatable-tbody > > :nth-child(3)")
       .eq(6)
       .should("have.text", "url");
+    cy.get(".p-datatable-tbody > > :nth-child(3)")
+      .eq(7)
+      .should("have.text", "url");
 
     // Check Value column
-    cy.get(".p-datatable-tbody > > :nth-child(4)").should("have.length", 7);
+    cy.get(".p-datatable-tbody > > :nth-child(4)").should("have.length", 8);
     cy.get(".p-datatable-tbody > > :nth-child(4)")
       .eq(0)
       .should("have.text", "badguy@evil.com");
@@ -836,19 +859,22 @@ describe("Observable Summary Details - Don't Affect State", () => {
       .should("have.text", "127.0.0.1");
     cy.get(".p-datatable-tbody > > :nth-child(4)")
       .eq(4)
-      .should("have.text", "/malware.exe");
+      .should("have.text", "912ec803b2ce49e4a541068d495ab570");
     cy.get(".p-datatable-tbody > > :nth-child(4)")
       .eq(5)
-      .should("have.text", "http://amazon.com/");
+      .should("have.text", "/malware.exe");
     cy.get(".p-datatable-tbody > > :nth-child(4)")
       .eq(6)
+      .should("have.text", "http://amazon.com/");
+    cy.get(".p-datatable-tbody > > :nth-child(4)")
+      .eq(7)
       .should("have.text", "http://evil.com/malware.exe");
 
-    // Check Tags column
-    cy.get(".p-datatable-tbody > > :nth-child(5)").should("have.length", 7);
+    // Check Relationships column
+    cy.get(".p-datatable-tbody > > :nth-child(5)").should("have.length", 8);
     cy.get(".p-datatable-tbody > > :nth-child(5)")
       .eq(0)
-      .should("have.text", "from_address");
+      .should("have.text", "");
     cy.get(".p-datatable-tbody > > :nth-child(5)")
       .eq(1)
       .should("have.text", "");
@@ -857,23 +883,55 @@ describe("Observable Summary Details - Don't Affect State", () => {
       .should("have.text", "");
     cy.get(".p-datatable-tbody > > :nth-child(5)")
       .eq(3)
-      .should("have.text", "c2contacted_host");
+      .should("have.text", "");
     cy.get(".p-datatable-tbody > > :nth-child(5)")
       .eq(4)
-      .should("have.text", "");
+      .should("have.text", "IS_HASH_OF: email.rfc822");
     cy.get(".p-datatable-tbody > > :nth-child(5)")
       .eq(5)
       .should("have.text", "");
     cy.get(".p-datatable-tbody > > :nth-child(5)")
       .eq(6)
       .should("have.text", "");
+    cy.get(".p-datatable-tbody > > :nth-child(5)")
+      .eq(7)
+      .should("have.text", "");
 
-    // Check that the tags themselves are formatted as tags
-    cy.get(".p-tag").should("have.length", 3);
+    // Check Tags column
+    cy.get(".p-datatable-tbody > > :nth-child(6)").should("have.length", 8);
+    cy.get(".p-datatable-tbody > > :nth-child(6)")
+      .eq(0)
+      .should("have.text", "from_address");
+    cy.get(".p-datatable-tbody > > :nth-child(6)")
+      .eq(1)
+      .should("have.text", "");
+    cy.get(".p-datatable-tbody > > :nth-child(6)")
+      .eq(2)
+      .should("have.text", "");
+    cy.get(".p-datatable-tbody > > :nth-child(6)")
+      .eq(3)
+      .should("have.text", "c2contacted_host");
+    cy.get(".p-datatable-tbody > > :nth-child(6)")
+      .eq(4)
+      .should("have.text", "");
+    cy.get(".p-datatable-tbody > > :nth-child(6)")
+      .eq(5)
+      .should("have.text", "");
+    cy.get(".p-datatable-tbody > > :nth-child(6)")
+      .eq(6)
+      .should("have.text", "");
+    cy.get(".p-datatable-tbody > > :nth-child(6)")
+      .eq(7)
+      .should("have.text", "");
+
+    // Check that the tags themselves are formatted as tags (one of these is a relationship, not actually a tag)
+    cy.get(".p-tag").should("have.length", 4);
     cy.get(".p-tag").eq(0).should("have.text", "from_address");
     cy.get(".p-tag").eq(1).should("have.text", "c2");
     cy.get(".p-tag").eq(2).should("have.text", "contacted_host");
+    cy.get(".p-tag").eq(3).should("have.text", "IS_HASH_OF: email.rfc822");
   });
+
   it("correctly selects observables with low hits when 'Select low hits' button clicked ", () => {
     cy.get("#select-low-hits-button").click();
 
@@ -884,9 +942,10 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get("tr").eq(3).should("not.have.class", "p-highlight");
     cy.get("tr").eq(4).should("have.class", "p-highlight"); // This row will stay selected/highlighted
     cy.get("tr").eq(5).should("not.have.class", "p-highlight");
-    cy.get("tr").eq(6).should("not.have.class", "p-highlight");
-    cy.get("tr").eq(7).should("have.class", "p-highlight"); // Will have the highlighted class now that it is selected
-    cy.get("tr").eq(8).should("not.have.class", "p-highlight");
+    cy.get("tr").eq(6).should("have.class", "p-highlight"); // Will have the highlighted class now that it is selected
+    cy.get("tr").eq(7).should("not.have.class", "p-highlight");
+    cy.get("tr").eq(8).should("have.class", "p-highlight"); // Will have the highlighted class now that it is selected
+    cy.get("tr").eq(9).should("not.have.class", "p-highlight");
 
     cy.get("tr").eq(0).should("not.have.class", "low-hits");
     cy.get("tr").eq(1).should("not.have.class", "low-hits");
@@ -894,9 +953,10 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get("tr").eq(3).should("not.have.class", "low-hits");
     cy.get("tr").eq(4).should("not.have.class", "low-hits");
     cy.get("tr").eq(5).should("not.have.class", "low-hits");
-    cy.get("tr").eq(6).should("not.have.class", "low-hits");
-    cy.get("tr").eq(7).should("have.class", "low-hits");
-    cy.get("tr").eq(8).should("not.have.class", "low-hits");
+    cy.get("tr").eq(6).should("have.class", "low-hits");
+    cy.get("tr").eq(7).should("not.have.class", "low-hits");
+    cy.get("tr").eq(8).should("have.class", "low-hits");
+    cy.get("tr").eq(9).should("not.have.class", "low-hits");
 
     // Check checkboxes
     cy.get(".p-datatable-thead .p-checkbox .p-checkbox-box").should(
@@ -916,12 +976,15 @@ describe("Observable Summary Details - Don't Affect State", () => {
       .should("have.attr", "aria-checked", "false");
     cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
       .eq(4)
-      .should("have.attr", "aria-checked", "false");
+      .should("have.attr", "aria-checked", "true");
     cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
       .eq(5)
-      .should("have.attr", "aria-checked", "true"); // This observable will now be checked
+      .should("have.attr", "aria-checked", "false");
     cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
       .eq(6)
+      .should("have.attr", "aria-checked", "true"); // This observable will now be checked
+    cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
+      .eq(7)
       .should("have.attr", "aria-checked", "false");
 
     // Reset newly selected checkbox
@@ -937,12 +1000,13 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get("tr").eq(0).should("not.have.class", "p-highlight");
     cy.get("tr").eq(1).should("not.have.class", "p-highlight");
     cy.get("tr").eq(2).should("not.have.class", "p-highlight");
-    cy.get("tr").eq(3).should("have.class", "p-highlight");
+    cy.get("tr").eq(3).should("have.class", "p-highlight"); // Will have the highlighted class now that it is selected
     cy.get("tr").eq(4).should("have.class", "p-highlight"); // This row will stay selected/highlighted
     cy.get("tr").eq(5).should("not.have.class", "p-highlight");
     cy.get("tr").eq(6).should("not.have.class", "p-highlight");
     cy.get("tr").eq(7).should("have.class", "p-highlight"); // Will have the highlighted class now that it is selected
     cy.get("tr").eq(8).should("not.have.class", "p-highlight");
+    cy.get("tr").eq(9).should("not.have.class", "p-highlight");
 
     cy.get("tr").eq(0).should("not.have.class", "low-hits");
     cy.get("tr").eq(1).should("not.have.class", "low-hits");
@@ -950,9 +1014,10 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get("tr").eq(3).should("not.have.class", "low-hits");
     cy.get("tr").eq(4).should("not.have.class", "low-hits");
     cy.get("tr").eq(5).should("not.have.class", "low-hits");
-    cy.get("tr").eq(6).should("not.have.class", "low-hits");
-    cy.get("tr").eq(7).should("have.class", "low-hits");
-    cy.get("tr").eq(8).should("not.have.class", "low-hits");
+    cy.get("tr").eq(6).should("have.class", "low-hits");
+    cy.get("tr").eq(7).should("not.have.class", "low-hits");
+    cy.get("tr").eq(8).should("have.class", "low-hits");
+    cy.get("tr").eq(9).should("not.have.class", "low-hits");
 
     // Check checkboxes
     cy.get(".p-datatable-thead .p-checkbox .p-checkbox-box").should(
@@ -963,7 +1028,7 @@ describe("Observable Summary Details - Don't Affect State", () => {
       .should("have.attr", "aria-checked", "false");
     cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
       .eq(1)
-      .should("have.attr", "aria-checked", "true");
+      .should("have.attr", "aria-checked", "true"); // This observable will now be checked
     cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
       .eq(2)
       .should("have.attr", "aria-checked", "true"); // This observable is enabled and will stay checked
@@ -979,6 +1044,9 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
       .eq(6)
       .should("have.attr", "aria-checked", "false");
+    cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
+      .eq(7)
+      .should("have.attr", "aria-checked", "false");
 
     cy.get("#reset-selected-observables-button").click();
 
@@ -992,6 +1060,7 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get("tr").eq(6).should("not.have.class", "p-highlight");
     cy.get("tr").eq(7).should("not.have.class", "p-highlight");
     cy.get("tr").eq(8).should("not.have.class", "p-highlight");
+    cy.get("tr").eq(9).should("not.have.class", "p-highlight");
 
     cy.get("tr").eq(0).should("not.have.class", "low-hits");
     cy.get("tr").eq(1).should("not.have.class", "low-hits");
@@ -999,9 +1068,10 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get("tr").eq(3).should("not.have.class", "low-hits");
     cy.get("tr").eq(4).should("not.have.class", "low-hits");
     cy.get("tr").eq(5).should("not.have.class", "low-hits");
-    cy.get("tr").eq(6).should("not.have.class", "low-hits");
-    cy.get("tr").eq(7).should("have.class", "low-hits");
-    cy.get("tr").eq(8).should("not.have.class", "low-hits");
+    cy.get("tr").eq(6).should("have.class", "low-hits");
+    cy.get("tr").eq(7).should("not.have.class", "low-hits");
+    cy.get("tr").eq(8).should("have.class", "low-hits");
+    cy.get("tr").eq(9).should("not.have.class", "low-hits");
 
     // Check checkboxes
     cy.get(".p-datatable-thead .p-checkbox .p-checkbox-box").should(
@@ -1028,7 +1098,11 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
       .eq(6)
       .should("have.attr", "aria-checked", "false");
+    cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box")
+      .eq(7)
+      .should("have.attr", "aria-checked", "false");
   });
+
   it("correctly hides and shows rows with high FAQueue Hits when toggle button clicked", () => {
     cy.get("#toggle-max-hits-button").should("have.text", "Hide Max Hits");
     cy.get("#toggle-max-hits-button > .pi").should(
@@ -1036,8 +1110,8 @@ describe("Observable Summary Details - Don't Affect State", () => {
       "pi-eye-slash",
     );
     cy.get("#toggle-max-hits-button").click();
-    // Should only be 8 rows now, 1 will have been hidden
-    cy.get("tr").should("have.length", 8);
+    // Should only be 9 rows now, 1 will have been hidden
+    cy.get("tr").should("have.length", 9);
     cy.get("#toggle-max-hits-button").should("have.text", "Show Max Hits");
     cy.get("#toggle-max-hits-button > .pi").should("have.class", "pi-eye");
     cy.get('[data-cy="faqueue-hits-count"]')
@@ -1050,7 +1124,7 @@ describe("Observable Summary Details - Don't Affect State", () => {
       .contains("127.0.0.1")
       .should("not.exist");
     cy.get("#toggle-max-hits-button").click();
-    cy.get("tr").should("have.length", 9);
+    cy.get("tr").should("have.length", 10);
     cy.get("#toggle-max-hits-button").should("have.text", "Hide Max Hits");
     cy.get("#toggle-max-hits-button > .pi").should(
       "have.class",
@@ -1066,6 +1140,7 @@ describe("Observable Summary Details - Don't Affect State", () => {
       .contains("127.0.0.1")
       .should("be.visible");
   });
+
   it("correctly filters by observable type when selected", () => {
     cy.get('[data-cy="observable-type-filter-multiselect"]').click();
     cy.get('[aria-label="email_address"]').click();
@@ -1085,8 +1160,9 @@ describe("Observable Summary Details - Don't Affect State", () => {
     cy.get("td").contains("No observables found.").should("be.visible");
     // Click the remove filter button, all rows should be visible again
     cy.get(".p-column-filter-clear-button").eq(2).click();
-    cy.get("tr").should("have.length", 9);
+    cy.get("tr").should("have.length", 10);
   });
+
   it("correctly filters by observable value when typing", () => {
     cy.get('[data-cy="observable-value-filter-input"]').click().type("He");
     // Should only be 3 rows now, 2 headers and 3 "H" observable
@@ -1102,8 +1178,9 @@ describe("Observable Summary Details - Don't Affect State", () => {
       .should("be.visible");
     // Click the remove filter button, all rows should be visible again
     cy.get(".p-column-filter-clear-button").eq(3).click();
-    cy.get("tr").should("have.length", 9);
+    cy.get("tr").should("have.length", 10);
   });
+
   it("correctly sorts by observable value when typing", () => {
     cy.get('[data-cy="observable-value-filter-input"]').click().type("He");
     // Should only be 3 rows now, 2 headers and 3 "H" observable
@@ -1119,7 +1196,7 @@ describe("Observable Summary Details - Don't Affect State", () => {
       .should("be.visible");
     // Click the remove filter button, all rows should be visible again
     cy.get(".p-column-filter-clear-button").eq(3).click();
-    cy.get("tr").should("have.length", 9);
+    cy.get("tr").should("have.length", 10);
   });
 });
 
