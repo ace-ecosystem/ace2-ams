@@ -47,19 +47,19 @@ describe("Alert calls", () => {
       .get("/newItem")
       .reply(200, "Read successful");
     const res = await api.createAndRead(MOCK_ALERT_CREATE);
-    expect(res).toEqual("Read successful");
+    expect(res).to.eql("Read successful");
   });
 
   it("will make a get request to the /alert/{uuid} endpoint when 'read' is called with a given UUID", async () => {
     myNock.get("/alert/uuid").reply(200, "Read successful");
     const res = await api.read("uuid");
-    expect(res).toEqual("Read successful");
+    expect(res).to.eql("Read successful");
   });
 
   it("will make a get request to the /alert/ endpoint when 'readPage' is called with no params, if none given", async () => {
     myNock.get("/alert/").reply(200, "Read successful");
     const res = await api.readPage();
-    expect(res).toEqual("Read successful");
+    expect(res).to.eql("Read successful");
   });
 
   it("will make a get request to the /alert/ endpoint when 'readPage' is called with properly formatted params", async () => {
@@ -69,12 +69,12 @@ describe("Alert calls", () => {
       )
       .reply(200, "Read successful");
     const res = await api.readPage(MOCK_PARAMS);
-    expect(res).toEqual("Read successful");
+    expect(res).to.eql("Read successful");
   });
 
   it("will make a patch request to the /alert/ endpoint when 'update' is called with an array of update data", async () => {
     myNock.patch("/alert/").reply(200, "Update successful");
     const res = await api.update([MOCK_ALERT_UPDATE]);
-    expect(res).toEqual("Update successful");
+    expect(res).to.eql("Update successful");
   });
 });

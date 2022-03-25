@@ -7,15 +7,15 @@ const store = useFilterStore();
 
 describe("filters helpers", () => {
   it("will correctly identify if a given variable is empty / falsy on isEmpty", () => {
-    expect(isEmpty({})).toBeTruthy();
-    expect(isEmpty({ test: "test" })).toBeFalsy();
-    expect(isEmpty([])).toBeTruthy();
-    expect(isEmpty(["test"])).toBeFalsy();
-    expect(isEmpty(false)).toBeTruthy();
-    expect(isEmpty(true)).toBeFalsy();
-    expect(isEmpty("")).toBeTruthy();
-    expect(isEmpty("test")).toBeFalsy();
-    expect(isEmpty(new Date())).toBeFalsy();
+    expect(isEmpty({})).to.equal(true);
+    expect(isEmpty({ test: "test" })).to.equal(false);
+    expect(isEmpty([])).to.equal(true);
+    expect(isEmpty(["test"])).to.equal(false);
+    expect(isEmpty(false)).to.equal(true);
+    expect(isEmpty(true)).to.equal(false);
+    expect(isEmpty("")).to.equal(true);
+    expect(isEmpty("test")).to.equal(false);
+    expect(isEmpty(new Date())).to.equal(false);
   });
 });
 
@@ -26,8 +26,7 @@ describe("filters Actions", () => {
   });
 
   it("will set the given nodeTypes filter object to the given filter object argument upon the bulkSetFilters action", () => {
-    expect(store.alerts).toStrictEqual({});
-    expect(localStorage.getItem("aceFilters")).toStrictEqual(null);
+    expect(localStorage.getItem("aceFilters")).to.eql(null);
 
     store.bulkSetFilters({
       nodeType: "alerts",
@@ -41,15 +40,13 @@ describe("filters Actions", () => {
       events: {},
     };
 
-    expect(store.$state).toEqual(expectedState);
-    expect(localStorage.getItem("aceFilters")).toEqual(
+    expect(store.$state).to.eql(expectedState);
+    expect(localStorage.getItem("aceFilters")).to.eql(
       JSON.stringify(expectedState),
     );
   });
 
   it("will skip falsy/empty given filterValues upon the bulkSetFilters action", () => {
-    expect(store.alerts).toStrictEqual({});
-
     store.bulkSetFilters({
       nodeType: "alerts",
       filters: {
@@ -60,7 +57,7 @@ describe("filters Actions", () => {
       },
     });
 
-    expect(store.$state).toEqual({
+    expect(store.$state).to.eql({
       alerts: {
         testFilterName4: "testFilterValue",
       },
@@ -69,8 +66,7 @@ describe("filters Actions", () => {
   });
 
   it("will add a new property and specified to a given filter object upon the setFilter action", () => {
-    expect(store.alerts).toStrictEqual({});
-    expect(localStorage.getItem("aceFilters")).toStrictEqual(null);
+    expect(localStorage.getItem("aceFilters")).to.equal(null);
 
     store.setFilter({
       nodeType: "alerts",
@@ -85,22 +81,20 @@ describe("filters Actions", () => {
       events: {},
     };
 
-    expect(store.$state).toEqual(expectedState);
-    expect(localStorage.getItem("aceFilters")).toEqual(
+    expect(store.$state).to.eql(expectedState);
+    expect(localStorage.getItem("aceFilters")).to.eql(
       JSON.stringify(expectedState),
     );
   });
 
   it("will not alter a given property for a given filter object upon the setFilter action if given filterValue falsy/empty ", () => {
-    expect(store.alerts).toStrictEqual({});
-
     store.setFilter({
       nodeType: "alerts",
       filterName: "testFilterName",
       filterValue: [],
     });
 
-    expect(store.$state).toEqual({
+    expect(store.$state).to.eql({
       alerts: {},
       events: {},
     });
@@ -111,7 +105,7 @@ describe("filters Actions", () => {
       filterValue: "",
     });
 
-    expect(store.$state).toEqual({
+    expect(store.$state).to.eql({
       alerts: {},
       events: {},
     });
@@ -124,8 +118,8 @@ describe("filters Actions", () => {
       JSON.stringify({ alerts: { name: "test" }, events: {} }),
     );
 
-    expect(store.alerts).toStrictEqual({ name: "test" });
-    expect(localStorage.getItem("aceFilters")).toStrictEqual(
+    expect(store.alerts).to.eql({ name: "test" });
+    expect(localStorage.getItem("aceFilters")).to.equal(
       JSON.stringify({ alerts: { name: "test" }, events: {} }),
     );
 
@@ -134,12 +128,12 @@ describe("filters Actions", () => {
       filterName: "name",
     });
 
-    expect(store.$state).toEqual({
+    expect(store.$state).to.eql({
       alerts: {},
       events: {},
     });
 
-    expect(localStorage.getItem("aceFilters")).toStrictEqual(
+    expect(localStorage.getItem("aceFilters")).to.equal(
       JSON.stringify({ alerts: {}, events: {} }),
     );
   });
@@ -157,8 +151,8 @@ describe("filters Actions", () => {
       }),
     );
 
-    expect(store.alerts).toStrictEqual({ name: "test", description: "test" });
-    expect(localStorage.getItem("aceFilters")).toStrictEqual(
+    expect(store.alerts).to.eql({ name: "test", description: "test" });
+    expect(localStorage.getItem("aceFilters")).to.equal(
       JSON.stringify({
         alerts: { name: "test", description: "test" },
         events: {},
@@ -169,12 +163,12 @@ describe("filters Actions", () => {
       nodeType: "alerts",
     });
 
-    expect(store.$state).toEqual({
+    expect(store.$state).to.eql({
       alerts: {},
       events: {},
     });
 
-    expect(localStorage.getItem("aceFilters")).toStrictEqual(
+    expect(localStorage.getItem("aceFilters")).to.equal(
       JSON.stringify({ alerts: {}, events: {} }),
     );
   });

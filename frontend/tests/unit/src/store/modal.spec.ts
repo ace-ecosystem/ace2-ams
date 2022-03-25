@@ -11,13 +11,13 @@ describe("modal Getters", () => {
   });
 
   it("will return null when there is no open/active modal", () => {
-    expect(store.active).toBeNull();
+    expect(store.active).to.equal(null);
   });
 
   it("will return the name of the currently active modal (first in the list)", () => {
     store.openModals = ["modal1", "modal2"];
 
-    expect(store.active).toBe("modal1");
+    expect(store.active).to.equal("modal1");
   });
 });
 
@@ -27,19 +27,19 @@ describe("modal Actions", () => {
   });
 
   it("will add a new modal to the front of the open list upon the open action", () => {
-    expect(store.openModals.length).toBe(0);
+    expect(store.openModals.length).to.equal(0);
     store.open("modal1");
-    expect(store.openModals.length).toBe(1);
-    expect(store.openModals[0]).toBe("modal1");
+    expect(store.openModals.length).to.equal(1);
+    expect(store.openModals[0]).to.equal("modal1");
     store.open("modal2");
-    expect(store.openModals.length).toBe(2);
-    expect(store.openModals[0]).toBe("modal2");
+    expect(store.openModals.length).to.equal(2);
+    expect(store.openModals[0]).to.equal("modal2");
   });
   it("will remove the given modal from the open list upon the close action", () => {
     store.openModals = ["modal1"];
 
-    expect(store.openModals.length).toBe(1);
+    expect(store.openModals.length).to.equal(1);
     store.close("modal1");
-    expect(store.openModals.length).toBe(0);
+    expect(store.openModals.length).to.equal(0);
   });
 });

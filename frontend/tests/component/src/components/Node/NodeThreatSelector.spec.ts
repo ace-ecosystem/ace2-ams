@@ -14,7 +14,7 @@ describe("NodeThreatSelector", () => {
         plugins: [PrimeVue, createPinia()],
       },
       propsData: {
-        modelValue: "EditEventModal",
+        modelValue: [],
       },
     });
   });

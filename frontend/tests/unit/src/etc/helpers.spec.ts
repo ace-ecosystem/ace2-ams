@@ -15,6 +15,7 @@ import { createTestingPinia } from "@pinia/testing";
 import { expect } from "vitest";
 import { vi, describe, it } from "vitest";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { genericObjectRead } from "@/models/base";
 
 createTestingPinia({ createSpy: vi.fn });
 
@@ -62,7 +63,7 @@ describe("parseFilters", () => {
       alertFilters.external,
     );
 
-    expect(results).toEqual({
+    expect(results).to.eql({
       observableTypes: [
         { value: "ipv4", description: null, uuid: "1" },
         { value: "file", description: null, uuid: "2" },
@@ -73,7 +74,7 @@ describe("parseFilters", () => {
   it("will correctly parse and add any chips filters", async () => {
     const results = parseFilters({ tags: "tagA,tagB" }, alertFilters.external);
 
-    expect(results).toEqual({
+    expect(results).to.eql({
       tags: ["tagA", "tagB"],
     });
   });
@@ -110,7 +111,7 @@ describe("parseFilters", () => {
 
     const results = parseFilters({ owner: "analystB" }, alertFilters.external);
 
-    expect(results).toEqual({
+    expect(results).to.eql({
       owner: mockUserB,
     });
   });
@@ -124,7 +125,7 @@ describe("parseFilters", () => {
       alertFilters.external,
     );
 
-    expect(results).toEqual({
+    expect(results).to.eql({
       eventTimeBefore: new Date("2022-01-08T16:31:51.000Z"),
     });
   });
@@ -135,13 +136,13 @@ describe("parseFilters", () => {
       alertFilters.external,
     );
 
-    expect(results).toEqual({});
+    expect(results).to.eql({});
   });
 
   it("will correctly parse and add any input text filters", async () => {
     const results = parseFilters({ name: "test name" }, alertFilters.external);
 
-    expect(results).toEqual({
+    expect(results).to.eql({
       name: "test name",
     });
   });
@@ -157,7 +158,7 @@ describe("parseFilters", () => {
       alertFilters.external,
     );
 
-    expect(results).toEqual({
+    expect(results).to.eql({
       observable: {
         category: { value: "ipv4", description: null, uuid: "1" },
         value: "1.2.3.4",
@@ -214,7 +215,7 @@ describe("parseFilters", () => {
       alertFilters.external,
     );
 
-    expect(results).toEqual({
+    expect(results).to.eql({
       tags: ["tagA", "tagB"],
       owner: mockUserB,
       observableTypes: [
@@ -261,7 +262,7 @@ describe("formatNodeFiltersForAPI", () => {
       alertFilters.external,
       MOCK_PARAMS,
     );
-    expect(formattedFilters).toEqual({
+    expect(formattedFilters).to.eql({
       limit: 10,
       offset: 10,
       disposition: "FALSE_POSITIVE",
@@ -275,12 +276,12 @@ describe("formatNodeFiltersForAPI", () => {
 
   it("getAlertLink correctly generates an alert link given an alert object", () => {
     const result = getAlertLink(mockAlertTreeRead);
-    expect(result).toEqual("/alert/testAlertUuid");
+    expect(result).to.eql("/alert/testAlertUuid");
   });
 
   it("getAllAlertTags formats a given alert's tags into a sorted and dedup'd list of tags", () => {
     const result = getAllAlertTags(mockAlertTreeRead);
-    expect(result).toEqual([
+    expect(result).to.eql([
       {
         description: null,
         value: "c2",
@@ -310,35 +311,35 @@ describe("groupItemsByQueue", () => {
     const queueA = genericObjectReadFactory({ value: "A" });
     const queueB = genericObjectReadFactory({ value: "B" });
     const queueC = genericObjectReadFactory({ value: "C" });
-    const testData = [
-      { value: 1, queues: [queueA, queueB] },
-      { value: 2, queues: [queueB] },
-      { value: 3, queues: [queueA, queueC] },
-      { value: 4 },
-      { value: 5, queues: [queueA] },
-      { value: 6, queues: [queueB] },
-      { value: 7, queues: [queueB, queueC] },
+    const testData: genericObjectRead[] = [
+      { value: "1", queues: [queueA, queueB], uuid: "1", description: null },
+      { value: "2", queues: [queueB], uuid: "1", description: null },
+      { value: "3", queues: [queueA, queueC], uuid: "1", description: null },
+      { value: "4", uuid: "1", description: null },
+      { value: "5", queues: [queueA], uuid: "1", description: null },
+      { value: "6", queues: [queueB], uuid: "1", description: null },
+      { value: "7", queues: [queueB, queueC], uuid: "1", description: null },
     ];
 
     const expected = {
       A: [
-        { value: 1, queues: [queueA, queueB] },
-        { value: 3, queues: [queueA, queueC] },
-        { value: 5, queues: [queueA] },
+        { value: "1", queues: [queueA, queueB], uuid: "1", description: null },
+        { value: "3", queues: [queueA, queueC], uuid: "1", description: null },
+        { value: "5", queues: [queueA], uuid: "1", description: null },
       ],
       B: [
-        { value: 1, queues: [queueA, queueB] },
-        { value: 2, queues: [queueB] },
-        { value: 6, queues: [queueB] },
-        { value: 7, queues: [queueB, queueC] },
+        { value: "1", queues: [queueA, queueB], uuid: "1", description: null },
+        { value: "2", queues: [queueB], uuid: "1", description: null },
+        { value: "6", queues: [queueB], uuid: "1", description: null },
+        { value: "7", queues: [queueB, queueC], uuid: "1", description: null },
       ],
       C: [
-        { value: 3, queues: [queueA, queueC] },
-        { value: 7, queues: [queueB, queueC] },
+        { value: "3", queues: [queueA, queueC], uuid: "1", description: null },
+        { value: "7", queues: [queueB, queueC], uuid: "1", description: null },
       ],
     };
 
     const result = groupItemsByQueue(testData);
-    expect(result).toEqual(expected);
+    expect(result).to.eql(expected);
   });
 });

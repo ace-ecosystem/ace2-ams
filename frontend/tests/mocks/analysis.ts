@@ -44,7 +44,7 @@ export const analysisReadFactory = ({
 });
 
 export const analysisTreeReadFactory = ({
-  analysisModuleType = undefined,
+  analysisModuleType = { uuid: "testUuid", value: "TestAnalysis" },
   children = [],
   parentTreeUuid = "",
   treeUuid = "",
