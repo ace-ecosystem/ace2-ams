@@ -129,6 +129,16 @@
         />
       </template>
     </Column>
+    <Column field="relationships" header="Relationships">
+      <template #body="slotProps">
+        <NodeRelationshipVue
+          v-for="relationship of slotProps.data.observableRelationships"
+          :key="relationship.uuid"
+          :type="relationship.type.value"
+          :value="relationship.relatedNode.value"
+        />
+      </template>
+    </Column>
     <Column field="tags" header="Tags">
       <template #body="slotProps">
         <NodeTagVue
@@ -150,6 +160,7 @@
   import DataTable from "primevue/datatable";
   import InputText from "primevue/inputtext";
   import MultiSelect from "primevue/multiselect";
+  import NodeRelationshipVue from "@/components/Node/NodeRelationship.vue";
   import NodeTagVue from "@/components/Node/NodeTag.vue";
 
   import { Event } from "@/services/api/event";

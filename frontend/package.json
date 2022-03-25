@@ -59,7 +59,7 @@
     "stylelint-config-standard": "^25.0.0",
     "typescript": "^4.5.5",
     "vite": "^2.8.5",
-    "vitest": "^0.5.9",
+    "vitest": "^0.7.10",
     "vue-router-mock": "^0.1.7",
     "vue-tsc": "^0.31.4"
   },

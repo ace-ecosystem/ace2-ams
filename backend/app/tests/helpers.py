@@ -738,6 +738,16 @@ def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) ->
             tags=tags,
         )
 
+        if "observable_relationships" in o:
+            for relationship in o["observable_relationships"]:
+                related_observable = crud.read_observable(
+                    type=relationship["o_type"], value=relationship["o_value"], db=db
+                )
+
+                create_node_relationship(
+                    node=leaf.node, related_node=related_observable, type=relationship["type"], db=db
+                )
+
         if "analyses" in o:
             for analysis in o["analyses"]:
                 _create_analysis(a=analysis, parent_tree=leaf)
