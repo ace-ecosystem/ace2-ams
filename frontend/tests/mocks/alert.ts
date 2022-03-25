@@ -169,7 +169,7 @@ export const alertSummaryFactory = ({
 });
 
 export const alertReadPageFactory = (
-  alerts = [],
+  alerts: alertTreeRead[] | alertRead[] = [],
   limit = 50,
   offset = 0,
 ): alertReadPage => ({
