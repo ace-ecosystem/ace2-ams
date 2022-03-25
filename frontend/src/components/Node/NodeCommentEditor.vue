@@ -64,7 +64,7 @@
 
   import Button from "primevue/button";
   import InputText from "primevue/inputtext";
-  import NodeComment from "../Node/NodeComment.vue";
+  import NodeComment from "@/components/Node/NodeComment.vue";
 
   const props = defineProps({
     modelValue: { type: Array, required: true },

@@ -78,7 +78,7 @@
   import Paginator from "primevue/paginator";
   import Toolbar from "primevue/toolbar";
 
-  import AlertTableCell from "../Alerts/AlertTableCell.vue";
+  import AlertTableCell from "@/components/Alerts/AlertTableCell.vue";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
   import { Alert } from "@/services/api/alert";
   import { parseAlertSummary } from "@/etc/helpers";

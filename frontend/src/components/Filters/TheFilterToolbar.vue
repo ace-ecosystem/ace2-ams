@@ -61,7 +61,7 @@
   import Toolbar from "primevue/toolbar";
   import OverlayPanel from "primevue/overlaypanel";
   import SplitButton from "primevue/splitbutton";
-  import NodePropertyInput from "../Node/NodePropertyInput.vue";
+  import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";

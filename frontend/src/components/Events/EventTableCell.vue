@@ -62,8 +62,8 @@
   import Button from "primevue/button";
 
   import NodeTagVue from "@/components/Node/NodeTag.vue";
-  import NodeComment from "../Node/NodeComment.vue";
-  import EditEventModal from "../Modals/EditEventModal.vue";
+  import NodeComment from "@/components/Node/NodeComment.vue";
+  import EditEventModal from "@/components/Modals/EditEventModal.vue";
 
   import { useModalStore } from "@/stores/modal";
   import { useEventTableStore } from "@/stores/eventTable";

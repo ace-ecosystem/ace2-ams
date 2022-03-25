@@ -2,10 +2,10 @@
 import myNock from "@unit/services/api/nock";
 import { eventFilterParams } from "@/models/event";
 import { parseEventSummary, useEventTableStore } from "@/stores/eventTable";
-import { eventReadFactory, eventSummaryFactory } from "../../../mocks/events";
-import { genericObjectReadFactory } from "../../../mocks/genericObject";
-import { nodeThreatReadFactory } from "../../../mocks/nodeThreat";
-import { userReadFactory } from "../../../mocks/user";
+import { eventReadFactory, eventSummaryFactory } from "@mocks/events";
+import { genericObjectReadFactory } from "@mocks/genericObject";
+import { nodeThreatReadFactory } from "@mocks/nodeThreat";
+import { userReadFactory } from "@mocks/user";
 import { createCustomPinia } from "@unit/helpers";
 
 createCustomPinia();
@@ -62,8 +62,8 @@ describe("eventTable helpers", () => {
   it("will correctly parse an event received from the backend using parseEventSummary", () => {
     const resA = parseEventSummary(mockEventReadA);
     const resB = parseEventSummary(mockEventReadC);
-    expect(resA).toEqual(mockEventReadASummary);
-    expect(resB).toEqual(mockEventReadCSummary);
+    expect(resA).to.eql(mockEventReadASummary);
+    expect(resB).to.eql(mockEventReadCSummary);
   });
 });
 
@@ -78,7 +78,7 @@ describe("eventTable getters", () => {
       mockEventReadB,
       mockEventReadC,
     ];
-    expect(store.visibleQueriedItemSummaries).toEqual([
+    expect(store.visibleQueriedItemSummaries).to.eql([
       mockEventReadASummary,
       mockEventReadBSummary,
       mockEventReadCSummary,
@@ -91,7 +91,7 @@ describe("eventTable getters", () => {
       mockEventReadB,
       mockEventReadC,
     ];
-    expect(store.visibleQueriedItemsUuids).toEqual(["uuid1", "uuid2", "uuid3"]);
+    expect(store.visibleQueriedItemsUuids).to.eql(["uuid1", "uuid2", "uuid3"]);
   });
 
   it("will correctly return  visibleQueriedItemById", () => {
@@ -100,26 +100,26 @@ describe("eventTable getters", () => {
       mockEventReadB,
       mockEventReadC,
     ];
-    expect(store.visibleQueriedItemById("uuid1")).toEqual(mockEventReadA);
+    expect(store.visibleQueriedItemById("uuid1")).to.eql(mockEventReadA);
   });
 
   it("will correctly return sortFilter", () => {
-    expect(store.sortFilter).toEqual("created_time|desc");
+    expect(store.sortFilter).to.eql("created_time|desc");
 
     store.sortField = null;
     store.sortOrder = null;
-    expect(store.sortFilter).toBeNull();
+    expect(store.sortFilter).to.equal(null);
   });
 
   it("will correctly return allFiltersLoaded", () => {
-    expect(store.allFiltersLoaded).toBeFalsy();
+    expect(store.allFiltersLoaded).to.equal(false);
     store.stateFiltersLoaded = true;
-    expect(store.allFiltersLoaded).toBeFalsy();
+    expect(store.allFiltersLoaded).to.equal(false);
     store.stateFiltersLoaded = false;
     store.routeFiltersLoaded = true;
-    expect(store.allFiltersLoaded).toBeFalsy();
+    expect(store.allFiltersLoaded).to.equal(false);
     store.stateFiltersLoaded = true;
-    expect(store.allFiltersLoaded).toBeTruthy();
+    expect(store.allFiltersLoaded).to.equal(true);
   });
 });
 
@@ -136,26 +136,29 @@ describe("eventTable actions", () => {
 
     await store.readPage(mockParams);
 
-    expect(mockRequest.isDone()).toEqual(true);
-    expect(store.visibleQueriedItems).toEqual([
+    expect(mockRequest.isDone()).to.eql(true);
+    expect(store.visibleQueriedItems).to.eql([
       JSON.parse(JSON.stringify(mockEventReadA)),
       JSON.parse(JSON.stringify(mockEventReadB)),
       JSON.parse(JSON.stringify(mockEventReadC)),
     ]);
-    expect(store.totalItems).toEqual(3);
-    expect(store.requestReload).toEqual(false);
+    expect(store.totalItems).to.eql(3);
+    expect(store.requestReload).to.eql(false);
   });
 
   it("will throw an error if request fails on readPage", async () => {
     myNock.get("/event/?limit=5&offset=0").reply(403);
 
-    await expect(store.readPage(mockParams)).rejects.toEqual(
-      new Error("Request failed with status code 403"),
-    );
+    try {
+      await store.readPage(mockParams);
+    } catch (e) {
+      const error = e as Error;
+      expect(error.message).to.equal("Request failed with status code 403");
+    }
 
-    expect(store.visibleQueriedItems).toEqual([]);
-    expect(store.totalItems).toEqual(0);
-    expect(store.requestReload).toEqual(false);
+    expect(store.visibleQueriedItems).to.eql([]);
+    expect(store.totalItems).to.eql(0);
+    expect(store.requestReload).to.eql(false);
   });
   it("will reset the sort order and sort field to written defaults on resetSort", () => {
     store.sortField = "exampleSort";
@@ -163,7 +166,7 @@ describe("eventTable actions", () => {
 
     store.resetSort();
 
-    expect(store.sortField).toEqual("createdTime");
-    expect(store.sortOrder).toEqual("desc");
+    expect(store.sortField).to.eql("createdTime");
+    expect(store.sortOrder).to.eql("desc");
   });
 });

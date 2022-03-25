@@ -8,7 +8,7 @@ import PrimeVue from "primevue/config";
 import TheNodeActionToolbar from "@/components/Node/TheNodeActionToolbar.vue";
 
 const props = {
-  reloadObject: { value: "node" },
+  reloadObject: "node",
 };
 
 describe("TheNodeActionToolbar", () => {

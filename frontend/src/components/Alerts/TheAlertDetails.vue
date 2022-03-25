@@ -45,7 +45,7 @@
   import AccordionTab from "primevue/accordiontab";
   import Button from "primevue/button";
   import Card from "primevue/card";
-  import NodeTagVue from "../../components/Node/NodeTag.vue";
+  import NodeTagVue from "@/components/Node/NodeTag.vue";
 
   import { copyToClipboard } from "@/etc/helpers";
   import { useAlertStore } from "@/stores/alert";

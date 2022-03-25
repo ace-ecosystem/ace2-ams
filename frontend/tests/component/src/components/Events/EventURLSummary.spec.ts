@@ -11,7 +11,7 @@ import EventURLSummary from "@/components/Events/EventURLSummary.vue";
 import router from "@/router/index";
 
 const props = {
-  eventUuid: "uuid",
+  eventAlertUuids: [],
 };
 
 describe("EventURLSummary", () => {

@@ -7,7 +7,7 @@ import PrimeVue from "primevue/config";
 
 import EditEventModal from "@/components/Modals/EditEventModal.vue";
 import { Event } from "@/services/api/event";
-import { eventReadFactory, mockEventUUID } from "./../../../../mocks/events";
+import { eventReadFactory, mockEventUUID } from "@mocks/events";
 import { testConfiguration } from "@/etc/configuration/test/index";
 
 describe("EventAlertsTable", () => {
