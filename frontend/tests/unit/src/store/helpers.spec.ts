@@ -7,7 +7,6 @@ import { useEventTableStore } from "@/stores/eventTable";
 import { useFilterStore } from "@/stores/filter";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { userReadFactory } from "@mocks/user";
-import { vi, describe, it } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
 
 createTestingPinia({ createSpy: vi.fn });

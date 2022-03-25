@@ -13,7 +13,6 @@ import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
 import { createTestingPinia } from "@pinia/testing";
 import { expect } from "vitest";
-import { vi, describe, it } from "vitest";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { genericObjectRead } from "@/models/base";
 

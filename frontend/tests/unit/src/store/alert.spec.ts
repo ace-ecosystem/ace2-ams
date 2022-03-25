@@ -2,7 +2,6 @@ import myNock from "@unit/services/api/nock";
 import snakecaseKeys from "snakecase-keys";
 import { useAlertStore } from "@/stores/alert";
 import { createCustomPinia } from "@unit/helpers";
-import { describe, it, beforeEach, expect } from "vitest";
 
 import {
   alertCreateFactory,

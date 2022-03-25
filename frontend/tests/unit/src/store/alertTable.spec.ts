@@ -10,8 +10,6 @@ import {
   alertReadPageFactory,
 } from "@mocks/alert";
 
-import { describe, it, expect, beforeEach } from "vitest";
-
 createCustomPinia();
 const store = useAlertTableStore();
 
