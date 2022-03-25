@@ -53,7 +53,7 @@
 
   import Button from "primevue/button";
 
-  import NodePropertyInput from "../Node/NodePropertyInput.vue";
+  import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
   import BaseModal from "@/components/Modals/BaseModal.vue";
   import NodeQueueSelector from "@/components/Node/NodeQueueSelector.vue";
 

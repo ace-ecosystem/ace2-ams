@@ -1,7 +1,4 @@
-import {
-  observableRead,
-  observableTreeRead,
-} from "../../src/models/observable";
+import { observableRead, observableTreeRead } from "@/models/observable";
 import { genericObjectReadFactory } from "./genericObject";
 
 export const observableReadFactory = ({
@@ -19,6 +16,7 @@ export const observableReadFactory = ({
   threats = [],
   type = genericObjectReadFactory({ value: "testObservableType" }),
   version = "observableVersion1",
+  observableRelationships = [],
 }: Partial<observableRead> = {}): observableRead => ({
   time: time,
   uuid: uuid,
@@ -35,6 +33,7 @@ export const observableReadFactory = ({
   type: type,
   nodeType: "observable",
   version: version,
+  observableRelationships: observableRelationships,
 });
 
 export const observableTreeReadFactory = ({
@@ -55,6 +54,7 @@ export const observableTreeReadFactory = ({
   threats = [],
   type = genericObjectReadFactory({ value: "testObservableType" }),
   version = "observableVersion1",
+  observableRelationships = [],
 }: Partial<observableTreeRead> = {}): observableTreeRead => ({
   children: children,
   parentTreeUuid: parentTreeUuid,
@@ -74,4 +74,5 @@ export const observableTreeReadFactory = ({
   threats: threats,
   type: type,
   nodeType: "observable",
+  observableRelationships: observableRelationships,
 });

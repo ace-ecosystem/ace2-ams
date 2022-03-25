@@ -74,7 +74,7 @@
   import Chip from "primevue/chip";
   import OverlayPanel from "primevue/overlaypanel";
 
-  import NodePropertyInput from "../Node/NodePropertyInput.vue";
+  import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const filterStore = useFilterStore();
   const nodeType = inject("nodeType");

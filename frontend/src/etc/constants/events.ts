@@ -1,4 +1,4 @@
-import { eventRemediationRead } from "../../models/eventRemediation";
+import { eventRemediationRead } from "@/models/eventRemediation";
 import { propertyOption } from "@/models/base";
 import { eventPreventionToolRead } from "@/models/eventPreventionTool";
 import { eventVectorRead } from "@/models/eventVector";

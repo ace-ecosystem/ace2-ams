@@ -8,7 +8,7 @@ import router from "@/router";
 
 import EventAlertsTable from "@/components/Events/EventAlertsTable.vue";
 import { Alert } from "@/services/api/alert";
-import { alertReadFactory } from "../../../../mocks/alert";
+import { alertReadFactory } from "@mocks/alert";
 
 const mockAlert = alertReadFactory();
 

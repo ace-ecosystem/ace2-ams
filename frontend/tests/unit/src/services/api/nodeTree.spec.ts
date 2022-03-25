@@ -23,6 +23,6 @@ describe("nodeTree API calls", () => {
       .reply(200, mockObjectReadArray);
 
     const res = await NodeTree.readNodesOfNodeTree(["1", "2"], "observable");
-    expect(res).toEqual(mockObjectReadArray);
+    expect(res).to.eql(mockObjectReadArray);
   });
 });

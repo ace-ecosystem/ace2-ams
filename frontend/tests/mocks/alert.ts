@@ -4,7 +4,7 @@ import {
   alertReadPage,
   alertSummary,
   alertTreeRead,
-} from "../../src/models/alert";
+} from "@/models/alert";
 import { genericObjectReadFactory } from "./genericObject";
 
 export const alertCreateFactory = ({
@@ -169,7 +169,7 @@ export const alertSummaryFactory = ({
 });
 
 export const alertReadPageFactory = (
-  alerts = [],
+  alerts: alertTreeRead[] | alertRead[] = [],
   limit = 50,
   offset = 0,
 ): alertReadPage => ({

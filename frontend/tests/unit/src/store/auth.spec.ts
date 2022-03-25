@@ -25,12 +25,12 @@ describe("auth Getters", () => {
   });
 
   it("will return isAuthenticated state when not logged in", () => {
-    expect(store.isAuthenticated).toStrictEqual(false);
+    expect(store.isAuthenticated).to.equal(false);
   });
 
   it("will return isAuthenticated state when logged in", () => {
     store.user = mockUser;
 
-    expect(store.isAuthenticated).toStrictEqual(true);
+    expect(store.isAuthenticated).to.equal(true);
   });
 });

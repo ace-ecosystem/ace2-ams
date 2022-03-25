@@ -1,4 +1,4 @@
-import { nodeThreatCreate, nodeThreatUpdate } from "./../models/nodeThreat";
+import { nodeThreatCreate, nodeThreatUpdate } from "@/models/nodeThreat";
 import { defineStore } from "pinia";
 import { nodeThreatRead } from "@/models/nodeThreat";
 import { NodeThreat } from "@/services/api/nodeThreat";

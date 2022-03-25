@@ -5,16 +5,17 @@ import { createCustomPinia } from "@unit/helpers";
 import { describe, it, beforeEach, expect } from "vitest";
 
 import {
+  alertCreateFactory,
   alertTreeReadFactory,
   alertReadFactory,
   alertSummaryFactory,
-} from "../../../mocks/alert";
+} from "@mocks/alert";
 
 createCustomPinia();
 
 const mockAlertTree = alertTreeReadFactory();
 const mockAlert = alertReadFactory();
-const mockAlertCreate = alertReadFactory();
+const mockAlertCreate = alertCreateFactory();
 const mockAlertSummary = alertSummaryFactory();
 
 const store = useAlertStore();
@@ -25,9 +26,9 @@ describe("alert Actions", () => {
   });
 
   it("will have openAlertSummary return the current opensummary if there is one, otherwise it will return null", () => {
-    expect(store.openAlertSummary).toBeNull();
+    expect(store.openAlertSummary).to.equal(null);
     store.open = mockAlertTree;
-    expect(store.openAlertSummary).toEqual(mockAlertSummary);
+    expect(store.openAlertSummary).to.eql(mockAlertSummary);
   });
 
   it("will request to create an alert with a given AlertCreate object, and set the opento result on success", async () => {
@@ -37,26 +38,26 @@ describe("alert Actions", () => {
 
     await store.create(mockAlertCreate);
 
-    expect(mockRequest.isDone()).toEqual(true);
-    expect(store.open).toEqual(JSON.parse(JSON.stringify(mockAlert)));
+    expect(mockRequest.isDone()).to.eql(true);
+    expect(store.open).to.eql(JSON.parse(JSON.stringify(mockAlert)));
   });
 
   it("will fetch alert data given an alert ID", async () => {
     const mockRequest = myNock.get("/alert/uuid1").reply(200, mockAlert);
     await store.read("uuid1");
 
-    expect(mockRequest.isDone()).toEqual(true);
+    expect(mockRequest.isDone()).to.eql(true);
 
-    expect(store.open).toEqual(JSON.parse(JSON.stringify(mockAlert)));
+    expect(store.open).to.eql(JSON.parse(JSON.stringify(mockAlert)));
   });
 
   it("will make a request to update an alert given the UUID and update data upon the updateAlert action", async () => {
     const mockRequest = myNock.patch("/alert/").reply(200);
     await store.update([{ uuid: "uuid1", disposition: "test" }]);
 
-    expect(mockRequest.isDone()).toEqual(true);
+    expect(mockRequest.isDone()).to.eql(true);
     // None of these should be changed
-    expect(store.open).toBeNull();
+    expect(store.open).to.equal(null);
   });
 
   it("will throw an error when a request fails in any action", async () => {
@@ -69,17 +70,26 @@ describe("alert Actions", () => {
       .patch(/\/alert\/*/)
       .reply(403, "Bad request :(");
 
-    await expect(store.create(mockAlertCreate)).rejects.toEqual(
-      new Error("Request failed with status code 403"),
-    );
+    try {
+      await store.create(mockAlertCreate);
+    } catch (e) {
+      const error = e as Error;
+      expect(error.message).to.equal("Request failed with status code 403");
+    }
 
-    await expect(store.read("uuid1")).rejects.toEqual(
-      new Error("Request failed with status code 403"),
-    );
+    try {
+      await store.read("uuid1");
+    } catch (e) {
+      const error = e as Error;
+      expect(error.message).to.equal("Request failed with status code 403");
+    }
 
-    await expect(
-      store.update([{ uuid: "uuid1", disposition: "test" }]),
-    ).rejects.toEqual(new Error("Request failed with status code 403"));
+    try {
+      await store.update([{ uuid: "uuid1", disposition: "test" }]);
+    } catch (e) {
+      const error = e as Error;
+      expect(error.message).to.equal("Request failed with status code 403");
+    }
 
     mockRequest.persist(false); // cleanup persisted nock request
   });

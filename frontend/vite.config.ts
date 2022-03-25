@@ -10,6 +10,7 @@ export default defineConfig({
     alias: {
       "@": resolve(__dirname, "./src"),
       "@unit": resolve(__dirname, "./tests/unit/src"),
+      "@mocks": resolve(__dirname, "./tests/mocks"),
     },
   },
   plugins: [vue()],

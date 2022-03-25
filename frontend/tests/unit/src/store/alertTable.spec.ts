@@ -8,7 +8,7 @@ import {
   alertTreeReadFactory,
   alertSummaryFactory,
   alertReadPageFactory,
-} from "../../../mocks/alert";
+} from "@mocks/alert";
 
 import { describe, it, expect, beforeEach } from "vitest";
 
@@ -34,8 +34,8 @@ describe("alertTable helpers", () => {
   it("will correctly parse an alert received from the backend using parseAlertSummary", () => {
     const resA = parseAlertSummary(mockAlertTreeReadA);
     const resB = parseAlertSummary(mockAlertTreeReadC);
-    expect(resA).toEqual(mockAlertReadASummary);
-    expect(resB).toEqual(mockAlertReadCSummary);
+    expect(resA).to.eql(mockAlertReadASummary);
+    expect(resB).to.eql(mockAlertReadCSummary);
   });
 });
 
@@ -50,7 +50,7 @@ describe("alertTable getters", () => {
       mockAlertTreeReadB,
       mockAlertTreeReadC,
     ];
-    expect(store.visibleQueriedItemSummaries).toEqual([
+    expect(store.visibleQueriedItemSummaries).to.eql([
       mockAlertReadASummary,
       mockAlertReadBSummary,
       mockAlertReadCSummary,
@@ -63,7 +63,7 @@ describe("alertTable getters", () => {
       mockAlertTreeReadB,
       mockAlertTreeReadC,
     ];
-    expect(store.visibleQueriedItemsUuids).toEqual(["uuid1", "uuid2", "uuid3"]);
+    expect(store.visibleQueriedItemsUuids).to.eql(["uuid1", "uuid2", "uuid3"]);
   });
 
   it("will correctly return  visibleQueriedItemById", () => {
@@ -72,22 +72,22 @@ describe("alertTable getters", () => {
       mockAlertTreeReadB,
       mockAlertTreeReadC,
     ];
-    expect(store.visibleQueriedItemById("uuid1")).toEqual(mockAlertTreeReadA);
+    expect(store.visibleQueriedItemById("uuid1")).to.eql(mockAlertTreeReadA);
   });
 
   it("will correctly return sortFilter", () => {
-    expect(store.sortFilter).toEqual("event_time|desc");
+    expect(store.sortFilter).to.eql("event_time|desc");
   });
 
   it("will correctly return allFiltersLoaded", () => {
-    expect(store.allFiltersLoaded).toBeFalsy();
+    expect(store.allFiltersLoaded).to.equal(false);
     store.stateFiltersLoaded = true;
-    expect(store.allFiltersLoaded).toBeFalsy();
+    expect(store.allFiltersLoaded).to.equal(false);
     store.stateFiltersLoaded = false;
     store.routeFiltersLoaded = true;
-    expect(store.allFiltersLoaded).toBeFalsy();
+    expect(store.allFiltersLoaded).to.equal(false);
     store.stateFiltersLoaded = true;
-    expect(store.allFiltersLoaded).toBeTruthy();
+    expect(store.allFiltersLoaded).to.equal(true);
   });
 });
 
@@ -103,26 +103,29 @@ describe("alertTable actions", () => {
 
     await store.readPage(mockParams);
 
-    expect(mockRequest.isDone()).toEqual(true);
-    expect(store.visibleQueriedItems).toEqual([
+    expect(mockRequest.isDone()).to.eql(true);
+    expect(store.visibleQueriedItems).to.eql([
       JSON.parse(JSON.stringify(mockAlertTreeReadA)),
       JSON.parse(JSON.stringify(mockAlertTreeReadB)),
       JSON.parse(JSON.stringify(mockAlertTreeReadC)),
     ]);
-    expect(store.totalItems).toEqual(3);
-    expect(store.requestReload).toEqual(false);
+    expect(store.totalItems).to.eql(3);
+    expect(store.requestReload).to.eql(false);
   });
 
   it("will throw an error if request fails on readPage", async () => {
     myNock.get("/alert/?limit=5&offset=0").reply(403);
 
-    await expect(store.readPage(mockParams)).rejects.toEqual(
-      new Error("Request failed with status code 403"),
-    );
+    try {
+      await store.readPage(mockParams);
+    } catch (e) {
+      const error = e as Error;
+      expect(error.message).to.equal("Request failed with status code 403");
+    }
 
-    expect(store.visibleQueriedItems).toEqual([]);
-    expect(store.totalItems).toEqual(0);
-    expect(store.requestReload).toEqual(false);
+    expect(store.visibleQueriedItems).to.eql([]);
+    expect(store.totalItems).to.eql(0);
+    expect(store.requestReload).to.eql(false);
   });
   it("will reset the sort order and sort field to written defaults on resetSort", () => {
     store.sortField = "exampleSort";
@@ -130,7 +133,7 @@ describe("alertTable actions", () => {
 
     store.resetSort();
 
-    expect(store.sortField).toEqual("eventTime");
-    expect(store.sortOrder).toEqual("desc");
+    expect(store.sortField).to.eql("eventTime");
+    expect(store.sortOrder).to.eql("desc");
   });
 });

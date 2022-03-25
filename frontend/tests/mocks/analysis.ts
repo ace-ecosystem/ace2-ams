@@ -1,5 +1,5 @@
-import { analysisRead, analysisTreeRead } from "../../src/models/analysis";
-import { analysisModuleTypeRead } from "../../src/models/analysisModuleType";
+import { analysisRead, analysisTreeRead } from "@/models/analysis";
+import { analysisModuleTypeRead } from "@/models/analysisModuleType";
 
 export const analysisModuleTypeReadFactory = ({
   description = null,
@@ -44,7 +44,7 @@ export const analysisReadFactory = ({
 });
 
 export const analysisTreeReadFactory = ({
-  analysisModuleType = undefined,
+  analysisModuleType = { uuid: "testUuid", value: "TestAnalysis" },
   children = [],
   parentTreeUuid = "",
   treeUuid = "",

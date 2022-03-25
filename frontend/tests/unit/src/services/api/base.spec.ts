@@ -17,13 +17,13 @@ describe("BaseAPI calls", () => {
       .get("/newItem")
       .reply(200, "Read successful");
     const res = await api.create("/create", {}, true);
-    expect(res).toEqual("Read successful");
+    expect(res).to.eql("Read successful");
   });
 
   it("will make only a post request when getAfterCreate is true and there is NOT a 'content-location' header", async () => {
     myNock.post("/create").reply(200, "Create successful");
     const res = await api.create("/create", {}, true);
-    expect(res).toEqual("Create successful");
+    expect(res).to.eql("Create successful");
   });
 
   it("will make only a post request when getAfterCreate is false and there is a 'content-location' header", async () => {
@@ -31,25 +31,25 @@ describe("BaseAPI calls", () => {
       "content-location": "/newItem",
     });
     const res = await api.create("/create", {}, false);
-    expect(res).toEqual("Create successful");
+    expect(res).to.eql("Create successful");
   });
 
   it("will make only a post request when getAfterCreate is false and there is NOT a 'content-location' header", async () => {
     myNock.post("/create").reply(200, "Create successful");
     const res = await api.create("/create", {}, false);
-    expect(res).toEqual("Create successful");
+    expect(res).to.eql("Create successful");
   });
 
   it("make a get request when readRequest called", async () => {
     myNock.get("/read").reply(200, "Read successful");
     const res = await api.read("/read");
-    expect(res).toEqual("Read successful");
+    expect(res).to.eql("Read successful");
   });
 
   it("make a patch request when updateRequest called", async () => {
     myNock.patch("/update").reply(200, "Update successful");
     const res = await api.update("/update");
-    expect(res).toEqual("Update successful");
+    expect(res).to.eql("Update successful");
   });
 
   it("will format outgoing data into snake_case keys", async () => {
@@ -64,7 +64,7 @@ describe("BaseAPI calls", () => {
       },
       false,
     );
-    expect(res).toEqual("Create successful");
+    expect(res).to.eql("Create successful");
   });
 
   it("will not change format of outgoing data if its an array of strings", async () => {
@@ -75,13 +75,13 @@ describe("BaseAPI calls", () => {
       { data: ["A", "B"] },
       false,
     );
-    expect(res).toEqual("Create successful");
+    expect(res).to.eql("Create successful");
   });
 
   it("will format incoming data into camelCase keys", async () => {
     myNock.post("/create").reply(200, { first_key: "A", second_key: 2 });
     const res = await api.create("/create", {}, false);
-    expect(res).toEqual({
+    expect(res).to.eql({
       firstKey: "A",
       secondKey: 2,
     });
@@ -93,7 +93,7 @@ describe("BaseAPI calls", () => {
       { third_key: "B", fourth_key: 3 },
     ]);
     const res = await api.create("/create", {}, false);
-    expect(res).toEqual([
+    expect(res).to.eql([
       {
         firstKey: "A",
         secondKey: 2,
@@ -108,13 +108,16 @@ describe("BaseAPI calls", () => {
   it("will correctly format URL parameters when given", async () => {
     myNock.get("/read?limit=5&offset=0").reply(200, "Read successful");
     const res = await api.read("/read", { limit: 5, offset: 0 });
-    expect(res).toEqual("Read successful");
+    expect(res).to.eql("Read successful");
   });
 
   it("will throw an error if a request completes, but without a successful response code", async () => {
     myNock.patch("/update").reply(404, "Not found :(");
-    await expect(api.update("/update")).rejects.toEqual(
-      new Error("Request failed with status code 404"),
-    );
+    try {
+      await api.update("/update");
+    } catch (e) {
+      const error = e as Error;
+      expect(error.message).to.equal("Request failed with status code 404");
+    }
   });
 });

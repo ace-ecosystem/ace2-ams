@@ -18,6 +18,7 @@ describe("TagModal", () => {
       },
       propsData: {
         name: "TagModal",
+        reloadObject: "node",
       },
     });
   });
