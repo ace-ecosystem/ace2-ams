@@ -22,7 +22,7 @@ describe("ManageEvents", () => {
             initialState: {
               currentUserSettingsStore: {
                 queues: {
-                  events: { value: "external" },
+                  alerts: { value: "external" },
                   events: { value: "external" },
                 },
               },
