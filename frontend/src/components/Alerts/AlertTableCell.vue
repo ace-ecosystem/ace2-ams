@@ -50,23 +50,29 @@
   <span v-else> {{ props.data[props.field] }}</span>
 </template>
 
-<script setup>
-  import { defineProps } from "vue";
+<script setup lang="ts">
+  import { defineProps, PropType } from "vue";
 
   import NodeTagVue from "@/components/Node/NodeTag.vue";
   import NodeComment from "@/components/Node/NodeComment.vue";
 
+  import { alertSummary } from "@/models/alert";
   import { getAllAlertTags, getAlertLink } from "@/etc/helpers";
+  import { isValidDate } from "@/etc/validators";
 
   const props = defineProps({
-    data: { type: Object, required: true },
-    field: { type: String, required: true },
+    data: { type: Object as PropType<alertSummary>, required: true },
+    field: { type: String as PropType<keyof alertSummary>, required: true },
   });
 
-  const formatDateTime = (dateTime) => {
+  const formatDateTime = (dateTime: unknown) => {
     if (dateTime) {
-      const d = new Date(dateTime);
-      return d.toLocaleString("en-US", { timeZone: "UTC" });
+      if (isValidDate(dateTime)) {
+        const d = new Date(dateTime);
+        return d.toLocaleString("en-US", { timeZone: "UTC" });
+      } else {
+        return dateTime;
+      }
     }
 
     return "None";
