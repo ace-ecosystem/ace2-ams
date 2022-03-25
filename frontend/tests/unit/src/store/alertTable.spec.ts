@@ -1,120 +1,39 @@
 // TODO: Move to alertTable store tests
 import myNock from "@unit/services/api/nock";
-import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
+import { alertFilterParams } from "@/models/alert";
 import { useAlertTableStore } from "@/stores/alertTable";
 import { createCustomPinia } from "@unit/helpers";
 import { parseAlertSummary } from "@/etc/helpers";
 import {
-  mockAlert,
-  mockAlertTreeReadA,
-  mockAlertReadASummary,
+  alertTreeReadFactory,
+  alertSummaryFactory,
+  alertReadPageFactory,
 } from "../../../mocks/alert";
+
+import { describe, it, expect, beforeEach } from "vitest";
 
 createCustomPinia();
 const store = useAlertTableStore();
 
-const mockAlertReadB = Object.assign({}, mockAlert, { uuid: "uuid2" });
-const mockAlertReadC: alertRead = {
-  childTags: [],
-  childThreatActors: [],
-  childThreats: [],
-  description: "test description",
-  disposition: {
-    value: "FALSE_POSITIVE",
-    rank: 0,
-    uuid: "1",
-    description: null,
-  },
-  dispositionTime: new Date("2021-12-18T00:59:43.570343+00:00"),
-  dispositionUser: null,
-  eventTime: new Date("2021-12-18T00:59:43.570343+00:00"),
-  eventUuid: null,
-  insertTime: new Date("2021-12-18T00:59:43.570343+00:00"),
-  instructions: null,
-  name: "Test alert",
-  owner: null,
-  queue: { value: "testQueue", description: null, uuid: "1" },
-  tool: null,
-  toolInstance: null,
-  type: { value: "testType", description: null, uuid: "1" },
-  comments: [],
-  nodeType: "",
-  tags: [],
-  threats: [],
-  uuid: "uuid3",
-  version: "",
-  threatActors: [],
-};
+const mockAlertTreeReadA = alertTreeReadFactory({ uuid: "uuid1" });
+const mockAlertTreeReadB = alertTreeReadFactory({ uuid: "uuid2" });
+const mockAlertTreeReadC = alertTreeReadFactory({ uuid: "uuid3" });
 
-const mockAlertReadBSummary: alertSummary = {
-  childTags: [
-    {
-      description: null,
-      value: "recipient",
-      uuid: "c5d3321d-883c-4772-b511-489273e13fde",
-    },
-    {
-      description: null,
-      value: "from_address",
-      uuid: "f9081b70-c2bf-4a7d-ba90-a675e8a929d2",
-    },
-    {
-      description: null,
-      value: "contacted_host",
-      uuid: "3c1ca637-48d1-4d47-aeee-0962bc32d96d",
-    },
-    {
-      description: null,
-      value: "c2",
-      uuid: "a0b2d514-c544-4a8f-a059-b6151b9f1dd6",
-    },
-  ],
-  comments: [],
-  description: "",
-  disposition: "OPEN",
-  dispositionTime: null,
-  dispositionUser: "Analyst",
-  eventUuid: "None",
+const mockAlertReadASummary = alertSummaryFactory({ uuid: "uuid1" });
+const mockAlertReadBSummary = alertSummaryFactory({ uuid: "uuid2" });
+const mockAlertReadCSummary = alertSummaryFactory({ uuid: "uuid3" });
 
-  eventTime: new Date("2021-12-18T00:59:43.570343+00:00"),
-  insertTime: new Date("2021-12-18T00:59:43.570343+00:00"),
-  name: "Small Alert",
-  owner: "Analyst",
-  queue: "external",
-  tags: [],
-  tool: "test_tool",
-  toolInstance: "test_tool_instance",
-
-  type: "test_type",
-  uuid: "uuid2",
-};
-const mockAlertReadCSummary: alertSummary = {
-  childTags: [],
-  comments: [],
-  description: "test description",
-  disposition: "FALSE_POSITIVE",
-  dispositionTime: new Date("2021-12-18T00:59:43.570343+00:00"),
-  dispositionUser: "None",
-  eventUuid: "None",
-  eventTime: new Date("2021-12-18T00:59:43.570343+00:00"),
-  insertTime: new Date("2021-12-18T00:59:43.570343+00:00"),
-  name: "Test alert",
-  owner: "None",
-  queue: "testQueue",
-  tags: [],
-  tool: "None",
-  toolInstance: "None",
-
-  type: "testType",
-  uuid: "uuid3",
-};
+const mockAlertReadPage = alertReadPageFactory(
+  [mockAlertTreeReadA, mockAlertTreeReadB, mockAlertTreeReadC],
+  5,
+);
 
 const mockParams: alertFilterParams = { limit: 5, offset: 0 };
 
 describe("alertTable helpers", () => {
   it("will correctly parse an alert received from the backend using parseAlertSummary", () => {
     const resA = parseAlertSummary(mockAlertTreeReadA);
-    const resB = parseAlertSummary(mockAlertReadC);
+    const resB = parseAlertSummary(mockAlertTreeReadC);
     expect(resA).toEqual(mockAlertReadASummary);
     expect(resB).toEqual(mockAlertReadCSummary);
   });
@@ -128,8 +47,8 @@ describe("alertTable getters", () => {
   it("will correctly return  visibleQueriedItemSummaries", () => {
     store.visibleQueriedItems = [
       mockAlertTreeReadA,
-      mockAlertReadB,
-      mockAlertReadC,
+      mockAlertTreeReadB,
+      mockAlertTreeReadC,
     ];
     expect(store.visibleQueriedItemSummaries).toEqual([
       mockAlertReadASummary,
@@ -141,8 +60,8 @@ describe("alertTable getters", () => {
   it("will correctly return  visibleQueriedItemsUuids", () => {
     store.visibleQueriedItems = [
       mockAlertTreeReadA,
-      mockAlertReadB,
-      mockAlertReadC,
+      mockAlertTreeReadB,
+      mockAlertTreeReadC,
     ];
     expect(store.visibleQueriedItemsUuids).toEqual(["uuid1", "uuid2", "uuid3"]);
   });
@@ -150,8 +69,8 @@ describe("alertTable getters", () => {
   it("will correctly return  visibleQueriedItemById", () => {
     store.visibleQueriedItems = [
       mockAlertTreeReadA,
-      mockAlertReadB,
-      mockAlertReadC,
+      mockAlertTreeReadB,
+      mockAlertTreeReadC,
     ];
     expect(store.visibleQueriedItemById("uuid1")).toEqual(mockAlertTreeReadA);
   });
@@ -178,31 +97,17 @@ describe("alertTable actions", () => {
   });
 
   it("will request to read page of alerts with given params on readPage", async () => {
-    const mockRequest = myNock.get("/alert/?limit=5&offset=0").reply(200, {
-      total: 3,
-      items: [mockAlertTreeReadA, mockAlertReadB, mockAlertReadC],
-    });
+    const mockRequest = myNock
+      .get("/alert/?limit=5&offset=0")
+      .reply(200, mockAlertReadPage);
 
     await store.readPage(mockParams);
 
     expect(mockRequest.isDone()).toEqual(true);
     expect(store.visibleQueriedItems).toEqual([
-      Object.assign({}, JSON.parse(JSON.stringify(mockAlertTreeReadA)), {
-        eventTime: "2021-12-18T00:59:43.570Z",
-        insertTime: "2021-12-18T00:59:43.570Z",
-        uuid: "uuid1",
-      }),
-      Object.assign({}, JSON.parse(JSON.stringify(mockAlertReadB)), {
-        eventTime: "2021-12-18T00:59:43.570Z",
-        insertTime: "2021-12-18T00:59:43.570Z",
-        uuid: "uuid2",
-      }),
-      Object.assign({}, JSON.parse(JSON.stringify(mockAlertReadC)), {
-        eventTime: "2021-12-18T00:59:43.570Z",
-        insertTime: "2021-12-18T00:59:43.570Z",
-        dispositionTime: "2021-12-18T00:59:43.570Z",
-        uuid: "uuid3",
-      }),
+      JSON.parse(JSON.stringify(mockAlertTreeReadA)),
+      JSON.parse(JSON.stringify(mockAlertTreeReadB)),
+      JSON.parse(JSON.stringify(mockAlertTreeReadC)),
     ]);
     expect(store.totalItems).toEqual(3);
     expect(store.requestReload).toEqual(false);

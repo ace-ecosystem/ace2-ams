@@ -8,3 +8,12 @@ export const createCustomPinia = (options?: TestingOptions) => {
 
   return createTestingPinia(defaultOptions);
 };
+
+export const createCustomCypressPinia = (options?: TestingOptions) => {
+  const defaultOptions: TestingOptions = { createSpy: cy.spy };
+  if (options) {
+    return createTestingPinia({ ...options, ...defaultOptions });
+  }
+
+  return createTestingPinia(defaultOptions);
+};

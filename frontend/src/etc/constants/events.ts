@@ -12,7 +12,6 @@ import { useEventTypeStore } from "@/stores/eventType";
 import { useEventVectorStore } from "@/stores/eventVector";
 
 import {
-  inputTypes,
   nameProperty,
   nodeTagsProperty,
   nodeThreatActorProperty,
@@ -22,13 +21,8 @@ import {
   observableValueProperty,
   ownerProperty,
   queueProperty,
-} from "./base";
-import EventSummaryVue from "@/components/Events/EventSummary.vue";
-import EventAlertsTableVue from "@/components/Events/EventAlertsTable.vue";
-import EventURLSummaryVue from "@/components/Events/EventURLSummary.vue";
-import EventURLDomainSummaryVue from "@/components/Events/EventURLDomainSummary.vue";
-import EventObservableSummaryVue from "@/components/Events/EventObservableSummary.vue";
-import EventDetectionsSummaryVue from "@/components/Events/EventDetectionsSummary.vue";
+} from "./common";
+import { inputTypes } from "./base";
 
 // ** Events ** //
 
@@ -263,12 +257,3 @@ export const validEventFilters: propertyOption[] = [
   eventTypeProperty,
   eventVectorsProperty,
 ];
-
-export const defaultEventDetailsSections = {
-  "Event Summary": EventSummaryVue,
-  "Alert Summary": EventAlertsTableVue,
-  "Detection Summary": EventDetectionsSummaryVue,
-  "URL Summary": EventURLSummaryVue,
-  "URL Domain Summary": EventURLDomainSummaryVue,
-  "Observable Summary": EventObservableSummaryVue,
-};

@@ -145,7 +145,7 @@
   import { useFilterStore } from "@/stores/filter";
   import { nodeSelectedStores, nodeTableStores } from "@/stores/index";
 
-  import { loadFiltersFromStorage } from "@/etc/helpers";
+  import { loadFiltersFromStorage } from "@/stores/helpers";
 
   const props = defineProps({
     columns: { type: Array, required: true },

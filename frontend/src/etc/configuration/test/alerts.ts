@@ -15,7 +15,7 @@ import {
   nodeThreatsProperty,
   queueProperty,
   ownerProperty,
-} from "@/etc/constants/base";
+} from "@/etc/constants/common";
 
 const defaultAlertFilters = [
   alertDispositionProperty,

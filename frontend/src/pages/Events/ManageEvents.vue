@@ -23,7 +23,8 @@
 
   import { useFilterStore } from "@/stores/filter";
   import { useEventTableStore } from "@/stores/eventTable";
-  import { parseFilters, populateCommonStores } from "@/etc/helpers";
+  import { parseFilters } from "@/etc/helpers";
+  import { populateCommonStores } from "@/stores/helpers";
   import { validEventFilters } from "@/etc/constants/events";
 
   const route = useRoute();
