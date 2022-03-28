@@ -14,7 +14,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@unit/*": ["./tests/unit/src/*"],
-      "@mocks/*": ["./tests/mocks/*"]
+      "@mocks/*": ["./tests/mocks/*"],
+      "@tests/*": ["./tests/*"]
     },
     "types": ["vite/client"],
     "allowJs": true,
