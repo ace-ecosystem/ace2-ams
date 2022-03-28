@@ -11,6 +11,7 @@ from api.models.analysis_details import FAQueueAnalysisDetails
 from api.models.event_summaries import (
     EmailHeadersBody,
     EmailSummary,
+    SandboxSummary,
     URLDomainSummaryIndividual,
     UserSummary,
 )
@@ -169,6 +170,45 @@ def get_observable_summary(uuid: UUID, db: Session = Depends(get_db)):
 
     # Return the observables sorted by their type then value
     return sorted(results, key=lambda x: (x.type.value, x.value))
+
+
+def get_sandbox_summary(uuid: UUID, db: Session = Depends(get_db)):
+    # Get the event from the database
+    event: Event = crud.read(uuid=uuid, db_table=Event, db=db)
+
+    # Get all the sandbox analyses (and their root Node UUIDs) performed in the event.
+    query = (
+        select([NodeTree.root_node_uuid, Analysis])
+        .select_from(join(NodeTree, Node, NodeTree.node_uuid == Node.uuid))
+        .join(
+            Analysis,
+            onclause=and_(
+                Node.node_type == "analysis",
+                Analysis.uuid == NodeTree.node_uuid,
+                Analysis.analysis_module_type.has(AnalysisModuleType.value.startswith("Sandbox Analysis")),
+                NodeTree.root_node_uuid.in_(event.alert_uuids),
+            ),
+        )
+        .options(Load(Analysis).undefer("details"))
+    )
+
+    alert_uuid_and_analysis: List[Tuple[UUID, Analysis]] = db.execute(query).unique().fetchall()
+
+    # Build a list of SandboxSummary objects from the unique email analyses
+    results: List[SandboxSummary] = []
+    unique = []
+    for alert_uuid, analysis in alert_uuid_and_analysis:
+        # Skip this sandbox report if it is a duplicate
+        details_hash = DeepHash(analysis.details)[analysis.details]
+        if details_hash in unique:
+            continue
+        else:
+            unique.append(details_hash)
+
+        results.append(SandboxSummary(**analysis.details, alert_uuid=alert_uuid))
+
+    # Return the summaries by the filename
+    return sorted(results, key=lambda x: x.filename)
 
 
 def get_url_domain_summary(uuid: UUID, db: Session = Depends(get_db)):

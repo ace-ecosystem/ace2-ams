@@ -2,7 +2,12 @@ from pydantic import BaseModel, Field, UUID4
 from typing import List, Optional
 
 from api.models import type_str
-from api.models.analysis_details import EmailAnalysisDetailsBase, EmailAnalysisDetailsHeaderBody, UserAnalysisDetails
+from api.models.analysis_details import (
+    EmailAnalysisDetailsBase,
+    EmailAnalysisDetailsHeaderBody,
+    SandboxAnalysisDetails,
+    UserAnalysisDetails,
+)
 from api.models.node_detection_point import NodeDetectionPointRead
 from api.models.observable import ObservableRead
 
@@ -33,6 +38,12 @@ class ObservableSummary(ObservableRead):
     faqueue_hits: int = Field(description="The number of hits found by FA Queue Analysis for this observable")
 
     faqueue_link: Optional[type_str] = Field(description="An optional link to view the FA Queue search")
+
+
+class SandboxSummary(SandboxAnalysisDetails):
+    """Represents a sandbox report summary as used on the event pages."""
+
+    alert_uuid: UUID4 = Field(description="The UUID of the alert to which this sandbox summary belongs")
 
 
 class URLDomainSummaryIndividual(BaseModel):
