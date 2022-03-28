@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import auth from "@/services/api/auth";
 import myNock from "@unit/services/api/nock";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 
 createCustomPinia();
 

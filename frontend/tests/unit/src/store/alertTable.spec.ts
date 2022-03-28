@@ -3,7 +3,7 @@ import { describe, it, beforeEach, expect } from "vitest";
 import myNock from "@unit/services/api/nock";
 import { alertFilterParams } from "@/models/alert";
 import { useAlertTableStore } from "@/stores/alertTable";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 import { parseAlertSummary } from "@/etc/helpers";
 import {
   alertTreeReadFactory,

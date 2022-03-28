@@ -7,7 +7,7 @@ import { eventReadFactory, eventSummaryFactory } from "@mocks/events";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { nodeThreatReadFactory } from "@mocks/nodeThreat";
 import { userReadFactory } from "@mocks/user";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 
 createCustomPinia();
 const store = useEventTableStore();

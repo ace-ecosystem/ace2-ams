@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect } from "vitest";
 import { useModalStore } from "@/stores/modal";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 
 createCustomPinia();
 

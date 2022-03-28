@@ -1,7 +1,7 @@
 import { describe, it, beforeEach, expect } from "vitest";
 import { useAuthStore } from "@/stores/auth";
 import { userRead } from "@/models/user";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 
 createCustomPinia();
 

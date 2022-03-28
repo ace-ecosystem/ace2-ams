@@ -2,7 +2,7 @@ import { describe, it, beforeEach, expect } from "vitest";
 import myNock from "@unit/services/api/nock";
 import { useEventStore } from "@/stores/event";
 import { eventReadFactory } from "@mocks/events";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 
 createCustomPinia();
 

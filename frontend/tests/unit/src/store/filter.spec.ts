@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect } from "vitest";
 import { useFilterStore, isEmpty } from "@/stores/filter";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 
 createCustomPinia();
 

@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect } from "vitest";
 import { useSelectedAlertStore } from "@/stores/selectedAlert";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 
 createCustomPinia();
 

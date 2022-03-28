@@ -2,7 +2,7 @@
 // NOTE: This test is not fully functional at this point.
 
 import { mount } from "@cypress/vue";
-import { createCustomCypressPinia } from "@unit/helpers";
+import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import PrimeVue from "primevue/config";
 
 import FilterModal from "@/components/Modals/FilterModal.vue";

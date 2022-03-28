@@ -6,7 +6,7 @@ import { createRouterMock, injectRouterMock } from "vue-router-mock";
 
 import { useAuthStore } from "@/stores/auth";
 import { useFilterStore } from "@/stores/filter";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 
 function factory(args: { authenticated?: boolean; options?: TestingOptions }) {
   const testingPinia = createCustomPinia(args.options);

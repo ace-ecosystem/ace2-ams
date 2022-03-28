@@ -7,7 +7,7 @@ import snakecaseKeys from "snakecase-keys";
 import { NodeComment } from "@/services/api/nodeComment";
 import myNock from "@unit/services/api/nock";
 import { nodeCommentCreate, nodeCommentRead } from "@/models/nodeComment";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 
 createCustomPinia();
 
