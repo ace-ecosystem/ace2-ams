@@ -1,3 +1,4 @@
+import { vi } from "vitest";
 import { createTestingPinia, TestingOptions } from "@pinia/testing";
 
 export const createCustomPinia = (options?: TestingOptions) => {
