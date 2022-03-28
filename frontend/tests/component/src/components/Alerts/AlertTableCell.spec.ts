@@ -1,17 +1,14 @@
-// Example Cypress Vue component test that we might use one day
-// NOTE: This test is not fully functional at this point.
-
+import { createPinia } from "pinia";
 import { mount } from "@cypress/vue";
-import { createCustomCypressPinia } from "@unit/helpers";
 import PrimeVue from "primevue/config";
 
 import AlertTableCell from "@/components/Alerts/AlertTableCell.vue";
 
-import router from "@/router/index";
 import { alertSummary } from "@/models/alert";
 import { alertSummaryFactory } from "@mocks/alert";
 import { commentReadFactory } from "@mocks/comment";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import router from "@/router/index";
 
 interface AlertTableCellProps {
   data: alertSummary;
@@ -31,13 +28,12 @@ const defaultProps: AlertTableCellProps = {
 
 function factory(
   args = {
-    piniaOptions: {},
     props: defaultProps,
   },
 ) {
   return mount(AlertTableCell, {
     global: {
-      plugins: [createCustomCypressPinia(args.piniaOptions), PrimeVue, router],
+      plugins: [createPinia(), PrimeVue, router],
       provide: { nodeType: "alerts" },
     },
     propsData: args.props,
@@ -53,7 +49,7 @@ describe("AlertTableCell", () => {
       data: mockAlert,
       field: "name",
     };
-    factory({ piniaOptions: {}, props: props });
+    factory({ props: props });
     // Alert name & link
     cy.contains("Test")
       .invoke("attr", "href")
@@ -68,7 +64,7 @@ describe("AlertTableCell", () => {
       data: mockAlert,
       field: "eventTime",
     };
-    factory({ piniaOptions: {}, props: props });
+    factory({ props: props });
     cy.contains("3/24/2022, 4:00:00 AM");
   });
   it("correctly renders an alert comments cell", () => {
@@ -76,7 +72,7 @@ describe("AlertTableCell", () => {
       data: mockAlert,
       field: "comments",
     };
-    factory({ piniaOptions: {}, props: props });
+    factory({ props: props });
     cy.contains("12/31/2019, 7:00:00 PM (Test Analyst) Test comment");
   });
   it("correctly renders a generic alert cell (queue)", () => {
@@ -84,7 +80,7 @@ describe("AlertTableCell", () => {
       data: mockAlert,
       field: "queue",
     };
-    factory({ piniaOptions: {}, props: props });
+    factory({ props: props });
     cy.contains("testAlertQueue");
   });
 });
