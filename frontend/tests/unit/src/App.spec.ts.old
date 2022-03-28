@@ -1,3 +1,4 @@
+import { describe, it, beforeEach, expect } from "vitest";
 import App from "@/App.vue";
 import { mount } from "@vue/test-utils";
 import { TestingOptions } from "@pinia/testing";
@@ -5,7 +6,7 @@ import { createRouterMock, injectRouterMock } from "vue-router-mock";
 
 import { useAuthStore } from "@/stores/auth";
 import { useFilterStore } from "@/stores/filter";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 
 function factory(args: { authenticated?: boolean; options?: TestingOptions }) {
   const testingPinia = createCustomPinia(args.options);

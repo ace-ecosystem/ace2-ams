@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { Analysis } from "@/services/api/analysis";
 import myNock from "@unit/services/api/nock";
 import { analysisReadFactory } from "@mocks/analysis";
@@ -7,7 +8,7 @@ describe("Analysis API calls", () => {
     myNock.get("/analysis/uuid2").reply(200, analysisReadFactory());
 
     const res = await Analysis.read("uuid2");
-    expect(res).to.eql(analysisReadFactory());
+    expect(res).toEqual(analysisReadFactory());
   });
 
   it("will throw an error if a request fails", async () => {
@@ -16,7 +17,9 @@ describe("Analysis API calls", () => {
       await Analysis.read("uuid2");
     } catch (e) {
       const error = e as Error;
-      expect(error.message).to.equal("Request failed with status code 404");
+      expect(error.message).toStrictEqual(
+        "Request failed with status code 404",
+      );
     }
   });
 });

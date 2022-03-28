@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 
+import { describe, it, expect } from "vitest";
 import { NodeTree } from "@/services/api/nodeTree";
 import myNock from "./nock";
 
@@ -23,6 +24,6 @@ describe("nodeTree API calls", () => {
       .reply(200, mockObjectReadArray);
 
     const res = await NodeTree.readNodesOfNodeTree(["1", "2"], "observable");
-    expect(res).to.eql(mockObjectReadArray);
+    expect(res).toEqual(mockObjectReadArray);
   });
 });

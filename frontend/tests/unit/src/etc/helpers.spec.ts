@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from "vitest";
 import { alertFilters } from "@/etc/configuration/alerts";
 import {
   formatNodeFiltersForAPI,
@@ -12,8 +13,6 @@ import { userRead } from "@/models/user";
 import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
 import { createTestingPinia } from "@pinia/testing";
-import { expect } from "vitest";
-import { vi, describe, it } from "vitest";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { genericObjectRead } from "@/models/base";
 
@@ -63,7 +62,7 @@ describe("parseFilters", () => {
       alertFilters.external,
     );
 
-    expect(results).to.eql({
+    expect(results).toEqual({
       observableTypes: [
         { value: "ipv4", description: null, uuid: "1" },
         { value: "file", description: null, uuid: "2" },
@@ -74,7 +73,7 @@ describe("parseFilters", () => {
   it("will correctly parse and add any chips filters", async () => {
     const results = parseFilters({ tags: "tagA,tagB" }, alertFilters.external);
 
-    expect(results).to.eql({
+    expect(results).toEqual({
       tags: ["tagA", "tagB"],
     });
   });
@@ -111,7 +110,7 @@ describe("parseFilters", () => {
 
     const results = parseFilters({ owner: "analystB" }, alertFilters.external);
 
-    expect(results).to.eql({
+    expect(results).toEqual({
       owner: mockUserB,
     });
   });
@@ -125,7 +124,7 @@ describe("parseFilters", () => {
       alertFilters.external,
     );
 
-    expect(results).to.eql({
+    expect(results).toEqual({
       eventTimeBefore: new Date("2022-01-08T16:31:51.000Z"),
     });
   });
@@ -136,13 +135,13 @@ describe("parseFilters", () => {
       alertFilters.external,
     );
 
-    expect(results).to.eql({});
+    expect(results).toEqual({});
   });
 
   it("will correctly parse and add any input text filters", async () => {
     const results = parseFilters({ name: "test name" }, alertFilters.external);
 
-    expect(results).to.eql({
+    expect(results).toEqual({
       name: "test name",
     });
   });
@@ -158,7 +157,7 @@ describe("parseFilters", () => {
       alertFilters.external,
     );
 
-    expect(results).to.eql({
+    expect(results).toEqual({
       observable: {
         category: { value: "ipv4", description: null, uuid: "1" },
         value: "1.2.3.4",
@@ -215,7 +214,7 @@ describe("parseFilters", () => {
       alertFilters.external,
     );
 
-    expect(results).to.eql({
+    expect(results).toEqual({
       tags: ["tagA", "tagB"],
       owner: mockUserB,
       observableTypes: [
@@ -262,7 +261,7 @@ describe("formatNodeFiltersForAPI", () => {
       alertFilters.external,
       MOCK_PARAMS,
     );
-    expect(formattedFilters).to.eql({
+    expect(formattedFilters).toEqual({
       limit: 10,
       offset: 10,
       disposition: "FALSE_POSITIVE",
@@ -276,12 +275,12 @@ describe("formatNodeFiltersForAPI", () => {
 
   it("getAlertLink correctly generates an alert link given an alert object", () => {
     const result = getAlertLink(mockAlertTreeRead);
-    expect(result).to.eql("/alert/testAlertUuid");
+    expect(result).toEqual("/alert/testAlertUuid");
   });
 
   it("getAllAlertTags formats a given alert's tags into a sorted and dedup'd list of tags", () => {
     const result = getAllAlertTags(mockAlertTreeRead);
-    expect(result).to.eql([
+    expect(result).toEqual([
       {
         description: null,
         value: "c2",
@@ -340,6 +339,6 @@ describe("groupItemsByQueue", () => {
     };
 
     const result = groupItemsByQueue(testData);
-    expect(result).to.eql(expected);
+    expect(result).toEqual(expected);
   });
 });
