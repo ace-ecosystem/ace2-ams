@@ -16,7 +16,7 @@
       "@unit/*": ["./tests/unit/src/*"],
       "@mocks/*": ["./tests/mocks/*"]
     },
-    "types": ["vite/client", "vitest/globals"],
+    "types": ["vite/client"],
     "allowJs": true,
     "skipLibCheck": true
   },

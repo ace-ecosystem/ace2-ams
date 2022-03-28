@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import auth from "@/services/api/auth";
 import { User } from "@/services/api/user";
 import myNock from "@unit/services/api/nock";
@@ -12,7 +13,9 @@ describe("Axios interceptor functionality", () => {
       await User.readAll();
     } catch (e) {
       const error = e as Error;
-      expect(error.message).to.equal("Request failed with status code 405");
+      expect(error.message).toStrictEqual(
+        "Request failed with status code 405",
+      );
     }
   });
 
@@ -22,7 +25,9 @@ describe("Axios interceptor functionality", () => {
       await auth.logout();
     } catch (e) {
       const error = e as Error;
-      expect(error.message).to.equal("Request failed with status code 405");
+      expect(error.message).toStrictEqual(
+        "Request failed with status code 405",
+      );
     }
   });
 
@@ -34,7 +39,7 @@ describe("Axios interceptor functionality", () => {
       .reply(200, { items: [{ username: "analyst" }] });
 
     const res = await User.readAll();
-    expect(res).to.eql([{ username: "analyst" }]);
+    expect(res).toEqual([{ username: "analyst" }]);
   });
 
   it("will reject a bad request after successfully refreshing tokens", async () => {
@@ -45,7 +50,9 @@ describe("Axios interceptor functionality", () => {
       await User.readAll();
     } catch (e) {
       const error = e as Error;
-      expect(error.message).to.equal("Request failed with status code 405");
+      expect(error.message).toStrictEqual(
+        "Request failed with status code 405",
+      );
     }
   });
 
@@ -56,7 +63,9 @@ describe("Axios interceptor functionality", () => {
       await User.readAll();
     } catch (e) {
       const error = e as Error;
-      expect(error.message).to.equal("Request failed with status code 401");
+      expect(error.message).toStrictEqual(
+        "Request failed with status code 401",
+      );
     }
   });
 });

@@ -1,4 +1,5 @@
 // TODO: Move to eventTable store tests
+import { describe, it, beforeEach, expect } from "vitest";
 import myNock from "@unit/services/api/nock";
 import { eventFilterParams } from "@/models/event";
 import { parseEventSummary, useEventTableStore } from "@/stores/eventTable";
@@ -62,8 +63,8 @@ describe("eventTable helpers", () => {
   it("will correctly parse an event received from the backend using parseEventSummary", () => {
     const resA = parseEventSummary(mockEventReadA);
     const resB = parseEventSummary(mockEventReadC);
-    expect(resA).to.eql(mockEventReadASummary);
-    expect(resB).to.eql(mockEventReadCSummary);
+    expect(resA).toEqual(mockEventReadASummary);
+    expect(resB).toEqual(mockEventReadCSummary);
   });
 });
 
@@ -78,7 +79,7 @@ describe("eventTable getters", () => {
       mockEventReadB,
       mockEventReadC,
     ];
-    expect(store.visibleQueriedItemSummaries).to.eql([
+    expect(store.visibleQueriedItemSummaries).toEqual([
       mockEventReadASummary,
       mockEventReadBSummary,
       mockEventReadCSummary,
@@ -91,7 +92,7 @@ describe("eventTable getters", () => {
       mockEventReadB,
       mockEventReadC,
     ];
-    expect(store.visibleQueriedItemsUuids).to.eql(["uuid1", "uuid2", "uuid3"]);
+    expect(store.visibleQueriedItemsUuids).toEqual(["uuid1", "uuid2", "uuid3"]);
   });
 
   it("will correctly return  visibleQueriedItemById", () => {
@@ -100,26 +101,26 @@ describe("eventTable getters", () => {
       mockEventReadB,
       mockEventReadC,
     ];
-    expect(store.visibleQueriedItemById("uuid1")).to.eql(mockEventReadA);
+    expect(store.visibleQueriedItemById("uuid1")).toEqual(mockEventReadA);
   });
 
   it("will correctly return sortFilter", () => {
-    expect(store.sortFilter).to.eql("created_time|desc");
+    expect(store.sortFilter).toEqual("created_time|desc");
 
     store.sortField = null;
     store.sortOrder = null;
-    expect(store.sortFilter).to.equal(null);
+    expect(store.sortFilter).toStrictEqual(null);
   });
 
   it("will correctly return allFiltersLoaded", () => {
-    expect(store.allFiltersLoaded).to.equal(false);
+    expect(store.allFiltersLoaded).toStrictEqual(false);
     store.stateFiltersLoaded = true;
-    expect(store.allFiltersLoaded).to.equal(false);
+    expect(store.allFiltersLoaded).toStrictEqual(false);
     store.stateFiltersLoaded = false;
     store.routeFiltersLoaded = true;
-    expect(store.allFiltersLoaded).to.equal(false);
+    expect(store.allFiltersLoaded).toStrictEqual(false);
     store.stateFiltersLoaded = true;
-    expect(store.allFiltersLoaded).to.equal(true);
+    expect(store.allFiltersLoaded).toStrictEqual(true);
   });
 });
 
@@ -136,14 +137,14 @@ describe("eventTable actions", () => {
 
     await store.readPage(mockParams);
 
-    expect(mockRequest.isDone()).to.eql(true);
-    expect(store.visibleQueriedItems).to.eql([
+    expect(mockRequest.isDone()).toEqual(true);
+    expect(store.visibleQueriedItems).toEqual([
       JSON.parse(JSON.stringify(mockEventReadA)),
       JSON.parse(JSON.stringify(mockEventReadB)),
       JSON.parse(JSON.stringify(mockEventReadC)),
     ]);
-    expect(store.totalItems).to.eql(3);
-    expect(store.requestReload).to.eql(false);
+    expect(store.totalItems).toEqual(3);
+    expect(store.requestReload).toEqual(false);
   });
 
   it("will throw an error if request fails on readPage", async () => {
@@ -153,12 +154,14 @@ describe("eventTable actions", () => {
       await store.readPage(mockParams);
     } catch (e) {
       const error = e as Error;
-      expect(error.message).to.equal("Request failed with status code 403");
+      expect(error.message).toStrictEqual(
+        "Request failed with status code 403",
+      );
     }
 
-    expect(store.visibleQueriedItems).to.eql([]);
-    expect(store.totalItems).to.eql(0);
-    expect(store.requestReload).to.eql(false);
+    expect(store.visibleQueriedItems).toEqual([]);
+    expect(store.totalItems).toEqual(0);
+    expect(store.requestReload).toEqual(false);
   });
   it("will reset the sort order and sort field to written defaults on resetSort", () => {
     store.sortField = "exampleSort";
@@ -166,7 +169,7 @@ describe("eventTable actions", () => {
 
     store.resetSort();
 
-    expect(store.sortField).to.eql("createdTime");
-    expect(store.sortOrder).to.eql("desc");
+    expect(store.sortField).toEqual("createdTime");
+    expect(store.sortOrder).toEqual("desc");
   });
 });

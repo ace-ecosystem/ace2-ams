@@ -1,5 +1,5 @@
+import { describe, it, beforeEach, expect, vi } from "vitest";
 import { setUserDefaults, loadFiltersFromStorage } from "@/stores/helpers";
-import { beforeEach, expect } from "vitest";
 import { useAlertTableStore } from "@/stores/alertTable";
 import { useAuthStore } from "@/stores/auth";
 import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
@@ -7,7 +7,6 @@ import { useEventTableStore } from "@/stores/eventTable";
 import { useFilterStore } from "@/stores/filter";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { userReadFactory } from "@mocks/user";
-import { vi, describe, it } from "vitest";
 import { createTestingPinia } from "@pinia/testing";
 
 createTestingPinia({ createSpy: vi.fn });
@@ -28,11 +27,11 @@ describe("setUserDefaults", () => {
 
   it("will do nothing when there is no authStore user set", () => {
     setUserDefaults();
-    expect(currentUserSettingsStore.queues.events).to.equal(null);
-    expect(currentUserSettingsStore.queues.alerts).to.equal(null);
+    expect(currentUserSettingsStore.queues.events).toStrictEqual(null);
+    expect(currentUserSettingsStore.queues.alerts).toStrictEqual(null);
 
-    expect(filterStore.events).to.eql({});
-    expect(filterStore.alerts).to.eql({});
+    expect(filterStore.events).toEqual({});
+    expect(filterStore.alerts).toEqual({});
   });
 
   it("will correctly set all user defaults when nodeType == 'all'", () => {
@@ -41,12 +40,12 @@ describe("setUserDefaults", () => {
       defaultEventQueue: eventQueue,
     });
     setUserDefaults();
-    expect(currentUserSettingsStore.queues.events).to.eql(eventQueue);
-    expect(currentUserSettingsStore.queues.alerts).to.eql(alertQueue);
-    expect(filterStore.events).to.eql({
+    expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
+    expect(currentUserSettingsStore.queues.alerts).toEqual(alertQueue);
+    expect(filterStore.events).toEqual({
       queue: eventQueue,
     });
-    expect(filterStore.alerts).to.eql({
+    expect(filterStore.alerts).toEqual({
       queue: alertQueue,
     });
   });
@@ -56,12 +55,12 @@ describe("setUserDefaults", () => {
       defaultEventQueue: eventQueue,
     });
     setUserDefaults("events");
-    expect(currentUserSettingsStore.queues.events).to.eql(eventQueue);
-    expect(currentUserSettingsStore.queues.alerts).to.equal(null);
-    expect(filterStore.events).to.eql({
+    expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
+    expect(currentUserSettingsStore.queues.alerts).toStrictEqual(null);
+    expect(filterStore.events).toEqual({
       queue: eventQueue,
     });
-    expect(filterStore.alerts).to.eql({});
+    expect(filterStore.alerts).toEqual({});
   });
   it("will correctly set alert user defaults when nodeType == 'alerts'", () => {
     authStore.user = userReadFactory({
@@ -69,21 +68,21 @@ describe("setUserDefaults", () => {
       defaultEventQueue: eventQueue,
     });
     setUserDefaults("alerts");
-    expect(currentUserSettingsStore.queues.events).to.equal(null);
-    expect(currentUserSettingsStore.queues.alerts).to.eql(alertQueue);
-    expect(filterStore.events).to.eql({});
-    expect(filterStore.alerts).to.eql({
+    expect(currentUserSettingsStore.queues.events).toStrictEqual(null);
+    expect(currentUserSettingsStore.queues.alerts).toEqual(alertQueue);
+    expect(filterStore.events).toEqual({});
+    expect(filterStore.alerts).toEqual({
       queue: alertQueue,
     });
   });
 
   it("will not set any user defaults when nodeType is unknown", () => {
     setUserDefaults("unknown");
-    expect(currentUserSettingsStore.queues.events).to.equal(null);
-    expect(currentUserSettingsStore.queues.alerts).to.equal(null);
+    expect(currentUserSettingsStore.queues.events).toStrictEqual(null);
+    expect(currentUserSettingsStore.queues.alerts).toStrictEqual(null);
 
-    expect(filterStore.events).to.eql({});
-    expect(filterStore.alerts).to.eql({});
+    expect(filterStore.events).toEqual({});
+    expect(filterStore.alerts).toEqual({});
   });
 });
 
@@ -105,13 +104,13 @@ describe("loadFiltersFromStorage", () => {
 
     loadFiltersFromStorage();
 
-    expect(filterStore.$state).to.eql({
+    expect(filterStore.$state).toEqual({
       alerts: {},
       events: {
         queue: { description: null, value: "external", uuid: "uuid1" },
       },
     });
-    expect(alertTableStore.stateFiltersLoaded).to.equal(true);
-    expect(eventTableStore.stateFiltersLoaded).to.equal(true);
+    expect(alertTableStore.stateFiltersLoaded).toStrictEqual(true);
+    expect(eventTableStore.stateFiltersLoaded).toStrictEqual(true);
   });
 });

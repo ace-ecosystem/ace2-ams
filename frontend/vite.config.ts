@@ -15,7 +15,7 @@ export default defineConfig({
   },
   plugins: [vue()],
   test: {
-    globals: true,
+    globals: false,
     environment: "jsdom",
     include: ["**/unit/**/*.spec.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     reporters: ["verbose"],
