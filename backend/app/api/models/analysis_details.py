@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, IPvAnyAddress
 from typing import List, Optional
 
 from api.models import type_str
@@ -43,6 +43,142 @@ class FAQueueAnalysisDetails(BaseModel):
     hits: int = Field(description="The number of hits produced by the FA Queue search for the observable")
 
     link: Optional[type_str] = Field(description="A link (such as to Splunk) where the FA Queue search can be viewed")
+
+
+class SandboxContactedHost(BaseModel):
+    """Represents a contacted host from a sandbox report."""
+
+    ip: IPvAnyAddress = Field(description="The IP address of the contacted host")
+
+    port: Optional[int] = Field(description="The TCP/UDP port used when contacting the host")
+
+    protocol: Optional[type_str] = Field(description="The protocol used when contacting the host (usually TCP or UDP)")
+
+    location: Optional[type_str] = Field(description="Where the host is located")
+
+    associated_domains: List[type_str] = Field(description="A list of domains associated with the contacted host")
+
+
+class SandboxDnsRequest(BaseModel):
+    """Represents a DNS request from a sandbox report."""
+
+    request: type_str = Field(description="The domain that was requested")
+
+    type: Optional[type_str] = Field(description="The type of the DNS request (usually 'A')")
+
+    answer: Optional[type_str] = Field(description="The result of the DNS request")
+
+    answer_type: Optional[type_str] = Field(description="The type of the DNS request answer")
+
+
+class SandboxDroppedFile(BaseModel):
+    """Represents a dropped file from a sandbox report."""
+
+    filename: type_str = Field(description="The name of the dropped file")
+
+    path: Optional[type_str] = Field(description="The path where the file was dropped")
+
+    size: Optional[int] = Field(description="The size (in bytes) of the dropped file")
+
+    type: Optional[type_str] = Field(description="The type of the dropped file")
+
+    md5: Optional[type_str] = Field(description="The MD5 hash of the dropped file")
+
+    sha1: Optional[type_str] = Field(description="The SHA1 hash of the dropped file")
+
+    sha256: Optional[type_str] = Field(description="The SHA256 hash of the dropped file")
+
+    sha512: Optional[type_str] = Field(description="The SHA512 hash of the dropped file")
+
+    ssdeep: Optional[type_str] = Field(description="The SSDEEP hash of the dropped file")
+
+
+class SandboxHttpRequest(BaseModel):
+    """Represents an HTTP request from a sandbox report."""
+
+    host: type_str = Field(description="The HTTP host that was contacted")
+
+    port: Optional[int] = Field(description="The HTTP port used in the request")
+
+    path: Optional[type_str] = Field(description="The path that was requested")
+
+    method: Optional[type_str] = Field(description="The HTTP method used for the request")
+
+    user_agent: Optional[type_str] = Field(description="The user-agent used for the request")
+
+
+class SandboxProcess(BaseModel):
+    """Represents an executed process from a sandbox report."""
+
+    command: type_str = Field(description="The command that was executed")
+
+    pid: int = Field(description="The process ID")
+
+    parent_pid: int = Field(description="The parent process' ID")
+
+
+class SandboxAnalysisDetails(BaseModel):
+    """Represents the minimum fields in the Sandbox Analysis details that the frontend expects for event pages."""
+
+    contacted_hosts: List[SandboxContactedHost] = Field(
+        description="A list of contacted hosts during the sandbox execution"
+    )
+
+    created_services: List[type_str] = Field(
+        description="A list of services that were created during the sandbox execution"
+    )
+
+    dns_requests: List[SandboxDnsRequest] = Field(
+        description="A list of DNS requests made during the sandbox execution"
+    )
+
+    dropped_files: List[SandboxDroppedFile] = Field(description="A list of dropped files from the sandbox execution")
+
+    filename: type_str = Field(description="The name of the sandboxed file")
+
+    http_requests: List[SandboxHttpRequest] = Field(
+        description="A list of HTTP requests made during the sandbox execution"
+    )
+
+    malware_family: Optional[type_str] = Field(description="The malware family as identified from the sandbox")
+
+    md5: Optional[type_str] = Field(description="The MD5 hash of the sandboxed file")
+
+    memory_strings: List[type_str] = Field(description="A list of strings found in memory")
+
+    memory_urls: List[type_str] = Field(description="A list of URLs found in memory")
+
+    mutexes: List[type_str] = Field(description="A list of mutexes created during the sandbox execution")
+
+    processes: Optional[List[SandboxProcess]] = Field(
+        description="A list of the executed processes during the sandbox execution"
+    )
+
+    registry_keys: List[type_str] = Field(
+        description="A list of registry keys accessed or modified during the sandbox execution"
+    )
+
+    resolved_apis: List[type_str] = Field(description="A list of APIs used during the sandbox execution")
+
+    sandbox_url: type_str = Field(description="A URL where the sandbox report can be viewed")
+
+    sha1: Optional[type_str] = Field(description="The SHA1 hash of the sandboxed file")
+
+    sha256: Optional[type_str] = Field(description="The SHA256 hash of the sandboxed file")
+
+    sha512: Optional[type_str] = Field(description="The SHA512 hash of the sandboxed file")
+
+    ssdeep: Optional[type_str] = Field(description="The SSDEEP hash of the sandboxed file")
+
+    started_services: List[type_str] = Field(
+        description="A list of services that were started during the sandbox execution"
+    )
+
+    strings_urls: List[type_str] = Field(description="A list of URLs found in the strings of the sandboxed file")
+
+    suricata_alerts: List[type_str] = Field(
+        description="A list of Suricata alerts identified during the sandbox execution"
+    )
 
 
 class UserAnalysisDetails(BaseModel):
