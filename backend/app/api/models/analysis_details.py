@@ -121,63 +121,71 @@ class SandboxAnalysisDetails(BaseModel):
     """Represents the minimum fields in the Sandbox Analysis details that the frontend expects for event pages."""
 
     contacted_hosts: List[SandboxContactedHost] = Field(
-        description="A list of contacted hosts during the sandbox execution"
+        description="A list of contacted hosts during the sandbox execution", default_factory=list
     )
 
     created_services: List[type_str] = Field(
-        description="A list of services that were created during the sandbox execution"
+        description="A list of services that were created during the sandbox execution", default_factory=list
     )
 
     dns_requests: List[SandboxDnsRequest] = Field(
-        description="A list of DNS requests made during the sandbox execution"
+        description="A list of DNS requests made during the sandbox execution", default_factory=list
     )
 
-    dropped_files: List[SandboxDroppedFile] = Field(description="A list of dropped files from the sandbox execution")
+    dropped_files: List[SandboxDroppedFile] = Field(
+        description="A list of dropped files from the sandbox execution", default_factory=list
+    )
 
     filename: type_str = Field(description="The name of the sandboxed file")
 
     http_requests: List[SandboxHttpRequest] = Field(
-        description="A list of HTTP requests made during the sandbox execution"
+        description="A list of HTTP requests made during the sandbox execution", default_factory=list
     )
 
-    malware_family: Optional[type_str] = Field(description="The malware family as identified from the sandbox")
+    malware_family: str = Field(description="The malware family as identified from the sandbox", default="")
 
-    md5: Optional[type_str] = Field(description="The MD5 hash of the sandboxed file")
+    md5: type_str = Field(description="The MD5 hash of the sandboxed file", default="")
 
-    memory_strings: List[type_str] = Field(description="A list of strings found in memory")
+    memory_strings: List[type_str] = Field(description="A list of strings found in memory", default_factory=list)
 
-    memory_urls: List[type_str] = Field(description="A list of URLs found in memory")
+    memory_urls: List[type_str] = Field(description="A list of URLs found in memory", default_factory=list)
 
-    mutexes: List[type_str] = Field(description="A list of mutexes created during the sandbox execution")
+    mutexes: List[type_str] = Field(
+        description="A list of mutexes created during the sandbox execution", default_factory=list
+    )
 
-    processes: Optional[List[SandboxProcess]] = Field(
-        description="A list of the executed processes during the sandbox execution"
+    processes: List[SandboxProcess] = Field(
+        description="A list of the executed processes during the sandbox execution", default_factory=list
     )
 
     registry_keys: List[type_str] = Field(
-        description="A list of registry keys accessed or modified during the sandbox execution"
+        description="A list of registry keys accessed or modified during the sandbox execution", default_factory=list
     )
 
-    resolved_apis: List[type_str] = Field(description="A list of APIs used during the sandbox execution")
+    resolved_apis: List[type_str] = Field(
+        description="A list of APIs used during the sandbox execution", default_factory=list
+    )
 
     sandbox_url: type_str = Field(description="A URL where the sandbox report can be viewed")
 
-    sha1: Optional[type_str] = Field(description="The SHA1 hash of the sandboxed file")
+    sha1: str = Field(description="The SHA1 hash of the sandboxed file", default="")
 
-    sha256: Optional[type_str] = Field(description="The SHA256 hash of the sandboxed file")
+    sha256: str = Field(description="The SHA256 hash of the sandboxed file", default="")
 
-    sha512: Optional[type_str] = Field(description="The SHA512 hash of the sandboxed file")
+    sha512: str = Field(description="The SHA512 hash of the sandboxed file", default="")
 
-    ssdeep: Optional[type_str] = Field(description="The SSDEEP hash of the sandboxed file")
+    ssdeep: str = Field(description="The SSDEEP hash of the sandboxed file", default="")
 
     started_services: List[type_str] = Field(
-        description="A list of services that were started during the sandbox execution"
+        description="A list of services that were started during the sandbox execution", default_factory=list
     )
 
-    strings_urls: List[type_str] = Field(description="A list of URLs found in the strings of the sandboxed file")
+    strings_urls: List[type_str] = Field(
+        description="A list of URLs found in the strings of the sandboxed file", default_factory=list
+    )
 
     suricata_alerts: List[type_str] = Field(
-        description="A list of Suricata alerts identified during the sandbox execution"
+        description="A list of Suricata alerts identified during the sandbox execution", default_factory=list
     )
 
 
