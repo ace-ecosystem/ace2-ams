@@ -550,7 +550,9 @@ def test_summary_sandbox(client_valid_access_token, db):
     get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/sandbox")
     assert len(get.json()) == 2
     assert get.json()[0]["filename"] == "malware.exe"
+    assert get.json()[0]["process_tree"] == "malware.exe\n    sub_command1\n        sub_sub_command\n    sub_command2"
     assert get.json()[1]["filename"] == "othermalware.exe"
+    assert get.json()[1]["process_tree"] == ""
 
 
 def test_summary_url_domains(client_valid_access_token, db):

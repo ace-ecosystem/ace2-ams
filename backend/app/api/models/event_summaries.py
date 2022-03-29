@@ -45,6 +45,8 @@ class SandboxSummary(SandboxAnalysisDetails):
 
     alert_uuid: UUID4 = Field(description="The UUID of the alert to which this sandbox summary belongs")
 
+    process_tree: str = Field(description="The formatted process tree of the sandbox execution", default="")
+
 
 class URLDomainSummaryIndividual(BaseModel):
     """Represents an individual URL domain summary."""

@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple
 from urllib.parse import urlparse
 from uuid import UUID
 
-from api.models.analysis_details import FAQueueAnalysisDetails
+from api.models.analysis_details import FAQueueAnalysisDetails, SandboxProcess
 from api.models.event_summaries import (
     EmailHeadersBody,
     EmailSummary,
@@ -173,6 +173,24 @@ def get_observable_summary(uuid: UUID, db: Session = Depends(get_db)):
 
 
 def get_sandbox_summary(uuid: UUID, db: Session = Depends(get_db)):
+    def _create_process_tree(processes: List[SandboxProcess], text="", depth=0) -> str:
+        if not text:
+            pids = [proc.pid for proc in processes]
+            root_pids = [proc.pid for proc in processes if proc.parent_pid not in pids]
+
+            for process in processes:
+                process.children = [proc for proc in processes if proc.parent_pid == process.pid]
+
+            processes = [proc for proc in processes if proc.pid in root_pids]
+
+        for process in processes:
+            text += f"{'    ' * depth}{process.command}\n"
+
+            if process.children:
+                text = _create_process_tree(process.children, text=text, depth=depth + 1)
+
+        return text
+
     # Get the event from the database
     event: Event = crud.read(uuid=uuid, db_table=Event, db=db)
 
@@ -205,7 +223,12 @@ def get_sandbox_summary(uuid: UUID, db: Session = Depends(get_db)):
         else:
             unique.append(details_hash)
 
-        results.append(SandboxSummary(**analysis.details, alert_uuid=alert_uuid))
+        # Create the SandboxSummary object and calculate its process tree if there are processes
+        report_summary = SandboxSummary(**analysis.details, alert_uuid=alert_uuid)
+        if report_summary.processes:
+            report_summary.process_tree = _create_process_tree(report_summary.processes).strip()
+
+        results.append(report_summary)
 
     # Return the summaries by the filename
     return sorted(results, key=lambda x: x.filename)

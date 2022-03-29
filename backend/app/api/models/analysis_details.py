@@ -116,6 +116,8 @@ class SandboxProcess(BaseModel):
 
     parent_pid: int = Field(description="The parent process' ID")
 
+    children: List["SandboxProcess"] = Field(description="A list of child processes", default_factory=list)
+
 
 class SandboxAnalysisDetails(BaseModel):
     """Represents the minimum fields in the Sandbox Analysis details that the frontend expects for event pages."""
@@ -205,3 +207,7 @@ class UserAnalysisDetails(BaseModel):
     title: Optional[type_str] = Field(description="The user's job title")
 
     user_id: type_str = Field(description="The user's user ID")
+
+
+# This is needed for the circular relationship between SandboxProcess
+SandboxProcess.update_forward_refs()
