@@ -16,7 +16,12 @@
       "@unit/*": ["./tests/unit/src/*"],
       "@mocks/*": ["./tests/mocks/*"]
     },
-    "types": ["vite/client", "vitest/globals"],
+    "types": [
+      "vite/client",
+      "vitest/globals",
+      "cypress",
+      "@testing-library/cypress"
+    ],
     "allowJs": true,
     "skipLibCheck": true
   },
