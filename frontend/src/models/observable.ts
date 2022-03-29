@@ -20,7 +20,7 @@ export interface observableCreate extends nodeCreate {
   directives?: string[];
   expiresOn?: Date;
   forDetection?: boolean;
-  nodeTree: nodeTreeCreate;
+  nodeTree?: nodeTreeCreate;
   redirectionUuid?: UUID;
   tags?: string[];
   threatActors?: string[];

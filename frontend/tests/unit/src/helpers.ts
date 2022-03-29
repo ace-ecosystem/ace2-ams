@@ -18,7 +18,7 @@ export const createCustomCypressPinia = (
   };
 
   if (options && Object.keys(options).length) {
-    if (!options.stubActions) {
+    if (options.stubActions != undefined && !options.stubActions) {
       defaultOptions = {
         createSpy: (fn) => {
           if (fn) {
