@@ -13,6 +13,7 @@ from api.models.event_summaries import (
     EmailHeadersBody,
     EmailSummary,
     ObservableSummary,
+    SandboxSummary,
     URLDomainSummary,
     UserSummary,
 )
@@ -23,6 +24,7 @@ from api.routes.event_summaries import (
     get_email_headers_body_summary,
     get_email_summary,
     get_observable_summary,
+    get_sandbox_summary,
     get_url_domain_summary,
     get_user_summary,
 )
@@ -672,5 +674,6 @@ helpers.api_route_read(
 )
 helpers.api_route_read(router, get_email_summary, List[EmailSummary], path="/{uuid}/summary/email")
 helpers.api_route_read(router, get_observable_summary, List[ObservableSummary], path="/{uuid}/summary/observable")
+helpers.api_route_read(router, get_sandbox_summary, List[SandboxSummary], path="/{uuid}/summary/sandbox")
 helpers.api_route_read(router, get_user_summary, List[UserSummary], path="/{uuid}/summary/user")
 helpers.api_route_read(router, get_url_domain_summary, URLDomainSummary, path="/{uuid}/summary/url_domain")

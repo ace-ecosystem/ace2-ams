@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from datetime import datetime, timedelta
@@ -5,6 +6,14 @@ from dateutil.parser import parse
 from fastapi import status
 from urllib.parse import urlencode
 
+from api.models.analysis_details import (
+    SandboxAnalysisDetails,
+    SandboxContactedHost,
+    SandboxDnsRequest,
+    SandboxDroppedFile,
+    SandboxHttpRequest,
+    SandboxProcess,
+)
 from tests import helpers
 
 
@@ -382,6 +391,168 @@ def test_summary_observable(client_valid_access_token, db):
     assert get.json()[0]["faqueue_hits"] == 10
     assert get.json()[1]["value"] == "192.168.1.1"
     assert get.json()[1]["faqueue_hits"] == 100
+
+
+def test_summary_sandbox(client_valid_access_token, db):
+    # Create an event
+    event = helpers.create_event(name="test event", db=db)
+
+    # The sandbox summary should be empty
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/sandbox")
+    assert get.json() == []
+
+    # Define the sandbox analysis details that will be used in the alerts
+    sample1_details = SandboxAnalysisDetails(
+        contacted_hosts=[
+            SandboxContactedHost(
+                ip="127.0.0.1",
+                port=80,
+                protocol="TCP",
+                location="some place",
+                associated_domains=["domain1", "domain2"],
+            ),
+            SandboxContactedHost(
+                ip="192.168.1.1", port=443, protocol="TCP", location="some other place", associated_domains=[]
+            ),
+        ],
+        created_services=["created_service1", "created_service2"],
+        dns_requests=[
+            SandboxDnsRequest(request="malware.com", type="A", answer="127.0.0.1", answer_type="A"),
+            SandboxDnsRequest(request="othermalware.com", type="A", answer="192.168.1.1", answer_type="A"),
+        ],
+        dropped_files=[
+            SandboxDroppedFile(
+                filename="dropped1.exe",
+                path="c:\\users\\analyst\\desktop\\dropped1.exe",
+                size=100,
+                type="application/octet-stream",
+                md5="10239eb7264449296277d10538e27f3e",
+                sha1="344329cc1356f227a722ad81e36a6e5baf6a0642",
+                sha256="17d771db597ca8eb06c874200a067d7ac4374aa14d7b775a3b57181e69cfb100",
+                sha512="54f61aba3cfb0249b84b9b2464b946e1039615dbebe6ce2ca6403c91945ef30a6156eb5c3ec330fe8c67b34e8a8b71a2f6e8d394874a72dd06fb96649d020682",
+                ssdeep="3:cIoN:cb",
+            ),
+            SandboxDroppedFile(
+                filename="dropped2.exe",
+                path="c:\\users\\analyst\\desktop\\dropped2.exe",
+                size=100,
+                type="application/octet-stream",
+                md5="8ad98e2965070ebbb86a95e35c18010f",
+                sha1="6e1833d62213441c60edce1a4cfb6674af102d69",
+                sha256="fc0fefa8d1f318419f927bc3b793bf66a035d59f24874ce7cf773f9162d0a158",
+                sha512="6774d837fb2851c1c1d89170068caa1b81143b81ec7fbf4322b3ffdbc24efcebcc12d763d1c6f4b0c843e43427671453167b1c50ed5f71c7ede8759f75f39732",
+                ssdeep="3:cIeAn:ckn",
+            ),
+        ],
+        filename="malware.exe",
+        http_requests=[
+            SandboxHttpRequest(
+                host="malware.com",
+                port=80,
+                path="/malware.exe",
+                method="GET",
+                user_agent="Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0",
+            ),
+            SandboxHttpRequest(
+                host="othermalware.com",
+                port=443,
+                path="/othermalware.exe",
+                method="GET",
+                user_agent="Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0",
+            ),
+        ],
+        malware_family="ransomware",
+        md5="9051c29972c935649d8fa4b823e54dea",
+        memory_strings=["memory_string1", "memory_string2"],
+        memory_urls=["http://memory.url1", "http://memory.url2"],
+        mutexes=["mutex1", "mutex2"],
+        processes=[
+            SandboxProcess(command="malware.exe", pid=1000, parent_pid=0),
+            SandboxProcess(command="sub_command1", pid=1001, parent_pid=1000),
+            SandboxProcess(command="sub_sub_command", pid=1002, parent_pid=1001),
+            SandboxProcess(command="sub_command2", pid=1003, parent_pid=1000),
+        ],
+        registry_keys=["registry_key1", "registry_key2"],
+        resolved_apis=["resolved_api1", "resolved_api2"],
+        sandbox_url="https://url.to.sandbox.report",
+        sha1="2da7b04fa4f6e94c7c82c1c8ee09ead16121bc60",
+        sha256="66ecfc29b6d458538b23310988289158f319e2e1cf7587413011d43a639c6ec0",
+        sha512="951c56c1bad4cdb721da736d9f1c04ebbbf32d2737c8ec8c64086a4c5448cb37f95784186c8c67c42b7bc622ba6358dc8befee750c14bcf5136a6706a19e007b",
+        ssdeep="3:5c+a:q",
+        started_services=["started_service1", "started_service2"],
+        strings_urls=["https://string.url1", "https://string.url2"],
+        suricata_alerts=["suricata_alert1", "suricata_alert2"],
+    )
+
+    sample2_details = SandboxAnalysisDetails(
+        filename="othermalware.exe",
+        md5="be0910beda52d3c1552822c43345061a",
+        sandbox_url="https://url.to.other.sandbox.report",
+        sha1="534cc9232929857e8b84236a4f955c9b5d303a7d",
+        sha256="73b4ed99444440ad52ad2bb8da8ee7d186d4b31705783c0b8f45ada7007bfd1c",
+    )
+
+    sample3_details = SandboxAnalysisDetails(
+        filename="good.exe",
+        md5="93ac743902fa30840d4cd30a52068a78",
+        sandbox_url="https://url.to.sandbox.report",
+    )
+
+    # Add some alerts with sandbox analysis to the event
+    #
+    # alert1
+    #   o1
+    #     a1 - Sandbox Analysis (malware.exe)
+    #
+    # alert2
+    #   o1
+    #     a1 - Sandbox Analysis (malware.exe)
+    #   o2
+    #     a2 - Sandbox Analysis (othermalware.exe)
+    alert_tree1 = helpers.create_alert(db=db, event=event)
+    alert1_o1 = helpers.create_observable(type="file", value="malware.exe", parent_tree=alert_tree1, db=db)
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert1_o1,
+        amt_value="Sandbox Analysis - Sandbox 1",
+        details=json.loads(sample1_details.json()),
+    )
+
+    alert_tree2 = helpers.create_alert(db=db, event=event)
+    alert2_o1 = helpers.create_observable(type="file", value="malware.exe", parent_tree=alert_tree2, db=db)
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert2_o1,
+        amt_value="Sandbox Analysis - Sandbox 1",
+        details=json.loads(sample1_details.json()),
+    )
+    alert2_o2 = helpers.create_observable(type="file", value="othermalware.exe", parent_tree=alert_tree2, db=db)
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert2_o2,
+        amt_value="Sandbox Analysis - Sandbox 2",
+        details=json.loads(sample2_details.json()),
+    )
+
+    # Add a third alert that is not part of the event
+    alert_tree3 = helpers.create_alert(db=db)
+    alert3_o1 = helpers.create_observable(type="file", value="good.exe", parent_tree=alert_tree3, db=db)
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert3_o1,
+        amt_value="Sandbox Analysis - Sandbox 1",
+        details=json.loads(sample3_details.json()),
+    )
+
+    # The sandbox summary should now have two entries in it. The malware.exe report is repeated, so it
+    # only counts once for the purposes of the summary.
+    # Additionally, the results should be sorted by the filenames.
+    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/sandbox")
+    assert len(get.json()) == 2
+    assert get.json()[0]["filename"] == "malware.exe"
+    assert get.json()[0]["process_tree"] == "malware.exe\n    sub_command1\n        sub_sub_command\n    sub_command2"
+    assert get.json()[1]["filename"] == "othermalware.exe"
+    assert get.json()[1]["process_tree"] == ""
 
 
 def test_summary_url_domains(client_valid_access_token, db):

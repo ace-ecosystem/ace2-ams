@@ -1,6 +1,13 @@
 import { UUID } from "./base";
 import { nodeDetectionPointRead } from "./nodeDetectionPoint";
 import { observableRead } from "./observable";
+import {
+  sandboxContactedHost,
+  sandboxDnsRequest,
+  sandboxDroppedFile,
+  sandboxHttpRequest,
+  sandboxProcess,
+} from "./sandbox";
 
 export interface detectionPointSummary extends nodeDetectionPointRead {
   alertUuid: UUID;
@@ -29,6 +36,32 @@ export interface emailSummary {
 export interface observableSummary extends observableRead {
   faqueueHits: number;
   faqueueLink: string;
+}
+
+export interface sandboxSummary {
+  contactedHosts: sandboxContactedHost[];
+  createdServices: string[];
+  dnsRequests: sandboxDnsRequest[];
+  droppedFiles: sandboxDroppedFile[];
+  filename: string;
+  httpRequests: sandboxHttpRequest[];
+  malwareFamily: string;
+  md5: string;
+  memoryStrings: string[];
+  memoryUrls: string[];
+  mutexes: string[];
+  processes: sandboxProcess[];
+  processTree: string;
+  registryKeys: string[];
+  resolvedApis: string[];
+  sandboxUrl: string;
+  sha1: string;
+  sha256: string;
+  sha512: string;
+  ssdeep: string;
+  startedServices: string[];
+  stringsUrls: string[];
+  suricataAlerts: string[];
 }
 
 interface urlDomainSummaryIndividual {
