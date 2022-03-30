@@ -376,7 +376,9 @@
     alertDate.value = new Date();
     alertDescription.value = "Manual Alert";
     alertDescriptionAppendString.value = "";
-    alertType.value = alertTypeStore.items[0].value;
+    alertType.value = alertTypeStore.items.length
+      ? alertTypeStore.items[0].value
+      : "manual";
     // TODO: This needs to be based on the current user's preferred queue
     queue.value = authStore.user.defaultAlertQueue.value;
     errors.value = [];
