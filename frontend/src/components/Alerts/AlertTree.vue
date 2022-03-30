@@ -29,14 +29,13 @@
             >{{ treeItemName(i) }}</span
           >
 
-          <span
-            v-else
-            class="treenode-text"
-            @click="router.push(viewAnalysisRoute(i))"
-            >{{ treeItemName(i) }}</span
+          <router-link v-else-if="isAnalysis(i)" :to="viewAnalysisRoute(i)"
+            ><span class="treenode-text">{{
+              treeItemName(i)
+            }}</span></router-link
           >
 
-          <span v-if="hasTags(i)">
+          <span v-if="hasTags(i) && isObservable(i)">
             <NodeTagVue
               v-for="tag in i.tags"
               :key="tag.uuid"
@@ -49,46 +48,56 @@
           v-if="nodeExpanded(index) && i.children.length"
           class="p-treenode-children"
         >
-          <AlertTree :items="i.children" />
+          <AlertTree :items="i.children" :alert-id="alertId" />
         </div>
       </li>
     </ul>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { useRouter } from "vue-router";
   import NodeTagVue from "@/components/Node/NodeTag.vue";
-  import { onBeforeMount, defineProps, ref } from "vue";
-  import { useAlertStore } from "@/stores/alert";
-
-  const alertStore = useAlertStore();
-  const openAlertId = ref(alertStore.open.uuid);
+  import { onBeforeMount, defineProps, ref, PropType } from "vue";
+  import { analysisTreeRead } from "@/models/analysis";
+  import { observableTreeRead } from "@/models/observable";
+  import { useFilterStore } from "@/stores/filter";
 
   const props = defineProps({
-    items: { type: Array, required: true },
+    items: {
+      type: Array as PropType<(analysisTreeRead | observableTreeRead)[]>,
+      required: true,
+    },
+    alertId: {
+      type: String,
+      required: true,
+    },
   });
 
-  const itemsExpandedStatus = ref({});
+  const itemsExpandedStatus = ref({} as Record<number, boolean>);
 
   onBeforeMount(() => {
     itemsExpandedStatus.value = generateExpandedStatus(props.items);
   });
 
-  function generateExpandedStatus(items) {
-    const expandedStatus = [];
+  function generateExpandedStatus(
+    items: (analysisTreeRead | observableTreeRead)[],
+  ) {
+    const expandedStatus: Record<number, boolean> = {};
     items.forEach((item, index) => {
-      expandedStatus[index] = item.firstAppearance;
+      expandedStatus[index] = item.firstAppearance
+        ? item.firstAppearance
+        : false;
     });
     return expandedStatus;
   }
-  function nodeExpanded(index) {
+  function nodeExpanded(index: number) {
     return itemsExpandedStatus.value[index];
   }
-  function toggleNodeExpanded(index) {
+  function toggleNodeExpanded(index: number) {
     itemsExpandedStatus.value[index] = !itemsExpandedStatus.value[index];
   }
-  function toggleIcon(index) {
+  function toggleIcon(index: number) {
     return [
       "p-tree-toggler-icon pi pi-fw",
       {
@@ -99,21 +108,30 @@
   }
 
   const router = useRouter();
-  function viewAnalysisRoute(item) {
+  function viewAnalysisRoute(item: analysisTreeRead) {
     return {
       name: "View Analysis",
-      params: { alertId: openAlertId.value, analysisID: item.uuid },
+      params: { alertID: props.alertId, analysisID: item.uuid },
     };
   }
 
-  function filterByObservable(obs) {
+  const filterStore = useFilterStore();
+  function filterByObservable(obs: observableTreeRead) {
+    filterStore.bulkSetFilters({
+      nodeType: "alerts",
+      filters: {
+        observable: {
+          category: obs.type,
+          value: obs.value,
+        },
+      },
+    });
     router.replace({
       path: "/manage_alerts",
-      query: { observable: `${obs.type.value}|${obs.value}` },
     });
   }
 
-  function treeItemName(item) {
+  function treeItemName(item: analysisTreeRead | observableTreeRead) {
     if (isAnalysis(item)) {
       return item.analysisModuleType.value;
     } else {
@@ -121,7 +139,7 @@
       let value = null;
 
       try {
-        if (item.nodeMetadata.display) {
+        if (item.nodeMetadata && item.nodeMetadata.display) {
           if (item.nodeMetadata.display.type) {
             type =
               item.nodeMetadata.display.type + " (" + item.type.value + ")";
@@ -145,18 +163,22 @@
       return type + ": " + value;
     }
   }
-  function isAnalysis(item) {
+  function isAnalysis(
+    item: analysisTreeRead | observableTreeRead,
+  ): item is analysisTreeRead {
     return item.nodeType === "analysis";
   }
-  function isObservable(item) {
+  function isObservable(
+    item: analysisTreeRead | observableTreeRead,
+  ): item is observableTreeRead {
     return item.nodeType === "observable";
   }
 
-  function containerClass(item) {
+  function containerClass(item: analysisTreeRead | observableTreeRead) {
     return ["p-treenode", { "p-treenode-leaf": !item.children.length }];
   }
 
-  function hasTags(item) {
+  function hasTags(item: analysisTreeRead | observableTreeRead) {
     if ("tags" in item) {
       return item.tags.length;
     }

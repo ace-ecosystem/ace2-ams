@@ -4,12 +4,15 @@
 <template>
   <div v-if="isLoading" style="flex: 1">
     <ul>
-      <li><Skeleton width="30%"></Skeleton></li>
-      <li><Skeleton width="25%"></Skeleton></li>
-      <li><Skeleton width="30%"></Skeleton></li>
-      <li><Skeleton width="25%"></Skeleton></li>
+      <li><Skeleton width="30%" data-cy="loading-observable"></Skeleton></li>
+      <li><Skeleton width="25%" data-cy="loading-observable"></Skeleton></li>
+      <li><Skeleton width="30%" data-cy="loading-observable"></Skeleton></li>
+      <li><Skeleton width="25%" data-cy="loading-observable"></Skeleton></li>
     </ul>
   </div>
+  <span v-else-if="observablesIsEmpty"
+    >No observables exist for this alert.</span
+  >
   <ul v-else>
     <!-- List each observable with link to filter -->
     <li v-for="obs of observables" :key="obs.value">
@@ -22,27 +25,36 @@
   </ul>
 </template>
 
-<script setup>
-  import { computed, defineProps } from "vue";
+<script setup lang="ts">
+  import { computed, defineProps, PropType } from "vue";
   import Skeleton from "primevue/skeleton";
 
   import { useFilterStore } from "@/stores/filter";
   import NodeTagVue from "@/components/Node/NodeTag.vue";
 
+  import { observableRead } from "@/models/observable";
+
   const props = defineProps({
-    observables: { type: [Array, null], required: true },
+    observables: {
+      type: Array as PropType<observableRead[] | null>,
+      required: true,
+    },
   });
 
   const isLoading = computed(() => {
     return props.observables === null;
   });
 
-  const formatObservable = (observable) => {
+  const observablesIsEmpty = computed(() => {
+    return Array.isArray(props.observables) && !props.observables.length;
+  });
+
+  const formatObservable = (observable: observableRead) => {
     return `${observable.type.value} : ${observable.value}`;
   };
 
   const filterStore = useFilterStore();
-  const filterByObservable = (observable) => {
+  const filterByObservable = (observable: observableRead) => {
     filterStore.bulkSetFilters({
       nodeType: "alerts",
       filters: {
