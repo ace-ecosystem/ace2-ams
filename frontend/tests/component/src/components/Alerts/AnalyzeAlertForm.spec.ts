@@ -154,7 +154,9 @@ describe("AnalyzeAlertForm - Observables", () => {
 
     // Switch to 'ipv4' input type
     cy.get("[name=observable-type]").click();
+    cy.get(".p-dropdown-items").should("be.visible");
     cy.get('[aria-label="ipv4"]').click();
+    cy.get(".p-dropdown-items").should("not.exist");
     cy.get("body").click();
 
     // Should be input box
@@ -167,7 +169,9 @@ describe("AnalyzeAlertForm - Observables", () => {
 
     // Switch back to 'file,' should be the file input again
     cy.get("[name=observable-type]").click();
+    cy.get(".p-dropdown-items").should("be.visible");
     cy.get('[aria-label="file"]').click();
+    cy.get(".p-dropdown-items").should("not.exist");
     cy.get("[name=observable-type]").should("have.text", "file");
     cy.get("[name=observable-value]").should("be.visible");
     cy.get("[name=observable-file-upload]").should("be.visible");
