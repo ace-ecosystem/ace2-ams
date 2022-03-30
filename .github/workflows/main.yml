@@ -141,6 +141,7 @@ jobs:
       DATABASE_URL: postgresql://ace:supersecret@db:5432/ace
       DATABASE_TEST_URL: postgresql://ace:supersecret@db:5432/ace_test
       TESTING: yes
+      TZ: America/New_York
 
     steps:
       - name: Checkout code
@@ -162,7 +163,6 @@ jobs:
     env:
       DOCKER_BUILDKIT: 0
       COMPOSE_DOCKER_CLI_BUILD: 0
-      TZ: America/New_York
 
     steps:
       - name: Checkout code
