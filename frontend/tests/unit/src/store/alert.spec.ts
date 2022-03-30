@@ -1,7 +1,8 @@
+import { describe, it, beforeEach, expect } from "vitest";
 import myNock from "@unit/services/api/nock";
 import snakecaseKeys from "snakecase-keys";
 import { useAlertStore } from "@/stores/alert";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 
 import {
   alertCreateFactory,
@@ -25,9 +26,9 @@ describe("alert Actions", () => {
   });
 
   it("will have openAlertSummary return the current opensummary if there is one, otherwise it will return null", () => {
-    expect(store.openAlertSummary).to.equal(null);
+    expect(store.openAlertSummary).toStrictEqual(null);
     store.open = mockAlertTree;
-    expect(store.openAlertSummary).to.eql(mockAlertSummary);
+    expect(store.openAlertSummary).toEqual(mockAlertSummary);
   });
 
   it("will request to create an alert with a given AlertCreate object, and set the opento result on success", async () => {
@@ -37,26 +38,26 @@ describe("alert Actions", () => {
 
     await store.create(mockAlertCreate);
 
-    expect(mockRequest.isDone()).to.eql(true);
-    expect(store.open).to.eql(JSON.parse(JSON.stringify(mockAlert)));
+    expect(mockRequest.isDone()).toEqual(true);
+    expect(store.open).toEqual(JSON.parse(JSON.stringify(mockAlert)));
   });
 
   it("will fetch alert data given an alert ID", async () => {
     const mockRequest = myNock.get("/alert/uuid1").reply(200, mockAlert);
     await store.read("uuid1");
 
-    expect(mockRequest.isDone()).to.eql(true);
+    expect(mockRequest.isDone()).toEqual(true);
 
-    expect(store.open).to.eql(JSON.parse(JSON.stringify(mockAlert)));
+    expect(store.open).toEqual(JSON.parse(JSON.stringify(mockAlert)));
   });
 
   it("will make a request to update an alert given the UUID and update data upon the updateAlert action", async () => {
     const mockRequest = myNock.patch("/alert/").reply(200);
     await store.update([{ uuid: "uuid1", disposition: "test" }]);
 
-    expect(mockRequest.isDone()).to.eql(true);
+    expect(mockRequest.isDone()).toEqual(true);
     // None of these should be changed
-    expect(store.open).to.equal(null);
+    expect(store.open).toStrictEqual(null);
   });
 
   it("will throw an error when a request fails in any action", async () => {
@@ -73,21 +74,27 @@ describe("alert Actions", () => {
       await store.create(mockAlertCreate);
     } catch (e) {
       const error = e as Error;
-      expect(error.message).to.equal("Request failed with status code 403");
+      expect(error.message).toStrictEqual(
+        "Request failed with status code 403",
+      );
     }
 
     try {
       await store.read("uuid1");
     } catch (e) {
       const error = e as Error;
-      expect(error.message).to.equal("Request failed with status code 403");
+      expect(error.message).toStrictEqual(
+        "Request failed with status code 403",
+      );
     }
 
     try {
       await store.update([{ uuid: "uuid1", disposition: "test" }]);
     } catch (e) {
       const error = e as Error;
-      expect(error.message).to.equal("Request failed with status code 403");
+      expect(error.message).toStrictEqual(
+        "Request failed with status code 403",
+      );
     }
 
     mockRequest.persist(false); // cleanup persisted nock request

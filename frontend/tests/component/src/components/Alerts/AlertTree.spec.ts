@@ -5,7 +5,7 @@ import { mount } from "@cypress/vue";
 import PrimeVue from "primevue/config";
 
 import AlertTree from "@/components/Alerts/AlertTree.vue";
-import { createCustomCypressPinia } from "@unit/helpers";
+import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import router from "@/router/index";
 import { observableTreeRead } from "@/models/observable";
 import { analysisTreeRead } from "@/models/analysis";

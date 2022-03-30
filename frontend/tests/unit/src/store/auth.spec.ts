@@ -1,6 +1,7 @@
+import { describe, it, beforeEach, expect } from "vitest";
 import { useAuthStore } from "@/stores/auth";
 import { userRead } from "@/models/user";
-import { createCustomPinia } from "@unit/helpers";
+import { createCustomPinia } from "@tests/unitHelpers";
 
 createCustomPinia();
 
@@ -25,12 +26,12 @@ describe("auth Getters", () => {
   });
 
   it("will return isAuthenticated state when not logged in", () => {
-    expect(store.isAuthenticated).to.equal(false);
+    expect(store.isAuthenticated).toStrictEqual(false);
   });
 
   it("will return isAuthenticated state when logged in", () => {
     store.user = mockUser;
 
-    expect(store.isAuthenticated).to.equal(true);
+    expect(store.isAuthenticated).toStrictEqual(true);
   });
 });

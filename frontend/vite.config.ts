@@ -11,11 +11,12 @@ export default defineConfig({
       "@": resolve(__dirname, "./src"),
       "@unit": resolve(__dirname, "./tests/unit/src"),
       "@mocks": resolve(__dirname, "./tests/mocks"),
+      "@tests": resolve(__dirname, "./tests"),
     },
   },
   plugins: [vue()],
   test: {
-    globals: true,
+    globals: false,
     environment: "jsdom",
     include: ["**/unit/**/*.spec.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     reporters: ["verbose"],
