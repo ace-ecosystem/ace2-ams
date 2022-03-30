@@ -8,7 +8,7 @@ import PrimeVue from "primevue/config";
 import AnalyzeAlertForm from "@/components/Alerts/AnalyzeAlertForm.vue";
 import router from "@/router/index";
 
-import { createCustomCypressPinia } from "@unit/helpers";
+import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { userReadFactory } from "@mocks/user";
 import { alertReadFactory } from "@mocks/alert";

@@ -3,7 +3,7 @@ import PrimeVue from "primevue/config";
 
 import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
 
-import { createCustomCypressPinia } from "@unit/helpers";
+import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { observableRead } from "@/models/observable";
 import { observableReadFactory } from "@mocks/observable";
