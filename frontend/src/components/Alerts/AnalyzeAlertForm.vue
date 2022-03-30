@@ -380,7 +380,9 @@
       ? alertTypeStore.items[0].value
       : "manual";
     // TODO: This needs to be based on the current user's preferred queue
-    queue.value = authStore.user.defaultAlertQueue.value;
+    queue.value = authStore.user
+      ? authStore.user.defaultAlertQueue.value
+      : "default";
     errors.value = [];
     timezone.value = moment.tz.guess();
     observables.value = [];
