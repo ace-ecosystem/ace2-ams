@@ -155,6 +155,7 @@ describe("AnalyzeAlertForm - Observables", () => {
     // Switch to 'ipv4' input type
     cy.get("[name=observable-type]").click();
     cy.get('[aria-label="ipv4"]').click();
+    cy.get("body").click();
 
     // Should be input box
     cy.get("[name=observable-type]").should("have.text", "ipv4");
@@ -165,6 +166,7 @@ describe("AnalyzeAlertForm - Observables", () => {
     cy.get("[name=observable-file-upload]").should("not.exist");
 
     // Switch back to 'file,' should be the file input again
+    cy.get("[name=observable-type]").click();
     cy.get("[name=observable-type]").click();
     cy.get('[aria-label="file"]').click();
     cy.get("[name=observable-type]").should("have.text", "file");
