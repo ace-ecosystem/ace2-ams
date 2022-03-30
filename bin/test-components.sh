@@ -14,6 +14,6 @@ set +a
 docker-compose up -d
 
 # Run Cypress
-docker exec ace2-ams-gui xvfb-run cypress run-ct --headed --browser chrome
+docker exec -e TZ=America/New_York ace2-ams-gui xvfb-run cypress run-ct --headed --browser chrome
 
 bin/disable-test-mode.sh
