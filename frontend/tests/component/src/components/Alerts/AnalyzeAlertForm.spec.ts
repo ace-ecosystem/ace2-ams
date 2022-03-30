@@ -167,7 +167,6 @@ describe("AnalyzeAlertForm - Observables", () => {
 
     // Switch back to 'file,' should be the file input again
     cy.get("[name=observable-type]").click();
-    cy.get("[name=observable-type]").click();
     cy.get('[aria-label="file"]').click();
     cy.get("[name=observable-type]").should("have.text", "file");
     cy.get("[name=observable-value]").should("be.visible");
