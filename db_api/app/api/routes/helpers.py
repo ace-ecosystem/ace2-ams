@@ -3,8 +3,6 @@ from fastapi_pagination.limit_offset import LimitOffsetPage
 from pydantic import BaseModel
 from typing import Callable
 
-from core.auth import validate_access_token
-
 
 #
 # AUTH
@@ -46,9 +44,6 @@ def api_route_create(
     responses: dict = None,
     status_code=status.HTTP_201_CREATED,
 ):
-    if dependencies is None:
-        dependencies = [Depends(validate_access_token)]
-
     if responses is None:
         responses = {
             status.HTTP_201_CREATED: {
@@ -80,7 +75,6 @@ def api_route_create(
 # which is invalid since you must supply a UUID in order to retrieve a user.
 def api_route_read_all(router: APIRouter, endpoint: Callable, response_model: BaseModel, path: str = "/"):
     router.add_api_route(
-        dependencies=[Depends(validate_access_token)],
         path=path,
         endpoint=endpoint,
         methods=["GET"],
@@ -99,7 +93,6 @@ def api_route_read(
         methods = ["GET"]
 
     router.add_api_route(
-        dependencies=[Depends(validate_access_token)],
         path=path,
         endpoint=endpoint,
         methods=methods,
@@ -117,7 +110,6 @@ def api_route_read(
 
 def api_route_update(router: APIRouter, endpoint: Callable, path: str = "/{uuid}"):
     router.add_api_route(
-        dependencies=[Depends(validate_access_token)],
         path=path,
         endpoint=endpoint,
         methods=["PATCH"],
@@ -139,7 +131,6 @@ def api_route_update(router: APIRouter, endpoint: Callable, path: str = "/{uuid}
 
 def api_route_delete(router: APIRouter, endpoint: Callable, path: str = "/{uuid}"):
     router.add_api_route(
-        dependencies=[Depends(validate_access_token)],
         path=path,
         endpoint=endpoint,
         methods=["DELETE"],

@@ -12,7 +12,6 @@ from api_models.observable import ObservableRead
 from api.routes import helpers
 from api.routes.node import create_node, update_node
 from api.routes.observable import _create_observable
-from core.auth import validate_access_token
 from db import crud
 from db.database import get_db
 from db.schemas.alert import Alert, AlertHistory
@@ -48,7 +47,6 @@ def create_alert(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    claims: dict = Depends(validate_access_token),
 ):
     # Create the new alert Node using the data from the request
     new_alert: Alert = create_node(
@@ -84,12 +82,6 @@ def create_alert(
 
         crud.commit(db)
 
-        crud.record_node_create_history(
-            record_node=db_observable,
-            action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-            db=db,
-        )
-
     # Create a NodeTree with the alert as the root and link the observables to it
     node_tree = crud.create_node_tree_leaf(root_node_uuid=new_alert.uuid, node_uuid=new_alert.uuid, db=db)
 
@@ -101,13 +93,6 @@ def create_alert(
         )
 
     crud.commit(db)
-
-    # Add an entry to the history table
-    crud.record_node_create_history(
-        record_node=new_alert,
-        action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-        db=db,
-    )
 
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=new_alert.uuid)
 
@@ -417,7 +402,6 @@ def update_alerts(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    claims: dict = Depends(validate_access_token),
 ):
     for alert in alerts:
         # Update the Node attributes
@@ -440,7 +424,7 @@ def update_alerts(
                 value=update_data["disposition"], db_table=AlertDisposition, db=db
             )
             db_alert.disposition_time = datetime.utcnow()
-            db_alert.disposition_user = crud.read_user_by_username(username=claims["sub"], db=db)
+            # db_alert.disposition_user = crud.read_user_by_username(username=claims["sub"], db=db)
 
         if "event_uuid" in update_data:
             diffs.append(crud.create_diff(field="event_uuid", old=db_alert.event_uuid, new=update_data["event_uuid"]))
@@ -477,14 +461,6 @@ def update_alerts(
             db_alert.queue = crud.read_by_value(value=update_data["queue"], db_table=Queue, db=db)
 
         crud.commit(db)
-
-        # Add the entries to the history table
-        crud.record_node_update_history(
-            record_node=db_alert,
-            action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-            diffs=diffs,
-            db=db,
-        )
 
         response.headers["Content-Location"] = request.url_for("get_alert", uuid=alert.uuid)
 

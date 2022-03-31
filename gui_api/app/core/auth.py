@@ -1,3 +1,4 @@
+import requests
 import uuid
 
 from collections.abc import Mapping
@@ -13,8 +14,6 @@ from sqlalchemy.orm import Session
 from typing import Dict, Mapping, Optional
 
 from core.config import get_settings
-from db.database import get_db
-from db.schemas.user import User
 
 
 # This class is copy/pasted from fastapi.security.OAuth2PasswordBearer with slight modifications
@@ -134,7 +133,7 @@ def hash_password(password: str) -> str:
     return bcrypt_sha256.hash(password)
 
 
-def refresh_token(db: Session = Depends(get_db), refresh_token: str = Depends(oauth2_refresh_scheme)) -> dict:
+def refresh_token(refresh_token: str = Depends(oauth2_refresh_scheme)) -> dict:
     """
     Generates and returns a new access_token if the given refresh_token is valid and not expired.
 
@@ -142,7 +141,6 @@ def refresh_token(db: Session = Depends(get_db), refresh_token: str = Depends(oa
     API endpoint is invoked.
 
     Args:
-        db: a Session to the database
         refresh_token: a valid refresh_token
 
     Returns:
@@ -156,42 +154,37 @@ def refresh_token(db: Session = Depends(get_db), refresh_token: str = Depends(oa
         claims = decode_token(refresh_token)
 
         if _is_refresh_token(claims):
-            # Make sure the user in the refresh token claims is valid and enabled
-            user: User = (
-                db.execute(select(User).where(User.username == claims["sub"], User.enabled == True))
-                .scalars()
-                .one_or_none()
-            )
-            if user is None:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid token",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-
-            # Check the refresh token against the database to ensure it is valid. If the token does not match, it may mean
-            # that someone is trying to use an old refresh token. In this case, remove the current refresh token from the
-            # database to require the user to fully log in again.
-            if refresh_token != user.refresh_token:
-                user.refresh_token = None
-                db.commit()
-
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Reused token",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-
-            # Rotate the refresh token and save it to the database
+            # Make sure the user in the refresh token claims is valid and enabled. If the current refresh token
+            # is valid, the database API will update the token to what is given as the new_refresh_token.
             new_refresh_token = create_refresh_token(sub=claims["sub"])
-            user.refresh_token = new_refresh_token
-            db.commit()
+            try:
+                result = requests.post(
+                    f"{get_settings().database_api_url}/user/validate_refresh_token",
+                    data={
+                        "username": claims["sub"],
+                        "refresh_token": refresh_token,
+                        "new_refresh_token": new_refresh_token,
+                    },
+                )
 
-            return {
-                "access_token": create_access_token(sub=claims["sub"]),
-                "refresh_token": new_refresh_token,
-                "user": user,
-            }
+                if result.status_code == status.HTTP_200_OK:
+                    return {
+                        "access_token": create_access_token(sub=claims["sub"]),
+                        "refresh_token": new_refresh_token,
+                    }
+
+                raise HTTPException(
+                    status_code=result.status_code,
+                    detail=result.text,
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+
+            except:
+                raise HTTPException(
+                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                    detail="Database API is unavailable",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

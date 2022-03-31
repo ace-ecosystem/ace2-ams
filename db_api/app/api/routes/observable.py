@@ -14,7 +14,6 @@ from api_models.observable import (
 )
 from api.routes import helpers
 from api.routes.node import create_node, update_node
-from core.auth import validate_access_token
 from db import crud
 from db.database import get_db
 from db.schemas.observable import Observable, ObservableHistory
@@ -64,7 +63,6 @@ def create_observables(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    claims: dict = Depends(validate_access_token),
 ):
     # NOTE: There are multiple crud.commit(db) statements to avoid the possibility of
     # getting an IntegrityError when trying to read the observable from the Node table. This
@@ -77,13 +75,6 @@ def create_observables(
         observable.uuid = new_observable.uuid
 
         crud.commit(db)
-
-        # Add an entry to the history table
-        crud.record_node_create_history(
-            record_node=new_observable,
-            action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-            db=db,
-        )
 
     crud.commit(db)
 
@@ -138,7 +129,6 @@ def update_observable(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    claims: dict = Depends(validate_access_token),
 ):
     # Update the Node attributes
     db_observable, diffs = update_node(node_update=observable, uuid=uuid, db_table=Observable, db=db)
@@ -193,14 +183,6 @@ def update_observable(
         db_observable.value = update_data["value"]
 
     crud.commit(db)
-
-    # Add the entries to the history table
-    crud.record_node_update_history(
-        record_node=db_observable,
-        action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-        diffs=diffs,
-        db=db,
-    )
 
     response.headers["Content-Location"] = request.url_for("get_observable", uuid=uuid)
 

@@ -4,7 +4,7 @@ Environment variables / configuration
 
 import os
 
-from pydantic import BaseSettings, Field, PostgresDsn
+from pydantic import BaseSettings, Field
 
 
 class Settings(BaseSettings):
@@ -14,8 +14,7 @@ class Settings(BaseSettings):
 
     cookies_samesite: str = Field(default="lax")
     cookies_secure: bool = Field(default=True)
-    database_url: PostgresDsn
-    database_test_url: PostgresDsn
+    database_api_url: str
     jwt_access_expire_seconds: int
     jwt_algorithm: str
     jwt_refresh_expire_seconds: int

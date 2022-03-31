@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
+from typing import Optional
 from uuid import UUID
 
 from api_models.history import UserHistoryRead
@@ -11,7 +12,7 @@ from api_models.user import (
     UserUpdate,
 )
 from api.routes import helpers
-from core.auth import hash_password, validate_access_token
+from core.auth import hash_password
 from db import crud
 from db.database import get_db
 from db.schemas.queue import Queue
@@ -35,7 +36,6 @@ def create_user(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    claims: dict = Depends(validate_access_token),
 ):
     # Create the new user using the data from the request
     new_user = User(**user.dict())
@@ -55,14 +55,6 @@ def create_user(
     db.add(new_user)
     crud.commit(db)
 
-    # Add an entry to the history table
-    crud.record_create_history(
-        history_table=UserHistory,
-        action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-        record=new_user,
-        db=db,
-    )
-
     response.headers["Content-Location"] = request.url_for("get_user", uuid=new_user.uuid)
 
 
@@ -74,8 +66,23 @@ helpers.api_route_create(router, create_user)
 #
 
 
-def get_all_users(db: Session = Depends(get_db)):
-    return paginate(db, select(User).order_by(User.username))
+def _join_as_subquery(query: select, subquery: select):
+    s = subquery.subquery()
+    return query.join(s, User.uuid == s.c.uuid).group_by(User.uuid)
+
+
+def get_all_users(db: Session = Depends(get_db), enabled: Optional[bool] = None, username: Optional[str] = None):
+    query = select(User).order_by(User.username)
+
+    if enabled is not None:
+        enabled_query = select(User).where(User.enabled == enabled)
+        query = _join_as_subquery(query, enabled_query)
+
+    if username:
+        username_query = select(User).where(User.username == username)
+        query = _join_as_subquery(query, username_query)
+
+    return paginate(db, query)
 
 
 def get_user(uuid: UUID, db: Session = Depends(get_db)):
@@ -102,7 +109,6 @@ def update_user(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    claims: dict = Depends(validate_access_token),
 ):
     # Read the current user from the database
     db_user: User = crud.read(uuid=uuid, db_table=User, db=db)
@@ -173,15 +179,6 @@ def update_user(
 
     crud.commit(db)
 
-    # Add the entries to the history table
-    crud.record_update_history(
-        history_table=UserHistory,
-        action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-        record=db_user,
-        diffs=diffs,
-        db=db,
-    )
-
     response.headers["Content-Location"] = request.url_for("get_user", uuid=uuid)
 
 
@@ -194,3 +191,49 @@ helpers.api_route_update(router, update_user)
 
 
 # Deleting users is not currently supported (mark them as disabled instead)
+
+
+#
+# VALIDATE REFRESH TOKEN
+#
+
+
+def validate_refresh_token(
+    username: str,
+    refresh_token: str,
+    new_refresh_token: str,
+    db: Session = Depends(get_db),
+):
+    user: User = db.execute(select(User).where(User.username == username, User.enabled == True)).scalars().one_or_none()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Check the refresh token against the database to ensure it is valid. If the token does not match, it may mean
+    # that someone is trying to use an old refresh token. In this case, remove the current refresh token from the
+    # database to require the user to fully log in again.
+    if refresh_token != user.refresh_token:
+        user.refresh_token = None
+        db.commit()
+
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Reused token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Rotate the refresh token and save it to the database
+    user.refresh_token = new_refresh_token
+    db.commit()
+
+
+helpers.api_route_auth(
+    router,
+    validate_refresh_token,
+    path="/validate_refresh_token",
+    success_desc="Token is valid",
+    failure_desc="Token is invalid",
+)

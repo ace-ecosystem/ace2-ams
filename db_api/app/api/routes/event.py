@@ -29,7 +29,6 @@ from api.routes.event_summaries import (
     get_user_summary,
 )
 from api.routes.node import create_node, update_node
-from core.auth import validate_access_token
 from db import crud
 from db.database import get_db
 from db.schemas.alert import Alert, AlertHistory
@@ -74,7 +73,6 @@ def create_event(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    claims: dict = Depends(validate_access_token),
 ):
     # Create the new event Node using the data from the request
     new_event: Event = create_node(node_create=event, db_node_type=Event, db=db, exclude={"alert_uuids"})
@@ -112,13 +110,6 @@ def create_event(
     # Save the new event to the database
     db.add(new_event)
     crud.commit(db)
-
-    # Add an entry to the history table
-    crud.record_node_create_history(
-        record_node=new_event,
-        action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-        db=db,
-    )
 
     response.headers["Content-Location"] = request.url_for("get_event", uuid=new_event.uuid)
 
@@ -515,7 +506,6 @@ def update_events(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    claims: dict = Depends(validate_access_token),
 ):
     for event in events:
         # Update the Node attributes
@@ -639,14 +629,6 @@ def update_events(
             db_event.vectors = crud.read_by_values(values=update_data["vectors"], db_table=EventVector, db=db)
 
         crud.commit(db)
-
-        # Add the entries to the history table
-        crud.record_node_update_history(
-            record_node=db_event,
-            action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-            diffs=diffs,
-            db=db,
-        )
 
         response.headers["Content-Location"] = request.url_for("get_event", uuid=event.uuid)
 

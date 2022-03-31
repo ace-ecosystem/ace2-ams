@@ -6,7 +6,6 @@ from uuid import UUID, uuid4
 
 from api_models.node_detection_point import NodeDetectionPointCreate, NodeDetectionPointRead, NodeDetectionPointUpdate
 from api.routes import helpers
-from core.auth import validate_access_token
 from db import crud
 from db.database import get_db
 from db.schemas.node import Node
@@ -29,7 +28,6 @@ def create_node_detection_points(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    claims: dict = Depends(validate_access_token),
 ):
     for node_detection_point in node_detection_points:
         # Create the new node detection point
@@ -44,18 +42,6 @@ def create_node_detection_points(
         # Save the new detection point to the database
         db.add(new_detection_point)
         crud.commit(db)
-
-        # Add an entry to the correct history table based on the node_type.
-        # Even though this is creating a detection point, we treat it as though it is
-        # modifying the node for history tracking purposes.
-        crud.record_node_update_history(
-            record_node=db_node,
-            action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-            diffs=[
-                crud.Diff(field="detection_points", added_to_list=[node_detection_point.value], removed_from_list=[])
-            ],
-            db=db,
-        )
 
         response.headers["Content-Location"] = request.url_for(
             "get_node_detection_point", uuid=new_detection_point.uuid
@@ -88,7 +74,6 @@ def update_node_detection_point(
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
-    claims: dict = Depends(validate_access_token),
 ):
     # Read the current node detection point from the database
     db_node_detection_point: NodeDetectionPoint = crud.read(uuid=uuid, db_table=NodeDetectionPoint, db=db)
@@ -112,11 +97,6 @@ def update_node_detection_point(
     # Modifying the detection point counts as modifying the node, so it should receive a new version
     crud.update_node_version(node=db_node, db=db)
 
-    # Add an entry to the correct history table based on the node_type.
-    crud.record_node_update_history(
-        record_node=db_node, action_by=crud.read_user_by_username(username=claims["sub"], db=db), diffs=[diff], db=db
-    )
-
     response.headers["Content-Location"] = request.url_for("get_node_detection_point", uuid=uuid)
 
 
@@ -128,22 +108,12 @@ helpers.api_route_update(router, update_node_detection_point)
 #
 
 
-def delete_node_detection_point(
-    uuid: UUID, db: Session = Depends(get_db), claims: dict = Depends(validate_access_token)
-):
+def delete_node_detection_point(uuid: UUID, db: Session = Depends(get_db)):
     # Read the current node detection point from the database to get its value
     db_node: NodeDetectionPoint = crud.read(uuid=uuid, db_table=NodeDetectionPoint, db=db)
 
     # Update any root node versions
     crud.update_node_version(node=db_node, db=db)
-
-    # Add an entry to the correct history table based on the node_type.
-    crud.record_node_update_history(
-        record_node=db_node.node,
-        action_by=crud.read_user_by_username(username=claims["sub"], db=db),
-        diffs=[crud.Diff(field="detection_points", added_to_list=[], removed_from_list=[db_node.value])],
-        db=db,
-    )
 
     # Delete the detection point
     crud.delete(uuid=uuid, db_table=NodeDetectionPoint, db=db)
