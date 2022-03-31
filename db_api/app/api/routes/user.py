@@ -5,6 +5,7 @@ from sqlalchemy.sql.expression import select
 from typing import Optional
 from uuid import UUID
 
+from api_models.auth import ValidateRefreshToken
 from api_models.history import UserHistoryRead
 from api_models.user import (
     UserCreate,
@@ -199,12 +200,12 @@ helpers.api_route_update(router, update_user)
 
 
 def validate_refresh_token(
-    username: str,
-    refresh_token: str,
-    new_refresh_token: str,
+    data: ValidateRefreshToken,
     db: Session = Depends(get_db),
 ):
-    user: User = db.execute(select(User).where(User.username == username, User.enabled == True)).scalars().one_or_none()
+    user: User = (
+        db.execute(select(User).where(User.username == data.username, User.enabled == True)).scalars().one_or_none()
+    )
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -215,7 +216,7 @@ def validate_refresh_token(
     # Check the refresh token against the database to ensure it is valid. If the token does not match, it may mean
     # that someone is trying to use an old refresh token. In this case, remove the current refresh token from the
     # database to require the user to fully log in again.
-    if refresh_token != user.refresh_token:
+    if data.refresh_token != user.refresh_token:
         user.refresh_token = None
         db.commit()
 
@@ -226,7 +227,7 @@ def validate_refresh_token(
         )
 
     # Rotate the refresh token and save it to the database
-    user.refresh_token = new_refresh_token
+    user.refresh_token = data.new_refresh_token
     db.commit()
 
 

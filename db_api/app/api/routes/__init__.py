@@ -7,6 +7,7 @@ from api.routes.alert_tool_instance import router as alert_tool_instance_router
 from api.routes.alert_type import router as alert_type_router
 from api.routes.analysis import router as analysis_router
 from api.routes.analysis_module_type import router as analysis_module_type_router
+from api.routes.auth import router as auth_router
 from api.routes.event import router as event_router
 from api.routes.event_prevention_tool import router as event_prevention_tool_router
 from api.routes.event_remediation import router as event_remediation_router
@@ -44,6 +45,7 @@ router.include_router(alert_tool_instance_router)
 router.include_router(alert_type_router)
 router.include_router(analysis_router)
 router.include_router(analysis_module_type_router)
+router.include_router(auth_router)
 router.include_router(event_router)
 router.include_router(event_prevention_tool_router)
 router.include_router(event_remediation_router)

@@ -160,31 +160,30 @@ def refresh_token(refresh_token: str = Depends(oauth2_refresh_scheme)) -> dict:
             try:
                 result = requests.post(
                     f"{get_settings().database_api_url}/user/validate_refresh_token",
-                    data={
+                    json={
                         "username": claims["sub"],
                         "refresh_token": refresh_token,
                         "new_refresh_token": new_refresh_token,
                     },
                 )
-
-                if result.status_code == status.HTTP_200_OK:
-                    return {
-                        "access_token": create_access_token(sub=claims["sub"]),
-                        "refresh_token": new_refresh_token,
-                    }
-
-                raise HTTPException(
-                    status_code=result.status_code,
-                    detail=result.text,
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
-
             except:
                 raise HTTPException(
                     status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                     detail="Database API is unavailable",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
+
+            if result.status_code == status.HTTP_200_OK:
+                return {
+                    "access_token": create_access_token(sub=claims["sub"]),
+                    "refresh_token": new_refresh_token,
+                }
+
+            raise HTTPException(
+                status_code=result.status_code,
+                detail=result.text,
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
