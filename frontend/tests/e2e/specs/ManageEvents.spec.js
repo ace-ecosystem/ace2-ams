@@ -609,6 +609,7 @@ describe("ManageEvents.vue Actions", () => {
 
   it("will not allow submission of a comment unless an event is selected and comment value is provided", () => {
     // Check comment submit button when no event is selected and no comment is provided
+    cy.get('[data-cy="comment-button"]').click();
     cy.get(".p-dialog-footer > button ")
       .eq(1)
       .should("have.class", "p-disabled");
