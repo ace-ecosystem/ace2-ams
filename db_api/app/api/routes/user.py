@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 from uuid import UUID
 
-from api.models.history import UserHistoryRead
-from api.models.user import (
+from api_models.history import UserHistoryRead
+from api_models.user import (
     UserCreate,
     UserRead,
     UserUpdate,

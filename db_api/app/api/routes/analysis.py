@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from api.models.analysis import AnalysisCreate, AnalysisRead, AnalysisUpdate
-from api.models.analysis_details import (
+from api_models.analysis import AnalysisCreate, AnalysisRead, AnalysisUpdate
+from api_models.analysis_details import (
     EmailAnalysisDetails,
     FAQueueAnalysisDetails,
     SandboxAnalysisDetails,

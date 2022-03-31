@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 from uuid import UUID
 
-from api.models.event_prevention_tool import (
+from api_models.event_prevention_tool import (
     EventPreventionToolCreate,
     EventPreventionToolRead,
     EventPreventionToolUpdate,

@@ -4,7 +4,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, func, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from api.models.user import UserRead
+from api_models.user import UserRead
 from db.database import Base
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.user_role_mapping import user_role_mapping

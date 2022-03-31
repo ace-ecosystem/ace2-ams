@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from api.models.node_relationship import NodeRelationshipCreate, NodeRelationshipRead
+from api_models.node_relationship import NodeRelationshipCreate, NodeRelationshipRead
 from api.routes import helpers
 from core.auth import validate_access_token
 from db import crud

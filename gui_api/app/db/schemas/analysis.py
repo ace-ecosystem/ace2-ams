@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import deferred, relationship
 
-from api.models.analysis import AnalysisNodeTreeRead
+from api_models.analysis import AnalysisNodeTreeRead
 from db.schemas.node import Node
 
 

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 from uuid import UUID
 
-from api.models.alert_tool_instance import AlertToolInstanceCreate, AlertToolInstanceRead, AlertToolInstanceUpdate
+from api_models.alert_tool_instance import AlertToolInstanceCreate, AlertToolInstanceRead, AlertToolInstanceUpdate
 from api.routes import helpers
 from db import crud
 from db.database import get_db

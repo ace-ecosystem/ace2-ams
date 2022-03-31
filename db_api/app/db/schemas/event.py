@@ -6,9 +6,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 from typing import Optional
-from api.models.alert_disposition import AlertDispositionRead
+from api_models.alert_disposition import AlertDispositionRead
 
-from api.models.event import EventRead
+from api_models.event import EventRead
 from db.database import Base
 from db.schemas.event_prevention_tool_mapping import event_prevention_tool_mapping
 from db.schemas.event_remediation_mapping import event_remediation_mapping

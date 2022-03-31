@@ -20,8 +20,8 @@ services:
       - db
     container_name: ace2-ams-db-api
     build:
-      context: ./db_api
-      dockerfile: ./Dockerfile
+      context: ./
+      dockerfile: ./db_api/Dockerfile
     environment:
       # The DATABASE_URL environment variable needs to be in the form of:
       # postgresql://<user>:<password>@db:5432/<database>
@@ -35,6 +35,7 @@ services:
       - 8888:80
     volumes:
       - ./db_api/app:/app
+      - ./api_models:/app/api_models
     command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; /start-reload.sh'
 
   gui-api:
@@ -42,8 +43,8 @@ services:
       - db-api
     container_name: ace2-ams-gui-api
     build:
-      context: ./gui_api
-      dockerfile: ./Dockerfile
+      context: ./
+      dockerfile: ./gui_api/Dockerfile
     environment:
       # The DATABASE_URL environment variable needs to be in the form of:
       # postgresql://<user>:<password>@db:5432/<database>
@@ -63,6 +64,7 @@ services:
       - 7777:80
     volumes:
       - ./gui_api/app:/app
+      - ./api_models:/app/api_models
     command: bash -c 'while !</dev/tcp/db-api/80; do sleep 1; done; /start-reload.sh'
 
   gui:

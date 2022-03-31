@@ -13,7 +13,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from typing import List
 
-from api.models.observable import ObservableNodeTreeRead, ObservableRead, ObservableRelationshipRead
+from api_models.observable import ObservableNodeTreeRead, ObservableRead, ObservableRelationshipRead
 from db.database import Base
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin

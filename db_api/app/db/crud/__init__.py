@@ -13,7 +13,7 @@ from sqlalchemy.sql.expression import join
 from typing import Any, Dict, List, Optional, Tuple, Union
 from uuid import UUID, uuid4
 
-from api.models.node import NodeRead, NodeTreeMetadata
+from api_models.node import NodeRead, NodeTreeMetadata
 from core.auth import verify_password
 from db.schemas.alert import AlertHistory
 from db.schemas.event import EventHistory

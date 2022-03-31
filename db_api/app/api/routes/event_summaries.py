@@ -7,8 +7,8 @@ from typing import Dict, List, Tuple
 from urllib.parse import urlparse
 from uuid import UUID
 
-from api.models.analysis_details import FAQueueAnalysisDetails, SandboxProcess
-from api.models.event_summaries import (
+from api_models.analysis_details import FAQueueAnalysisDetails, SandboxProcess
+from api_models.event_summaries import (
     EmailHeadersBody,
     EmailSummary,
     SandboxSummary,

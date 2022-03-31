@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from uuid import UUID, uuid4
 
-from api.models.node import NodeCreate, NodeUpdate, NodeVersion
+from api_models.node import NodeCreate, NodeUpdate, NodeVersion
 from api.routes import helpers
 from db import crud
 from db.database import get_db

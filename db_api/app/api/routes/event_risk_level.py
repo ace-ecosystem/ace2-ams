@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 from uuid import UUID
 
-from api.models.event_risk_level import (
+from api_models.event_risk_level import (
     EventRiskLevelCreate,
     EventRiskLevelRead,
     EventRiskLevelUpdate,

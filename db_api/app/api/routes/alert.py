@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from api.models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
-from api.models.history import AlertHistoryRead
-from api.models.observable import ObservableRead
+from api_models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
+from api_models.history import AlertHistoryRead
+from api_models.observable import ObservableRead
 from api.routes import helpers
 from api.routes.node import create_node, update_node
 from api.routes.observable import _create_observable

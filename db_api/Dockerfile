@@ -1,6 +1,7 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9-slim
 
-COPY requirements.txt .
+COPY db_api/requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY app/ /app
+COPY db_api/app/ /app
+COPY api_models/ /app/api_models

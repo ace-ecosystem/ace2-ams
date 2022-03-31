@@ -5,8 +5,8 @@ from sqlalchemy.sql.expression import select
 from typing import List, Union
 from uuid import UUID
 
-from api.models.history import ObservableHistoryRead
-from api.models.observable import (
+from api_models.history import ObservableHistoryRead
+from api_models.observable import (
     ObservableCreate,
     ObservableCreateWithAlert,
     ObservableRead,

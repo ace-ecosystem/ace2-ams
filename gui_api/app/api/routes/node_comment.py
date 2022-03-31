@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID, uuid4
 
-from api.models.node_comment import NodeCommentCreate, NodeCommentRead, NodeCommentUpdate
+from api_models.node_comment import NodeCommentCreate, NodeCommentRead, NodeCommentUpdate
 from api.routes import helpers
 from core.auth import validate_access_token
 from db import crud

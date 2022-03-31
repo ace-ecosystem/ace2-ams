@@ -7,8 +7,8 @@ from sqlalchemy.sql.expression import select
 from typing import List, Optional
 from uuid import UUID
 
-from api.models.event import EventCreate, EventRead, EventUpdateMultiple
-from api.models.event_summaries import (
+from api_models.event import EventCreate, EventRead, EventUpdateMultiple
+from api_models.event_summaries import (
     DetectionSummary,
     EmailHeadersBody,
     EmailSummary,
@@ -17,7 +17,7 @@ from api.models.event_summaries import (
     URLDomainSummary,
     UserSummary,
 )
-from api.models.history import EventHistoryRead
+from api_models.history import EventHistoryRead
 from api.routes import helpers
 from api.routes.event_summaries import (
     get_detection_point_summary,

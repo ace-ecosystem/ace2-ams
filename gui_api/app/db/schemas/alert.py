@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from typing import Optional
 
-from api.models.alert import AlertRead, AlertTreeRead
+from api_models.alert import AlertRead, AlertTreeRead
 from db.database import Base
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin

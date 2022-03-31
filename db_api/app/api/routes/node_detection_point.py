@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID, uuid4
 
-from api.models.node_detection_point import NodeDetectionPointCreate, NodeDetectionPointRead, NodeDetectionPointUpdate
+from api_models.node_detection_point import NodeDetectionPointCreate, NodeDetectionPointRead, NodeDetectionPointUpdate
 from api.routes import helpers
 from core.auth import validate_access_token
 from db import crud
