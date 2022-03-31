@@ -609,7 +609,6 @@ describe("ManageEvents.vue Actions", () => {
 
   it("will not allow submission of a comment unless an event is selected and comment value is provided", () => {
     // Check comment submit button when no event is selected and no comment is provided
-    cy.get('[data-cy="comment-button"]').click();
     cy.get(".p-dialog-footer > button ")
       .eq(1)
       .should("have.class", "p-disabled");
@@ -729,7 +728,7 @@ describe("ManageEvents.vue Actions", () => {
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check owner
-    cy.get(".p-datatable-tbody > tr > :nth-child(9) > span").should(
+    cy.get(".p-datatable-tbody > tr > :nth-child(9) > div").should(
       "have.text",
       "Analyst",
     );
@@ -749,7 +748,7 @@ describe("ManageEvents.vue Actions", () => {
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check owner
-    cy.get(".p-datatable-tbody > tr > :nth-child(9) > span").should(
+    cy.get(".p-datatable-tbody > tr > :nth-child(9) > div").should(
       "have.text",
       "Analyst Alice",
     );
