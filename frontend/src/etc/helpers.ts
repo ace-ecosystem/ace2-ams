@@ -205,7 +205,7 @@ export function formatNodeFiltersForAPI(
 }
 
 export function getAllAlertTags(
-  alert: alertRead | alertTreeRead,
+  alert: alertRead | alertSummary | alertTreeRead,
 ): Array<nodeTagRead> {
   const allTags = alert.tags.concat(alert.childTags);
 
@@ -215,7 +215,7 @@ export function getAllAlertTags(
   );
 }
 
-export function getAlertLink(alert: alertRead): string {
+export function getAlertLink(alert: alertRead | alertSummary): string {
   return "/alert/" + alert.uuid;
 }
 

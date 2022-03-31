@@ -594,7 +594,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.get("[data-cy=save-edit-event-button]").click();
     cy.wait("@updateEvent").its("state").should("eq", "Complete");
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
-    cy.get(".p-datatable-tbody > tr > :nth-child(9) > span")
+    cy.get(".p-datatable-tbody > tr > :nth-child(9) > div")
       .eq(0)
       .invoke("text")
       .should("eq", "Analyst");

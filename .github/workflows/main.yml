@@ -141,6 +141,7 @@ jobs:
       DATABASE_URL: postgresql://ace:supersecret@db:5432/ace
       DATABASE_TEST_URL: postgresql://ace:supersecret@db:5432/ace_test
       TESTING: yes
+      TZ: America/New_York
 
     steps:
       - name: Checkout code
@@ -153,7 +154,7 @@ jobs:
         run: docker exec ace2-ams-gui bin/wait-for-gui.sh
 
       - name: Component Tests
-        run: docker exec ace2-ams-gui xvfb-run cypress run-ct --headed --browser chrome --config video=false,screenshotOnRunFailure=false
+        run: docker exec -e TZ=America/New_York ace2-ams-gui xvfb-run cypress run-ct --headed --browser chrome --config video=false,screenshotOnRunFailure=false
 
   production-build:
     name: Production Build

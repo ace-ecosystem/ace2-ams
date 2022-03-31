@@ -8,7 +8,11 @@
     <Card>
       <template #content>
         <div class="p-tree p-component p-tree-wrapper" style="border: none">
-          <AlertTree id="alert-tree" :items="alertStore.open.children" />
+          <AlertTree
+            id="alert-tree"
+            :items="alertStore.open.children"
+            :alert-id="route.params.alertID"
+          />
         </div>
       </template>
     </Card>

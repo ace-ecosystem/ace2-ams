@@ -114,6 +114,7 @@
                     name="observable-time"
                     placeholder="No time selected"
                     class="inputfield w-full"
+                    :touch-u-i="true"
                     :show-time="true"
                     :show-seconds="true"
                   />
@@ -129,11 +130,15 @@
                   />
                 </div>
                 <div class="field col-3 px-1" name="observable-value">
-                  <FileUpload
+                  <div
                     v-if="observables[index].type == 'file'"
-                    mode="basic"
-                    class="inputfield w-full"
-                  ></FileUpload>
+                    name="observable-file-upload"
+                  >
+                    <FileUpload
+                      mode="basic"
+                      class="inputfield w-full"
+                    ></FileUpload>
+                  </div>
                   <div v-else class="p-inputgroup">
                     <InputText
                       v-if="!observables[index].multiAdd"
@@ -371,9 +376,13 @@
     alertDate.value = new Date();
     alertDescription.value = "Manual Alert";
     alertDescriptionAppendString.value = "";
-    alertType.value = "manual";
+    alertType.value = alertTypeStore.items.length
+      ? alertTypeStore.items[0].value
+      : "manual";
     // TODO: This needs to be based on the current user's preferred queue
-    queue.value = "external";
+    queue.value = authStore.user
+      ? authStore.user.defaultAlertQueue.value
+      : "default";
     errors.value = [];
     timezone.value = moment.tz.guess();
     observables.value = [];

@@ -17,15 +17,16 @@
     :sort-field="tableStore.sortField"
     :sort-order="sortOrder"
     removable-sort
+    @add-filter="addFilter"
     @sort="sort"
     @row-expand="$emit('rowExpand', $event)"
     @row-collapse="$emit('rowCollapse', $event)"
-    @rowSelect="selectedStore.select($event.data.uuid)"
-    @rowUnselect="selectedStore.unselect($event.data.uuid)"
-    @rowSelect-all="
+    @row-select="selectedStore.select($event.data.uuid)"
+    @row-unselect="selectedStore.unselect($event.data.uuid)"
+    @row-select-all="
       selectedStore.selectAll(tableStore.visibleQueriedItemsUuids)
     "
-    @rowUnselect-all="selectedStore.unselectAll()"
+    @row-unselect-all="selectedStore.unselectAll()"
   >
     <!-- TABLE TOOLBAR-->
     <template v-if="tableToolbarRequired" #header>
@@ -40,7 +41,7 @@
             data-cy="table-column-select"
             option-label="header"
             placeholder="Select Columns"
-            @update:modelValue="onColumnToggle"
+            @update:model-value="onColumnToggle"
           />
         </template>
         <template #end>
@@ -99,7 +100,9 @@
     >
       <!-- DATA COLUMN CELL BODIES-->
       <template #body="{ data, field }">
-        <slot name="rowCell" :data="data" :col="col" :field="field"></slot>
+        <div :class="cellClass(field)" @click="addFilter(data, field)">
+          <slot name="rowCell" :data="data" :col="col" :field="field"></slot>
+        </div>
       </template>
     </Column>
 
@@ -142,10 +145,12 @@
   import Paginator from "primevue/paginator";
   import Toolbar from "primevue/toolbar";
 
-  import { useFilterStore } from "@/stores/filter";
   import { nodeSelectedStores, nodeTableStores } from "@/stores/index";
-
+  import { useFilterStore } from "@/stores/filter";
   import { loadFiltersFromStorage } from "@/stores/helpers";
+  import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
+
+  import { inputTypes } from "@/etc/constants/base";
 
   const props = defineProps({
     columns: { type: Array, required: true },
@@ -158,10 +163,13 @@
 
   defineEmits(["rowExpand", "rowCollapse"]);
 
-  const filterStore = useFilterStore();
   const nodeType = inject("nodeType");
+  const availableFilters = inject("availableFilters");
+
   const tableStore = nodeTableStores[nodeType]();
   const selectedStore = nodeSelectedStores[nodeType]();
+  const currentUserSettingsStore = useCurrentUserSettingsStore();
+  const filterStore = useFilterStore();
 
   const tableToolbarRequired =
     props.exportCSV ||
@@ -304,6 +312,40 @@
       tableStore.sortOrder = null;
     }
   };
+
+  const currentQueue = ref(
+    currentUserSettingsStore.queues[nodeType]
+      ? currentUserSettingsStore.queues[nodeType].value
+      : undefined,
+  );
+
+  const isFilterable = (field) => {
+    if (!availableFilters || !currentQueue.value) {
+      return false;
+    }
+    let filter = availableFilters[currentQueue.value].find((filter) => {
+      return filter.name === field;
+    });
+    if (filter && filter.type === inputTypes.SELECT) {
+      return true;
+    }
+    return false;
+  };
+
+  const cellClass = (field) => {
+    return [{ filter: isFilterable(field) }];
+  };
+
+  const addFilter = (data, field) => {
+    const node = tableStore.visibleQueriedItemById(data.uuid);
+    if (isFilterable(field) && node) {
+      filterStore.setFilter({
+        nodeType: nodeType,
+        filterName: field,
+        filterValue: node[field],
+      });
+    }
+  };
 </script>
 
 <style>
@@ -311,5 +353,9 @@
     cursor: pointer;
     text-decoration: underline;
     font-weight: bold;
+  }
+
+  .filter:hover {
+    cursor: pointer;
   }
 </style>
