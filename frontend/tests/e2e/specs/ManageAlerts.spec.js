@@ -807,9 +807,10 @@ describe("Manage Alerts - Single Alert Tests", () => {
       cy.intercept("PATCH", "/api/alert/").as("updateAlert");
 
       // Check first visible alert current owner, should be "Analyst Bob" (from the test alert that was inserted)
-      cy.get(
-        ".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span",
-      ).should("have.text", "Analyst Bob");
+      cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > div").should(
+        "have.text",
+        "Analyst Bob",
+      );
       // Get first visible alert checkbox
       cy.get(" .p-checkbox-box").eq(1).click();
       // Click Take Ownership button
@@ -817,9 +818,10 @@ describe("Manage Alerts - Single Alert Tests", () => {
 
       cy.wait("@updateAlert").its("state").should("eq", "Complete");
       // Check owner name after taking ownership
-      cy.get(
-        ".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span",
-      ).should("have.text", "Analyst");
+      cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > div").should(
+        "have.text",
+        "Analyst",
+      );
       cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
     });
   });
@@ -829,9 +831,10 @@ describe("Manage Alerts - Single Alert Tests", () => {
       cy.intercept("PATCH", "/api/alert/").as("updateAlert");
 
       // Check first visible alert current owner, should not be Analyst Alice
-      cy.get(
-        ".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span",
-      ).should("not.have.text", "Analyst Alice");
+      cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > div").should(
+        "not.have.text",
+        "Analyst Alice",
+      );
       // Get first visible alert checkbox
       cy.get(" .p-checkbox-box").eq(1).click();
       // Open assign owner modal
@@ -845,9 +848,10 @@ describe("Manage Alerts - Single Alert Tests", () => {
       cy.get(".p-dialog-content").should("not.exist");
       cy.wait("@updateAlert").its("state").should("eq", "Complete");
       // Check owner name after assigning
-      cy.get(
-        ".p-datatable-tbody > :nth-child(1) > :nth-child(5) > span",
-      ).should("have.text", "Analyst Alice");
+      cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(5) > div").should(
+        "have.text",
+        "Analyst Alice",
+      );
       cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
     });
   });
@@ -858,9 +862,10 @@ describe("Manage Alerts - Single Alert Tests", () => {
       cy.intercept("POST", "/api/node/comment/").as("addComment");
 
       // Check first visible alert current disposition, should be "OPEN"
-      cy.get(
-        ".p-datatable-tbody > :nth-child(1) > :nth-child(6) > span",
-      ).should("have.text", "OPEN");
+      cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(6) > div").should(
+        "have.text",
+        "OPEN",
+      );
       // Get first visible alert checkbox
       cy.get(" .p-checkbox-box").eq(1).click();
       // Open disposition modal
@@ -876,9 +881,10 @@ describe("Manage Alerts - Single Alert Tests", () => {
       cy.wait("@addComment").its("state").should("eq", "Complete");
       cy.wait("@updateAlert").its("state").should("eq", "Complete");
       // Check disposition
-      cy.get(
-        ".p-datatable-tbody > :nth-child(1) > :nth-child(6) > span",
-      ).should("have.text", "FALSE_POSITIVE");
+      cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(6) > div").should(
+        "have.text",
+        "FALSE_POSITIVE",
+      );
       // Check for disposition comment
       cy.get(".comment")
         .first()
@@ -1211,7 +1217,7 @@ describe("Manage Alerts - Save to Event", () => {
       cy.get("[data-cy=save-to-event-modal]").should("not.exist");
 
       // Check first alert disposition
-      cy.get(".p-datatable-tbody > tr > :nth-child(6) > span").should(
+      cy.get(".p-datatable-tbody > tr > :nth-child(6) > div").should(
         "contain.text",
         "APPROVED_BUSINESS",
       );
@@ -1268,7 +1274,7 @@ describe("Manage Alerts - Save to Event", () => {
       cy.get("[data-cy=save-to-event-modal]").should("not.exist");
 
       // Check first alert disposition
-      cy.get(".p-datatable-tbody > tr > :nth-child(6) > span").should(
+      cy.get(".p-datatable-tbody > tr > :nth-child(6) > div").should(
         "contain.text",
         "APPROVED_BUSINESS",
       );

@@ -729,7 +729,7 @@ describe("ManageEvents.vue Actions", () => {
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check owner
-    cy.get(".p-datatable-tbody > tr > :nth-child(9) > span").should(
+    cy.get(".p-datatable-tbody > tr > :nth-child(9) > div").should(
       "have.text",
       "Analyst",
     );
@@ -749,7 +749,7 @@ describe("ManageEvents.vue Actions", () => {
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
 
     // Check owner
-    cy.get(".p-datatable-tbody > tr > :nth-child(9) > span").should(
+    cy.get(".p-datatable-tbody > tr > :nth-child(9) > div").should(
       "have.text",
       "Analyst Alice",
     );
