@@ -1,0 +1,171 @@
+queue:
+  - external
+  - internal
+  - intel
+
+user:
+  - username: analyst
+    default_alert_queue: external
+    default_event_queue: external
+    display_name: Analyst
+    email: analyst@fake.com
+    password: analyst
+    roles:
+      - admin
+  - username: alice
+    default_alert_queue: external
+    default_event_queue: internal
+    display_name: Analyst Alice
+    email: alice@fake.com
+    password: analyst
+    roles:
+      - admin
+  - username: bob
+    default_alert_queue: external
+    default_event_queue: external
+    display_name: Analyst Bob
+    email: bob@fake.com
+    password: analyst
+    roles:
+      - admin
+
+# Dispositions added here will receive an automated rank number based on the order they appear.
+# Example: The first disposition listed here will receive rank 0 and will appear first when shown in the GUI.
+alert_disposition:
+  - FALSE_POSITIVE
+  - IGNORE
+  - APPROVED_BUSINESS
+  - APPROVED_PERSONAL
+  - UNKNOWN
+  - REVIEWED
+  - GRAYWARE
+  - POLICY_VIOLATION
+  - RECONNAISSANCE
+  - WEAPONIZATION
+  - DELIVERY
+  - EXPLOITATION
+  - INSTALLATION
+  - COMMAND_AND_CONTROL
+  - EXFIL
+  - DAMAGE
+alert_type:
+  - manual
+event_prevention_tool:
+  external:
+    - antivirus
+    - application whitelisting
+    - edr
+    - email filter
+    - fw
+    - ips
+    - proxy
+    - response team
+    - user
+event_remediation:
+  external:
+    - cleaned manually
+    - cleaned with antivirus
+    - credentials reset
+    - domain takedown
+    - escalated
+    - network block
+    - not remediated
+    - reimaged
+    - removed from mailbox
+  internal:
+    - cleaned manually
+    - cleaned with antivirus
+    - credentials reset
+    - domain takedown
+    - escalated
+    - network block
+    - not remediated
+    - reimaged
+    - removed from mailbox
+    - some internal value
+event_risk_level:
+  external:
+    - 0
+    - 1
+    - 2
+    - 3
+event_source:
+  external:
+    - internal
+    - osint
+  internal:
+    - internal
+    - osint
+    - some internal value
+event_status:
+  external:
+    - OPEN
+    - IGNORE
+    - CLOSED
+  internal:
+    - OPEN
+    - IGNORE
+    - CLOSED
+    - some internal value
+event_type:
+  external:
+    - credential compromise
+    - host compromise
+    - pentest
+    - phish
+    - recon
+    - third party
+    - web browsing
+  internal:
+    - credential compromise
+    - host compromise
+    - pentest
+    - phish
+    - recon
+    - third party
+    - web browsing
+    - some internal value
+event_vector:
+  external:
+    - business application
+    - compromised website
+    - corporate email
+    - unknown
+    - usb
+    - webmail
+node_threat_type:
+  external:
+    - botnet
+    - customer threat
+    - downloader
+    - fraud
+    - infostealer
+    - keylogger
+    - ransomware
+    - rat
+    - rootkit
+  internal:
+    - botnet
+    - customer threat
+    - downloader
+    - fraud
+    - infostealer
+    - keylogger
+    - ransomware
+    - rat
+    - rootkit
+    - some internal value
+node_relationship_type:
+  - DOWNLOADED_FROM
+  - EXECUTED_ON
+  - IS_HASH_OF
+  - LOGGED_INTO
+  - REDIRECTED_FROM
+observable_type:
+  - file
+  - ipv4
+  - url
+user_role:
+  - admin
+  - analyst
+  - read only

@@ -1,0 +1,208 @@
+{
+  "alert_uuid": "02f8299b-2a24-400f-9751-7dd9164daf6a",
+  "disposition_user": "alice",
+  "name": "Small Alert",
+  "owner": "bob",
+  "observables": [
+    {
+      "type": "file",
+      "value": "email.rfc822",
+      "analyses": [
+        {
+          "type": "Email Analysis",
+          "details": {
+            "from_address": "badguy@evil.com",
+            "to_address": "goodguy@company.com",
+            "cc_addresses": ["otherguy@company.com"],
+            "subject": "Hello",
+            "message_id": "<123abc@evil.com>",
+            "time": "2022-03-18T12:00:00.000Z",
+            "attachments": [],
+            "headers": "blah",
+            "body_text": "Here, download this malware."
+          },
+          "observable_types": ["file"],
+          "required_directives": ["email"],
+          "required_tags": ["scan_me"],
+          "observables": [
+            {
+              "type": "email_address",
+              "value": "badguy@evil.com",
+              "node_metadata": {
+                "display": {
+                  "type": "sender"
+                }
+              },
+              "tags": ["from_address"],
+              "analyses": [
+                {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "link": "https://url.to.search/query=asdf",
+                    "hits": 5
+                  }
+                },
+                {
+                  "type": "Email Address Analysis",
+                  "observables": [
+                    {
+                      "type": "fqdn",
+                      "value": "evil.com",
+                      "for_detection": true,
+                      "analyses": [
+                        {
+                          "type": "FA Queue Analysis",
+                          "details": {
+                            "link": "https://url.to.search/query=asdf",
+                            "hits": 10
+                          }
+                        },
+                        {
+                          "type": "Test Analysis",
+                          "observables": [
+                            { "type": "test_type", "value": "test_value" }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "email_address",
+              "value": "goodguy@company.com",
+              "tags": ["recipient"],
+              "analyses": [
+                {
+                  "type": "Email Address Analysis",
+                  "observables": [{ "type": "fqdn", "value": "company.com" }]
+                }
+              ]
+            },
+            {
+              "type": "email_subject",
+              "value": "Hello",
+              "analyses": [
+                {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "link": "https://url.to.search/query=asdf",
+                    "hits": 100
+                  }
+                }
+              ]
+            },
+            {
+              "type": "file",
+              "value": "email.rfc822.unknown_plain_text_000",
+              "node_metadata": {
+                "display": {
+                  "value": "email plaintext body"
+                }
+              },
+              "analyses": [
+                {
+                  "type": "URL Extraction Analysis",
+                  "observables": [
+                    {
+                      "type": "url",
+                      "value": "http://evil.com/malware.exe",
+                      "analyses": [
+                        {
+                          "type": "FA Queue Analysis",
+                          "details": {
+                            "link": "https://url.to.search/query=asdf",
+                            "hits": 5
+                          }
+                        },
+                        {
+                          "type": "URL Parse Analysis",
+                          "observables": [
+                            {
+                              "type": "fqdn",
+                              "value": "evil.com",
+                              "analyses": [
+                                {
+                                  "type": "FA Queue Analysis",
+                                  "details": {
+                                    "link": "https://url.to.search/query=asdf",
+                                    "hits": 10
+                                  }
+                                },
+                                {
+                                  "type": "Test Analysis",
+                                  "observables": [
+                                    {
+                                      "type": "test_type",
+                                      "value": "test_value"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "uri_path",
+                              "value": "/malware.exe",
+                              "analyses": [
+                                {
+                                  "type": "FA Queue Analysis",
+                                  "details": {
+                                    "link": "https://url.to.search/query=asdf",
+                                    "hits": 20
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "File Analysis",
+          "observables": [
+            {
+              "type": "md5",
+              "value": "912ec803b2ce49e4a541068d495ab570",
+              "analyses": [
+                {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "link": "https://url.to.search/query=asdf",
+                    "hits": 0
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ipv4",
+      "value": "127.0.0.1",
+      "tags": ["c2", "contacted_host"],
+      "node_metadata": {
+        "display": {
+          "type": "private ip address",
+          "value": "localhost"
+        }
+      },
+      "analyses": [
+        {
+          "type": "FA Queue Analysis",
+          "details": {
+            "link": "https://url.to.search/query=asdf",
+            "hits": 1000
+          }
+        }
+      ]
+    }
+  ]
+}

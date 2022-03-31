@@ -4,8 +4,8 @@ services:
   db:
     container_name: ace2-ams-db
     build:
-      context: ./backend
-      dockerfile: ./db/Dockerfile
+      context: ./db
+      dockerfile: ./Dockerfile
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -15,12 +15,34 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
 
-  api:
+  db-api:
     depends_on:
       - db
-    container_name: ace2-ams-api
+    container_name: ace2-ams-db-api
     build:
-      context: ./backend
+      context: ./db_api
+      dockerfile: ./Dockerfile
+    environment:
+      # The DATABASE_URL environment variable needs to be in the form of:
+      # postgresql://<user>:<password>@db:5432/<database>
+      - ACE_DEV=${ACE_DEV}
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_TEST_URL=${DATABASE_TEST_URL}
+      - LOG_LEVEL=debug
+      - SQL_ECHO=${SQL_ECHO}
+      - TESTING=${TESTING:-no}
+    ports:
+      - 8888:80
+    volumes:
+      - ./db_api/app:/app
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; /start-reload.sh'
+
+  gui-api:
+    depends_on:
+      - db-api
+    container_name: ace2-ams-gui-api
+    build:
+      context: ./gui_api
       dockerfile: ./Dockerfile
     environment:
       # The DATABASE_URL environment variable needs to be in the form of:
@@ -40,12 +62,12 @@ services:
     ports:
       - 7777:80
     volumes:
-      - ./backend/app:/app
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; /start-reload.sh'
+      - ./gui_api/app:/app
+    command: bash -c 'while !</dev/tcp/db-api/80; do sleep 1; done; /start-reload.sh'
 
   gui:
     depends_on:
-      - api
+      - gui-api
     container_name: ace2-ams-gui
     build:
       context: ./frontend
