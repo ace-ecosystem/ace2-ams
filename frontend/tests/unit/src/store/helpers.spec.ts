@@ -8,16 +8,20 @@ import { useFilterStore } from "@/stores/filter";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { userReadFactory } from "@mocks/user";
 import { createTestingPinia } from "@pinia/testing";
+import { useEventStatusStore } from "@/stores/eventStatus";
 
 createTestingPinia({ createSpy: vi.fn });
 
 describe("setUserDefaults", () => {
   const authStore = useAuthStore();
   const filterStore = useFilterStore();
+  const eventStatusStore = useEventStatusStore();
   const currentUserSettingsStore = useCurrentUserSettingsStore();
 
   const alertQueue = genericObjectReadFactory({ value: "alertQueue" });
   const eventQueue = genericObjectReadFactory({ value: "eventQueue" });
+  const openStatus = genericObjectReadFactory({ value: "OPEN" });
+  const closedStatus = genericObjectReadFactory({ value: "CLOSED" });
 
   beforeEach(() => {
     authStore.$reset();
@@ -34,11 +38,29 @@ describe("setUserDefaults", () => {
     expect(filterStore.alerts).toEqual({});
   });
 
-  it("will correctly set all user defaults when nodeType == 'all'", () => {
+  it("will correctly set all user defaults when nodeType == 'all' and 'OPEN' event status is available", () => {
     authStore.user = userReadFactory({
       defaultAlertQueue: alertQueue,
       defaultEventQueue: eventQueue,
     });
+    eventStatusStore.items = [openStatus, closedStatus];
+    setUserDefaults();
+    expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
+    expect(currentUserSettingsStore.queues.alerts).toEqual(alertQueue);
+    expect(filterStore.events).toEqual({
+      queue: eventQueue,
+      status: openStatus,
+    });
+    expect(filterStore.alerts).toEqual({
+      queue: alertQueue,
+    });
+  });
+  it("will correctly set all user defaults when nodeType == 'all' and 'OPEN' event status is not available", () => {
+    authStore.user = userReadFactory({
+      defaultAlertQueue: alertQueue,
+      defaultEventQueue: eventQueue,
+    });
+    eventStatusStore.items = [closedStatus];
     setUserDefaults();
     expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
     expect(currentUserSettingsStore.queues.alerts).toEqual(alertQueue);
@@ -49,11 +71,27 @@ describe("setUserDefaults", () => {
       queue: alertQueue,
     });
   });
-  it("will correctly set event user defaults when nodeType == 'events'", () => {
+  it("will correctly set event user defaults when nodeType == 'events' and 'OPEN' event status is available", () => {
     authStore.user = userReadFactory({
       defaultAlertQueue: alertQueue,
       defaultEventQueue: eventQueue,
     });
+    eventStatusStore.items = [openStatus, closedStatus];
+    setUserDefaults("events");
+    expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
+    expect(currentUserSettingsStore.queues.alerts).toStrictEqual(null);
+    expect(filterStore.events).toEqual({
+      queue: eventQueue,
+      status: openStatus,
+    });
+    expect(filterStore.alerts).toEqual({});
+  });
+  it("will correctly set event user defaults when nodeType == 'events' and 'OPEN' event status is not available", () => {
+    authStore.user = userReadFactory({
+      defaultAlertQueue: alertQueue,
+      defaultEventQueue: eventQueue,
+    });
+    eventStatusStore.items = [closedStatus];
     setUserDefaults("events");
     expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
     expect(currentUserSettingsStore.queues.alerts).toStrictEqual(null);

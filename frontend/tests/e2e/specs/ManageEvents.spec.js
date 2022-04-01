@@ -450,6 +450,11 @@ describe("ManageEvents.vue Filtering", () => {
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefault");
 
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&status=OPEN&queue=external",
+    ).as("getEventsResetFilters");
+
     // SETUP -- adding a filter
     // Open edit filter modal
     cy.get(".p-splitbutton > .p-button-icon-only").click();
@@ -470,7 +475,7 @@ describe("ManageEvents.vue Filtering", () => {
     // Click reset button
     cy.get(".p-splitbutton > .p-button-icon-only").click();
     cy.get(".p-menuitem-link").eq(1).click();
-    cy.wait("@getEventsDefault").its("state").should("eq", "Complete");
+    cy.wait("@getEventsResetFilters").its("state").should("eq", "Complete");
   });
 
   it("successfully clears filters when clear filters clicked", () => {
