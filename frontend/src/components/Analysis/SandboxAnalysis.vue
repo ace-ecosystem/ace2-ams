@@ -1,7 +1,8 @@
-<!-- AnalysisDetailsBase.vue -->
-<!-- Base/Details component for analysis details -->
+<!-- SandboxAnalysis.vue -->
 
 <template>
+  <Message v-if="error" severity="error">{{ error }}</Message>
+  <span v-if="!files.length">No sandbox analysis available.</span>
   <div>
     <ul>
       <li
@@ -25,6 +26,7 @@
         legend="Sandbox URLs"
         :toggleable="true"
         responsive-layout="scroll"
+        :data-cy="`${file.md5}-urls`"
       >
         <div style="width: 90vw">
           <ul>
@@ -39,6 +41,7 @@
         legend="Contacted Hosts"
         :toggleable="true"
         responsive-layout="scroll"
+        :data-cy="`${file.md5}-contacted-hosts`"
       >
         <div style="width: 90vw">
           <DataTable
@@ -46,6 +49,7 @@
             sort-field="ip"
             :sort-order="1"
             class="p-datatable-sm"
+            responsive-layout="scroll"
             ><Column field="ip" header="Address" :sortable="true"></Column
             ><Column field="port" header="Port" :sortable="true"></Column
             ><Column
@@ -74,6 +78,7 @@
         legend="DNS Requests"
         :toggleable="true"
         responsive-layout="scroll"
+        :data-cy="`${file.md5}-dns-requests`"
       >
         <div style="width: 90vw">
           <DataTable
@@ -81,6 +86,7 @@
             sort-field="request"
             :sort-order="1"
             class="p-datatable-sm"
+            responsive-layout="scroll"
             ><Column field="request" header="Request" :sortable="true"></Column
             ><Column field="type" header="Type" :sortable="true"></Column
             ><Column field="answer" header="Answer" :sortable="true"></Column
@@ -98,6 +104,7 @@
         legend="Dropped Files"
         :toggleable="true"
         responsive-layout="scroll"
+        :data-cy="`${file.md5}-dropped-files`"
       >
         <div style="width: 90vw">
           <DataTable
@@ -127,6 +134,7 @@
         v-if="file.httpRequests.length"
         legend="HTTP Requests"
         :toggleable="true"
+        :data-cy="`${file.md5}-http-requests`"
       >
         <div style="width: 90vw">
           <DataTable
@@ -152,6 +160,7 @@
         legend="Mutexes"
         :toggleable="true"
         responsive-layout="scroll"
+        :data-cy="`${file.md5}-mutexes`"
       >
         <div style="width: 90vw">
           <pre v-for="mutex in file.mutexes" :key="mutex">{{ mutex }}</pre>
@@ -163,6 +172,7 @@
         legend="Process Trees"
         :toggleable="true"
         responsive-layout="scroll"
+        :data-cy="`${file.md5}-process-trees`"
       >
         <div style="width: 90vw">
           <div v-for="tree in file.processTrees" :key="tree">
@@ -181,6 +191,8 @@
   import { sandboxSummary } from "@/models/eventSummaries";
   import Fieldset from "primevue/fieldset";
   import DataTable from "primevue/datatable";
+  import Message from "primevue/message";
+
   import Column from "primevue/column";
 
   import {
@@ -195,11 +207,18 @@
   });
   const isLoading = ref(false);
   const sandboxSummariesByHash = ref({} as Record<string, sandboxSummary[]>);
+  const error = ref();
 
   onMounted(async () => {
     isLoading.value = true;
-    const sandboxSummaries = await Event.readSandboxSummary(props.eventUuid);
-    if (sandboxSummaries) {
+    let sandboxSummaries: sandboxSummary[] = [];
+    try {
+      sandboxSummaries = await Event.readSandboxSummary(props.eventUuid);
+    } catch (exception) {
+      error.value = exception;
+    }
+
+    if (sandboxSummaries.length) {
       sandboxSummariesByHash.value = groupByHash(sandboxSummaries);
     }
     isLoading.value = false;
@@ -227,7 +246,9 @@
         droppedFiles.push(...summary.droppedFiles);
         httpRequests.push(...summary.httpRequests);
         mutexes.push(...summary.mutexes);
-        processTrees.push(summary.processTree);
+        if (summary.processTree.length) {
+          processTrees.push(summary.processTree);
+        }
       });
 
       return {
