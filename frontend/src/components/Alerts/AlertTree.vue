@@ -74,7 +74,7 @@
     },
   });
 
-  const itemsExpandedStatus = ref({} as Record<number, boolean>);
+  const itemsExpandedStatus = ref<Record<number, boolean>>({});
 
   onBeforeMount(() => {
     itemsExpandedStatus.value = generateExpandedStatus(props.items);
