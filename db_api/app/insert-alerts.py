@@ -22,8 +22,8 @@ if len(sys.argv) < 2:
 # However, this runs inside of the container, so the backend/ part of the path
 # does not exist and must be removed so that it is a valid path inside the container.
 #
-# Example: backend/app/tests/alerts/blah.json -> /app/tests/alerts/blah.json
-json_path = sys.argv[1].replace("backend", "")
+# Example: db_api/app/tests/alerts/blah.json -> /app/tests/alerts/blah.json
+json_path = sys.argv[1].replace("db_api", "")
 
 num_alerts = 1
 if len(sys.argv) == 3:
