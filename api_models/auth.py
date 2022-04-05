@@ -1,8 +1,4 @@
 from pydantic import BaseModel, Field
-from typing import Optional
-
-from api_models import type_str
-from api_models.user import UserRead
 
 
 class Auth(BaseModel):
@@ -15,16 +11,6 @@ class Auth(BaseModel):
     password: str = Field(description="The password to use for authentication")
 
     username: str = Field(description="The username to use for authentication")
-
-
-class AuthResponse(BaseModel):
-    """Represents the response to successful authentication."""
-
-    access_token: type_str
-
-    refresh_token: Optional[type_str]
-
-    token_type: type_str
 
 
 class ValidateRefreshToken(BaseModel):

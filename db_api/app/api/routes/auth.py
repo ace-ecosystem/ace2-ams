@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from api_models.auth import Auth, AuthResponse
+from api_models.auth import Auth
+from api_models.user import UserRead
 from api.routes import helpers
 from db import crud
 from db.database import get_db
@@ -35,11 +35,13 @@ def auth(data: Auth, db: Session = Depends(get_db)):
     user.refresh_token = data.new_refresh_token
     crud.commit(db)
 
+    return user
+
 
 helpers.api_route_auth(
     router=router,
     endpoint=auth,
-    response_model=AuthResponse,
+    response_model=UserRead,
     success_desc="Authentication was successful",
     failure_desc="Invalid username or password",
 )

@@ -3,7 +3,7 @@ import requests
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from api_models.auth import AuthResponse
+from api_models.user import UserRead
 from api.routes import helpers
 from core.auth import (
     create_access_token,
@@ -86,7 +86,7 @@ def auth(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
         access_token = create_access_token(sub=form_data.username)
         _set_access_token_cookie(response, access_token)
         _set_refresh_token_cookie(response, new_refresh_token)
-        return {"access_token": access_token, "refresh_token": new_refresh_token, "token_type": "bearer"}
+        return result.json()
 
     raise HTTPException(
         status_code=result.status_code,
@@ -98,7 +98,7 @@ def auth(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
 helpers.api_route_auth(
     router=router,
     endpoint=auth,
-    response_model=AuthResponse,
+    response_model=UserRead,
     success_desc="Authentication was successful",
     failure_desc="Invalid username or password",
 )
@@ -148,17 +148,10 @@ def auth_refresh(response: Response, new_tokens: dict = Depends(refresh_token)):
     refresh_token = new_tokens["refresh_token"]
     _set_refresh_token_cookie(response, refresh_token)
 
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-    }
-
 
 helpers.api_route_auth(
     router=router,
     endpoint=auth_refresh,
-    response_model=AuthResponse,
     method="GET",
     path="/refresh",
     success_desc="Token was successfully refreshed",
