@@ -187,14 +187,13 @@
 
 <script setup lang="ts">
   import { onMounted, ref, defineProps, computed } from "vue";
-  import { Event } from "@/services/api/event";
-  import { sandboxSummary } from "@/models/eventSummaries";
-  import Fieldset from "primevue/fieldset";
-  import DataTable from "primevue/datatable";
-  import Message from "primevue/message";
 
   import Column from "primevue/column";
+  import DataTable from "primevue/datatable";
+  import Fieldset from "primevue/fieldset";
+  import Message from "primevue/message";
 
+  import { sandboxSummary } from "@/models/eventSummaries";
   import {
     sandboxContactedHost,
     sandboxDnsRequest,
@@ -202,12 +201,15 @@
     sandboxHttpRequest,
   } from "@/models/sandbox";
 
+  import { Event } from "@/services/api/event";
+
   const props = defineProps({
     eventUuid: { type: String, required: true },
   });
+
   const isLoading = ref(false);
-  const sandboxSummariesByHash = ref({} as Record<string, sandboxSummary[]>);
   const error = ref();
+  const sandboxSummariesByHash = ref({} as Record<string, sandboxSummary[]>);
 
   onMounted(async () => {
     isLoading.value = true;
@@ -265,10 +267,14 @@
     });
   });
 
-  function scrollTo(md5: string) {
-    console.log(md5);
-    document.getElementById(md5)?.scrollIntoView();
-  }
+  const groupByHash = (summaries: sandboxSummary[]) => {
+    return summaries.reduce(
+      (r: Record<string, sandboxSummary[]>, v, i, a, k = v.md5) => (
+        (r[k] || (r[k] = [])).push(v), r
+      ),
+      {},
+    );
+  };
 
   function dedupe<T>(arr: T[]) {
     return arr.reduce(
@@ -278,14 +284,9 @@
     );
   }
 
-  const groupByHash = (summaries: sandboxSummary[]) => {
-    return summaries.reduce(
-      (r: Record<string, sandboxSummary[]>, v, i, a, k = v.md5) => (
-        (r[k] || (r[k] = [])).push(v), r
-      ),
-      {},
-    );
-  };
+  function scrollTo(md5: string) {
+    document.getElementById(md5)?.scrollIntoView();
+  }
 </script>
 
 <style>
