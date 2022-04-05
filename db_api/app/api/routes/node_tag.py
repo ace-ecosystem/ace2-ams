@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 from uuid import UUID
 
+from api_models.create import Create
 from api_models.node_tag import NodeTagCreate, NodeTagRead, NodeTagUpdate
 from api.routes import helpers
 from db import crud
@@ -32,8 +33,10 @@ def create_node_tag(
 
     response.headers["Content-Location"] = request.url_for("get_node_tag", uuid=obj.uuid)
 
+    return {"uuid": obj.uuid}
 
-helpers.api_route_create(router, create_node_tag)
+
+helpers.api_route_create(router, create_node_tag, response_model=Create)
 
 
 #

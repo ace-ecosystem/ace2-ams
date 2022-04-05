@@ -13,6 +13,7 @@ from api.routes.event_status import router as event_status_router
 from api.routes.event_type import router as event_type_router
 from api.routes.event_vector import router as event_vector_router
 from api.routes.node_directive import router as node_directive_router
+from api.routes.node_tag import router as node_tag_router
 from api.routes.observable_type import router as observable_type_read
 from api.routes.ping import router as ping_router
 from api.routes.queue import router as queue_router
@@ -34,6 +35,7 @@ router.include_router(event_status_router)
 router.include_router(event_type_router)
 router.include_router(event_vector_router)
 router.include_router(node_directive_router)
+router.include_router(node_tag_router)
 router.include_router(observable_type_read)
 router.include_router(ping_router)
 router.include_router(queue_router)
