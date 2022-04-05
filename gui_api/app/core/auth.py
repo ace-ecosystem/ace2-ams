@@ -177,6 +177,7 @@ def refresh_token(refresh_token: str = Depends(oauth2_refresh_scheme)) -> dict:
                 return {
                     "access_token": create_access_token(sub=claims["sub"]),
                     "refresh_token": new_refresh_token,
+                    "user": result.json(),
                 }
 
             raise HTTPException(

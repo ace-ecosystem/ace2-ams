@@ -230,11 +230,14 @@ def validate_refresh_token(
     user.refresh_token = data.new_refresh_token
     db.commit()
 
+    return user
+
 
 helpers.api_route_auth(
     router,
     validate_refresh_token,
     path="/validate_refresh_token",
+    response_model=UserRead,
     success_desc="Token is valid",
     failure_desc="Token is invalid",
 )

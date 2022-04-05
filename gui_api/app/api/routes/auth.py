@@ -148,10 +148,13 @@ def auth_refresh(response: Response, new_tokens: dict = Depends(refresh_token)):
     refresh_token = new_tokens["refresh_token"]
     _set_refresh_token_cookie(response, refresh_token)
 
+    return new_tokens["user"]
+
 
 helpers.api_route_auth(
     router=router,
     endpoint=auth_refresh,
+    response_model=UserRead,
     method="GET",
     path="/refresh",
     success_desc="Token was successfully refreshed",
