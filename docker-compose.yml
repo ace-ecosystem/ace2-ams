@@ -4,7 +4,7 @@ services:
   db:
     container_name: ace2-ams-db
     build:
-      context: ./db
+      context: ./db_container
       dockerfile: ./Dockerfile
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
