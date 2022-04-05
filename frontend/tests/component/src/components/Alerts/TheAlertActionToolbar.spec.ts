@@ -13,16 +13,27 @@ const props = {
   reloadObject: "node",
 };
 
-describe("TheAlertActionToolbar", () => {
-  it("renders", () => {
-    mount(TheAlertActionToolbar, {
-      global: {
-        plugins: [PrimeVue, createPinia(), router],
-        provide: {
-          nodeType: "alerts",
-        },
+function factory() {
+  return mount(TheAlertActionToolbar, {
+    global: {
+      plugins: [PrimeVue, createPinia(), router],
+      provide: {
+        nodeType: "alerts",
       },
-      propsData: props,
-    });
+    },
+    propsData: props,
+  });
+}
+
+describe("TheAlertActionToolbar", () => {
+  it("renders as expected", () => {
+    factory();
+    cy.contains("Disposition").should("be.visible");
+    cy.contains("Remediate").should("be.visible");
+  });
+  it("opens disposition modal when 'Disposition' button clicked", () => {
+    factory();
+    cy.contains("Disposition").click();
+    cy.contains("Set Disposition").should("be.visible");
   });
 });
