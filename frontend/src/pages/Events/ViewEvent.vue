@@ -78,6 +78,7 @@
   const currentComponent = shallowRef(EventSummary);
 
   provide("nodeType", "events");
+  provide("analysisModuleComponents", config.analysis.analysisModuleComponents);
   provide("availableFilters", config.events.eventFilters);
   provide("availableEditFields", config.events.eventEditableProperties);
 

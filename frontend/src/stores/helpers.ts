@@ -88,6 +88,7 @@ export async function populateEventStores(): Promise<void> {
 export function setUserDefaults(nodeType = "all"): void {
   const authStore = useAuthStore();
   const filterStore = useFilterStore();
+  const eventStatusStore = useEventStatusStore();
   const currentUserSettingsStore = useCurrentUserSettingsStore();
 
   if (!authStore.user) {
@@ -102,6 +103,18 @@ export function setUserDefaults(nodeType = "all"): void {
       filterName: "queue",
       filterValue: currentUserSettingsStore.queues.events,
     });
+
+    // Set default event status filter
+    const openStatus = eventStatusStore.items.find((status) => {
+      return status.value === "OPEN";
+    });
+    if (openStatus) {
+      filterStore.setFilter({
+        nodeType: "events",
+        filterName: "status",
+        filterValue: openStatus,
+      });
+    }
   }
 
   if (nodeType === "all" || nodeType === "alerts") {

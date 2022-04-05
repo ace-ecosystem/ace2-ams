@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-  import { ref, defineProps, computed, watch, defineEmits } from "vue";
+  import { ref, defineProps, computed, watch, defineEmits, inject } from "vue";
 
   import MegaMenu from "primevue/megamenu";
 
@@ -41,6 +41,8 @@
   const eventStore = useEventStore();
   const modalStore = useModalStore();
   const selectedStore = useSelectedEventStore();
+
+  const analysisModuleComponents = inject("analysisModuleComponents");
 
   const props = defineProps({
     eventUuid: { type: String, required: true },
@@ -74,15 +76,34 @@
     }
   }
 
+  const formatAnalysisType = (analysisType) => {
+    return analysisType.split(" - ")[0];
+  };
+
   const analysisMenuItems = computed(() => {
     let analysisMenuItems = [];
+    let processed = [];
     if (eventStore.open) {
-      analysisMenuItems = eventStore.open.analysisTypes.map((analysisType) => ({
-        label: analysisType,
-        command: () => {
-          emit("sectionClicked", analysisType);
-        },
-      }));
+      analysisMenuItems = eventStore.open.analysisTypes
+        .filter((analysisType) => {
+          let analysisTypeFormatted = formatAnalysisType(analysisType);
+          if (
+            analysisTypeFormatted in analysisModuleComponents && // Filter out analysis modules that don't have configured components
+            !processed.includes(analysisTypeFormatted) //  OR that have already been added to the list
+          ) {
+            processed.push(analysisTypeFormatted);
+            return true;
+          }
+        })
+        .map((analysisType) => {
+          let analysisTypeFormatted = formatAnalysisType(analysisType);
+          return {
+            label: analysisTypeFormatted,
+            command: () => {
+              emit("sectionClicked", analysisTypeFormatted);
+            },
+          };
+        });
     }
     return {
       label: "Analysis",

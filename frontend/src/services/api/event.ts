@@ -13,6 +13,7 @@ import {
   observableSummary,
   userSummary,
   urlDomainSummary,
+  sandboxSummary,
 } from "@/models/eventSummaries";
 import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
@@ -52,6 +53,9 @@ export const Event = {
 
   readEmailHeadersAndBody: async (uuid: UUID): Promise<emailHeadersBody[]> =>
     await api.read(`${endpoint}${uuid}/summary/email_headers_body`),
+
+  readSandboxSummary: async (uuid: UUID): Promise<sandboxSummary[]> =>
+    await api.read(`${endpoint}${uuid}/summary/sandbox`),
 
   readDetectionSummary: async (uuid: UUID): Promise<detectionPointSummary[]> =>
     await api.read(`${endpoint}${uuid}/summary/detection_point`),

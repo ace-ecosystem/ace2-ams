@@ -49,13 +49,10 @@ describe("ViewEvent.vue", () => {
     // Click on the Analysis dropdown
     cy.get('[aria-haspopup="true"]').eq(2).click();
     // Select first available analysis type
-    cy.get("span").contains("a_type0 Analysis").click();
-    // Check that basic analysis showed up
+    cy.get("span").contains("Email Analysis").click();
+    // Check that rge analysis showed up
     cy.get('[data-cy="event-details-content"]')
-      .contains("Basic Analysis")
-      .should("be.visible");
-    cy.get('[data-cy="event-details-content"]')
-      .contains("a_type0 Analysis")
+      .contains("Email Analysis")
       .should("be.visible");
     // Switch back to the event summary section and check content
     cy.get('[aria-haspopup="true"]').eq(1).click();
