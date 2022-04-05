@@ -14,7 +14,7 @@
       />
       <DispositionModal
         name="DispositionModal"
-        @requestReload="requestReload"
+        @request-reload="requestReload"
       />
       <!--      REMEDIATE MODAL -->
       <Button
@@ -30,7 +30,7 @@
   </TheNodeActionToolbarVue>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { ref, defineProps } from "vue";
 
   import Button from "primevue/button";
@@ -46,12 +46,12 @@
   });
 
   const modalStore = useModalStore();
-  const open = (name) => {
+  const open = (name: string) => {
     modalStore.open(name);
   };
 
-  const toolbar = ref(null);
+  const toolbar = ref<InstanceType<typeof TheNodeActionToolbarVue>>();
   const requestReload = () => {
-    toolbar.value.requestReload();
+    toolbar.value?.requestReload();
   };
 </script>
