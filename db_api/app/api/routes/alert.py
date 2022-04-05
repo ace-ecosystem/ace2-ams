@@ -7,6 +7,7 @@ from typing import List, Optional
 from uuid import UUID, uuid4
 
 from api_models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
+from api_models.create import Create
 from api_models.history import AlertHistoryRead
 from api_models.observable import ObservableRead
 from api.routes import helpers
@@ -96,8 +97,10 @@ def create_alert(
 
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=new_alert.uuid)
 
+    return {"uuid": new_alert.uuid}
 
-helpers.api_route_create(router, create_alert)
+
+helpers.api_route_create(router, create_alert, response_model=Create)
 
 
 #

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from api.routes.alert import router as alert_router
 from api.routes.alert_disposition import router as alert_disposition_router
 from api.routes.alert_tool import router as alert_tool_router
 from api.routes.alert_tool_instance import router as alert_tool_instance_router
@@ -19,6 +20,7 @@ from api.routes.user import router as user_router
 
 router = APIRouter()
 
+router.include_router(alert_router)
 router.include_router(alert_disposition_router)
 router.include_router(alert_tool_router)
 router.include_router(alert_tool_instance_router)

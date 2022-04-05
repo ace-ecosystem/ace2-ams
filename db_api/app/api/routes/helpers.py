@@ -42,6 +42,7 @@ def api_route_create(
     path: str = "/",
     dependencies: list = None,
     responses: dict = None,
+    response_model: BaseModel = None,
     status_code=status.HTTP_201_CREATED,
 ):
     if responses is None:
@@ -58,7 +59,7 @@ def api_route_create(
         path=path,
         endpoint=endpoint,
         methods=["POST"],
-        response_class=Response,  # This allows to respond with a 201 and no body listed in the documentation
+        response_model=response_model,
         responses=responses,
         status_code=status_code,
     )
