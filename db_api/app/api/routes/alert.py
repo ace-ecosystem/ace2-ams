@@ -47,6 +47,7 @@ def create_alert(
     alert: AlertCreate,
     request: Request,
     response: Response,
+    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     # Create the new alert Node using the data from the request
@@ -83,6 +84,14 @@ def create_alert(
 
         crud.commit(db)
 
+        # If a username was given, add a history entry for the observable creation
+        if history_username:
+            crud.record_node_create_history(
+                record_node=db_observable,
+                action_by=crud.read_user_by_username(username=history_username, db=db),
+                db=db,
+            )
+
     # Create a NodeTree with the alert as the root and link the observables to it
     node_tree = crud.create_node_tree_leaf(root_node_uuid=new_alert.uuid, node_uuid=new_alert.uuid, db=db)
 
@@ -94,6 +103,14 @@ def create_alert(
         )
 
     crud.commit(db)
+
+    # If a username was given, add an entry to the history table for the alert creation
+    if history_username:
+        crud.record_node_create_history(
+            record_node=new_alert,
+            action_by=crud.read_user_by_username(username=history_username, db=db),
+            db=db,
+        )
 
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=new_alert.uuid)
 
@@ -404,6 +421,7 @@ def update_alerts(
     alerts: List[AlertUpdateMultiple],
     request: Request,
     response: Response,
+    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     for alert in alerts:
@@ -464,6 +482,15 @@ def update_alerts(
             db_alert.queue = crud.read_by_value(value=update_data["queue"], db_table=Queue, db=db)
 
         crud.commit(db)
+
+        # If a username was given, add an entry to the history table for the alert update
+        if history_username:
+            crud.record_node_update_history(
+                record_node=db_alert,
+                action_by=crud.read_user_by_username(username=history_username, db=db),
+                diffs=diffs,
+                db=db,
+            )
 
         response.headers["Content-Location"] = request.url_for("get_alert", uuid=alert.uuid)
 

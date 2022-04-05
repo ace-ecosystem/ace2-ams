@@ -2,7 +2,7 @@ import json
 import requests
 
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from typing import List, Optional
 from uuid import UUID
 
@@ -10,6 +10,7 @@ from api_models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
 from api_models.history import AlertHistoryRead
 from api.routes import helpers
 
+from core.auth import validate_access_token
 from core.config import get_settings
 
 
@@ -28,9 +29,12 @@ def create_alert(
     alert: AlertCreate,
     request: Request,
     response: Response,
+    claims: dict = Depends(validate_access_token),
 ):
     try:
-        result = requests.post(f"{get_settings().database_api_url}/alert/", json=json.loads(alert.json()))
+        result = requests.post(
+            f"{get_settings().database_api_url}/alert/?history_username={claims['sub']}", json=json.loads(alert.json())
+        )
     except:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
@@ -219,10 +223,12 @@ def update_alerts(
     alerts: List[AlertUpdateMultiple],
     request: Request,
     response: Response,
+    claims: dict = Depends(validate_access_token),
 ):
     try:
         result = requests.patch(
-            f"{get_settings().database_api_url}/alert/", json=[json.loads(a.json(exclude_unset=True)) for a in alerts]
+            f"{get_settings().database_api_url}/alert/?history_username={claims['sub']}",
+            json=[json.loads(a.json(exclude_unset=True)) for a in alerts],
         )
     except:
         raise HTTPException(
