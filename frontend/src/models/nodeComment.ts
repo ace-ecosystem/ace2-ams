@@ -4,6 +4,7 @@ import { userRead } from "./user";
 export interface nodeCommentCreate {
   nodeUuid: UUID;
   uuid?: UUID;
+  username: string;
   value: string;
   [key: string]: unknown;
 }

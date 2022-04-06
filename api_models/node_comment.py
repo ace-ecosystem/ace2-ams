@@ -15,6 +15,8 @@ class NodeCommentBase(BaseModel):
 
 
 class NodeCommentCreate(NodeCommentBase):
+    username: type_str = Field(description="The username of the user creating the comment")
+
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the comment")
 
 
@@ -30,6 +32,8 @@ class NodeCommentRead(NodeCommentBase):
 
 
 class NodeCommentUpdate(BaseModel):
+    username: type_str = Field(description="The username of the user updating the comment")
+
     # The only thing that makes sense to be able to update is the actual value of the comment.
     # Otherwise, you would delete the comment and create a new comment on a new node.
     value: type_str = Field(description="The value of the comment")
