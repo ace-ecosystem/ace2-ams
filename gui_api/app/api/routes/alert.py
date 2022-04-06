@@ -1,17 +1,15 @@
 import json
-import requests
 
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, Depends, Query, Request, Response
 from typing import List, Optional
 from uuid import UUID
 
+from api import db_api
+from api.routes import helpers
 from api_models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
 from api_models.history import AlertHistoryRead
-from api.routes import helpers
-
 from core.auth import validate_access_token
-from core.config import get_settings
 
 
 router = APIRouter(
@@ -31,18 +29,9 @@ def create_alert(
     response: Response,
     claims: dict = Depends(validate_access_token),
 ):
-    try:
-        result = requests.post(
-            f"{get_settings().database_api_url}/alert/?history_username={claims['sub']}", json=json.loads(alert.json())
-        )
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database API is unavailable",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    result = db_api.post(path=f"/alert/?history_username={claims['sub']}", payload=json.loads(alert.json()))
 
-    response.headers["Content-Location"] = request.url_for("get_alert", uuid=result.json()["uuid"])
+    response.headers["Content-Location"] = request.url_for("get_alert", uuid=result["uuid"])
 
 
 helpers.api_route_create(router, create_alert)
@@ -165,48 +154,15 @@ def get_all_alerts(
     if sort:
         query_params += f"&sort={sort}"
 
-    try:
-        result = requests.get(
-            f"{get_settings().database_api_url}/alert/{query_params}",
-        )
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database API is unavailable",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return result.json()
+    return db_api.get(path=f"/alert/{query_params}")
 
 
 def get_alert(uuid: UUID):
-    try:
-        result = requests.get(
-            f"{get_settings().database_api_url}/alert/{uuid}",
-        )
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database API is unavailable",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return result.json()
+    return db_api.get(path=f"/alert/{uuid}")
 
 
 def get_alert_history(uuid: UUID):
-    try:
-        result = requests.get(
-            f"{get_settings().database_api_url}/alert/{uuid}/history",
-        )
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database API is unavailable",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return result.json()
+    return db_api.get(f"/alert/{uuid}/history")
 
 
 helpers.api_route_read_all(router, get_all_alerts, AlertRead)
@@ -225,20 +181,12 @@ def update_alerts(
     response: Response,
     claims: dict = Depends(validate_access_token),
 ):
-    try:
-        result = requests.patch(
-            f"{get_settings().database_api_url}/alert/?history_username={claims['sub']}",
-            json=[json.loads(a.json(exclude_unset=True)) for a in alerts],
-        )
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database API is unavailable",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    db_api.patch(
+        path=f"/alert/?history_username={claims['sub']}",
+        payload=[json.loads(a.json(exclude_unset=True)) for a in alerts],
+    )
 
-    if result.status_code == status.HTTP_204_NO_CONTENT:
-        response.headers["Content-Location"] = request.url_for("get_alert", uuid=alerts[-1].uuid)
+    response.headers["Content-Location"] = request.url_for("get_alert", uuid=alerts[-1].uuid)
 
 
 helpers.api_route_update(router, update_alerts, path="/")

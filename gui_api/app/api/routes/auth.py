@@ -1,10 +1,9 @@
-import requests
-
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, Response, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-from api_models.user import UserRead
+from api import db_api
 from api.routes import helpers
+from api_models.user import UserRead
 from core.auth import (
     create_access_token,
     create_refresh_token,
@@ -60,39 +59,28 @@ def _set_refresh_token_cookie(response: Response, refresh_token: str):
 
 def auth(response: Response, form_data: OAuth2PasswordRequestForm = Depends()):
     """
-    Used to authenticate with the API. Returns an access_token and refresh_token in addition to setting them as
-    HttpOnly cookies.
+    Used to authenticate with the API. Returns the authenticated user's details and
+    sets the access_token and refresh_token as HttpOnly cookies.
     """
 
     # Validate the login information with the database API.
     new_refresh_token = create_refresh_token(sub=form_data.username)
-    try:
-        result = requests.post(
-            f"{get_settings().database_api_url}/auth",
-            json={
-                "new_refresh_token": new_refresh_token,
-                "username": form_data.username,
-                "password": form_data.password,
-            },
-        )
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database API is unavailable",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    if result.status_code == status.HTTP_200_OK:
-        access_token = create_access_token(sub=form_data.username)
-        _set_access_token_cookie(response, access_token)
-        _set_refresh_token_cookie(response, new_refresh_token)
-        return result.json()
-
-    raise HTTPException(
-        status_code=result.status_code,
-        detail=result.text,
-        headers={"WWW-Authenticate": "Bearer"},
+    result = db_api.post(
+        path="/auth",
+        payload={
+            "new_refresh_token": new_refresh_token,
+            "username": form_data.username,
+            "password": form_data.password,
+        },
+        expected_status=status.HTTP_200_OK,
     )
+
+    # Set the auth token cookies
+    access_token = create_access_token(sub=form_data.username)
+    _set_access_token_cookie(response, access_token)
+    _set_refresh_token_cookie(response, new_refresh_token)
+
+    return result
 
 
 helpers.api_route_auth(

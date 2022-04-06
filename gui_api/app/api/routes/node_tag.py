@@ -1,13 +1,12 @@
 import json
-import requests
 
-from fastapi import APIRouter, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, Query, Request, Response
 from typing import Optional
 from uuid import UUID
 
-from api_models.node_tag import NodeTagCreate, NodeTagRead
+from api import db_api
 from api.routes import helpers
-from core.config import get_settings
+from api_models.node_tag import NodeTagCreate, NodeTagRead
 
 
 router = APIRouter(
@@ -21,22 +20,10 @@ router = APIRouter(
 #
 
 
-def create_node_tag(
-    create: NodeTagCreate,
-    request: Request,
-    response: Response,
-):
+def create_node_tag(create: NodeTagCreate, request: Request, response: Response):
+    result = db_api.post(path="/node/tag/", payload=json.loads(create.json()))
 
-    try:
-        result = requests.post(f"{get_settings().database_api_url}/node/tag/", json=json.loads(create.json()))
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database API is unavailable",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    response.headers["Content-Location"] = request.url_for("get_node_tag", uuid=result.json()["uuid"])
+    response.headers["Content-Location"] = request.url_for("get_node_tag", uuid=result["uuid"])
 
 
 helpers.api_route_create(router, create_node_tag)
@@ -47,33 +34,12 @@ helpers.api_route_create(router, create_node_tag)
 #
 
 
-def get_all_node_tags(
-    limit: Optional[int] = Query(50, le=100),
-    offset: Optional[int] = Query(0),
-):
-    try:
-        result = requests.get(f"{get_settings().database_api_url}/node/tag/?limit={limit}&offset={offset}")
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database API is unavailable",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return result.json()
+def get_all_node_tags(limit: Optional[int] = Query(50, le=100), offset: Optional[int] = Query(0)):
+    return db_api.get(path=f"/node/tag/?limit={limit}&offset={offset}")
 
 
 def get_node_tag(uuid: UUID):
-    try:
-        result = requests.get(f"{get_settings().database_api_url}/node/tag/{uuid}")
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Database API is unavailable",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return result.json()
+    return db_api.get(path=f"/node/tag/{uuid}")
 
 
 helpers.api_route_read_all(router, get_all_node_tags, NodeTagRead)
