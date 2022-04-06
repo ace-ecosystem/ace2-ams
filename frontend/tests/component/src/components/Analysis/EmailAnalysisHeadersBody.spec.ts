@@ -10,8 +10,6 @@ import EmailAnalysisHeadersBody from "@/components/Analysis/EmailAnalysisHeaders
 import router from "@/router/index";
 import { Event } from "@/services/api/event";
 import { emailHeadersBody } from "@/models/eventSummaries";
-import { find } from "cypress/types/lodash";
-import EmailAnalysisHeadersBodyVue from "@/components/Analysis/EmailAnalysisHeadersBody.vue";
 
 const props = {
   eventUuid: "uuid",
