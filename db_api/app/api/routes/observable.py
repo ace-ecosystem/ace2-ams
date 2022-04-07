@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request, Response
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
-from typing import List, Union
+from typing import List, Optional, Union
 from uuid import UUID
 
 from api_models.history import ObservableHistoryRead
@@ -128,6 +128,7 @@ def update_observable(
     observable: ObservableUpdate,
     request: Request,
     response: Response,
+    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     # Update the Node attributes
@@ -183,6 +184,15 @@ def update_observable(
         db_observable.value = update_data["value"]
 
     crud.commit(db)
+
+    # If a username was given, add an entry to the history table for the observable update
+    if history_username:
+        crud.record_node_update_history(
+            record_node=db_observable,
+            action_by=crud.read_user_by_username(username=history_username, db=db),
+            diffs=diffs,
+            db=db,
+        )
 
     response.headers["Content-Location"] = request.url_for("get_observable", uuid=uuid)
 

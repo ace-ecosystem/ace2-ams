@@ -2,8 +2,9 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
 from typing import List
-from uuid import UUID, uuid4
+from uuid import UUID
 
+from api_models.create import Create
 from api_models.node_detection_point import NodeDetectionPointCreate, NodeDetectionPointRead, NodeDetectionPointUpdate
 from api.routes import helpers
 from db import crud
@@ -47,8 +48,11 @@ def create_node_detection_points(
             "get_node_detection_point", uuid=new_detection_point.uuid
         )
 
+    # Return the UUID of the last detection point
+    return {"uuid": new_detection_point.uuid}
 
-helpers.api_route_create(router, create_node_detection_points)
+
+helpers.api_route_create(router, create_node_detection_points, response_model=Create)
 
 
 #
