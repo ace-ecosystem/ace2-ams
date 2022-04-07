@@ -2,71 +2,80 @@
 
 <template>
   <div v-if="isLoading">Loading...</div>
-  <div v-else-if="emailHeadersBody">
+  <div v-else-if="emailHeadersBodyRes">
     <span>
       <h5>
         Email Details
-        <router-link :to="`/alert/${emailHeadersBody.alertUuid}`" exact
+        <router-link :to="`/alert/${emailHeadersBodyRes.alertUuid}`" exact
           >(Alert)</router-link
         >
       </h5>
     </span>
     <Panel id="email-headers-panel" header="Headers" :toggleable="true">
       <div style="width: 100%">
-        <pre>{{ emailHeadersBody.headers }}</pre>
+        <pre>{{ emailHeadersBodyRes.headers }}</pre>
       </div>
     </Panel>
     <br />
     <Panel id="email-body-panel" header="Body" :toggleable="true">
       <div class="flex">
         <div
-          v-if="emailHeadersBody.bodyText"
+          v-if="emailHeadersBodyRes.bodyText?.length"
           id="body-text"
           class="panel-content"
         >
           <h5>Body Text</h5>
-          <pre>{{ emailHeadersBody.bodyText }}</pre>
+          <pre>{{ emailHeadersBodyRes.bodyText }}</pre>
         </div>
-        <Divider layout="vertical" />
+        <Divider
+          v-if="emailHeadersBodyRes.bodyHtml && emailHeadersBodyRes.bodyText"
+          id="divider"
+          layout="vertical"
+        />
         <div
-          v-if="emailHeadersBody.bodyHtml"
+          v-if="emailHeadersBodyRes.bodyHtml?.length"
           id="body-html"
           class="panel-content"
         >
           <h5>Body HTML</h5>
-          <pre class="pre-panel">{{ emailHeadersBody.bodyHtml }}</pre>
+          <pre class="pre-panel">{{ emailHeadersBodyRes.bodyHtml }}</pre>
         </div>
       </div>
     </Panel>
   </div>
-  <div v-else>
+  <div v-else-if="error">
     <div>Couldn't load email details: {{ error }}</div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { onMounted, ref, defineProps } from "vue";
 
   import Panel from "primevue/panel";
   import Divider from "primevue/divider";
 
   import { Event } from "@/services/api/event";
+  import { emailHeadersBody } from "@/models/eventSummaries";
 
   const props = defineProps({
     eventUuid: { type: String, required: true },
   });
   const isLoading = ref(false);
-  const error = ref(null);
-  const emailHeadersBody = ref(null);
+  const error = ref<string>();
+  const emailHeadersBodyRes = ref<emailHeadersBody>();
 
   onMounted(async () => {
     isLoading.value = true;
     try {
-      emailHeadersBody.value = await Event.readEmailHeadersAndBody(
+      emailHeadersBodyRes.value = await Event.readEmailHeadersAndBody(
         props.eventUuid,
       );
-    } catch (error) {
-      error.value = error.message;
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
     }
     isLoading.value = false;
   });

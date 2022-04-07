@@ -8,7 +8,7 @@
   <EmailAnalysisHeadersBody :event-uuid="eventUuid"></EmailAnalysisHeadersBody>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import EmailAnalysisSummaryTable from "@/components/Analysis/EmailAnalysisSummaryTable.vue";
   import EmailAnalysisHeadersBody from "@/components/Analysis/EmailAnalysisHeadersBody.vue";
 

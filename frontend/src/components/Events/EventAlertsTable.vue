@@ -2,6 +2,7 @@
 <!-- Contains logic and functionality for displaying a table of alerts inside of an event -->
 
 <template>
+  <Message v-if="error" severity="error">{{ error }}</Message>
   <div v-if="isLoading" id="loading-message">
     Loading alerts, please hold...
   </div>
@@ -11,10 +12,10 @@
       :selection="selectedRows"
       responsive-layout="scroll"
       data-cy="event-alerts-table"
-      @rowSelect="selectedAlertStore.select($event.data.uuid)"
-      @rowUnselect="selectedAlertStore.unselect($event.data.uuid)"
-      @rowSelect-all="selectedAlertStore.selectAll(visibleAlertUuids)"
-      @rowUnselect-all="selectedAlertStore.unselectAll()"
+      @row-select="selectedAlertStore.select($event.data.uuid)"
+      @row-unselect="selectedAlertStore.unselect($event.data.uuid)"
+      @row-select-all="selectedAlertStore.selectAll(visibleAlertUuids)"
+      @row-unselect-all="selectedAlertStore.unselectAll()"
     >
       <!-- TABLE TOOLBAR-->
       <template #header>
@@ -49,9 +50,12 @@
         ><template #body="{ data, field }">
           <AlertTableCell
             :data="data"
-            :field="field"
+            :field="(field as unknown as alertSummaryKeys)"
           ></AlertTableCell> </template
       ></Column>
+      <template #empty>
+        No alerts for this event were found. {{ error }}
+      </template>
     </DataTable>
 
     <Paginator
@@ -69,9 +73,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { computed, defineProps, onBeforeMount, onUnmounted, ref } from "vue";
 
+  import Message from "primevue/message";
   import Button from "primevue/button";
   import Column from "primevue/column";
   import DataTable from "primevue/datatable";
@@ -79,11 +84,13 @@
   import Toolbar from "primevue/toolbar";
 
   import AlertTableCell from "@/components/Alerts/AlertTableCell.vue";
-  import { useSelectedAlertStore } from "@/stores/selectedAlert";
+
   import { Alert } from "@/services/api/alert";
+  import { alertSummary } from "@/models/alert";
+  import { useSelectedAlertStore } from "@/stores/selectedAlert";
   import { parseAlertSummary } from "@/etc/helpers";
 
-  const selectedAlertStore = useSelectedAlertStore();
+  type alertSummaryKeys = keyof alertSummary;
 
   onBeforeMount(async () => {
     await initTable();
@@ -97,8 +104,10 @@
     eventUuid: { type: String, required: true },
   });
 
-  const alerts = ref([]);
-  const error = ref(null);
+  const selectedAlertStore = useSelectedAlertStore();
+
+  const alerts = ref<alertSummary[]>([]);
+  const error = ref<string>();
   const isLoading = ref(false);
   const page = ref(0);
   const pageSize = ref(10);
@@ -126,13 +135,27 @@
     { field: "disposition", header: "Disposition" },
   ];
 
-  const getAlerts = async (uuid) => {
-    const allAlerts = await Alert.readAllPages({
-      eventUuid: uuid,
-      sort: "event_time|asc",
-    });
+  const getAlerts = async (uuid: string) => {
+    let allAlerts;
 
-    return allAlerts.map((x) => parseAlertSummary(x));
+    try {
+      allAlerts = await Alert.readAllPages({
+        eventUuid: uuid,
+        sort: "event_time|asc",
+      });
+    } catch (e: unknown) {
+      alerts.value = [];
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
+    }
+
+    if (allAlerts) {
+      return allAlerts.map((x) => parseAlertSummary(x));
+    }
+    return [];
   };
 
   const initTable = async () => {
@@ -142,7 +165,7 @@
     isLoading.value = false;
   };
 
-  const onPage = async (event) => {
+  const onPage = async (event: { page: number; rows: number }) => {
     selectedAlertStore.unselectAll();
     page.value = event.page;
     pageSize.value = event.rows;
@@ -157,12 +180,16 @@
       }));
 
       await Alert.update(updateData);
-    } catch (err) {
-      error.value = err.message;
-    }
 
-    // Reinitialize the table
-    await initTable();
+      // Reinitialize the table
+      await initTable();
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = `Could not remove alerts: ${e}`;
+      } else if (e instanceof Error) {
+        error.value = `Could not remove alerts: ${e.message}`;
+      }
+    }
   };
 </script>
 

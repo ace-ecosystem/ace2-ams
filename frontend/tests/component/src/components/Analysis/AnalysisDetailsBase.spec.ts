@@ -16,5 +16,7 @@ describe("AnalysisDetailsBase", () => {
         plugins: [PrimeVue, createPinia(), router],
       },
     });
+
+    cy.contains("Basic Analysis").should("be.visible");
   });
 });
