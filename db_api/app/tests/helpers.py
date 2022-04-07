@@ -483,7 +483,6 @@ def create_node_comment(
 
 def create_node_detection_point(
     node: Node,
-    username: str,
     value: str,
     db: Session,
     history_username: Optional[str] = None,

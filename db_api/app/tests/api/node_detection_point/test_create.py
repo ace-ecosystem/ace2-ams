@@ -98,14 +98,16 @@ def test_create_nonexistent_node_uuid(client, db):
 
 
 def test_create_verify_history_observables(client, db):
-    alert_tree = helpers.create_alert(db=db)
-    observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
+    observable_tree = helpers.create_observable(
+        type="test_type", value="test_value", parent_tree=alert_tree, db=db, history_username="analyst"
+    )
 
     # Add a detection point to the node
     create_json = [
         {"node_uuid": str(observable_tree.node_uuid), "value": "test"},
     ]
-    create = client.post("/api/node/detection_point/", json=create_json)
+    create = client.post("/api/node/detection_point/?history_username=analyst", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record

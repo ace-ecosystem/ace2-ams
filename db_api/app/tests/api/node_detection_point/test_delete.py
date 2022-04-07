@@ -33,13 +33,17 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete(client, db):
     # Create a detection point
-    alert_tree = helpers.create_alert(db=db)
-    observable = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
-    detection_point = helpers.create_node_detection_point(node=observable.node, username="analyst", value="test", db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
+    observable = helpers.create_observable(
+        type="test_type", value="test_value", parent_tree=alert_tree, db=db, history_username="analyst"
+    )
+    detection_point = helpers.create_node_detection_point(
+        node=observable.node, value="test", db=db, history_username="analyst"
+    )
     assert observable.node.detection_points[0].value == "test"
 
     # Delete it
-    delete = client.delete(f"/api/node/detection_point/{detection_point.uuid}")
+    delete = client.delete(f"/api/node/detection_point/{detection_point.uuid}?history_username=analyst")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
