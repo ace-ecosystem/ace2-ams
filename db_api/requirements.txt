@@ -9,11 +9,8 @@ psycopg2-binary==2.9.3
 pytest==6.2.5
 pytest-cov==3.0.0
 python-dateutil==2.8.2
-python-jose==3.3.0
-python-multipart==0.0.5
 pytz==2021.3
 pyyaml==6.0
-requests==2.27.1
 semver==2.13.0
 SQLAlchemy==1.4.31
 types-python-dateutil==2.8.8
