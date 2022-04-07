@@ -7,6 +7,7 @@ from sqlalchemy.sql.expression import select
 from typing import List, Optional
 from uuid import UUID
 
+from api_models.create import Create
 from api_models.event import EventCreate, EventRead, EventUpdateMultiple
 from api_models.event_summaries import (
     DetectionSummary,
@@ -72,6 +73,7 @@ def create_event(
     event: EventCreate,
     request: Request,
     response: Response,
+    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     # Create the new event Node using the data from the request
@@ -111,10 +113,20 @@ def create_event(
     db.add(new_event)
     crud.commit(db)
 
+    # If a username was given, add an entry to the history table for the event creation
+    if history_username:
+        crud.record_node_create_history(
+            record_node=new_event,
+            action_by=crud.read_user_by_username(username=history_username, db=db),
+            db=db,
+        )
+
     response.headers["Content-Location"] = request.url_for("get_event", uuid=new_event.uuid)
 
+    return {"uuid": new_event.uuid}
 
-helpers.api_route_create(router, create_event)
+
+helpers.api_route_create(router, create_event, response_model=Create)
 
 
 #
@@ -505,6 +517,7 @@ def update_events(
     events: List[EventUpdateMultiple],
     request: Request,
     response: Response,
+    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     for event in events:
@@ -629,6 +642,15 @@ def update_events(
             db_event.vectors = crud.read_by_values(values=update_data["vectors"], db_table=EventVector, db=db)
 
         crud.commit(db)
+
+        # If a username was given, add an entry to the history table for the event update
+        if history_username:
+            crud.record_node_update_history(
+                record_node=db_event,
+                action_by=crud.read_user_by_username(username=history_username, db=db),
+                diffs=diffs,
+                db=db,
+            )
 
         response.headers["Content-Location"] = request.url_for("get_event", uuid=event.uuid)
 

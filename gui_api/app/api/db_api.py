@@ -10,7 +10,7 @@ def _request(method: str, path: str, expected_status: int, payload: Optional[dic
     result = requests.request(method=method, url=f"{get_settings().database_api_url}{path}", json=payload)
 
     if result.status_code != expected_status:
-        raise HTTPException(status_code=result.status_code, detail=result.text)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=result.text)
 
     if return_json:
         return result.json()
