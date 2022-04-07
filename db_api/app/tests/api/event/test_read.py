@@ -61,8 +61,8 @@ def test_summary_detection_point(client, db):
         db=db,
     )
     analysis_tree1 = helpers.create_analysis(db=db, parent_tree=alert1_o1)
-    helpers.create_node_detection_point(node=analysis_tree1.node, username="analyst", value="detection point 1", db=db)
-    helpers.create_node_detection_point(node=analysis_tree1.node, username="analyst", value="detection point 2", db=db)
+    helpers.create_node_detection_point(node=analysis_tree1.node, value="detection point 1", db=db)
+    helpers.create_node_detection_point(node=analysis_tree1.node, value="detection point 2", db=db)
 
     alert_tree2 = helpers.create_alert(db=db, event=event)
     alert2_o1 = helpers.create_observable(
@@ -71,8 +71,8 @@ def test_summary_detection_point(client, db):
         parent_tree=alert_tree2,
         db=db,
     )
-    helpers.create_node_detection_point(node=alert2_o1.node, username="analyst", value="detection point 2", db=db)
-    helpers.create_node_detection_point(node=alert2_o1.node, username="analyst", value="detection point 3", db=db)
+    helpers.create_node_detection_point(node=alert2_o1.node, value="detection point 2", db=db)
+    helpers.create_node_detection_point(node=alert2_o1.node, value="detection point 3", db=db)
 
     # The detection point summary should now have 3 entries (since one detection point was repeated).
     # They should be sorted by the detection point values
