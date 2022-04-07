@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 from uuid import UUID
 
+from api_models.create import Create
 from api_models.node_threat import NodeThreatCreate, NodeThreatRead, NodeThreatUpdate
 from api.routes import helpers
 from db import crud
@@ -44,8 +45,10 @@ def create_node_threat(
 
     response.headers["Content-Location"] = request.url_for("get_node_threat", uuid=new_threat.uuid)
 
+    return {"uuid": new_threat.uuid}
 
-helpers.api_route_create(router, create_node_threat)
+
+helpers.api_route_create(router, create_node_threat, response_model=Create)
 
 
 #

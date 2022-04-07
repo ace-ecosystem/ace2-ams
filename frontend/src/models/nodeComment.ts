@@ -19,6 +19,7 @@ export interface nodeCommentRead {
 
 export interface nodeCommentUpdate {
   uuid: UUID;
+  username: string;
   value: string;
   [key: string]: unknown;
 }

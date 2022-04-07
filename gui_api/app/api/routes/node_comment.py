@@ -6,7 +6,7 @@ from uuid import UUID
 
 from api import db_api
 from api.routes import helpers
-from api_models.node_comment import NodeCommentCreate, NodeCommentRead
+from api_models.node_comment import NodeCommentCreate, NodeCommentRead, NodeCommentUpdate
 from core.auth import validate_access_token
 
 
@@ -49,3 +49,25 @@ def get_node_comment(uuid: UUID):
 
 
 helpers.api_route_read(router, get_node_comment, NodeCommentRead)
+
+
+#
+# UPDATE
+#
+
+
+def update_comment(
+    uuid: UUID,
+    node_comment: NodeCommentUpdate,
+    request: Request,
+    response: Response,
+):
+    db_api.patch(
+        path=f"/node/comment/{uuid}",
+        payload=json.loads(node_comment.json()),
+    )
+
+    response.headers["Content-Location"] = request.url_for("get_node_comment", uuid=uuid)
+
+
+helpers.api_route_update(router, update_comment)

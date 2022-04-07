@@ -76,7 +76,9 @@
   import { isObject } from "@/etc/validators";
   import NodeCommentEditor from "@/components/Node/NodeCommentEditor.vue";
   import { NodeComment } from "@/services/api/nodeComment";
+  import { useAuthStore } from "@/stores/auth";
 
+  const authStore = useAuthStore();
   const modalStore = useModalStore();
   const eventStore = useEventStore();
 
@@ -183,6 +185,7 @@
   const saveEventComments = async () => {
     for (const comment of formFields.value["comments"].propertyValue) {
       await NodeComment.update(comment.uuid, {
+        username: authStore.user.username,
         value: comment.value,
       });
     }
