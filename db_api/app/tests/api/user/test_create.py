@@ -58,7 +58,7 @@ from tests import helpers
         ("uuid", ""),
     ],
 )
-def test_create_invalid_fields(client_valid_access_token, key, value):
+def test_create_invalid_fields(client, key, value):
     create_json = {
         "default_alert_queue": "test_queue",
         "default_event_queue": "test_queue",
@@ -69,7 +69,7 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
         "username": "johndoe",
     }
     create_json[key] = value
-    create = client_valid_access_token.post("/api/user/", json=create_json)
+    create = client.post("/api/user/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -81,7 +81,7 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
         ("uuid"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
+def test_create_duplicate_unique_fields(client, db, key):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_user_role(value="test_role", db=db)
 
@@ -96,7 +96,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "username": "johndoe",
         "uuid": str(uuid.uuid4()),
     }
-    client_valid_access_token.post("/api/user/", json=create1_json)
+    client.post("/api/user/", json=create1_json)
 
     # Ensure you cannot create another object with the same unique field value
     create2_json = {
@@ -110,7 +110,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "uuid": str(uuid.uuid4()),
     }
     create2_json[key] = create1_json[key]
-    create2 = client_valid_access_token.post("/api/user/", json=create2_json)
+    create2 = client.post("/api/user/", json=create2_json)
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
@@ -126,7 +126,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         ("username"),
     ],
 )
-def test_create_missing_required_fields(client_valid_access_token, key):
+def test_create_missing_required_fields(client, key):
     create_json = {
         "default_alert_queue": "test_queue",
         "default_event_queue": "test_queue",
@@ -137,7 +137,7 @@ def test_create_missing_required_fields(client_valid_access_token, key):
         "username": "johndoe",
     }
     del create_json[key]
-    create = client_valid_access_token.post("/api/user/", json=create_json)
+    create = client.post("/api/user/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -146,7 +146,7 @@ def test_create_missing_required_fields(client_valid_access_token, key):
 #
 
 
-def test_create_verify_history(client_valid_access_token, db):
+def test_create_verify_history(client, db):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_user_role(value="test_role", db=db)
 
@@ -162,11 +162,11 @@ def test_create_verify_history(client_valid_access_token, db):
         "username": "johndoe",
         "uuid": user_uuid,
     }
-    create = client_valid_access_token.post("/api/user/", json=create_json)
+    create = client.post("/api/user/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
-    history = client_valid_access_token.get(f"/api/user/{user_uuid}/history")
+    history = client.get(f"/api/user/{user_uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "CREATE"
     assert history.json()["items"][0]["action_by"]["username"] == "analyst"
@@ -180,7 +180,7 @@ def test_create_verify_history(client_valid_access_token, db):
     "key,value",
     [("enabled", False), ("timezone", "America/New_York"), ("training", False), ("uuid", str(uuid.uuid4()))],
 )
-def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
+def test_create_valid_optional_fields(client, db, key, value):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_user_role(value="test_role", db=db)
 
@@ -195,15 +195,15 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
         "username": "johndoe",
     }
     create_json[key] = value
-    create = client_valid_access_token.post("/api/user/", json=create_json)
+    create = client.post("/api/user/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()[key] == value
 
 
-def test_create_valid_required_fields(client_valid_access_token, db):
+def test_create_valid_required_fields(client, db):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_user_role(value="test_role", db=db)
 
@@ -217,11 +217,11 @@ def test_create_valid_required_fields(client_valid_access_token, db):
         "roles": ["test_role"],
         "username": "johndoe",
     }
-    create = client_valid_access_token.post("/api/user/", json=create_json)
+    create = client.post("/api/user/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["default_alert_queue"]["value"] == "test_queue"
     assert get.json()["default_event_queue"]["value"] == "test_queue"
     assert get.json()["display_name"] == "John Doe"

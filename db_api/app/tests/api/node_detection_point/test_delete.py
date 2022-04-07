@@ -16,13 +16,13 @@ are in place in order to account for this.
 #
 
 
-def test_delete_invalid_uuid(client_valid_access_token):
-    delete = client_valid_access_token.delete("/api/node/detection_point/1")
+def test_delete_invalid_uuid(client):
+    delete = client.delete("/api/node/detection_point/1")
     assert delete.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_delete_nonexistent_uuid(client_valid_access_token):
-    delete = client_valid_access_token.delete(f"/api/node/detection_point/{uuid.uuid4()}")
+def test_delete_nonexistent_uuid(client):
+    delete = client.delete(f"/api/node/detection_point/{uuid.uuid4()}")
     assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -31,7 +31,7 @@ def test_delete_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_delete(client_valid_access_token, db):
+def test_delete(client, db):
     # Create a detection point
     alert_tree = helpers.create_alert(db=db)
     observable = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
@@ -39,18 +39,18 @@ def test_delete(client_valid_access_token, db):
     assert observable.node.detection_points[0].value == "test"
 
     # Delete it
-    delete = client_valid_access_token.delete(f"/api/node/detection_point/{detection_point.uuid}")
+    delete = client.delete(f"/api/node/detection_point/{detection_point.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
-    get = client_valid_access_token.get(f"/api/node/detection_point/{detection_point.uuid}")
+    get = client.get(f"/api/node/detection_point/{detection_point.uuid}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
     # And make sure the node no longer shows the detection point
     assert len(observable.node.detection_points) == 0
 
     # Verify the history record
-    history = client_valid_access_token.get(f"/api/observable/{observable.node_uuid}/history")
+    history = client.get(f"/api/observable/{observable.node_uuid}/history")
     assert history.json()["total"] == 3
     assert history.json()["items"][2]["action"] == "UPDATE"
     assert history.json()["items"][2]["action_by"]["username"] == "analyst"

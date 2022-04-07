@@ -54,7 +54,7 @@ from tests import helpers
         ("uuid", "abc"),
     ],
 )
-def test_create_invalid_fields(client_valid_access_token, key, value):
+def test_create_invalid_fields(client, key, value):
     create_json = {
         "name": "test alert",
         "queue": "test_queue",
@@ -62,7 +62,7 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
         "type": "test_type",
     }
     create_json[key] = value
-    create = client_valid_access_token.post("/api/alert/", json=create_json)
+    create = client.post("/api/alert/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert key in create.text
 
@@ -75,9 +75,9 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
         ("threats", INVALID_LIST_STRING_VALUES),
     ],
 )
-def test_create_invalid_node_fields(client_valid_access_token, key, values):
+def test_create_invalid_node_fields(client, key, values):
     for value in values:
-        create = client_valid_access_token.post(
+        create = client.post(
             "/api/alert/",
             json={
                 key: value,
@@ -97,7 +97,7 @@ def test_create_invalid_node_fields(client_valid_access_token, key, values):
         ("uuid"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
+def test_create_duplicate_unique_fields(client, db, key):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
@@ -110,7 +110,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "observables": [{"type": "o_type", "value": "o_value"}],
         "type": "test_type",
     }
-    client_valid_access_token.post("/api/alert/", json=create1_json)
+    client.post("/api/alert/", json=create1_json)
 
     # Ensure you cannot create another object with the same unique field value
     create2_json = {
@@ -120,16 +120,16 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "type": "test_type",
     }
     create2_json[key] = create1_json[key]
-    create2 = client_valid_access_token.post("/api/alert/", json=create2_json)
+    create2 = client.post("/api/alert/", json=create2_json)
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
-def test_create_nonexistent_observable_type(client_valid_access_token, db):
+def test_create_nonexistent_observable_type(client, db):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             "name": "test alert",
@@ -142,13 +142,13 @@ def test_create_nonexistent_observable_type(client_valid_access_token, db):
     assert "observable_type" in create.text
 
 
-def test_create_nonexistent_owner(client_valid_access_token, db):
+def test_create_nonexistent_owner(client, db):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             "name": "test alert",
@@ -162,12 +162,12 @@ def test_create_nonexistent_owner(client_valid_access_token, db):
     assert "user" in create.text
 
 
-def test_create_nonexistent_queue(client_valid_access_token, db):
+def test_create_nonexistent_queue(client, db):
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             "name": "test alert",
@@ -180,13 +180,13 @@ def test_create_nonexistent_queue(client_valid_access_token, db):
     assert "queue" in create.text
 
 
-def test_create_nonexistent_tool(client_valid_access_token, db):
+def test_create_nonexistent_tool(client, db):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             "name": "test alert",
@@ -200,13 +200,13 @@ def test_create_nonexistent_tool(client_valid_access_token, db):
     assert "alert_tool" in create.text
 
 
-def test_create_nonexistent_tool_instance(client_valid_access_token, db):
+def test_create_nonexistent_tool_instance(client, db):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             "name": "test alert",
@@ -220,12 +220,12 @@ def test_create_nonexistent_tool_instance(client_valid_access_token, db):
     assert "alert_tool_instance" in create.text
 
 
-def test_create_nonexistent_type(client_valid_access_token, db):
+def test_create_nonexistent_type(client, db):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             "name": "test alert",
@@ -242,12 +242,12 @@ def test_create_nonexistent_type(client_valid_access_token, db):
     "key",
     [("tags"), ("threat_actors"), ("threats")],
 )
-def test_create_nonexistent_node_fields(client_valid_access_token, db, key):
+def test_create_nonexistent_node_fields(client, db, key):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             key: ["abc"],
@@ -266,13 +266,13 @@ def test_create_nonexistent_node_fields(client_valid_access_token, db, key):
 #
 
 
-def test_create_verify_history(client_valid_access_token, db):
+def test_create_verify_history(client, db):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
     alert_uuid = str(uuid.uuid4())
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             "uuid": alert_uuid,
@@ -285,7 +285,7 @@ def test_create_verify_history(client_valid_access_token, db):
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
-    history = client_valid_access_token.get(f"/api/alert/{alert_uuid}/history")
+    history = client.get(f"/api/alert/{alert_uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "CREATE"
     assert history.json()["items"][0]["action_by"]["username"] == "analyst"
@@ -295,7 +295,7 @@ def test_create_verify_history(client_valid_access_token, db):
     assert history.json()["items"][0]["snapshot"]["name"] == "test alert"
 
     db_observable = crud.read_observable(type="o_type", value="o_value", db=db)
-    history = client_valid_access_token.get(f"/api/observable/{db_observable.uuid}/history")
+    history = client.get(f"/api/observable/{db_observable.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "CREATE"
     assert history.json()["items"][0]["action_by"]["username"] == "analyst"
@@ -320,13 +320,13 @@ def test_create_verify_history(client_valid_access_token, db):
         ("uuid", str(uuid.uuid4())),
     ],
 )
-def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
+def test_create_valid_optional_fields(client, db, key, value):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
     # Create the alert
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             key: value,
@@ -339,7 +339,7 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
 
     # If the test is for event_time, make sure that the retrieved value matches the proper UTC timestamp
     if key == "event_time" and value:
@@ -348,7 +348,7 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
         assert get.json()[key] == value
 
 
-def test_create_valid_owner(client_valid_access_token, db):
+def test_create_valid_owner(client, db):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
@@ -357,7 +357,7 @@ def test_create_valid_owner(client_valid_access_token, db):
     helpers.create_user(username="johndoe", db=db)
 
     # Use the user to create a new alert
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             "name": "test alert",
@@ -370,11 +370,11 @@ def test_create_valid_owner(client_valid_access_token, db):
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["owner"]["username"] == "johndoe"
 
 
-def test_create_valid_tool(client_valid_access_token, db):
+def test_create_valid_tool(client, db):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
@@ -383,7 +383,7 @@ def test_create_valid_tool(client_valid_access_token, db):
     helpers.create_alert_tool(value="test_tool", db=db)
 
     # Use the tool to create a new alert
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             "name": "test alert",
@@ -396,11 +396,11 @@ def test_create_valid_tool(client_valid_access_token, db):
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["tool"]["value"] == "test_tool"
 
 
-def test_create_valid_tool_instance(client_valid_access_token, db):
+def test_create_valid_tool_instance(client, db):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
@@ -409,7 +409,7 @@ def test_create_valid_tool_instance(client_valid_access_token, db):
     helpers.create_alert_tool_instance(value="test_tool_instance", db=db)
 
     # Use the tool instance to create a new alert
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             "name": "test alert",
@@ -422,17 +422,17 @@ def test_create_valid_tool_instance(client_valid_access_token, db):
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["tool_instance"]["value"] == "test_tool_instance"
 
 
-def test_create_valid_required_fields(client_valid_access_token, db):
+def test_create_valid_required_fields(client, db):
     helpers.create_queue(value="test_queue", db=db)
     helpers.create_alert_type(value="test_type", db=db)
     helpers.create_observable_type(value="o_type", db=db)
 
     # Create the alert
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/alert/",
         json={
             "name": "test alert",
@@ -444,7 +444,7 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.status_code == 200
     assert get.json()["queue"]["value"] == "test_queue"
     assert get.json()["type"]["value"] == "test_type"
@@ -468,7 +468,7 @@ def test_create_valid_required_fields(client_valid_access_token, db):
         ("threats", VALID_LIST_STRING_VALUES, helpers.create_node_threat),
     ],
 )
-def test_create_valid_node_fields(client_valid_access_token, db, key, value_lists, helper_create_func):
+def test_create_valid_node_fields(client, db, key, value_lists, helper_create_func):
     for value_list in value_lists:
         for value in value_list:
             helper_create_func(value=value, db=db)
@@ -477,7 +477,7 @@ def test_create_valid_node_fields(client_valid_access_token, db, key, value_list
         helpers.create_alert_type(value="test_type", db=db)
         helpers.create_observable_type(value="o_type", db=db)
 
-        create = client_valid_access_token.post(
+        create = client.post(
             "/api/alert/",
             json={
                 key: value_list,
@@ -490,5 +490,5 @@ def test_create_valid_node_fields(client_valid_access_token, db, key, value_list
         assert create.status_code == status.HTTP_201_CREATED
 
         # Read it back
-        get = client_valid_access_token.get(create.headers["Content-Location"])
+        get = client.get(create.headers["Content-Location"])
         assert len(get.json()[key]) == len(list(set(value_list)))

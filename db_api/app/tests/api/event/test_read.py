@@ -22,13 +22,13 @@ from tests import helpers
 #
 
 
-def test_get_invalid_uuid(client_valid_access_token):
-    get = client_valid_access_token.get("/api/event/1")
+def test_get_invalid_uuid(client):
+    get = client.get("/api/event/1")
     assert get.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_get_nonexistent_uuid(client_valid_access_token):
-    get = client_valid_access_token.get(f"/api/event/{uuid.uuid4()}")
+def test_get_nonexistent_uuid(client):
+    get = client.get(f"/api/event/{uuid.uuid4()}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -37,12 +37,12 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_summary_detection_point(client_valid_access_token, db):
+def test_summary_detection_point(client, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
 
     # The detection point summary should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/detection_point")
+    get = client.get(f"/api/event/{event.uuid}/summary/detection_point")
     assert get.json() == []
 
     # Add some alerts with detection points to the event
@@ -76,7 +76,7 @@ def test_summary_detection_point(client_valid_access_token, db):
 
     # The detection point summary should now have 3 entries (since one detection point was repeated).
     # They should be sorted by the detection point values
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/detection_point")
+    get = client.get(f"/api/event/{event.uuid}/summary/detection_point")
     assert len(get.json()) == 3
     assert get.json()[0]["count"] == 1
     assert get.json()[0]["alert_uuid"] == str(alert_tree1.node_uuid)
@@ -89,12 +89,12 @@ def test_summary_detection_point(client_valid_access_token, db):
     assert get.json()[2]["value"] == "detection point 3"
 
 
-def test_summary_email(client_valid_access_token, db):
+def test_summary_email(client, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
 
     # The email summary should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/email")
+    get = client.get(f"/api/event/{event.uuid}/summary/email")
     assert get.json() == []
 
     # Add some alerts with analysis to the event
@@ -208,18 +208,18 @@ def test_summary_email(client_valid_access_token, db):
     # The email summary should now have two entries in it. Even though one of the emails was repeated two
     # times across the alerts, its Email Analysis is going to be the same for each, so it appears once in the summary.
     # Additionally, the results should be sorted by the email time.
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/email")
+    get = client.get(f"/api/event/{event.uuid}/summary/email")
     assert len(get.json()) == 2
     assert get.json()[0]["message_id"] == "<abcd1234@evil.com>"
     assert get.json()[1]["message_id"] == "<1234abcd@evil.com>"
 
 
-def test_summary_email_headers_body(client_valid_access_token, db):
+def test_summary_email_headers_body(client, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
 
     # The email headers/body summary should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/email_headers_body")
+    get = client.get(f"/api/event/{event.uuid}/summary/email_headers_body")
     assert get.json() is None
 
     # Add some alerts with analysis to the event
@@ -307,19 +307,19 @@ def test_summary_email_headers_body(client_valid_access_token, db):
     )
 
     # The email headers/body summary should now have the details of the second alert's email
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/email_headers_body")
+    get = client.get(f"/api/event/{event.uuid}/summary/email_headers_body")
     assert get.json()["alert_uuid"] == str(alert_tree2.node_uuid)
     assert get.json()["headers"] == "headers2"
     assert get.json()["body_html"] == "<p>body2</p>"
     assert get.json()["body_text"] == "body2"
 
 
-def test_summary_observable(client_valid_access_token, db):
+def test_summary_observable(client, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
 
     # The observable summary should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
+    get = client.get(f"/api/event/{event.uuid}/summary/observable")
     assert get.json() == []
 
     # Add some alerts with analyses to the event
@@ -385,7 +385,7 @@ def test_summary_observable(client_valid_access_token, db):
     # The observable summary should now have two entries in it. Even though the 127.0.0.1 observable was repeated three
     # times across the two alerts, its FA Queue Analysis is going to be the same for each, so it appears once in the summary.
     # Additionally, the results should be sorted by their type then value.
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/observable")
+    get = client.get(f"/api/event/{event.uuid}/summary/observable")
     assert len(get.json()) == 2
     assert get.json()[0]["value"] == "127.0.0.1"
     assert get.json()[0]["faqueue_hits"] == 10
@@ -393,12 +393,12 @@ def test_summary_observable(client_valid_access_token, db):
     assert get.json()[1]["faqueue_hits"] == 100
 
 
-def test_summary_sandbox(client_valid_access_token, db):
+def test_summary_sandbox(client, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
 
     # The sandbox summary should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/sandbox")
+    get = client.get(f"/api/event/{event.uuid}/summary/sandbox")
     assert get.json() == []
 
     # Define the sandbox analysis details that will be used in the alerts
@@ -547,7 +547,7 @@ def test_summary_sandbox(client_valid_access_token, db):
     # The sandbox summary should now have two entries in it. The malware.exe report is repeated, so it
     # only counts once for the purposes of the summary.
     # Additionally, the results should be sorted by the filenames.
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/sandbox")
+    get = client.get(f"/api/event/{event.uuid}/summary/sandbox")
     assert len(get.json()) == 2
     assert get.json()[0]["filename"] == "malware.exe"
     assert get.json()[0]["process_tree"] == "malware.exe\n    sub_command1\n        sub_sub_command\n    sub_command2"
@@ -555,12 +555,12 @@ def test_summary_sandbox(client_valid_access_token, db):
     assert get.json()[1]["process_tree"] == ""
 
 
-def test_summary_url_domains(client_valid_access_token, db):
+def test_summary_url_domains(client, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
 
     # The URL domains summary should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/url_domain")
+    get = client.get(f"/api/event/{event.uuid}/summary/url_domain")
     assert get.json() == {"domains": [], "total": 0}
 
     # Add some alerts with analyses to the event
@@ -593,7 +593,7 @@ def test_summary_url_domains(client_valid_access_token, db):
     # Additionally, the results should be sorted by the number of times the domains appeared then by the domain.
     #
     # Results: example.com (2), example2.com (1), example3.com (1)
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/url_domain")
+    get = client.get(f"/api/event/{event.uuid}/summary/url_domain")
     assert get.json()["total"] == 4
     assert len(get.json()["domains"]) == 3
     assert get.json()["domains"][0]["domain"] == "example.com"
@@ -604,12 +604,12 @@ def test_summary_url_domains(client_valid_access_token, db):
     assert get.json()["domains"][2]["count"] == 1
 
 
-def test_summary_user(client_valid_access_token, db):
+def test_summary_user(client, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
 
     # The user summary should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
+    get = client.get(f"/api/event/{event.uuid}/summary/user")
     assert get.json() == []
 
     # Add some alerts with analyses to the event
@@ -702,19 +702,19 @@ def test_summary_user(client_valid_access_token, db):
     # The user summary should now have two entries in it. Even though one user's analysis was repeated two
     # times across the alerts, its User Analysis is going to be the same for each, so it appears once in the summary.
     # Additionally, the results should be sorted by their email.
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}/summary/user")
+    get = client.get(f"/api/event/{event.uuid}/summary/user")
     assert len(get.json()) == 2
     assert get.json()[0]["email"] == "goodguy@company.com"
     assert get.json()[0]["manager_email"] is None
     assert get.json()[1]["email"] == "otherguy@company.com"
 
 
-def test_analysis_module_types(client_valid_access_token, db):
+def test_analysis_module_types(client, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
 
     # The list of analysis types should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert get.json()["analysis_types"] == []
 
     # Add some alerts with analyses to the event
@@ -733,16 +733,16 @@ def test_analysis_module_types(client_valid_access_token, db):
     helpers.create_analysis(db=db, parent_tree=alert2_o2, amt_value="URI Path Analysis")
 
     # The list of analysis types should now have some entries
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert get.json()["analysis_types"] == ["IP Analysis", "URI Path Analysis", "URL Analysis"]
 
 
-def test_auto_alert_time(client_valid_access_token, db):
+def test_auto_alert_time(client, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
 
     # The auto_alert_time should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert get.json()["auto_alert_time"] is None
 
     # Add an alert to the event
@@ -750,7 +750,7 @@ def test_auto_alert_time(client_valid_access_token, db):
     alert_tree1 = helpers.create_alert(db=db, event=event, insert_time=now)
 
     # Verify the auto_alert_time
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert parse(get.json()["auto_alert_time"]).timestamp() == alert_tree1.node.insert_time.timestamp()
 
     # Add a second alert to the event with an earlier insert time
@@ -758,16 +758,16 @@ def test_auto_alert_time(client_valid_access_token, db):
     alert_tree2 = helpers.create_alert(db=db, event=event, insert_time=earlier)
 
     # Verify the new auto_alert_time
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert parse(get.json()["auto_alert_time"]).timestamp() == alert_tree2.node.insert_time.timestamp()
 
 
-def test_auto_disposition_time(client_valid_access_token, db):
+def test_auto_disposition_time(client, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
 
     # The auto_disposition_time should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert get.json()["auto_disposition_time"] is None
 
     # Add an alert to the event
@@ -775,7 +775,7 @@ def test_auto_disposition_time(client_valid_access_token, db):
     alert_tree1 = helpers.create_alert(db=db, event=event, disposition="DELIVERY", update_time=now)
 
     # Verify the auto_disposition_time
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert parse(get.json()["auto_disposition_time"]) == alert_tree1.node.disposition_time_earliest
 
     # Add a second alert to the event with an earlier disposition time
@@ -783,16 +783,16 @@ def test_auto_disposition_time(client_valid_access_token, db):
     alert_tree2 = helpers.create_alert(db=db, event=event, disposition="DELIVERY", update_time=earlier)
 
     # Verify the new auto_disposition_time
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert parse(get.json()["auto_disposition_time"]) == alert_tree2.node.disposition_time_earliest
 
 
-def test_auto_event_time(client_valid_access_token, db):
+def test_auto_event_time(client, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
 
     # The auto_event_time should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert get.json()["auto_event_time"] is None
 
     # Add an alert to the event
@@ -800,7 +800,7 @@ def test_auto_event_time(client_valid_access_token, db):
     alert_tree1 = helpers.create_alert(db=db, event=event, event_time=now)
 
     # Verify the auto_event_time
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert parse(get.json()["auto_event_time"]).timestamp() == alert_tree1.node.event_time.timestamp()
 
     # Add a second alert to the event with an earlier insert time
@@ -808,16 +808,16 @@ def test_auto_event_time(client_valid_access_token, db):
     alert_tree2 = helpers.create_alert(db=db, event=event, event_time=earlier)
 
     # Verify the new auto_event_time
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert parse(get.json()["auto_event_time"]).timestamp() == alert_tree2.node.event_time.timestamp()
 
 
-def test_auto_ownership_time(client_valid_access_token, db):
+def test_auto_ownership_time(client, db):
     # Create an event
     event = helpers.create_event(name="test event", db=db)
 
     # The auto_ownership_time should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert get.json()["auto_ownership_time"] is None
 
     # Add an alert to the event
@@ -825,7 +825,7 @@ def test_auto_ownership_time(client_valid_access_token, db):
     alert_tree1 = helpers.create_alert(db=db, event=event, owner="alice", update_time=now)
 
     # Verify the auto_ownership_time
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert parse(get.json()["auto_ownership_time"]) == alert_tree1.node.ownership_time_earliest
 
     # Add a second alert to the event with an earlier ownership time
@@ -833,11 +833,11 @@ def test_auto_ownership_time(client_valid_access_token, db):
     alert_tree2 = helpers.create_alert(db=db, event=event, owner="alice", update_time=earlier)
 
     # Verify the new auto_ownership_time
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert parse(get.json()["auto_ownership_time"]) == alert_tree2.node.ownership_time_earliest
 
 
-def test_disposition(client_valid_access_token, db):
+def test_disposition(client, db):
     # Create some dispositions
     helpers.create_alert_disposition(value="FALSE_POSITIVE", rank=1, db=db)
     helpers.create_alert_disposition(value="DELIVERY", rank=2, db=db)
@@ -846,25 +846,25 @@ def test_disposition(client_valid_access_token, db):
     event = helpers.create_event(name="test event", db=db)
 
     # The disposition should be empty
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert get.json()["disposition"] is None
 
     # Add an alert to the event
     helpers.create_alert(db=db, event=event, disposition="FALSE_POSITIVE")
 
     # Verify the disposition
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert get.json()["disposition"]["value"] == "FALSE_POSITIVE"
 
     # Add a second alert to the event with a higher disposition
     helpers.create_alert(db=db, event=event, disposition="DELIVERY")
 
     # Verify the new disposition
-    get = client_valid_access_token.get(f"/api/event/{event.uuid}")
+    get = client.get(f"/api/event/{event.uuid}")
     assert get.json()["disposition"]["value"] == "DELIVERY"
 
 
-def test_get_all_pagination(client_valid_access_token, db):
+def test_get_all_pagination(client, db):
     # Create 11 events
     for i in range(11):
         helpers.create_event(name=f"event{i}", db=db)
@@ -875,7 +875,7 @@ def test_get_all_pagination(client_valid_access_token, db):
     # Read every page in chunks of 2 while there are still results
     offset = 0
     while True:
-        get = client_valid_access_token.get(f"/api/event/?limit=2&offset={offset}")
+        get = client.get(f"/api/event/?limit=2&offset={offset}")
 
         # Store the event UUIDs
         for event in get.json()["items"]:
@@ -896,13 +896,13 @@ def test_get_all_pagination(client_valid_access_token, db):
     assert len(unique_event_uuids) == 11
 
 
-def test_get_all_empty(client_valid_access_token):
-    get = client_valid_access_token.get("/api/event/")
+def test_get_all_empty(client):
+    get = client.get("/api/event/")
     assert get.status_code == status.HTTP_200_OK
     assert get.json() == {"items": [], "limit": 50, "offset": 0, "total": 0}
 
 
-def test_get_filter_alert_time_after(client_valid_access_token, db):
+def test_get_filter_alert_time_after(client, db):
     event1 = helpers.create_event(name="event1", db=db)
     helpers.create_alert(event=event1, insert_time=datetime.utcnow() - timedelta(seconds=5), db=db)
 
@@ -913,20 +913,20 @@ def test_get_filter_alert_time_after(client_valid_access_token, db):
     alert_tree3 = helpers.create_alert(event=event3, insert_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by alert_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
     params = {"alert_time_after": alert_tree2.node.insert_time}
-    get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
+    get = client.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
     assert parse(get.json()["items"][0]["auto_alert_time"]) == alert_tree3.node.insert_time
 
 
-def test_get_filter_alert_time_before(client_valid_access_token, db):
+def test_get_filter_alert_time_before(client, db):
     event1 = helpers.create_event(name="event1", db=db)
     alert_tree1 = helpers.create_alert(event=event1, insert_time=datetime.utcnow() - timedelta(seconds=5), db=db)
 
@@ -937,92 +937,92 @@ def test_get_filter_alert_time_before(client_valid_access_token, db):
     helpers.create_alert(event=event3, insert_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by alert_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
     params = {"alert_time_before": alert_tree2.node.insert_time}
-    get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
+    get = client.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
     assert parse(get.json()["items"][0]["auto_alert_time"]) == alert_tree1.node.insert_time
 
 
-def test_get_filter_contain_time_after(client_valid_access_token, db):
+def test_get_filter_contain_time_after(client, db):
     helpers.create_event(name="event1", contain_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = helpers.create_event(name="event2", contain_time=datetime.utcnow(), db=db)
     helpers.create_event(name="event3", contain_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by contain_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
     params = {"contain_time_after": event2.contain_time}
-    get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
+    get = client.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
 
-def test_get_filter_contain_time_before(client_valid_access_token, db):
+def test_get_filter_contain_time_before(client, db):
     helpers.create_event(name="event1", contain_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = helpers.create_event(name="event2", contain_time=datetime.utcnow(), db=db)
     helpers.create_event(name="event3", contain_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by contain_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
     params = {"contain_time_before": event2.contain_time}
-    get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
+    get = client.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
 
 
-def test_get_filter_created_time_after(client_valid_access_token, db):
+def test_get_filter_created_time_after(client, db):
     helpers.create_event(name="event1", created_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = helpers.create_event(name="event2", created_time=datetime.utcnow(), db=db)
     helpers.create_event(name="event3", created_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by created_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
     params = {"created_time_after": event2.creation_time}
-    get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
+    get = client.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
 
-def test_get_filter_created_time_before(client_valid_access_token, db):
+def test_get_filter_created_time_before(client, db):
     helpers.create_event(name="event1", created_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = helpers.create_event(name="event2", created_time=datetime.utcnow(), db=db)
     helpers.create_event(name="event3", created_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by created_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
     params = {"created_time_before": event2.creation_time}
-    get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
+    get = client.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
 
 
-def test_get_filter_disposition(client_valid_access_token, db):
+def test_get_filter_disposition(client, db):
     event1 = helpers.create_event(name="event1", contain_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     helpers.create_alert(event=event1, db=db)
 
@@ -1030,20 +1030,20 @@ def test_get_filter_disposition(client_valid_access_token, db):
     helpers.create_alert(event=event2, db=db, disposition="FALSE_POSITIVE")
 
     # There should be 2 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 2
 
     # There should only be 1 event when we filter by the disposition
-    get = client_valid_access_token.get("/api/event/?disposition=none")
+    get = client.get("/api/event/?disposition=none")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
 
-    get = client_valid_access_token.get("/api/event/?disposition=FALSE_POSITIVE")
+    get = client.get("/api/event/?disposition=FALSE_POSITIVE")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event2"
 
 
-def test_get_filter_disposition_time_after(client_valid_access_token, db):
+def test_get_filter_disposition_time_after(client, db):
     now = datetime.utcnow()
 
     event1 = helpers.create_event(name="event1", db=db)
@@ -1056,19 +1056,19 @@ def test_get_filter_disposition_time_after(client_valid_access_token, db):
     helpers.create_alert(event=event3, disposition="DELIVERY", update_time=now + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by disposition_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
     params = {"disposition_time_after": now}
-    get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
+    get = client.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
 
-def test_get_filter_disposition_time_before(client_valid_access_token, db):
+def test_get_filter_disposition_time_before(client, db):
     now = datetime.utcnow()
 
     event1 = helpers.create_event(name="event1", db=db)
@@ -1081,33 +1081,33 @@ def test_get_filter_disposition_time_before(client_valid_access_token, db):
     helpers.create_alert(event=event3, disposition="DELIVERY", update_time=now + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by disposition_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
     params = {"disposition_time_before": now}
-    get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
+    get = client.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
 
 
-def test_get_filter_name(client_valid_access_token, db):
+def test_get_filter_name(client, db):
     helpers.create_event(db=db, name="Test Event")
     helpers.create_event(db=db, name="Some Other Event")
 
     # There should be 2 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 2
 
     # There should only be 1 event when we filter by the name
-    get = client_valid_access_token.get("/api/event/?name=test")
+    get = client.get("/api/event/?name=test")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "Test Event"
 
 
-def test_get_filter_observable(client_valid_access_token, db):
+def test_get_filter_observable(client, db):
     # Create an empty event
     event1 = helpers.create_event(name="event1", db=db)
     helpers.create_alert(db=db, event=event1)
@@ -1129,22 +1129,22 @@ def test_get_filter_observable(client_valid_access_token, db):
     helpers.create_observable(parent_tree=alert_tree4, type="test_type2", value="test_value2", db=db)
 
     # There should be 4 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 4
 
     # There should only be 1 event when we filter by the test_type1/test_value1 observable
-    get = client_valid_access_token.get("/api/event/?observable=test_type1|test_value1")
+    get = client.get("/api/event/?observable=test_type1|test_value1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event2"
 
     # There should be 2 events when we filter by the test_type2/test_value2 observable
-    get = client_valid_access_token.get("/api/event/?observable=test_type2|test_value2")
+    get = client.get("/api/event/?observable=test_type2|test_value2")
     assert get.json()["total"] == 2
     assert any(a["name"] == "event3" for a in get.json()["items"])
     assert any(a["name"] == "event4" for a in get.json()["items"])
 
 
-def test_get_filter_observable_types(client_valid_access_token, db):
+def test_get_filter_observable_types(client, db):
     # Create an empty event
     event1 = helpers.create_event(name="event1", db=db)
     helpers.create_alert(db=db, event=event1)
@@ -1162,22 +1162,22 @@ def test_get_filter_observable_types(client_valid_access_token, db):
     helpers.create_observable(parent_tree=alert_tree3, type="test_type2", value="test_value2", db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should be 2 events when we filter by just test_type1
-    get = client_valid_access_token.get("/api/event/?observable_types=test_type1")
+    get = client.get("/api/event/?observable_types=test_type1")
     assert get.json()["total"] == 2
     assert any(a["name"] == "event2" for a in get.json()["items"])
     assert any(a["name"] == "event3" for a in get.json()["items"])
 
     # There should only be 1 event when we filter by the test_type1 and test_type2
-    get = client_valid_access_token.get("/api/event/?observable_types=test_type1,test_type2")
+    get = client.get("/api/event/?observable_types=test_type1,test_type2")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
 
-def test_get_filter_observable_value(client_valid_access_token, db):
+def test_get_filter_observable_value(client, db):
     # Create an empty event
     event1 = helpers.create_event(name="event1", db=db)
     helpers.create_alert(db=db, event=event1)
@@ -1199,195 +1199,195 @@ def test_get_filter_observable_value(client_valid_access_token, db):
     helpers.create_observable(parent_tree=alert_tree4, type="test_type2", value="test_value2", db=db)
 
     # There should be 4 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 4
 
     # There should only be 1 event when we filter by the test_value_asdf observable value
-    get = client_valid_access_token.get("/api/event/?observable_value=test_value_asdf")
+    get = client.get("/api/event/?observable_value=test_value_asdf")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event4"
 
     # There should be 2 events when we filter by the test_value1 observable value
-    get = client_valid_access_token.get("/api/event/?observable_value=test_value1")
+    get = client.get("/api/event/?observable_value=test_value1")
     assert get.json()["total"] == 2
     assert any(a["name"] == "event2" for a in get.json()["items"])
     assert any(a["name"] == "event4" for a in get.json()["items"])
 
 
-def test_get_filter_owner(client_valid_access_token, db):
+def test_get_filter_owner(client, db):
     helpers.create_user(username="analyst", db=db)
     helpers.create_event(name="event1", db=db)
     helpers.create_event(name="event2", db=db, owner="analyst")
 
     # There should be 2 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 2
 
     # There should only be 1 event when we filter by the owner
-    get = client_valid_access_token.get("/api/event/?owner=analyst")
+    get = client.get("/api/event/?owner=analyst")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["owner"]["username"] == "analyst"
 
 
-def test_get_filter_prevention_tools(client_valid_access_token, db):
+def test_get_filter_prevention_tools(client, db):
     helpers.create_event(name="event1", db=db)
     helpers.create_event(name="event2", db=db, prevention_tools=["value1"])
     helpers.create_event(name="event3", db=db, prevention_tools=["value2", "value3"])
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by value1
-    get = client_valid_access_token.get("/api/event/?prevention_tools=value1")
+    get = client.get("/api/event/?prevention_tools=value1")
     assert get.json()["total"] == 1
     assert len(get.json()["items"][0]["prevention_tools"]) == 1
     assert get.json()["items"][0]["prevention_tools"][0]["value"] == "value1"
 
     # There should only be 1 event when we filter by value2 AND value3
-    get = client_valid_access_token.get("/api/event/?prevention_tools=value2,value3")
+    get = client.get("/api/event/?prevention_tools=value2,value3")
     assert get.json()["total"] == 1
     assert len(get.json()["items"][0]["prevention_tools"]) == 2
     assert any(t["value"] == "value2" for t in get.json()["items"][0]["prevention_tools"])
     assert any(t["value"] == "value3" for t in get.json()["items"][0]["prevention_tools"])
 
     # All the events should be returned if you don't specify any value for the filter
-    get = client_valid_access_token.get("/api/event/?prevention_tools=")
+    get = client.get("/api/event/?prevention_tools=")
     assert get.json()["total"] == 3
 
 
-def test_get_filter_queue(client_valid_access_token, db):
+def test_get_filter_queue(client, db):
     helpers.create_event(name="event1", db=db, queue="test_queue1")
     helpers.create_event(name="event2", db=db, queue="test_queue2")
 
     # There should be 2 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 2
 
     # There should only be 1 event when we filter by the queue
-    get = client_valid_access_token.get("/api/event/?queue=test_queue1")
+    get = client.get("/api/event/?queue=test_queue1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["queue"]["value"] == "test_queue1"
 
 
-def test_get_filter_remediation_time_after(client_valid_access_token, db):
+def test_get_filter_remediation_time_after(client, db):
     helpers.create_event(name="event1", remediation_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = helpers.create_event(name="event2", remediation_time=datetime.utcnow(), db=db)
     helpers.create_event(name="event3", remediation_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by remediation_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
     params = {"remediation_time_after": event2.remediation_time}
-    get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
+    get = client.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
 
-def test_get_filter_remediation_time_before(client_valid_access_token, db):
+def test_get_filter_remediation_time_before(client, db):
     helpers.create_event(name="event1", remediation_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = helpers.create_event(name="event2", remediation_time=datetime.utcnow(), db=db)
     helpers.create_event(name="event3", remediation_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by remediation_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
     params = {"remediation_time_before": event2.remediation_time}
-    get = client_valid_access_token.get(f"/api/event/?{urlencode(params)}")
+    get = client.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
 
 
-def test_get_filter_remediations(client_valid_access_token, db):
+def test_get_filter_remediations(client, db):
     helpers.create_event(name="event1", db=db)
     helpers.create_event(name="event2", db=db, remediations=["value1"])
     helpers.create_event(name="event3", db=db, remediations=["value2", "value3"])
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by value1
-    get = client_valid_access_token.get("/api/event/?remediations=value1")
+    get = client.get("/api/event/?remediations=value1")
     assert get.json()["total"] == 1
     assert len(get.json()["items"][0]["remediations"]) == 1
     assert get.json()["items"][0]["remediations"][0]["value"] == "value1"
 
     # There should only be 1 event when we filter by value2 AND value3
-    get = client_valid_access_token.get("/api/event/?remediations=value2,value3")
+    get = client.get("/api/event/?remediations=value2,value3")
     assert get.json()["total"] == 1
     assert len(get.json()["items"][0]["remediations"]) == 2
     assert any(t["value"] == "value2" for t in get.json()["items"][0]["remediations"])
     assert any(t["value"] == "value3" for t in get.json()["items"][0]["remediations"])
 
     # All the events should be returned if you don't specify any value for the filter
-    get = client_valid_access_token.get("/api/event/?remediations=")
+    get = client.get("/api/event/?remediations=")
     assert get.json()["total"] == 3
 
 
-def test_get_filter_risk_level(client_valid_access_token, db):
+def test_get_filter_risk_level(client, db):
     helpers.create_event(name="event1", db=db)
     helpers.create_event(name="event2", db=db, risk_level="value1")
 
     # There should be 2 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 2
 
     # There should only be 1 event when we filter by value1
-    get = client_valid_access_token.get("/api/event/?risk_level=value1")
+    get = client.get("/api/event/?risk_level=value1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["risk_level"]["value"] == "value1"
 
     # All the events should be returned if you don't specify any value for the filter
-    get = client_valid_access_token.get("/api/event/?risk_level=")
+    get = client.get("/api/event/?risk_level=")
     assert get.json()["total"] == 2
 
 
-def test_get_filter_source(client_valid_access_token, db):
+def test_get_filter_source(client, db):
     helpers.create_event(name="event1", db=db)
     helpers.create_event(name="event2", db=db, source="value1")
 
     # There should be 2 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 2
 
     # There should only be 1 event when we filter by value1
-    get = client_valid_access_token.get("/api/event/?source=value1")
+    get = client.get("/api/event/?source=value1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["source"]["value"] == "value1"
 
     # All the events should be returned if you don't specify any value for the filter
-    get = client_valid_access_token.get("/api/event/?source=")
+    get = client.get("/api/event/?source=")
     assert get.json()["total"] == 2
 
 
-def test_get_filter_status(client_valid_access_token, db):
+def test_get_filter_status(client, db):
     helpers.create_event(name="event1", db=db, status="value1")
     helpers.create_event(name="event2", db=db, status="value2")
 
     # There should be 2 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 2
 
     # There should only be 1 event when we filter by value1
-    get = client_valid_access_token.get("/api/event/?status=value1")
+    get = client.get("/api/event/?status=value1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["status"]["value"] == "value1"
 
     # All the events should be returned if you don't specify any value for the filter
-    get = client_valid_access_token.get("/api/event/?status=")
+    get = client.get("/api/event/?status=")
     assert get.json()["total"] == 2
 
 
-def test_get_filter_tags(client_valid_access_token, db):
+def test_get_filter_tags(client, db):
     # Create an event with a tagged observable
     event1 = helpers.create_event(name="event1", db=db)
     alert_tree1 = helpers.create_alert(event=event1, db=db)
@@ -1406,35 +1406,35 @@ def test_get_filter_tags(client_valid_access_token, db):
     helpers.create_alert(event=event4, db=db)
 
     # There should be 4 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 4
 
     # There should only be 1 event when we filter by tag1
-    get = client_valid_access_token.get("/api/event/?tags=tag1")
+    get = client.get("/api/event/?tags=tag1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event2"
 
     # There should only be 1 event when we filter by tag2 AND tag3
-    get = client_valid_access_token.get("/api/event/?tags=tag2,tag3")
+    get = client.get("/api/event/?tags=tag2,tag3")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
     # There should only be 1 event when we filter by the child observable tag obs1
-    get = client_valid_access_token.get("/api/event/?tags=obs1")
+    get = client.get("/api/event/?tags=obs1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
 
     # There should only be 1 event when we filter by tag4
-    get = client_valid_access_token.get("/api/event/?tags=tag4")
+    get = client.get("/api/event/?tags=tag4")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event4"
 
     # All the events should be returned if you don't specify any tags for the filter
-    get = client_valid_access_token.get("/api/event/?tags=")
+    get = client.get("/api/event/?tags=")
     assert get.json()["total"] == 4
 
 
-def test_get_filter_threat_actors(client_valid_access_token, db):
+def test_get_filter_threat_actors(client, db):
     event1 = helpers.create_event(name="event1", db=db)
     alert_tree1 = helpers.create_alert(event=event1, db=db)
     helpers.create_observable(type="fqdn", value="bad.com", parent_tree=alert_tree1, db=db, threat_actors=["bad_guys"])
@@ -1446,30 +1446,30 @@ def test_get_filter_threat_actors(client_valid_access_token, db):
     helpers.create_alert(event=event3, db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should be 1 event when we filter test_actor
-    get = client_valid_access_token.get("/api/event/?threat_actors=test_actor")
+    get = client.get("/api/event/?threat_actors=test_actor")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event2"
 
     # There should be 1 event when we filter by the child observable threat_actor
-    get = client_valid_access_token.get("/api/event/?threat_actors=bad_guys")
+    get = client.get("/api/event/?threat_actors=bad_guys")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
 
     # There should be 1 event when we filter test_actor2
-    get = client_valid_access_token.get("/api/event/?threat_actors=test_actor2")
+    get = client.get("/api/event/?threat_actors=test_actor2")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
     # All the alerts should be returned if you don't specify anything for the filter
-    get = client_valid_access_token.get("/api/event/?threat_actors=")
+    get = client.get("/api/event/?threat_actors=")
     assert get.json()["total"] == 3
 
 
-def test_get_filter_threats(client_valid_access_token, db):
+def test_get_filter_threats(client, db):
     event1 = helpers.create_event(name="event1", db=db)
     alert_tree1 = helpers.create_alert(event=event1, db=db)
     helpers.create_observable(type="fqdn", value="bad.com", parent_tree=alert_tree1, db=db, threats=["malz"])
@@ -1481,71 +1481,71 @@ def test_get_filter_threats(client_valid_access_token, db):
     helpers.create_alert(event=event3, db=db)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should be 1 event when we filter by threat1
-    get = client_valid_access_token.get("/api/event/?threats=threat1")
+    get = client.get("/api/event/?threats=threat1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event2"
 
     # There should be 1 event when we filter by the child observable threat
-    get = client_valid_access_token.get("/api/event/?threats=malz")
+    get = client.get("/api/event/?threats=malz")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
 
     # There should be 1 event when we filter by threat2 AND threat3
-    get = client_valid_access_token.get("/api/event/?threats=threat2,threat3")
+    get = client.get("/api/event/?threats=threat2,threat3")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
     # All the alerts should be returned if you don't specify anything for the filter
-    get = client_valid_access_token.get("/api/event/?threats=")
+    get = client.get("/api/event/?threats=")
     assert get.json()["total"] == 3
 
 
-def test_get_filter_type(client_valid_access_token, db):
+def test_get_filter_type(client, db):
     helpers.create_event(name="event1", db=db, type="test_type")
     helpers.create_event(name="event2", db=db, type="test_type2")
 
     # There should be 2 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 2
 
     # There should only be 1 event when we filter by test_type
-    get = client_valid_access_token.get("/api/event/?type=test_type")
+    get = client.get("/api/event/?type=test_type")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["type"]["value"] == "test_type"
 
 
-def test_get_filter_vectors(client_valid_access_token, db):
+def test_get_filter_vectors(client, db):
     helpers.create_event(name="event1", db=db)
     helpers.create_event(name="event2", db=db, vectors=["value1"])
     helpers.create_event(name="event3", db=db, vectors=["value2", "value3"])
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by value1
-    get = client_valid_access_token.get("/api/event/?vectors=value1")
+    get = client.get("/api/event/?vectors=value1")
     assert get.json()["total"] == 1
     assert len(get.json()["items"][0]["vectors"]) == 1
     assert get.json()["items"][0]["vectors"][0]["value"] == "value1"
 
     # There should only be 1 event when we filter by value2 AND value3
-    get = client_valid_access_token.get("/api/event/?vectors=value2,value3")
+    get = client.get("/api/event/?vectors=value2,value3")
     assert get.json()["total"] == 1
     assert len(get.json()["items"][0]["vectors"]) == 2
     assert any(t["value"] == "value2" for t in get.json()["items"][0]["vectors"])
     assert any(t["value"] == "value3" for t in get.json()["items"][0]["vectors"])
 
     # All the events should be returned if you don't specify any value for the filter
-    get = client_valid_access_token.get("/api/event/?vectors=")
+    get = client.get("/api/event/?vectors=")
     assert get.json()["total"] == 3
 
 
-def test_get_multiple_filters(client_valid_access_token, db):
+def test_get_multiple_filters(client, db):
     event1 = helpers.create_event(name="event1", db=db, type="test_type1")
     helpers.create_alert(db=db, event=event1)
 
@@ -1556,117 +1556,117 @@ def test_get_multiple_filters(client_valid_access_token, db):
     helpers.create_alert(db=db, event=event2)
 
     # There should be 3 total events
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by the type and prevention_tools
-    get = client_valid_access_token.get("/api/event/?type=test_type1&prevention_tools=tool1")
+    get = client.get("/api/event/?type=test_type1&prevention_tools=tool1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event2"
 
 
-def test_get_sort_by_created_time(client_valid_access_token, db):
+def test_get_sort_by_created_time(client, db):
     helpers.create_event(name="event1", db=db, created_time=datetime.utcnow())
     helpers.create_event(name="event2", db=db, created_time=datetime.utcnow() + timedelta(seconds=5))
 
     # If you sort descending, the newest event (event2) should appear first
-    get = client_valid_access_token.get("/api/event/?sort=created_time|desc")
+    get = client.get("/api/event/?sort=created_time|desc")
     assert get.json()["total"] == 2
     assert get.json()["items"][0]["name"] == "event2"
     assert get.json()["items"][1]["name"] == "event1"
 
     # If you sort ascending, the oldest event (event1) should appear first
-    get = client_valid_access_token.get("/api/event/?sort=created_time|asc")
+    get = client.get("/api/event/?sort=created_time|asc")
     assert get.json()["total"] == 2
     assert get.json()["items"][0]["name"] == "event1"
     assert get.json()["items"][1]["name"] == "event2"
 
 
-def test_get_sort_by_name(client_valid_access_token, db):
+def test_get_sort_by_name(client, db):
     helpers.create_event(name="event1", db=db)
     helpers.create_event(name="event2", db=db)
 
     # If you sort descending: event2, event1
-    get = client_valid_access_token.get("/api/event/?sort=name|desc")
+    get = client.get("/api/event/?sort=name|desc")
     assert get.json()["total"] == 2
     assert get.json()["items"][0]["name"] == "event2"
     assert get.json()["items"][1]["name"] == "event1"
 
     # If you sort ascending: event1, event2
-    get = client_valid_access_token.get("/api/event/?sort=name|asc")
+    get = client.get("/api/event/?sort=name|asc")
     assert get.json()["total"] == 2
     assert get.json()["items"][0]["name"] == "event1"
     assert get.json()["items"][1]["name"] == "event2"
 
 
-def test_get_sort_by_owner(client_valid_access_token, db):
+def test_get_sort_by_owner(client, db):
     helpers.create_event(name="event1", db=db, owner="alice")
     helpers.create_event(name="event2", db=db, owner="bob")
 
     # If you sort descending: event2, event1
-    get = client_valid_access_token.get("/api/event/?sort=owner|desc")
+    get = client.get("/api/event/?sort=owner|desc")
     assert get.json()["total"] == 2
     assert get.json()["items"][0]["name"] == "event2"
     assert get.json()["items"][1]["name"] == "event1"
 
     # If you sort ascending: event1, event2
-    get = client_valid_access_token.get("/api/event/?sort=owner|asc")
+    get = client.get("/api/event/?sort=owner|asc")
     assert get.json()["total"] == 2
     assert get.json()["items"][0]["name"] == "event1"
     assert get.json()["items"][1]["name"] == "event2"
 
 
-def test_get_sort_by_risk_level(client_valid_access_token, db):
+def test_get_sort_by_risk_level(client, db):
     helpers.create_event(name="event1", db=db)
     helpers.create_event(name="event2", db=db, risk_level="value1")
     helpers.create_event(name="event3", db=db, risk_level="value2")
 
     # If you sort descending: event1, event3, event2
-    get = client_valid_access_token.get("/api/event/?sort=risk_level|desc")
+    get = client.get("/api/event/?sort=risk_level|desc")
     assert get.json()["total"] == 3
     assert get.json()["items"][0]["name"] == "event1"
     assert get.json()["items"][1]["name"] == "event3"
     assert get.json()["items"][2]["name"] == "event2"
 
     # If you sort ascending: event2, event3, event1
-    get = client_valid_access_token.get("/api/event/?sort=risk_level|asc")
+    get = client.get("/api/event/?sort=risk_level|asc")
     assert get.json()["total"] == 3
     assert get.json()["items"][0]["name"] == "event2"
     assert get.json()["items"][1]["name"] == "event3"
     assert get.json()["items"][2]["name"] == "event1"
 
 
-def test_get_sort_by_status(client_valid_access_token, db):
+def test_get_sort_by_status(client, db):
     helpers.create_event(name="event1", db=db, status="value1")
     helpers.create_event(name="event2", db=db, status="value2")
 
     # If you sort descending: event2, event1
-    get = client_valid_access_token.get("/api/event/?sort=status|desc")
+    get = client.get("/api/event/?sort=status|desc")
     assert get.json()["total"] == 2
     assert get.json()["items"][0]["name"] == "event2"
     assert get.json()["items"][1]["name"] == "event1"
 
     # If you sort ascending: event1, event2
-    get = client_valid_access_token.get("/api/event/?sort=status|asc")
+    get = client.get("/api/event/?sort=status|asc")
     assert get.json()["total"] == 2
     assert get.json()["items"][0]["name"] == "event1"
     assert get.json()["items"][1]["name"] == "event2"
 
 
-def test_get_sort_by_type(client_valid_access_token, db):
+def test_get_sort_by_type(client, db):
     helpers.create_event(name="event1", db=db)
     helpers.create_event(name="event2", db=db, type="value1")
     helpers.create_event(name="event3", db=db, type="value2")
 
     # If you sort descending: event1, event3, event2
-    get = client_valid_access_token.get("/api/event/?sort=type|desc")
+    get = client.get("/api/event/?sort=type|desc")
     assert get.json()["total"] == 3
     assert get.json()["items"][0]["name"] == "event1"
     assert get.json()["items"][1]["name"] == "event3"
     assert get.json()["items"][2]["name"] == "event2"
 
     # If you sort ascending: event2, event3, event1
-    get = client_valid_access_token.get("/api/event/?sort=type|asc")
+    get = client.get("/api/event/?sort=type|asc")
     assert get.json()["total"] == 3
     assert get.json()["items"][0]["name"] == "event2"
     assert get.json()["items"][1]["name"] == "event3"

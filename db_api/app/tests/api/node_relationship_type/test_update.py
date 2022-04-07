@@ -21,13 +21,13 @@ from tests import helpers
         ("value", ""),
     ],
 )
-def test_update_invalid_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(f"/api/node/relationship/type/{uuid.uuid4()}", json={key: value})
+def test_update_invalid_fields(client, key, value):
+    update = client.patch(f"/api/node/relationship/type/{uuid.uuid4()}", json={key: value})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_update_invalid_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch("/api/node/relationship/type/1", json={"value": "test"})
+def test_update_invalid_uuid(client):
+    update = client.patch("/api/node/relationship/type/1", json={"value": "test"})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -37,18 +37,18 @@ def test_update_invalid_uuid(client_valid_access_token):
         ("value"),
     ],
 )
-def test_update_duplicate_unique_fields(client_valid_access_token, db, key):
+def test_update_duplicate_unique_fields(client, db, key):
     # Create some objects
     obj1 = helpers.create_node_relationship_type(value="test", db=db)
     obj2 = helpers.create_node_relationship_type(value="test2", db=db)
 
     # Ensure you cannot update a unique field to a value that already exists
-    update = client_valid_access_token.patch(f"/api/node/relationship/type/{obj2.uuid}", json={key: getattr(obj1, key)})
+    update = client.patch(f"/api/node/relationship/type/{obj2.uuid}", json={key: getattr(obj1, key)})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
-def test_update_nonexistent_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch(f"/api/node/relationship/type/{uuid.uuid4()}", json={"value": "test"})
+def test_update_nonexistent_uuid(client):
+    update = client.patch(f"/api/node/relationship/type/{uuid.uuid4()}", json={"value": "test"})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -66,7 +66,7 @@ def test_update_nonexistent_uuid(client_valid_access_token):
         ("value", "test", "test"),
     ],
 )
-def test_update(client_valid_access_token, db, key, initial_value, updated_value):
+def test_update(client, db, key, initial_value, updated_value):
     # Create the object
     obj = helpers.create_node_relationship_type(value="test", db=db)
 
@@ -74,6 +74,6 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     setattr(obj, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(f"/api/node/relationship/type/{obj.uuid}", json={key: updated_value})
+    update = client.patch(f"/api/node/relationship/type/{obj.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert getattr(obj, key) == updated_value

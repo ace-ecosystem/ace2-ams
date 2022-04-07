@@ -55,13 +55,13 @@ from tests import helpers
         ("username", ""),
     ],
 )
-def test_update_invalid_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(f"/api/user/{uuid.uuid4()}", json={key: value})
+def test_update_invalid_fields(client, key, value):
+    update = client.patch(f"/api/user/{uuid.uuid4()}", json={key: value})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_update_invalid_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch("/api/user/1", json={"value": "test"})
+def test_update_invalid_uuid(client):
+    update = client.patch("/api/user/1", json={"value": "test"})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -72,18 +72,18 @@ def test_update_invalid_uuid(client_valid_access_token):
         ("username"),
     ],
 )
-def test_update_duplicate_unique_fields(client_valid_access_token, db, key):
+def test_update_duplicate_unique_fields(client, db, key):
     # Create some users
     obj1 = helpers.create_user(username="johndoe", email="johndoe@test.com", db=db)
     obj2 = helpers.create_user(username="janedoe", email="janedoe@test.com", db=db)
 
     # Ensure you cannot update a unique field to a value that already exists
-    update = client_valid_access_token.patch(f"/api/user/{obj2.uuid}", json={key: getattr(obj1, key)})
+    update = client.patch(f"/api/user/{obj2.uuid}", json={key: getattr(obj1, key)})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
-def test_update_nonexistent_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch(f"/api/user/{uuid.uuid4()}", json={"display_name": "test"})
+def test_update_nonexistent_uuid(client):
+    update = client.patch(f"/api/user/{uuid.uuid4()}", json={"display_name": "test"})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -92,7 +92,7 @@ def test_update_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_update_valid_alert_queue(client_valid_access_token, db):
+def test_update_valid_alert_queue(client, db):
     # Create a user
     obj = helpers.create_user(username="johndoe", alert_queue="test_queue", db=db)
     assert obj.default_alert_queue.value == "test_queue"
@@ -101,12 +101,12 @@ def test_update_valid_alert_queue(client_valid_access_token, db):
     helpers.create_queue(value="test_queue2", db=db)
 
     # Update it
-    update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={"default_alert_queue": "test_queue2"})
+    update = client.patch(f"/api/user/{obj.uuid}", json={"default_alert_queue": "test_queue2"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.default_alert_queue.value == "test_queue2"
 
     # Verify the history
-    history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
+    history = client.get(f"/api/user/{obj.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"
@@ -116,7 +116,7 @@ def test_update_valid_alert_queue(client_valid_access_token, db):
     assert history.json()["items"][1]["snapshot"]["default_alert_queue"]["value"] == "test_queue2"
 
 
-def test_update_valid_event_queue(client_valid_access_token, db):
+def test_update_valid_event_queue(client, db):
     # Create a user
     obj = helpers.create_user(username="johndoe", event_queue="test_queue", db=db)
     assert obj.default_event_queue.value == "test_queue"
@@ -125,12 +125,12 @@ def test_update_valid_event_queue(client_valid_access_token, db):
     helpers.create_queue(value="test_queue2", db=db)
 
     # Update it
-    update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={"default_event_queue": "test_queue2"})
+    update = client.patch(f"/api/user/{obj.uuid}", json={"default_event_queue": "test_queue2"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.default_event_queue.value == "test_queue2"
 
     # Verify the history
-    history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
+    history = client.get(f"/api/user/{obj.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"
@@ -147,7 +147,7 @@ def test_update_valid_event_queue(client_valid_access_token, db):
         (["new_role1", "new_role2"]),
     ],
 )
-def test_update_valid_roles(client_valid_access_token, db, values):
+def test_update_valid_roles(client, db, values):
     # Create a user
     initial_roles = ["test_role1", "test_role2", "test_role3"]
     obj = helpers.create_user(username="johndoe", roles=initial_roles, db=db)
@@ -158,12 +158,12 @@ def test_update_valid_roles(client_valid_access_token, db, values):
         helpers.create_user_role(value=value, db=db)
 
     # Update it
-    update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={"roles": values})
+    update = client.patch(f"/api/user/{obj.uuid}", json={"roles": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(obj.roles) == len(values)
 
     # Verify the history
-    history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
+    history = client.get(f"/api/user/{obj.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"
@@ -192,7 +192,7 @@ def test_update_valid_roles(client_valid_access_token, db, values):
         ("username", "johndoe", "johndoe"),
     ],
 )
-def test_update(client_valid_access_token, db, key, initial_value, updated_value):
+def test_update(client, db, key, initial_value, updated_value):
     # Create a user
     obj = helpers.create_user(username="johndoe", db=db)
 
@@ -200,12 +200,12 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     setattr(obj, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={key: updated_value})
+    update = client.patch(f"/api/user/{obj.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert getattr(obj, key) == updated_value
 
     # Verify the history
-    history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
+    history = client.get(f"/api/user/{obj.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"
@@ -222,7 +222,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
         ("abcd1234", "abcd1234"),
     ],
 )
-def test_update_password(client_valid_access_token, db, initial_value, updated_value):
+def test_update_password(client, db, initial_value, updated_value):
     # Create a user
     obj = helpers.create_user(username="johndoe", password=initial_value, db=db)
     initial_password_hash = obj.password
@@ -231,13 +231,13 @@ def test_update_password(client_valid_access_token, db, initial_value, updated_v
     assert verify_password(initial_value, initial_password_hash) is True
 
     # Update it
-    update = client_valid_access_token.patch(f"/api/user/{obj.uuid}", json={"password": updated_value})
+    update = client.patch(f"/api/user/{obj.uuid}", json={"password": updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.password != initial_password_hash
     assert verify_password(updated_value, obj.password) is True
 
     # Verify the history
-    history = client_valid_access_token.get(f"/api/user/{obj.uuid}/history")
+    history = client.get(f"/api/user/{obj.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"

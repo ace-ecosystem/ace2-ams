@@ -27,32 +27,32 @@ from tests import helpers
         ("summary", ""),
     ],
 )
-def test_update_invalid_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(f"/api/analysis/{uuid.uuid4()}", json={key: value})
+def test_update_invalid_fields(client, key, value):
+    update = client.patch(f"/api/analysis/{uuid.uuid4()}", json={key: value})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert len(update.json()["detail"]) == 1
     assert key in update.json()["detail"][0]["loc"]
 
 
-def test_update_invalid_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch("/api/analysis/1", json={})
+def test_update_invalid_uuid(client):
+    update = client.patch("/api/analysis/1", json={})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_update_invalid_version(client_valid_access_token, db):
+def test_update_invalid_version(client, db):
     alert_tree = helpers.create_alert(db=db)
     analysis_tree = helpers.create_analysis(parent_tree=alert_tree, db=db)
 
     # Make sure you cannot update it using an invalid version. The version is
     # optional, but if given, it must match.
-    update = client_valid_access_token.patch(
+    update = client.patch(
         f"/api/analysis/{analysis_tree.node.uuid}", json={"version": str(uuid.uuid4())}
     )
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
-def test_update_nonexistent_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch(f"/api/analysis/{uuid.uuid4()}", json={})
+def test_update_nonexistent_uuid(client):
+    update = client.patch(f"/api/analysis/{uuid.uuid4()}", json={})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -78,7 +78,7 @@ def test_update_nonexistent_uuid(client_valid_access_token):
         ("summary", "test", "test"),
     ],
 )
-def test_update(client_valid_access_token, db, key, initial_value, updated_value):
+def test_update(client, db, key, initial_value, updated_value):
     alert_tree = helpers.create_alert(db=db)
     analysis_tree = helpers.create_analysis(parent_tree=alert_tree, db=db)
     initial_analysis_version = analysis_tree.node.version
@@ -87,7 +87,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     setattr(analysis_tree.node, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(f"/api/analysis/{analysis_tree.node.uuid}", json={key: updated_value})
+    update = client.patch(f"/api/analysis/{analysis_tree.node.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     if key == "details" and updated_value:

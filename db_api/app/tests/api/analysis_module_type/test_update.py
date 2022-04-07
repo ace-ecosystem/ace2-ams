@@ -54,28 +54,28 @@ from tests import helpers
         ("version", "v1.0"),
     ],
 )
-def test_update_invalid_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(f"/api/analysis/module_type/{uuid.uuid4()}", json={key: value})
+def test_update_invalid_fields(client, key, value):
+    update = client.patch(f"/api/analysis/module_type/{uuid.uuid4()}", json={key: value})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_update_invalid_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch("/api/analysis/module_type/1", json={"value": "test_type"})
+def test_update_invalid_uuid(client):
+    update = client.patch("/api/analysis/module_type/1", json={"value": "test_type"})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_update_duplicate_value_version(client_valid_access_token, db):
+def test_update_duplicate_value_version(client, db):
     # Create some objects
     helpers.create_analysis_module_type(value="test", version="1.0.0", db=db)
     amt2 = helpers.create_analysis_module_type(value="test", version="1.0.1", db=db)
 
     # Ensure you cannot update an analysis module type to have a duplicate version+value combination
-    update = client_valid_access_token.patch(f"/api/analysis/module_type/{amt2.uuid}", json={"version": "1.0.0"})
+    update = client.patch(f"/api/analysis/module_type/{amt2.uuid}", json={"version": "1.0.0"})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
-def test_update_nonexistent_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch(f"/api/analysis/module_type/{uuid.uuid4()}", json={"value": "test"})
+def test_update_nonexistent_uuid(client):
+    update = client.patch(f"/api/analysis/module_type/{uuid.uuid4()}", json={"value": "test"})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -101,7 +101,7 @@ def test_update_nonexistent_uuid(client_valid_access_token):
         ("required_tags", ["test", "test"]),
     ],
 )
-def test_update_valid_list_fields(client_valid_access_token, db, key, values):
+def test_update_valid_list_fields(client, db, key, values):
     # Create an analysis module type
     analysis_module_type = helpers.create_analysis_module_type(value="test_type", db=db)
 
@@ -117,7 +117,7 @@ def test_update_valid_list_fields(client_valid_access_token, db, key, values):
         create_func(value=value, db=db)
 
     # Update it
-    update = client_valid_access_token.patch(
+    update = client.patch(
         f"/api/analysis/module_type/{analysis_module_type.uuid}", json={key: values}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
@@ -139,7 +139,7 @@ def test_update_valid_list_fields(client_valid_access_token, db, key, values):
         ("version", "1.0.0", "1.0.0"),
     ],
 )
-def test_update(client_valid_access_token, db, key, initial_value, updated_value):
+def test_update(client, db, key, initial_value, updated_value):
     # Create an analysis module type
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
@@ -147,7 +147,7 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     setattr(analysis_module_type, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(
+    update = client.patch(
         f"/api/analysis/module_type/{analysis_module_type.uuid}", json={key: updated_value}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT

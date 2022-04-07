@@ -10,13 +10,13 @@ from tests import helpers
 #
 
 
-def test_get_invalid_uuid(client_valid_access_token):
-    get = client_valid_access_token.get("/api/event/prevention_tool/1")
+def test_get_invalid_uuid(client):
+    get = client.get("/api/event/prevention_tool/1")
     assert get.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_get_nonexistent_uuid(client_valid_access_token):
-    get = client_valid_access_token.get(f"/api/event/prevention_tool/{uuid.uuid4()}")
+def test_get_nonexistent_uuid(client):
+    get = client.get(f"/api/event/prevention_tool/{uuid.uuid4()}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -25,14 +25,14 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_get_all(client_valid_access_token, db):
+def test_get_all(client, db):
     # Create some objects
     helpers.create_event_prevention_tool(value="test", queues=["internal"], db=db)
     helpers.create_event_prevention_tool(value="test2", queues=["external"], db=db)
     helpers.create_event_prevention_tool(value="test3", queues=["internal", "external"], db=db)
 
     # Read them back
-    get = client_valid_access_token.get("/api/event/prevention_tool/")
+    get = client.get("/api/event/prevention_tool/")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["total"] == 3
 
@@ -50,7 +50,7 @@ def test_get_all(client_valid_access_token, db):
     assert any(x["value"] == "external" for x in results[2]["queues"])
 
 
-def test_get_all_empty(client_valid_access_token):
-    get = client_valid_access_token.get("/api/event/prevention_tool/")
+def test_get_all_empty(client):
+    get = client.get("/api/event/prevention_tool/")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["total"] == 0

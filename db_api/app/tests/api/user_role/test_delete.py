@@ -16,13 +16,13 @@ are in place in order to account for this.
 #
 
 
-def test_delete_invalid_uuid(client_valid_access_token):
-    delete = client_valid_access_token.delete("/api/user/role/1")
+def test_delete_invalid_uuid(client):
+    delete = client.delete("/api/user/role/1")
     assert delete.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_delete_nonexistent_uuid(client_valid_access_token):
-    delete = client_valid_access_token.delete(f"/api/user/role/{uuid.uuid4()}")
+def test_delete_nonexistent_uuid(client):
+    delete = client.delete(f"/api/user/role/{uuid.uuid4()}")
     assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -31,18 +31,18 @@ def test_delete_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_delete(client_valid_access_token, db):
+def test_delete(client, db):
     # Create the object
     obj = helpers.create_user_role(value="test_role2", db=db)
 
     # Read it back
-    get = client_valid_access_token.get(f"/api/user/role/{obj.uuid}")
+    get = client.get(f"/api/user/role/{obj.uuid}")
     assert get.status_code == status.HTTP_200_OK
 
     # Delete it
-    delete = client_valid_access_token.delete(f"/api/user/role/{obj.uuid}")
+    delete = client.delete(f"/api/user/role/{obj.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
-    get = client_valid_access_token.get(f"/api/user/role/{obj.uuid}")
+    get = client.get(f"/api/user/role/{obj.uuid}")
     assert get.status_code == status.HTTP_404_NOT_FOUND

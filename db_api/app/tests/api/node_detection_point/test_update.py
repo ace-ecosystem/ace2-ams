@@ -19,23 +19,23 @@ from tests import helpers
         ("value", ""),
     ],
 )
-def test_update_invalid_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(f"/api/node/detection_point/{uuid.uuid4()}", json={key: value})
+def test_update_invalid_fields(client, key, value):
+    update = client.patch(f"/api/node/detection_point/{uuid.uuid4()}", json={key: value})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert key in update.text
 
 
-def test_update_invalid_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch("/api/node/detection_point/1", json={"value": "test"})
+def test_update_invalid_uuid(client):
+    update = client.patch("/api/node/detection_point/1", json={"value": "test"})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_update_nonexistent_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch(f"/api/node/detection_point/{uuid.uuid4()}", json={"value": "test"})
+def test_update_nonexistent_uuid(client):
+    update = client.patch(f"/api/node/detection_point/{uuid.uuid4()}", json={"value": "test"})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_update_duplicate_node_uuid_value(client_valid_access_token, db):
+def test_update_duplicate_node_uuid_value(client, db):
     # Create an observable
     node_tree = helpers.create_alert(db=db)
     observable = helpers.create_observable(type="test_type", value="test_value", parent_tree=node_tree, db=db)
@@ -49,7 +49,7 @@ def test_update_duplicate_node_uuid_value(client_valid_access_token, db):
     )
 
     # Make sure you cannot update a detection point on a node to one that already exists
-    update = client_valid_access_token.patch(
+    update = client.patch(
         f"/api/node/detection_point/{detection_point2.uuid}", json={"value": detection_point1.value}
     )
     assert update.status_code == status.HTTP_409_CONFLICT
@@ -60,7 +60,7 @@ def test_update_duplicate_node_uuid_value(client_valid_access_token, db):
 #
 
 
-def test_update_observables(client_valid_access_token, db):
+def test_update_observables(client, db):
     # Create a detection point
     alert_tree = helpers.create_alert(db=db)
     observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
@@ -71,7 +71,7 @@ def test_update_observables(client_valid_access_token, db):
     assert observable_tree.node.detection_points[0].value == "test"
 
     # Update it
-    update = client_valid_access_token.patch(
+    update = client.patch(
         f"/api/node/detection_point/{detection_point.uuid}", json={"value": "updated"}
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
@@ -79,7 +79,7 @@ def test_update_observables(client_valid_access_token, db):
     assert observable_tree.node.detection_points[0].insert_time != original_time
 
     # Verify the history record
-    history = client_valid_access_token.get(f"/api/observable/{observable_tree.node_uuid}/history")
+    history = client.get(f"/api/observable/{observable_tree.node_uuid}/history")
 
     assert history.json()["total"] == 3
     assert history.json()["items"][1]["action"] == "UPDATE"

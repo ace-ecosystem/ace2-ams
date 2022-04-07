@@ -16,13 +16,13 @@ are in place in order to account for this.
 #
 
 
-def test_delete_invalid_uuid(client_valid_access_token):
-    delete = client_valid_access_token.delete("/api/node/comment/1")
+def test_delete_invalid_uuid(client):
+    delete = client.delete("/api/node/comment/1")
     assert delete.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_delete_nonexistent_uuid(client_valid_access_token):
-    delete = client_valid_access_token.delete(f"/api/node/comment/{uuid.uuid4()}")
+def test_delete_nonexistent_uuid(client):
+    delete = client.delete(f"/api/node/comment/{uuid.uuid4()}")
     assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -31,25 +31,25 @@ def test_delete_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_delete_alerts(client_valid_access_token, db):
+def test_delete_alerts(client, db):
     # Create a comment
     alert_tree = helpers.create_alert(db=db)
     comment = helpers.create_node_comment(node=alert_tree.node, username="johndoe", value="test", db=db)
     assert alert_tree.node.comments[0].value == "test"
 
     # Delete it
-    delete = client_valid_access_token.delete(f"/api/node/comment/{comment.uuid}")
+    delete = client.delete(f"/api/node/comment/{comment.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
-    get = client_valid_access_token.get(f"/api/node/comment/{comment.uuid}")
+    get = client.get(f"/api/node/comment/{comment.uuid}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
     # And make sure the node no longer shows the comment
     assert len(alert_tree.node.comments) == 0
 
     # Verify the history record
-    history = client_valid_access_token.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    history = client.get(f"/api/alert/{alert_tree.node_uuid}/history")
     assert history.json()["total"] == 3
     assert history.json()["items"][2]["action"] == "UPDATE"
     assert history.json()["items"][2]["action_by"]["username"] == "analyst"
@@ -62,25 +62,25 @@ def test_delete_alerts(client_valid_access_token, db):
     assert history.json()["items"][2]["snapshot"]["name"] == "Test Alert"
 
 
-def test_delete_events(client_valid_access_token, db):
+def test_delete_events(client, db):
     # Create a comment
     event = helpers.create_event(name="Test Event", db=db)
     comment = helpers.create_node_comment(node=event, username="johndoe", value="test", db=db)
     assert event.comments[0].value == "test"
 
     # Delete it
-    delete = client_valid_access_token.delete(f"/api/node/comment/{comment.uuid}")
+    delete = client.delete(f"/api/node/comment/{comment.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
-    get = client_valid_access_token.get(f"/api/node/comment/{comment.uuid}")
+    get = client.get(f"/api/node/comment/{comment.uuid}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
     # And make sure the node no longer shows the comment
     assert len(event.comments) == 0
 
     # Verify the history record
-    history = client_valid_access_token.get(f"/api/event/{event.uuid}/history")
+    history = client.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 3
     assert history.json()["items"][2]["action"] == "UPDATE"
     assert history.json()["items"][2]["action_by"]["username"] == "analyst"
@@ -93,7 +93,7 @@ def test_delete_events(client_valid_access_token, db):
     assert history.json()["items"][2]["snapshot"]["name"] == "Test Event"
 
 
-def test_delete_observables(client_valid_access_token, db):
+def test_delete_observables(client, db):
     # Create a comment
     alert_tree = helpers.create_alert(db=db)
     observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
@@ -101,18 +101,18 @@ def test_delete_observables(client_valid_access_token, db):
     assert observable_tree.node.comments[0].value == "test"
 
     # Delete it
-    delete = client_valid_access_token.delete(f"/api/node/comment/{comment.uuid}")
+    delete = client.delete(f"/api/node/comment/{comment.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
-    get = client_valid_access_token.get(f"/api/node/comment/{comment.uuid}")
+    get = client.get(f"/api/node/comment/{comment.uuid}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
     # And make sure the node no longer shows the comment
     assert len(alert_tree.node.comments) == 0
 
     # Verify the history record
-    history = client_valid_access_token.get(f"/api/observable/{observable_tree.node_uuid}/history")
+    history = client.get(f"/api/observable/{observable_tree.node_uuid}/history")
     assert history.json()["total"] == 3
     assert history.json()["items"][2]["action"] == "UPDATE"
     assert history.json()["items"][2]["action_by"]["username"] == "analyst"

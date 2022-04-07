@@ -16,13 +16,13 @@ are in place in order to account for this.
 #
 
 
-def test_delete_invalid_uuid(client_valid_access_token):
-    delete = client_valid_access_token.delete("/api/node/relationship/1")
+def test_delete_invalid_uuid(client):
+    delete = client.delete("/api/node/relationship/1")
     assert delete.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_delete_nonexistent_uuid(client_valid_access_token):
-    delete = client_valid_access_token.delete(f"/api/node/relationship/{uuid.uuid4()}")
+def test_delete_nonexistent_uuid(client):
+    delete = client.delete(f"/api/node/relationship/{uuid.uuid4()}")
     assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -31,7 +31,7 @@ def test_delete_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_delete(client_valid_access_token, db):
+def test_delete(client, db):
     # Create some nodes
     alert_tree1 = helpers.create_alert(db=db)
     alert_tree2 = helpers.create_alert(db=db)
@@ -40,19 +40,19 @@ def test_delete(client_valid_access_token, db):
     obj = helpers.create_node_relationship(node=alert_tree1.node, related_node=alert_tree2.node, type="test_rel", db=db)
 
     # Read it back
-    get = client_valid_access_token.get(f"/api/node/relationship/{obj.uuid}")
+    get = client.get(f"/api/node/relationship/{obj.uuid}")
     assert get.status_code == status.HTTP_200_OK
 
     # Delete it
-    delete = client_valid_access_token.delete(f"/api/node/relationship/{obj.uuid}")
+    delete = client.delete(f"/api/node/relationship/{obj.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
-    get = client_valid_access_token.get(f"/api/node/relationship/{obj.uuid}")
+    get = client.get(f"/api/node/relationship/{obj.uuid}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_delete_verify_observable(client_valid_access_token, db):
+def test_delete_verify_observable(client, db):
     # Create some nodes with relationships
     #
     # alert
@@ -71,7 +71,7 @@ def test_delete_verify_observable(client_valid_access_token, db):
     )
 
     # Delete the relationship
-    delete = client_valid_access_token.delete(f"/api/node/relationship/{relationship.uuid}")
+    delete = client.delete(f"/api/node/relationship/{relationship.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Removing a relationship counts as modifying the node, so it should have a new version
@@ -79,7 +79,7 @@ def test_delete_verify_observable(client_valid_access_token, db):
 
     # Verify the observable history. The first record is for creating the observable, and
     # the second record is from removing the node relationship.
-    history = client_valid_access_token.get(f"/api/observable/{observable_tree2.node_uuid}/history")
+    history = client.get(f"/api/observable/{observable_tree2.node_uuid}/history")
     assert len(history.json()["items"]) == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"

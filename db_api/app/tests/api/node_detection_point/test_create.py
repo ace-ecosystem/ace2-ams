@@ -27,12 +27,12 @@ from tests import helpers
         ("value", ""),
     ],
 )
-def test_create_invalid_fields(client_valid_access_token, key, value):
-    create = client_valid_access_token.post("/api/node/detection_point/", json=[{key: value}])
+def test_create_invalid_fields(client, key, value):
+    create = client.post("/api/node/detection_point/", json=[{key: value}])
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
+def test_create_duplicate_node_uuid_value(client, db):
     alert_tree = helpers.create_alert(db=db)
 
     # Create a detection point
@@ -41,7 +41,7 @@ def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
-    create = client_valid_access_token.post("/api/node/detection_point/", json=[create_json])
+    create = client.post("/api/node/detection_point/", json=[create_json])
     assert create.status_code == status.HTTP_201_CREATED
 
     # Make sure you cannot add the same detection point value to a node
@@ -50,7 +50,7 @@ def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
-    create = client_valid_access_token.post("/api/node/detection_point/", json=[create_json])
+    create = client.post("/api/node/detection_point/", json=[create_json])
     assert create.status_code == status.HTTP_409_CONFLICT
 
 
@@ -60,7 +60,7 @@ def test_create_duplicate_node_uuid_value(client_valid_access_token, db):
         ("uuid"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
+def test_create_duplicate_unique_fields(client, db, key):
     alert_tree = helpers.create_alert(db=db)
 
     # Create a detection point
@@ -69,7 +69,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
-    client_valid_access_token.post("/api/node/detection_point/", json=[create1_json])
+    client.post("/api/node/detection_point/", json=[create1_json])
 
     # Ensure you cannot create another detection point with the same unique field value
     create2_json = {
@@ -78,17 +78,17 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "value": "test2",
     }
     create2_json[key] = create1_json[key]
-    create2 = client_valid_access_token.post("/api/node/detection_point/", json=[create2_json])
+    create2 = client.post("/api/node/detection_point/", json=[create2_json])
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
-def test_create_nonexistent_node_uuid(client_valid_access_token, db):
+def test_create_nonexistent_node_uuid(client, db):
     create_json = {
         "node_uuid": str(uuid.uuid4()),
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
-    create = client_valid_access_token.post("/api/node/detection_point/", json=[create_json])
+    create = client.post("/api/node/detection_point/", json=[create_json])
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -97,7 +97,7 @@ def test_create_nonexistent_node_uuid(client_valid_access_token, db):
 #
 
 
-def test_create_verify_history_observables(client_valid_access_token, db):
+def test_create_verify_history_observables(client, db):
     alert_tree = helpers.create_alert(db=db)
     observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
 
@@ -105,11 +105,11 @@ def test_create_verify_history_observables(client_valid_access_token, db):
     create_json = [
         {"node_uuid": str(observable_tree.node_uuid), "value": "test"},
     ]
-    create = client_valid_access_token.post("/api/node/detection_point/", json=create_json)
+    create = client.post("/api/node/detection_point/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
-    history = client_valid_access_token.get(f"/api/observable/{observable_tree.node_uuid}/history")
+    history = client.get(f"/api/observable/{observable_tree.node_uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"
@@ -122,7 +122,7 @@ def test_create_verify_history_observables(client_valid_access_token, db):
     assert history.json()["items"][1]["snapshot"]["value"] == "test_value"
 
 
-def test_create_multiple(client_valid_access_token, db):
+def test_create_multiple(client, db):
     alert_tree1 = helpers.create_alert(db=db)
     obs_tree1 = helpers.create_observable(type="test_type", value="test_value1", parent_tree=alert_tree1, db=db)
     initial_alert1_version = alert_tree1.node.version
@@ -148,7 +148,7 @@ def test_create_multiple(client_valid_access_token, db):
         {"node_uuid": str(obs_tree2.node_uuid), "value": "test2"},
         {"node_uuid": str(obs_tree3.node_uuid), "value": "test3"},
     ]
-    create = client_valid_access_token.post("/api/node/detection_point/", json=create_json)
+    create = client.post("/api/node/detection_point/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # The observables should each have a detection point and a new version.
@@ -169,7 +169,7 @@ def test_create_multiple(client_valid_access_token, db):
     assert alert_tree3.node.version != initial_alert3_version
 
 
-def test_create_valid_required_fields(client_valid_access_token, db):
+def test_create_valid_required_fields(client, db):
     alert_tree = helpers.create_alert(db=db)
     initial_node_version = alert_tree.node.version
 
@@ -179,7 +179,7 @@ def test_create_valid_required_fields(client_valid_access_token, db):
         "uuid": str(uuid.uuid4()),
         "value": "test",
     }
-    create = client_valid_access_token.post("/api/node/detection_point/", json=[create_json])
+    create = client.post("/api/node/detection_point/", json=[create_json])
     assert create.status_code == status.HTTP_201_CREATED
     assert len(alert_tree.node.detection_points) == 1
     assert alert_tree.node.detection_points[0].value == "test"

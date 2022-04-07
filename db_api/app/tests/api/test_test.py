@@ -50,29 +50,29 @@ def test_not_testing_mode_reset_database(client):
 #
 
 
-def test_add_alerts(client_valid_access_token):
-    get = client_valid_access_token.get("/api/alert/")
+def test_add_alerts(client):
+    get = client.get("/api/alert/")
     assert get.json()["total"] == 0
 
-    result = client_valid_access_token.post("/api/test/add_alerts", json={"template": "small.json", "count": 1})
+    result = client.post("/api/test/add_alerts", json={"template": "small.json", "count": 1})
     assert result.status_code == status.HTTP_204_NO_CONTENT
 
-    get = client_valid_access_token.get("/api/alert/")
+    get = client.get("/api/alert/")
     assert get.json()["total"] == 1
 
 
-def test_add_event(client_valid_access_token):
-    get = client_valid_access_token.get("/api/alert/")
+def test_add_event(client):
+    get = client.get("/api/alert/")
     assert get.json()["total"] == 0
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 0
 
-    result = client_valid_access_token.post(
+    result = client.post(
         "/api/test/add_event", json={"alert_template": "small.json", "alert_count": 1, "name": "Test Event", "status": "OPEN"}
     )
     assert result.status_code == status.HTTP_204_NO_CONTENT
 
-    get = client_valid_access_token.get("/api/alert/")
+    get = client.get("/api/alert/")
     assert get.json()["total"] == 1
-    get = client_valid_access_token.get("/api/event/")
+    get = client.get("/api/event/")
     assert get.json()["total"] == 1

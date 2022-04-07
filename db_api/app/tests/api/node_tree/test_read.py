@@ -10,20 +10,20 @@ from tests import helpers
 #
 
 
-def test_get_node_tree_nodes_invalid_uuid(client_valid_access_token):
-    get = client_valid_access_token.post("/api/node/tree/observable", json=["1"])
+def test_get_node_tree_nodes_invalid_uuid(client):
+    get = client.post("/api/node/tree/observable", json=["1"])
     assert get.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_get_node_tree_nodes_nonexistent_type(client_valid_access_token, db):
+def test_get_node_tree_nodes_nonexistent_type(client, db):
     alert_tree = helpers.create_alert(db=db)
 
-    get = client_valid_access_token.post("/api/node/tree/abc", json=[str(alert_tree.node_uuid)])
+    get = client.post("/api/node/tree/abc", json=[str(alert_tree.node_uuid)])
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_get_node_tree_nodes_nonexistent_uuid(client_valid_access_token):
-    get = client_valid_access_token.post("/api/node/tree/observable", json=[str(uuid.uuid4())])
+def test_get_node_tree_nodes_nonexistent_uuid(client):
+    get = client.post("/api/node/tree/observable", json=[str(uuid.uuid4())])
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -32,7 +32,7 @@ def test_get_node_tree_nodes_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_get_node_tree_nodes(client_valid_access_token, db):
+def test_get_node_tree_nodes(client, db):
     # Create an alert tree where the same observable type+value appears twice
     alert_tree = helpers.create_alert(db=db)
     observable1_tree = helpers.create_observable(type="fqdn", value="bad.com", parent_tree=alert_tree, db=db)
@@ -51,7 +51,7 @@ def test_get_node_tree_nodes(client_valid_access_token, db):
     # email_address: badguy@bad.com
     # fqdn: bad.com
     # ipv4: 127.0.0.1
-    get = client_valid_access_token.post(
+    get = client.post(
         "/api/node/tree/observable", json=[str(alert_tree.node_uuid), str(alert_tree2.node_uuid)]
     )
     assert get.status_code == status.HTTP_200_OK

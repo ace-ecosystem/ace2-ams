@@ -31,10 +31,10 @@ from tests import helpers
         ("uuid", ""),
     ],
 )
-def test_create_invalid_fields(client_valid_access_token, key, value):
+def test_create_invalid_fields(client, key, value):
     create_json = {"node_uuid": str(uuid.uuid4()), "related_node_uuid": str(uuid.uuid4()), "type": "test"}
     create_json[key] = value
-    create = client_valid_access_token.post("/api/node/relationship/type/", json=create_json)
+    create = client.post("/api/node/relationship/type/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -44,7 +44,7 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
         ("uuid"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
+def test_create_duplicate_unique_fields(client, db, key):
     # Create two nodes
     alert_tree1 = helpers.create_alert(db=db)
     alert_tree2 = helpers.create_alert(db=db)
@@ -60,7 +60,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "related_node_uuid": str(alert_tree2.node_uuid),
         "type": "test_rel",
     }
-    client_valid_access_token.post("/api/node/relationship/", json=create1_json)
+    client.post("/api/node/relationship/", json=create1_json)
 
     # Ensure you cannot create another relationship with the same unique field value
     create2_json = {
@@ -70,7 +70,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "type": "test_rel2",
     }
     create2_json[key] = create1_json[key]
-    create2 = client_valid_access_token.post("/api/node/relationship/", json=create2_json)
+    create2 = client.post("/api/node/relationship/", json=create2_json)
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
@@ -82,7 +82,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         ("type"),
     ],
 )
-def test_create_missing_required_fields(client_valid_access_token, db, key):
+def test_create_missing_required_fields(client, db, key):
     # Create two nodes
     alert_tree1 = helpers.create_alert(db=db)
     alert_tree2 = helpers.create_alert(db=db)
@@ -99,7 +99,7 @@ def test_create_missing_required_fields(client_valid_access_token, db, key):
     }
 
     del create_json[key]
-    create = client_valid_access_token.post("/api/node/relationship/", json=create_json)
+    create = client.post("/api/node/relationship/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -112,7 +112,7 @@ def test_create_missing_required_fields(client_valid_access_token, db, key):
     "key,value",
     [("uuid", str(uuid.uuid4()))],
 )
-def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
+def test_create_valid_optional_fields(client, db, key, value):
     # Create two nodes
     alert_tree1 = helpers.create_alert(db=db)
     alert_tree2 = helpers.create_alert(db=db)
@@ -129,15 +129,15 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
     create_json[key] = value
 
     # Create the object
-    create = client_valid_access_token.post("/api/node/relationship/", json=create_json)
+    create = client.post("/api/node/relationship/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()[key] == value
 
 
-def test_create_valid_required_fields(client_valid_access_token, db):
+def test_create_valid_required_fields(client, db):
     # Create two nodes
     alert_tree1 = helpers.create_alert(db=db)
     alert_tree2 = helpers.create_alert(db=db)
@@ -152,17 +152,17 @@ def test_create_valid_required_fields(client_valid_access_token, db):
         "type": "test_rel",
     }
 
-    create = client_valid_access_token.post("/api/node/relationship/", json=create_json)
+    create = client.post("/api/node/relationship/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["node_uuid"] == str(alert_tree1.node_uuid)
     assert get.json()["related_node"]["uuid"] == str(alert_tree2.node_uuid)
     assert get.json()["type"]["value"] == "test_rel"
 
 
-def test_create_verify_observable(client_valid_access_token, db):
+def test_create_verify_observable(client, db):
     # Create some nodes with relationships
     #
     # alert
@@ -185,7 +185,7 @@ def test_create_verify_observable(client_valid_access_token, db):
         "type": "IS_HASH_OF",
     }
 
-    create = client_valid_access_token.post("/api/node/relationship/", json=create_json)
+    create = client.post("/api/node/relationship/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Adding a relationship counts as modifying the node, so it should have a new version
@@ -193,7 +193,7 @@ def test_create_verify_observable(client_valid_access_token, db):
 
     # Verify the observable history. The first record is for creating the observable, and
     # the second record is from adding the node relationship.
-    history = client_valid_access_token.get(f"/api/observable/{observable_tree2.node_uuid}/history")
+    history = client.get(f"/api/observable/{observable_tree2.node_uuid}/history")
     assert len(history.json()["items"]) == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"

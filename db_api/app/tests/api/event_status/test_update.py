@@ -27,13 +27,13 @@ from tests import helpers
         ("value", ""),
     ],
 )
-def test_update_invalid_fields(client_valid_access_token, key, value):
-    update = client_valid_access_token.patch(f"/api/event/status/{uuid.uuid4()}", json={key: value})
+def test_update_invalid_fields(client, key, value):
+    update = client.patch(f"/api/event/status/{uuid.uuid4()}", json={key: value})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_update_invalid_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch("/api/event/status/1", json={"value": "test"})
+def test_update_invalid_uuid(client):
+    update = client.patch("/api/event/status/1", json={"value": "test"})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -43,18 +43,18 @@ def test_update_invalid_uuid(client_valid_access_token):
         ("value"),
     ],
 )
-def test_update_duplicate_unique_fields(client_valid_access_token, db, key):
+def test_update_duplicate_unique_fields(client, db, key):
     # Create some objects
     obj1 = helpers.create_event_status(value="test", db=db)
     obj2 = helpers.create_event_status(value="test2", db=db)
 
     # Ensure you cannot update a unique field to a value that already exists
-    update = client_valid_access_token.patch(f"/api/event/status/{obj2.uuid}", json={key: getattr(obj1, key)})
+    update = client.patch(f"/api/event/status/{obj2.uuid}", json={key: getattr(obj1, key)})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
-def test_update_nonexistent_uuid(client_valid_access_token):
-    update = client_valid_access_token.patch(f"/api/event/status/{uuid.uuid4()}", json={"value": "test"})
+def test_update_nonexistent_uuid(client):
+    update = client.patch(f"/api/event/status/{uuid.uuid4()}", json={"value": "test"})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -72,7 +72,7 @@ def test_update_nonexistent_uuid(client_valid_access_token):
         ("value", "test", "test"),
     ],
 )
-def test_update(client_valid_access_token, db, key, initial_value, updated_value):
+def test_update(client, db, key, initial_value, updated_value):
     # Create the object
     obj = helpers.create_event_status(value="test", db=db)
 
@@ -80,12 +80,12 @@ def test_update(client_valid_access_token, db, key, initial_value, updated_value
     setattr(obj, key, initial_value)
 
     # Update it
-    update = client_valid_access_token.patch(f"/api/event/status/{obj.uuid}", json={key: updated_value})
+    update = client.patch(f"/api/event/status/{obj.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert getattr(obj, key) == updated_value
 
 
-def test_update_queue(client_valid_access_token, db):
+def test_update_queue(client, db):
     helpers.create_queue(value="default", db=db)
     helpers.create_queue(value="updated", db=db)
 
@@ -93,6 +93,6 @@ def test_update_queue(client_valid_access_token, db):
     obj = helpers.create_event_status(value="test", queues=["default"], db=db)
 
     # Update it
-    update = client_valid_access_token.patch(f"/api/event/status/{obj.uuid}", json={"queues": ["updated"]})
+    update = client.patch(f"/api/event/status/{obj.uuid}", json={"queues": ["updated"]})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.queues[0].value == "updated"

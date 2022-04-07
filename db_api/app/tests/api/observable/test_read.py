@@ -10,13 +10,13 @@ from tests import helpers
 #
 
 
-def test_get_invalid_uuid(client_valid_access_token):
-    get = client_valid_access_token.get("/api/observable/1")
+def test_get_invalid_uuid(client):
+    get = client.get("/api/observable/1")
     assert get.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_get_nonexistent_uuid(client_valid_access_token):
-    get = client_valid_access_token.get(f"/api/observable/{uuid.uuid4()}")
+def test_get_nonexistent_uuid(client):
+    get = client.get(f"/api/observable/{uuid.uuid4()}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -25,16 +25,16 @@ def test_get_nonexistent_uuid(client_valid_access_token):
 #
 
 
-def test_get(client_valid_access_token, db):
+def test_get(client, db):
     alert_tree = helpers.create_alert(db=db)
     observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
 
-    get = client_valid_access_token.get(f"/api/observable/{observable_tree.node.uuid}")
+    get = client.get(f"/api/observable/{observable_tree.node.uuid}")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["node_type"] == "observable"
 
 
-def test_get_all(client_valid_access_token, db):
+def test_get_all(client, db):
     alert_tree = helpers.create_alert(db=db)
     observable_tree = helpers.create_observable(type="test_type", value="test", parent_tree=alert_tree, db=db)
     helpers.create_observable(type="test_type", value="test2", parent_tree=alert_tree, db=db)
@@ -44,18 +44,18 @@ def test_get_all(client_valid_access_token, db):
     helpers.create_observable(type="test_type", value="test2", parent_tree=observable_tree, db=db)
 
     # Read them back
-    get = client_valid_access_token.get("/api/observable/")
+    get = client.get("/api/observable/")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["total"] == 2
 
 
-def test_get_all_empty(client_valid_access_token):
-    get = client_valid_access_token.get("/api/observable/")
+def test_get_all_empty(client):
+    get = client.get("/api/observable/")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["total"] == 0
 
 
-def test_observable_relationships(client_valid_access_token, db):
+def test_observable_relationships(client, db):
     # Create some nodes with relationships
     #
     # alert
@@ -82,7 +82,7 @@ def test_observable_relationships(client_valid_access_token, db):
 
     # The o2 observable has three relationships but only two observable relationship. The observable relationships
     # should be sorted by the related observable's type then value.
-    get = client_valid_access_token.get(f"/api/observable/{observable_tree3.node_uuid}")
+    get = client.get(f"/api/observable/{observable_tree3.node_uuid}")
     assert get.status_code == status.HTTP_200_OK
     assert len(observable_tree3.node.relationships) == 3
     assert len(get.json()["observable_relationships"]) == 2

@@ -74,10 +74,10 @@ from tests import helpers
         ("vectors", ["abc", 123]),
     ],
 )
-def test_create_invalid_fields(client_valid_access_token, key, value):
+def test_create_invalid_fields(client, key, value):
     create_json = {"name": "test", "status": "OPEN"}
     create_json[key] = value
-    create = client_valid_access_token.post("/api/event/", json=create_json)
+    create = client.post("/api/event/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert key in create.text
 
@@ -90,9 +90,9 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
         ("threats", INVALID_LIST_STRING_VALUES),
     ],
 )
-def test_create_invalid_node_fields(client_valid_access_token, key, values):
+def test_create_invalid_node_fields(client, key, values):
     for value in values:
-        create = client_valid_access_token.post(
+        create = client.post(
             "/api/event/", json={key: value, "name": "test", "queue": "external", "status": "OPEN"}
         )
         assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -105,119 +105,119 @@ def test_create_invalid_node_fields(client_valid_access_token, key, values):
         ("uuid"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
+def test_create_duplicate_unique_fields(client, db, key):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
     create1_json = {"uuid": str(uuid.uuid4()), "name": "test", "queue": "external", "status": "OPEN"}
-    client_valid_access_token.post("/api/event/", json=create1_json)
+    client.post("/api/event/", json=create1_json)
 
     # Ensure you cannot create another object with the same unique field value
     create2_json = {"name": "test2", "queue": "external", "status": "OPEN"}
     create2_json[key] = create1_json[key]
-    create2 = client_valid_access_token.post("/api/event/", json=create2_json)
+    create2 = client.post("/api/event/", json=create2_json)
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
-def test_create_nonexistent_owner(client_valid_access_token, db):
+def test_create_nonexistent_owner(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"owner": "johndoe", "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "user" in create.text
 
 
-def test_create_nonexistent_prevention_tools(client_valid_access_token, db):
+def test_create_nonexistent_prevention_tools(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"prevention_tools": ["test"], "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "event_prevention_tool" in create.text
 
 
-def test_create_nonexistent_queue(client_valid_access_token, db):
+def test_create_nonexistent_queue(client, db):
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"name": "test", "queue": "nonexistent_queue", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "queue" in create.text
 
 
-def test_create_nonexistent_remediations(client_valid_access_token, db):
+def test_create_nonexistent_remediations(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"remediations": ["test"], "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "event_remediation" in create.text
 
 
-def test_create_nonexistent_risk_level(client_valid_access_token, db):
+def test_create_nonexistent_risk_level(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"risk_level": "test", "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "event_risk_level" in create.text
 
 
-def test_create_nonexistent_source(client_valid_access_token, db):
+def test_create_nonexistent_source(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"source": "test", "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "event_source" in create.text
 
 
-def test_create_nonexistent_status(client_valid_access_token, db):
+def test_create_nonexistent_status(client, db):
     helpers.create_queue(value="external", db=db)
 
     # Create an object
-    create = client_valid_access_token.post("/api/event/", json={"name": "test", "queue": "external", "status": "OPEN"})
+    create = client.post("/api/event/", json={"name": "test", "queue": "external", "status": "OPEN"})
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "event_status" in create.text
 
 
-def test_create_nonexistent_type(client_valid_access_token, db):
+def test_create_nonexistent_type(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"type": "test", "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "event_type" in create.text
 
 
-def test_create_nonexistent_vectors(client_valid_access_token, db):
+def test_create_nonexistent_vectors(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"vectors": ["test"], "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
@@ -228,11 +228,11 @@ def test_create_nonexistent_vectors(client_valid_access_token, db):
     "key",
     [("tags"), ("threat_actors"), ("threats")],
 )
-def test_create_nonexistent_node_fields(client_valid_access_token, db, key):
+def test_create_nonexistent_node_fields(client, db, key):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={key: ["abc"], "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
@@ -244,18 +244,18 @@ def test_create_nonexistent_node_fields(client_valid_access_token, db, key):
 #
 
 
-def test_create_verify_history(client_valid_access_token, db):
+def test_create_verify_history(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     event_uuid = str(uuid.uuid4())
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"uuid": event_uuid, "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
-    history = client_valid_access_token.get(f"/api/event/{event_uuid}/history")
+    history = client.get(f"/api/event/{event_uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "CREATE"
     assert history.json()["items"][0]["action_by"]["username"] == "analyst"
@@ -307,18 +307,18 @@ def test_create_verify_history(client_valid_access_token, db):
         ("uuid", str(uuid.uuid4())),
     ],
 )
-def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
+def test_create_valid_optional_fields(client, db, key, value):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create the object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={key: value, "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
 
     # If the test is for one of the times, make sure that the retrieved value matches the proper UTC timestamp
     if key.endswith("_time") and value:
@@ -327,127 +327,127 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
         assert get.json()[key] == value
 
 
-def test_create_valid_owner(client_valid_access_token, db):
+def test_create_valid_owner(client, db):
     helpers.create_user(username="johndoe", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Use the user to create a new event
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"owner": "johndoe", "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["owner"]["username"] == "johndoe"
 
 
-def test_create_valid_prevention_tools(client_valid_access_token, db):
+def test_create_valid_prevention_tools(client, db):
     helpers.create_event_prevention_tool(value="test", db=db)
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Use the prevention tool to create a new event
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"prevention_tools": ["test"], "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["prevention_tools"][0]["value"] == "test"
 
 
-def test_create_valid_remediations(client_valid_access_token, db):
+def test_create_valid_remediations(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_remediation(value="test", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Use the remediation to create a new event
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"remediations": ["test"], "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["remediations"][0]["value"] == "test"
 
 
-def test_create_valid_risk_level(client_valid_access_token, db):
+def test_create_valid_risk_level(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_risk_level(value="test", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Use the risk level to create a new event
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"risk_level": "test", "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["risk_level"]["value"] == "test"
 
 
-def test_create_valid_source(client_valid_access_token, db):
+def test_create_valid_source(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_source(value="test", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Use the source to create a new event
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"source": "test", "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["source"]["value"] == "test"
 
 
-def test_create_valid_type(client_valid_access_token, db):
+def test_create_valid_type(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
     helpers.create_event_type(value="test", db=db)
 
     # Use the type to create a new event
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"type": "test", "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["type"]["value"] == "test"
 
 
-def test_create_valid_vectors(client_valid_access_token, db):
+def test_create_valid_vectors(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
     helpers.create_event_vector(value="test", db=db)
 
     # Use the vector to create a new event
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/", json={"vectors": ["test"], "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["vectors"][0]["value"] == "test"
 
 
-def test_create_valid_required_fields(client_valid_access_token, db):
+def test_create_valid_required_fields(client, db):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create the object
-    create = client_valid_access_token.post("/api/event/", json={"name": "test", "queue": "external", "status": "OPEN"})
+    create = client.post("/api/event/", json={"name": "test", "queue": "external", "status": "OPEN"})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.status_code == 200
     assert get.json()["name"] == "test"
     assert get.json()["status"]["value"] == "OPEN"
@@ -461,7 +461,7 @@ def test_create_valid_required_fields(client_valid_access_token, db):
         ("threats", VALID_LIST_STRING_VALUES, helpers.create_node_threat),
     ],
 )
-def test_create_valid_node_fields(client_valid_access_token, db, key, value_lists, helper_create_func):
+def test_create_valid_node_fields(client, db, key, value_lists, helper_create_func):
     for value_list in value_lists:
         for value in value_list:
             helper_create_func(value=value, db=db)
@@ -469,11 +469,11 @@ def test_create_valid_node_fields(client_valid_access_token, db, key, value_list
         helpers.create_queue(value="external", db=db)
         helpers.create_event_status(value="OPEN", db=db)
 
-        create = client_valid_access_token.post(
+        create = client.post(
             "/api/event/", json={key: value_list, "name": "test", "queue": "external", "status": "OPEN"}
         )
         assert create.status_code == status.HTTP_201_CREATED
 
         # Read it back
-        get = client_valid_access_token.get(create.headers["Content-Location"])
+        get = client.get(create.headers["Content-Location"])
         assert len(get.json()[key]) == len(list(set(value_list)))

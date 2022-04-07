@@ -57,10 +57,10 @@ from tests import helpers
         ("version", "v1.0"),
     ],
 )
-def test_create_invalid_fields(client_valid_access_token, key, value):
+def test_create_invalid_fields(client, key, value):
     create_json = {"value": "test"}
     create_json[key] = value
-    create = client_valid_access_token.post("/api/analysis/module_type/", json=create_json)
+    create = client.post("/api/analysis/module_type/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -70,24 +70,24 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
         ("uuid"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, key):
+def test_create_duplicate_unique_fields(client, key):
     # Create an object
     create1_json = {"uuid": str(uuid.uuid4()), "value": "test", "version": "1.0.0"}
-    client_valid_access_token.post("/api/analysis/module_type/", json=create1_json)
+    client.post("/api/analysis/module_type/", json=create1_json)
 
     # Ensure you cannot create another object with the same unique field value
     create2_json = {"value": "test2", "version": "1.0.0"}
     create2_json[key] = create1_json[key]
-    create2 = client_valid_access_token.post("/api/analysis/module_type/", json=create2_json)
+    create2 = client.post("/api/analysis/module_type/", json=create2_json)
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
-def test_create_duplicate_version_value(client_valid_access_token):
+def test_create_duplicate_version_value(client):
     # Create an object
-    client_valid_access_token.post("/api/analysis/module_type/", json={"value": "test", "version": "1.0.0"})
+    client.post("/api/analysis/module_type/", json={"value": "test", "version": "1.0.0"})
 
     # Ensure you cannot create another object with the same unique value+version combination
-    create = client_valid_access_token.post("/api/analysis/module_type/", json={"value": "test", "version": "1.0.0"})
+    create = client.post("/api/analysis/module_type/", json={"value": "test", "version": "1.0.0"})
     assert create.status_code == status.HTTP_409_CONFLICT
 
 
@@ -98,10 +98,10 @@ def test_create_duplicate_version_value(client_valid_access_token):
         ("version"),
     ],
 )
-def test_create_missing_required_fields(client_valid_access_token, key):
+def test_create_missing_required_fields(client, key):
     create_json = {"value": "test", "version": "1.0.0"}
     del create_json[key]
-    create = client_valid_access_token.post("/api/analysis/module_type/", json=create_json)
+    create = client.post("/api/analysis/module_type/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -113,8 +113,8 @@ def test_create_missing_required_fields(client_valid_access_token, key):
         ("required_tags"),
     ],
 )
-def test_create_nonexistent_list_values(client_valid_access_token, key):
-    create = client_valid_access_token.post(
+def test_create_nonexistent_list_values(client, key):
+    create = client.post(
         "/api/analysis/module_type/", json={"value": "test", "version": "1.0.0", key: ["test_value"]}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
@@ -137,15 +137,15 @@ def test_create_nonexistent_list_values(client_valid_access_token, key):
         ("uuid", str(uuid.uuid4())),
     ],
 )
-def test_create_valid_optional_fields(client_valid_access_token, key, value):
+def test_create_valid_optional_fields(client, key, value):
     # Create the object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/analysis/module_type/", json={key: value, "value": "test", "version": "1.0.0"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
 
     # If the test is for extended_version, make sure the JSON form of the supplied string matches
     if key == "extended_version" and value:
@@ -171,7 +171,7 @@ def test_create_valid_optional_fields(client_valid_access_token, key, value):
         ("required_tags", ["test", "test"]),
     ],
 )
-def test_create_valid_list_fields(client_valid_access_token, db, key, values):
+def test_create_valid_list_fields(client, db, key, values):
     # Create the objects
     if key == "observable_types":
         create_func = helpers.create_observable_type
@@ -184,21 +184,21 @@ def test_create_valid_list_fields(client_valid_access_token, db, key, values):
         create_func(value=value, db=db)
 
     # Create the analysis module type
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/analysis/module_type/", json={key: values, "value": "test", "version": "1.0.0"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert len(get.json()[key]) == len(list(set(values)))
 
 
-def test_create_valid_required_fields(client_valid_access_token):
+def test_create_valid_required_fields(client):
     # Create the object
-    create = client_valid_access_token.post("/api/analysis/module_type/", json={"value": "test", "version": "1.0.0"})
+    create = client.post("/api/analysis/module_type/", json={"value": "test", "version": "1.0.0"})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["value"] == "test"

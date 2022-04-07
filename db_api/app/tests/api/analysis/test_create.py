@@ -35,12 +35,12 @@ from tests import helpers
         ("uuid", "abc"),
     ],
 )
-def test_create_invalid_fields(client_valid_access_token, key, value):
+def test_create_invalid_fields(client, key, value):
     create_json = {
         "node_tree": {"root_node_uuid": str(uuid.uuid4())},
     }
     create_json[key] = value
-    create = client_valid_access_token.post("/api/analysis/", json=create_json)
+    create = client.post("/api/analysis/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert len(create.json()["detail"]) == 1
     assert key in create.json()["detail"][0]["loc"]
@@ -52,7 +52,7 @@ def test_create_invalid_fields(client_valid_access_token, key, value):
         ("uuid"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
+def test_create_duplicate_unique_fields(client, db, key):
     node_tree = helpers.create_alert(db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
@@ -62,7 +62,7 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "analysis_module_type": str(analysis_module_type.uuid),
         "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
     }
-    client_valid_access_token.post("/api/analysis/", json=create1_json)
+    client.post("/api/analysis/", json=create1_json)
 
     # Ensure you cannot create another object with the same unique field value
     create2_json = {
@@ -70,14 +70,14 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
     }
     create2_json[key] = create1_json[key]
-    create2 = client_valid_access_token.post("/api/analysis/", json=create2_json)
+    create2 = client.post("/api/analysis/", json=create2_json)
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
-def test_create_nonexistent_analysis_module_type(client_valid_access_token, db):
+def test_create_nonexistent_analysis_module_type(client, db):
     node_tree = helpers.create_alert(db=db)
 
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/analysis/",
         json={
             "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
@@ -87,12 +87,12 @@ def test_create_nonexistent_analysis_module_type(client_valid_access_token, db):
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_create_invalid_email_analysis(client_valid_access_token, db):
+def test_create_invalid_email_analysis(client, db):
     node_tree = helpers.create_alert(db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="Email Analysis", db=db)
 
     # Create the analysis - it is missing the required "from_address" key
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/analysis/",
         json={
             "analysis_module_type": str(analysis_module_type.uuid),
@@ -115,12 +115,12 @@ def test_create_invalid_email_analysis(client_valid_access_token, db):
     assert create.status_code == status.HTTP_400_BAD_REQUEST
 
 
-def test_create_invalid_faqueue_analysis(client_valid_access_token, db):
+def test_create_invalid_faqueue_analysis(client, db):
     node_tree = helpers.create_alert(db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="FA Queue Analysis", db=db)
 
     # Create the analysis - it is missing the required "hits" key
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/analysis/",
         json={
             "analysis_module_type": str(analysis_module_type.uuid),
@@ -132,12 +132,12 @@ def test_create_invalid_faqueue_analysis(client_valid_access_token, db):
     assert create.status_code == status.HTTP_400_BAD_REQUEST
 
 
-def test_create_invalid_sandbox_analysis(client_valid_access_token, db):
+def test_create_invalid_sandbox_analysis(client, db):
     node_tree = helpers.create_alert(db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="Sandbox Analysis - Sandbox1", db=db)
 
     # Create the analysis - it is missing the required "filename" key
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/analysis/",
         json={
             "analysis_module_type": str(analysis_module_type.uuid),
@@ -149,12 +149,12 @@ def test_create_invalid_sandbox_analysis(client_valid_access_token, db):
     assert create.status_code == status.HTTP_400_BAD_REQUEST
 
 
-def test_create_invalid_user_analysis(client_valid_access_token, db):
+def test_create_invalid_user_analysis(client, db):
     node_tree = helpers.create_alert(db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="User Analysis", db=db)
 
     # Create the analysis - it is missing the required "user_id" key
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/analysis/",
         json={
             "analysis_module_type": str(analysis_module_type.uuid),
@@ -171,12 +171,12 @@ def test_create_invalid_user_analysis(client_valid_access_token, db):
 #
 
 
-def test_create_node_metadata(client_valid_access_token, db):
+def test_create_node_metadata(client, db):
     node_tree = helpers.create_alert(db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Create the object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/analysis/",
         json={
             "analysis_module_type": str(analysis_module_type.uuid),
@@ -190,7 +190,7 @@ def test_create_node_metadata(client_valid_access_token, db):
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read the alert back to get its tree structure that contains the analysis to verify its node_metadata
-    get = client_valid_access_token.get(f"http://testserver/api/alert/{node_tree.root_node_uuid}")
+    get = client.get(f"http://testserver/api/alert/{node_tree.root_node_uuid}")
     assert get.json()["children"][0]["node_metadata"] == {
         "display": {"type": "override_type", "value": "override_value"}
     }
@@ -211,12 +211,12 @@ def test_create_node_metadata(client_valid_access_token, db):
         ("uuid", str(uuid.uuid4())),
     ],
 )
-def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
+def test_create_valid_optional_fields(client, db, key, value):
     node_tree = helpers.create_alert(db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Create the object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/analysis/",
         json={
             "analysis_module_type": str(analysis_module_type.uuid),
@@ -227,7 +227,7 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
 
     # If the test is for details, make sure the JSON form of the supplied string matches
     if key == "details" and value:
@@ -236,12 +236,12 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
         assert get.json()[key] == value
 
 
-def test_create_valid_required_fields(client_valid_access_token, db):
+def test_create_valid_required_fields(client, db):
     node_tree = helpers.create_alert(db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Create the object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/analysis/",
         json={
             "analysis_module_type": str(analysis_module_type.uuid),
@@ -251,5 +251,5 @@ def test_create_valid_required_fields(client_valid_access_token, db):
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back, but since there are no required fields to create the analysis, there is nothing to verify.
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.status_code == 200

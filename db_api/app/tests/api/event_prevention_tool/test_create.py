@@ -31,11 +31,11 @@ from tests import helpers
         ("value", ""),
     ],
 )
-def test_create_invalid_fields(client_valid_access_token, db, key, value):
+def test_create_invalid_fields(client, db, key, value):
     helpers.create_queue(value="default", db=db)
     create_json = {"value": "test", "queues": ["default"]}
     create_json[key] = value
-    create = client_valid_access_token.post("/api/event/prevention_tool/", json=create_json)
+    create = client.post("/api/event/prevention_tool/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -46,16 +46,16 @@ def test_create_invalid_fields(client_valid_access_token, db, key, value):
         ("value"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
+def test_create_duplicate_unique_fields(client, db, key):
     # Create an object
     helpers.create_queue(value="default", db=db)
     create1_json = {"uuid": str(uuid.uuid4()), "value": "test", "queues": ["default"]}
-    client_valid_access_token.post("/api/event/prevention_tool/", json=create1_json)
+    client.post("/api/event/prevention_tool/", json=create1_json)
 
     # Ensure you cannot create another object with the same unique field value
     create2_json = {"value": "test2", "queues": ["default"]}
     create2_json[key] = create1_json[key]
-    create2 = client_valid_access_token.post("/api/event/prevention_tool/", json=create2_json)
+    create2 = client.post("/api/event/prevention_tool/", json=create2_json)
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
@@ -66,11 +66,11 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         ("value"),
     ],
 )
-def test_create_missing_required_fields(client_valid_access_token, db, key):
+def test_create_missing_required_fields(client, db, key):
     helpers.create_queue(value="default", db=db)
     create_json = {"value": "test", "queues": ["default"]}
     del create_json[key]
-    create = client_valid_access_token.post("/api/event/prevention_tool/", json=create_json)
+    create = client.post("/api/event/prevention_tool/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -83,27 +83,27 @@ def test_create_missing_required_fields(client_valid_access_token, db, key):
     "key,value",
     [("description", None), ("description", "test"), ("uuid", str(uuid.uuid4()))],
 )
-def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
+def test_create_valid_optional_fields(client, db, key, value):
     # Create the object
     helpers.create_queue(value="default", db=db)
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/prevention_tool/", json={key: value, "value": "test", "queues": ["default"]}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()[key] == value
 
 
-def test_create_valid_required_fields(client_valid_access_token, db):
+def test_create_valid_required_fields(client, db):
     # Create the object
     helpers.create_queue(value="default", db=db)
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/event/prevention_tool/", json={"value": "test", "queues": ["default"]}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["value"] == "test"

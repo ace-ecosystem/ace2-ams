@@ -40,11 +40,11 @@ from tests import helpers
         ("value", ""),
     ],
 )
-def test_create_invalid_fields(client_valid_access_token, db, key, value):
+def test_create_invalid_fields(client, db, key, value):
     helpers.create_queue(value="default", db=db)
     create_json = {"types": ["test_type"], "value": "test", "queues": ["default"]}
     create_json[key] = value
-    create = client_valid_access_token.post("/api/node/threat/", json=create_json)
+    create = client.post("/api/node/threat/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -55,18 +55,18 @@ def test_create_invalid_fields(client_valid_access_token, db, key, value):
         ("value"),
     ],
 )
-def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
+def test_create_duplicate_unique_fields(client, db, key):
     helpers.create_queue(value="default", db=db)
     helpers.create_node_threat_type(value="test_type", db=db)
 
     # Create an object
     create1_json = {"types": ["test_type"], "uuid": str(uuid.uuid4()), "value": "test", "queues": ["default"]}
-    client_valid_access_token.post("/api/node/threat/", json=create1_json)
+    client.post("/api/node/threat/", json=create1_json)
 
     # Ensure you cannot create another object with the same unique field value
     create2_json = {"types": ["test_type"], "value": "test2", "queues": ["default"]}
     create2_json[key] = create1_json[key]
-    create2 = client_valid_access_token.post("/api/node/threat/", json=create2_json)
+    create2 = client.post("/api/node/threat/", json=create2_json)
     assert create2.status_code == status.HTTP_409_CONFLICT
 
 
@@ -78,25 +78,25 @@ def test_create_duplicate_unique_fields(client_valid_access_token, db, key):
         ("value"),
     ],
 )
-def test_create_missing_required_fields(client_valid_access_token, db, key):
+def test_create_missing_required_fields(client, db, key):
     helpers.create_queue(value="default", db=db)
     create_json = {"types": ["test_type"], "value": "test", "queues": ["default"]}
     del create_json[key]
-    create = client_valid_access_token.post("/api/node/threat/", json=create_json)
+    create = client.post("/api/node/threat/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_create_nonexistent_queue(client_valid_access_token, db):
+def test_create_nonexistent_queue(client, db):
     helpers.create_node_threat_type(value="test_type", db=db)
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/node/threat/", json={"types": ["test_type"], "value": "test", "queues": ["nonexistent_queue"]}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
-def test_create_nonexistent_type(client_valid_access_token, db):
+def test_create_nonexistent_type(client, db):
     helpers.create_queue(value="default", db=db)
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/node/threat/", json={"types": ["test_type"], "value": "test", "queues": ["default"]}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
@@ -115,18 +115,18 @@ def test_create_nonexistent_type(client_valid_access_token, db):
         ("uuid", str(uuid.uuid4())),
     ],
 )
-def test_create_valid_optional_fields(client_valid_access_token, db, key, value):
+def test_create_valid_optional_fields(client, db, key, value):
     helpers.create_queue(value="default", db=db)
     helpers.create_node_threat_type(value="test_type", db=db)
 
     # Create the object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/node/threat/", json={key: value, "types": ["test_type"], "value": "test", "queues": ["default"]}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()[key] == value
 
 
@@ -138,32 +138,32 @@ def test_create_valid_optional_fields(client_valid_access_token, db, key, value)
         (["test_type", "test_type"], 1),
     ],
 )
-def test_create_valid_types(client_valid_access_token, db, values, list_length):
+def test_create_valid_types(client, db, values, list_length):
     helpers.create_queue(value="default", db=db)
     for value in values:
         helpers.create_node_threat_type(value=value, db=db)
 
     # Create the object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/node/threat/", json={"types": values, "value": "test", "queues": ["default"]}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert len(get.json()["types"]) == list_length
 
 
-def test_create_valid_required_fields(client_valid_access_token, db):
+def test_create_valid_required_fields(client, db):
     helpers.create_queue(value="default", db=db)
     helpers.create_node_threat_type(value="test_type", db=db)
 
     # Create the object
-    create = client_valid_access_token.post(
+    create = client.post(
         "/api/node/threat/", json={"types": ["test_type"], "value": "test", "queues": ["default"]}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
-    get = client_valid_access_token.get(create.headers["Content-Location"])
+    get = client.get(create.headers["Content-Location"])
     assert get.json()["value"] == "test"
