@@ -29,14 +29,14 @@ parser.add_argument("--vectors", type=str, help="Comma-separated list of vectors
 args = parser.parse_args()
 
 # When you specify the path to the JSON file, you do so from the perspective
-# of outisde the container, so you preface it with backend/ so that you can
+# of outisde the container, so you preface it with db_api/ so that you can
 # use tab-completion on your local command line.
 #
-# However, this runs inside of the container, so the backend/ part of the path
+# However, this runs inside of the container, so the db_api/ part of the path
 # does not exist and must be removed so that it is a valid path inside the container.
 #
-# Example: backend/app/tests/alerts/blah.json -> /app/tests/alerts/blah.json
-alert_json_path = args.alert_json_path.replace("backend", "")
+# Example: db_api/app/tests/alerts/blah.json -> /app/tests/alerts/blah.json
+alert_json_path = args.alert_json_path.replace("db_api", "")
 
 db: Session = next(get_db())
 
