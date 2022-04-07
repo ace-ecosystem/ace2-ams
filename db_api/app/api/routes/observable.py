@@ -5,6 +5,8 @@ from sqlalchemy.sql.expression import select
 from typing import List, Optional, Union
 from uuid import UUID
 
+from api.routes import helpers
+from api.routes.node import create_node, update_node
 from api_models.history import ObservableHistoryRead
 from api_models.observable import (
     ObservableCreate,
@@ -12,8 +14,6 @@ from api_models.observable import (
     ObservableRead,
     ObservableUpdate,
 )
-from api.routes import helpers
-from api.routes.node import create_node, update_node
 from db import crud
 from db.database import get_db
 from db.schemas.observable import Observable, ObservableHistory

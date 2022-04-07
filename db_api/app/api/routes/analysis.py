@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 from uuid import UUID
 
+from api.routes import helpers
+from api.routes.node import create_node, update_node
 from api_models.analysis import AnalysisCreate, AnalysisRead, AnalysisUpdate
 from api_models.analysis_details import (
     EmailAnalysisDetails,
@@ -9,8 +11,6 @@ from api_models.analysis_details import (
     SandboxAnalysisDetails,
     UserAnalysisDetails,
 )
-from api.routes import helpers
-from api.routes.node import create_node, update_node
 from db import crud
 from db.database import get_db
 from db.schemas.analysis import Analysis

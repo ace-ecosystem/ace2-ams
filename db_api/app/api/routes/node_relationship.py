@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from api_models.node_relationship import NodeRelationshipCreate, NodeRelationshipRead
 from api.routes import helpers
+from api_models.node_relationship import NodeRelationshipCreate, NodeRelationshipRead
 from db import crud
 from db.database import get_db
 from db.schemas.node import Node

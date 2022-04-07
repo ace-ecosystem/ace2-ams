@@ -6,13 +6,12 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from uuid import UUID, uuid4
 
-from api_models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
-from api_models.create import Create
-from api_models.history import AlertHistoryRead
-from api_models.observable import ObservableRead
 from api.routes import helpers
 from api.routes.node import create_node, update_node
 from api.routes.observable import _create_observable
+from api_models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
+from api_models.create import Create
+from api_models.history import AlertHistoryRead
 from db import crud
 from db.database import get_db
 from db.schemas.alert import Alert, AlertHistory
@@ -26,7 +25,7 @@ from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.node_tree import NodeTree
-from db.schemas.observable import Observable, ObservableHistory
+from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.user import User

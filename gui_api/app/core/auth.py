@@ -9,8 +9,6 @@ from fastapi.security import OAuth2
 from fastapi.security.utils import get_authorization_scheme_param
 from jose import ExpiredSignatureError, jwt, JWTError
 from passlib.hash import bcrypt_sha256
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 from typing import Dict, Mapping, Optional
 
 from core.config import get_settings

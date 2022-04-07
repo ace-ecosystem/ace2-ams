@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, status
 from fastapi_pagination.limit_offset import LimitOffsetPage
 from pydantic import BaseModel
 from typing import Callable

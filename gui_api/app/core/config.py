@@ -1,9 +1,3 @@
-"""
-Environment variables / configuration
-"""
-
-import os
-
 from pydantic import BaseSettings, Field
 
 

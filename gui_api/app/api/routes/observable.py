@@ -1,7 +1,6 @@
 import json
 
 from fastapi import APIRouter, Depends, Request, Response
-from typing import Optional
 from uuid import UUID
 
 from api import db_api

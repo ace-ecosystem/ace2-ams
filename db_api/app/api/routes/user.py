@@ -5,6 +5,7 @@ from sqlalchemy.sql.expression import select
 from typing import Optional
 from uuid import UUID
 
+from api.routes import helpers
 from api_models.auth import ValidateRefreshToken
 from api_models.history import UserHistoryRead
 from api_models.user import (
@@ -12,7 +13,6 @@ from api_models.user import (
     UserRead,
     UserUpdate,
 )
-from api.routes import helpers
 from core.auth import hash_password
 from db import crud
 from db.database import get_db

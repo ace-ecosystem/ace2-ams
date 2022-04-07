@@ -4,12 +4,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 from uuid import UUID
 
+from api.routes import helpers
 from api_models.event_status import (
     EventStatusCreate,
     EventStatusRead,
     EventStatusUpdate,
 )
-from api.routes import helpers
 from db import crud
 from db.database import get_db
 from db.schemas.queue import Queue

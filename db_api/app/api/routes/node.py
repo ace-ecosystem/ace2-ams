@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, status
 from fastapi.exceptions import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
-from uuid import UUID, uuid4
+from uuid import UUID
 
-from api_models.node import NodeCreate, NodeUpdate, NodeVersion
 from api.routes import helpers
+from api_models.node import NodeCreate, NodeUpdate, NodeVersion
 from db import crud
 from db.database import get_db
 from db.schemas.node import Node

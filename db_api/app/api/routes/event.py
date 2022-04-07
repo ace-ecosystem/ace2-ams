@@ -7,6 +7,17 @@ from sqlalchemy.sql.expression import select
 from typing import List, Optional
 from uuid import UUID
 
+from api.routes import helpers
+from api.routes.event_summaries import (
+    get_detection_point_summary,
+    get_email_headers_body_summary,
+    get_email_summary,
+    get_observable_summary,
+    get_sandbox_summary,
+    get_url_domain_summary,
+    get_user_summary,
+)
+from api.routes.node import create_node, update_node
 from api_models.create import Create
 from api_models.event import EventCreate, EventRead, EventUpdateMultiple
 from api_models.event_summaries import (
@@ -19,17 +30,6 @@ from api_models.event_summaries import (
     UserSummary,
 )
 from api_models.history import EventHistoryRead
-from api.routes import helpers
-from api.routes.event_summaries import (
-    get_detection_point_summary,
-    get_email_headers_body_summary,
-    get_email_summary,
-    get_observable_summary,
-    get_sandbox_summary,
-    get_url_domain_summary,
-    get_user_summary,
-)
-from api.routes.node import create_node, update_node
 from db import crud
 from db.database import get_db
 from db.schemas.alert import Alert, AlertHistory

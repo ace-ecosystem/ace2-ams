@@ -4,8 +4,8 @@ from alembic.config import Config
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 
-from api_models.test import AddTestAlert, AddTestEvent
 from api.routes import helpers
+from api_models.test import AddTestAlert, AddTestEvent
 from core.config import is_in_testing_mode
 from db.database import get_db
 from seed import seed

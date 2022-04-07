@@ -4,12 +4,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import select
 from uuid import UUID
 
+from api.routes import helpers
 from api_models.analysis_module_type import (
     AnalysisModuleTypeCreate,
     AnalysisModuleTypeRead,
     AnalysisModuleTypeUpdate,
 )
-from api.routes import helpers
 from db import crud
 from db.database import get_db
 from db.schemas.analysis_module_type import AnalysisModuleType
