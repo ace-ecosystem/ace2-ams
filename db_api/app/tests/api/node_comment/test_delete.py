@@ -33,12 +33,14 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete_alerts(client, db):
     # Create a comment
-    alert_tree = helpers.create_alert(db=db)
-    comment = helpers.create_node_comment(node=alert_tree.node, username="johndoe", value="test", db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
+    comment = helpers.create_node_comment(
+        node=alert_tree.node, username="johndoe", value="test", db=db, history_username="analyst"
+    )
     assert alert_tree.node.comments[0].value == "test"
 
     # Delete it
-    delete = client.delete(f"/api/node/comment/{comment.uuid}")
+    delete = client.delete(f"/api/node/comment/{comment.uuid}?history_username=analyst")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
@@ -64,12 +66,14 @@ def test_delete_alerts(client, db):
 
 def test_delete_events(client, db):
     # Create a comment
-    event = helpers.create_event(name="Test Event", db=db)
-    comment = helpers.create_node_comment(node=event, username="johndoe", value="test", db=db)
+    event = helpers.create_event(name="Test Event", db=db, history_username="analyst")
+    comment = helpers.create_node_comment(
+        node=event, username="johndoe", value="test", db=db, history_username="analyst"
+    )
     assert event.comments[0].value == "test"
 
     # Delete it
-    delete = client.delete(f"/api/node/comment/{comment.uuid}")
+    delete = client.delete(f"/api/node/comment/{comment.uuid}?history_username=analyst")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
@@ -95,13 +99,17 @@ def test_delete_events(client, db):
 
 def test_delete_observables(client, db):
     # Create a comment
-    alert_tree = helpers.create_alert(db=db)
-    observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
-    comment = helpers.create_node_comment(node=observable_tree.node, username="johndoe", value="test", db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
+    observable_tree = helpers.create_observable(
+        type="test_type", value="test_value", parent_tree=alert_tree, db=db, history_username="analyst"
+    )
+    comment = helpers.create_node_comment(
+        node=observable_tree.node, username="johndoe", value="test", db=db, history_username="analyst"
+    )
     assert observable_tree.node.comments[0].value == "test"
 
     # Delete it
-    delete = client.delete(f"/api/node/comment/{comment.uuid}")
+    delete = client.delete(f"/api/node/comment/{comment.uuid}?history_username=analyst")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone

@@ -28,7 +28,7 @@ from tests import helpers
     ],
 )
 def test_create_invalid_fields(client, key, value):
-    create = client.post("/api/node/comment/", json=[{key: value}])
+    create = client.post("/api/node/comment/", json=[{key: value, "username": "analyst"}])
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -40,6 +40,7 @@ def test_create_duplicate_node_uuid_value(client, db):
         "node_uuid": str(alert_tree.node_uuid),
         "uuid": str(uuid.uuid4()),
         "value": "test",
+        "username": "analyst",
     }
     create = client.post("/api/node/comment/", json=[create_json])
     assert create.status_code == status.HTTP_201_CREATED
@@ -49,6 +50,7 @@ def test_create_duplicate_node_uuid_value(client, db):
         "node_uuid": str(alert_tree.node_uuid),
         "uuid": str(uuid.uuid4()),
         "value": "test",
+        "username": "analyst",
     }
     create = client.post("/api/node/comment/", json=[create_json])
     assert create.status_code == status.HTTP_409_CONFLICT
@@ -68,6 +70,7 @@ def test_create_duplicate_unique_fields(client, db, key):
         "node_uuid": str(alert_tree.node_uuid),
         "uuid": str(uuid.uuid4()),
         "value": "test",
+        "username": "analyst",
     }
     client.post("/api/node/comment/", json=[create1_json])
 
@@ -76,6 +79,7 @@ def test_create_duplicate_unique_fields(client, db, key):
         "node_uuid": str(alert_tree.node_uuid),
         "uuid": str(uuid.uuid4()),
         "value": "test2",
+        "username": "analyst",
     }
     create2_json[key] = create1_json[key]
     create2 = client.post("/api/node/comment/", json=[create2_json])
@@ -88,6 +92,7 @@ def test_create_nonexistent_node_uuid(client, db):
         "node_uuid": str(uuid.uuid4()),
         "uuid": str(uuid.uuid4()),
         "value": "test",
+        "username": "analyst",
     }
     create = client.post("/api/node/comment/", json=[create_json])
     assert create.status_code == status.HTTP_404_NOT_FOUND
@@ -99,13 +104,13 @@ def test_create_nonexistent_node_uuid(client, db):
 
 
 def test_create_verify_history_alerts(client, db):
-    alert_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
 
     # Add a comment to the node
     create_json = [
-        {"node_uuid": str(alert_tree.node_uuid), "value": "test"},
+        {"node_uuid": str(alert_tree.node_uuid), "value": "test", "username": "analyst"},
     ]
-    create = client.post("/api/node/comment/", json=create_json)
+    create = client.post("/api/node/comment/?history_username=analyst", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
@@ -123,13 +128,13 @@ def test_create_verify_history_alerts(client, db):
 
 
 def test_create_verify_history_events(client, db):
-    event = helpers.create_event(name="Test Event", db=db)
+    event = helpers.create_event(name="Test Event", db=db, history_username="analyst")
 
     # Add a comment to the node
     create_json = [
-        {"node_uuid": str(event.uuid), "value": "test"},
+        {"node_uuid": str(event.uuid), "value": "test", "username": "analyst"},
     ]
-    create = client.post("/api/node/comment/", json=create_json)
+    create = client.post("/api/node/comment/?history_username=analyst", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
@@ -148,13 +153,15 @@ def test_create_verify_history_events(client, db):
 
 def test_create_verify_history_observables(client, db):
     alert_tree = helpers.create_alert(db=db)
-    observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
+    observable_tree = helpers.create_observable(
+        type="test_type", value="test_value", parent_tree=alert_tree, db=db, history_username="analyst"
+    )
 
     # Add a comment to the node
     create_json = [
-        {"node_uuid": str(observable_tree.node_uuid), "value": "test"},
+        {"node_uuid": str(observable_tree.node_uuid), "value": "test", "username": "analyst"},
     ]
-    create = client.post("/api/node/comment/", json=create_json)
+    create = client.post("/api/node/comment/?history_username=analyst", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
@@ -187,9 +194,9 @@ def test_create_multiple(client, db):
 
     # Add a comment to each node at once
     create_json = [
-        {"node_uuid": str(alert_tree1.node_uuid), "value": "test1"},
-        {"node_uuid": str(alert_tree2.node_uuid), "value": "test2"},
-        {"node_uuid": str(alert_tree3.node_uuid), "value": "test3"},
+        {"node_uuid": str(alert_tree1.node_uuid), "value": "test1", "username": "analyst"},
+        {"node_uuid": str(alert_tree2.node_uuid), "value": "test2", "username": "analyst"},
+        {"node_uuid": str(alert_tree3.node_uuid), "value": "test3", "username": "analyst"},
     ]
     create = client.post("/api/node/comment/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
@@ -219,6 +226,7 @@ def test_create_valid_required_fields(client, db):
         "node_uuid": str(alert_tree.node_uuid),
         "uuid": str(uuid.uuid4()),
         "value": "test",
+        "username": "analyst",
     }
     create = client.post("/api/node/comment/", json=[create_json])
     assert create.status_code == status.HTTP_201_CREATED

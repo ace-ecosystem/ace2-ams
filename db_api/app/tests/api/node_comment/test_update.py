@@ -20,18 +20,18 @@ from tests import helpers
     ],
 )
 def test_update_invalid_fields(client, key, value):
-    update = client.patch(f"/api/node/comment/{uuid.uuid4()}", json={key: value})
+    update = client.patch(f"/api/node/comment/{uuid.uuid4()}", json={key: value, "username": "analyst"})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert key in update.text
 
 
 def test_update_invalid_uuid(client):
-    update = client.patch("/api/node/comment/1", json={"value": "test"})
+    update = client.patch("/api/node/comment/1", json={"value": "test", "username": "analyst"})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_update_nonexistent_uuid(client):
-    update = client.patch(f"/api/node/comment/{uuid.uuid4()}", json={"value": "test"})
+    update = client.patch(f"/api/node/comment/{uuid.uuid4()}", json={"value": "test", "username": "analyst"})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -44,7 +44,7 @@ def test_update_duplicate_node_uuid_value(client, db):
     comment2 = helpers.create_node_comment(node=node_tree.node, username="johndoe", value="test2", db=db)
 
     # Make sure you cannot update a comment on a node to one that already exists
-    update = client.patch(f"/api/node/comment/{comment2.uuid}", json={"value": comment1.value})
+    update = client.patch(f"/api/node/comment/{comment2.uuid}", json={"value": comment1.value, "username": "johndoe"})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
@@ -55,14 +55,18 @@ def test_update_duplicate_node_uuid_value(client, db):
 
 def test_update_alerts(client, db):
     # Create a comment
-    alert_tree = helpers.create_alert(db=db)
-    comment = helpers.create_node_comment(node=alert_tree.node, username="johndoe", value="test", db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
+    comment = helpers.create_node_comment(
+        node=alert_tree.node, username="johndoe", value="test", db=db, history_username="johndoe"
+    )
     original_time = comment.insert_time
     assert alert_tree.node.comments[0].value == "test"
     assert comment.user.username == "johndoe"
 
     # Update it
-    update = client.patch(f"/api/node/comment/{comment.uuid}", json={"value": "updated"})
+    update = client.patch(
+        f"/api/node/comment/{comment.uuid}?history_username=analyst", json={"value": "updated", "username": "analyst"}
+    )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.comments[0].value == "updated"
     assert alert_tree.node.comments[0].user.username == "analyst"
@@ -95,14 +99,18 @@ def test_update_alerts(client, db):
 
 def test_update_events(client, db):
     # Create a comment
-    event = helpers.create_event(name="Test Event", db=db)
-    comment = helpers.create_node_comment(node=event, username="johndoe", value="test", db=db)
+    event = helpers.create_event(name="Test Event", db=db, history_username="analyst")
+    comment = helpers.create_node_comment(
+        node=event, username="johndoe", value="test", db=db, history_username="johndoe"
+    )
     original_time = comment.insert_time
     assert event.comments[0].value == "test"
     assert comment.user.username == "johndoe"
 
     # Update it
-    update = client.patch(f"/api/node/comment/{comment.uuid}", json={"value": "updated"})
+    update = client.patch(
+        f"/api/node/comment/{comment.uuid}?history_username=analyst", json={"value": "updated", "username": "analyst"}
+    )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert event.comments[0].value == "updated"
     assert event.comments[0].user.username == "analyst"
@@ -136,14 +144,20 @@ def test_update_events(client, db):
 def test_update_observables(client, db):
     # Create a comment
     alert_tree = helpers.create_alert(db=db)
-    observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
-    comment = helpers.create_node_comment(node=observable_tree.node, username="johndoe", value="test", db=db)
+    observable_tree = helpers.create_observable(
+        type="test_type", value="test_value", parent_tree=alert_tree, db=db, history_username="analyst"
+    )
+    comment = helpers.create_node_comment(
+        node=observable_tree.node, username="johndoe", value="test", db=db, history_username="johndoe"
+    )
     original_time = comment.insert_time
     assert observable_tree.node.comments[0].value == "test"
     assert comment.user.username == "johndoe"
 
     # Update it
-    update = client.patch(f"/api/node/comment/{comment.uuid}", json={"value": "updated"})
+    update = client.patch(
+        f"/api/node/comment/{comment.uuid}?history_username=analyst", json={"value": "updated", "username": "analyst"}
+    )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert observable_tree.node.comments[0].value == "updated"
     assert observable_tree.node.comments[0].user.username == "analyst"

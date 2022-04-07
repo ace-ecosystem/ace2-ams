@@ -128,12 +128,21 @@ helpers.api_route_update(router, update_node_comment)
 #
 
 
-def delete_node_comment(uuid: UUID, db: Session = Depends(get_db)):
+def delete_node_comment(uuid: UUID, history_username: Optional[str] = None, db: Session = Depends(get_db)):
     # Read the current node comment from the database to get its value
     db_node: NodeComment = crud.read(uuid=uuid, db_table=NodeComment, db=db)
 
     # Update any root node versions
     crud.update_node_version(node=db_node, db=db)
+
+    # If a username was given, add an entry to the appropriate node history table for deleting the comment
+    if history_username:
+        crud.record_node_update_history(
+            record_node=db_node.node,
+            action_by=crud.read_user_by_username(username=history_username, db=db),
+            diffs=[crud.Diff(field="comments", added_to_list=[], removed_from_list=[db_node.value])],
+            db=db,
+        )
 
     # Delete the comment
     crud.delete(uuid=uuid, db_table=NodeComment, db=db)
