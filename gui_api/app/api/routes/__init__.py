@@ -24,6 +24,7 @@ from api.routes.node_tree import router as node_tree_router
 from api.routes.observable_type import router as observable_type_router
 from api.routes.ping import router as ping_router
 from api.routes.queue import router as queue_router
+from api.routes.test import router as test_router
 from api.routes.user import router as user_router
 
 
@@ -53,4 +54,5 @@ router.include_router(node_tree_router)
 router.include_router(observable_type_router)
 router.include_router(ping_router)
 router.include_router(queue_router)
+router.include_router(test_router)
 router.include_router(user_router)
