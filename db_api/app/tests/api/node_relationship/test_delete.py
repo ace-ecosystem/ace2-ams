@@ -59,11 +59,13 @@ def test_delete_verify_observable(client, db):
     #   analysis
     #     o1
     #     o2 - IS_HASH_OF o1
-    alert_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
     analysis_tree = helpers.create_analysis(db=db, parent_tree=alert_tree)
-    observable_tree1 = helpers.create_observable(type="test_type", value="test_value", parent_tree=analysis_tree, db=db)
+    observable_tree1 = helpers.create_observable(
+        type="test_type", value="test_value", parent_tree=analysis_tree, db=db, history_username="analyst"
+    )
     observable_tree2 = helpers.create_observable(
-        type="test_type", value="test_value2", parent_tree=analysis_tree, db=db
+        type="test_type", value="test_value2", parent_tree=analysis_tree, db=db, history_username="analyst"
     )
     initial_version = observable_tree2.node.version
     relationship = helpers.create_node_relationship(
@@ -71,7 +73,7 @@ def test_delete_verify_observable(client, db):
     )
 
     # Delete the relationship
-    delete = client.delete(f"/api/node/relationship/{relationship.uuid}")
+    delete = client.delete(f"/api/node/relationship/{relationship.uuid}?history_username=analyst")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Removing a relationship counts as modifying the node, so it should have a new version

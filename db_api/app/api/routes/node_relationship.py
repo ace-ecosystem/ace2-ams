@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
+from typing import Optional
 from uuid import UUID
 
 from api.routes import helpers
@@ -26,6 +27,7 @@ def create_node_relationship(
     create: NodeRelationshipCreate,
     request: Request,
     response: Response,
+    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     # Make sure the nodes actually exist
@@ -42,6 +44,15 @@ def create_node_relationship(
 
     # Adding the relationship counts as modifying the node, so update its version
     crud.update_node_version(node=node, db=db)
+
+    # Add the node history record
+    if history_username:
+        crud.record_node_update_history(
+            record_node=node,
+            action_by=crud.read_user_by_username(username=history_username, db=db),
+            diffs=[crud.Diff(field="relationships", added_to_list=[str(related_node.uuid)], removed_from_list=[])],
+            db=db,
+        )
 
     response.headers["Content-Location"] = request.url_for("get_node_relationship", uuid=obj.uuid)
 
@@ -68,6 +79,7 @@ helpers.api_route_read(router, get_node_relationship, NodeRelationshipRead)
 
 def delete_node_relationship(
     uuid: UUID,
+    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     # Read the relationship to get the impacted node
@@ -80,6 +92,15 @@ def delete_node_relationship(
 
     # Delete the relationship
     crud.delete(uuid=uuid, db_table=NodeRelationship, db=db)
+
+    # Add the node history record
+    if history_username:
+        crud.record_node_update_history(
+            record_node=node,
+            action_by=crud.read_user_by_username(username=history_username, db=db),
+            diffs=[crud.Diff(field="relationships", added_to_list=[], removed_from_list=[str(related_node_uuid)])],
+            db=db,
+        )
 
 
 helpers.api_route_delete(router, delete_node_relationship)

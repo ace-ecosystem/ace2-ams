@@ -169,11 +169,13 @@ def test_create_verify_observable(client, db):
     #   analysis
     #     o1
     #     o2 - IS_HASH_OF o1
-    alert_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
     analysis_tree = helpers.create_analysis(db=db, parent_tree=alert_tree)
-    observable_tree1 = helpers.create_observable(type="test_type", value="test_value", parent_tree=analysis_tree, db=db)
+    observable_tree1 = helpers.create_observable(
+        type="test_type", value="test_value", parent_tree=analysis_tree, db=db, history_username="analyst"
+    )
     observable_tree2 = helpers.create_observable(
-        type="test_type", value="test_value2", parent_tree=analysis_tree, db=db
+        type="test_type", value="test_value2", parent_tree=analysis_tree, db=db, history_username="analyst"
     )
     initial_version = observable_tree2.node.version
     helpers.create_node_relationship_type(value="IS_HASH_OF", db=db)
@@ -185,7 +187,7 @@ def test_create_verify_observable(client, db):
         "type": "IS_HASH_OF",
     }
 
-    create = client.post("/api/node/relationship/", json=create_json)
+    create = client.post("/api/node/relationship/?history_username=analyst", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Adding a relationship counts as modifying the node, so it should have a new version
