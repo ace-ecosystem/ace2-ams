@@ -80,8 +80,10 @@ def test_get_filter_disposition(client, db):
 
 
 def test_get_filter_disposition_user(client, db):
-    helpers.create_alert(db)
-    alert_tree = helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="analyst")
+    helpers.create_alert(db, history_username="analyst")
+    alert_tree = helpers.create_alert(
+        db, disposition="FALSE_POSITIVE", updated_by_user="analyst", history_username="analyst"
+    )
 
     # There should be 2 total alerts
     get = client.get("/api/alert/")
@@ -95,17 +97,19 @@ def test_get_filter_disposition_user(client, db):
 
 def test_get_filter_disposition_user_multiple(client, db):
     helpers.create_alert_disposition(value="DELIVERY", rank=2, db=db)
-    helpers.create_alert(db)
+    helpers.create_alert(db, history_username="analyst")
 
     # This alert was first dispositioned by alice
-    alert_tree = helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="alice")
+    alert_tree = helpers.create_alert(
+        db, disposition="FALSE_POSITIVE", updated_by_user="alice", history_username="alice"
+    )
 
     # This alert was first dispositioned by analyst
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="analyst")
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", updated_by_user="analyst", history_username="analyst")
 
     # analyst re-dispositions alice's alert
     update = client.patch(
-        "/api/alert/", json=[{"disposition": "DELIVERY", "uuid": str(alert_tree.node_uuid)}]
+        "/api/alert/?history_username=analyst", json=[{"disposition": "DELIVERY", "uuid": str(alert_tree.node_uuid)}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
@@ -125,9 +129,11 @@ def test_get_filter_disposition_user_multiple(client, db):
 
 def test_get_filter_dispositioned_after(client, db):
     now = datetime.utcnow()
-    helpers.create_alert(db)
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now)
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now + timedelta(seconds=5))
+    helpers.create_alert(db, history_username="analyst")
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now, history_username="analyst")
+    helpers.create_alert(
+        db, disposition="FALSE_POSITIVE", update_time=now + timedelta(seconds=5), history_username="analyst"
+    )
 
     # There should be 3 total alerts
     get = client.get("/api/alert/")
@@ -143,9 +149,11 @@ def test_get_filter_dispositioned_after(client, db):
 
 def test_get_filter_dispositioned_before(client, db):
     now = datetime.utcnow()
-    helpers.create_alert(db)
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now - timedelta(seconds=5))
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now)
+    helpers.create_alert(db, history_username="analyst")
+    helpers.create_alert(
+        db, disposition="FALSE_POSITIVE", update_time=now - timedelta(seconds=5), history_username="analyst"
+    )
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now, history_username="analyst")
 
     # There should be 3 total alerts
     get = client.get("/api/alert/")
@@ -163,9 +171,9 @@ def test_get_filter_dispositioned_after_and_before(client, db):
     now = datetime.utcnow()
     after = now - timedelta(days=1)
     before = now + timedelta(days=1)
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=after)
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now)
-    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=before)
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=after, history_username="analyst")
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=now, history_username="analyst")
+    helpers.create_alert(db, disposition="FALSE_POSITIVE", update_time=before, history_username="analyst")
 
     # There should be 3 total alerts
     get = client.get("/api/alert/")

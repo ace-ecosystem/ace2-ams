@@ -92,6 +92,7 @@ def create_alert(
     disposition: Optional[str] = None,
     event: Optional[Event] = None,
     event_time: datetime = None,
+    history_username: Optional[str] = None,
     insert_time: datetime = None,
     name: str = "Test Alert",
     observables: Optional[List[dict]] = None,
@@ -169,26 +170,28 @@ def create_alert(
                 type=observable["type"],
                 value=observable["value"],
                 parent_tree=node_tree,
+                history_username=history_username,
                 db=db,
             )
 
     crud.commit(db)
 
-    # Add an entry to the history table
-    crud.record_node_create_history(
-        record_node=alert,
-        action_by=create_user(username="analyst", db=db),
-        db=db,
-    )
-
-    if diffs and updated_by_user:
-        crud.record_node_update_history(
+    if history_username:
+        # Add an entry to the history table
+        crud.record_node_create_history(
             record_node=alert,
-            action_by=create_user(username=updated_by_user, db=db),
-            action_time=update_time,
-            diffs=diffs,
+            action_by=create_user(username=history_username, db=db),
             db=db,
         )
+
+        if diffs and updated_by_user:
+            crud.record_node_update_history(
+                record_node=alert,
+                action_by=create_user(username=updated_by_user, db=db),
+                action_time=update_time,
+                diffs=diffs,
+                db=db,
+            )
 
     return node_tree
 
@@ -298,6 +301,7 @@ def create_event(
     contain_time: Optional[datetime] = None,
     created_time: Optional[datetime] = None,
     disposition_time: Optional[datetime] = None,
+    history_username: Optional[str] = None,
     owner: Optional[str] = None,
     prevention_tools: Optional[List[str]] = None,
     queue: str = "external",
@@ -368,11 +372,12 @@ def create_event(
     db.add(obj)
     crud.commit(db)
 
-    crud.record_node_create_history(
-        record_node=obj,
-        action_by=create_user(username="analyst", db=db),
-        db=db,
-    )
+    if history_username:
+        crud.record_node_create_history(
+            record_node=obj,
+            action_by=create_user(username=history_username, db=db),
+            db=db,
+        )
 
     return obj
 
@@ -448,7 +453,12 @@ def create_event_vector(value: str, db: Session, queues: List[str] = None) -> Ev
 
 
 def create_node_comment(
-    node: Node, username: str, value: str, db: Session, insert_time: Optional[datetime] = None
+    node: Node,
+    username: str,
+    value: str,
+    db: Session,
+    history_username: Optional[str] = None,
+    insert_time: Optional[datetime] = None,
 ) -> NodeComment:
     if insert_time is None:
         insert_time = datetime.utcnow()
@@ -459,19 +469,25 @@ def create_node_comment(
     db.add(obj)
     crud.commit(db)
 
-    crud.record_node_update_history(
-        record_node=node,
-        action_by=create_user(username=username, display_name=username, db=db),
-        action_time=insert_time,
-        diffs=[crud.Diff(field="comments", added_to_list=[obj.value], removed_from_list=[])],
-        db=db,
-    )
+    if history_username:
+        crud.record_node_update_history(
+            record_node=node,
+            action_by=create_user(username=history_username, display_name=history_username, db=db),
+            action_time=insert_time,
+            diffs=[crud.Diff(field="comments", added_to_list=[obj.value], removed_from_list=[])],
+            db=db,
+        )
 
     return obj
 
 
 def create_node_detection_point(
-    node: Node, username: str, value: str, db: Session, insert_time: Optional[datetime] = None
+    node: Node,
+    username: str,
+    value: str,
+    db: Session,
+    history_username: Optional[str] = None,
+    insert_time: Optional[datetime] = None,
 ) -> NodeDetectionPoint:
     if insert_time is None:
         insert_time = datetime.utcnow()
@@ -480,13 +496,14 @@ def create_node_detection_point(
     db.add(obj)
     crud.commit(db)
 
-    crud.record_node_update_history(
-        record_node=node,
-        action_by=create_user(username=username, display_name=username, db=db),
-        action_time=insert_time,
-        diffs=[crud.Diff(field="detection_points", added_to_list=[obj.value], removed_from_list=[])],
-        db=db,
-    )
+    if history_username:
+        crud.record_node_update_history(
+            record_node=node,
+            action_by=create_user(username=history_username, display_name=history_username, db=db),
+            action_time=insert_time,
+            diffs=[crud.Diff(field="detection_points", added_to_list=[obj.value], removed_from_list=[])],
+            db=db,
+        )
 
     return obj
 
@@ -563,6 +580,7 @@ def create_observable(
     directives: Optional[List[str]] = None,
     expires_on: Optional[datetime] = None,
     for_detection: bool = False,
+    history_username: Optional[str] = None,
     node_metadata: Optional[Dict[str, object]] = None,
     redirection: Optional[Observable] = None,
     tags: Optional[List[str]] = None,
@@ -612,11 +630,12 @@ def create_observable(
 
     crud.commit(db)
 
-    crud.record_node_create_history(
-        record_node=obj,
-        action_by=create_user(username="analyst", db=db),
-        db=db,
-    )
+    if history_username:
+        crud.record_node_create_history(
+            record_node=obj,
+            action_by=create_user(username=history_username, db=db),
+            db=db,
+        )
 
     return node_tree
 
@@ -636,6 +655,7 @@ def create_user(
     display_name: str = "Analyst",
     email: Optional[str] = None,
     event_queue: str = "external",
+    history_username: Optional[str] = None,
     password: str = "asdfasdf",
     roles: List[str] = None,
 ) -> User:
@@ -664,12 +684,13 @@ def create_user(
     db.add(obj)
     crud.commit(db)
 
-    crud.record_create_history(
-        history_table=UserHistory,
-        action_by=obj,
-        record=obj,
-        db=db,
-    )
+    if history_username:
+        crud.record_create_history(
+            history_table=UserHistory,
+            action_by=obj,
+            record=obj,
+            db=db,
+        )
 
     return obj
 

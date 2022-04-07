@@ -436,7 +436,7 @@ def update_alerts(
             )
             db_alert.description = update_data["description"]
 
-        if "disposition" in update_data:
+        if "disposition" in update_data and history_username:
             old = db_alert.disposition.value if db_alert.disposition else None
             diffs.append(crud.create_diff(field="disposition", old=old, new=update_data["disposition"]))
 
@@ -444,7 +444,7 @@ def update_alerts(
                 value=update_data["disposition"], db_table=AlertDisposition, db=db
             )
             db_alert.disposition_time = datetime.utcnow()
-            # db_alert.disposition_user = crud.read_user_by_username(username=claims["sub"], db=db)
+            db_alert.disposition_user = crud.read_user_by_username(username=history_username, db=db)
 
         if "event_uuid" in update_data:
             diffs.append(crud.create_diff(field="event_uuid", old=db_alert.event_uuid, new=update_data["event_uuid"]))

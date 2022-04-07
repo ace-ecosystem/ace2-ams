@@ -67,9 +67,7 @@ def test_update_invalid_version(client, db):
 
     # Make sure you cannot update it using an invalid version. The version is
     # optional, but if given, it must match.
-    update = client.patch(
-        "/api/alert/", json=[{"version": str(uuid.uuid4()), "uuid": str(alert_tree.node_uuid)}]
-    )
+    update = client.patch("/api/alert/", json=[{"version": str(uuid.uuid4()), "uuid": str(alert_tree.node_uuid)}])
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
@@ -86,7 +84,9 @@ def test_update_nonexistent_fields(client, db, key, value):
     alert_tree = helpers.create_alert(db=db)
 
     # Make sure you cannot update it to use a nonexistent field value
-    update = client.patch("/api/alert/", json=[{key: value, "uuid": str(alert_tree.node_uuid)}])
+    update = client.patch(
+        "/api/alert/?history_username=analyst", json=[{key: value, "uuid": str(alert_tree.node_uuid)}]
+    )
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -114,7 +114,7 @@ def test_update_nonexistent_uuid(client):
 
 
 def test_update_disposition(client, db):
-    alert_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
     initial_version = alert_tree.node.version
 
     # Create a user
@@ -125,7 +125,7 @@ def test_update_disposition(client, db):
 
     # Update the disposition
     update = client.patch(
-        "/api/alert/", json=[{"disposition": "test", "uuid": str(alert_tree.node_uuid)}]
+        "/api/alert/?history_username=analyst", json=[{"disposition": "test", "uuid": str(alert_tree.node_uuid)}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.disposition.value == "test"
@@ -143,7 +143,7 @@ def test_update_disposition(client, db):
 
     # Set it back to None
     update = client.patch(
-        "/api/alert/", json=[{"disposition": None, "uuid": str(alert_tree.node_uuid)}]
+        "/api/alert/?history_username=analyst", json=[{"disposition": None, "uuid": str(alert_tree.node_uuid)}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.disposition is None
@@ -160,16 +160,17 @@ def test_update_disposition(client, db):
 
 
 def test_update_event_uuid(client, db):
-    alert_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
     initial_alert_version = alert_tree.node.version
 
     # Create an event
-    event = helpers.create_event(name="test", db=db)
+    event = helpers.create_event(name="test", db=db, history_username="analyst")
     initial_event_version = event.version
 
     # Update the alert to add it to the event
     update = client.patch(
-        "/api/alert/", json=[{"event_uuid": str(event.uuid), "uuid": str(alert_tree.node_uuid)}]
+        "/api/alert/?history_username=analyst",
+        json=[{"event_uuid": str(event.uuid), "uuid": str(alert_tree.node_uuid)}],
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.event_uuid == event.uuid
@@ -194,7 +195,7 @@ def test_update_event_uuid(client, db):
 
     # Set it back to None
     update = client.patch(
-        "/api/alert/", json=[{"event_uuid": None, "uuid": str(alert_tree.node_uuid)}]
+        "/api/alert/?history_username=analyst", json=[{"event_uuid": None, "uuid": str(alert_tree.node_uuid)}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.event is None
@@ -211,7 +212,7 @@ def test_update_event_uuid(client, db):
 
 
 def test_update_owner(client, db):
-    alert_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
     initial_alert_version = alert_tree.node.version
 
     # Create a user
@@ -219,7 +220,7 @@ def test_update_owner(client, db):
 
     # Update the owner
     update = client.patch(
-        "/api/alert/", json=[{"owner": "johndoe", "uuid": str(alert_tree.node_uuid)}]
+        "/api/alert/?history_username=analyst", json=[{"owner": "johndoe", "uuid": str(alert_tree.node_uuid)}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.owner.username == "johndoe"
@@ -236,7 +237,9 @@ def test_update_owner(client, db):
     assert history.json()["items"][1]["snapshot"]["owner"]["username"] == "johndoe"
 
     # Set it back to None
-    update = client.patch("/api/alert/", json=[{"owner": None, "uuid": str(alert_tree.node_uuid)}])
+    update = client.patch(
+        "/api/alert/?history_username=analyst", json=[{"owner": None, "uuid": str(alert_tree.node_uuid)}]
+    )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.owner is None
 
@@ -252,7 +255,7 @@ def test_update_owner(client, db):
 
 
 def test_update_queue(client, db):
-    alert_tree = helpers.create_alert(alert_queue="external", db=db)
+    alert_tree = helpers.create_alert(alert_queue="external", db=db, history_username="analyst")
     initial_alert_version = alert_tree.node.version
 
     # Create a new alert queue
@@ -260,7 +263,7 @@ def test_update_queue(client, db):
 
     # Update the queue
     update = client.patch(
-        "/api/alert/", json=[{"queue": "updated_queue", "uuid": str(alert_tree.node_uuid)}]
+        "/api/alert/?history_username=analyst", json=[{"queue": "updated_queue", "uuid": str(alert_tree.node_uuid)}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert alert_tree.node.queue.value == "updated_queue"
@@ -287,7 +290,13 @@ def test_update_queue(client, db):
 )
 def test_update_valid_node_fields(client, db, key, value_lists, helper_create_func):
     for value_list in value_lists:
-        alert_tree = helpers.create_alert(tags=["remove_me"], threat_actors=["remove_me"], threats=["remove_me"], db=db)
+        alert_tree = helpers.create_alert(
+            tags=["remove_me"],
+            threat_actors=["remove_me"],
+            threats=["remove_me"],
+            db=db,
+            history_username="analyst",
+        )
         initial_alert_version = alert_tree.node.version
 
         for value in value_list:
@@ -299,7 +308,7 @@ def test_update_valid_node_fields(client, db, key, value_lists, helper_create_fu
 
         # Update the alert
         update = client.patch(
-            "/api/alert/", json=[{key: value_list, "uuid": str(alert_tree.node_uuid)}]
+            "/api/alert/?history_username=analyst", json=[{key: value_list, "uuid": str(alert_tree.node_uuid)}]
         )
         assert update.status_code == status.HTTP_204_NO_CONTENT
         assert len(getattr(alert_tree.node, key)) == len(set(value_list))
@@ -336,7 +345,7 @@ def test_update_valid_node_fields(client, db, key, value_lists, helper_create_fu
     ],
 )
 def test_update(client, db, key, initial_value, updated_value):
-    alert_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
     initial_alert_version = alert_tree.node.version
 
     # Set the initial value on the alert
@@ -345,7 +354,7 @@ def test_update(client, db, key, initial_value, updated_value):
 
     # Update it
     update = client.patch(
-        "/api/alert/", json=[{key: updated_value, "uuid": str(alert_tree.node_uuid)}]
+        "/api/alert/?history_username=analyst", json=[{key: updated_value, "uuid": str(alert_tree.node_uuid)}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
@@ -369,14 +378,14 @@ def test_update(client, db, key, initial_value, updated_value):
 
 
 def test_update_multiple_alerts(client, db):
-    alert_tree1 = helpers.create_alert(db=db)
+    alert_tree1 = helpers.create_alert(db=db, history_username="analyst")
     initial_alert1_version = alert_tree1.node.version
 
-    alert_tree2 = helpers.create_alert(db=db)
+    alert_tree2 = helpers.create_alert(db=db, history_username="analyst")
     initial_alert2_version = alert_tree2.node.version
     initial_event_time = alert_tree2.node.event_time.isoformat()
 
-    alert_tree3 = helpers.create_alert(db=db)
+    alert_tree3 = helpers.create_alert(db=db, history_username="analyst")
     initial_alert3_version = alert_tree3.node.version
 
     assert alert_tree1.node.description is None
@@ -389,7 +398,7 @@ def test_update_multiple_alerts(client, db):
         {"event_time": "2022-01-01 00:00:00", "uuid": str(alert_tree2.node_uuid)},
         {"instructions": "updated_instructions", "uuid": str(alert_tree3.node_uuid)},
     ]
-    update = client.patch("/api/alert/", json=update_data)
+    update = client.patch("/api/alert/?history_username=analyst", json=update_data)
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     assert alert_tree1.node.description == "updated_description"
@@ -431,12 +440,12 @@ def test_update_multiple_alerts(client, db):
 
 
 def test_update_multiple_fields(client, db):
-    alert_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db, history_username="analyst")
     initial_alert_version = alert_tree.node.version
 
     # Update it
     update = client.patch(
-        "/api/alert/",
+        "/api/alert/?history_username=analyst",
         json=[
             {
                 "description": "updated_description",

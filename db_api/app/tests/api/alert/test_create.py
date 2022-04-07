@@ -273,7 +273,7 @@ def test_create_verify_history(client, db):
 
     alert_uuid = str(uuid.uuid4())
     create = client.post(
-        "/api/alert/",
+        "/api/alert/?history_username=analyst",
         json={
             "uuid": alert_uuid,
             "name": "test alert",
