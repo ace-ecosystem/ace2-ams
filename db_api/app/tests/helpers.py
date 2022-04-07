@@ -653,9 +653,11 @@ def create_user(
     alert_queue: str = "external",
     display_name: str = "Analyst",
     email: Optional[str] = None,
+    enabled: bool = True,
     event_queue: str = "external",
     history_username: Optional[str] = None,
     password: str = "asdfasdf",
+    refresh_token: str = "asdf",
     roles: List[str] = None,
 ) -> User:
     existing = crud.read_user_by_username(username=username, db=db, err_on_not_found=False)
@@ -675,7 +677,9 @@ def create_user(
         default_event_queue=create_queue(value=event_queue, db=db),
         display_name=display_name,
         email=email,
+        enabled=enabled,
         password=hash_password(password),
+        refresh_token=refresh_token,
         roles=roles,
         username=username,
         uuid=uuid.uuid4(),
