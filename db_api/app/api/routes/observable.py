@@ -62,6 +62,7 @@ def create_observables(
     observables: List[ObservableCreate],
     request: Request,
     response: Response,
+    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     # NOTE: There are multiple crud.commit(db) statements to avoid the possibility of
@@ -75,6 +76,14 @@ def create_observables(
         observable.uuid = new_observable.uuid
 
         crud.commit(db)
+
+        # Add an entry to the history table
+        if history_username:
+            crud.record_node_create_history(
+                record_node=new_observable,
+                action_by=crud.read_user_by_username(username=history_username, db=db),
+                db=db,
+            )
 
     crud.commit(db)
 

@@ -253,7 +253,7 @@ def test_create_nonexistent_type(client, db):
 
 def test_create_verify_history(client, db):
     # Create an alert
-    node_tree = helpers.create_alert(db=db)
+    node_tree = helpers.create_alert(db=db, history_username="analyst")
 
     # Create an observable type
     helpers.create_observable_type(value="test_type", db=db)
@@ -269,7 +269,7 @@ def test_create_verify_history(client, db):
                 "value": f"test{i}",
             }
         )
-    create = client.post("/api/observable/", json=observables)
+    create = client.post("/api/observable/?history_username=analyst", json=observables)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history records
