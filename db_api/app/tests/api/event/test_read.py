@@ -6,7 +6,7 @@ from dateutil.parser import parse
 from fastapi import status
 from urllib.parse import urlencode
 
-from api.models.analysis_details import (
+from api_models.analysis_details import (
     SandboxAnalysisDetails,
     SandboxContactedHost,
     SandboxDnsRequest,
@@ -772,7 +772,9 @@ def test_auto_disposition_time(client, db):
 
     # Add an alert to the event
     now = datetime.utcnow()
-    alert_tree1 = helpers.create_alert(db=db, event=event, disposition="DELIVERY", update_time=now)
+    alert_tree1 = helpers.create_alert(
+        db=db, event=event, disposition="DELIVERY", update_time=now, history_username="analyst"
+    )
 
     # Verify the auto_disposition_time
     get = client.get(f"/api/event/{event.uuid}")
@@ -780,7 +782,9 @@ def test_auto_disposition_time(client, db):
 
     # Add a second alert to the event with an earlier disposition time
     earlier = now - timedelta(seconds=5)
-    alert_tree2 = helpers.create_alert(db=db, event=event, disposition="DELIVERY", update_time=earlier)
+    alert_tree2 = helpers.create_alert(
+        db=db, event=event, disposition="DELIVERY", update_time=earlier, history_username="analyst"
+    )
 
     # Verify the new auto_disposition_time
     get = client.get(f"/api/event/{event.uuid}")
@@ -822,7 +826,7 @@ def test_auto_ownership_time(client, db):
 
     # Add an alert to the event
     now = datetime.utcnow()
-    alert_tree1 = helpers.create_alert(db=db, event=event, owner="alice", update_time=now)
+    alert_tree1 = helpers.create_alert(db=db, event=event, owner="alice", update_time=now, history_username="analyst")
 
     # Verify the auto_ownership_time
     get = client.get(f"/api/event/{event.uuid}")
@@ -830,7 +834,9 @@ def test_auto_ownership_time(client, db):
 
     # Add a second alert to the event with an earlier ownership time
     earlier = now - timedelta(seconds=5)
-    alert_tree2 = helpers.create_alert(db=db, event=event, owner="alice", update_time=earlier)
+    alert_tree2 = helpers.create_alert(
+        db=db, event=event, owner="alice", update_time=earlier, history_username="analyst"
+    )
 
     # Verify the new auto_ownership_time
     get = client.get(f"/api/event/{event.uuid}")
@@ -1047,13 +1053,17 @@ def test_get_filter_disposition_time_after(client, db):
     now = datetime.utcnow()
 
     event1 = helpers.create_event(name="event1", db=db)
-    helpers.create_alert(event=event1, disposition="DELIVERY", update_time=now - timedelta(seconds=5), db=db)
+    helpers.create_alert(
+        event=event1, disposition="DELIVERY", update_time=now - timedelta(seconds=5), db=db, history_username="analyst"
+    )
 
     event2 = helpers.create_event(name="event2", db=db)
-    helpers.create_alert(event=event2, disposition="DELIVERY", update_time=now, db=db)
+    helpers.create_alert(event=event2, disposition="DELIVERY", update_time=now, db=db, history_username="analyst")
 
     event3 = helpers.create_event(name="event3", db=db)
-    helpers.create_alert(event=event3, disposition="DELIVERY", update_time=now + timedelta(seconds=5), db=db)
+    helpers.create_alert(
+        event=event3, disposition="DELIVERY", update_time=now + timedelta(seconds=5), db=db, history_username="analyst"
+    )
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1072,13 +1082,17 @@ def test_get_filter_disposition_time_before(client, db):
     now = datetime.utcnow()
 
     event1 = helpers.create_event(name="event1", db=db)
-    helpers.create_alert(event=event1, disposition="DELIVERY", update_time=now - timedelta(seconds=5), db=db)
+    helpers.create_alert(
+        event=event1, disposition="DELIVERY", update_time=now - timedelta(seconds=5), db=db, history_username="analyst"
+    )
 
     event2 = helpers.create_event(name="event2", db=db)
-    helpers.create_alert(event=event2, disposition="DELIVERY", update_time=now, db=db)
+    helpers.create_alert(event=event2, disposition="DELIVERY", update_time=now, db=db, history_username="analyst")
 
     event3 = helpers.create_event(name="event3", db=db)
-    helpers.create_alert(event=event3, disposition="DELIVERY", update_time=now + timedelta(seconds=5), db=db)
+    helpers.create_alert(
+        event=event3, disposition="DELIVERY", update_time=now + timedelta(seconds=5), db=db, history_username="analyst"
+    )
 
     # There should be 3 total events
     get = client.get("/api/event/")

@@ -92,9 +92,7 @@ def test_create_invalid_fields(client, key, value):
 )
 def test_create_invalid_node_fields(client, key, values):
     for value in values:
-        create = client.post(
-            "/api/event/", json={key: value, "name": "test", "queue": "external", "status": "OPEN"}
-        )
+        create = client.post("/api/event/", json={key: value, "name": "test", "queue": "external", "status": "OPEN"})
         assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert key in create.json()["detail"][0]["loc"]
 
@@ -148,9 +146,7 @@ def test_create_nonexistent_queue(client, db):
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
-    create = client.post(
-        "/api/event/", json={"name": "test", "queue": "nonexistent_queue", "status": "OPEN"}
-    )
+    create = client.post("/api/event/", json={"name": "test", "queue": "nonexistent_queue", "status": "OPEN"})
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "queue" in create.text
 
@@ -184,9 +180,7 @@ def test_create_nonexistent_source(client, db):
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
-    create = client.post(
-        "/api/event/", json={"source": "test", "name": "test", "queue": "external", "status": "OPEN"}
-    )
+    create = client.post("/api/event/", json={"source": "test", "name": "test", "queue": "external", "status": "OPEN"})
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "event_source" in create.text
 
@@ -205,9 +199,7 @@ def test_create_nonexistent_type(client, db):
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create an object
-    create = client.post(
-        "/api/event/", json={"type": "test", "name": "test", "queue": "external", "status": "OPEN"}
-    )
+    create = client.post("/api/event/", json={"type": "test", "name": "test", "queue": "external", "status": "OPEN"})
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "event_type" in create.text
 
@@ -232,9 +224,7 @@ def test_create_nonexistent_node_fields(client, db, key):
     helpers.create_queue(value="external", db=db)
     helpers.create_event_status(value="OPEN", db=db)
 
-    create = client.post(
-        "/api/event/", json={key: ["abc"], "name": "test", "queue": "external", "status": "OPEN"}
-    )
+    create = client.post("/api/event/", json={key: ["abc"], "name": "test", "queue": "external", "status": "OPEN"})
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "abc" in create.text
 
@@ -250,7 +240,8 @@ def test_create_verify_history(client, db):
 
     event_uuid = str(uuid.uuid4())
     create = client.post(
-        "/api/event/", json={"uuid": event_uuid, "name": "test", "queue": "external", "status": "OPEN"}
+        "/api/event/?history_username=analyst",
+        json={"uuid": event_uuid, "name": "test", "queue": "external", "status": "OPEN"},
     )
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -312,9 +303,7 @@ def test_create_valid_optional_fields(client, db, key, value):
     helpers.create_event_status(value="OPEN", db=db)
 
     # Create the object
-    create = client.post(
-        "/api/event/", json={key: value, "name": "test", "queue": "external", "status": "OPEN"}
-    )
+    create = client.post("/api/event/", json={key: value, "name": "test", "queue": "external", "status": "OPEN"})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
@@ -396,9 +385,7 @@ def test_create_valid_source(client, db):
     helpers.create_event_status(value="OPEN", db=db)
 
     # Use the source to create a new event
-    create = client.post(
-        "/api/event/", json={"source": "test", "name": "test", "queue": "external", "status": "OPEN"}
-    )
+    create = client.post("/api/event/", json={"source": "test", "name": "test", "queue": "external", "status": "OPEN"})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
@@ -412,9 +399,7 @@ def test_create_valid_type(client, db):
     helpers.create_event_type(value="test", db=db)
 
     # Use the type to create a new event
-    create = client.post(
-        "/api/event/", json={"type": "test", "name": "test", "queue": "external", "status": "OPEN"}
-    )
+    create = client.post("/api/event/", json={"type": "test", "name": "test", "queue": "external", "status": "OPEN"})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
