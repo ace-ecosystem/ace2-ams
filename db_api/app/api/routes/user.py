@@ -36,6 +36,7 @@ def create_user(
     user: UserCreate,
     request: Request,
     response: Response,
+    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     # Create the new user using the data from the request
@@ -55,6 +56,15 @@ def create_user(
     # Save the new user to the database
     db.add(new_user)
     crud.commit(db)
+
+    # Add an entry to the history table
+    if history_username:
+        crud.record_create_history(
+            history_table=UserHistory,
+            action_by=crud.read_user_by_username(username=history_username, db=db),
+            record=new_user,
+            db=db,
+        )
 
     response.headers["Content-Location"] = request.url_for("get_user", uuid=new_user.uuid)
 
@@ -109,6 +119,7 @@ def update_user(
     user: UserUpdate,
     request: Request,
     response: Response,
+    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     # Read the current user from the database
@@ -179,6 +190,16 @@ def update_user(
         db_user.username = update_data["username"]
 
     crud.commit(db)
+
+    # Add the entries to the history table
+    if history_username:
+        crud.record_update_history(
+            history_table=UserHistory,
+            action_by=crud.read_user_by_username(username=history_username, db=db),
+            record=db_user,
+            diffs=diffs,
+            db=db,
+        )
 
     response.headers["Content-Location"] = request.url_for("get_user", uuid=uuid)
 

@@ -94,14 +94,14 @@ def test_update_nonexistent_uuid(client):
 
 def test_update_valid_alert_queue(client, db):
     # Create a user
-    obj = helpers.create_user(username="johndoe", alert_queue="test_queue", db=db)
+    obj = helpers.create_user(username="johndoe", alert_queue="test_queue", db=db, history_username="analyst")
     assert obj.default_alert_queue.value == "test_queue"
 
     # Create the new alert queue
     helpers.create_queue(value="test_queue2", db=db)
 
     # Update it
-    update = client.patch(f"/api/user/{obj.uuid}", json={"default_alert_queue": "test_queue2"})
+    update = client.patch(f"/api/user/{obj.uuid}?history_username=analyst", json={"default_alert_queue": "test_queue2"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.default_alert_queue.value == "test_queue2"
 
@@ -118,14 +118,14 @@ def test_update_valid_alert_queue(client, db):
 
 def test_update_valid_event_queue(client, db):
     # Create a user
-    obj = helpers.create_user(username="johndoe", event_queue="test_queue", db=db)
+    obj = helpers.create_user(username="johndoe", event_queue="test_queue", db=db, history_username="analyst")
     assert obj.default_event_queue.value == "test_queue"
 
     # Create the new event queue
     helpers.create_queue(value="test_queue2", db=db)
 
     # Update it
-    update = client.patch(f"/api/user/{obj.uuid}", json={"default_event_queue": "test_queue2"})
+    update = client.patch(f"/api/user/{obj.uuid}?history_username=analyst", json={"default_event_queue": "test_queue2"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.default_event_queue.value == "test_queue2"
 
@@ -150,7 +150,7 @@ def test_update_valid_event_queue(client, db):
 def test_update_valid_roles(client, db, values):
     # Create a user
     initial_roles = ["test_role1", "test_role2", "test_role3"]
-    obj = helpers.create_user(username="johndoe", roles=initial_roles, db=db)
+    obj = helpers.create_user(username="johndoe", roles=initial_roles, db=db, history_username="analyst")
     assert len(obj.roles) == len(initial_roles)
 
     # Create the new user roles
@@ -158,7 +158,7 @@ def test_update_valid_roles(client, db, values):
         helpers.create_user_role(value=value, db=db)
 
     # Update it
-    update = client.patch(f"/api/user/{obj.uuid}", json={"roles": values})
+    update = client.patch(f"/api/user/{obj.uuid}?history_username=analyst", json={"roles": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(obj.roles) == len(values)
 
@@ -194,13 +194,13 @@ def test_update_valid_roles(client, db, values):
 )
 def test_update(client, db, key, initial_value, updated_value):
     # Create a user
-    obj = helpers.create_user(username="johndoe", db=db)
+    obj = helpers.create_user(username="johndoe", db=db, history_username="analyst")
 
     # Set the initial value
     setattr(obj, key, initial_value)
 
     # Update it
-    update = client.patch(f"/api/user/{obj.uuid}", json={key: updated_value})
+    update = client.patch(f"/api/user/{obj.uuid}?history_username=analyst", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert getattr(obj, key) == updated_value
 
@@ -224,14 +224,14 @@ def test_update(client, db, key, initial_value, updated_value):
 )
 def test_update_password(client, db, initial_value, updated_value):
     # Create a user
-    obj = helpers.create_user(username="johndoe", password=initial_value, db=db)
+    obj = helpers.create_user(username="johndoe", password=initial_value, db=db, history_username="analyst")
     initial_password_hash = obj.password
 
     # Make sure the initial password validates against its hash
     assert verify_password(initial_value, initial_password_hash) is True
 
     # Update it
-    update = client.patch(f"/api/user/{obj.uuid}", json={"password": updated_value})
+    update = client.patch(f"/api/user/{obj.uuid}?history_username=analyst", json={"password": updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.password != initial_password_hash
     assert verify_password(updated_value, obj.password) is True

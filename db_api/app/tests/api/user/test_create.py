@@ -162,7 +162,7 @@ def test_create_verify_history(client, db):
         "username": "johndoe",
         "uuid": user_uuid,
     }
-    create = client.post("/api/user/", json=create_json)
+    create = client.post("/api/user/?history_username=analyst", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
