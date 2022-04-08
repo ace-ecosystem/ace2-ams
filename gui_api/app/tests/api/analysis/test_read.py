@@ -1,34 +1,15 @@
-import uuid
-
-from fastapi import status
-
-from tests import helpers
+from uuid import uuid4
 
 
-#
-# INVALID TESTS
-#
+def test_get_analysis(client_valid_access_token, requests_mock):
+    analysis_uuid = str(uuid4())
+    requests_mock.get(
+        f"http://db-api/api/analysis/{analysis_uuid}",
+        json={"node_type": "analysis", "uuid": analysis_uuid, "detection_points": []},
+    )
 
+    client_valid_access_token.get(f"/api/analysis/{analysis_uuid}")
 
-def test_get_invalid_uuid(client_valid_access_token):
-    get = client_valid_access_token.get("/api/analysis/1")
-    assert get.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-
-
-def test_get_nonexistent_uuid(client_valid_access_token):
-    get = client_valid_access_token.get(f"/api/analysis/{uuid.uuid4()}")
-    assert get.status_code == status.HTTP_404_NOT_FOUND
-
-
-#
-# VALID TESTS
-#
-
-
-def test_get(client_valid_access_token, db):
-    alert_tree = helpers.create_alert(db=db)
-    analysis_tree = helpers.create_analysis(parent_tree=alert_tree, db=db)
-
-    get = client_valid_access_token.get(f"/api/analysis/{analysis_tree.node.uuid}")
-    assert get.status_code == status.HTTP_200_OK
-    assert get.json()["node_type"] == "analysis"
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/analysis/{analysis_uuid}"

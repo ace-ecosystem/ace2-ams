@@ -1,42 +1,17 @@
-import uuid
-
-from fastapi import status
-
-from tests import helpers
+from urllib.parse import unquote_plus, urlencode
 
 
-#
-# INVALID TESTS
-#
+def test_get_all_alert_dispositions(client_valid_access_token, requests_mock):
+    params = urlencode({"limit": 50, "offset": 0})
 
+    requests_mock.get(
+        f"http://db-api/api/alert/disposition/?{params}", json={"items": [], "total": 0, "limit": 50, "offset": 0}
+    )
 
-def test_get_invalid_uuid(client_valid_access_token):
-    get = client_valid_access_token.get("/api/alert/disposition/1")
-    assert get.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    client_valid_access_token.get(f"/api/alert/disposition/?{params}")
 
-
-def test_get_nonexistent_uuid(client_valid_access_token):
-    get = client_valid_access_token.get(f"/api/alert/disposition/{uuid.uuid4()}")
-    assert get.status_code == status.HTTP_404_NOT_FOUND
-
-
-#
-# VALID TESTS
-#
-
-
-def test_get_all(client_valid_access_token, db):
-    # Create some objects
-    helpers.create_alert_disposition(value="test", rank=1, db=db)
-    helpers.create_alert_disposition(value="test2", rank=2, db=db)
-
-    # Read them back
-    get = client_valid_access_token.get("/api/alert/disposition/")
-    assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 2
-
-
-def test_get_all_empty(client_valid_access_token):
-    get = client_valid_access_token.get("/api/alert/disposition/")
-    assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 0
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert unquote_plus(requests_mock.request_history[1].url) == unquote_plus(
+        f"http://db-api/api/alert/disposition/?{params}"
+    )

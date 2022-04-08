@@ -1,41 +1,30 @@
-import uuid
-
-from fastapi import status
-
-
-#
-# INVALID TESTS
-#
+from datetime import datetime
+from uuid import uuid4
 
 
-def test_get_invalid_uuid(client_valid_access_token):
-    get = client_valid_access_token.get("/api/node/comment/1")
-    assert get.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+def test_get_node_comment(client_valid_access_token, requests_mock):
+    node_comment_uuid = uuid4()
+    requests_mock.get(
+        f"http://db-api/api/node/comment/{node_comment_uuid}",
+        json={
+            "node_uuid": str(uuid4()),
+            "value": "value",
+            "insert_time": str(datetime.now()),
+            "user": {
+                "default_alert_queue": {"value": "queue1", "uuid": str(uuid4())},
+                "default_event_queue": {"value": "queue1", "uuid": str(uuid4())},
+                "display_name": "Analyst",
+                "email": "analyst@test.com",
+                "roles": [],
+                "username": "analyst",
+                "uuid": str(uuid4()),
+            },
+            "uuid": str(uuid4()),
+        },
+    )
 
+    client_valid_access_token.get(f"/api/node/comment/{node_comment_uuid}")
 
-def test_get_nonexistent_uuid(client_valid_access_token):
-    get = client_valid_access_token.get(f"/api/node/comment/{uuid.uuid4()}")
-    assert get.status_code == status.HTTP_404_NOT_FOUND
-
-
-#
-# VALID TESTS
-#
-
-
-# There is currently no get_all endpoint for comments
-# def test_get_all(client_valid_access_token):
-#     # Create some objects
-#     client_valid_access_token.post("/api/analysis/", json={})
-#     client_valid_access_token.post("/api/analysis/", json={})
-
-#     # Read them back
-#     get = client_valid_access_token.get("/api/analysis/")
-#     assert get.status_code == status.HTTP_200_OK
-#     assert len(get.json()) == 2
-
-
-# def test_get_all_empty(client_valid_access_token):
-#     get = client_valid_access_token.get("/api/analysis/module_type/")
-#     assert get.status_code == status.HTTP_200_OK
-#     assert get.json() == []
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/node/comment/{node_comment_uuid}"

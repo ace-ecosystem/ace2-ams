@@ -1,56 +1,17 @@
-import uuid
-
-from fastapi import status
-
-from tests import helpers
+from urllib.parse import unquote_plus, urlencode
 
 
-#
-# INVALID TESTS
-#
+def test_get_all_node_threat_types(client_valid_access_token, requests_mock):
+    params = urlencode({"limit": 50, "offset": 0})
 
+    requests_mock.get(
+        f"http://db-api/api/node/threat/type/?{params}", json={"items": [], "total": 0, "limit": 50, "offset": 0}
+    )
 
-def test_get_invalid_uuid(client_valid_access_token):
-    get = client_valid_access_token.get("/api/node/threat/type/1")
-    assert get.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    client_valid_access_token.get(f"/api/node/threat/type/?{params}")
 
-
-def test_get_nonexistent_uuid(client_valid_access_token):
-    get = client_valid_access_token.get(f"/api/node/threat/type/{uuid.uuid4()}")
-    assert get.status_code == status.HTTP_404_NOT_FOUND
-
-
-#
-# VALID TESTS
-#
-
-
-def test_get_all(client_valid_access_token, db):
-    # Create some objects
-    helpers.create_node_threat_type(value="test", queues=["internal"], db=db)
-    helpers.create_node_threat_type(value="test2", queues=["external"], db=db)
-    helpers.create_node_threat_type(value="test3", queues=["internal", "external"], db=db)
-
-    # Read them back
-    get = client_valid_access_token.get("/api/node/threat/type/")
-    assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 3
-
-    # Sort them by their names so we know the order
-    results = sorted(get.json()["items"], key=lambda x: x["value"])
-
-    assert len(results[0]["queues"]) == 1
-    assert results[0]["queues"][0]["value"] == "internal"
-
-    assert len(results[1]["queues"]) == 1
-    assert results[1]["queues"][0]["value"] == "external"
-
-    assert len(results[2]["queues"]) == 2
-    assert any(x["value"] == "internal" for x in results[2]["queues"])
-    assert any(x["value"] == "external" for x in results[2]["queues"])
-
-
-def test_get_all_empty(client_valid_access_token):
-    get = client_valid_access_token.get("/api/node/threat/type/")
-    assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 0
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert unquote_plus(requests_mock.request_history[1].url) == unquote_plus(
+        f"http://db-api/api/node/threat/type/?{params}"
+    )
