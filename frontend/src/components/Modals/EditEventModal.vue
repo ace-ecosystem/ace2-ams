@@ -91,6 +91,7 @@
 
   const error = ref(null);
   const event = ref(null);
+  const originalEvent = ref(null);
   const fieldOptionObjects = ref({});
   const formFields = ref({});
   const isLoading = ref(false);
@@ -115,13 +116,16 @@
     const data = { uuid: props.eventUuid };
     // Add the formatted valueds for all fields in the form
     for (const field in formFields.value) {
-      data[field] = formatValue(field, formFields.value[field].propertyValue);
+      if (formFields.value[field].propertyValue !== event.value[field]) {
+        data[field] = formatValue(field, formFields.value[field].propertyValue);
+      }
     }
     return [data];
   });
 
   const fetchEvent = async () => {
     event.value = await Event.read(props.eventUuid);
+    originalEvent.value = JSON.parse(JSON.stringify(event.value));
   };
 
   const initializeData = async () => {
@@ -182,9 +186,16 @@
 
   const saveEventComments = async () => {
     for (const comment of formFields.value["comments"].propertyValue) {
-      await NodeComment.update(comment.uuid, {
-        value: comment.value,
-      });
+      const commentChanged = originalEvent.value.comments.find(
+        (originalComment) =>
+          originalComment.uuid == comment.uuid &&
+          originalComment.value != comment.value,
+      );
+      if (commentChanged) {
+        await NodeComment.update(comment.uuid, {
+          value: comment.value,
+        });
+      }
     }
   };
 
