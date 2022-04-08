@@ -86,6 +86,7 @@ export interface eventRead extends nodeRead {
   threats: nodeThreatRead[];
   type: eventTypeRead | null;
   vectors: eventVectorRead[];
+  [key: string]: unknown;
 }
 
 export interface eventReadPage extends nodeReadPage {
