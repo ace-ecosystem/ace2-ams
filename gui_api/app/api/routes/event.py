@@ -191,8 +191,9 @@ def get_event(uuid: UUID):
     return db_api.get(path=f"/event/{uuid}")
 
 
-def get_event_history(uuid: UUID):
-    return db_api.get(f"/event/{uuid}/history")
+def get_event_history(uuid: UUID, limit: Optional[int] = Query(50, le=100), offset: Optional[int] = Query(0)):
+    query_params = f"?limit={limit}&offset={offset}"
+    return db_api.get(f"/event/{uuid}/history{query_params}")
 
 
 helpers.api_route_read_all(router, get_all_events, EventRead)
