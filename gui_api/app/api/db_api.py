@@ -9,8 +9,12 @@ from core.config import get_settings
 def _request(method: str, path: str, expected_status: int, payload: Optional[dict] = None, return_json: bool = False):
     result = requests.request(method=method, url=f"{get_settings().database_api_url}{path}", json=payload)
 
-    if result.status_code != expected_status:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=result.text)
+    if result.status_code != expected_status and result.status_code not in [
+        status.HTTP_200_OK,
+        status.HTTP_201_CREATED,
+        status.HTTP_204_NO_CONTENT,
+    ]:
+        raise HTTPException(status_code=result.status_code, detail=result.text)
 
     if return_json:
         return result.json()
