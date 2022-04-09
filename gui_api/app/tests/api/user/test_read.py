@@ -1,36 +1,13 @@
-import uuid
-
-from fastapi import status
-
-from tests import helpers
+from urllib.parse import unquote_plus, urlencode
 
 
-#
-# INVALID TESTS
-#
+def test_get_all_users(client_valid_access_token, requests_mock):
+    params = urlencode({"limit": 50, "offset": 0})
 
+    requests_mock.get(f"http://db-api/api/user/?{params}", json={"items": [], "total": 0, "limit": 50, "offset": 0})
 
-def test_get_invalid_uuid(client_valid_access_token):
-    get = client_valid_access_token.get("/api/user/1")
-    assert get.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    c = client_valid_access_token.get(f"/api/user/?{params}")
 
-
-def test_get_nonexistent_uuid(client_valid_access_token):
-    get = client_valid_access_token.get(f"/api/user/{uuid.uuid4()}")
-    assert get.status_code == status.HTTP_404_NOT_FOUND
-
-
-#
-# VALID TESTS
-#
-
-
-def test_get_all(client_valid_access_token, db):
-    # Create some users
-    helpers.create_user(username="johndoe", email="johndoe@test.com", db=db)
-    helpers.create_user(username="janedoe", email="janedoe@test.com", db=db)
-
-    # Read them back
-    get = client_valid_access_token.get("/api/user/")
-    assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 3  # There is by default an "analyst" user
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert unquote_plus(requests_mock.request_history[1].url) == unquote_plus(f"http://db-api/api/user/?{params}")
