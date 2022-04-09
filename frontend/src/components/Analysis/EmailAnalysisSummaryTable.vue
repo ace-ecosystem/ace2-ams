@@ -4,6 +4,7 @@
   <h5>Email Summary</h5>
   <DataTable
     :value="emails"
+    :loading="isLoading"
     responsive-layout="scroll"
     data-cy="email-analysis-table"
   >
@@ -52,29 +53,40 @@
       </template></Column
     >
     <Column field="messageId" header="Message-ID" :sortable="true"></Column>
+    <template #empty> Could not find any emails. {{ error }} </template>
   </DataTable>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import DataTable from "primevue/datatable";
   import Column from "primevue/column";
 
   import { onMounted, ref, defineProps } from "vue";
   import { Event } from "@/services/api/event";
+  import { emailSummary } from "@/models/eventSummaries";
 
   const props = defineProps({
     eventUuid: { type: String, required: true },
   });
   const isLoading = ref(false);
-  const emails = ref([]);
+  const emails = ref<emailSummary[]>([]);
+  const error = ref<string>();
 
   onMounted(async () => {
     isLoading.value = true;
-    emails.value = await Event.readEmailSummary(props.eventUuid);
+    try {
+      emails.value = await Event.readEmailSummary(props.eventUuid);
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
+    }
     isLoading.value = false;
   });
 
-  const formatDateTime = (dateTime) => {
+  const formatDateTime = (dateTime: string) => {
     if (dateTime) {
       const d = new Date(dateTime);
       return d.toLocaleString("en-US", { timeZone: "UTC" });
@@ -83,7 +95,7 @@
     return "None";
   };
 
-  const formatList = (list) => {
+  const formatList = (list: []) => {
     if (list.length) {
       return list.join(", ");
     }

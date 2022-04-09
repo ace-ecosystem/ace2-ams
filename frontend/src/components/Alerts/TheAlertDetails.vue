@@ -1,7 +1,7 @@
 <!-- TheAlertDetails.vue -->
 
 <template>
-  <Card>
+  <Card v-if="alertStore.openAlertSummary">
     <template #title>
       {{ alertStore.open.name }}
       <Button
@@ -40,7 +40,7 @@
   </Card>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import Accordion from "primevue/accordion";
   import AccordionTab from "primevue/accordiontab";
   import Button from "primevue/button";
@@ -51,11 +51,11 @@
   import { useAlertStore } from "@/stores/alert";
   import { getAllAlertTags } from "@/etc/helpers";
   import AlertTableCell from "./AlertTableCell.vue";
+  import { alertSummary } from "@/models/alert";
 
   const alertStore = useAlertStore();
 
-  // Key 'values' must be properties of model alertSummary
-  const alertDetailKeys = [
+  const alertDetailKeys: { value: keyof alertSummary; label: string }[] = [
     { value: "insertTime", label: "Insert Time" },
     { value: "eventTime", label: "Event Time" },
     { value: "tool", label: "Tool" },
@@ -69,7 +69,7 @@
   ];
 
   function copyLink() {
-    copyToClipboard(window.location);
+    copyToClipboard(window.location.href);
   }
 </script>
 

@@ -1,4 +1,4 @@
-# ACE2 AMS Development Guide
+# Setup
 
 ## Initial setup
 
@@ -18,11 +18,11 @@ In order to work within the devcontainer, you will need the following installed 
 
 When you open the project in VSCode, it will detect the devcontainer configuration and prompt you to reopen it inside of the container:
 
-![Reopen in Container](open-in-container.png)
+![Reopen in Container](gui/open-in-container.png)
 
 Once you choose the `Reopen in Container` option, VSCode will work on building the environment. Once it is complete, you can open a terminal within VSCode to interact with the application:
 
-![Terminal](terminal.png)
+![Terminal](gui/terminal.png)
 
 Any work done on the application should be done through the devcontainer. If you make a change to the devcontainer configuration (found in the `.devcontainer` directory), you can rebuild the devcontainer by clicking on `Dev Container: ACE2 AMS` in the lower-left corner of VSCode and then selecting the `Rebuild Container` option in the menu that opens.
 
@@ -86,7 +86,7 @@ npm uninstall <package>
 
 ## Running tests
 
-## Backend
+### Backend
 
 The backend API has a suite of tests performed by Pytest that includes code coverage:
 
@@ -102,7 +102,7 @@ bin/test-backend.sh backend/app/tests/api/test_auth_validate.py
 
 ### Frontend
 
-This frontend has a suite of unit tests performed by [Jest](https://jestjs.io/) and end-to-end tests performed by [Cypress](https://www.cypress.io/).
+This frontend has a suite of unit tests performed by [Vitest](https://vitest.dev/) and component and end-to-end tests performed by [Cypress](https://www.cypress.io/).
 
 #### Unit tests
 
@@ -110,6 +110,14 @@ You can execute the unit tests by running:
 
 ```
 bin/test-frontend-unit.sh
+```
+
+#### Component Tests
+
+You can execute the end-to-end tests by running:
+
+```
+bin/test-components.sh
 ```
 
 #### End-to-end tests
@@ -122,7 +130,7 @@ bin/test-e2e.sh
 
 ##### Test Runner
 
-Cypress also comes with an amazing [Test Runner](https://docs.cypress.io/guides/core-concepts/test-runner) that lets you see and interact with the tests in your local web browser. This can be helpful when writing end-to-end tests to ensure they are working properly as well as any debugging you might need to do.
+Cypress also comes with an amazing [Test Runner](https://docs.cypress.io/guides/core-concepts/test-runner) that lets you see and interact with the tests in your local web browser. This can be helpful when writing component and end-to-end tests to ensure they are working properly as well as any debugging you might need to do.
 
 However, this will need to be performed on your local system ouside of the containers. To do this, you will need to have [Node.js 16](https://nodejs.org/en/download/current/) installed.
 
@@ -142,10 +150,11 @@ bin/test-interactive-e2e.sh
 
 ```
 cd cypress/
-cypress open
+cypress open // End-to-End tests
+cypress open-ct // Component tests
 ```
 
-![Test Runner](test-runner.png)
+![Test Runner](gui/test-runner.png)
 
 For more information on what you can do with the Test Runner, view the Test Runner [documentation](https://docs.cypress.io/guides/core-concepts/test-runner).
 

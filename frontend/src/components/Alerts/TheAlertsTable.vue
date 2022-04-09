@@ -4,31 +4,42 @@
 <template>
   <TheNodeTable
     :columns="columns"
-    @rowExpand="onRowExpand"
-    @rowCollapse="onRowCollapse"
+    @row-expand="onRowExpand"
+    @row-collapse="onRowCollapse"
   >
     <template #rowCell="{ data, field }">
-      <AlertTableCell :data="data" :field="field"></AlertTableCell>
+      <AlertTableCell
+        :data="data"
+        :field="(field as unknown as alertSummaryKeys)"
+      ></AlertTableCell>
     </template>
 
     <!-- Row Expansion -->
     <template #rowExpansion="{ data }">
-      <AlertTableExpansion
-        :observables="alertObservables[data.uuid]"
-      ></AlertTableExpansion>
+      <div data-cy="row-expansion">
+        <AlertTableExpansion
+          :observables="alertObservables[data.uuid]"
+        ></AlertTableExpansion>
+      </div>
     </template>
   </TheNodeTable>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { ref } from "vue";
 
-  import { NodeTree } from "@/services/api/nodeTree";
-  import TheNodeTable from "@/components/Node/TheNodeTable.vue";
   import AlertTableCell from "@/components/Alerts/AlertTableCell.vue";
   import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
+  import TheNodeTable from "@/components/Node/TheNodeTable.vue";
 
-  const columns = ref([
+  import { observableRead } from "@/models/observable";
+
+  import { NodeTree } from "@/services/api/nodeTree";
+  import { alertSummary } from "@/models/alert";
+
+  type alertSummaryKeys = keyof alertSummary;
+
+  const columns = [
     {
       field: "dispositionTime",
       header: "Dispositioned Time",
@@ -58,28 +69,29 @@
     },
     { field: "queue", header: "Queue", sortable: true, default: false },
     { field: "type", header: "Type", sortable: true, default: false },
-  ]);
+  ];
 
-  const alertObservables = ref({});
+  const alertObservables = ref<Record<string, null | observableRead[]>>({});
 
-  const onRowExpand = async (event) => {
+  const onRowExpand = async (event: { data: alertSummary }) => {
     const alertUuid = event.data.uuid;
     // Set to null first so AlertTableExpansion can show loading
     alertObservables.value[alertUuid] = null;
     alertObservables.value[alertUuid] = await getObservables(alertUuid);
   };
-  const onRowCollapse = (event) => {
+
+  const onRowCollapse = (event: { data: alertSummary }) => {
     const alertUuid = event.data.uuid;
     delete alertObservables.value[alertUuid];
   };
 
-  const getObservables = async (uuid) => {
-    const unsortedObservables = await NodeTree.readNodesOfNodeTree(
+  const getObservables = async (uuid: string) => {
+    const unsortedObservables = (await NodeTree.readNodesOfNodeTree(
       [uuid],
       "observable",
-    );
+    )) as unknown as observableRead[];
 
-    return unsortedObservables.sort((a, b) => {
+    return unsortedObservables.sort((a: observableRead, b: observableRead) => {
       if (a.type.value === b.type.value) {
         return a.value < b.value ? -1 : 1;
       } else {
