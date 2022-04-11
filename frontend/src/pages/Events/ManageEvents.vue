@@ -24,7 +24,7 @@
   import { useFilterStore } from "@/stores/filter";
   import { useEventTableStore } from "@/stores/eventTable";
   import { parseFilters } from "@/etc/helpers";
-  import { populateCommonStores } from "@/stores/helpers";
+  import { populateCommonStores, populateEventStores } from "@/stores/helpers";
   import { validEventFilters } from "@/etc/constants/events";
 
   const route = useRoute();
@@ -44,6 +44,7 @@
     if (Object.keys(route.query).length) {
       // Will need to load common stores in order to find filter values
       await populateCommonStores();
+      await populateEventStores();
       loadRouteQuery();
     }
     eventTableStore.routeFiltersLoaded = true;

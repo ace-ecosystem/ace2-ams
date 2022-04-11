@@ -72,7 +72,6 @@
   import { Event } from "@/services/api/event";
   import { useEventStore } from "@/stores/event";
   import { useModalStore } from "@/stores/modal";
-  import { populateEventStores } from "@/stores/helpers";
   import { isObject } from "@/etc/validators";
   import NodeCommentEditor from "@/components/Node/NodeCommentEditor.vue";
   import { NodeComment } from "@/services/api/nodeComment";
@@ -143,10 +142,13 @@
     isLoading.value = true;
     try {
       await fetchEvent();
-      await populateEventStores();
-
       if (!event.value) {
-        throw new Error("Event data not saved");
+        throw new Error("Event data not saved to local store");
+      }
+      if (!(event.value.queue.value in availableEditFields)) {
+        throw new Error(
+          `Could not load settings for this event queue: ${event.value.queue.value}`,
+        );
       }
 
       for (const option of availableEditFields[event.value.queue.value]) {
@@ -162,9 +164,9 @@
       await resetForm();
     } catch (e: unknown) {
       if (typeof e === "string") {
-        error.value = `Could not remove alerts: ${e}`;
+        error.value = `Could not load event data: ${e}`;
       } else if (e instanceof Error) {
-        error.value = `Could not remove alerts: ${e.message}`;
+        error.value = `Could not load event data: ${e.message}`;
       }
     }
     isLoading.value = false;
@@ -197,9 +199,9 @@
       }
     } catch (e: unknown) {
       if (typeof e === "string") {
-        error.value = `Could not remove alerts: ${e}`;
+        error.value = `Could not update event: ${e}`;
       } else if (e instanceof Error) {
-        error.value = `Could not remove alerts: ${e.message}`;
+        error.value = `Could not update event: ${e.message}`;
       }
     }
 
