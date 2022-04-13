@@ -2,7 +2,6 @@
 // NOTE: This test is not fully functional at this point.
 
 import { mount } from "@cypress/vue";
-import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 
 import EditEventModal from "@/components/Modals/EditEventModal.vue";
@@ -12,15 +11,33 @@ import { testConfiguration } from "@/etc/configuration/test/index";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 
-function factory(args = { modalIsOpen: true, stubActions: true }) {
-  let initialState;
-  if (args.modalIsOpen) {
-    initialState = { modalStore: { openModals: ["EditEventModal"] } };
-  } else {
-    initialState = { modalStore: { openModals: [] } };
-  }
+import Tooltip from "primevue/tooltip";
+import { userReadFactory } from "@mocks/user";
+
+import NodeCommentEditor from "@/components/Node/NodeCommentEditor.vue";
+import NodeThreatSelector from "@/components/Node/NodeThreatSelector.vue";
+import { NodeThreat } from "@/services/api/nodeThreat";
+
+function factory(args = { stubActions: true }) {
+  const initialState = {
+    modalStore: { openModals: ["EditEventModal"] },
+    userStore: { items: [userReadFactory()] },
+    eventRemediationStore: {
+      items: [genericObjectReadFactory({ value: "Test Remediation" })],
+      itemsByQueue: {
+        external: [genericObjectReadFactory({ value: "Test Remediation" })],
+      },
+    },
+    eventPreventionToolStore: {
+      items: [genericObjectReadFactory({ value: "Test Prevention Tool" })],
+      itemsByQueue: {
+        external: [genericObjectReadFactory({ value: "Test Prevention Tool" })],
+      },
+    },
+  };
   const wrapper = mount(EditEventModal, {
     global: {
+      directives: { tooltip: Tooltip },
       plugins: [
         PrimeVue,
         createCustomCypressPinia({
@@ -30,6 +47,7 @@ function factory(args = { modalIsOpen: true, stubActions: true }) {
       ],
       provide: {
         availableEditFields: testConfiguration.events.eventEditableProperties,
+        availableFilters: testConfiguration.events.eventFilters,
       },
     },
     propsData: {
@@ -41,53 +59,215 @@ function factory(args = { modalIsOpen: true, stubActions: true }) {
 }
 
 describe("EventAlertsTable", () => {
-  it.skip("renders when modal is closed", () => {
-    cy.stub(Event, "read").returns(eventReadFactory());
-    factory({ modalIsOpen: false, stubActions: true });
-  });
-  it.skip("renders when modal is open", () => {
+  it("renders", () => {
     cy.stub(Event, "read").returns(eventReadFactory());
     factory();
   });
-  it.only("correctly pre-loads the form with existing event data", () => {
+  it("correctly pre-loads the form with existing event data", () => {
     cy.stub(Event, "read").returns(
       eventReadFactory({
         queue: genericObjectReadFactory({ value: "external" }),
       }),
     );
+    cy.stub(NodeThreat, "readAll").returns([]);
     const wrapper = factory({
-      modalIsOpen: false,
       stubActions: false,
     });
     wrapper.then((wrapper) => {
-      wrapper.vm.modalStore.open("EditEventModal");
+      wrapper.vm.modalStore.open("EditEventModal"); // This will trigger initialization of the form
+
+      cy.contains("Name")
+        .siblings()
+        .eq(0)
+        .find("input")
+        .should("have.value", "Test Event");
+      cy.contains("Owner")
+        .siblings()
+        .eq(0)
+        .find("span")
+        .should("have.text", "Test Analyst");
+      // cy.contains("Owner").siblings().eq(0).find('span').should("have.text", "None") // Needs to be fixed
+      cy.contains("Comment").should("exist");
+      wrapper.findComponent(NodeCommentEditor);
+      cy.contains("Prevention Tools").siblings().eq(0).contains("None");
+      cy.contains("Remediation").siblings().eq(0).contains("None");
+      cy.contains("Threats").should("exist");
+      wrapper.findComponent(NodeThreatSelector);
+      cy.contains("Event Time")
+        .siblings()
+        .eq(0)
+        .find("input")
+        .should("contain.value", "")
+        .invoke("attr", "placeholder")
+        .should("equal", "Enter a date!");
     });
   });
-  it("correctly submits updated event data and updates modal form when re-opened", () => {
-    cy.stub(Event, "read").returns(eventReadFactory());
-    factory();
+  it("correctly submits updated event data", () => {
+    cy.stub(Event, "read").returns(
+      eventReadFactory({
+        queue: genericObjectReadFactory({ value: "external" }),
+      }),
+    );
+    cy.stub(Event, "update")
+      .withArgs([
+        {
+          uuid: "testEvent1",
+          name: "New Name",
+          owner: "analyst",
+          preventionTools: ["Test Prevention Tool"],
+          remediations: ["Test Remediation"],
+          eventTime: new Date("2022-04-12T16:00:00.000Z"),
+        },
+      ])
+      .as("updateEvent")
+      .resolves();
+    cy.stub(NodeThreat, "readAll").returns([]);
+    const wrapper = factory({
+      stubActions: false,
+    });
+    wrapper.then((wrapper) => {
+      wrapper.vm.modalStore.open("EditEventModal"); // This will trigger initialization of the form
+
+      cy.contains("Name")
+        .siblings()
+        .eq(0)
+        .find("input")
+        .clear()
+        .type("New Name");
+      cy.contains("Prevention Tools").siblings().eq(0).contains("None").click();
+      cy.contains("Test Prevention Tool").click();
+      cy.contains("Remediation").siblings().eq(0).contains("None").click();
+      cy.contains("Test Remediation").click();
+      cy.contains("Event Time")
+        .siblings()
+        .eq(0)
+        .find("input")
+        .click()
+        .type("04/12/2022 12:00");
+
+      cy.contains("Save").click();
+
+      cy.get("@updateEvent").should("have.been.calledOnce");
+
+      cy.contains("Edit Event").should("not.exist");
+    });
   });
-  it("correctly displays error if event attribute data (status, owners, etc.) cannot be fetched", () => {
+  it("correctly displays error if event cannot be fetched", () => {
     cy.stub(Event, "read").rejects(
       new Error("404 request could not be completed"),
     );
     factory();
+    const wrapper = factory({
+      stubActions: false,
+    });
+    wrapper.then((wrapper) => {
+      wrapper.vm.modalStore.open("EditEventModal"); // This will trigger initialization of the form
+
+      cy.contains(
+        "Could not load event data: 404 request could not be completed",
+      ).should("be.visible");
+
+      // Checks for the modal content main content div and error div
+      cy.get('[data-cy="edit-event-modal"]')
+        .children(".p-dialog-content")
+        .should("have.length", 2);
+      // Checks that nothing is in the main content div (form shouldn't load if there was an error)
+      cy.get('[data-cy="edit-event-modal"]')
+        .children(".p-dialog-content")
+        .eq(0)
+        .children()
+        .children()
+        .should("have.length", 0);
+    });
   });
-  it("correctly displays error if event queue is not valid", () => {
+  it("correctly displays error if event has invalid queue", () => {
     cy.stub(Event, "read").returns(eventReadFactory());
     factory();
+    const wrapper = factory({
+      stubActions: false,
+    });
+    wrapper.then((wrapper) => {
+      wrapper.vm.modalStore.open("EditEventModal"); // This will trigger initialization of the form
+
+      cy.contains(
+        "Could not load event data: Could not load settings for this event queue: testObject",
+      ).should("be.visible");
+
+      // Checks for the modal content main content div and error div
+      cy.get('[data-cy="edit-event-modal"]')
+        .children(".p-dialog-content")
+        .should("have.length", 2);
+      // Checks that nothing is in the main content div (form shouldn't load if there was an error)
+      cy.get('[data-cy="edit-event-modal"]')
+        .children(".p-dialog-content")
+        .eq(0)
+        .children()
+        .children()
+        .should("have.length", 0);
+    });
   });
-  it("correctly displays error if event data cannot be fetched", () => {
-    cy.stub(Event, "read").rejects(
-      new Error("404 request could not be completed"),
+  it.only("correctly displays error if event cannot be updated", () => {
+    cy.stub(Event, "read").returns(
+      eventReadFactory({
+        queue: genericObjectReadFactory({ value: "external" }),
+      }),
     );
-    factory();
-  });
-  it("correctly displays error if event cannot be updated", () => {
-    cy.stub(Event, "read").returns(eventReadFactory());
-    cy.stub(Event, "update").rejects(
-      new Error("404 request could not be completed"),
-    );
-    factory();
+    cy.stub(Event, "update")
+      .withArgs([
+        {
+          uuid: "testEvent1",
+          name: "New Name",
+          owner: "analyst",
+          preventionTools: ["Test Prevention Tool"],
+          remediations: ["Test Remediation"],
+          eventTime: new Date("2022-04-12T16:00:00.000Z"),
+        },
+      ])
+      .as("updateEvent")
+      .rejects(new Error("404 request could not be completed"));
+    cy.stub(NodeThreat, "readAll").returns([]);
+    const wrapper = factory({
+      stubActions: false,
+    });
+    wrapper.then((wrapper) => {
+      wrapper.vm.modalStore.open("EditEventModal"); // This will trigger initialization of the form
+
+      cy.contains("Name")
+        .siblings()
+        .eq(0)
+        .find("input")
+        .clear()
+        .type("New Name");
+      cy.contains("Prevention Tools").siblings().eq(0).contains("None").click();
+      cy.contains("Test Prevention Tool").click();
+      cy.contains("Remediation").siblings().eq(0).contains("None").click();
+      cy.contains("Test Remediation").click();
+      cy.contains("Event Time")
+        .siblings()
+        .eq(0)
+        .find("input")
+        .click()
+        .type("04/12/2022 12:00");
+
+      cy.contains("Save").click();
+
+      cy.get("@updateEvent").should("have.been.calledOnce");
+
+      cy.contains(
+        "Could not update event: 404 request could not be completed",
+      ).should("be.visible");
+
+      // Checks for the modal content main content div and error div
+      cy.get('[data-cy="edit-event-modal"]')
+        .children(".p-dialog-content")
+        .should("have.length", 2);
+      // Checks that nothing is in the main content div (form shouldn't load if there was an error)
+      cy.get('[data-cy="edit-event-modal"]')
+        .children(".p-dialog-content")
+        .eq(0)
+        .children()
+        .children()
+        .should("have.length", 0);
+    });
   });
 });
