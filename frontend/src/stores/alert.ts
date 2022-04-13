@@ -9,12 +9,16 @@ import {
 import { UUID } from "@/models/base";
 import { Alert } from "@/services/api/alert";
 import { parseAlertSummary } from "@/etc/helpers";
+import { observableRead } from "@/models/observable";
+import { NodeTree } from "@/services/api/nodeTree";
 
 export const useAlertStore = defineStore({
   id: "alertStore",
 
   state: () => ({
     open: null as unknown as alertTreeRead,
+
+    openObservables: [] as unknown as observableRead[],
 
     // whether the alert should be reloaded
     requestReload: false,
@@ -44,6 +48,14 @@ export const useAlertStore = defineStore({
       await Alert.read(uuid)
         .then((alert) => {
           this.open = alert;
+        })
+        .catch((error) => {
+          throw error;
+        });
+
+      await NodeTree.readNodesOfNodeTree([uuid], "observable")
+        .then((observables) => {
+          this.openObservables = observables as unknown as observableRead[];
         })
         .catch((error) => {
           throw error;

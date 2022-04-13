@@ -112,7 +112,7 @@
       isLoading.value = false;
     }
   });
-
+//todo convert to computed
   const getAllDetectionPoints = async (uuid: string) => {
     try {
       const unsortedObservables = (await NodeTree.readNodesOfNodeTree(
