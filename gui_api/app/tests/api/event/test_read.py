@@ -74,3 +74,91 @@ def test_get_event_history(client_valid_access_token, requests_mock):
     assert (len(requests_mock.request_history)) == 2
     assert requests_mock.request_history[1].method == "GET"
     assert requests_mock.request_history[1].url == f"http://db-api/api/event/{event_uuid}/history?{params}"
+
+
+#
+# SUMMARIES
+#
+
+
+def test_get_detection_point_summary(client_valid_access_token, requests_mock):
+    event_uuid = uuid4()
+    requests_mock.get(f"http://db-api/api/event/{event_uuid}/summary/detection_point", json=[])
+
+    client_valid_access_token.get(f"/api/event/{event_uuid}/summary/detection_point")
+
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/event/{event_uuid}/summary/detection_point"
+
+
+def test_get_email_headers_body_summary(client_valid_access_token, requests_mock):
+    event_uuid = uuid4()
+    requests_mock.get(
+        f"http://db-api/api/event/{event_uuid}/summary/email_headers_body",
+        json={"headers": "asdf", "alert_uuid": str(uuid4())},
+    )
+
+    client_valid_access_token.get(f"/api/event/{event_uuid}/summary/email_headers_body")
+
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/event/{event_uuid}/summary/email_headers_body"
+
+
+def test_get_email_summary(client_valid_access_token, requests_mock):
+    event_uuid = uuid4()
+    requests_mock.get(f"http://db-api/api/event/{event_uuid}/summary/email", json=[])
+
+    client_valid_access_token.get(f"/api/event/{event_uuid}/summary/email")
+
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/event/{event_uuid}/summary/email"
+
+
+def test_get_observable_summary(client_valid_access_token, requests_mock):
+    event_uuid = uuid4()
+    requests_mock.get(f"http://db-api/api/event/{event_uuid}/summary/observable", json=[])
+
+    client_valid_access_token.get(f"/api/event/{event_uuid}/summary/observable")
+
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/event/{event_uuid}/summary/observable"
+
+
+def test_get_sandbox_summary(client_valid_access_token, requests_mock):
+    event_uuid = uuid4()
+    requests_mock.get(f"http://db-api/api/event/{event_uuid}/summary/sandbox", json=[])
+
+    client_valid_access_token.get(f"/api/event/{event_uuid}/summary/sandbox")
+
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/event/{event_uuid}/summary/sandbox"
+
+
+def test_get_user_summary(client_valid_access_token, requests_mock):
+    event_uuid = uuid4()
+    requests_mock.get(f"http://db-api/api/event/{event_uuid}/summary/user", json=[])
+
+    client_valid_access_token.get(f"/api/event/{event_uuid}/summary/user")
+
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/event/{event_uuid}/summary/user"
+
+
+def test_get_url_domain_summary(client_valid_access_token, requests_mock):
+    event_uuid = uuid4()
+    requests_mock.get(
+        f"http://db-api/api/event/{event_uuid}/summary/url_domain",
+        json={"domains": [], "total": 0},
+    )
+
+    client_valid_access_token.get(f"/api/event/{event_uuid}/summary/url_domain")
+
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/event/{event_uuid}/summary/url_domain"
