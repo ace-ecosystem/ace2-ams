@@ -2,9 +2,8 @@ import pytest
 import time
 
 from fastapi import status
+from uuid import uuid4
 
-from core.config import Settings
-from tests import helpers
 from main import app
 
 
@@ -13,81 +12,41 @@ from main import app
 #
 
 
-@pytest.mark.parametrize(
-    "username,password",
-    [
-        ("analyst", "wrongpassword"),
-        ("wronguser", "asdfasdf"),
-    ],
-)
-def test_auth_invalid(client, username, password):
-    # Attempt to authenticate
-    auth = client.post("/api/auth", data={"username": username, "password": password})
-    assert auth.status_code == status.HTTP_401_UNAUTHORIZED
-    assert auth.json()["detail"] == "Invalid username or password"
+def test_expired_token(client, monkeypatch, requests_mock):
+    # This is set to a fairly high number for the purposes of a unit test because PyJWT
+    # and other JWT implementations usually allow for a small amount of leeway due to clock
+    # drift when validating the tokens. Values less than 10 seconds here break the test.
+    expiration_seconds = 10
+    monkeypatch.setenv("JWT_ACCESS_EXPIRE_SECONDS", str(expiration_seconds))
 
-    # Attempt to use a bogus token to access a protected API endpoint
-    get = client.get("/api/user/", headers={"Authorization": "Bearer asdf"})
-    assert get.status_code == status.HTTP_401_UNAUTHORIZED
-    assert get.json()["detail"] == "Invalid token"
-
-
-def test_disabled_user(client, db):
-    user = helpers.create_user(username="johndoe", password="abcd1234", db=db)
-
-    # Attempt to authenticate
-    auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
-    access_token = auth.json()["access_token"]
-    assert auth.status_code == status.HTTP_200_OK
-    assert auth.json()["token_type"] == "bearer"
-    assert access_token
-
-    # Attempt to use the token to access a protected API endpoint
-    headers = {"Authorization": f"Bearer {access_token}"}
-    get = client.get("/api/user/", headers=headers)
-    assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 2  # There is a default analyst user
-
-    # Disable the user
-    user.enabled = False
-
-    # The user is disabled, but the token is still valid, so they will still have access until it expires.
-    get = client.get("/api/user/", headers=headers)
-    assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 2  # There is a default analyst user
-
-    # However, they will not be able to authenticate again to receive a new token.
-    auth = client.post("/api/auth", data={"username": "johndoe", "password": "abcd1234"})
-    assert auth.status_code == status.HTTP_401_UNAUTHORIZED
-    assert auth.json()["detail"] == "Invalid username or password"
-
-
-def test_expired_token(client, monkeypatch):
-    def mock_get_settings():
-        settings = Settings()
-        settings.jwt_access_expire_seconds = 1
-        return settings
-
-    # Patching __code__ works no matter how the function is imported
-    monkeypatch.setattr("core.config.get_settings.__code__", mock_get_settings.__code__)
+    requests_mock.post(
+        "http://db-api/api/auth",
+        json={
+            "default_alert_queue": {"value": "queue1", "uuid": str(uuid4())},
+            "default_event_queue": {"value": "queue1", "uuid": str(uuid4())},
+            "display_name": "Analyst",
+            "email": "analyst@test.com",
+            "roles": [],
+            "username": "analyst",
+            "uuid": str(uuid4()),
+        },
+    )
 
     # Attempt to authenticate
     auth = client.post("/api/auth", data={"username": "analyst", "password": "asdfasdf"})
-    access_token = auth.json()["access_token"]
+    access_token = auth.cookies.get("access_token")
     assert auth.status_code == status.HTTP_200_OK
-    assert auth.json()["token_type"] == "bearer"
     assert access_token
 
     # Attempt to use the token to access a protected API endpoint
-    get = client.get("/api/user/", headers={"Authorization": f"Bearer {access_token}"})
+    get = client.get("/api/user/", cookies={"access_token": access_token})
     assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 1
 
     # Wait for the token to expire
-    time.sleep(2)
+    time.sleep(expiration_seconds + 1)
 
     # Attempt to use the token to access a protected API endpoint now that the token is expired
-    get = client.get("/api/user/", headers={"Authorization": f"Bearer {access_token}"})
+    get = client.get("/api/user/", cookies={"access_token": access_token})
     assert get.status_code == status.HTTP_401_UNAUTHORIZED
     assert get.json()["detail"] == "Access token expired"
 
@@ -113,16 +72,28 @@ def test_missing_token(client):
     assert get.json()["detail"] == "Not authenticated"
 
 
-def test_wrong_token_type(client):
+def test_wrong_token_type(client, requests_mock):
+    requests_mock.post(
+        "http://db-api/api/auth",
+        json={
+            "default_alert_queue": {"value": "queue1", "uuid": str(uuid4())},
+            "default_event_queue": {"value": "queue1", "uuid": str(uuid4())},
+            "display_name": "Analyst",
+            "email": "analyst@test.com",
+            "roles": [],
+            "username": "analyst",
+            "uuid": str(uuid4()),
+        },
+    )
+
     # Attempt to authenticate
     auth = client.post("/api/auth", data={"username": "analyst", "password": "asdfasdf"})
-    refresh_token = auth.json()["refresh_token"]
+    refresh_token = auth.cookies.get("refresh_token")
     assert auth.status_code == status.HTTP_200_OK
-    assert auth.json()["token_type"] == "bearer"
     assert refresh_token
 
     # Attempt to use the refresh token to access a protected API endpoint
-    get = client.get("/api/user/", headers={"Authorization": f"Bearer {refresh_token}"})
+    get = client.get("/api/user/", cookies={"access_token": refresh_token})
     assert get.status_code == status.HTTP_401_UNAUTHORIZED
     assert get.json()["detail"] == "Invalid token type"
 
@@ -168,20 +139,31 @@ def test_missing_route_authentication(client, route):
 #
 
 
-def test_auth_success(client):
+def test_auth_success(client, requests_mock):
+    # Attempt to access a protected API endpoint
+    get = client.get("/api/user/")
+    assert get.status_code == status.HTTP_401_UNAUTHORIZED
+
+    requests_mock.post(
+        "http://db-api/api/auth",
+        json={
+            "default_alert_queue": {"value": "queue1", "uuid": str(uuid4())},
+            "default_event_queue": {"value": "queue1", "uuid": str(uuid4())},
+            "display_name": "Analyst",
+            "email": "analyst@test.com",
+            "roles": [],
+            "username": "analyst",
+            "uuid": str(uuid4()),
+        },
+    )
+
     # Attempt to authenticate
     auth = client.post("/api/auth", data={"username": "analyst", "password": "asdfasdf"})
-    access_token = auth.json()["access_token"]
-    refresh_token = auth.json()["refresh_token"]
     assert auth.status_code == status.HTTP_200_OK
-    assert auth.json()["token_type"] == "bearer"
-    assert auth.json()["user"]["username"] == "analyst"
-    assert access_token
-    assert refresh_token
+    assert auth.json()["username"] == "analyst"
     assert auth.cookies.get("access_token")
     assert auth.cookies.get("refresh_token")
 
     # Attempt to use the token to access a protected API endpoint
-    get = client.get("/api/user/", headers={"Authorization": f"Bearer {access_token}"})
+    get = client.get("/api/user/", cookies=auth.cookies)
     assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 1
