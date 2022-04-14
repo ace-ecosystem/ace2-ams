@@ -31,7 +31,7 @@ export default {
       throw error;
     });
 
-    authStore.user = camelcaseKeys(response.data.user, { deep: true });
+    authStore.user = camelcaseKeys(response.data, { deep: true });
   },
 
   // REFRESH AUTH

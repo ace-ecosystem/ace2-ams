@@ -1,0 +1,10 @@
+[tool.black]
+line-length = 120
+extend-exclude = '''
+(
+  /(
+      db\/migrations
+    # | some_other_directory    # uncomment this line to add extra directories or files to skip
+  )
+)
+'''

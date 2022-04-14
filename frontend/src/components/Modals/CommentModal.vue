@@ -47,6 +47,7 @@
 
   import { NodeComment } from "@/services/api/nodeComment";
 
+  import { useAuthStore } from "@/stores/auth";
   import { nodeSelectedStores } from "@/stores/index";
   import { useModalStore } from "@/stores/modal";
 
@@ -57,6 +58,7 @@
   });
 
   const nodeType = inject("nodeType");
+  const authStore = useAuthStore();
   const selectedStore = nodeSelectedStores[nodeType]();
   const modalStore = useModalStore();
 
@@ -69,6 +71,7 @@
     try {
       await NodeComment.create(
         selectedStore.selected.map((uuid) => ({
+          username: authStore.user.username,
           nodeUuid: uuid,
           ...commentData.value,
         })),

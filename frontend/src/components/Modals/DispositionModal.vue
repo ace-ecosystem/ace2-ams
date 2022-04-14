@@ -64,11 +64,13 @@
 
   import { useAlertDispositionStore } from "@/stores/alertDisposition";
   import { useAlertStore } from "@/stores/alert";
+  import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
   const alertDispositionStore = useAlertDispositionStore();
   const alertStore = useAlertStore();
+  const authStore = useAuthStore();
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
 
@@ -95,6 +97,7 @@
 
       if (dispositionComment.value) {
         const commentCreateData = selectedAlertStore.selected.map((uuid) => ({
+          username: authStore.user.username,
           nodeUuid: uuid,
           ...commentData.value,
         }));

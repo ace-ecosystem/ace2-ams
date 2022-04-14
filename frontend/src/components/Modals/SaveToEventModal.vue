@@ -208,6 +208,7 @@
       if (commentData.value) {
         const newCommentData = [
           {
+            username: authStore.user.username,
             nodeUuid: eventUuid,
             ...commentData.value,
           },

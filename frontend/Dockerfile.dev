@@ -12,4 +12,4 @@ COPY . .
 RUN chmod -R 777 /app
 
 # Override the entrypoint of the cypress/included image
-ENTRYPOINT ["bash", "-c", "while !</dev/tcp/api/80; do sleep 1; done; npm run dev"]
+ENTRYPOINT ["bash", "-c", "while !</dev/tcp/gui-api/80; do sleep 1; done; npm run dev"]

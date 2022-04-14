@@ -75,11 +75,13 @@
   import { isObject } from "@/etc/validators";
   import NodeCommentEditor from "@/components/Node/NodeCommentEditor.vue";
   import { NodeComment } from "@/services/api/nodeComment";
+  import { useAuthStore } from "@/stores/auth";
   import { eventRead, eventUpdate } from "@/models/event";
   import { propertyOption } from "@/models/base";
   import { nodeCommentRead } from "@/models/nodeComment";
   import { populateEventStores } from "@/stores/helpers";
 
+  const authStore = useAuthStore();
   const modalStore = useModalStore();
   const eventStore = useEventStore();
 
@@ -224,7 +226,7 @@
       );
       if (commentChanged) {
         await NodeComment.update(comment.uuid, {
-          uuid: comment.uuid,
+          username: authStore.user.username,
           value: comment.value,
         });
       }
