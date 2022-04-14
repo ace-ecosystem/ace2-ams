@@ -33,6 +33,7 @@
           :options="propertyValueOptions"
           :option-label="propertyValueOptionProperty"
           type="text"
+          placeholder="None"
           @change="updateValue('propertyValue', $event.value)"
         ></Dropdown>
       </div>
@@ -44,6 +45,7 @@
           :options="propertyValueOptions"
           :option-label="propertyValueOptionProperty"
           type="text"
+          placeholder="None"
           @change="updateValue('propertyValue', $event.value)"
         ></Multiselect>
       </div>
