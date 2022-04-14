@@ -120,6 +120,7 @@ jobs:
       POSTGRES_PASSWORD: supersecret
       DATABASE_URL: postgresql://ace:supersecret@db:5432/ace
       DATABASE_TEST_URL: postgresql://ace:supersecret@db:5432/ace_test
+      DATABASE_API_URL: http://db-api/api
       TESTING: yes
 
     steps:
@@ -166,6 +167,7 @@ jobs:
       POSTGRES_PASSWORD: supersecret
       DATABASE_URL: postgresql://ace:supersecret@db:5432/ace
       DATABASE_TEST_URL: postgresql://ace:supersecret@db:5432/ace_test
+      DATABASE_API_URL: http://db-api/api
       TESTING: yes
       TZ: America/New_York
 
