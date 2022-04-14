@@ -83,7 +83,7 @@ describe("NodeComment API calls", () => {
     myNock
       .patch(
         "/node/comment/1",
-        JSON.stringify({ uuid: "1", value: "New Name" }),
+        JSON.stringify({ username: "Alice", value: "New Name" }),
       )
       .reply(200, successMessage);
 
