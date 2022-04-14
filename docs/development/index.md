@@ -4,27 +4,9 @@
 
 This project has VSCode devcontainer support to ensure that anyone working on the project does so in a consistent environment as well as follows the same formatting/styling guidelines.
 
-### Required setup
+### Using WSL2
 
-In order to work within the devcontainer, you will need the following installed on your system:
-
-- [Docker](https://www.docker.com/products/docker-desktop)
-- [VSCode](https://code.visualstudio.com/)
-- [Remote Development](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack) VSCode extension pack
-
-> NOTE: If you are developing in Windows, you will need to make sure that you have WSL 2 set up and properly configured with Docker. That is outside the scope of this documentation, but you can find steps [here](https://docs.docker.com/desktop/windows/wsl/).
-
-## Working in the VSCode devcontainer
-
-When you open the project in VSCode, it will detect the devcontainer configuration and prompt you to reopen it inside of the container:
-
-![Reopen in Container](gui/open-in-container.png)
-
-Once you choose the `Reopen in Container` option, VSCode will work on building the environment. Once it is complete, you can open a terminal within VSCode to interact with the application:
-
-![Terminal](gui/terminal.png)
-
-Any work done on the application should be done through the devcontainer. If you make a change to the devcontainer configuration (found in the `.devcontainer` directory), you can rebuild the devcontainer by clicking on `Dev Container: ACE2 AMS` in the lower-left corner of VSCode and then selecting the `Rebuild Container` option in the menu that opens.
+TODO (instructions on how we set up our WSL2 environments for local development)
 
 ## Updating your hosts file
 
@@ -50,11 +32,13 @@ bin/reset-dev-container.sh
 
 This script will generate random passwords for the database user and the secret key used for JWTs. If you need to access these, you can view them in the `$HOME/.ace2.env` file, which configures the environment variables that will be loaded into the database container.
 
-Once the both the frontend and backend development environments are built and started, you can access the components:
+Once the both the frontend and API development environments are built and started, you can access the components:
 
 - Frontend: [http://ace2-ams:8080](http://ace2-ams:8080)
-- Backend API Swagger documentation: [http://localhost:7777/docs](http://localhost:7777/docs)
-- Backend API ReDoc documentation: [http://localhost:7777/redoc](http://localhost:7777/redoc)
+- Database API Swagger documentation: [http://localhost:8888/docs](http://localhost:8888/docs)
+- Database API ReDoc documentation: [http://localhost:8888/redoc](http://localhost:8888/redoc)
+- GUI API Swagger documentation: [http://localhost:7777/docs](http://localhost:7777/docs)
+- GUI API ReDoc documentation: [http://localhost:7777/redoc](http://localhost:7777/redoc)
 
 ## Managing NPM packages
 
@@ -86,18 +70,32 @@ npm uninstall <package>
 
 ## Running tests
 
-### Backend
+### Database API
 
-The backend API has a suite of tests performed by Pytest that includes code coverage:
+The database API has a suite of tests performed by Pytest that includes code coverage:
 
 ```
-bin/test-backend.sh
+bin/test-db-api.sh
 ```
 
 You can run a specific portion of the tests using the same script:
 
 ```
-bin/test-backend.sh backend/app/tests/api/test_auth_validate.py
+bin/test-db-api.sh db_api/app/tests/api/test_auth.py
+```
+
+### GUI API
+
+The GUI API has a suite of tests performed by Pytest that includes code coverage:
+
+```
+bin/test-gui-api.sh
+```
+
+You can run a specific portion of the tests using the same script:
+
+```
+bin/test-gui-api.sh gui_api/app/tests/api/test_auth.py
 ```
 
 ### Frontend

@@ -7,14 +7,14 @@ There is a script at `bin/insert-alerts.sh` that allows you to insert alerts int
 To insert a single alert into the database:
 
 ```
-bin/insert-alerts.sh backend/app/tests/alerts/alert.json
+bin/insert-alerts.sh db_api/app/tests/alerts/alert.json
 ```
 
 You must pass a path to a JSON file that represents the structure of an alert's analysis and observable instance objects. There are already some example JSON files available:
 
 ```
-backend/app/tests/alerts/large.json
-backend/app/tests/alerts/small.json
+backdb_apiend/app/tests/alerts/large.json
+db_api/app/tests/alerts/small.json
 ```
 
 ## Adding multiple alerts
@@ -22,12 +22,12 @@ backend/app/tests/alerts/small.json
 You can use the script to add multiple alerts using the same JSON file. This will add 10 separate alerts to the database:
 
 ```
-bin/insert-alerts.sh backend/app/tests/alerts/small.json 10
+bin/insert-alerts.sh db_api/app/tests/alerts/small.json 10
 ```
 
 ## Using a dynamic alert template
 
-You can also use an alert template where certain tokens inside of the JSON file get replaced with dynamic/random data. An example alert template is available at `backend/app/tests/alerts/small_template.json`.
+You can also use an alert template where certain tokens inside of the JSON file get replaced with dynamic/random data. An example alert template is available at `db_api/app/tests/alerts/small_template.json`.
 
 This template uses the following tokens that get replaced with random data using Faker:
 
@@ -40,5 +40,5 @@ This template uses the following tokens that get replaced with random data using
 Using the dynamic template is the same command. To add 10 dynamic alerts to the database:
 
 ```
-bin/insert-alerts.sh backend/app/tests/alerts/small_template.json 10
+bin/insert-alerts.sh db_api/app/tests/alerts/small_template.json 10
 ```

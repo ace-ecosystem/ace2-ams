@@ -16,7 +16,7 @@ Add the following entry to the file:
 127.0.0.1 ace2-ams
 ```
 
-With your host file updated, you can use the helper script to reset and build the local AMS development environment that includes hot-reloading for both the frontend and backend:
+With your host file updated, you can use the helper script to reset and build the local AMS development environment that includes hot-reloading for both the frontend and APIs:
 
 ```
 bin/reset-dev-container.sh
@@ -25,8 +25,10 @@ bin/reset-dev-container.sh
 After the containers are built and running, you can access the components using the following URLs:
 
 - Frontend: [http://ace2-ams:8080](http://ace2-ams:8080)
-- Backend API Swagger documentation: [http://localhost:7777/docs](http://localhost:7777/docs)
-- Backend API ReDoc documentation: [http://localhost:7777/redoc](http://localhost:7777/redoc)
+- Database API Swagger documentation: [http://localhost:8888/docs](http://localhost:8888/docs)
+- Database API ReDoc documentation: [http://localhost:8888/redoc](http://localhost:8888/redoc)
+- GUI API Swagger documentation: [http://localhost:7777/docs](http://localhost:7777/docs)
+- GUI API ReDoc documentation: [http://localhost:7777/redoc](http://localhost:7777/redoc)
 
 ## Philosophy
 
