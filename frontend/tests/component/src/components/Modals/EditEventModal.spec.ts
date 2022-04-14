@@ -17,23 +17,19 @@ import { userReadFactory } from "@mocks/user";
 import NodeCommentEditor from "@/components/Node/NodeCommentEditor.vue";
 import NodeThreatSelector from "@/components/Node/NodeThreatSelector.vue";
 import { NodeThreat } from "@/services/api/nodeThreat";
+import { NodeThreatActor } from "@/services/api/nodeThreatActor";
+import { NodeThreatType } from "@/services/api/nodeThreatType";
+import { EventPreventionTool } from "@/services/api/eventPreventionTool";
+import { EventRemediation } from "@/services/api/eventRemediation";
+import { EventRiskLevel } from "@/services/api/eventRiskLevel";
+import { EventStatus } from "@/services/api/eventStatus";
+import { EventType } from "@/services/api/eventType";
+import { EventVector } from "@/services/api/eventVector";
+import { User } from "@/services/api/user";
 
 function factory(args = { stubActions: true }) {
   const initialState = {
     modalStore: { openModals: ["EditEventModal"] },
-    userStore: { items: [userReadFactory()] },
-    eventRemediationStore: {
-      items: [genericObjectReadFactory({ value: "Test Remediation" })],
-      itemsByQueue: {
-        external: [genericObjectReadFactory({ value: "Test Remediation" })],
-      },
-    },
-    eventPreventionToolStore: {
-      items: [genericObjectReadFactory({ value: "Test Prevention Tool" })],
-      itemsByQueue: {
-        external: [genericObjectReadFactory({ value: "Test Prevention Tool" })],
-      },
-    },
   };
   const wrapper = mount(EditEventModal, {
     global: {
@@ -59,6 +55,29 @@ function factory(args = { stubActions: true }) {
 }
 
 describe("EventAlertsTable", () => {
+  beforeEach(() => {
+    cy.stub(EventPreventionTool, "readAll").returns([
+      genericObjectReadFactory({
+        value: "Test Prevention Tool",
+        queues: [genericObjectReadFactory({ value: "external" })],
+      }),
+    ]);
+    cy.stub(EventRiskLevel, "readAll").returns([]);
+    cy.stub(EventRemediation, "readAll").returns([
+      genericObjectReadFactory({
+        value: "Test Remediation",
+        queues: [genericObjectReadFactory({ value: "external" })],
+      }),
+    ]);
+    cy.stub(EventStatus, "readAll").returns([]);
+    cy.stub(EventType, "readAll").returns([]);
+    cy.stub(NodeThreatActor, "readAll").returns([]);
+    cy.stub(NodeThreat, "readAll").returns([]);
+    cy.stub(NodeThreatType, "readAll").returns([]);
+    cy.stub(EventVector, "readAll").returns([]);
+    cy.stub(User, "readAll").returns([userReadFactory()]);
+  });
+
   it("renders", () => {
     cy.stub(Event, "read").returns(eventReadFactory());
     factory();
@@ -69,7 +88,6 @@ describe("EventAlertsTable", () => {
         queue: genericObjectReadFactory({ value: "external" }),
       }),
     );
-    cy.stub(NodeThreat, "readAll").returns([]);
     const wrapper = factory({
       stubActions: false,
     });
@@ -121,7 +139,6 @@ describe("EventAlertsTable", () => {
       ])
       .as("updateEvent")
       .resolves();
-    cy.stub(NodeThreat, "readAll").returns([]);
     const wrapper = factory({
       stubActions: false,
     });
@@ -206,7 +223,7 @@ describe("EventAlertsTable", () => {
         .should("have.length", 0);
     });
   });
-  it.only("correctly displays error if event cannot be updated", () => {
+  it("correctly displays error if event cannot be updated", () => {
     cy.stub(Event, "read").returns(
       eventReadFactory({
         queue: genericObjectReadFactory({ value: "external" }),
@@ -225,7 +242,6 @@ describe("EventAlertsTable", () => {
       ])
       .as("updateEvent")
       .rejects(new Error("404 request could not be completed"));
-    cy.stub(NodeThreat, "readAll").returns([]);
     const wrapper = factory({
       stubActions: false,
     });
@@ -257,17 +273,13 @@ describe("EventAlertsTable", () => {
         "Could not update event: 404 request could not be completed",
       ).should("be.visible");
 
-      // Checks for the modal content main content div and error div
-      cy.get('[data-cy="edit-event-modal"]')
-        .children(".p-dialog-content")
-        .should("have.length", 2);
-      // Checks that nothing is in the main content div (form shouldn't load if there was an error)
+      // Checks that the error and form elements are all visible together
       cy.get('[data-cy="edit-event-modal"]')
         .children(".p-dialog-content")
         .eq(0)
         .children()
         .children()
-        .should("have.length", 0);
+        .should("have.length", 8);
     });
   });
 });

@@ -78,6 +78,7 @@
   import { eventRead, eventUpdate } from "@/models/event";
   import { propertyOption } from "@/models/base";
   import { nodeCommentRead } from "@/models/nodeComment";
+  import { populateEventStores } from "@/stores/helpers";
 
   const modalStore = useModalStore();
   const eventStore = useEventStore();
@@ -141,6 +142,7 @@
   const initializeData = async () => {
     isLoading.value = true;
     try {
+      await populateEventStores();
       await fetchEvent();
       if (!event.value) {
         throw new Error("Event data not saved to local store");
