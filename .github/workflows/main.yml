@@ -142,8 +142,11 @@ jobs:
       - name: Nginx logs
         run: docker logs ace2-ams
 
-      - name: FastAPI logs
-        run: docker logs ace2-ams-api
+      - name: Database API logs
+        run: docker logs ace2-ams-db-api
+
+      - name: GUI API logs
+        run: docker logs ace2-ams-gui-api
 
       - name: Database logs
         run: docker logs ace2-ams-db
