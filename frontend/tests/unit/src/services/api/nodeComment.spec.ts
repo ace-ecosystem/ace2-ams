@@ -6,7 +6,7 @@ import { describe, it, expect } from "vitest";
 import snakecaseKeys from "snakecase-keys";
 import { NodeComment } from "@/services/api/nodeComment";
 import myNock from "@unit/services/api/nock";
-import { nodeCommentCreate, nodeCommentRead } from "@/models/nodeComment";
+import { nodeCommentCreate } from "@/models/nodeComment";
 import { createCustomPinia } from "@tests/unitHelpers";
 
 createCustomPinia();
@@ -19,6 +19,7 @@ describe("NodeComment API calls", () => {
     {
       nodeUuid: "uuid1",
       description: "This is a comment",
+      username: "Alice",
       value: "Test",
     },
   ];
@@ -86,7 +87,10 @@ describe("NodeComment API calls", () => {
       )
       .reply(200, successMessage);
 
-    const res = await NodeComment.update("1", { uuid: "1", value: "New Name" });
+    const res = await NodeComment.update("1", {
+      username: "Alice",
+      value: "New Name",
+    });
     expect(res).toEqual(successMessage);
   });
 
