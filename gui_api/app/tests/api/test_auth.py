@@ -32,6 +32,8 @@ def test_expired_token(client, monkeypatch, requests_mock):
         },
     )
 
+    requests_mock.get(f"http://db-api/api/user/", json={"items": [], "total": 0, "limit": 50, "offset": 0})
+
     # Attempt to authenticate
     auth = client.post("/api/auth", data={"username": "analyst", "password": "asdfasdf"})
     access_token = auth.cookies.get("access_token")
