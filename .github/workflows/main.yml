@@ -10,8 +10,33 @@ on:
 
 # All of the jobs run in parallel, but each step within a job is sequential
 jobs:
-  backend:
-    name: Backend
+  db-api:
+    name: DB API
+    runs-on: ubuntu-latest
+
+    env:
+      ACE_DEV: true
+      DOCKER_BUILDKIT: 0
+      COMPOSE_DOCKER_CLI_BUILD: 0
+      POSTGRES_DB: ace
+      POSTGRES_USER: ace
+      POSTGRES_PASSWORD: supersecret
+      DATABASE_URL: postgresql://ace:supersecret@db:5432/ace
+      DATABASE_TEST_URL: postgresql://ace:supersecret@db:5432/ace_test
+      TESTING: yes
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: docker-compose build db-api
+
+      - name: Test
+        run: docker-compose run -e TESTING=1 db-api pytest -vv
+
+  gui-api:
+    name: GUI API
     runs-on: ubuntu-latest
 
     env:
@@ -36,10 +61,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build
-        run: docker-compose build api
+        run: docker-compose build gui-api
 
       - name: Test
-        run: docker-compose run -e TESTING=1 api pytest -vv
+        run: docker-compose run -e TESTING=1 gui-api pytest -vv
 
   frontend:
     name: Frontend
