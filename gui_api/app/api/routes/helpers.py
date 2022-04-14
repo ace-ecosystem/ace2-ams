@@ -130,21 +130,3 @@ def api_route_update(router: APIRouter, endpoint: Callable, path: str = "/{uuid}
         },
         status_code=status.HTTP_204_NO_CONTENT,
     )
-
-
-#
-# DELETE
-#
-
-
-def api_route_delete(router: APIRouter, endpoint: Callable, path: str = "/{uuid}"):
-    router.add_api_route(
-        dependencies=[Depends(validate_access_token)],
-        path=path,
-        endpoint=endpoint,
-        methods=["DELETE"],
-        responses={
-            status.HTTP_400_BAD_REQUEST: {"description": "Unable to delete the alert queue"},
-        },
-        status_code=status.HTTP_204_NO_CONTENT,
-    )
