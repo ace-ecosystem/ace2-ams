@@ -1,4 +1,3 @@
-import requests
 import uuid
 
 from collections.abc import Mapping
@@ -11,6 +10,7 @@ from jose import ExpiredSignatureError, jwt, JWTError
 from passlib.hash import bcrypt_sha256
 from typing import Dict, Mapping, Optional
 
+from api import db_api
 from core.config import get_settings
 
 
@@ -155,34 +155,22 @@ def refresh_token(refresh_token: str = Depends(oauth2_refresh_scheme)) -> dict:
             # Make sure the user in the refresh token claims is valid and enabled. If the current refresh token
             # is valid, the database API will update the token to what is given as the new_refresh_token.
             new_refresh_token = create_refresh_token(sub=claims["sub"])
-            try:
-                result = requests.post(
-                    f"{get_settings().database_api_url}/user/validate_refresh_token",
-                    json={
-                        "username": claims["sub"],
-                        "refresh_token": refresh_token,
-                        "new_refresh_token": new_refresh_token,
-                    },
-                )
-            except:
-                raise HTTPException(
-                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                    detail="Database API is unavailable",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
 
-            if result.status_code == status.HTTP_200_OK:
-                return {
-                    "access_token": create_access_token(sub=claims["sub"]),
-                    "refresh_token": new_refresh_token,
-                    "user": result.json(),
-                }
-
-            raise HTTPException(
-                status_code=result.status_code,
-                detail=result.text,
-                headers={"WWW-Authenticate": "Bearer"},
+            result = db_api.post(
+                path="/user/validate_refresh_token",
+                payload={
+                    "username": claims["sub"],
+                    "refresh_token": refresh_token,
+                    "new_refresh_token": new_refresh_token,
+                },
+                expected_status=status.HTTP_200_OK,
             )
+
+            return {
+                "access_token": create_access_token(sub=claims["sub"]),
+                "refresh_token": new_refresh_token,
+                "user": result,
+            }
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
