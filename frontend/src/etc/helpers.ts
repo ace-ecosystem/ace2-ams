@@ -250,6 +250,7 @@ export function groupItemsByQueue<T extends genericObjectRead>(
 ): Record<string, T[]> {
   const itemsByQueue: Record<string, T[]> = {};
   for (const item of arr) {
+    console.log(item);
     if (item.queues) {
       for (const queue of item.queues) {
         if (queue.value in itemsByQueue) {
