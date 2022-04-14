@@ -43,8 +43,13 @@ def test_expired_token(client, monkeypatch, requests_mock):
     assert refresh.json()["detail"] == "Refresh token expired"
 
 
+def test_invalid_token(client):
+    refresh = client.get("/api/auth/refresh", cookies={"refresh_token": "Bearer asdf"})
+    assert refresh.status_code == status.HTTP_401_UNAUTHORIZED
+    assert refresh.json()["detail"] == "Invalid token"
+
+
 def test_missing_token(client):
-    # Attempt to get a new access token without supplying a refresh token
     refresh = client.get("/api/auth/refresh")
     assert refresh.status_code == status.HTTP_401_UNAUTHORIZED
     assert refresh.json()["detail"] == "Not authenticated"

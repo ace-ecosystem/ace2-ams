@@ -51,6 +51,12 @@ def test_expired_token(client, monkeypatch, requests_mock):
     assert get.json()["detail"] == "Access token expired"
 
 
+def test_invalid_token(client):
+    get = client.get("/api/user/", cookies={"access_token": "Bearer asdf"})
+    assert get.status_code == status.HTTP_401_UNAUTHORIZED
+    assert get.json()["detail"] == "Invalid token"
+
+
 @pytest.mark.parametrize(
     "key",
     [

@@ -63,7 +63,7 @@ def update_comment(
     response: Response,
 ):
     db_api.patch(
-        path=f"/node/comment/{uuid}",
+        path=f"/node/comment/{uuid}?history_username={node_comment.username}",
         payload=json.loads(node_comment.json()),
     )
 

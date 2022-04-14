@@ -20,10 +20,6 @@ def _request(method: str, path: str, expected_status: int, payload: Optional[dic
         return result.json()
 
 
-def delete(path: str, expected_status: int = status.HTTP_204_NO_CONTENT, return_json: bool = False):
-    return _request(method="DELETE", path=path, expected_status=expected_status, return_json=return_json)
-
-
 def get(path: str, expected_status: int = status.HTTP_200_OK, return_json: bool = True):
     return _request(method="GET", path=path, expected_status=expected_status, return_json=return_json)
 

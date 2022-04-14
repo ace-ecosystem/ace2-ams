@@ -21,3 +21,13 @@ def test_add_event(client_valid_access_token, requests_mock):
     assert (len(requests_mock.request_history)) == 2
     assert requests_mock.request_history[1].method == "POST"
     assert requests_mock.request_history[1].url == "http://db-api/api/test/add_event"
+
+
+def test_reset_database(client_valid_access_token, requests_mock):
+    requests_mock.post("http://db-api/api/test/reset_database", status_code=status.HTTP_204_NO_CONTENT)
+
+    client_valid_access_token.post("/api/test/reset_database")
+
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "POST"
+    assert requests_mock.request_history[1].url == "http://db-api/api/test/reset_database"
