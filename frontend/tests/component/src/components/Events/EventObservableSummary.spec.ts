@@ -12,10 +12,7 @@ import router from "@/router/index";
 import { Event } from "@/services/api/event";
 import { observableSummary } from "@/models/eventSummaries";
 import { observableReadFactory } from "@mocks/observable";
-import { result } from "cypress/types/lodash";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import { observableRelationshipRead } from "@/models/observable";
-import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { ObservableInstance } from "@/services/api/observable";
 
 const props = {
