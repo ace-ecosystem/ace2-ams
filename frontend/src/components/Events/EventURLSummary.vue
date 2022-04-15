@@ -2,6 +2,9 @@
 <!-- A simple list of all URLs contained in the given alert UUIDs -->
 
 <template>
+  <Message v-if="error" severity="error" data-cy="error-banner">{{
+    error
+  }}</Message>
   <Listbox
     v-model="selectedURL"
     :options="sortedUrlObservables"
@@ -14,18 +17,23 @@
   />
 </template>
 
-<script setup>
-  import { defineProps, ref, onMounted } from "vue";
+<script setup lang="ts">
+  import { defineProps, ref, onMounted, PropType } from "vue";
+
   import Listbox from "primevue/listbox";
+  import Message from "primevue/message";
+
   import { NodeTree } from "@/services/api/nodeTree";
   import { copyToClipboard } from "@/etc/helpers";
+  import { observableRead } from "@/models/observable";
 
   const props = defineProps({
-    eventAlertUuids: { type: Array, required: true },
+    eventAlertUuids: { type: Array as PropType<string[]>, required: true },
   });
 
+  const error = ref<string>();
   const selectedURL = ref(null);
-  const sortedUrlObservables = ref([]);
+  const sortedUrlObservables = ref<observableRead[]>([]);
 
   onMounted(async () => {
     const observables = await getAllObservables();
@@ -33,14 +41,23 @@
   });
 
   const getAllObservables = async () => {
-    const allObservables = await NodeTree.readNodesOfNodeTree(
-      props.eventAlertUuids,
-      "observable",
-    );
-    return allObservables;
+    try {
+      const allObservables = await NodeTree.readNodesOfNodeTree(
+        props.eventAlertUuids,
+        "observable",
+      );
+      return allObservables as unknown as observableRead[];
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
+      return [];
+    }
   };
 
-  const getURLObservables = (allObservables) => {
+  const getURLObservables = (allObservables: observableRead[]) => {
     const urlObservables = allObservables.filter(
       (observable) => observable.type.value == "url",
     );
