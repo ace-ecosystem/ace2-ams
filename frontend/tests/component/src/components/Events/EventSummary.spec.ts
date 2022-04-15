@@ -55,12 +55,6 @@ describe("EventSummary", () => {
     queue: genericObjectReadFactory({ value: "external" }),
   });
 
-  const events = [
-    [openEventDefaults, "TBD", "default"],
-    [openEventManual, manualTime, "manual"],
-    [openEventAuto, autoTime, "auto"],
-  ];
-
   const expectedDefaultColHeaders = [
     "Created",
     "Name",
@@ -120,8 +114,14 @@ describe("EventSummary", () => {
       });
   });
 
-  events.forEach(($type) => {
-    const [event, expectedTime, eventTimeType] = $type;
+  const eventsParameters = [
+    [openEventDefaults, "TBD", "default"],
+    [openEventManual, manualTime, "manual"],
+    [openEventAuto, autoTime, "auto"],
+  ];
+
+  eventsParameters.forEach(($event) => {
+    const [event, expectedTime, eventTimeType] = $event;
 
     it(`renders timeline correctly when there is an open event available with all ${eventTimeType} values`, () => {
       factory({ eventStore: { open: event, requestReload: false } });
