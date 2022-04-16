@@ -22,7 +22,7 @@
   />
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { ref, defineProps, computed, watch, defineEmits, inject } from "vue";
 
   import MegaMenu from "primevue/megamenu";
@@ -42,7 +42,10 @@
   const modalStore = useModalStore();
   const selectedStore = useSelectedEventStore();
 
-  const analysisModuleComponents = inject("analysisModuleComponents");
+  const analysisModuleComponents = inject("analysisModuleComponents") as Record<
+    string,
+    unknown
+  >;
 
   const props = defineProps({
     eventUuid: { type: String, required: true },
@@ -50,9 +53,9 @@
 
   const emit = defineEmits(["sectionClicked"]);
 
-  const error = ref();
+  const error = ref<string>();
 
-  const open = (name) => {
+  const open = (name: string) => {
     modalStore.open(name);
   };
 
@@ -68,21 +71,31 @@
       }));
 
       await eventStore.update(updateData);
-    } catch (err) {
-      error.value = err.message;
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
     }
     if (!error.value) {
       requestReload();
     }
   }
 
-  const formatAnalysisType = (analysisType) => {
+  const formatAnalysisType = (analysisType: string) => {
     return analysisType.split(" - ")[0];
   };
 
+  interface menuItem {
+    label: string;
+    command: () => void;
+    disabled?: boolean;
+  }
+
   const analysisMenuItems = computed(() => {
-    let analysisMenuItems = [];
-    let processed = [];
+    let analysisMenuItems: menuItem[] = [];
+    let processed: string[] = [];
     if (eventStore.open) {
       analysisMenuItems = eventStore.open.analysisTypes
         .filter((analysisType) => {
