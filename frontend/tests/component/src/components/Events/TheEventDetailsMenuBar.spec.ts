@@ -192,7 +192,7 @@ describe("TheEventDetailsMenuBar", () => {
       .eq(1)
       .should("have.text", "Sandbox Analysis");
   });
-  it.only("correctly emits sectionClicked with section name when menu item link is clicked", () => {
+  it("correctly emits sectionClicked with section name when menu item link is clicked", () => {
     factory();
     cy.contains("Information").click();
     cy.contains("Event Summary")
