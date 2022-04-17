@@ -1,5 +1,7 @@
 FROM cypress/included:9.5.4
 
+RUN apt-get install -y curl
+
 WORKDIR /app
 
 COPY package*.json ./
