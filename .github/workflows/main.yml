@@ -130,11 +130,18 @@ jobs:
       - name: Run environment
         run: docker-compose -f docker-compose.yml up -d
 
+      - name: Sleep for 30 seconds
+        run: sleep 30s
+        shell: bash
+
       - name: Database API logs
         run: docker logs ace2-ams-db-api
 
       - name: GUI API logs
         run: docker logs ace2-ams-gui-api
+
+      - name: Database logs
+        run: docker logs ace2-ams-db
 
       - name: Wait for the environment to be accessible
         run: docker exec ace2-ams-gui bin/wait-for-gui.sh
