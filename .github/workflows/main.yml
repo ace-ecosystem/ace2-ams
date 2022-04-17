@@ -130,6 +130,12 @@ jobs:
       - name: Run environment
         run: docker-compose -f docker-compose.yml up -d
 
+      - name: Database API logs
+        run: docker logs ace2-ams-db-api
+
+      - name: GUI API logs
+        run: docker logs ace2-ams-gui-api
+
       - name: Wait for the environment to be accessible
         run: docker exec ace2-ams-gui bin/wait-for-gui.sh
 
