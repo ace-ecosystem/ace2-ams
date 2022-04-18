@@ -12,6 +12,7 @@
     :style="props.style"
     :draggable="false"
     @update:visible="close"
+    :data-cy="name"
   >
     <template #header>
       <slot name="header"></slot>

@@ -37,3 +37,8 @@ Cypress.Commands.add("resetDatabase", () => {
 Cypress.Commands.add("addFormObservable", () => {
   cy.get("#add-observable").click();
 });
+
+// Only use in component tests!!!
+Cypress.Commands.add("vue", () => {
+  return cy.wrap(Cypress.vueWrapper);
+});
