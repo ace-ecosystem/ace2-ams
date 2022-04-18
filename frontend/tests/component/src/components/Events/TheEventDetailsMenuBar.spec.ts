@@ -1,6 +1,3 @@
-// Example Cypress Vue component test that we might use one day
-// NOTE: This test is not fully functional at this point.
-
 import { mount } from "@cypress/vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 
@@ -13,7 +10,6 @@ import { testConfiguration } from "@/etc/configuration/test/index";
 import { eventRead } from "@/models/event";
 import { eventReadFactory } from "@mocks/events";
 import { userReadFactory } from "@mocks/user";
-import { flushPromises } from "@vue/test-utils";
 
 const props = {
   eventUuid: "uuid",
