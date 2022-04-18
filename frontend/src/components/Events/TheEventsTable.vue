@@ -19,7 +19,7 @@
   </TheNodeTable>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { ref, onMounted, inject } from "vue";
 
   import EventAlertsTable from "./EventAlertsTable.vue";
@@ -30,7 +30,7 @@
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
   const currentUserSettingsStore = useCurrentUserSettingsStore();
 
-  const config = inject("config");
+  const config = inject("config") as Record<string, any>;
 
   const columns = ref([]);
   const preferredEventQueue = ref(currentUserSettingsStore.queues.events);
