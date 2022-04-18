@@ -1,4 +1,6 @@
-FROM cypress/included:9.5.0
+FROM cypress/included:9.5.4
+
+RUN apt-get install -y curl
 
 WORKDIR /app
 
