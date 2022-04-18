@@ -3,6 +3,9 @@
 <!-- Also includes controls for managing whether an observable should be enabled for detection  -->
 
 <template>
+  <Message v-if="error" severity="error" data-cy="error-banner">{{
+    error
+  }}</Message>
   <DataTable
     v-model:filters="filters"
     v-model:selection="modifiedEnabledForDetection"
@@ -152,13 +155,14 @@
   </DataTable>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { defineProps, computed, ref, onMounted, inject } from "vue";
   import { FilterMatchMode } from "primevue/api";
   import Button from "primevue/button";
   import Column from "primevue/column";
-  import DataTable from "primevue/datatable";
+  import DataTable, { DataTableFilterMeta } from "primevue/datatable";
   import InputText from "primevue/inputtext";
+  import Message from "primevue/message";
   import MultiSelect from "primevue/multiselect";
   import NodeRelationshipVue from "@/components/Node/NodeRelationship.vue";
   import NodeTagVue from "@/components/Node/NodeTag.vue";
@@ -167,27 +171,37 @@
   import { ObservableInstance } from "@/services/api/observable";
 
   import { useObservableTypeStore } from "@/stores/observableType";
+  import { observableSummary } from "@/models/eventSummaries";
 
-  const config = inject("config");
+  const config = inject("config") as Record<string, any>;
   const props = defineProps({
     eventUuid: { type: String, required: true },
   });
 
   const observableTypeStore = useObservableTypeStore();
 
-  const maxHits = ref(config.events.faqueue.mediumHits);
-  const lowHits = ref(config.events.faqueue.lowHits);
+  const currentlyEnabledForDetection = ref<observableSummary[]>([]);
+  const error = ref<string>();
   const isLoading = ref(false);
   const isShowingMaxHits = ref(true);
-  const toggleShowMaxHitsButtonText = ref("Hide Max Hits");
+  const lowHits = ref<number>(config.events.faqueue.lowHits);
+  const maxHits = ref<number>(config.events.faqueue.mediumHits);
+  const modifiedEnabledForDetection = ref<observableSummary[]>([]);
+  const observables = ref<observableSummary[]>([]);
   const toggleShowMaxHitsButtonIcon = ref("pi pi-eye-slash");
-  const observables = ref([]);
-  const modifiedEnabledForDetection = ref([]);
-  const currentlyEnabledForDetection = ref([]);
+  const toggleShowMaxHitsButtonText = ref("Hide Max Hits");
 
   onMounted(async () => {
     isLoading.value = true;
-    await initData();
+    try {
+      await initData();
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = `Could not fetch observable summary data: ${e}`;
+      } else if (e instanceof Error) {
+        error.value = `Could not fetch observable summary data: ${e.message}`;
+      }
+    }
     isLoading.value = false;
   });
 
@@ -202,7 +216,9 @@
     if (isShowingMaxHits.value) {
       return observables.value;
     }
-    return observables.value.filter((obs) => obs.faqueueHits < maxHits.value);
+    return observables.value.filter(
+      (obs: observableSummary) => obs.faqueueHits < maxHits.value,
+    );
   });
 
   const resetSelectedObservables = () => {
@@ -212,7 +228,9 @@
   const selectLowHitObservables = () => {
     modifiedEnabledForDetection.value = [
       ...modifiedEnabledForDetection.value,
-      ...observables.value.filter((obs) => obs.faqueueHits <= lowHits.value),
+      ...observables.value.filter(
+        (obs: observableSummary) => obs.faqueueHits <= lowHits.value,
+      ),
     ];
   };
 
@@ -229,15 +247,17 @@
 
   const updateDetectionStatuses = async () => {
     isLoading.value = true;
-    const setFalse = currentlyEnabledForDetection.value.filter(
-      (obs) => !modifiedEnabledForDetection.value.includes(obs),
-    );
+    const setFalse: observableSummary[] =
+      currentlyEnabledForDetection.value.filter(
+        (obs) => !modifiedEnabledForDetection.value.includes(obs),
+      );
     for (const observable of setFalse) {
       await updateObservableDetectionStatus(observable.uuid, false);
     }
-    const setTrue = modifiedEnabledForDetection.value.filter(
-      (obs) => !currentlyEnabledForDetection.value.includes(obs),
-    );
+    const setTrue: observableSummary[] =
+      modifiedEnabledForDetection.value.filter(
+        (obs) => !currentlyEnabledForDetection.value.includes(obs),
+      );
     for (const observable of setTrue) {
       await updateObservableDetectionStatus(observable.uuid, true);
     }
@@ -245,18 +265,29 @@
     isLoading.value = false;
   };
 
-  const updateObservableDetectionStatus = async (uuid, forDetection) => {
-    await ObservableInstance.update(uuid, { forDetection: forDetection });
+  const updateObservableDetectionStatus = async (
+    uuid: string,
+    forDetection: boolean,
+  ) => {
+    try {
+      await ObservableInstance.update(uuid, { forDetection: forDetection });
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = `Could not update observables: ${e}`;
+      } else if (e instanceof Error) {
+        error.value = `Could not update observables: ${e.message}`;
+      }
+    }
   };
 
-  const rowClass = (data) => {
-    return data.faqueueHits <= lowHits.value ? "low-hits" : null;
+  const rowClass = (obs: observableSummary): string | undefined => {
+    return obs.faqueueHits <= lowHits.value ? "low-hits" : undefined;
   };
 
   const filters = ref({
     value: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
     "type.value": { value: null, matchMode: FilterMatchMode.IN },
-  });
+  } as DataTableFilterMeta);
 </script>
 
 <style scoped>

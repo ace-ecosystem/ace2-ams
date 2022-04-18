@@ -45,7 +45,7 @@ export const Event = {
   readUserSummary: async (uuid: UUID): Promise<userSummary[]> =>
     await api.read(`${endpoint}${uuid}/summary/user`),
 
-  readUrlDomainSummary: async (uuid: UUID): Promise<urlDomainSummary[]> =>
+  readUrlDomainSummary: async (uuid: UUID): Promise<urlDomainSummary> =>
     await api.read(`${endpoint}${uuid}/summary/url_domain`),
 
   readEmailSummary: async (uuid: UUID): Promise<emailSummary[]> =>
