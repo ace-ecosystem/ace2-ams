@@ -38,7 +38,7 @@ const initialStateDefault: eventTableStoreState = {
 };
 
 function factory(initialState: eventTableStoreState) {
-  mount(TheEventsTable, {
+  return mount(TheEventsTable, {
     global: {
       plugins: [
         PrimeVue,
@@ -61,14 +61,15 @@ function factory(initialState: eventTableStoreState) {
       },
     },
   });
-
-  cy.findByRole("table");
-  cy.wrap(Cypress.vueWrapper).then((wrapper) => {
-    expect(wrapper.findComponent(NodeQueueSelectorVue)).to.exist;
-  });
 }
 
 describe("TheEventsTable", () => {
+  it("renders basic elements correctly", () => {
+    factory(initialStateDefault).then((wrapper) => {
+      cy.findByRole("table");
+      expect(wrapper.findComponent(NodeQueueSelectorVue)).to.exist;
+    });
+  });
   it("renders when there are no events to show", () => {
     factory(initialStateDefault);
     const defaultColumnHeaders = [
@@ -155,14 +156,9 @@ describe("TheEventsTable", () => {
       });
   });
   it("updates columns and reloads table only when preferred event queue changes", () => {
-    factory(initialStateDefault);
     const internalQueue = genericObjectReadFactory({ value: "internal" });
     const externalQueue = genericObjectReadFactory({ value: "external" });
-    cy.wrap(
-      Cypress.vueWrapper as VueWrapper<
-        ComponentPublicInstance<typeof TheEventsTable>
-      >,
-    ).then((wrapper) => {
+    factory(initialStateDefault).then((wrapper) => {
       // Table SHOULD update if preferred event queue changes
       wrapper.vm.currentUserSettingsStore.queues.events = internalQueue;
       const updatedColumnHeaders = ["", "", "", "Created", "Name", "Type"];
