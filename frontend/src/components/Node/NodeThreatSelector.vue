@@ -58,6 +58,7 @@
     <div class="field col-fixed" style="width: 150px">
       <MultiSelect
         data-cy="threat-types"
+        append-to="self"
         v-model="newThreatTypes"
         :options="nodeThreatTypeStore.allItems"
         option-label="value"
