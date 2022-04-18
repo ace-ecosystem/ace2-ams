@@ -6,14 +6,11 @@ import { userRead } from "@/models/user";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { userReadFactory } from "@mocks/user";
 import { Alert } from "@/services/api/alert";
-import Message from "primevue/message";
-import { VueWrapper } from "@vue/test-utils";
-import { ComponentPublicInstance } from "vue";
 
 function factory(
   args: { users: userRead[]; selected: string[] } = { users: [], selected: [] },
 ) {
-  mount(AssignModal, {
+  return mount(AssignModal, {
     global: {
       plugins: [
         PrimeVue,
@@ -36,21 +33,15 @@ function factory(
     propsData: {
       name: "AssignModal",
     },
-  });
-  cy.wrap(
-    Cypress.vueWrapper as VueWrapper<
-      ComponentPublicInstance<typeof AssignModal>
-    >,
-  ).then((wrapper) => {
+  }).then((wrapper) => {
     wrapper.vm.modalStore.open("AssignModal");
+    cy.get("[data-cy=AssignModal]").should("be.visible");
+    cy.findAllByText("Assign Ownership").should("be.visible");
+    cy.findAllByText("Select a user").should("be.visible");
+    cy.findAllByText("Nevermind").should("be.visible");
+    cy.findAllByText("Assign").should("be.visible");
   });
-  cy.get("[data-cy=AssignModal]").should("be.visible");
-  cy.findAllByText("Assign Ownership").should("be.visible");
-  cy.findAllByText("Select a user").should("be.visible");
-  cy.findAllByText("Nevermind").should("be.visible");
-  cy.findAllByText("Assign").should("be.visible");
 }
-
 describe("AssignModal", () => {
   const users = [
     userReadFactory({ displayName: "Analyst A" }),
@@ -107,9 +98,6 @@ describe("AssignModal", () => {
     cy.findByText("Assign").click();
     cy.get("@updateAlert").should("have.been.calledOnce");
     cy.get("[data-cy=AssignModal]").should("be.visible");
-    cy.wrap(Cypress.vueWrapper).then((wrapper) => {
-      expect(wrapper.findComponent(Message)).to.exist;
-      cy.contains("404 request failed").should("be.visible");
-    });
+    cy.contains("404 request failed").should("be.visible");
   });
 });

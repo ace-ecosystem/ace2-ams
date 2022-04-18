@@ -163,6 +163,9 @@ describe("TheEventsTable", () => {
       wrapper.vm.currentUserSettingsStore.queues.events = internalQueue;
       const updatedColumnHeaders = ["", "", "", "Created", "Name", "Type"];
       cy.get("tr").should("have.length", 2);
+
+      cy.contains("Type", { timeout: 5000 }); // Effectively need to wait for the component to rerender
+
       cy.get("tr")
         .eq(0)
         .children()

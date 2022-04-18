@@ -3,11 +3,9 @@ import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 
 import BaseModal from "@/components/Modals/BaseModal.vue";
-import { VueWrapper } from "@vue/test-utils";
-import { ComponentPublicInstance } from "vue";
 
 function factory(props = {}) {
-  mount(BaseModal, {
+  return mount(BaseModal, {
     global: {
       plugins: [PrimeVue, createPinia()],
       provide: {
@@ -18,10 +16,7 @@ function factory(props = {}) {
       name: "BaseModal",
       ...props,
     },
-  });
-  cy.wrap(
-    Cypress.vueWrapper as VueWrapper<ComponentPublicInstance<typeof BaseModal>>,
-  ).then((wrapper) => {
+  }).then((wrapper) => {
     wrapper.vm.store.open("BaseModal");
     cy.get("[data-cy=BaseModal]").should("be.visible");
   });
