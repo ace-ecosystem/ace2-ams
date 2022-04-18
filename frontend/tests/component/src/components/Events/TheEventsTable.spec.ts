@@ -12,6 +12,8 @@ import { eventRead } from "@/models/event";
 import { eventReadFactory } from "@mocks/events";
 import NodeQueueSelectorVue from "@/components/Node/NodeQueueSelector.vue";
 import { nodeThreatRead } from "@/models/nodeThreat";
+import { VueWrapper } from "@vue/test-utils";
+import { ComponentPublicInstance } from "vue";
 
 interface eventTableStoreState {
   visibleQueriedItems: eventRead[];
@@ -61,7 +63,7 @@ function factory(initialState: eventTableStoreState) {
   });
 
   cy.findByRole("table");
-  cy.vue().then((wrapper) => {
+  cy.wrap(Cypress.vueWrapper).then((wrapper) => {
     expect(wrapper.findComponent(NodeQueueSelectorVue)).to.exist;
   });
 }
@@ -156,7 +158,11 @@ describe("TheEventsTable", () => {
     factory(initialStateDefault);
     const internalQueue = genericObjectReadFactory({ value: "internal" });
     const externalQueue = genericObjectReadFactory({ value: "external" });
-    cy.vue().then((wrapper) => {
+    cy.wrap(
+      Cypress.vueWrapper as VueWrapper<
+        ComponentPublicInstance<typeof TheEventsTable>
+      >,
+    ).then((wrapper) => {
       // Table SHOULD update if preferred event queue changes
       wrapper.vm.currentUserSettingsStore.queues.events = internalQueue;
       const updatedColumnHeaders = ["", "", "", "Created", "Name", "Type"];

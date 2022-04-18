@@ -28,13 +28,15 @@
     </span>
   </div>
   <!-- Event Time fields -->
-  <span v-else-if="props.field.includes('Time')">
-    {{ formatDateTime(props.data[props.field]) }}</span
+  <span
+    v-else-if="typeof props.field === 'string' && props.field.includes('Time')"
+  >
+    {{ formatDateTime(props.data[props.field] as unknown as string) }}</span
   >
   <!-- Any event property that uses a list -->
   <span v-else-if="Array.isArray(props.data[props.field])">
-    <span v-if="props.data[props.field].length">
-      {{ joinStringArray(props.data[props.field]) }}
+    <span v-if="arrayHasLength(props.data[props.field])">
+      {{ joinStringArray(props.data[props.field] as unknown as string[]) }}
     </span>
     <span v-else> None </span>
   </span>
@@ -96,6 +98,13 @@
 
   const getEventLink = (uuid: string) => {
     return "/event/" + uuid;
+  };
+
+  const arrayHasLength = (arr: unknown): boolean => {
+    if (Array.isArray(arr)) {
+      return Boolean(arr.length);
+    }
+    return false;
   };
 
   const joinStringArray = (arr: string[]) => {

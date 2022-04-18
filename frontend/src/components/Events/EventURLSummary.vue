@@ -13,7 +13,7 @@
     data-key="uuid"
     empty-message="This event doesn't have any URL observables."
     data-cy="url-observable-listbox"
-    @change="copyToClipboard(selectedURL)"
+    @change="copyToClipboard(selectedURL as unknown as string)"
   />
 </template>
 

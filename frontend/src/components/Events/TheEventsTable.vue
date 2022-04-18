@@ -9,7 +9,10 @@
     /></template>
 
     <template #rowCell="{ data, field }">
-      <EventTableCell :data="data" :field="field"></EventTableCell>
+      <EventTableCell
+        :data="data"
+        :field="(field as unknown as eventSummaryKeys)"
+      ></EventTableCell>
     </template>
 
     <!-- Row Expansion -->
@@ -28,6 +31,10 @@
   import EventTableCell from "@/components/Events/EventTableCell.vue";
 
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
+  import { eventSummary } from "@/models/event";
+
+  type eventSummaryKeys = keyof eventSummary;
+
   const currentUserSettingsStore = useCurrentUserSettingsStore();
 
   const config = inject("config") as Record<string, any>;

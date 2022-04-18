@@ -6,6 +6,8 @@ import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { NodeComment } from "@/services/api/nodeComment";
 import { userReadFactory } from "@mocks/user";
 import Message from "primevue/message";
+import { VueWrapper } from "@vue/test-utils";
+import { ComponentPublicInstance } from "vue";
 
 function factory(args: { selected: string[] } = { selected: [] }) {
   mount(CommentModal, {
@@ -32,7 +34,11 @@ function factory(args: { selected: string[] } = { selected: [] }) {
       name: "CommentModal",
     },
   });
-  cy.vue().then((wrapper) => {
+  cy.wrap(
+    Cypress.vueWrapper as VueWrapper<
+      ComponentPublicInstance<typeof CommentModal>
+    >,
+  ).then((wrapper) => {
     wrapper.vm.modalStore.open("CommentModal");
   });
   cy.get("[data-cy=CommentModal]").should("be.visible");
@@ -91,7 +97,7 @@ describe("CommentModal", () => {
     cy.findByText("Add").click();
     cy.get("@addComment").should("have.been.calledOnce");
     cy.get("[data-cy=CommentModal]").should("be.visible");
-    cy.vue().then((wrapper) => {
+    cy.wrap(Cypress.vueWrapper).then((wrapper) => {
       expect(wrapper.findComponent(Message)).to.exist;
       cy.contains("404 request failed").should("be.visible");
     });

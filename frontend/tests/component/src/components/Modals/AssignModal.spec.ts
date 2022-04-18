@@ -7,6 +7,8 @@ import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { userReadFactory } from "@mocks/user";
 import { Alert } from "@/services/api/alert";
 import Message from "primevue/message";
+import { VueWrapper } from "@vue/test-utils";
+import { ComponentPublicInstance } from "vue";
 
 function factory(
   args: { users: userRead[]; selected: string[] } = { users: [], selected: [] },
@@ -35,7 +37,11 @@ function factory(
       name: "AssignModal",
     },
   });
-  cy.vue().then((wrapper) => {
+  cy.wrap(
+    Cypress.vueWrapper as VueWrapper<
+      ComponentPublicInstance<typeof AssignModal>
+    >,
+  ).then((wrapper) => {
     wrapper.vm.modalStore.open("AssignModal");
   });
   cy.get("[data-cy=AssignModal]").should("be.visible");
@@ -101,7 +107,7 @@ describe("AssignModal", () => {
     cy.findByText("Assign").click();
     cy.get("@updateAlert").should("have.been.calledOnce");
     cy.get("[data-cy=AssignModal]").should("be.visible");
-    cy.vue().then((wrapper) => {
+    cy.wrap(Cypress.vueWrapper).then((wrapper) => {
       expect(wrapper.findComponent(Message)).to.exist;
       cy.contains("404 request failed").should("be.visible");
     });
