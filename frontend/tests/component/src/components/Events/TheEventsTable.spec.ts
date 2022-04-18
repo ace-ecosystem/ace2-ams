@@ -1,5 +1,4 @@
 import { mount } from "@cypress/vue";
-import { createPinia } from "pinia";
 
 import PrimeVue from "primevue/config";
 
@@ -153,36 +152,24 @@ describe("TheEventsTable", () => {
         }
       });
   });
-  it("updates columns and reloads table when preferred event queue changes", () => {
+  it("updates columns and reloads table only when preferred event queue changes", () => {
     factory(initialStateDefault);
     const internalQueue = genericObjectReadFactory({ value: "internal" });
-    cy.vue().then((wrapper) => {
-      // Table should not change if preferred alert queue changes
-      wrapper.vm.currentUserSettingsStore.queues.alerts = internalQueue;
-      const defaultColumnHeaders = [
-        "",
-        "",
-        "",
-        "Created",
-        "Name",
-        "Threats",
-        "Risk Level",
-        "Status",
-        "Owner",
-      ];
-      cy.get("tr").should("have.length", 2);
-      cy.get("tr")
-        .eq(0)
-        .children()
-        .each(($li, index) => {
-          cy.wrap($li).should("have.text", defaultColumnHeaders[index]);
-        });
-    });
+    const externalQueue = genericObjectReadFactory({ value: "external" });
     cy.vue().then((wrapper) => {
       // Table SHOULD update if preferred event queue changes
       wrapper.vm.currentUserSettingsStore.queues.events = internalQueue;
       const updatedColumnHeaders = ["", "", "", "Created", "Name", "Type"];
       cy.get("tr").should("have.length", 2);
+      cy.get("tr")
+        .eq(0)
+        .children()
+        .each(($li, index) => {
+          cy.wrap($li).should("have.text", updatedColumnHeaders[index]);
+        });
+
+      // Table should not change if preferred alert queue changes
+      wrapper.vm.currentUserSettingsStore.queues.alerts = externalQueue;
       cy.get("tr")
         .eq(0)
         .children()
