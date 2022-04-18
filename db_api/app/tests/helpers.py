@@ -251,6 +251,7 @@ def create_analysis(
 def create_analysis_module_type(
     value: str,
     db: Session,
+    cache_seconds: int = 90,
     description: Optional[str] = None,
     extended_version: Optional[dict] = None,
     manual: bool = False,
@@ -280,6 +281,7 @@ def create_analysis_module_type(
 
     obj = AnalysisModuleType(
         value=value,
+        cache_seconds=cache_seconds,
         description=description,
         extended_version=extended_version,
         manual=manual,

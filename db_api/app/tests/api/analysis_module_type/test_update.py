@@ -3,7 +3,6 @@ import pytest
 import uuid
 
 from fastapi import status
-from db.schemas.analysis_module_type import AnalysisModuleType
 
 from tests import helpers
 
@@ -16,6 +15,10 @@ from tests import helpers
 @pytest.mark.parametrize(
     "key,value",
     [
+        ("cache_seconds", None),
+        ("cache_seconds", ""),
+        ("cache_seconds", "abc"),
+        ("cache_seconds", "1"),
         ("description", 123),
         ("description", ""),
         ("extended_version", 123),
@@ -117,9 +120,7 @@ def test_update_valid_list_fields(client, db, key, values):
         create_func(value=value, db=db)
 
     # Update it
-    update = client.patch(
-        f"/api/analysis/module_type/{analysis_module_type.uuid}", json={key: values}
-    )
+    update = client.patch(f"/api/analysis/module_type/{analysis_module_type.uuid}", json={key: values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(getattr(analysis_module_type, key)) == len(set(values))
 
@@ -127,6 +128,8 @@ def test_update_valid_list_fields(client, db, key, values):
 @pytest.mark.parametrize(
     "key,initial_value,updated_value",
     [
+        ("cache_seconds", 90, 3600),
+        ("cache_seconds", 90, 90),
         ("description", None, "test"),
         ("description", "test", "test"),
         ("extended_version", None, '{"foo": "bar"}'),
@@ -147,9 +150,7 @@ def test_update(client, db, key, initial_value, updated_value):
     setattr(analysis_module_type, key, initial_value)
 
     # Update it
-    update = client.patch(
-        f"/api/analysis/module_type/{analysis_module_type.uuid}", json={key: updated_value}
-    )
+    update = client.patch(f"/api/analysis/module_type/{analysis_module_type.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     if key == "extended_version":
