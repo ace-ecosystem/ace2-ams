@@ -18,9 +18,9 @@
 
   import Card from "primevue/card";
   import { useAlertStore } from "@/stores/alert";
-  let alertStore = useAlertStore();
-
   import { Analysis } from "@/services/api/analysis";
+
+  let alertStore = useAlertStore();
 
   let analysis = ref();
 
