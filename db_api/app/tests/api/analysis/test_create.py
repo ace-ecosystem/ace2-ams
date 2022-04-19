@@ -1,5 +1,6 @@
 import json
 import pytest
+import time
 import uuid
 
 from datetime import datetime
@@ -253,3 +254,96 @@ def test_create_valid_required_fields(client, db):
     # Read it back, but since there are no required fields to create the analysis, there is nothing to verify.
     get = client.get(create.headers["Content-Location"])
     assert get.status_code == 200
+
+
+def test_cached_analysis(client, db):
+    # Create the first alert and add the analysis to it.
+    alert_tree1 = helpers.create_alert(db=db)
+    observable_tree1 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree1, db=db)
+    analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
+
+    # Create the analysis
+    create1 = client.post(
+        "/api/analysis/",
+        json={
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "node_tree": {
+                "parent_tree_uuid": str(observable_tree1.uuid),
+                "root_node_uuid": str(alert_tree1.root_node_uuid),
+            },
+            "parent_observable_uuid": str(observable_tree1.node_uuid),
+            "run_time": str(datetime.utcnow()),
+        },
+    )
+    assert create1.status_code == status.HTTP_201_CREATED
+
+    # Create a second alert with the same observable and analysis type. This should be cached.
+    alert_tree2 = helpers.create_alert(db=db)
+    observable_tree2 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree2, db=db)
+
+    # Create the analysis
+    create2 = client.post(
+        "/api/analysis/",
+        json={
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "node_tree": {
+                "parent_tree_uuid": str(observable_tree2.uuid),
+                "root_node_uuid": str(alert_tree2.root_node_uuid),
+            },
+            "parent_observable_uuid": str(observable_tree2.node_uuid),
+            "run_time": str(datetime.utcnow()),
+        },
+    )
+    assert create2.status_code == status.HTTP_201_CREATED
+
+    # The Content-Location headers should be the same from the two create API calls, which
+    # indicates that the existing/cached analysis was used for the second API call.
+    assert create1.headers["Content-Location"] == create2.headers["Content-Location"]
+
+
+def test_expired_cached_analysis(client, db):
+    # Create the first alert and add the analysis to it.
+    alert_tree1 = helpers.create_alert(db=db)
+    observable_tree1 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree1, db=db)
+    analysis_module_type = helpers.create_analysis_module_type(value="test", cache_seconds=1, db=db)
+
+    # Create the analysis
+    create1 = client.post(
+        "/api/analysis/",
+        json={
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "node_tree": {
+                "parent_tree_uuid": str(observable_tree1.uuid),
+                "root_node_uuid": str(alert_tree1.root_node_uuid),
+            },
+            "parent_observable_uuid": str(observable_tree1.node_uuid),
+            "run_time": str(datetime.utcnow()),
+        },
+    )
+    assert create1.status_code == status.HTTP_201_CREATED
+
+    # Sleep so that the analysis expires from the cache
+    time.sleep(2)
+
+    # Create a second alert with the same observable and analysis type. The cache is expired.
+    alert_tree2 = helpers.create_alert(db=db)
+    observable_tree2 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree2, db=db)
+
+    # Create the analysis
+    create2 = client.post(
+        "/api/analysis/",
+        json={
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "node_tree": {
+                "parent_tree_uuid": str(observable_tree2.uuid),
+                "root_node_uuid": str(alert_tree2.root_node_uuid),
+            },
+            "parent_observable_uuid": str(observable_tree2.node_uuid),
+            "run_time": str(datetime.utcnow()),
+        },
+    )
+    assert create2.status_code == status.HTTP_201_CREATED
+
+    # The Content-Location headers NOT should be the same from the two create API calls, which
+    # indicates that the existing/cached analysis was expired and a new one was created.
+    assert create1.headers["Content-Location"] != create2.headers["Content-Location"]
