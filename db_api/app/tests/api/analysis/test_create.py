@@ -17,15 +17,24 @@ from tests import helpers
 @pytest.mark.parametrize(
     "key,value",
     [
-        ("analysis_module_type", 123),
-        ("analysis_module_type", ""),
-        ("analysis_module_type", "abc"),
+        ("analysis_module_type_uuid", 123),
+        ("analysis_module_type_uuid", None),
+        ("analysis_module_type_uuid", ""),
+        ("analysis_module_type_uuid", "abc"),
         ("details", 123),
         ("details", ""),
         ("details", "abc"),
         ("details", []),
         ("error_message", 123),
         ("error_message", ""),
+        ("parent_observable_uuid", 123),
+        ("parent_observable_uuid", None),
+        ("parent_observable_uuid", ""),
+        ("parent_observable_uuid", "abc"),
+        ("run_time", None),
+        ("run_time", ""),
+        ("run_time", "Monday"),
+        ("run_time", "2022-01-01"),
         ("stack_trace", 123),
         ("stack_trace", ""),
         ("summary", 123),
@@ -38,7 +47,10 @@ from tests import helpers
 )
 def test_create_invalid_fields(client, key, value):
     create_json = {
+        "analysis_module_type_uuid": str(uuid.uuid4()),
         "node_tree": {"root_node_uuid": str(uuid.uuid4())},
+        "parent_observable_uuid": str(uuid.uuid4()),
+        "run_time": str(datetime.utcnow()),
     }
     create_json[key] = value
     create = client.post("/api/analysis/", json=create_json)
@@ -54,21 +66,27 @@ def test_create_invalid_fields(client, key, value):
     ],
 )
 def test_create_duplicate_unique_fields(client, db, key):
-    node_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Create an object
     create1_json = {
         "uuid": str(uuid.uuid4()),
-        "analysis_module_type": str(analysis_module_type.uuid),
-        "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+        "analysis_module_type_uuid": str(analysis_module_type.uuid),
+        "node_tree": {"parent_tree_uuid": str(observable_tree.uuid), "root_node_uuid": str(alert_tree.root_node_uuid)},
+        "parent_observable_uuid": str(observable_tree.node_uuid),
+        "run_time": str(datetime.utcnow()),
     }
     client.post("/api/analysis/", json=create1_json)
 
     # Ensure you cannot create another object with the same unique field value
+    observable_tree2 = helpers.create_observable(type="ipv4", value="192.168.1.1", parent_tree=alert_tree, db=db)
     create2_json = {
-        "analysis_module_type": str(analysis_module_type.uuid),
-        "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+        "analysis_module_type_uuid": str(analysis_module_type.uuid),
+        "node_tree": {"parent_tree_uuid": str(observable_tree2.uuid), "root_node_uuid": str(alert_tree.root_node_uuid)},
+        "parent_observable_uuid": str(observable_tree2.node_uuid),
+        "run_time": str(datetime.utcnow()),
     }
     create2_json[key] = create1_json[key]
     create2 = client.post("/api/analysis/", json=create2_json)
@@ -76,28 +94,60 @@ def test_create_duplicate_unique_fields(client, db, key):
 
 
 def test_create_nonexistent_analysis_module_type(client, db):
-    node_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
 
     create = client.post(
         "/api/analysis/",
         json={
-            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
-            "analysis_module_type": str(uuid.uuid4()),
+            "node_tree": {
+                "parent_tree_uuid": str(observable_tree.uuid),
+                "root_node_uuid": str(alert_tree.root_node_uuid),
+            },
+            "analysis_module_type_uuid": str(uuid.uuid4()),
+            "parent_observable_uuid": str(observable_tree.node_uuid),
+            "run_time": str(datetime.utcnow()),
         },
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_create_nonexistent_parent_observable(client, db):
+    alert_tree = helpers.create_alert(db=db)
+    analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
+
+    create = client.post(
+        "/api/analysis/",
+        json={
+            "node_tree": {
+                "parent_tree_uuid": str(alert_tree.uuid),
+                "root_node_uuid": str(alert_tree.root_node_uuid),
+            },
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "parent_observable_uuid": str(uuid.uuid4()),
+            "run_time": str(datetime.utcnow()),
+        },
+    )
+
+    # The create_analysis API endpoint does not try to read the parent observable, so it returns an
+    # IntegrityError and 409 status code if you try to add an analysis with a nonexistent parent observable.
+    assert create.status_code == status.HTTP_409_CONFLICT
+
+
 def test_create_invalid_email_analysis(client, db):
-    node_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="Email Analysis", db=db)
 
     # Create the analysis - it is missing the required "from_address" key
     create = client.post(
         "/api/analysis/",
         json={
-            "analysis_module_type": str(analysis_module_type.uuid),
-            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "node_tree": {
+                "parent_tree_uuid": str(observable_tree.uuid),
+                "root_node_uuid": str(alert_tree.root_node_uuid),
+            },
             "details": json.dumps(
                 {
                     "attachments": [],
@@ -110,6 +160,8 @@ def test_create_invalid_email_analysis(client, db):
                     "extra_field": "extra_value",
                 }
             ),
+            "parent_observable_uuid": str(observable_tree.node_uuid),
+            "run_time": str(datetime.utcnow()),
         },
     )
 
@@ -117,16 +169,22 @@ def test_create_invalid_email_analysis(client, db):
 
 
 def test_create_invalid_faqueue_analysis(client, db):
-    node_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="FA Queue Analysis", db=db)
 
     # Create the analysis - it is missing the required "hits" key
     create = client.post(
         "/api/analysis/",
         json={
-            "analysis_module_type": str(analysis_module_type.uuid),
-            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "node_tree": {
+                "parent_tree_uuid": str(observable_tree.uuid),
+                "root_node_uuid": str(alert_tree.root_node_uuid),
+            },
             "details": json.dumps({"faqueue_hits": 100, "link": "https://example.com"}),
+            "parent_observable_uuid": str(observable_tree.node_uuid),
+            "run_time": str(datetime.utcnow()),
         },
     )
 
@@ -134,16 +192,22 @@ def test_create_invalid_faqueue_analysis(client, db):
 
 
 def test_create_invalid_sandbox_analysis(client, db):
-    node_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="Sandbox Analysis - Sandbox1", db=db)
 
     # Create the analysis - it is missing the required "filename" key
     create = client.post(
         "/api/analysis/",
         json={
-            "analysis_module_type": str(analysis_module_type.uuid),
-            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "node_tree": {
+                "parent_tree_uuid": str(observable_tree.uuid),
+                "root_node_uuid": str(alert_tree.root_node_uuid),
+            },
             "details": json.dumps({"sandbox_url": "http://url.to.sandbox.report"}),
+            "parent_observable_uuid": str(observable_tree.node_uuid),
+            "run_time": str(datetime.utcnow()),
         },
     )
 
@@ -151,16 +215,22 @@ def test_create_invalid_sandbox_analysis(client, db):
 
 
 def test_create_invalid_user_analysis(client, db):
-    node_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="User Analysis", db=db)
 
     # Create the analysis - it is missing the required "user_id" key
     create = client.post(
         "/api/analysis/",
         json={
-            "analysis_module_type": str(analysis_module_type.uuid),
-            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "node_tree": {
+                "parent_tree_uuid": str(observable_tree.uuid),
+                "root_node_uuid": str(alert_tree.root_node_uuid),
+            },
             "details": json.dumps({"username": "goodguy", "email": "goodguy@company.com"}),
+            "parent_observable_uuid": str(observable_tree.node_uuid),
+            "run_time": str(datetime.utcnow()),
         },
     )
 
@@ -173,26 +243,29 @@ def test_create_invalid_user_analysis(client, db):
 
 
 def test_create_node_metadata(client, db):
-    node_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Create the object
     create = client.post(
         "/api/analysis/",
         json={
-            "analysis_module_type": str(analysis_module_type.uuid),
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
             "node_tree": {
                 "node_metadata": {"display": {"type": "override_type", "value": "override_value"}},
-                "parent_tree_uuid": str(node_tree.uuid),
-                "root_node_uuid": str(node_tree.root_node_uuid),
+                "parent_tree_uuid": str(observable_tree.uuid),
+                "root_node_uuid": str(alert_tree.root_node_uuid),
             },
+            "parent_observable_uuid": str(observable_tree.node_uuid),
+            "run_time": str(datetime.utcnow()),
         },
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read the alert back to get its tree structure that contains the analysis to verify its node_metadata
-    get = client.get(f"http://testserver/api/alert/{node_tree.root_node_uuid}")
-    assert get.json()["children"][0]["node_metadata"] == {
+    get = client.get(f"http://testserver/api/alert/{alert_tree.root_node_uuid}")
+    assert get.json()["children"][0]["children"][0]["node_metadata"] == {
         "display": {"type": "override_type", "value": "override_value"}
     }
 
@@ -213,15 +286,21 @@ def test_create_node_metadata(client, db):
     ],
 )
 def test_create_valid_optional_fields(client, db, key, value):
-    node_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Create the object
     create = client.post(
         "/api/analysis/",
         json={
-            "analysis_module_type": str(analysis_module_type.uuid),
-            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "node_tree": {
+                "parent_tree_uuid": str(observable_tree.uuid),
+                "root_node_uuid": str(alert_tree.root_node_uuid),
+            },
+            "parent_observable_uuid": str(observable_tree.node_uuid),
+            "run_time": str(datetime.utcnow()),
             key: value,
         },
     )
@@ -238,15 +317,21 @@ def test_create_valid_optional_fields(client, db, key, value):
 
 
 def test_create_valid_required_fields(client, db):
-    node_tree = helpers.create_alert(db=db)
+    alert_tree = helpers.create_alert(db=db)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
 
     # Create the object
     create = client.post(
         "/api/analysis/",
         json={
-            "analysis_module_type": str(analysis_module_type.uuid),
-            "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "node_tree": {
+                "parent_tree_uuid": str(observable_tree.uuid),
+                "root_node_uuid": str(alert_tree.root_node_uuid),
+            },
+            "parent_observable_uuid": str(observable_tree.node_uuid),
+            "run_time": str(datetime.utcnow()),
         },
     )
     assert create.status_code == status.HTTP_201_CREATED
