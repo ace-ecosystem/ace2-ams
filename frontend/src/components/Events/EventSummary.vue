@@ -27,6 +27,7 @@
   <!-- Event Details Table -->
   <div id="event-summary-table">
     <DataTable :value="eventTableData" :resizable-columns="true">
+      <template #empty> Event data not found. </template>
       <!-- TABLE TOOLBAR-->
       <template #header>
         <Toolbar style="border: none">
@@ -72,13 +73,13 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
   export default {
     inheritAttrs: false,
   };
 </script>
 
-<script setup>
+<script setup lang="ts">
   import { ref, inject, computed, onMounted } from "vue";
 
   import { useEventStore } from "@/stores/event";
@@ -92,17 +93,30 @@
 
   import { parseEventSummary } from "@/stores/eventTable";
 
-  const eventStore = useEventStore();
+  interface eventTimeEntry {
+    label: string;
+    datetime: string | Date | null;
+    icon: string;
+  }
 
-  const config = inject("config");
+  interface column {
+    default: boolean;
+    required: boolean;
+    field: string;
+    header: string;
+  }
+
+  const config = inject("config") as any;
+
+  const eventStore = useEventStore();
 
   const eventTableData = ref(
     eventStore.open ? [parseEventSummary(eventStore.open)] : [],
   );
-  const eventTimes = ref([]);
-  const columns = ref([]);
-  const columnOptions = ref([]);
-  const selectedColumns = ref([]);
+  const eventTimes = ref<eventTimeEntry[]>([]);
+  const columns = ref<column[]>([]);
+  const columnOptions = ref<column[]>([]);
+  const selectedColumns = ref<column[]>([]);
 
   onMounted(() => {
     if (eventStore.open) {
@@ -116,7 +130,7 @@
     return [...eventTimes.value];
   });
 
-  const formatDatetime = (datetime) => {
+  const formatDatetime = (datetime: string) => {
     if (datetime == "TBD") {
       return datetime;
     }
@@ -124,7 +138,7 @@
     return d.toLocaleString("en-US", { timeZone: "UTC" });
   };
 
-  const onColumnToggle = (val) => {
+  const onColumnToggle = (val: any) => {
     // Toggles selected columns to display
     // This method required/provided by Primevue 'ColToggle' docs
     selectedColumns.value = columns.value.filter((col) => val.includes(col));
@@ -137,12 +151,14 @@
     eventTimes.value = [
       {
         label: "Event",
-        datetime: eventStore.open.eventTime || eventStore.open.autoEventTime,
+        datetime:
+          eventStore.open.eventTime || eventStore.open.autoEventTime || "TBD",
         icon: "pi pi-map-marker",
       },
       {
         label: "Alert",
-        datetime: eventStore.open.alertTime || eventStore.open.autoAlertTime,
+        datetime:
+          eventStore.open.alertTime || eventStore.open.autoAlertTime || "TBD",
         icon: "pi pi-exclamation-triangle",
       },
       {

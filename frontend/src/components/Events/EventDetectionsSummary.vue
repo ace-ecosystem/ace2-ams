@@ -3,6 +3,9 @@
 
 <template>
   <div>
+    <Message v-if="error" severity="error" data-cy="error-banner">{{
+      error
+    }}</Message>
     <DataTable
       :value="detections"
       :loading="isLoading"
@@ -42,23 +45,37 @@
   </div>
 </template>
 
-<script setup>
-  import Button from "primevue/button";
-  import DataTable from "primevue/datatable";
-  import Column from "primevue/column";
+<script setup lang="ts">
   import { defineProps, ref, onMounted } from "vue";
+
+  import Button from "primevue/button";
+  import Column from "primevue/column";
+  import DataTable from "primevue/datatable";
+  import Message from "primevue/message";
+
   import { Event } from "@/services/api/event";
+  import { detectionPointSummary } from "@/models/eventSummaries";
 
   const props = defineProps({
     eventUuid: { type: String, required: true },
   });
 
   const isLoading = ref(false);
-  const detections = ref([]);
+  const detections = ref<detectionPointSummary[]>([]);
+  const error = ref<string>();
 
   onMounted(async () => {
     isLoading.value = true;
-    detections.value = await Event.readDetectionSummary(props.eventUuid);
+    try {
+      detections.value = await Event.readDetectionSummary(props.eventUuid);
+    } catch (e: unknown) {
+      detections.value = [];
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
+    }
     isLoading.value = false;
   });
 </script>

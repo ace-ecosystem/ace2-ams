@@ -34,6 +34,7 @@ export interface eventSummary {
   vectors: string[];
   queue: string;
   remediations: string[];
+  [key: string]: unknown;
 }
 
 export interface eventCreate extends nodeCreate {

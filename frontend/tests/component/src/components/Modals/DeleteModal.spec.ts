@@ -1,5 +1,4 @@
-// Example Cypress Vue component test that we might use one day
-// NOTE: This test is not fully functional at this point.
+// This component currently not in use; no actual tests have been written
 
 import { mount } from "@cypress/vue";
 import { createPinia } from "pinia";

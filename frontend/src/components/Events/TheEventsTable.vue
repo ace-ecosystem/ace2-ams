@@ -9,7 +9,10 @@
     /></template>
 
     <template #rowCell="{ data, field }">
-      <EventTableCell :data="data" :field="field"></EventTableCell>
+      <EventTableCell
+        :data="data"
+        :field="(field as unknown as eventSummaryKeys)"
+      ></EventTableCell>
     </template>
 
     <!-- Row Expansion -->
@@ -19,7 +22,7 @@
   </TheNodeTable>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { ref, onMounted, inject } from "vue";
 
   import EventAlertsTable from "./EventAlertsTable.vue";
@@ -28,9 +31,13 @@
   import EventTableCell from "@/components/Events/EventTableCell.vue";
 
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
+  import { eventSummary } from "@/models/event";
+
+  type eventSummaryKeys = keyof eventSummary;
+
   const currentUserSettingsStore = useCurrentUserSettingsStore();
 
-  const config = inject("config");
+  const config = inject("config") as Record<string, any>;
 
   const columns = ref([]);
   const preferredEventQueue = ref(currentUserSettingsStore.queues.events);

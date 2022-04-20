@@ -38,7 +38,7 @@
   </BaseModal>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { computed, defineProps, ref, defineEmits, inject } from "vue";
 
   import Button from "primevue/button";
@@ -58,16 +58,16 @@
 
   const emit = defineEmits(["requestReload"]);
 
-  const nodeType = inject("nodeType");
+  const nodeType = inject("nodeType") as "events" | "alerts";
 
   const selectedStore = nodeSelectedStores[nodeType]();
   const nodeStore = nodeStores[nodeType]();
   const modalStore = useModalStore();
   const userStore = useUserStore();
 
-  const error = ref(null);
+  const error = ref<string>();
   const isLoading = ref(false);
-  const selectedUser = ref(null);
+  const selectedUser = ref();
 
   const assignUser = async () => {
     isLoading.value = true;
@@ -79,8 +79,12 @@
       }));
 
       await nodeStore.update(updateData);
-    } catch (err) {
-      error.value = err.message;
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
     }
     isLoading.value = false;
     if (!error.value) {
@@ -94,7 +98,7 @@
   });
 
   const handleError = () => {
-    error.value = null;
+    error.value = undefined;
     close();
   };
 
