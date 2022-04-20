@@ -1,3 +1,4 @@
+import { Component } from "vue";
 import { analysisTreeRead } from "./analysis";
 import { UUID } from "./base";
 import {
@@ -65,7 +66,7 @@ export interface observableTreeRead extends observableRead {
 export interface observableUpdate extends nodeUpdate {
   context?: string;
   directives?: string[];
-  expiresOn?: Date;
+  expiresOn?: Date | null;
   forDetection?: boolean;
   redirectionUuid?: UUID;
   tags?: string[];
@@ -80,3 +81,19 @@ export interface observableUpdate extends nodeUpdate {
 export interface observableRelationshipRead extends nodeRelationshipRead {
   relatedNode: observableRead;
 }
+
+export type observableAction = {
+  type: "url" | "modal" | "command";
+  command?: (obs: observableTreeRead) => unknown;
+  modal?: any;
+  url?: string;
+  label?: string;
+  description?: string;
+  icon?: string;
+  requirements?: (obs: observableTreeRead) => boolean;
+};
+
+export type observableActionSection = {
+  items: observableAction[];
+  label?: string;
+};
