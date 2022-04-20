@@ -41,13 +41,12 @@ def test_update_invalid_uuid(client):
 
 def test_update_invalid_version(client, db):
     alert_tree = helpers.create_alert(db=db)
-    analysis_tree = helpers.create_analysis(parent_tree=alert_tree, db=db)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
+    analysis_tree = helpers.create_analysis(parent_tree=observable_tree, parent_observable=observable_tree.node, db=db)
 
     # Make sure you cannot update it using an invalid version. The version is
     # optional, but if given, it must match.
-    update = client.patch(
-        f"/api/analysis/{analysis_tree.node.uuid}", json={"version": str(uuid.uuid4())}
-    )
+    update = client.patch(f"/api/analysis/{analysis_tree.node.uuid}", json={"version": str(uuid.uuid4())})
     assert update.status_code == status.HTTP_409_CONFLICT
 
 
@@ -80,7 +79,8 @@ def test_update_nonexistent_uuid(client):
 )
 def test_update(client, db, key, initial_value, updated_value):
     alert_tree = helpers.create_alert(db=db)
-    analysis_tree = helpers.create_analysis(parent_tree=alert_tree, db=db)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
+    analysis_tree = helpers.create_analysis(parent_tree=observable_tree, parent_observable=observable_tree.node, db=db)
     initial_analysis_version = analysis_tree.node.version
 
     # Set the initial value
