@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import uuid4
 
 
@@ -5,7 +6,13 @@ def test_get_analysis(client_valid_access_token, requests_mock):
     analysis_uuid = str(uuid4())
     requests_mock.get(
         f"http://db-api/api/analysis/{analysis_uuid}",
-        json={"node_type": "analysis", "uuid": analysis_uuid, "detection_points": []},
+        json={
+            "node_type": "analysis",
+            "uuid": analysis_uuid,
+            "detection_points": [],
+            "cached_until": str(datetime.utcnow()),
+            "run_time": str(datetime.utcnow()),
+        },
     )
 
     client_valid_access_token.get(f"/api/analysis/{analysis_uuid}")
