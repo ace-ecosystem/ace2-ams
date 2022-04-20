@@ -64,7 +64,7 @@ export interface sandboxSummary {
   suricataAlerts: string[];
 }
 
-interface urlDomainSummaryIndividual {
+export interface urlDomainSummaryIndividual {
   domain: string;
   count: number;
 }

@@ -36,7 +36,7 @@
   </BaseModal>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { computed, defineEmits, defineProps, ref, inject } from "vue";
 
   import Button from "primevue/button";
@@ -57,12 +57,12 @@
     name: { type: String, required: true },
   });
 
-  const nodeType = inject("nodeType");
+  const nodeType = inject("nodeType") as "alerts" | "events";
   const authStore = useAuthStore();
   const selectedStore = nodeSelectedStores[nodeType]();
   const modalStore = useModalStore();
 
-  const error = ref(null);
+  const error = ref<string>();
   const isLoading = ref(false);
   const newComment = ref("");
 
@@ -76,8 +76,12 @@
           ...commentData.value,
         })),
       );
-    } catch (err) {
-      error.value = err.message;
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
     }
 
     isLoading.value = false;
@@ -98,7 +102,7 @@
   });
 
   const handleError = () => {
-    error.value = null;
+    error.value = undefined;
     close();
   };
 

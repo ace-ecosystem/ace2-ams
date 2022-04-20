@@ -9,8 +9,8 @@
     append-to="self"
     :header="header"
     :modal="true"
-    :style="props.style"
     :draggable="false"
+    :data-cy="name"
     @update:visible="close"
   >
     <template #header>
@@ -24,13 +24,13 @@
   </Dialog>
 </template>
 
-<script>
+<script lang="ts">
   export default {
     name: "BaseModal",
   };
 </script>
 
-<script setup>
+<script setup lang="ts">
   import { onBeforeUnmount, computed, defineEmits, defineProps } from "vue";
   import Dialog from "primevue/dialog";
 
@@ -42,8 +42,7 @@
 
   const props = defineProps({
     name: { type: String, required: true },
-    header: { type: String, required: false },
-    style: { type: Object, required: false },
+    header: { type: String, required: false, default: "" },
   });
 
   const isOpen = computed(() => {

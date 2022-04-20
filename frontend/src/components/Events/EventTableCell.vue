@@ -28,13 +28,15 @@
     </span>
   </div>
   <!-- Event Time fields -->
-  <span v-else-if="props.field.includes('Time')">
-    {{ formatDateTime(props.data[props.field]) }}</span
+  <span
+    v-else-if="typeof props.field === 'string' && props.field.includes('Time')"
+  >
+    {{ formatDateTime(props.data[props.field] as unknown as string) }}</span
   >
   <!-- Any event property that uses a list -->
   <span v-else-if="Array.isArray(props.data[props.field])">
-    <span v-if="props.data[props.field].length">
-      {{ joinStringArray(props.data[props.field]) }}
+    <span v-if="arrayHasLength(props.data[props.field])">
+      {{ joinStringArray(props.data[props.field] as unknown as string[]) }}
     </span>
     <span v-else> None </span>
   </span>
@@ -50,15 +52,15 @@
       :id="props.data.uuid"
       :name="`EditEventModal-${props.data.uuid}`"
       :event-uuid="props.data.uuid"
-      @requestReload="requestReload"
+      @request-reload="requestReload"
     />
   </span>
   <!-- All other columns -->
   <span v-else> {{ props.data[props.field] }}</span>
 </template>
 
-<script setup>
-  import { computed, defineProps } from "vue";
+<script setup lang="ts">
+  import { computed, defineProps, PropType } from "vue";
   import Button from "primevue/button";
 
   import NodeTagVue from "@/components/Node/NodeTag.vue";
@@ -67,13 +69,17 @@
 
   import { useModalStore } from "@/stores/modal";
   import { useEventTableStore } from "@/stores/eventTable";
+  import { eventSummary } from "@/models/event";
 
   const eventTableStore = useEventTableStore();
   const modalStore = useModalStore();
 
   const props = defineProps({
-    data: { type: Object, required: true },
-    field: { type: String, required: true },
+    data: { type: Object as PropType<eventSummary>, required: true },
+    field: {
+      type: String as PropType<keyof eventSummary | "edit">,
+      required: true,
+    },
     showTags: { type: Boolean, required: false, default: true },
   });
 
@@ -81,7 +87,7 @@
     return `EditEventModal-${props.data.uuid}`;
   });
 
-  const formatDateTime = (dateTime) => {
+  const formatDateTime = (dateTime: string) => {
     if (dateTime) {
       const d = new Date(dateTime);
       return d.toLocaleString("en-US", { timeZone: "UTC" });
@@ -90,11 +96,18 @@
     return "None";
   };
 
-  const getEventLink = (uuid) => {
+  const getEventLink = (uuid: string) => {
     return "/event/" + uuid;
   };
 
-  const joinStringArray = (arr) => {
+  const arrayHasLength = (arr: unknown): boolean => {
+    if (Array.isArray(arr)) {
+      return Boolean(arr.length);
+    }
+    return false;
+  };
+
+  const joinStringArray = (arr: string[]) => {
     return arr.join(", ");
   };
 
@@ -102,7 +115,7 @@
     eventTableStore.requestReload = true;
   };
 
-  const open = (name) => {
+  const open = (name: string) => {
     modalStore.open(name);
   };
 </script>
