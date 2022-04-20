@@ -27,7 +27,7 @@
       <Menu
         id="overlayMenu"
         ref="menu"
-        :model="(itemsFiltered as MenuItem[])"
+        :model="(itemsFiltered as unknown as MenuItem[])"
         :popup="true"
       >
         <template #item="{ item }">
