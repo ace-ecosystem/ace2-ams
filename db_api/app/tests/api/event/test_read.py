@@ -60,7 +60,7 @@ def test_summary_detection_point(client, db):
         parent_tree=alert_tree1,
         db=db,
     )
-    analysis_tree1 = helpers.create_analysis(db=db, parent_tree=alert1_o1)
+    analysis_tree1 = helpers.create_analysis(db=db, parent_tree=alert1_o1, parent_observable=alert1_o1.node)
     helpers.create_node_detection_point(node=analysis_tree1.node, value="detection point 1", db=db)
     helpers.create_node_detection_point(node=analysis_tree1.node, value="detection point 2", db=db)
 
@@ -120,6 +120,7 @@ def test_summary_email(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert1_o1,
+        parent_observable=alert1_o1.node,
         amt_value="Email Analysis",
         details={
             "attachments": [],
@@ -144,6 +145,7 @@ def test_summary_email(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert2_o1,
+        parent_observable=alert2_o1.node,
         amt_value="Email Analysis",
         details={
             "attachments": [],
@@ -168,6 +170,7 @@ def test_summary_email(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert3_o1,
+        parent_observable=alert3_o1.node,
         amt_value="Email Analysis",
         details={
             "attachments": [],
@@ -192,6 +195,7 @@ def test_summary_email(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert4_o1,
+        parent_observable=alert4_o1.node,
         amt_value="Email Analysis",
         details={
             "attachments": [],
@@ -241,6 +245,7 @@ def test_summary_email_headers_body(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert1_o1,
+        parent_observable=alert1_o1.node,
         amt_value="Email Analysis",
         details={
             "attachments": [],
@@ -267,6 +272,7 @@ def test_summary_email_headers_body(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert2_o1,
+        parent_observable=alert2_o1.node,
         amt_value="Email Analysis",
         details={
             "attachments": [],
@@ -293,6 +299,7 @@ def test_summary_email_headers_body(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert3_o1,
+        parent_observable=alert3_o1.node,
         amt_value="Email Analysis",
         details={
             "attachments": [],
@@ -339,11 +346,14 @@ def test_summary_observable(client, db):
     #    a2 - FA Q
     alert_tree1 = helpers.create_alert(db=db, event=event)
     alert1_o1 = helpers.create_observable(type="fqdn", value="localhost.localdomain", parent_tree=alert_tree1, db=db)
-    alert1_a1 = helpers.create_analysis(db=db, parent_tree=alert1_o1, amt_value="FQDN Analysis")
+    alert1_a1 = helpers.create_analysis(
+        db=db, parent_tree=alert1_o1, parent_observable=alert1_o1.node, amt_value="FQDN Analysis"
+    )
     alert1_o2 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert1_a1, db=db)
     helpers.create_analysis(
         db=db,
         parent_tree=alert1_o2,
+        parent_observable=alert1_o2.node,
         amt_value="FA Queue Type 1",
         details={"link": "https://url.to.search/query=asdf", "hits": 10},
     )
@@ -351,6 +361,7 @@ def test_summary_observable(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert1_o3,
+        parent_observable=alert1_o3.node,
         amt_value="FA Queue Type 1",
         details={"link": "https://url.to.search/query=asdf", "hits": 10},
     )
@@ -360,6 +371,7 @@ def test_summary_observable(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert2_o1,
+        parent_observable=alert2_o1.node,
         amt_value="FA Queue Type 1",
         details={"link": "https://url.to.search/query=asdf", "hits": 10},
     )
@@ -368,6 +380,7 @@ def test_summary_observable(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert2_o2,
+        parent_observable=alert2_o2.node,
         amt_value="FA Queue Type 2",
         details={"hits": 100},
     )
@@ -378,6 +391,7 @@ def test_summary_observable(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert3_o1,
+        parent_observable=alert3_o1.node,
         amt_value="FA Queue Type 1",
         details={"link": "https://url.to.search/query=asdf", "hits": 0},
     )
@@ -514,6 +528,7 @@ def test_summary_sandbox(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert1_o1,
+        parent_observable=alert1_o1.node,
         amt_value="Sandbox Analysis - Sandbox 1",
         details=json.loads(sample1_details.json()),
     )
@@ -523,6 +538,7 @@ def test_summary_sandbox(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert2_o1,
+        parent_observable=alert2_o1.node,
         amt_value="Sandbox Analysis - Sandbox 1",
         details=json.loads(sample1_details.json()),
     )
@@ -530,6 +546,7 @@ def test_summary_sandbox(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert2_o2,
+        parent_observable=alert2_o2.node,
         amt_value="Sandbox Analysis - Sandbox 2",
         details=json.loads(sample2_details.json()),
     )
@@ -540,6 +557,7 @@ def test_summary_sandbox(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert3_o1,
+        parent_observable=alert3_o1.node,
         amt_value="Sandbox Analysis - Sandbox 1",
         details=json.loads(sample3_details.json()),
     )
@@ -576,7 +594,9 @@ def test_summary_url_domains(client, db):
     #  o2 - https://example3.com
     alert_tree1 = helpers.create_alert(db=db, event=event)
     alert1_o1 = helpers.create_observable(type="url", value="https://example.com", parent_tree=alert_tree1, db=db)
-    alert1_a1 = helpers.create_analysis(db=db, parent_tree=alert1_o1, amt_value="URL Analysis")
+    alert1_a1 = helpers.create_analysis(
+        db=db, parent_tree=alert1_o1, parent_observable=alert1_o1.node, amt_value="URL Analysis"
+    )
     helpers.create_observable(type="url", value="https://example2.com", parent_tree=alert1_a1, db=db)
     helpers.create_observable(type="url", value="https://example.com", parent_tree=alert1_a1, db=db)
 
@@ -632,6 +652,7 @@ def test_summary_user(client, db):
     alert1_a1 = helpers.create_analysis(
         db=db,
         parent_tree=alert1_o1,
+        parent_observable=alert1_o1.node,
         amt_value="User Analysis",
         details={
             "user_id": "12345",
@@ -649,6 +670,7 @@ def test_summary_user(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert1_o2,
+        parent_observable=alert1_o2.node,
         amt_value="User Analysis",
         details={
             "user_id": "12345",
@@ -667,6 +689,7 @@ def test_summary_user(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert2_o1,
+        parent_observable=alert2_o1.node,
         amt_value="User Analysis",
         details={
             "user_id": "98765",
@@ -687,6 +710,7 @@ def test_summary_user(client, db):
     helpers.create_analysis(
         db=db,
         parent_tree=alert3_o1,
+        parent_observable=alert3_o1.node,
         amt_value="User Analysis",
         details={
             "user_id": "abcde",
@@ -720,17 +744,23 @@ def test_analysis_module_types(client, db):
     # Add some alerts with analyses to the event
     alert_tree1 = helpers.create_alert(db=db, event=event)
     alert1_o1 = helpers.create_observable(type="url", value="https://127.0.0.1", parent_tree=alert_tree1, db=db)
-    alert1_a1 = helpers.create_analysis(db=db, parent_tree=alert1_o1, amt_value="URL Analysis")
+    alert1_a1 = helpers.create_analysis(
+        db=db, parent_tree=alert1_o1, parent_observable=alert1_o1.node, amt_value="URL Analysis"
+    )
     alert1_o2 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert1_a1, db=db)
-    helpers.create_analysis(db=db, parent_tree=alert1_o2, amt_value="IP Analysis")
+    helpers.create_analysis(db=db, parent_tree=alert1_o2, parent_observable=alert1_o2.node, amt_value="IP Analysis")
 
     alert_tree2 = helpers.create_alert(db=db, event=event)
     alert2_o1 = helpers.create_observable(
         type="url", value="https://127.0.0.1/malware.exe", parent_tree=alert_tree2, db=db
     )
-    alert2_a1 = helpers.create_analysis(db=db, parent_tree=alert2_o1, amt_value="URL Analysis")
+    alert2_a1 = helpers.create_analysis(
+        db=db, parent_tree=alert2_o1, parent_observable=alert2_o1.node, amt_value="URL Analysis"
+    )
     alert2_o2 = helpers.create_observable(type="uri_path", value="/malware.exe", parent_tree=alert2_a1, db=db)
-    helpers.create_analysis(db=db, parent_tree=alert2_o2, amt_value="URI Path Analysis")
+    helpers.create_analysis(
+        db=db, parent_tree=alert2_o2, parent_observable=alert2_o2.node, amt_value="URI Path Analysis"
+    )
 
     # The list of analysis types should now have some entries
     get = client.get(f"/api/event/{event.uuid}")

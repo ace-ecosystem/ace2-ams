@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 2d952cc05bfc
+Revision ID: efd69a6a8274
 Revises: 
-Create Date: 2022-03-23 15:58:55.973087
+Create Date: 2022-04-19 12:45:45.196632
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '2d952cc05bfc'
+revision = 'efd69a6a8274'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -49,6 +49,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_alert_type_value'), 'alert_type', ['value'], unique=True)
     op.create_table('analysis_module_type',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('cache_seconds', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
     sa.Column('extended_version', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('manual', sa.Boolean(), nullable=False),
@@ -184,17 +185,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_user_role_value'), 'user_role', ['value'], unique=True)
-    op.create_table('analysis',
-    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('details', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('error_message', sa.String(), nullable=True),
-    sa.Column('stack_trace', sa.String(), nullable=True),
-    sa.Column('summary', sa.String(), nullable=True),
-    sa.ForeignKeyConstraint(['analysis_module_type_uuid'], ['analysis_module_type.uuid'], ),
-    sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
-    sa.PrimaryKeyConstraint('uuid')
-    )
     op.create_table('analysis_module_type_directive_mapping',
     sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('directive_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -429,6 +419,23 @@ def upgrade() -> None:
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
     )
+    op.create_table('analysis',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('cached_until', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('details', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('error_message', sa.String(), nullable=True),
+    sa.Column('parent_observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('run_time', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('stack_trace', sa.String(), nullable=True),
+    sa.Column('summary', sa.String(), nullable=True),
+    sa.ForeignKeyConstraint(['analysis_module_type_uuid'], ['analysis_module_type.uuid'], ),
+    sa.ForeignKeyConstraint(['parent_observable_uuid'], ['observable.uuid'], ),
+    sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_analysis_cached_until'), 'analysis', ['cached_until'], unique=False)
+    op.create_index(op.f('ix_analysis_run_time'), 'analysis', ['run_time'], unique=False)
     op.create_table('event',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('alert_time', sa.DateTime(timezone=True), nullable=True),
@@ -663,6 +670,9 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_event_contain_time'), table_name='event')
     op.drop_index(op.f('ix_event_alert_time'), table_name='event')
     op.drop_table('event')
+    op.drop_index(op.f('ix_analysis_run_time'), table_name='analysis')
+    op.drop_index(op.f('ix_analysis_cached_until'), table_name='analysis')
+    op.drop_table('analysis')
     op.drop_table('user')
     op.drop_index('type_value', table_name='observable')
     op.drop_index('observable_value_trgm', table_name='observable', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
@@ -730,7 +740,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_analysis_module_type_directive_mapping_directive_uuid'), table_name='analysis_module_type_directive_mapping')
     op.drop_index(op.f('ix_analysis_module_type_directive_mapping_analysis_module_type_uuid'), table_name='analysis_module_type_directive_mapping')
     op.drop_table('analysis_module_type_directive_mapping')
-    op.drop_table('analysis')
     op.drop_index(op.f('ix_user_role_value'), table_name='user_role')
     op.drop_table('user_role')
     op.drop_index(op.f('ix_seed_seed_time'), table_name='seed')

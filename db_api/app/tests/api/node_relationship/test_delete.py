@@ -56,11 +56,13 @@ def test_delete_verify_observable(client, db):
     # Create some nodes with relationships
     #
     # alert
-    #   analysis
-    #     o1
-    #     o2 - IS_HASH_OF o1
+    #   o
+    #     analysis
+    #       o1
+    #       o2 - IS_HASH_OF o1
     alert_tree = helpers.create_alert(db=db, history_username="analyst")
-    analysis_tree = helpers.create_analysis(db=db, parent_tree=alert_tree)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
+    analysis_tree = helpers.create_analysis(db=db, parent_tree=observable_tree, parent_observable=observable_tree.node)
     observable_tree1 = helpers.create_observable(
         type="test_type", value="test_value", parent_tree=analysis_tree, db=db, history_username="analyst"
     )

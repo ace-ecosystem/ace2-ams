@@ -1,7 +1,7 @@
 import json
 import uuid
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
@@ -198,8 +198,10 @@ def create_alert(
 
 def create_analysis(
     db: Session,
+    parent_observable: Observable,
     parent_tree: NodeTree,
     amt_value: str = "test_module",
+    amt_cache_seconds: int = 90,
     amt_description: Optional[str] = None,
     amt_extended_version: Optional[dict] = None,
     amt_manual: bool = False,
@@ -209,28 +211,33 @@ def create_analysis(
     amt_version: str = "1.0.0",
     details: Optional[dict] = None,
     node_metadata: Optional[Dict[str, object]] = None,
+    run_time: datetime = None,
 ) -> NodeTree:
-    if amt_value:
-        analysis_module_type = create_analysis_module_type(
-            value=amt_value,
-            description=amt_description,
-            extended_version=amt_extended_version,
-            manual=amt_manual,
-            observable_types=amt_observable_types,
-            required_directives=amt_required_directives,
-            required_tags=amt_required_tags,
-            version=amt_version,
-            db=db,
-        )
+    analysis_module_type = create_analysis_module_type(
+        value=amt_value,
+        cache_seconds=amt_cache_seconds,
+        description=amt_description,
+        extended_version=amt_extended_version,
+        manual=amt_manual,
+        observable_types=amt_observable_types,
+        required_directives=amt_required_directives,
+        required_tags=amt_required_tags,
+        version=amt_version,
+        db=db,
+    )
 
-        obj = Analysis(
-            analysis_module_type=analysis_module_type,
-            details=details,
-            uuid=uuid.uuid4(),
-            version=uuid.uuid4(),
-        )
-    else:
-        obj = Analysis(details=details, uuid=uuid.uuid4(), version=uuid.uuid4())
+    if run_time is None:
+        run_time = datetime.utcnow()
+
+    obj = Analysis(
+        analysis_module_type=analysis_module_type,
+        cached_until=datetime.utcnow() + timedelta(seconds=analysis_module_type.cache_seconds),
+        details=details,
+        parent_observable_uuid=parent_observable.uuid,
+        run_time=run_time,
+        uuid=uuid.uuid4(),
+        version=uuid.uuid4(),
+    )
 
     db.add(obj)
     crud.commit(db)
@@ -251,6 +258,7 @@ def create_analysis(
 def create_analysis_module_type(
     value: str,
     db: Session,
+    cache_seconds: int = 90,
     description: Optional[str] = None,
     extended_version: Optional[dict] = None,
     manual: bool = False,
@@ -280,6 +288,7 @@ def create_analysis_module_type(
 
     obj = AnalysisModuleType(
         value=value,
+        cache_seconds=cache_seconds,
         description=description,
         extended_version=extended_version,
         manual=manual,
@@ -703,7 +712,7 @@ def create_user_role(value: str, db: Session) -> UserRole:
 
 
 def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) -> NodeTree:
-    def _create_analysis(a, parent_tree: NodeTree):
+    def _create_analysis(a, parent_tree: NodeTree, parent_observable: Observable):
         details = None
         if "details" in a:
             details = a["details"]
@@ -728,6 +737,7 @@ def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) ->
             db=db,
             node_metadata=node_metadata,
             parent_tree=parent_tree,
+            parent_observable=parent_observable,
             amt_value=a["type"],
             amt_observable_types=observable_types,
             amt_required_directives=required_directives,
@@ -774,7 +784,7 @@ def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) ->
 
         if "analyses" in o:
             for analysis in o["analyses"]:
-                _create_analysis(a=analysis, parent_tree=leaf)
+                _create_analysis(a=analysis, parent_tree=leaf, parent_observable=leaf.node)
 
     def _replace_tokens(text: str, token: str, base_replacement_string: str) -> str:
         for i in range(text.count(token)):

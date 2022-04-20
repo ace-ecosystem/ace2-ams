@@ -16,6 +16,7 @@ from uuid import UUID, uuid4
 from api_models.node import NodeRead, NodeTreeMetadata
 from core.auth import verify_password
 from db.schemas.alert import AlertHistory
+from db.schemas.analysis import Analysis
 from db.schemas.event import EventHistory
 from db.schemas.history import HasHistory
 from db.schemas.node import Node
@@ -309,6 +310,20 @@ def read_by_uuids(uuids: List[UUID], db_table: DeclarativeMeta, db: Session):
             )
 
     return resources
+
+
+def read_cached_analysis(analysis_module_type_uuid: UUID, observable_uuid: UUID, db: Session) -> Optional[Analysis]:
+    return (
+        db.execute(
+            select(Analysis).where(
+                Analysis.analysis_module_type_uuid == analysis_module_type_uuid,
+                Analysis.parent_observable_uuid == observable_uuid,
+                datetime.utcnow() < Analysis.cached_until,
+            )
+        )
+        .scalars()
+        .one_or_none()
+    )
 
 
 def read_observable(type: str, value: str, db: Session) -> Union[Observable, None]:

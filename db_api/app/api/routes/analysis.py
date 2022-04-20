@@ -1,3 +1,4 @@
+from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 from uuid import UUID
@@ -34,21 +35,27 @@ def create_analysis(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    # NOTE: There are multiple crud.commit(db) statements to avoid the possibility of
-    # getting an IntegrityError when trying to read the analysis from the Node table. This
-    # can happen due to autoflush in the case of trying to create analyses with the same UUID.
-
-    # Create the new analysis Node using the data from the request
-    new_analysis: Analysis = create_node(
-        node_create=analysis, db_node_type=Analysis, db=db, exclude={"parent_uuid", "node_tree"}
+    # Check for existing/cached analysis
+    db_analysis = crud.read_cached_analysis(
+        analysis_module_type_uuid=analysis.analysis_module_type_uuid,
+        observable_uuid=analysis.parent_observable_uuid,
+        db=db,
     )
 
-    # If an analysis module type was given, get it from the database to use with the new analysis
-    if analysis.analysis_module_type:
+    if not db_analysis:
+        # Create the new analysis Node using the data from the request
+        db_analysis: Analysis = create_node(node_create=analysis, db_node_type=Analysis, db=db, exclude={"node_tree"})
+
+        # Associate the analysis with its parent observable and analysis module type
+        db_analysis.parent_observable_uuid = analysis.parent_observable_uuid
+
         analysis_module_type: AnalysisModuleType = crud.read(
-            uuid=analysis.analysis_module_type, db_table=AnalysisModuleType, db=db
+            uuid=analysis.analysis_module_type_uuid, db_table=AnalysisModuleType, db=db
         )
-        new_analysis.analysis_module_type = analysis_module_type
+        db_analysis.analysis_module_type = analysis_module_type
+
+        # Calculate the cached_until time based on the AnalysisModuleType's cache_seconds
+        db_analysis.cached_until = analysis.run_time + timedelta(seconds=analysis_module_type.cache_seconds)
 
         # Validate certain types of analysis details. The GUI depends on specific analysis details
         # when showing event pages. Because of this, we want to ensure that these details conform
@@ -89,21 +96,21 @@ def create_analysis(
                     detail=f"The User Analysis details for alert {analysis.node_tree.root_node_uuid} are invalid: {e}",
                 )
 
-    db.add(new_analysis)
-    crud.commit(db)
+        db.add(db_analysis)
+        crud.commit(db)
 
-    # Link the analysis to a Node Tree
+    # Link the analysis to a Node Tree. This happens regardless of whether or not the analysis was cached.
     crud.create_node_tree_leaf(
         node_metadata=analysis.node_tree.node_metadata,
         root_node_uuid=analysis.node_tree.root_node_uuid,
         parent_tree_uuid=analysis.node_tree.parent_tree_uuid,
-        node_uuid=new_analysis.uuid,
+        node_uuid=db_analysis.uuid,
         db=db,
     )
 
     crud.commit(db)
 
-    response.headers["Content-Location"] = request.url_for("get_analysis", uuid=new_analysis.uuid)
+    response.headers["Content-Location"] = request.url_for("get_analysis", uuid=db_analysis.uuid)
 
 
 helpers.api_route_create(router, create_analysis)

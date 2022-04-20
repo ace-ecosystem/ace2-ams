@@ -5,6 +5,7 @@ import {
 } from "@/models/analysisModuleType";
 
 export const analysisModuleTypeReadFactory = ({
+  cacheSeconds = 90,
   description = null,
   extendedVersion = null,
   manual = false,
@@ -15,6 +16,7 @@ export const analysisModuleTypeReadFactory = ({
   version = "1.0.0",
   uuid = "e77f200e-93c9-4db8-b8b9-a0daddae1f0d",
 }: Partial<analysisModuleTypeRead> = {}): analysisModuleTypeRead => ({
+  cacheSeconds: cacheSeconds,
   description: description,
   extendedVersion: extendedVersion,
   manual: manual,
@@ -29,6 +31,7 @@ export const analysisModuleTypeReadFactory = ({
 export const analysisReadFactory = ({
   version = "f0590bba-c854-4a2c-b414-71c2bc580c4b",
   analysisModuleType = analysisModuleTypeReadFactory(),
+  cachedUntil = new Date(),
   details = { test: "test description" },
   errorMessage = null,
   stackTrace = null,
@@ -38,6 +41,7 @@ export const analysisReadFactory = ({
 }: Partial<analysisRead> = {}): analysisRead => ({
   version: version,
   analysisModuleType: analysisModuleType,
+  cachedUntil: cachedUntil,
   details: details,
   errorMessage: errorMessage,
   stackTrace: stackTrace,

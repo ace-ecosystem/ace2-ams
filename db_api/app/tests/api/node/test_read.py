@@ -27,7 +27,8 @@ def test_get_version_nonexistent_uuid(client):
 
 def test_get_version(client, db):
     alert_tree = helpers.create_alert(db=db)
-    analysis_tree = helpers.create_analysis(parent_tree=alert_tree, db=db)
+    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
+    analysis_tree = helpers.create_analysis(parent_tree=observable_tree, parent_observable=observable_tree.node, db=db)
 
     get = client.get(f"/api/node/{analysis_tree.node_uuid}/version")
     assert get.status_code == status.HTTP_200_OK
