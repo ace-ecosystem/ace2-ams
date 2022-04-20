@@ -5,10 +5,12 @@ import { analysisReadFactory } from "@mocks/analysis";
 
 describe("Analysis API calls", () => {
   it("will make a get request to /alert/queue/{uuid} when getSingle is called", async () => {
-    myNock.get("/analysis/uuid2").reply(200, analysisReadFactory());
+    const mockAnalysis = analysisReadFactory();
+    myNock.get("/analysis/uuid2").reply(200, mockAnalysis);
 
     const res = await Analysis.read("uuid2");
-    expect(res).toEqual(analysisReadFactory());
+
+    expect(res).toEqual(JSON.parse(JSON.stringify(mockAnalysis)));
   });
 
   it("will throw an error if a request fails", async () => {
