@@ -79,6 +79,11 @@ describe("ViewAlert.vue", () => {
     });
 
     it("should toggle observable/analysis expanded status when icon clicked", () => {
+      // Number of expanded nodes
+      cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 17);
+      // Number of collapsed nodes (the 2nd 'evil.com' observable)
+      cy.get(".p-treenode-content .pi-chevron-right").should("have.length", 1);
+
       // Second 'fqdn: evil.com' toggle icon
       cy.get(
         '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
@@ -98,9 +103,10 @@ describe("ViewAlert.vue", () => {
 
       // Only that icon should have changed
       // Number of expanded nodes
-      cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 19);
+      cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 18);
       // Number of collapsed nodes
-      cy.get(".p-treenode-content .pi-chevron-right").should("not.exist");
+      // The 2nd 'evil.com' is now opened up, but its child analysis is still collapsed
+      cy.get(".p-treenode-content .pi-chevron-right").should("have.length", 1);
 
       // Should now have down/'expanded' toggle icon
       cy.get(
