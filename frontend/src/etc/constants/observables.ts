@@ -1,4 +1,4 @@
-import AdjustDetectionExpirationVue from "@/components/Observables/ObservableActions/AdjustDetectionExpiration.vue";
+import UpdateDetectionExpirationVue from "@/components/Observables/ObservableActions/UpdateDetectionExpiration.vue";
 import { observableAction, observableTreeRead } from "@/models/observable";
 import { ObservableInstance } from "@/services/api/observable";
 
@@ -24,11 +24,11 @@ export const disableDetection: observableAction = {
   requirements: (obs: observableTreeRead) => obs.forDetection,
 };
 
-export const adjustDetectionExpiration: observableAction = {
-  label: "Adjust Expiration",
-  description: "Adjust expiration datetime for observable",
+export const updateDetectionExpiration: observableAction = {
+  label: "Update Expiration",
+  description: "Update expiration datetime for observable",
   icon: "pi pi-clock",
   type: "modal",
-  modal: AdjustDetectionExpirationVue,
+  modal: UpdateDetectionExpirationVue,
   requirements: (obs: observableTreeRead) => obs.forDetection,
 };

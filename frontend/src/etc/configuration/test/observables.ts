@@ -2,7 +2,7 @@ import { observableTypeMetaData } from "@/models/observableType";
 import {
   enableDetection,
   disableDetection,
-  adjustDetectionExpiration,
+  updateDetectionExpiration,
 } from "../../constants/observables";
 
 type FILE = "file";
@@ -16,7 +16,7 @@ type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
 export const commonObservableActions = [
   enableDetection,
   disableDetection,
-  adjustDetectionExpiration,
+  updateDetectionExpiration,
 ];
 
 export const observableMetadata: PartialRecord<
