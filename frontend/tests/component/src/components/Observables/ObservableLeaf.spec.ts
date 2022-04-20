@@ -9,6 +9,7 @@ import { observableTreeRead } from "../../../../../src/models/observable";
 import { observableTreeReadFactory } from "../../../../mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
+import { testConfiguration } from "@/etc/configuration/test";
 
 interface ObservableLeafProps {
   observable: observableTreeRead;
@@ -28,6 +29,7 @@ function factory(
     global: {
       plugins: [PrimeVue, createCustomCypressPinia(), router],
       provide: {
+        config: testConfiguration,
         nodeType: "alerts",
       },
     },

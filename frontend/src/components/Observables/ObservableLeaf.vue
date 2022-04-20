@@ -2,8 +2,8 @@
   <span>
     <span
       class="treenode-text leaf-element"
-      @click="filterByObservable(observable)"
       :style="style"
+      @click="filterByObservable(observable)"
       >{{ displayValue }}
     </span>
     <Button
@@ -73,21 +73,12 @@
   import Button from "primevue/button";
 
   import { observableTreeRead } from "@/models/observable";
+  import type { observableAction } from "@/models/observable";
   import { useFilterStore } from "@/stores/filter";
   import { copyToClipboard } from "@/etc/helpers";
   import { useModalStore } from "@/stores/modal";
   import { useAlertStore } from "@/stores/alert";
 
-  export type observableAction = {
-    type: "url" | "modal" | "command";
-    command?: (obs: observableTreeRead) => unknown;
-    modal?: any;
-    url?: string;
-    label?: string;
-    description?: string;
-    icon?: string;
-    requirements?: (obs: observableTreeRead) => boolean;
-  };
   const filterStore = useFilterStore();
   const router = useRouter();
 
@@ -103,30 +94,6 @@
   const items = ref<observableAction[]>([]); // todo fix
   const modalStore = useModalStore();
   const alertStore = useAlertStore();
-
-  const itemClick = async ($originalEvent: unknown, item: observableAction) => {
-    if (item.type == "modal" && "modal" in item) {
-      component.value = item.modal;
-      modalStore.open(`${item.modal}-${props.observable.uuid}`);
-    } else if (item.type == "command" && item.command) {
-      await item.command(props.observable);
-      alertStore.requestReload = true; // update in the future to be more extendable
-    } else if (item.type == "url" && "url" in item) {
-      window.location = item.url as unknown as Location;
-    }
-
-    toggle($originalEvent);
-  };
-
-  const itemsFiltered = computed(() => {
-    return items.value.filter((item) => {
-      if (item.requirements) {
-        return item.requirements(props.observable);
-      } else {
-        return true;
-      }
-    });
-  });
 
   onMounted(() => {
     if (props.observable.type.value in config.observables.observableMetadata) {
@@ -150,6 +117,30 @@
     } else {
       items.value = config.observables.commonObservableActions;
     }
+  });
+
+  const itemClick = async ($originalEvent: unknown, item: observableAction) => {
+    if (item.type == "modal" && "modal" in item) {
+      component.value = item.modal;
+      modalStore.open(`${item.modal}-${props.observable.uuid}`);
+    } else if (item.type == "command" && item.command) {
+      await item.command(props.observable);
+      alertStore.requestReload = true; // update in the future to be more extendable
+    } else if (item.type == "url" && "url" in item) {
+      window.location = item.url as unknown as Location;
+    }
+
+    toggle($originalEvent);
+  };
+
+  const itemsFiltered = computed(() => {
+    return items.value.filter((item) => {
+      if (item.requirements) {
+        return item.requirements(props.observable);
+      } else {
+        return true;
+      }
+    });
   });
 
   const props = defineProps({
