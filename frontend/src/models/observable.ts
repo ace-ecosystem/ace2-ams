@@ -87,9 +87,9 @@ export type observableAction = {
   command?: (obs: observableTreeRead) => unknown;
   modal?: any;
   url?: string;
-  label?: string;
-  description?: string;
-  icon?: string;
+  label: string;
+  description: string;
+  icon: string;
   requirements?: (obs: observableTreeRead) => boolean;
 };
 

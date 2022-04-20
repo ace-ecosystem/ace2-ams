@@ -5,7 +5,7 @@ import {
   genericObjectReadPage,
   genericObjectUpdate,
 } from "./base";
-import { observableActionSection } from "./observable";
+import { observableAction, observableActionSection } from "./observable";
 
 export type observableTypeCreate = genericObjectCreate;
 
@@ -18,6 +18,6 @@ export interface observableTypeReadPage extends genericObjectReadPage {
 export type observableTypeUpdate = genericObjectUpdate;
 
 export type observableTypeMetaData = {
-  actions?: observableActionSection[];
+  actions?: observableAction[] | observableActionSection[];
   style?: CSS.Properties;
 };

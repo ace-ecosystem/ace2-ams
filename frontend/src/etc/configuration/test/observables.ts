@@ -1,4 +1,6 @@
+import { observableAction } from "@/models/observable";
 import { observableTypeMetaData } from "@/models/observableType";
+import { observableTreeReadFactory } from "@mocks/observable";
 import {
   enableDetection,
   disableDetection,
@@ -19,6 +21,16 @@ export const commonObservableActions = [
   updateDetectionExpiration,
 ];
 
+const ipv4SpecificObservableAction: observableAction = {
+  type: "command",
+  label: "IPV4 Command",
+  description: "Test command",
+  icon: "pi pi=check",
+  command: (obs) => {
+    console.log(obs.uuid);
+  },
+};
+
 export const observableMetadata: PartialRecord<
   knownObservables,
   observableTypeMetaData
@@ -28,7 +40,7 @@ export const observableMetadata: PartialRecord<
     style: { color: "red" },
   },
   ipv4: {
-    actions: [{ items: [] }],
+    actions: [{ items: [ipv4SpecificObservableAction], label: "Subheader" }],
     style: { color: "blue" },
   },
 };
