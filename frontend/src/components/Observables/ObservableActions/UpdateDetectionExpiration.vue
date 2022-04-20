@@ -1,21 +1,26 @@
-<!-- DeleteModal.vue -->
-<!-- 'Delete' action modal, agnostic to what type of data is being deleted -->
+<!-- UpdateDetectionExpiration.vue -->
+<!-- 'UpdateDetectionExpiration' action modal, allows user to update an observables FAQueue expiration datetime -->
 
 <template>
   <BaseModal :name="name" header="Update Detection Expiration Time">
+    <Message v-if="error" severity="error" data-cy="error-banner">{{
+      error
+    }}</Message>
     <div>
       <b>Current Expiration Time (UTC)</b>
-      <span>{{ observable.expiresOn }}</span>
+      <span>{{ currentExpirationTime }}</span>
       <br />
       <span>
-        <InputSwitch v-model="neverExpires" /> This observable should never
-        expire.
+        <InputSwitch v-model="neverExpires" role="switch" /> This observable
+        should never expire.
       </span>
       <br />
       <div v-if="!neverExpires">
         <b>New Expiration Time (UTC)</b>
         <Calendar
           v-model="newExpirationTime"
+          data-cy="new-exipration-time-input"
+          placeholder="Enter a valid date"
           autocomplete="off"
           :show-time="true"
           :show-seconds="true"
@@ -24,18 +29,25 @@
     </div>
     <template #footer>
       <Button
+        role="button"
         label="Nevermind"
         icon="pi pi-times"
         class="p-button-text"
         @click="close"
       />
-      <Button label="Do it!" icon="pi pi-check" @click="update" />
+      <Button
+        label="Do it!"
+        icon="pi pi-check"
+        role="button"
+        :disabled="disabled"
+        @click="update"
+      />
     </template>
   </BaseModal>
 </template>
 
 <script setup lang="ts">
-  import { defineProps, PropType, ref, onMounted } from "vue";
+  import { defineProps, computed, PropType, ref, onMounted } from "vue";
 
   import Button from "primevue/button";
   import Calendar from "primevue/calendar";
@@ -46,15 +58,20 @@
   import InputSwitch from "primevue/inputswitch";
   import { ObservableInstance } from "@/services/api/observable";
   import { useAlertStore } from "@/stores/alert";
+  import Message from "primevue/message";
 
   const newExpirationTime = ref<Date>();
+  const currentExpirationTime = ref<string>();
 
   const modalStore = useModalStore();
   const neverExpires = ref(false);
+  const error = ref<string>();
 
   onMounted(() => {
     if (props.observable.expiresOn === null) {
       neverExpires.value = true;
+    } else {
+      currentExpirationTime.value = props.observable.expiresOn.toUTCString();
     }
   });
 
@@ -66,20 +83,27 @@
     },
   });
 
+  const disabled = computed(() => {
+    return !(neverExpires.value || newExpirationTime.value != null);
+  });
+
   const alertStore = useAlertStore();
 
   const update = async () => {
-    if (neverExpires.value) {
+    let newValue = neverExpires.value ? null : newExpirationTime.value;
+    try {
       await ObservableInstance.update(props.observable.uuid, {
-        expiresOn: null,
+        expiresOn: newValue,
       });
-    } else if (newExpirationTime.value) {
-      await ObservableInstance.update(props.observable.uuid, {
-        expiresOn: newExpirationTime.value,
-      });
+      alertStore.requestReload = true;
+      close();
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
     }
-    alertStore.requestReload = true;
-    close();
   };
 
   const close = () => {
