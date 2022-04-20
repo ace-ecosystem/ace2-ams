@@ -4,7 +4,7 @@ import time
 import uuid
 
 from datetime import datetime
-from fastapi import status
+from fastapi import HTTPException, status
 
 from tests import helpers
 
@@ -432,3 +432,30 @@ def test_expired_cached_analysis(client, db):
     # The Content-Location headers NOT should be the same from the two create API calls, which
     # indicates that the existing/cached analysis was expired and a new one was created.
     assert create1.headers["Content-Location"] != create2.headers["Content-Location"]
+
+
+def test_duplicate_cached_analysis(db):
+    # Create the first analysis
+    alert_tree1 = helpers.create_alert(db=db)
+    observable_tree1 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree1, db=db)
+    helpers.create_analysis(
+        db=db,
+        parent_observable=observable_tree1.node,
+        parent_tree=observable_tree1,
+        amt_value="test_module",
+        amt_cache_seconds=90,
+    )
+
+    # Trying to create the same analysis (same analysis module type, same parent observable,
+    # and overlapping cached_during) should result in an exception.
+    alert_tree2 = helpers.create_alert(db=db)
+    observable_tree2 = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree2, db=db)
+    with pytest.raises(HTTPException):
+        helpers.create_analysis(
+            db=db,
+            parent_observable=observable_tree2.node,
+            parent_tree=observable_tree2,
+            amt_value="test_module",
+            amt_cache_seconds=90,
+            check_for_cached=False,
+        )
