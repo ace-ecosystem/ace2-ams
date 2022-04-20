@@ -22,9 +22,10 @@
               <span :class="toggleIcon(index)"></span>
             </button>
           </span>
-          <span v-if="isObservable(i)">
-            <ObservableLeafVue :observable="i"></ObservableLeafVue
-          ></span>
+          <ObservableLeafVue
+            v-if="isObservable(i)"
+            :observable="i"
+          ></ObservableLeafVue>
 
           <router-link v-else-if="isAnalysis(i)" :to="viewAnalysisRoute(i)"
             ><span class="treenode-text">{{

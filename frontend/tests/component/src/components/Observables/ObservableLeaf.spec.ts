@@ -10,23 +10,20 @@ import { observableTreeReadFactory } from "../../../../mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 
-const defaultProps: { observable: observableTreeRead } = {
+interface ObservableLeafProps {
+  observable: observableTreeRead;
+  showCopyToClipboard?: boolean;
+  showActionsMenu?: boolean;
+  showTags?: boolean;
+}
+
+const defaultProps: ObservableLeafProps = {
   observable: observableTreeReadFactory(),
 };
 
-const parentObservable = observableTreeReadFactory({
-  value: "Parent Observable",
-  children: [],
-  tags: [genericObjectReadFactory({ value: "testTag" })],
-});
-
-const childObservable = observableTreeReadFactory({
-  value: "Child Observable",
-  firstAppearance: true,
-  nodeMetadata: { display: { type: "custom type", value: "custom value" } },
-});
-
-function factory(args = { props: defaultProps }) {
+function factory(
+  args: { props: ObservableLeafProps } = { props: defaultProps },
+) {
   mount(ObservableLeaf, {
     global: {
       plugins: [PrimeVue, createCustomCypressPinia(), router],
@@ -39,10 +36,29 @@ function factory(args = { props: defaultProps }) {
 }
 
 describe("ObservableLeaf", () => {
-  it("renders", () => {
-    factory();
+  const parentObservable = observableTreeReadFactory({
+    value: "Parent Observable",
+    children: [],
+    tags: [genericObjectReadFactory({ value: "testTag" })],
   });
-  it("renders an observables tags if available", () => {
+
+  const childObservable = observableTreeReadFactory({
+    value: "Child Observable",
+    firstAppearance: true,
+    nodeMetadata: { display: { type: "custom type", value: "custom value" } },
+  });
+
+  it("renders correctly with all optional props set to false", () => {
+    factory({
+      props: {
+        observable: observableTreeReadFactory(),
+        showCopyToClipboard: false,
+        showActionsMenu: false,
+        showTags: false,
+      },
+    });
+  });
+  it("renders correctly with default props", () => {
     factory({
       props: { observable: parentObservable },
     });
