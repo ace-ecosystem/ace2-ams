@@ -712,7 +712,7 @@ def create_user_role(value: str, db: Session) -> UserRole:
 
 
 def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) -> NodeTree:
-    def _create_analysis(a, parent_tree: NodeTree):
+    def _create_analysis(a, parent_tree: NodeTree, parent_observable: Observable):
         details = None
         if "details" in a:
             details = a["details"]
@@ -737,6 +737,7 @@ def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) ->
             db=db,
             node_metadata=node_metadata,
             parent_tree=parent_tree,
+            parent_observable=parent_observable,
             amt_value=a["type"],
             amt_observable_types=observable_types,
             amt_required_directives=required_directives,
@@ -783,7 +784,7 @@ def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) ->
 
         if "analyses" in o:
             for analysis in o["analyses"]:
-                _create_analysis(a=analysis, parent_tree=leaf)
+                _create_analysis(a=analysis, parent_tree=leaf, parent_observable=leaf.node)
 
     def _replace_tokens(text: str, token: str, base_replacement_string: str) -> str:
         for i in range(text.count(token)):
