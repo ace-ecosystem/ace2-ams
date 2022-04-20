@@ -1,5 +1,6 @@
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from uuid import UUID
 
@@ -42,7 +43,7 @@ def create_analysis(
         db=db,
     )
 
-    if not db_analysis:
+    if db_analysis is None:
         # Create the new analysis Node using the data from the request
         db_analysis: Analysis = create_node(node_create=analysis, db_node_type=Analysis, db=db, exclude={"node_tree"})
 
@@ -54,8 +55,10 @@ def create_analysis(
         )
         db_analysis.analysis_module_type = analysis_module_type
 
-        # Calculate the cached_until time based on the AnalysisModuleType's cache_seconds
-        db_analysis.cached_until = analysis.run_time + timedelta(seconds=analysis_module_type.cache_seconds)
+        # Calculate the cached_during range based on the AnalysisModuleType's cache_seconds
+        db_analysis.cached_during = func.tstzrange(
+            analysis.run_time, analysis.run_time + timedelta(seconds=analysis_module_type.cache_seconds), "[)"
+        )
 
         # Validate certain types of analysis details. The GUI depends on specific analysis details
         # when showing event pages. Because of this, we want to ensure that these details conform

@@ -2,7 +2,7 @@ import json
 import uuid
 
 from datetime import datetime, timedelta
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from typing import Dict, List, Optional, Union
@@ -209,6 +209,7 @@ def create_analysis(
     amt_required_directives: List[str] = None,
     amt_required_tags: List[str] = None,
     amt_version: str = "1.0.0",
+    check_for_cached: bool = True,
     details: Optional[dict] = None,
     node_metadata: Optional[Dict[str, object]] = None,
     run_time: datetime = None,
@@ -229,18 +230,27 @@ def create_analysis(
     if run_time is None:
         run_time = datetime.utcnow()
 
-    obj = Analysis(
-        analysis_module_type=analysis_module_type,
-        cached_until=datetime.utcnow() + timedelta(seconds=analysis_module_type.cache_seconds),
-        details=details,
-        parent_observable_uuid=parent_observable.uuid,
-        run_time=run_time,
-        uuid=uuid.uuid4(),
-        version=uuid.uuid4(),
-    )
+    obj = None
+    if check_for_cached:
+        obj = crud.read_cached_analysis(
+            analysis_module_type_uuid=analysis_module_type.uuid, observable_uuid=parent_observable.uuid, db=db
+        )
 
-    db.add(obj)
-    crud.commit(db)
+    if obj is None:
+        obj = Analysis(
+            analysis_module_type=analysis_module_type,
+            cached_during=func.tstzrange(
+                run_time, run_time + timedelta(seconds=analysis_module_type.cache_seconds), "[)"
+            ),
+            details=details,
+            parent_observable_uuid=parent_observable.uuid,
+            run_time=run_time,
+            uuid=uuid.uuid4(),
+            version=uuid.uuid4(),
+        )
+
+        db.add(obj)
+        crud.commit(db)
 
     node_tree = crud.create_node_tree_leaf(
         node_metadata=node_metadata,
