@@ -176,12 +176,7 @@
                   }
                 }
               ]
-            }
-          ]
-        },
-        {
-          "type": "File Analysis",
-          "observables": [
+            },
             {
               "type": "md5",
               "value": "912ec803b2ce49e4a541068d495ab570",
