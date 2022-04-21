@@ -12,19 +12,19 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import FilterChipVue from "@/components/Filters/FilterChip.vue";
   import { inject, computed } from "vue";
 
   import { useFilterStore } from "@/stores/filter";
   const filterStore = useFilterStore();
-  const nodeType = inject("nodeType");
+  const nodeType = inject("nodeType") as "alerts" | "events";
 
   const setFilters = computed(() => {
     return Object.keys(filterStore[nodeType]);
   });
 
-  function filterValue(filterName) {
+  function filterValue(filterName: string) {
     return filterStore[nodeType][filterName];
   }
 </script>
