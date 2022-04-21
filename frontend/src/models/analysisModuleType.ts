@@ -1,25 +1,11 @@
-import {
-  genericObjectCreate,
-  genericObjectRead,
-  genericObjectReadPage,
-  genericObjectUpdate,
-  UUID,
-} from "./base";
+import { genericObjectRead, UUID } from "./base";
 
 import { nodeDirectiveRead } from "./nodeDirective";
 import { nodeTagRead } from "./nodeTag";
 import { observableTypeRead } from "./observableType";
 
-export interface analysisModuleTypeCreate extends genericObjectCreate {
-  extendedVersion?: Record<string, unknown>;
-  manual?: boolean;
-  observableTypes?: string[];
-  requiredDirectives?: string[];
-  requiredTags?: string[];
-  version: string;
-}
-
 export interface analysisModuleTypeRead extends genericObjectRead {
+  cacheSeconds: number;
   extendedVersion: Record<string, unknown> | null;
   manual: boolean;
   observableTypes: observableTypeRead[];
@@ -31,17 +17,4 @@ export interface analysisModuleTypeRead extends genericObjectRead {
 export interface analysisModuleTypeNodeTreeRead {
   uuid: UUID;
   value: string;
-}
-
-export interface analysisModuleTypeReadPage extends genericObjectReadPage {
-  items: analysisModuleTypeRead[];
-}
-
-export interface analysisModuleTypeUpdate extends genericObjectUpdate {
-  extendedVersion?: Record<string, unknown> | null;
-  manual?: boolean;
-  observableTypes?: string[];
-  requiredDirectives?: string[];
-  requiredTags?: string[];
-  version?: string;
 }

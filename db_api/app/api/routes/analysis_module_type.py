@@ -107,6 +107,9 @@ def update_analysis_module_type(
     # Get the data that was given in the request and use it to update the database object
     update_data = analysis_module_type.dict(exclude_unset=True)
 
+    if "cache_seconds" in update_data:
+        db_analysis_module_type.cache_seconds = update_data["cache_seconds"]
+
     if "description" in update_data:
         db_analysis_module_type.description = update_data["description"]
 

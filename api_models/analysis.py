@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import Field, Json, UUID4
 from typing import List, Optional
 from uuid import uuid4
@@ -11,11 +12,6 @@ from api_models.node_detection_point import NodeDetectionPointRead
 class AnalysisBase(NodeBase):
     """Represents an individual analysis that was performed."""
 
-    analysis_module_type: Optional[UUID4] = Field(
-        description="""The UUID of the analysis module type that was used to perform this analysis. This can be NULL in
-            the case of manually created alerts."""
-    )
-
     details: Optional[Json] = Field(description="A JSON representation of the details produced by the analysis")
 
     error_message: Optional[type_str] = Field(description="An optional error message that occurred during analysis")
@@ -26,7 +22,15 @@ class AnalysisBase(NodeBase):
 
 
 class AnalysisCreate(NodeCreate, AnalysisBase):
+    analysis_module_type_uuid: UUID4 = Field(
+        description="""The UUID of the analysis module type that was used to perform this analysis."""
+    )
+
     node_tree: NodeTreeCreateWithNode = Field(description="This defines where in a Node Tree this analysis fits")
+
+    parent_observable_uuid: UUID4 = Field(description="The UUID of the target observable for this analysis")
+
+    run_time: datetime = Field(description="The time at which the analysis was performed")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
 
@@ -49,11 +53,15 @@ class AnalysisRead(NodeRead, AnalysisBase):
         description="The analysis module type that was used to perform this analysis"
     )
 
+    cached_until: datetime = Field(description="The time at which the analysis expires from the cache")
+
     details: Optional[dict] = Field(description="A JSON representation of the details produced by the analysis")
 
     detection_points: List[NodeDetectionPointRead] = Field(
         description="A list of detection points added to the analysis"
     )
+
+    run_time: datetime = Field(description="The time at which the analysis was performed")
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
 

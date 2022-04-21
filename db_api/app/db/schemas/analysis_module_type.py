@@ -1,4 +1,4 @@
-from sqlalchemy import func, Boolean, Column, Index, String, UniqueConstraint
+from sqlalchemy import func, Boolean, Column, Index, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import relationship
 
@@ -12,6 +12,8 @@ class AnalysisModuleType(Base):
     __tablename__ = "analysis_module_type"
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
+
+    cache_seconds = Column(Integer, nullable=False)
 
     description = Column(String)
 
