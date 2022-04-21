@@ -52,26 +52,28 @@ describe("ViewAlert.vue", () => {
 
     it("should automatically collapse repeated observable analysis", () => {
       // First appearance of 'fqdn: evil.com' observable
-      cy.get('[data-cy="fqdn: evil.com"]').first().should("be.visible");
+      cy.contains("fqdn: evil.com").first().should("be.visible");
 
       // First 'fqdn: evil.com' toggle icon
-      cy.get(
-        '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
-      )
+      cy.findAllByText("fqdn: evil.com")
         .first()
+        .parent()
+        .parent()
+        .find(".p-tree-toggler-icon")
         .should("have.class", "pi-chevron-down");
 
       // First appearance of 'Test Analysis', child analysis of 'evil.com'
       cy.get('[data-cy="Test Analysis"]').should("be.visible");
 
       // Second appearance of 'fqdn: evil.com' observable
-      cy.get('[data-cy="fqdn: evil.com"]').last().should("be.visible");
+      cy.contains("fqdn: evil.com").last().should("be.visible");
 
       // Second 'fqdn: evil.com' toggle icon
-      cy.get(
-        '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
-      )
+      cy.findAllByText("fqdn: evil.com")
         .last()
+        .parent()
+        .parent()
+        .find(".p-tree-toggler-icon")
         .should("have.class", "pi-chevron-right");
 
       // Second appearance of child analysis of 'evil.com'
@@ -80,20 +82,22 @@ describe("ViewAlert.vue", () => {
 
     it("should toggle observable/analysis expanded status when icon clicked", () => {
       // Second 'fqdn: evil.com' toggle icon
-      cy.get(
-        '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
-      )
+      cy.findAllByText("fqdn: evil.com")
         .last()
+        .parent()
+        .parent()
+        .find(".p-tree-toggler-icon")
         .should("have.class", "pi-chevron-right");
 
       // Second appearance of child analysis of 'evil.com'
       cy.get('[data-cy="Test Analysis"]').eq(1).should("not.exist");
 
       // Click the toggle
-      cy.get(
-        '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
-      )
+      cy.findAllByText("fqdn: evil.com")
         .last()
+        .parent()
+        .parent()
+        .find(".p-tree-toggler-icon")
         .click();
 
       // Only that icon should have changed
@@ -103,27 +107,30 @@ describe("ViewAlert.vue", () => {
       cy.get(".p-treenode-content .pi-chevron-right").should("not.exist");
 
       // Should now have down/'expanded' toggle icon
-      cy.get(
-        '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
-      )
+      cy.findAllByText("fqdn: evil.com")
         .last()
+        .parent()
+        .parent()
+        .find(".p-tree-toggler-icon")
         .should("have.class", "pi-chevron-down");
 
       // Repeated analysis should now be visible
       cy.get('[data-cy="Test Analysis"]').eq(1).should("be.visible");
 
       // Click the toggle again
-      cy.get(
-        '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
-      )
+      cy.findAllByText("fqdn: evil.com")
         .last()
+        .parent()
+        .parent()
+        .find(".p-tree-toggler-icon")
         .click();
 
       // Should have the right/'collapsed' toggle icon again
-      cy.get(
-        '[data-cy="fqdn: evil.com"] > :nth-child(1) > :nth-child(1) > .p-link > .p-tree-toggler-icon',
-      )
+      cy.findAllByText("fqdn: evil.com")
         .last()
+        .parent()
+        .parent()
+        .find(".p-tree-toggler-icon")
         .should("have.class", "pi-chevron-right");
 
       // Child analysis no longer visible
@@ -155,9 +162,10 @@ describe("ViewAlert.vue", () => {
       ).as("getAlerts");
 
       // Find the recipient tag and click
-      cy.get(
-        '[data-cy="email_address: goodguy@company.com"] > :nth-child(1) > :nth-child(3) > :nth-child(1) > .p-tag',
-      )
+      cy.findAllByText("email_address: goodguy@company.com")
+        .last()
+        .parent()
+        .parent()
         .contains("recipient")
         .click();
 
@@ -192,9 +200,7 @@ describe("ViewAlert.vue", () => {
       ).as("getAlerts");
 
       // Find the email subject observable and click
-      cy.get(
-        '[data-cy="email_subject: Hello"] > .p-treenode-content > .treenode-text',
-      ).click();
+      cy.contains("email_subject: Hello").click();
 
       // Should have been rerouted
       cy.url().should("contain", "/manage_alerts");
