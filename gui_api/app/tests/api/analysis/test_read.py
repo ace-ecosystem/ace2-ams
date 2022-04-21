@@ -10,6 +10,7 @@ def test_get_analysis(client_valid_access_token, requests_mock):
             "node_type": "analysis",
             "uuid": analysis_uuid,
             "detection_points": [],
+            "child_observables": [],
             "cached_until": str(datetime.utcnow()),
             "run_time": str(datetime.utcnow()),
         },
