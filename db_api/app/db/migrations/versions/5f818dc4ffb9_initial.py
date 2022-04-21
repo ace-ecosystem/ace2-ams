@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: cbfc69c2e753
+Revision ID: 5f818dc4ffb9
 Revises: 
-Create Date: 2022-04-20 18:31:41.264253
+Create Date: 2022-04-21 16:24:01.513318
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'cbfc69c2e753'
+revision = '5f818dc4ffb9'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -561,6 +561,15 @@ def upgrade() -> None:
     op.create_index(op.f('ix_alert_tool_uuid'), 'alert', ['tool_uuid'], unique=False)
     op.create_index(op.f('ix_alert_type_uuid'), 'alert', ['type_uuid'], unique=False)
     op.create_index('name_trgm', 'alert', ['name'], unique=False, postgresql_ops={'name': 'gin_trgm_ops'}, postgresql_using='gin')
+    op.create_table('analysis_child_observable_mapping',
+    sa.Column('analysis_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.ForeignKeyConstraint(['analysis_uuid'], ['analysis.uuid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['observable_uuid'], ['observable.uuid'], ),
+    sa.PrimaryKeyConstraint('analysis_uuid', 'observable_uuid')
+    )
+    op.create_index(op.f('ix_analysis_child_observable_mapping_analysis_uuid'), 'analysis_child_observable_mapping', ['analysis_uuid'], unique=False)
+    op.create_index(op.f('ix_analysis_child_observable_mapping_observable_uuid'), 'analysis_child_observable_mapping', ['observable_uuid'], unique=False)
     op.create_table('event_history',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('action', sa.String(), nullable=False),
@@ -637,6 +646,9 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_event_history_record_uuid'), table_name='event_history')
     op.drop_index(op.f('ix_event_history_action_by_user_uuid'), table_name='event_history')
     op.drop_table('event_history')
+    op.drop_index(op.f('ix_analysis_child_observable_mapping_observable_uuid'), table_name='analysis_child_observable_mapping')
+    op.drop_index(op.f('ix_analysis_child_observable_mapping_analysis_uuid'), table_name='analysis_child_observable_mapping')
+    op.drop_table('analysis_child_observable_mapping')
     op.drop_index('name_trgm', table_name='alert', postgresql_ops={'name': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_index(op.f('ix_alert_type_uuid'), table_name='alert')
     op.drop_index(op.f('ix_alert_tool_uuid'), table_name='alert')

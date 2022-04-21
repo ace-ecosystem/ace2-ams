@@ -14,6 +14,7 @@ from api_models.analysis_details import (
     UserAnalysisDetails,
 )
 from db import crud
+from db.crud.observable import create_observable
 from db.database import get_db
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_module_type import AnalysisModuleType
@@ -47,13 +48,17 @@ def create_analysis(
         # Create the new analysis Node using the data from the request
         db_analysis: Analysis = create_node(node_create=analysis, db_node_type=Analysis, db=db, exclude={"node_tree"})
 
-        # Associate the analysis with its parent observable and analysis module type
-        db_analysis.parent_observable_uuid = analysis.parent_observable_uuid
-
+        # Associate the analysis with its analysis module type, parent observable, and child observables
         analysis_module_type: AnalysisModuleType = crud.read(
             uuid=analysis.analysis_module_type_uuid, db_table=AnalysisModuleType, db=db
         )
         db_analysis.analysis_module_type = analysis_module_type
+
+        db_analysis.parent_observable_uuid = analysis.parent_observable_uuid
+
+        db_analysis.child_observables = [
+            create_observable(type=o.type, value=o.value, db=db) for o in analysis.child_observables
+        ]
 
         # Calculate the cached_during range based on the AnalysisModuleType's cache_seconds
         db_analysis.cached_during = func.tstzrange(
