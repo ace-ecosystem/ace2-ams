@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, Json, StrictBool, UUID4
+from pydantic import BaseModel, Field, Json, StrictBool, StrictInt, UUID4
 from typing import List, Optional
 from uuid import uuid4
 
@@ -10,6 +10,10 @@ from api_models.observable_type import ObservableTypeRead
 
 class AnalysisModuleTypeBase(BaseModel):
     """Represents a type of analysis module registered with the core."""
+
+    cache_seconds: StrictInt = Field(
+        description="The number of seconds that analysis produced by this module is cached"
+    )
 
     description: Optional[type_str] = Field(
         description="An optional human-readable description of the analysis module type"
@@ -97,6 +101,10 @@ class AnalysisModuleTypeRead(AnalysisModuleTypeBase):
 
 
 class AnalysisModuleTypeUpdate(AnalysisModuleTypeBase):
+    cache_seconds: Optional[StrictInt] = Field(
+        description="The number of seconds that analysis produced by this module is cached"
+    )
+
     manual: Optional[StrictBool] = Field(description="Whether or not this analysis module type runs in manual mode.")
 
     observable_types: Optional[List[type_str]] = Field(
@@ -121,6 +129,7 @@ class AnalysisModuleTypeUpdate(AnalysisModuleTypeBase):
     )
 
     _prevent_none: classmethod = validators.prevent_none(
+        "cache_seconds",
         "manual",
         "observable_types",
         "required_directives",

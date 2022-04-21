@@ -37,7 +37,9 @@ def test_get_node_tree_nodes(client, db):
     alert_tree = helpers.create_alert(db=db)
     observable1_tree = helpers.create_observable(type="fqdn", value="bad.com", parent_tree=alert_tree, db=db)
     helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
-    analysis_tree = helpers.create_analysis(parent_tree=observable1_tree, db=db)
+    analysis_tree = helpers.create_analysis(
+        parent_tree=observable1_tree, parent_observable=observable1_tree.node, db=db
+    )
     helpers.create_observable(type="fqdn", value="bad.com", parent_tree=analysis_tree, db=db)
 
     # Create a second alert tree with a duplicate observable from the first alert
@@ -51,9 +53,7 @@ def test_get_node_tree_nodes(client, db):
     # email_address: badguy@bad.com
     # fqdn: bad.com
     # ipv4: 127.0.0.1
-    get = client.post(
-        "/api/node/tree/observable", json=[str(alert_tree.node_uuid), str(alert_tree2.node_uuid)]
-    )
+    get = client.post("/api/node/tree/observable", json=[str(alert_tree.node_uuid), str(alert_tree2.node_uuid)])
     assert get.status_code == status.HTTP_200_OK
     assert len(get.json()) == 3
     assert any(o["type"]["value"] == "email_address" and o["value"] == "badguy@bad.com" for o in get.json())
