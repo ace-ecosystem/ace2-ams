@@ -21,6 +21,15 @@ from tests import helpers
         ("analysis_module_type_uuid", None),
         ("analysis_module_type_uuid", ""),
         ("analysis_module_type_uuid", "abc"),
+        ("child_observables", 123),
+        ("child_observables", None),
+        ("child_observables", ""),
+        ("child_observables", [123]),
+        ("child_observables", [None]),
+        ("child_observables", [""]),
+        ("child_observables", ["abc", 123]),
+        ("child_observables", [{}]),
+        ("child_observables", [{"type": "", "value": ""}]),
         ("details", 123),
         ("details", ""),
         ("details", "abc"),
@@ -55,7 +64,7 @@ def test_create_invalid_fields(client, key, value):
     create_json[key] = value
     create = client.post("/api/analysis/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert len(create.json()["detail"]) == 1
+    assert len(create.json()["detail"]) >= 1
     assert key in create.json()["detail"][0]["loc"]
 
 
@@ -273,6 +282,12 @@ def test_create_node_metadata(client, db):
 @pytest.mark.parametrize(
     "key,value",
     [
+        ("child_observables", []),
+        ("child_observables", [{"type": "ipv4", "value": "192.168.1.1"}]),
+        (
+            "child_observables",
+            [{"type": "ipv4", "value": "192.168.1.1"}, {"type": "fqdn", "value": "localhost.localdomain"}],
+        ),
         ("details", None),
         ("details", "{}"),
         ("details", '{"foo": "bar"}'),
@@ -312,6 +327,9 @@ def test_create_valid_optional_fields(client, db, key, value):
     # If the test is for details, make sure the JSON form of the supplied string matches
     if key == "details" and value:
         assert get.json()[key] == json.loads(value)
+    # If the test is for child_observables, make sure the length is the same as the supplied list
+    elif key == "child_observables":
+        assert len(get.json()[key]) == len(value)
     else:
         assert get.json()[key] == value
 
