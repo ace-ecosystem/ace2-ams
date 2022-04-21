@@ -12,6 +12,8 @@ import {
   analysisTreeReadFactory,
 } from "@mocks/analysis";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { testConfiguration } from "@/etc/configuration/test";
+import ToastService from "primevue/toastservice";
 
 const childObservable = observableTreeReadFactory({
   value: "Child Observable",
@@ -52,8 +54,8 @@ function factory(
 ) {
   return mount(AlertTree, {
     global: {
-      plugins: [createCustomCypressPinia(), PrimeVue, router],
-      provide: { nodeType: "alerts" },
+      plugins: [createCustomCypressPinia(), PrimeVue, router, ToastService],
+      provide: { nodeType: "alerts", config: testConfiguration },
     },
     propsData: args.props,
   });
@@ -89,21 +91,6 @@ describe("AlertTree", () => {
       .should("contain.text", "testObservableType")
       .get(".pi-chevron-right");
   });
-  it("renders an observables tags if available", () => {
-    factory({
-      props: { items: [parentObservable, parentAnalysis], alertId: "test" },
-    });
-    cy.get("li").eq(0).contains("testTag");
-  });
-  it("displays an observables value using node metadata if available", () => {
-    factory({
-      props: { items: [parentObservable, parentAnalysis], alertId: "test" },
-    });
-    cy.get("li")
-      .eq(2)
-      .should("contain.text", "custom type (testObservableType): custom value")
-      .get(".pi-chevron-right");
-  });
   it("toggles showing child nodes (analysis or observables) when toggle clicked", () => {
     factory({
       props: { items: [parentObservable, parentAnalysis], alertId: "test" },
@@ -129,20 +116,5 @@ describe("AlertTree", () => {
     cy.contains("Parent Analysis")
       .invoke("attr", "href")
       .should("contain", "/alert/test/testUuid");
-  });
-  it("sets the alert filters to the an observable's type and value when clicked", () => {
-    factory({
-      props: { items: [parentObservable, parentAnalysis], alertId: "test" },
-    });
-    cy.contains("Parent Observable").click();
-    cy.get("@stub-1").should("have.been.calledWith", {
-      nodeType: "alerts",
-      filters: {
-        observable: {
-          category: parentObservable.type,
-          value: parentObservable.value,
-        },
-      },
-    });
   });
 });

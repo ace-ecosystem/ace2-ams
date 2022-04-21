@@ -3,6 +3,7 @@ import App from "@/App.vue";
 import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 import Tooltip from "primevue/tooltip";
+import ToastService from "primevue/toastservice";
 
 import router from "@/router";
 import { axiosRefresh } from "@/services/api/axios";
@@ -23,7 +24,7 @@ import "snakecase-keys";
     console.error("Must reauthenticate");
   });
 
-  app.use(router).use(PrimeVue);
+  app.use(router).use(PrimeVue).use(ToastService);
 
   app.directive("tooltip", Tooltip);
 

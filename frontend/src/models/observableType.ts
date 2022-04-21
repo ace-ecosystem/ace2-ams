@@ -1,9 +1,11 @@
+import CSS from "csstype";
 import {
   genericObjectCreate,
   genericObjectRead,
   genericObjectReadPage,
   genericObjectUpdate,
 } from "./base";
+import { observableAction, observableActionSection } from "./observable";
 
 export type observableTypeCreate = genericObjectCreate;
 
@@ -14,3 +16,8 @@ export interface observableTypeReadPage extends genericObjectReadPage {
 }
 
 export type observableTypeUpdate = genericObjectUpdate;
+
+export type observableTypeMetaData = {
+  actions?: observableAction[] | observableActionSection[];
+  style?: CSS.Properties;
+};
