@@ -6,6 +6,7 @@ import ObservableLeaf from "@/components/Observables/ObservableLeaf.vue";
 import router from "@/router/index";
 import {
   observableAction,
+  observableActionUrl,
   observableTreeRead,
 } from "../../../../../src/models/observable";
 import { observableTreeReadFactory } from "../../../../mocks/observable";
@@ -137,35 +138,7 @@ describe("ObservableLeaf", () => {
     });
     cy.get("[data-cy='show-actions-menu-button']").click();
     cy.contains("Update Expiration").click();
-    cy.get("@stub-6").should("have.been.calledOnce");
-    cy.findByRole("menu").should("not.exist"); // Menu should have been closed
-  });
-  it("displays error message if 'modal'-type observable action clicked, but modal isn't available", () => {
-    const missingModalObservableAction: observableAction = {
-      type: "modal",
-      label: "Open Modal",
-      description: "Open a modal",
-      icon: "pi pi-link",
-    };
-
-    factory({
-      props: { observable: observableWithTags },
-      config: {
-        observables: {
-          commonObservableActions: [missingModalObservableAction],
-          observableMetadata: [],
-        },
-      },
-    });
-    cy.get("[data-cy='show-actions-menu-button']").click();
-    cy.contains("Open Modal").click();
-
-    cy.get("[data-cy='observable-action-error']")
-      .contains("'Open Modal' Failed")
-      .should("be.visible");
-    cy.get("[data-cy='observable-action-error']")
-      .contains("No modal has been configured for this action.")
-      .should("be.visible");
+    cy.get("@stub-10").should("have.been.calledOnce");
     cy.findByRole("menu").should("not.exist"); // Menu should have been closed
   });
   it("attempts to run command when 'command'-type observable action clicked", () => {
@@ -182,33 +155,6 @@ describe("ObservableLeaf", () => {
     cy.contains("Enable Detection").click();
 
     cy.get("@updateObservable").should("have.been.calledOnce");
-    cy.findByRole("menu").should("not.exist"); // Menu should have been closed
-  });
-  it("displays error message if 'command'-type observable action clicked, but command isn't available", () => {
-    const missingCommandObservableAction: observableAction = {
-      type: "command",
-      label: "Execute Command",
-      description: "Execute a command",
-      icon: "pi pi-link",
-    };
-
-    factory({
-      props: { observable: observableWithTags },
-      config: {
-        observables: {
-          commonObservableActions: [missingCommandObservableAction],
-          observableMetadata: [],
-        },
-      },
-    });
-    cy.get("[data-cy='show-actions-menu-button']").click();
-    cy.contains("Execute Command").click();
-    cy.get("[data-cy='observable-action-error']")
-      .contains("'Execute Command' Failed")
-      .should("be.visible");
-    cy.get("[data-cy='observable-action-error']")
-      .contains("No command has been configured for this action.")
-      .should("be.visible");
     cy.findByRole("menu").should("not.exist"); // Menu should have been closed
   });
   it("displays error message if 'command'-type observable action clicked, but command fails", () => {
@@ -229,35 +175,7 @@ describe("ObservableLeaf", () => {
       .contains("'Enable Detection' Failed")
       .should("be.visible");
     cy.get("[data-cy='observable-action-error']")
-      .contains("Error: 404 request failed")
-      .should("be.visible");
-    cy.findByRole("menu").should("not.exist"); // Menu should have been closed
-  });
-  it("displays error message if 'url'-type observable action clicked, but URL isn't available", () => {
-    const urlTypeObservableAction: observableAction = {
-      type: "url",
-      label: "Go to URL",
-      description: "Test url",
-      icon: "pi pi-link",
-    };
-
-    factory({
-      props: { observable: observableWithTags },
-      config: {
-        observables: {
-          commonObservableActions: [urlTypeObservableAction],
-          observableMetadata: [],
-        },
-      },
-    });
-
-    cy.get("[data-cy='show-actions-menu-button']").click();
-    cy.contains("Go to URL").click();
-    cy.get("[data-cy='observable-action-error']")
-      .contains("'Go to URL' Failed")
-      .should("be.visible");
-    cy.get("[data-cy='observable-action-error']")
-      .contains("No URL has been configured for this action.")
+      .contains("404 request failed")
       .should("be.visible");
     cy.findByRole("menu").should("not.exist"); // Menu should have been closed
   });
@@ -277,7 +195,7 @@ describe("ObservableLeaf", () => {
       config: testConfiguration,
     });
     cy.contains("Observable w/ Tags").click();
-    cy.get("@stub-1").should("have.been.calledWith", {
+    cy.get("@stub-5").should("have.been.calledWith", {
       nodeType: "alerts",
       filters: {
         observable: {
@@ -292,7 +210,7 @@ describe("ObservableLeaf", () => {
 // Because this test changes the testing URL, it needs to be isolated
 describe("ObservableLeaf URL test", () => {
   it("attempts to reroute to given URL when 'url'-type observable action clicked", () => {
-    const urlTypeObservableAction: observableAction = {
+    const urlTypeObservableAction: observableActionUrl = {
       type: "url",
       label: "Go to URL",
       description: "Test url",

@@ -13,6 +13,7 @@ import {
 } from "@mocks/analysis";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { testConfiguration } from "@/etc/configuration/test";
+import ToastService from "primevue/toastservice";
 
 const childObservable = observableTreeReadFactory({
   value: "Child Observable",
@@ -53,7 +54,7 @@ function factory(
 ) {
   return mount(AlertTree, {
     global: {
-      plugins: [createCustomCypressPinia(), PrimeVue, router],
+      plugins: [createCustomCypressPinia(), PrimeVue, router, ToastService],
       provide: { nodeType: "alerts", config: testConfiguration },
     },
     propsData: args.props,

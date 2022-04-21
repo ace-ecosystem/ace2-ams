@@ -8,8 +8,8 @@
       >{{ displayValue }}
     </span>
     <Button
-      data-cy="copy-to-clipboard-button"
       v-if="showCopyToClipboard"
+      data-cy="copy-to-clipboard-button"
       role="button"
       icon="pi pi-copy"
       class="p-button-rounded p-button-secondary p-button-outlined p-button-sm leaf-element"
@@ -33,7 +33,7 @@
         <template #item="{ item }">
           <li
             class="p-menuitem"
-            @click="itemClick($event, item as observableAction)"
+            @click="itemClick($event, item as observableActionSubTypes)"
           >
             <span role="menuitem" class="p-menuitem-link">
               <span :class="['p-menuitem-icon', item.icon]"></span>
@@ -44,7 +44,7 @@
       </Menu>
       <component
         :is="component"
-        :name="`${component}`"
+        :name="componentName"
         :observable="observable"
       ></component>
     </span>
@@ -59,145 +59,41 @@
 </template>
 
 <script setup lang="ts">
+  import {
+    computed,
+    defineProps,
+    inject,
+    onMounted,
+    PropType,
+    ref,
+    shallowRef,
+  } from "vue";
+  import { useRouter } from "vue-router";
+
+  import { useToast } from "primevue/usetoast";
+  import Button from "primevue/button";
+  import Menu from "primevue/menu";
+  import MenuItem from "primevue/menu";
+  import Toast from "primevue/toast";
+
+  import type CSS from "csstype";
+
   import NodeTagVue from "@/components/Node/NodeTag.vue";
 
   import {
-    defineProps,
-    computed,
-    PropType,
-    ref,
-    inject,
-    onMounted,
-    shallowRef,
-  } from "vue";
-
-  import { useRouter } from "vue-router";
-  import Menu from "primevue/menu";
-  import MenuItem from "primevue/menu";
-  import Button from "primevue/button";
-
-  import {
+    observableActionCommand,
+    observableActionModal,
     observableActionSection,
+    observableActionUrl,
     observableTreeRead,
   } from "@/models/observable";
-  import type { observableAction } from "@/models/observable";
-  import { useFilterStore } from "@/stores/filter";
+  import type { observableActionSubTypes } from "@/models/observable";
   import { copyToClipboard } from "@/etc/helpers";
-  import { useModalStore } from "@/stores/modal";
-  import Toast from "primevue/toast";
-  import { useToast } from "primevue/usetoast";
-
   import { useAlertStore } from "@/stores/alert";
-
-  const filterStore = useFilterStore();
-  const router = useRouter();
+  import { useFilterStore } from "@/stores/filter";
+  import { useModalStore } from "@/stores/modal";
 
   const config = inject("config") as Record<string, any>;
-  const toast = useToast();
-
-  const toggle = (event: unknown) => {
-    menu.value.toggle(event);
-  };
-
-  const menu = ref();
-  const style = ref();
-  const component = shallowRef();
-  const items = ref<observableAction[]>([]); // todo fix
-  const modalStore = useModalStore();
-  const alertStore = useAlertStore();
-
-  onMounted(() => {
-    if (props.observable.type.value in config.observables.observableMetadata) {
-      items.value = [
-        ...config.observables.commonObservableActions,
-        ...(config.observables.observableMetadata[props.observable.type.value]
-          .actions
-          ? config.observables.observableMetadata[props.observable.type.value]
-              .actions
-          : []),
-      ];
-
-      if (
-        config.observables.observableMetadata[props.observable.type.value].style
-      ) {
-        style.value =
-          config.observables.observableMetadata[
-            props.observable.type.value
-          ].style;
-      }
-    } else {
-      items.value = config.observables.commonObservableActions;
-    }
-  });
-
-  const showError = (args: {
-    item: observableAction;
-    detail: string | unknown;
-  }) => {
-    toast.add({
-      severity: "error",
-      summary: `'${args.item.label}' Failed`,
-      detail: args.detail,
-      life: 6000,
-    });
-  };
-
-  const itemClick = async (
-    $originalEvent: unknown,
-    item: observableAction | observableActionSection,
-  ) => {
-    if (!("items" in item)) {
-      if (item.type == "modal") {
-        if ("modal" in item) {
-          component.value = item.modal;
-          modalStore.open(item.modal);
-        } else {
-          showError({
-            item: item,
-            detail: "No modal has been configured for this action.",
-          });
-        }
-      } else if (item.type == "command") {
-        if (item.command) {
-          try {
-            await item.command(props.observable);
-            alertStore.requestReload = true; // update in the future to be more extendable
-          } catch (e: unknown) {
-            showError({
-              item: item,
-              detail: e,
-            });
-          }
-        } else {
-          showError({
-            item: item,
-            detail: "No command has been configured for this action.",
-          });
-        }
-      } else if (item.type == "url") {
-        console.log("blah");
-        if ("url" in item) {
-          window.location = item.url as unknown as Location;
-        } else {
-          showError({
-            item: item,
-            detail: "No URL has been configured for this action.",
-          });
-        }
-      }
-    }
-    toggle($originalEvent);
-  };
-
-  const itemsFiltered = computed(() => {
-    return items.value.filter((item) => {
-      if (item.requirements) {
-        return item.requirements(props.observable);
-      } else {
-        return true;
-      }
-    });
-  });
 
   const props = defineProps({
     observable: {
@@ -209,42 +105,123 @@
     showTags: { type: Boolean, required: false, default: true },
   });
 
-  const displayValue = computed(() => {
-    let type = null;
-    let value = null;
+  const alertStore = useAlertStore();
+  const filterStore = useFilterStore();
+  const modalStore = useModalStore();
+  const toast = useToast();
+  const router = useRouter();
 
-    try {
-      if (
-        props.observable.nodeMetadata &&
-        props.observable.nodeMetadata.display
-      ) {
-        if (props.observable.nodeMetadata.display.type) {
-          type =
-            props.observable.nodeMetadata.display.type +
-            " (" +
-            props.observable.type.value +
-            ")";
-        } else {
-          type = props.observable.type.value;
-        }
+  const component = shallowRef();
+  const menu = ref();
+  const items = ref<observableActionSubTypes[]>([]); // todo fix
+  const style = ref<CSS.Properties>();
+  const observableType = ref<string>(props.observable.type.value);
+  const componentName = ref<string>();
 
-        if (props.observable.nodeMetadata.display.value) {
-          value = props.observable.nodeMetadata.display.value;
-        } else {
-          value = props.observable.value;
-        }
-      } else {
-        throw new Error("No observable display metadata given");
+  onMounted(() => {
+    const observableMetadata = config.observables.observableMetadata;
+    const commonObservableActions = config.observables.commonObservableActions;
+    items.value = commonObservableActions;
+
+    // Check whether there is specific metadata config for this observable type
+    if (observableType.value in observableMetadata) {
+      // If so, add any available actions
+      if (observableMetadata[observableType.value].actions.length) {
+        items.value = [
+          ...items.value,
+          ...observableMetadata[observableType.value].actions,
+        ];
       }
-    } catch (error) {
-      type = props.observable.type.value;
-      value = props.observable.value;
-    }
 
-    return type + ": " + value;
+      // And use any configured styling
+      if (observableMetadata[observableType.value].style) {
+        style.value = observableMetadata[observableType.value].style;
+      }
+    }
   });
 
-  function filterByObservable(obs: observableTreeRead) {
+  const itemsFiltered = computed(() => {
+    return items.value.filter((item) => {
+      if (item.requirements) {
+        return item.requirements(props.observable);
+      } else {
+        return true;
+      }
+    });
+  });
+
+  const displayValue = computed(() => {
+    let type = observableType.value;
+    let value = props.observable.value;
+    const metadata = props.observable.nodeMetadata;
+
+    if (metadata && metadata.display) {
+      if (metadata.display.type) {
+        type = `${metadata.display.type} (${observableType.value})`;
+      }
+
+      if (metadata.display.value) {
+        value = metadata.display.value;
+      }
+    }
+
+    return `${type}: ${value}`;
+  });
+
+  const itemClick = async (
+    $originalEvent: unknown,
+    item: observableActionSubTypes | observableActionSection,
+  ) => {
+    if (!isObservableActionSection(item)) {
+      if (item.type == "modal") {
+        handleModalItemClicked(item);
+      } else if (item.type == "command") {
+        await handleCommandItemClicked(item);
+      } else if (item.type == "url") {
+        handleUrlItemClicked(item);
+      }
+    }
+    toggle($originalEvent);
+  };
+
+  const isObservableActionSection = (
+    item: observableActionSubTypes | observableActionSection,
+  ): item is observableActionSection => {
+    return "items" in item;
+  };
+
+  const handleModalItemClicked = (item: observableActionModal) => {
+    component.value = item.modal;
+    componentName.value = item.modalName;
+    modalStore.open(item.modalName);
+  };
+
+  const handleCommandItemClicked = async (item: observableActionCommand) => {
+    try {
+      await item.command(props.observable);
+      if (item.reloadPage) {
+        alertStore.requestReload = true; // update in the future to be more extendable
+      }
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        showError({
+          item: item,
+          detail: e,
+        });
+      } else if (e instanceof Error) {
+        showError({
+          item: item,
+          detail: e.message,
+        });
+      }
+    }
+  };
+
+  const handleUrlItemClicked = (item: observableActionUrl) => {
+    window.location = item.url as unknown as Location;
+  };
+
+  const filterByObservable = (obs: observableTreeRead) => {
     filterStore.bulkSetFilters({
       nodeType: "alerts",
       filters: {
@@ -257,7 +234,23 @@
     router.replace({
       path: "/manage_alerts",
     });
-  }
+  };
+
+  const showError = (args: {
+    item: observableActionSubTypes;
+    detail: string;
+  }) => {
+    toast.add({
+      severity: "error",
+      summary: `'${args.item.label}' Failed`,
+      detail: args.detail,
+      life: 6000,
+    });
+  };
+
+  const toggle = (event: unknown) => {
+    menu.value.toggle(event);
+  };
 </script>
 <style scoped>
   .treenode-text:hover {

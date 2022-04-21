@@ -83,17 +83,35 @@ export interface observableRelationshipRead extends nodeRelationshipRead {
 }
 
 export type observableAction = {
-  type: "url" | "modal" | "command";
-  command?: (obs: observableTreeRead) => unknown;
-  modal?: any;
-  url?: string;
+  type: "url" | "command" | "modal";
   label: string;
   description: string;
   icon: string;
   requirements?: (obs: observableTreeRead) => boolean;
 };
 
+export interface observableActionUrl extends observableAction {
+  type: "url";
+  url: string;
+}
+export interface observableActionCommand extends observableAction {
+  type: "command";
+  reloadPage: boolean;
+  command: (obs: observableTreeRead) => unknown;
+}
+
+export interface observableActionModal extends observableAction {
+  type: "modal";
+  modal: Component;
+  modalName: string;
+}
+
+export type observableActionSubTypes =
+  | observableActionUrl
+  | observableActionCommand
+  | observableActionModal;
+
 export type observableActionSection = {
-  items: observableAction[];
+  items: observableActionSubTypes[];
   label?: string;
 };

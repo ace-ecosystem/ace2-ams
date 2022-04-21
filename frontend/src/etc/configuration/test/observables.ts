@@ -1,6 +1,8 @@
-import { observableAction } from "@/models/observable";
+import {
+  observableActionCommand,
+  observableTreeRead,
+} from "@/models/observable";
 import { observableTypeMetaData } from "@/models/observableType";
-import { observableTreeReadFactory } from "@mocks/observable";
 import {
   enableDetection,
   disableDetection,
@@ -21,12 +23,13 @@ export const commonObservableActions = [
   updateDetectionExpiration,
 ];
 
-const ipv4SpecificObservableAction: observableAction = {
+const ipv4SpecificObservableAction: observableActionCommand = {
   type: "command",
   label: "IPV4 Command",
   description: "Test command",
   icon: "pi pi=check",
-  command: (obs) => {
+  reloadPage: false,
+  command: (obs: observableTreeRead) => {
     console.log(obs.uuid);
   },
 };
