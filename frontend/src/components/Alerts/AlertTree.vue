@@ -22,26 +22,16 @@
               <span :class="toggleIcon(index)"></span>
             </button>
           </span>
-          <span
+          <ObservableLeafVue
             v-if="isObservable(i)"
-            class="treenode-text"
-            @click="filterByObservable(i)"
-            >{{ treeItemName(i) }}</span
-          >
+            :observable="i"
+          ></ObservableLeafVue>
 
           <router-link v-else-if="isAnalysis(i)" :to="viewAnalysisRoute(i)"
             ><span class="treenode-text">{{
               treeItemName(i)
             }}</span></router-link
           >
-
-          <span v-if="hasTags(i) && isObservable(i)">
-            <NodeTagVue
-              v-for="tag in i.tags"
-              :key="tag.uuid"
-              :tag="tag"
-            ></NodeTagVue>
-          </span>
         </span>
 
         <div
@@ -56,12 +46,10 @@
 </template>
 
 <script setup lang="ts">
-  import { useRouter } from "vue-router";
-  import NodeTagVue from "@/components/Node/NodeTag.vue";
+  import ObservableLeafVue from "@/components/Observables/ObservableLeaf.vue";
   import { onBeforeMount, defineProps, ref, PropType } from "vue";
   import { analysisTreeRead } from "@/models/analysis";
   import { observableTreeRead } from "@/models/observable";
-  import { useFilterStore } from "@/stores/filter";
 
   const props = defineProps({
     items: {
@@ -107,7 +95,6 @@
     ];
   }
 
-  const router = useRouter();
   function viewAnalysisRoute(item: analysisTreeRead) {
     return {
       name: "View Analysis",
@@ -115,54 +102,12 @@
     };
   }
 
-  const filterStore = useFilterStore();
-  function filterByObservable(obs: observableTreeRead) {
-    filterStore.bulkSetFilters({
-      nodeType: "alerts",
-      filters: {
-        observable: {
-          category: obs.type,
-          value: obs.value,
-        },
-      },
-    });
-    router.replace({
-      path: "/manage_alerts",
-    });
-  }
-
   function treeItemName(item: analysisTreeRead | observableTreeRead) {
     if (isAnalysis(item)) {
       return item.analysisModuleType.value;
-    } else {
-      let type = null;
-      let value = null;
-
-      try {
-        if (item.nodeMetadata && item.nodeMetadata.display) {
-          if (item.nodeMetadata.display.type) {
-            type =
-              item.nodeMetadata.display.type + " (" + item.type.value + ")";
-          } else {
-            type = item.type.value;
-          }
-
-          if (item.nodeMetadata.display.value) {
-            value = item.nodeMetadata.display.value;
-          } else {
-            value = item.value;
-          }
-        } else {
-          throw new Error("No observable display metadata given");
-        }
-      } catch (error) {
-        type = item.type.value;
-        value = item.value;
-      }
-
-      return type + ": " + value;
     }
   }
+
   function isAnalysis(
     item: analysisTreeRead | observableTreeRead,
   ): item is analysisTreeRead {
@@ -176,13 +121,6 @@
 
   function containerClass(item: analysisTreeRead | observableTreeRead) {
     return ["p-treenode", { "p-treenode-leaf": !item.children.length }];
-  }
-
-  function hasTags(item: analysisTreeRead | observableTreeRead) {
-    if ("tags" in item) {
-      return item.tags.length;
-    }
-    return false;
   }
 </script>
 
