@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: efd69a6a8274
+Revision ID: cbfc69c2e753
 Revises: 
-Create Date: 2022-04-19 12:45:45.196632
+Create Date: 2022-04-20 18:31:41.264253
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'efd69a6a8274'
+revision = 'cbfc69c2e753'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -422,19 +422,20 @@ def upgrade() -> None:
     op.create_table('analysis',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('cached_until', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('cached_during', postgresql.TSTZRANGE(), nullable=False),
     sa.Column('details', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('error_message', sa.String(), nullable=True),
     sa.Column('parent_observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('run_time', sa.DateTime(timezone=True), nullable=False),
     sa.Column('stack_trace', sa.String(), nullable=True),
     sa.Column('summary', sa.String(), nullable=True),
+    postgresql.ExcludeConstraint((sa.column('analysis_module_type_uuid'), '='), (sa.column('parent_observable_uuid'), '='), (sa.column('cached_during'), '&&'), using='gist', name='cached_analysis_uc'),
     sa.ForeignKeyConstraint(['analysis_module_type_uuid'], ['analysis_module_type.uuid'], ),
     sa.ForeignKeyConstraint(['parent_observable_uuid'], ['observable.uuid'], ),
     sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
     sa.PrimaryKeyConstraint('uuid')
     )
-    op.create_index(op.f('ix_analysis_cached_until'), 'analysis', ['cached_until'], unique=False)
+    op.create_index('analysis_module_type_observable_cached_during_idx', 'analysis', ['analysis_module_type_uuid', 'parent_observable_uuid', 'cached_during'], unique=False)
     op.create_index(op.f('ix_analysis_run_time'), 'analysis', ['run_time'], unique=False)
     op.create_table('event',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -671,7 +672,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_event_alert_time'), table_name='event')
     op.drop_table('event')
     op.drop_index(op.f('ix_analysis_run_time'), table_name='analysis')
-    op.drop_index(op.f('ix_analysis_cached_until'), table_name='analysis')
+    op.drop_index('analysis_module_type_observable_cached_during_idx', table_name='analysis')
     op.drop_table('analysis')
     op.drop_table('user')
     op.drop_index('type_value', table_name='observable')

@@ -637,19 +637,21 @@ def test_summary_user(client, db):
     # alert1
     #   o1
     #     a1 - user1 analysis
-    #   o2
-    #     a2 - user1 analysis
     #
     # alert2
     #  o1
     #    a1 - user2 analysis
+    #
+    # alert3
+    #  o1
+    #    a1 - user1 analysis
 
     alert_tree1 = helpers.create_alert(db=db, event=event)
     alert1_o1 = helpers.create_observable(
         type="email_address", value="goodguy@company.com", parent_tree=alert_tree1, db=db
     )
     # This analysis is missing the optional "manager_email" key
-    alert1_a1 = helpers.create_analysis(
+    helpers.create_analysis(
         db=db,
         parent_tree=alert1_o1,
         parent_observable=alert1_o1.node,
@@ -663,28 +665,10 @@ def test_summary_user(client, db):
             "title": "Director",
         },
     )
-    alert1_o2 = helpers.create_observable(
-        type="email_address", value="otherguy@company.com", parent_tree=alert1_a1, db=db
-    )
-    # This analysis is missing the optional "manager_email" key
-    helpers.create_analysis(
-        db=db,
-        parent_tree=alert1_o2,
-        parent_observable=alert1_o2.node,
-        amt_value="User Analysis",
-        details={
-            "user_id": "12345",
-            "email": "goodguy@company.com",
-            "company": "Company Inc.",
-            "division": "R&D",
-            "department": "Widgets",
-            "title": "Director",
-        },
-    )
 
     alert_tree2 = helpers.create_alert(db=db, event=event)
     alert2_o1 = helpers.create_observable(
-        type="email_address", value="goodguy@company.com", parent_tree=alert_tree2, db=db
+        type="email_address", value="otherguy@company.com", parent_tree=alert_tree2, db=db
     )
     helpers.create_analysis(
         db=db,
@@ -702,15 +686,35 @@ def test_summary_user(client, db):
         },
     )
 
-    # Add a third alert that is not part of the event
-    alert_tree3 = helpers.create_alert(db=db)
+    alert_tree3 = helpers.create_alert(db=db, event=event)
     alert3_o1 = helpers.create_observable(
-        type="email_address", value="dude@company.com", parent_tree=alert_tree3, db=db
+        type="email_address", value="goodguy@company.com", parent_tree=alert_tree3, db=db
     )
+    # This analysis is missing the optional "manager_email" key
     helpers.create_analysis(
         db=db,
         parent_tree=alert3_o1,
         parent_observable=alert3_o1.node,
+        amt_value="User Analysis",
+        details={
+            "user_id": "12345",
+            "email": "goodguy@company.com",
+            "company": "Company Inc.",
+            "division": "R&D",
+            "department": "Widgets",
+            "title": "Director",
+        },
+    )
+
+    # Add a fourth alert that is not part of the event
+    alert_tree4 = helpers.create_alert(db=db)
+    alert4_o1 = helpers.create_observable(
+        type="email_address", value="dude@company.com", parent_tree=alert_tree4, db=db
+    )
+    helpers.create_analysis(
+        db=db,
+        parent_tree=alert4_o1,
+        parent_observable=alert4_o1.node,
         amt_value="User Analysis",
         details={
             "user_id": "abcde",

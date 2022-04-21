@@ -318,7 +318,7 @@ def read_cached_analysis(analysis_module_type_uuid: UUID, observable_uuid: UUID,
             select(Analysis).where(
                 Analysis.analysis_module_type_uuid == analysis_module_type_uuid,
                 Analysis.parent_observable_uuid == observable_uuid,
-                datetime.utcnow() < Analysis.cached_until,
+                Analysis.cached_during.contains(datetime.now(timezone.utc)),
             )
         )
         .scalars()
