@@ -71,7 +71,9 @@
     if (props.observable.expiresOn === null) {
       neverExpires.value = true;
     } else {
-      currentExpirationTime.value = props.observable.expiresOn.toUTCString();
+      currentExpirationTime.value = new Date(
+        props.observable.expiresOn,
+      ).toUTCString();
     }
   });
 

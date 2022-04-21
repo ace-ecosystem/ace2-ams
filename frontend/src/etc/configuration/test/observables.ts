@@ -39,7 +39,6 @@ export const observableMetadata: PartialRecord<
   observableTypeMetaData
 > = {
   file: {
-    actions: [{ items: [] }],
     style: { color: "red" },
   },
   ipv4: {

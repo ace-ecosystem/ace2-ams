@@ -126,7 +126,10 @@
     // Check whether there is specific metadata config for this observable type
     if (observableType.value in observableMetadata) {
       // If so, add any available actions
-      if (observableMetadata[observableType.value].actions.length) {
+      if (
+        observableMetadata[observableType.value].actions &&
+        observableMetadata[observableType.value].actions.length
+      ) {
         items.value = [
           ...items.value,
           ...observableMetadata[observableType.value].actions,
