@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from uuid import uuid4
 
-from db.crud.observable_type import create_observable_type
+from db.crud.observable_type import read_observable_type
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 
@@ -31,7 +31,7 @@ def create_observable(
             for_detection=for_detection,
             redirection=redirection,
             time=time,
-            type=create_observable_type(value=type, db=db),
+            type=read_observable_type(value=type, db=db),
             uuid=uuid4(),
             value=value,
             version=uuid4(),
