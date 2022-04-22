@@ -61,7 +61,7 @@ function factory(
 }
 
 describe("TagModal", () => {
-  it.only("renders", () => {
+  it("renders", () => {
     factory();
   });
   it("displays correct empty message when there are no existing tags to select", () => {
