@@ -6,20 +6,21 @@
     :name="name"
     header="Edit Filters"
     class="xl: w-5 lg:w-5 md:w-8"
-    @dialogClose="loadFormFilters"
+    @dialog-close="loadFormFilters"
   >
     <br />
     <NodeQueueSelector :node-queue="nodeType" /> <br />
     <div class="flex flex-wrap">
       <NodePropertyInput
         v-for="(filter, index) in formFilters"
-        :key="filter.index"
+        :key="filter.propertyType"
         v-model="formFilters[index]"
         class="w-12"
         :allow-delete="true"
         :queue="queue"
         form-type="filter"
-        @deleteFormField="deleteFormFilter(index)"
+        data-cy="filter-input"
+        @delete-form-field="deleteFormFilter(index)"
       ></NodePropertyInput>
     </div>
     <template #footer>
@@ -48,7 +49,7 @@
   </BaseModal>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { computed, defineProps, inject, onMounted, ref } from "vue";
 
   import Button from "primevue/button";
@@ -73,7 +74,7 @@
     name: { type: String, required: true },
   });
 
-  const nodeType = inject("nodeType");
+  const nodeType = inject("nodeType") as "alerts" | "events";
 
   filterStore.$subscribe(
     () => {
@@ -82,18 +83,21 @@
     { deep: true },
   );
 
-  const formFilters = ref([]);
+  const formFilters = ref<
+    { propertyType: string | null; propertyValue: unknown }[]
+  >([]);
 
   const queue = computed(() => {
-    return currentUserSettingsStore.$state["queues"][nodeType].value;
+    return currentUserSettingsStore.$state.queues[nodeType]?.value;
   });
 
   const submitFilters = computed(() => {
-    let submitFilters = {};
+    let submitFilters: { [index: string]: unknown } = {};
     for (const index in formFilters.value) {
       const filter = formFilters.value[index];
-      const filterName = filter.propertyType ? filter.propertyType : filter;
-      submitFilters[filterName] = filter.propertyValue;
+      if (filter.propertyType) {
+        submitFilters[filter.propertyType] = filter.propertyValue;
+      }
     }
     return submitFilters;
   });
@@ -101,14 +105,15 @@
   const submit = () => {
     if (!Object.keys(submitFilters.value).length) {
       filterStore.clearAll({ nodeType: nodeType });
+    } else {
+      filterStore.bulkSetFilters({
+        nodeType: nodeType,
+        filters: submitFilters.value,
+      });
     }
-    filterStore.bulkSetFilters({
-      nodeType: nodeType,
-      filters: submitFilters.value,
-    });
   };
 
-  const deleteFormFilter = (index) => {
+  const deleteFormFilter = (index: number) => {
     formFilters.value.splice(index, 1);
   };
 
