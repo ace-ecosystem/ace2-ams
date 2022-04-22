@@ -301,6 +301,7 @@ def test_create_node_metadata(client, db):
     ],
 )
 def test_create_valid_optional_fields(client, db, key, value):
+    helpers.create_observable_type(value="fqdn", db=db)
     alert_tree = helpers.create_alert(db=db)
     observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
     analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
