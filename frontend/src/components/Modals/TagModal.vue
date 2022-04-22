@@ -9,14 +9,14 @@
       </div>
     </div>
     <span class="p-fluid">
-      <Chips v-model="newTags" />
+      <Chips v-model="newTags" data-cy="chips-container" />
       <Dropdown
         :options="nodeTagStore.allItems"
         option-label="value"
         :filter="true"
         placeholder="Select from existing tags"
         filter-placeholder="Search tags"
-        @change="addExistingTag"
+        @change="addExistingTag($event as unknown as tagEvent)"
       />
     </span>
     <template #footer>
@@ -36,7 +36,7 @@
   </BaseModal>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { computed, defineEmits, defineProps, ref, inject } from "vue";
 
   import Button from "primevue/button";
@@ -54,8 +54,9 @@
   } from "@/stores/index";
   import { useModalStore } from "@/stores/modal";
   import { useNodeTagStore } from "@/stores/nodeTag";
+  import { nodeTagRead } from "@/models/nodeTag";
 
-  const nodeType = inject("nodeType");
+  const nodeType = inject("nodeType") as "alerts" | "events";
 
   const nodeStore = nodeStores[nodeType]();
   const tableStore = nodeTableStores[nodeType]();
@@ -70,9 +71,9 @@
     reloadObject: { type: String, required: true },
   });
 
-  const newTags = ref([]);
-  const storeTagValues = ref([]);
-  const error = ref(null);
+  const newTags = ref<string[]>([]);
+  const storeTagValues = ref<string[]>([]);
+  const error = ref<string>();
   const isLoading = ref(false);
 
   async function loadTags() {
@@ -91,8 +92,12 @@
       }));
 
       await nodeStore.update(updateData);
-    } catch (err) {
-      error.value = err.message;
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
     }
 
     isLoading.value = false;
@@ -102,18 +107,18 @@
     }
   }
 
-  function newNodeTags(uuid, tags) {
-    let nodeTags = [];
+  function newNodeTags(uuid: string, tags: string[]) {
+    let nodeTags: nodeTagRead[] = [];
     if (props.reloadObject == "table") {
       const node = tableStore.visibleQueriedItemById(uuid);
       nodeTags = node ? node.tags : [];
     } else if (props.reloadObject == "node") {
       nodeTags = nodeStore.open.tags;
     }
-    return tagValues(nodeTags).concat(tags);
+    return [...tagValues(nodeTags), ...tags];
   }
 
-  async function createTags(tags) {
+  async function createTags(tags: string[]) {
     for (const tag of tags) {
       if (!tagExists(tag)) {
         await NodeTag.create({ value: tag });
@@ -122,11 +127,11 @@
     }
   }
 
-  function tagExists(tagValue) {
+  function tagExists(tagValue: string) {
     return storeTagValues.value.includes(tagValue);
   }
 
-  function tagValues(tags) {
+  function tagValues(tags: nodeTagRead[]) {
     let values = [];
     for (const tag of tags) {
       values.push(tag.value);
@@ -134,7 +139,10 @@
     return values;
   }
 
-  function addExistingTag(tagEvent) {
+  interface tagEvent {
+    value: nodeTagRead;
+  }
+  function addExistingTag(tagEvent: tagEvent) {
     // Add an existing tag to the list of tags to be added
     newTags.value.push(tagEvent.value.value);
   }
@@ -144,7 +152,7 @@
   });
 
   const handleError = () => {
-    error.value = null;
+    error.value = undefined;
     close();
   };
 
