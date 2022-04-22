@@ -7,7 +7,7 @@
     :name="name"
     header="Save to Event"
     :style="{ width: '75vw' }"
-    @dialogClose="close"
+    @dialog-close="close"
   >
     <div>
       <div v-if="error" data-cy="save-to-event-error" class="p-col">
@@ -86,7 +86,7 @@
   </BaseModal>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { computed, defineEmits, defineProps, ref, watch } from "vue";
 
   import Button from "primevue/button";
@@ -108,6 +108,8 @@
   import { useEventStatusStore } from "@/stores/eventStatus";
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
+  import { eventRead, eventSummary } from "@/models/event";
+  import { eventStatusRead } from "@/models/eventStatus";
 
   const alertStore = useAlertStore();
   const authStore = useAuthStore();
@@ -124,14 +126,14 @@
   // TODO, may want to make this configurable in the constants file
   const eventStatusOptions = ["OPEN", "CLOSED"];
 
-  const availableEventStatusOptions = ref([]);
-  const error = ref(null);
-  const events = ref({});
+  const availableEventStatusOptions = ref<eventStatusRead[]>([]);
+  const error = ref<string>();
+  const events = ref<Record<string, eventSummary[]>>({});
   const isLoading = ref(false);
-  const newEventComment = ref(null);
-  const newEventName = ref("");
+  const newEventComment = ref<string>();
+  const newEventName = ref<string>();
   const selectedEventStatusOption = ref(1);
-  const selectedExistingEvent = ref(null);
+  const selectedExistingEvent = ref<eventSummary>();
 
   const getAvailableEventStatusOptions = () => {
     // Fetch all known event status objects that are configured in eventStatusOptions
@@ -158,15 +160,18 @@
       for (const status of availableEventStatusOptions.value) {
         events.value[status.value] = await getEventsWithStatus(status);
       }
-    } catch (err) {
-      console.debug(err.message);
-      error.value = err.message;
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
     }
 
     isLoading.value = false;
   };
 
-  const getEventsWithStatus = async (status) => {
+  const getEventsWithStatus = async (status: eventStatusRead) => {
     const allEvents = await Event.readAllPages({
       status: status,
       sort: "created_time|asc",
@@ -183,24 +188,27 @@
   });
 
   const saveToEvent = async () => {
-    let eventUuid = null;
+    let eventUuid: string;
 
     // If the event doesn't exist, create it
     if (newEventSelected.value) {
       try {
-        const newEvent = await Event.create(
+        const newEvent = (await Event.create(
           {
-            name: newEventName.value,
+            name: newEventName.value!,
             queue: authStore.user.defaultEventQueue.value,
             owner: authStore.user.username,
             status: "OPEN",
           },
           true,
-        );
+        )) as eventRead;
         eventUuid = newEvent.uuid;
-      } catch (err) {
-        console.debug(err.message);
-        error.value = err.message;
+      } catch (e: unknown) {
+        if (typeof e === "string") {
+          error.value = e;
+        } else if (e instanceof Error) {
+          error.value = e.message;
+        }
         return;
       }
 
@@ -216,19 +224,26 @@
 
         try {
           await NodeComment.create(newCommentData);
-        } catch (err) {
-          console.debug(err.message);
-
-          if (err.message.includes("409")) {
-            console.warn("Comment already exists!");
-          } else {
-            error.value = err.message;
-            return;
+        } catch (e: unknown) {
+          if (typeof e === "string") {
+            if (e.includes("409")) {
+              console.warn("Comment already exists!");
+            } else {
+              error.value = e;
+              return;
+            }
+          } else if (e instanceof Error) {
+            if (e.message.includes("409")) {
+              console.warn("Comment already exists!");
+            } else {
+              error.value = e.message;
+              return;
+            }
           }
         }
       }
     } else {
-      eventUuid = selectedExistingEvent.value.uuid;
+      eventUuid = selectedExistingEvent.value!.uuid;
     }
 
     // Update alert(s) eventUuid
@@ -238,13 +253,14 @@
     }));
     try {
       await alertStore.update(updateData);
-    } catch (err) {
-      console.debug(err.message);
-
-      error.value = err.message;
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
       return;
     }
-
     close();
     // This will close the disposition modal
     emit("saveToEvent");
@@ -262,7 +278,7 @@
 
         (newEventSelected.value &&
           // a name for the new event has been given
-          Boolean(newEventName.value.length)))
+          Boolean(newEventName.value?.length)))
     );
   });
 
@@ -281,15 +297,15 @@
   });
 
   const handleError = () => {
-    error.value = null;
+    error.value = undefined;
   };
 
   const close = () => {
     selectedEventStatusOption.value = 1;
-    selectedExistingEvent.value = null;
-    newEventComment.value = null;
+    selectedExistingEvent.value = undefined;
+    newEventComment.value = undefined;
     newEventName.value = "";
-    error.value = null;
+    error.value = undefined;
     modalStore.close(props.name);
   };
 </script>
