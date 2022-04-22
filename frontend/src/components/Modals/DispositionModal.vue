@@ -40,16 +40,16 @@
         v-if="showAddToEventButton"
         label="Save to Event"
         class="p-button-raised"
-        :disabled="!showAddToEventButton"
+        :disabled="!allowSubmit"
         @click="open('SaveToEventModal')"
       />
     </template>
   </BaseModal>
   <!--  SAVE TO EVENT  -->
-  <SaveToEventModal name="SaveToEventModal" @saveToEvent="setDisposition" />
+  <SaveToEventModal name="SaveToEventModal" @save-to-event="setDisposition" />
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { computed, defineEmits, defineProps, ref } from "vue";
 
   import Button from "primevue/button";
@@ -67,6 +67,8 @@
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
+  import { alertDispositionRead } from "@/models/alertDisposition";
+  import { nodeCommentCreate } from "@/models/nodeComment";
 
   const alertDispositionStore = useAlertDispositionStore();
   const alertStore = useAlertStore();
@@ -80,10 +82,10 @@
     name: { type: String, required: true },
   });
 
-  const newDisposition = ref(null);
-  const dispositionComment = ref(null);
+  const newDisposition = ref<alertDispositionRead>();
+  const dispositionComment = ref<string>();
   const isLoading = ref(false);
-  const error = ref(null);
+  const error = ref<string>();
 
   const setDisposition = async () => {
     isLoading.value = true;
@@ -91,23 +93,34 @@
     try {
       const updateData = selectedAlertStore.selected.map((uuid) => ({
         uuid: uuid,
-        disposition: newDisposition.value.value,
+        disposition: newDisposition.value?.value,
       }));
       await alertStore.update(updateData);
 
       if (dispositionComment.value) {
-        const commentCreateData = selectedAlertStore.selected.map((uuid) => ({
-          username: authStore.user.username,
-          nodeUuid: uuid,
-          ...commentData.value,
-        }));
-        await NodeComment.create(commentCreateData);
+        const commentCreateData: nodeCommentCreate[] =
+          selectedAlertStore.selected.map((uuid) => ({
+            username: authStore.user.username,
+            nodeUuid: uuid,
+            value: dispositionComment.value!,
+          }));
+        if (commentCreateData) {
+          await NodeComment.create(commentCreateData);
+        }
       }
-    } catch (err) {
-      if (err.message.includes("409")) {
-        console.warn("That comment already exists!");
-      } else {
-        error.value = err.message;
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        if (e.includes("409")) {
+          console.warn("That comment already exists!");
+        } else {
+          error.value = e;
+        }
+      } else if (e instanceof Error) {
+        if (e.message.includes("409")) {
+          console.warn("That comment already exists!");
+        } else {
+          error.value = e.message;
+        }
       }
     }
 
@@ -127,14 +140,8 @@
     return false;
   });
 
-  const commentData = computed(() => {
-    return {
-      value: dispositionComment.value,
-    };
-  });
-
   const handleError = () => {
-    error.value = null;
+    error.value = undefined;
     close();
   };
 
@@ -143,12 +150,12 @@
   });
 
   const close = () => {
-    newDisposition.value = null;
-    dispositionComment.value = null;
+    newDisposition.value = undefined;
+    dispositionComment.value = undefined;
     modalStore.close(props.name);
   };
 
-  const open = (name) => {
+  const open = (name: string) => {
     modalStore.open(name);
   };
 </script>
