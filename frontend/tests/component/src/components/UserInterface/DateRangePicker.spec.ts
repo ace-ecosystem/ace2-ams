@@ -1,5 +1,4 @@
 import { mount } from "@cypress/vue";
-import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 
 import Tooltip from "primevue/tooltip";

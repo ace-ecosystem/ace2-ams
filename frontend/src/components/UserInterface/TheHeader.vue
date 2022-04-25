@@ -31,23 +31,20 @@
   </Menubar>
 </template>
 
-<script>
+<script setup lang="ts">
+  import { useRouter } from "vue-router";
+
   import Menubar from "primevue/menubar";
   import Button from "primevue/button";
-
   import authApi from "@/services/api/auth";
 
-  export default {
-    name: "TheHeader",
-    components: { Menubar, Button },
-    methods: {
-      async logout() {
-        await authApi.logout().catch((error) => {
-          throw error;
-        });
+  const router = useRouter();
 
-        this.$router.replace({ name: "Login" });
-      },
-    },
-  };
+  async function logout() {
+    await authApi.logout().catch((error) => {
+      throw error;
+    });
+
+    router.replace({ name: "Login" });
+  }
 </script>
