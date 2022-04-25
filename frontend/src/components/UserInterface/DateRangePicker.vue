@@ -7,7 +7,11 @@
   />
   <OverlayPanel ref="op">
     <div class="p-d-flex">
-      <Dropdown v-model="currentRangeFilter" :options="rangeFilterOptions" />
+      <Dropdown
+        v-model="currentRangeFilter"
+        :options="rangeFilterOptions"
+        @change="toggleOptionsMenu"
+      />
     </div>
     <div class="p-d-flex p-flex-column p-jc-center">
       <div class="p-mb-2">
@@ -122,7 +126,7 @@
   </DatePicker>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { computed, inject, ref, watch } from "vue";
 
   import Dropdown from "primevue/dropdown";
@@ -132,6 +136,11 @@
   import { DatePicker } from "v-calendar";
 
   import { useFilterStore } from "@/stores/filter";
+
+  interface rangeFilter {
+    start: string;
+    end: string;
+  }
 
   const TODAY = "today";
   const YESTERDAY = "yesterday";
@@ -143,11 +152,11 @@
 
   const filterStore = useFilterStore();
 
-  const nodeType = inject("nodeType");
-  const rangeFilters = inject("rangeFilters");
+  const nodeType = inject("nodeType") as "alerts" | "events";
+  const rangeFilters = inject("rangeFilters") as Record<string, rangeFilter>;
 
   const currentRangeFilter = ref(Object.keys(rangeFilters)[0]);
-  const op = ref(null);
+  const op = ref();
 
   const filters = computed(() => {
     return filterStore.$state[nodeType];
@@ -190,26 +199,28 @@
     clearDate(rangeFilters[oldValue].end);
   });
 
-  const dateSelect = (date, filterName) => {
+  const dateSelect = (date: Date | null, filterName?: string) => {
     if (date == null) {
       return;
     }
 
-    filterStore.setFilter({
-      nodeType: nodeType,
-      filterName: filterName,
-      filterValue: date,
-    });
+    if (filterName) {
+      filterStore.setFilter({
+        nodeType: nodeType,
+        filterName: filterName,
+        filterValue: date,
+      });
+    }
   };
 
-  const clearDate = (filterName) => {
+  const clearDate = (filterName: string) => {
     filterStore.unsetFilter({
       nodeType: nodeType,
       filterName: filterName,
     });
   };
 
-  const setRange = (rangeType) => {
+  const setRange = (rangeType: string) => {
     const today = new Date();
     let startDate = null;
     let endDate = null;
@@ -247,6 +258,7 @@
         break;
       case LAST_MONTH:
         pastDate = today.getMonth() - 1;
+        today.setDate(1); // Need to reset day of the month, otherwise date will be wonky if prev. month has less days
         startDate = new Date(today.setMonth(pastDate));
         endDate = new Date(today.setMonth(pastDate + 1));
         startDate.setDate(1);
@@ -256,13 +268,18 @@
         break;
     }
     // Set start and end date times to capture entierty of each day
-    startDate.setHours(0, 0, 0, 0);
-    endDate.setHours(23, 59, 59, 0);
-    dateSelect(startDate, startFilter.value);
-    dateSelect(endDate, endFilter.value);
+    if (startDate && endDate) {
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 0);
+      dateSelect(startDate, startFilter.value);
+      dateSelect(endDate, endFilter.value);
+    }
+
+    toggleOptionsMenu();
   };
 
-  const toggleOptionsMenu = (event) => {
-    op.value.toggle(event);
+  const toggleOptionsMenu = (event?: unknown) => {
+    const e = event ? event : undefined;
+    op.value.toggle(e);
   };
 </script>
