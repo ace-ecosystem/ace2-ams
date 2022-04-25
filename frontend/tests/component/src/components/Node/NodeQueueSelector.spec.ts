@@ -5,7 +5,12 @@ import NodeQueueSelector from "@/components/Node/NodeQueueSelector.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 
-function factory(args = { props: { nodeQueue: "alerts" }, initialState: {} }) {
+function factory(
+  args: { props: { nodeQueue: "alerts" | "events" }; initialState: any } = {
+    props: { nodeQueue: "alerts" },
+    initialState: {},
+  },
+) {
   return mount(NodeQueueSelector, {
     global: {
       plugins: [
