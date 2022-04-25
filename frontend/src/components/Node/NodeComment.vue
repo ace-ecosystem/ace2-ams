@@ -5,7 +5,8 @@
   <br v-if="props.includeLineBreak" />
 </template>
 
-<script setup>
+<script setup lang="ts">
+  import { nodeCommentRead } from "@/models/nodeComment";
   import { defineProps } from "vue";
 
   const props = defineProps({
@@ -14,7 +15,7 @@
     includeLineBreak: { type: Boolean, required: false, default: true },
   });
 
-  const formatComment = (comment) => {
+  const formatComment = (comment: nodeCommentRead) => {
     if (props.includeTime) {
       const d = new Date(comment.insertTime);
       return `${d.toLocaleString("en-US")} (${comment.user.displayName}) ${
