@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 153f802fcaa7
+Revision ID: 24fd42ebc4e7
 Revises: 
-Create Date: 2022-04-25 12:23:54.550058
+Create Date: 2022-04-25 13:06:28.927252
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '153f802fcaa7'
+revision = '24fd42ebc4e7'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -574,17 +574,19 @@ def upgrade() -> None:
     op.create_index(op.f('ix_alert_type_uuid'), 'alert', ['type_uuid'], unique=False)
     op.create_index('name_trgm', 'alert', ['name'], unique=False, postgresql_ops={'name': 'gin_trgm_ops'}, postgresql_using='gin')
     op.create_table('analysis_child_observable_mapping',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('analysis_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('metadata_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('child_observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('metadata_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.ForeignKeyConstraint(['analysis_uuid'], ['analysis.uuid'], ),
+    sa.ForeignKeyConstraint(['child_observable_uuid'], ['observable.uuid'], ),
     sa.ForeignKeyConstraint(['metadata_uuid'], ['metadata.uuid'], ),
-    sa.ForeignKeyConstraint(['observable_uuid'], ['observable.uuid'], ),
-    sa.PrimaryKeyConstraint('analysis_uuid', 'observable_uuid', 'metadata_uuid')
+    sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_analysis_child_observable_mapping_analysis_uuid'), 'analysis_child_observable_mapping', ['analysis_uuid'], unique=False)
-    op.create_index(op.f('ix_analysis_child_observable_mapping_metadata_uuid'), 'analysis_child_observable_mapping', ['metadata_uuid'], unique=False)
-    op.create_index(op.f('ix_analysis_child_observable_mapping_observable_uuid'), 'analysis_child_observable_mapping', ['observable_uuid'], unique=False)
+    op.create_index(op.f('ix_analysis_child_observable_mapping_child_observable_uuid'), 'analysis_child_observable_mapping', ['child_observable_uuid'], unique=False)
+    op.create_index('uix_analysis_child_observable', 'analysis_child_observable_mapping', ['analysis_uuid', 'child_observable_uuid'], unique=True, postgresql_where=sa.text('metadata_uuid IS NULL'))
+    op.create_index('uix_analysis_child_observable_metadata', 'analysis_child_observable_mapping', ['analysis_uuid', 'child_observable_uuid', 'metadata_uuid'], unique=True, postgresql_where=sa.text('metadata_uuid IS NOT NULL'))
     op.create_table('event_history',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('action', sa.String(), nullable=False),
@@ -661,8 +663,9 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_event_history_record_uuid'), table_name='event_history')
     op.drop_index(op.f('ix_event_history_action_by_user_uuid'), table_name='event_history')
     op.drop_table('event_history')
-    op.drop_index(op.f('ix_analysis_child_observable_mapping_observable_uuid'), table_name='analysis_child_observable_mapping')
-    op.drop_index(op.f('ix_analysis_child_observable_mapping_metadata_uuid'), table_name='analysis_child_observable_mapping')
+    op.drop_index('uix_analysis_child_observable_metadata', table_name='analysis_child_observable_mapping', postgresql_where=sa.text('metadata_uuid IS NOT NULL'))
+    op.drop_index('uix_analysis_child_observable', table_name='analysis_child_observable_mapping', postgresql_where=sa.text('metadata_uuid IS NULL'))
+    op.drop_index(op.f('ix_analysis_child_observable_mapping_child_observable_uuid'), table_name='analysis_child_observable_mapping')
     op.drop_index(op.f('ix_analysis_child_observable_mapping_analysis_uuid'), table_name='analysis_child_observable_mapping')
     op.drop_table('analysis_child_observable_mapping')
     op.drop_index('name_trgm', table_name='alert', postgresql_ops={'name': 'gin_trgm_ops'}, postgresql_using='gin')
