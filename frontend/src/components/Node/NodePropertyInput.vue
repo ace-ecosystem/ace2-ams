@@ -4,14 +4,15 @@
       <Dropdown
         v-model="propertyType"
         data-cy="property-input-type"
-        :options="propertyTypeOptions"
+        :options="(propertyTypeOptions as any[])"
         option-label="label"
         type="text"
         class="w-13rem"
         tabindex="1"
+        placeholder="Select a property"
         @change="
           clearPropertyValue();
-          updateValue('propertyType', $event.value);
+          updatePropertyType;
         "
       />
     </div>
@@ -22,7 +23,7 @@
           data-cy="property-input-value"
           class="inputfield w-16rem"
           type="text"
-          @input="updateValue('propertyValue', $event.target.value)"
+          @input="updatePropertyValue"
         ></InputText>
       </div>
       <div v-else-if="isDropdown" class="field">
@@ -34,7 +35,7 @@
           :option-label="propertyValueOptionProperty"
           type="text"
           placeholder="None"
-          @change="updateValue('propertyValue', $event.value)"
+          @change="updatePropertyValue"
         ></Dropdown>
       </div>
       <div v-else-if="isMultiSelect" class="field">
@@ -46,7 +47,7 @@
           :option-label="propertyValueOptionProperty"
           type="text"
           placeholder="None"
-          @change="updateValue('propertyValue', $event.value)"
+          @change="updatePropertyValue"
         ></Multiselect>
       </div>
       <div v-else-if="isChips" class="field p-fluid">
@@ -54,7 +55,7 @@
           v-model="propertyValue"
           data-cy="property-input-value"
           class="w-full"
-          @update:model-value="updateValue('propertyValue', $event)"
+          @update:model-value="updatePropertyValue"
         ></Chips>
       </div>
       <div v-else-if="isDate" class="field">
@@ -63,7 +64,7 @@
           mode="dateTime"
           class="inputfield w-16rem"
           is24hr
-          @update:model-value="updateValue('propertyValue', $event)"
+          @update:model-value="updatePropertyValue"
         >
           <template #default="{ inputValue, inputEvents }">
             <div class="p-inputgroup">
@@ -88,7 +89,7 @@
             :option-label="propertyValueOptionProperty"
             class="w-16rem"
             type="text"
-            @change="updateValue('propertyValue', categorizedValueObject)"
+            @change="updatePropertyValue(categorizedValueObject)"
           ></Dropdown>
         </div>
         <div class="field">
@@ -97,7 +98,7 @@
             data-cy="property-input-value-value"
             class="w-16rem"
             type="text"
-            @input="updateValue('propertyValue', categorizedValueObject)"
+            @input="updatePropertyValue(categorizedValueObject)"
           ></InputText>
         </div>
       </div>
@@ -114,7 +115,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import {
     computed,
     defineEmits,
@@ -123,6 +124,7 @@
     onMounted,
     ref,
     watch,
+    PropType,
   } from "vue";
 
   import Button from "primevue/button";
@@ -132,35 +134,55 @@
   import Multiselect from "primevue/multiselect";
 
   import { DatePicker } from "v-calendar";
+  import { propertyOption } from "@/models/base";
+  import { isObject } from "@/etc/validators";
 
-  const availableFilters = inject("availableFilters");
-  const availableEditFields = inject("availableEditFields");
+  const availableFilters = inject("availableFilters") as Record<
+    string,
+    readonly propertyOption[]
+  >;
+  const availableEditFields = inject("availableEditFields") as Record<
+    string,
+    readonly propertyOption[]
+  >;
 
   const emit = defineEmits(["update:modelValue", "deleteFormField"]);
   const props = defineProps({
     queue: { type: String, required: true },
-    modelValue: { type: Object, required: true },
-    formType: { type: String, required: true },
+    modelValue: {
+      type: Object as PropType<{
+        propertyType: any;
+        propertyValue: any;
+      }>,
+      required: true,
+    },
+    formType: {
+      type: String as PropType<"filter" | "edit">,
+      required: true,
+    },
     fixedPropertyType: { type: Boolean, required: false },
     allowDelete: { type: Boolean, required: false },
   });
 
-  const propertyTypeOptions = computed(() => {
+  const propertyTypeOptions = computed((): readonly propertyOption[] => {
     return props.formType == "filter"
       ? availableFilters[props.queue]
       : props.formType == "edit"
       ? availableEditFields[props.queue]
-      : null;
+      : [];
   });
 
-  const getPropertyTypeObject = (propertyType) => {
+  const getPropertyTypeObject = (propertyType: string) => {
     if (!propertyType) {
-      return propertyTypeOptions.value ? propertyTypeOptions.value[0] : null;
+      return propertyTypeOptions.value
+        ? propertyTypeOptions.value[0]
+        : undefined;
     }
-    let property = propertyTypeOptions.value.find((option) => {
-      return option.name === propertyType;
-    });
-    property = property ? property : null;
+    let property: propertyOption | undefined = propertyTypeOptions.value.find(
+      (option) => {
+        return option.name === propertyType;
+      },
+    );
     return property;
   };
 
@@ -172,8 +194,8 @@
   // The categorizedValue property is a bit tricky
   // We need to copy the values and use those as the model
   // Otherwise, they will directly modify the filterStore state :/
-  const categorizedValueCategory = ref(null);
-  const categorizedValueValue = ref(null);
+  const categorizedValueCategory = ref();
+  const categorizedValueValue = ref();
 
   const propertyValueOptions = computed(() => {
     if (propertyType.value && propertyType.value.store) {
@@ -189,12 +211,14 @@
 
   onMounted(() => {
     // This will update the property to the default if one wasn't provided
-    updateValue("propertyType", propertyType.value);
+    if (propertyType.value) {
+      updatePropertyType({ value: propertyType.value });
+    }
 
     // This will udpate the property value to the default (if available) if one wasn't provided
     if (!propertyValue.value) {
       clearPropertyValue();
-      updateValue("propertyValue", propertyValue.value);
+      updatePropertyValue(propertyValue.value);
     }
 
     // we need to fill in the placeholder refs (see note above) for categorized value
@@ -210,7 +234,7 @@
         ? propertyType.value.optionProperty
         : "value";
     }
-    return null;
+    return undefined;
   });
 
   const isDate = computed(() => {
@@ -267,19 +291,33 @@
     }
   };
 
-  const updateValue = (attribute, newValue) => {
-    if (attribute === "propertyType") {
-      emit("update:modelValue", {
-        propertyType: newValue ? newValue.name : propertyType.value,
-        propertyValue: propertyValue.value,
-      });
-    } else if (attribute === "propertyValue") {
-      emit("update:modelValue", {
-        propertyType: propertyType.value
-          ? propertyType.value.name
-          : propertyType.value,
-        propertyValue: newValue,
-      });
+  const updatePropertyValue = (newValue: unknown) => {
+    let val = newValue;
+    if (isObject(newValue)) {
+      if ("value" in newValue) {
+        val = newValue.value;
+      } else if (
+        "target" in newValue &&
+        isObject(newValue.target) &&
+        "value" in newValue.target
+      ) {
+        val = newValue.target.value;
+      }
     }
+    emit("update:modelValue", {
+      propertyType: propertyType.value
+        ? propertyType.value.name
+        : propertyType.value,
+      propertyValue: val,
+    });
+  };
+
+  const updatePropertyType = (newValue: { value: propertyOption }) => {
+    emit("update:modelValue", {
+      propertyType: newValue.value.name
+        ? newValue.value.name
+        : propertyType.value,
+      propertyValue: propertyValue.value,
+    });
   };
 </script>
