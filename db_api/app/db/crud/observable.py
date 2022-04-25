@@ -37,6 +37,8 @@ def create_observable(
             version=uuid4(),
         )
 
+        db.add(obj)
+
     return obj
 
 
