@@ -1,24 +1,62 @@
-// Example Cypress Vue component test that we might use one day
-// NOTE: This test is not fully functional at this point.
-
 import { mount } from "@cypress/vue";
-import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 
 import NodeTag from "@/components/Node/NodeTag.vue";
+import router from "@/router/index";
+import { genericObjectReadFactory } from "@mocks/genericObject";
+import { createCustomCypressPinia } from "@tests/cypressHelpers";
 
-const props = {
-  tag: { value: "testTag" },
-};
+const testTag = genericObjectReadFactory({ value: "testTag" });
+
+function factory(
+  nodeType: "alerts" | "events" = "alerts",
+  overrideNodeType?: "alerts" | "events",
+) {
+  return mount(NodeTag, {
+    global: {
+      plugins: [PrimeVue, createCustomCypressPinia(), router],
+      provide: { nodeType: nodeType },
+    },
+    propsData: {
+      tag: testTag,
+      overrideNodeType: overrideNodeType,
+    },
+  });
+}
 
 describe("NodeTag", () => {
-  it("renders", () => {
-    mount(NodeTag, {
-      global: {
-        plugins: [PrimeVue, createPinia()],
-        provide: { nodeType: "alerts" },
+  it("renders as expected", () => {
+    factory();
+    cy.contains("testTag").should("be.visible");
+  });
+  it("adds a filter for provided node type as expected on click (alert)", () => {
+    factory();
+    cy.contains("testTag").click();
+    cy.get("@stub-1").should("have.been.calledOnceWith", {
+      nodeType: "alerts",
+      filters: {
+        tags: ["testTag"],
       },
-      propsData: props,
+    });
+  });
+  it("adds a filter for provided node type as expected on click (event)", () => {
+    factory("events");
+    cy.contains("testTag").click();
+    cy.get("@stub-1").should("have.been.calledOnceWith", {
+      nodeType: "events",
+      filters: {
+        tags: ["testTag"],
+      },
+    });
+  });
+  it("if set, 'overrideNodeType' is used for filtering as expected on click", () => {
+    factory("events", "alerts");
+    cy.contains("testTag").click();
+    cy.get("@stub-1").should("have.been.calledOnceWith", {
+      nodeType: "alerts",
+      filters: {
+        tags: ["testTag"],
+      },
     });
   });
 });
