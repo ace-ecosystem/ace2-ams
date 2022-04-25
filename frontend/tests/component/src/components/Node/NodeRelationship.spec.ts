@@ -1,6 +1,3 @@
-// Example Cypress Vue component test that we might use one day
-// NOTE: This test is not fully functional at this point.
-
 import { mount } from "@cypress/vue";
 import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
@@ -13,12 +10,13 @@ const props = {
 };
 
 describe("NodeRelationship", () => {
-  it("renders", () => {
+  it("renders correctly", () => {
     mount(NodeRelationship, {
       global: {
         plugins: [PrimeVue, createPinia()],
       },
       propsData: props,
     });
+    cy.contains("IS_HASH_OF: file.txt").should("be.visible");
   });
 });
