@@ -14,8 +14,8 @@
   </div>
 </template>
 
-<script setup>
-  import { defineProps, ref } from "vue";
+<script setup lang="ts">
+  import { defineProps, ref, PropType } from "vue";
 
   import Dropdown from "primevue/dropdown";
 
@@ -28,7 +28,10 @@
   const queueStore = useQueueStore();
 
   const props = defineProps({
-    nodeQueue: { type: String, required: true },
+    nodeQueue: {
+      type: String as PropType<"alerts" | "events">,
+      required: true,
+    },
   });
 
   const preferredQueue = ref();
