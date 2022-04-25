@@ -27,6 +27,7 @@ from db.schemas.event_type_queue_mapping import event_type_queue_mapping
 from db.schemas.event_vector import EventVector
 from db.schemas.event_vector_queue_mapping import event_vector_queue_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
+from db.schemas.metadata import Metadata
 from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment
 from db.schemas.node_detection_point import NodeDetectionPoint
@@ -49,6 +50,7 @@ from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.seed import Seed
+from db.schemas.tag import Tag
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
 from db.schemas.user_role_mapping import user_role_mapping

@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 5f818dc4ffb9
+Revision ID: 153f802fcaa7
 Revises: 
-Create Date: 2022-04-21 16:24:01.513318
+Create Date: 2022-04-25 12:23:54.550058
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '5f818dc4ffb9'
+revision = '153f802fcaa7'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -110,6 +110,11 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_event_vector_value'), 'event_vector', ['value'], unique=True)
+    op.create_table('metadata',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('type', sa.String(), nullable=True),
+    sa.PrimaryKeyConstraint('uuid')
+    )
     op.create_table('node',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('node_type', sa.String(), nullable=True),
@@ -401,6 +406,13 @@ def upgrade() -> None:
     )
     op.create_index('observable_value_trgm', 'observable', ['value'], unique=False, postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.create_index('type_value', 'observable', ['type_uuid', 'value'], unique=False)
+    op.create_table('tag',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['uuid'], ['metadata.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_tag_value'), 'tag', ['value'], unique=True)
     op.create_table('user',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('default_alert_queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -564,11 +576,14 @@ def upgrade() -> None:
     op.create_table('analysis_child_observable_mapping',
     sa.Column('analysis_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.ForeignKeyConstraint(['analysis_uuid'], ['analysis.uuid'], ondelete='CASCADE'),
+    sa.Column('metadata_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.ForeignKeyConstraint(['analysis_uuid'], ['analysis.uuid'], ),
+    sa.ForeignKeyConstraint(['metadata_uuid'], ['metadata.uuid'], ),
     sa.ForeignKeyConstraint(['observable_uuid'], ['observable.uuid'], ),
-    sa.PrimaryKeyConstraint('analysis_uuid', 'observable_uuid')
+    sa.PrimaryKeyConstraint('analysis_uuid', 'observable_uuid', 'metadata_uuid')
     )
     op.create_index(op.f('ix_analysis_child_observable_mapping_analysis_uuid'), 'analysis_child_observable_mapping', ['analysis_uuid'], unique=False)
+    op.create_index(op.f('ix_analysis_child_observable_mapping_metadata_uuid'), 'analysis_child_observable_mapping', ['metadata_uuid'], unique=False)
     op.create_index(op.f('ix_analysis_child_observable_mapping_observable_uuid'), 'analysis_child_observable_mapping', ['observable_uuid'], unique=False)
     op.create_table('event_history',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
@@ -647,6 +662,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_event_history_action_by_user_uuid'), table_name='event_history')
     op.drop_table('event_history')
     op.drop_index(op.f('ix_analysis_child_observable_mapping_observable_uuid'), table_name='analysis_child_observable_mapping')
+    op.drop_index(op.f('ix_analysis_child_observable_mapping_metadata_uuid'), table_name='analysis_child_observable_mapping')
     op.drop_index(op.f('ix_analysis_child_observable_mapping_analysis_uuid'), table_name='analysis_child_observable_mapping')
     op.drop_table('analysis_child_observable_mapping')
     op.drop_index('name_trgm', table_name='alert', postgresql_ops={'name': 'gin_trgm_ops'}, postgresql_using='gin')
@@ -687,6 +703,8 @@ def downgrade() -> None:
     op.drop_index('analysis_module_type_observable_cached_during_idx', table_name='analysis')
     op.drop_table('analysis')
     op.drop_table('user')
+    op.drop_index(op.f('ix_tag_value'), table_name='tag')
+    op.drop_table('tag')
     op.drop_index('type_value', table_name='observable')
     op.drop_index('observable_value_trgm', table_name='observable', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_table('observable')
@@ -774,6 +792,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_node_directive_value'), table_name='node_directive')
     op.drop_table('node_directive')
     op.drop_table('node')
+    op.drop_table('metadata')
     op.drop_index(op.f('ix_event_vector_value'), table_name='event_vector')
     op.drop_table('event_vector')
     op.drop_index(op.f('ix_event_type_value'), table_name='event_type')
