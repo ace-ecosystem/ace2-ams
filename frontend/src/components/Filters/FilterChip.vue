@@ -13,7 +13,7 @@
         style="padding-left: 2px; padding-right: 2px; font-weight: bold"
         @click="unsetFilter"
       >
-        {{ formatValue(filterValue) }}</span
+        {{ formatValue(filterValue as any) }}</span
       >
       <i
         data-cy="filter-chip-edit-button"
@@ -83,9 +83,9 @@
   const nodeType = inject("nodeType") as "alerts" | "events";
 
   const queue = computed(() => {
-    return currentUserSettingsStore.$state.queues[nodeType]
-      ? currentUserSettingsStore.$state.queues[nodeType]?.value
-      : null;
+    return currentUserSettingsStore.queues[nodeType] != null
+      ? currentUserSettingsStore.queues[nodeType]!.value
+      : "unknown";
   });
 
   const op = ref();

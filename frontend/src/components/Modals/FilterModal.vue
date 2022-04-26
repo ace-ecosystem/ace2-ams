@@ -13,7 +13,7 @@
     <div class="flex flex-wrap">
       <NodePropertyInput
         v-for="(filter, index) in formFilters"
-        :key="filter.propertyType"
+        :key="filter.propertyType!"
         v-model="formFilters[index]"
         class="w-12"
         :allow-delete="true"
@@ -88,7 +88,9 @@
   >([]);
 
   const queue = computed(() => {
-    return currentUserSettingsStore.$state.queues[nodeType]?.value;
+    return currentUserSettingsStore.queues[nodeType] != null
+      ? currentUserSettingsStore.queues[nodeType]!.value
+      : "unknown";
   });
 
   const submitFilters = computed(() => {

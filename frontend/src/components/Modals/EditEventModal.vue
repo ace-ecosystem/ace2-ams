@@ -24,6 +24,7 @@
           <NodeThreatSelector
             v-if="field.name == 'threats'"
             v-model="formFields['threats'].propertyValue"
+            :queue="event.queue.value"
           ></NodeThreatSelector>
           <NodeCommentEditor
             v-else-if="field.name == 'comments'"
@@ -102,7 +103,7 @@
   const originalEvent = ref<eventRead>();
   const fieldOptionObjects = ref<Record<keyof eventUpdate, propertyOption>>({});
   const formFields = ref<
-    Record<keyof eventUpdate, { propertyType: string; propertyValue: unknown }>
+    Record<keyof eventUpdate, { propertyType: string; propertyValue: any }>
   >({});
   const isLoading = ref<boolean>(false);
 

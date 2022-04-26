@@ -39,7 +39,15 @@
 
   type alertSummaryKeys = keyof alertSummary;
 
-  const columns = [
+  interface column {
+    required?: boolean;
+    default: boolean;
+    field: string;
+    header: string;
+    sortable: boolean;
+  }
+
+  const columns: column[] = [
     {
       field: "dispositionTime",
       header: "Dispositioned Time",

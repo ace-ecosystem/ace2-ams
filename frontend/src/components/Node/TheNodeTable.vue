@@ -41,7 +41,7 @@
             data-cy="table-column-select"
             option-label="header"
             placeholder="Select Columns"
-            @update:model-value="onColumnToggle"
+            @update:model-value="onColumnToggle($event as any)"
           />
         </template>
         <template #end>
@@ -162,7 +162,7 @@
   import { eventRead } from "@/models/event";
 
   interface column {
-    required: boolean;
+    required?: boolean;
     default: boolean;
     field: string;
     header: string;

@@ -88,7 +88,9 @@
   };
 
   const queue = computed(() => {
-    return currentUserSettingsStore.$state["queues"][nodeType]?.value;
+    return currentUserSettingsStore.queues[nodeType] != null
+      ? currentUserSettingsStore.queues[nodeType]!.value
+      : "unknown";
   });
 
   const clear = () => {

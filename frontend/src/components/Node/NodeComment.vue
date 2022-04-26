@@ -7,10 +7,10 @@
 
 <script setup lang="ts">
   import { nodeCommentRead } from "@/models/nodeComment";
-  import { defineProps } from "vue";
+  import { defineProps, PropType } from "vue";
 
   const props = defineProps({
-    comment: { type: Object, required: true },
+    comment: { type: Object as PropType<nodeCommentRead>, required: true },
     includeTime: { type: Boolean, required: false, default: false },
     includeLineBreak: { type: Boolean, required: false, default: true },
   });
