@@ -88,7 +88,7 @@ describe("TheFilterToolbar", () => {
     cy.get("@stub-2").should("have.been.calledOnceWith", {
       nodeType: "alerts",
       filterName: "disposition",
-      filterValue: genericObjectReadFactory(),
+      filterValue: "testObject",
     }); // set filter
     cy.get('[data-cy="quick-add-filter-panel"]').should("not.exist");
   });

@@ -10,6 +10,7 @@ import { eventReadFactory, mockEventUUID } from "@mocks/events";
 import { testConfiguration } from "@/etc/configuration/test/index";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import ToastService from "primevue/toastservice";
 
 import Tooltip from "primevue/tooltip";
 import { userReadFactory } from "@mocks/user";
@@ -40,6 +41,7 @@ function factory(args = { stubActions: true }) {
           initialState: initialState,
           stubActions: args.stubActions,
         }),
+        ToastService,
       ],
       provide: {
         availableEditFields: testConfiguration.events.eventEditableProperties,
@@ -54,7 +56,7 @@ function factory(args = { stubActions: true }) {
   return wrapper;
 }
 
-describe("EventAlertsTable", () => {
+describe("EditEventModal", () => {
   beforeEach(() => {
     cy.stub(EventPreventionTool, "readAll").returns([
       genericObjectReadFactory({

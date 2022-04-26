@@ -4,6 +4,7 @@
 import { mount } from "@cypress/vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import PrimeVue from "primevue/config";
+import ToastService from "primevue/toastservice";
 
 import router from "@/router/index";
 import { testConfiguration } from "@/etc/configuration/test/index";
@@ -29,6 +30,7 @@ describe("ManageEvents", () => {
             },
           }),
           router,
+          ToastService,
         ],
         provide: { config: testConfiguration, nodeType: "events" },
       },

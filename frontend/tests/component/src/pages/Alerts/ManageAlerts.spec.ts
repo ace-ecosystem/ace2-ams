@@ -8,6 +8,7 @@ import PrimeVue from "primevue/config";
 import router from "@/router/index";
 import { testConfiguration } from "@/etc/configuration/test/index";
 import Tooltip from "primevue/tooltip";
+import ToastService from "primevue/toastservice";
 
 import ManageAlerts from "@/pages/Alerts/ManageAlerts.vue";
 
@@ -17,6 +18,7 @@ describe("ManageAlerts", () => {
       global: {
         directives: { tooltip: Tooltip },
         plugins: [
+          ToastService,
           PrimeVue,
           createCustomCypressPinia({
             initialState: {

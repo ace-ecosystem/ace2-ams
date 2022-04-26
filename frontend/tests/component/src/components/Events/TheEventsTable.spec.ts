@@ -12,8 +12,7 @@ import { eventRead } from "@/models/event";
 import { eventReadFactory } from "@mocks/events";
 import NodeQueueSelectorVue from "@/components/Node/NodeQueueSelector.vue";
 import { nodeThreatRead } from "@/models/nodeThreat";
-import { VueWrapper } from "@vue/test-utils";
-import { ComponentPublicInstance } from "vue";
+import ToastService from "primevue/toastservice";
 
 interface eventTableStoreState {
   visibleQueriedItems: eventRead[];
@@ -54,6 +53,7 @@ function factory(initialState: eventTableStoreState) {
           },
         }),
         router,
+        ToastService,
       ],
       provide: {
         nodeType: "events",
