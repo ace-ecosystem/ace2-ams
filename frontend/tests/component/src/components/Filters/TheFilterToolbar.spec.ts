@@ -80,7 +80,7 @@ describe("TheFilterToolbar", () => {
     cy.get('[data-cy="filter-input"]').should("be.visible");
     cy.get('[data-cy="quick-add-filter-submit-button"]').should("be.visible");
   });
-  it.only("attempts to add a filter when submit button clicked in quick add panel ", () => {
+  it("attempts to add a filter when submit button clicked in quick add panel ", () => {
     factory();
     cy.contains("Quick Add").click();
     cy.get('[data-cy="quick-add-filter-panel"]').should("be.visible");

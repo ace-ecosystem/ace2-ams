@@ -323,7 +323,7 @@ describe("TheNodeTable", () => {
     cy.contains("Name, Owner").should("be.visible"); // columns will be back to default
   });
   // Come back to this once we update CSV export
-  // it.only("will export to csv as expected", () => {
+  // it("will export to csv as expected", () => {
   //   const stub = cy.stub(Alert, "readPage");
   //   stub
   //     .withArgs({
