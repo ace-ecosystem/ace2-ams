@@ -3,6 +3,7 @@ import { alertFilterParams, alertRead, alertSummary } from "@/models/alert";
 import { UUID } from "@/models/base";
 import { Alert } from "@/services/api/alert";
 import { camelToSnakeCase, parseAlertSummary } from "@/etc/helpers";
+import { useSelectedAlertStore } from "./selectedAlert";
 
 export const useAlertTableStore = defineStore({
   id: "alertTableStore",
@@ -44,6 +45,13 @@ export const useAlertTableStore = defineStore({
 
     visibleQueriedItemsUuids(): UUID[] {
       return this.visibleQueriedItems.map((x) => x.uuid);
+    },
+
+    visibleQueriedSelectedItems(): alertRead[] {
+      const selectedStore = useSelectedAlertStore();
+      return this.visibleQueriedItems.filter((x) =>
+        selectedStore.selected.includes(x.uuid),
+      );
     },
 
     visibleQueriedItemById: (state) => {
