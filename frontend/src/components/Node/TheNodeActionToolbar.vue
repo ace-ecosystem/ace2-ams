@@ -19,7 +19,7 @@
           label="Comment"
           @click="open('CommentModal')"
         />
-        <CommentModal name="CommentModal" @requestReload="requestReload" />
+        <CommentModal name="CommentModal" @request-reload="requestReload" />
       </div>
       <!--      TAKE OWNERSHIP -- NO MODAL -->
       <div v-if="props.takeOwnership">
@@ -41,7 +41,7 @@
           label="Assign"
           @click="open('AssignModal')"
         />
-        <AssignModal name="AssignModal" @requestReload="requestReload" />
+        <AssignModal name="AssignModal" @request-reload="requestReload" />
       </div>
       <!--      TAG MODAL -->
       <div v-if="props.tag">
@@ -51,12 +51,12 @@
           icon="pi pi-tags"
           label="Tag"
           @click="open('TagModal')"
-          @requestReload="requestReload"
+          @request-reload="requestReload"
         />
         <TagModal
           name="TagModal"
-          @requestReload="requestReload"
           :reload-object="props.reloadObject"
+          @request-reload="requestReload"
         />
       </div>
     </template>
@@ -66,8 +66,8 @@
   </Toolbar>
 </template>
 
-<script setup>
-  import { ref, defineProps, defineExpose, inject } from "vue";
+<script setup lang="ts">
+  import { ref, defineProps, defineExpose, inject, PropType } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -86,14 +86,17 @@
   import { useModalStore } from "@/stores/modal";
 
   const props = defineProps({
-    reloadObject: { type: String, required: true },
+    reloadObject: {
+      type: String as PropType<"node" | "table">,
+      required: true,
+    },
     assign: { type: Boolean, default: true },
     comment: { type: Boolean, default: true },
     tag: { type: Boolean, default: true },
     takeOwnership: { type: Boolean, default: true },
   });
 
-  const nodeType = inject("nodeType");
+  const nodeType = inject("nodeType") as "alerts" | "events";
 
   const nodeStore = nodeStores[nodeType]();
   const tableStore = nodeTableStores[nodeType]();
@@ -101,9 +104,9 @@
   const authStore = useAuthStore();
   const modalStore = useModalStore();
 
-  const error = ref(null);
+  const error = ref<string>();
 
-  const open = (name) => {
+  const open = (name: string) => {
     modalStore.open(name);
   };
 
@@ -115,8 +118,12 @@
       }));
 
       await nodeStore.update(updateData);
-    } catch (err) {
-      error.value = err.message;
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
     }
     if (!error.value) {
       requestReload();
@@ -124,6 +131,7 @@
   }
 
   const requestReload = () => {
+    console.log("reqesting");
     if (props.reloadObject == "table") {
       tableStore.requestReload = true;
     } else if (props.reloadObject == "node") {
@@ -132,7 +140,7 @@
   };
 
   const handleError = () => {
-    error.value = null;
+    error.value = undefined;
   };
 
   defineExpose({
