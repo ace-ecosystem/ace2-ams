@@ -40,7 +40,7 @@ describe("FilterChip", () => {
       filterValue: new Date(2022, 4, 21, 12, 12, 12),
     });
     cy.contains("Event Time After:").should("be.visible");
-    cy.contains("2022-05-21T16:12:12.000Z").should("be.visible");
+    cy.contains("2022-05-21T16:12:12.000").should("be.visible");
   });
   it("correctly renders if  filterNameObject provides an optionProperty (ex. owner)", () => {
     factory({ filterName: "owner", filterValue: userReadFactory() });

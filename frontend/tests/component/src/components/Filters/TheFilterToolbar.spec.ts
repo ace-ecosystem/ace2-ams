@@ -68,8 +68,8 @@ describe("TheFilterToolbar", () => {
     });
     cy.contains("Name:").should("be.visible");
     cy.contains("test name").should("be.visible");
-    cy.contains("2022-05-22T16:00:00.000Z").should("be.visible"); // filter chip
-    cy.contains("2022-05-23T16:00:00.000Z").should("be.visible"); // filter chip
+    cy.contains("2022-05-22T16:00:00.000").should("be.visible"); // filter chip
+    cy.contains("2022-05-23T16:00:00.000").should("be.visible"); // filter chip
     cy.findByDisplayValue("05/22/2022 12:00").should("be.visible"); // date range picker
     cy.findByDisplayValue("05/23/2022 12:00").should("be.visible"); // date range picker
   });
