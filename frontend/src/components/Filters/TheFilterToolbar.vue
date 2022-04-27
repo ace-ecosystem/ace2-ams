@@ -45,13 +45,13 @@
   </Toolbar>
 </template>
 
-<script>
+<script lang="ts">
   export default {
     name: "TheFilterToolbar",
   };
 </script>
 
-<script setup>
+<script setup lang="ts">
   import { inject, computed, ref } from "vue";
 
   import Button from "primevue/button";
@@ -72,6 +72,8 @@
   import { validEventFilters } from "@/etc/constants/events";
 
   import { copyToClipboard, formatNodeFiltersForAPI } from "@/etc/helpers";
+  import { queueRead } from "@/models/queue";
+  import { eventStatusRead } from "@/models/eventStatus";
 
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
@@ -79,14 +81,16 @@
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const eventStatusStore = useEventStatusStore();
 
-  const nodeType = inject("nodeType");
+  const nodeType = inject("nodeType") as "alerts" | "events";
   const validFilterOptions = {
     alerts: validAlertFilters,
     events: validEventFilters,
   };
 
   const queue = computed(() => {
-    return currentUserSettingsStore.$state["queues"][nodeType].value;
+    return currentUserSettingsStore.queues[nodeType] != null
+      ? currentUserSettingsStore.queues[nodeType]!.value
+      : "unknown";
   });
 
   const clear = () => {
@@ -101,7 +105,7 @@
     // reset all to start
     filterStore.clearAll({ nodeType: nodeType });
     if (nodeType === "alerts") {
-      const filters = {};
+      const filters: { queue?: queueRead } = {};
       // look for owner == current user OR none
       // currently explicit "no owner" filter is unavailable so, skip this one for now
       // filters.owner = authStore.user;
@@ -117,7 +121,7 @@
 
       filterStore.bulkSetFilters({ nodeType: nodeType, filters: filters });
     } else if (nodeType === "events") {
-      const filters = {};
+      const filters: { queue?: queueRead; status?: eventStatusRead } = {};
       // look for events with 'OPEN' or "INTERNAL COLLECTION" (?) status
       // can't do OR filters right now, look only for 'OPEN' events
       const openStatus = eventStatusStore.items.find((status) => {
@@ -167,7 +171,7 @@
         formatNodeFiltersForAPI(
           validFilterOptions[nodeType],
           filterStore[nodeType],
-        ),
+        ) as unknown as URLSearchParams,
       );
       link = `${
         window.location.origin
@@ -187,19 +191,21 @@
   });
 
   const addFilter = () => {
-    filterStore.setFilter({
-      nodeType: nodeType,
-      filterName: filterModel.value.propertyType,
-      filterValue: filterModel.value.propertyValue,
-    });
+    if (filterModel.value.propertyType && filterModel.value.propertyValue) {
+      filterStore.setFilter({
+        nodeType: nodeType,
+        filterName: filterModel.value.propertyType,
+        filterValue: filterModel.value.propertyValue,
+      });
+    }
     filterModel.value = {
       propertyType: null,
       propertyValue: null,
     };
   };
 
-  const op = ref(null);
-  const toggleQuickAddPanel = (event) => {
+  const op = ref();
+  const toggleQuickAddPanel = (event: unknown) => {
     op.value.toggle(event);
   };
 </script>

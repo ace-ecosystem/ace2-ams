@@ -515,7 +515,7 @@ describe("ManageEvents.vue Filtering", () => {
   it("successfully sets and clears the date range picker start", () => {
     cy.intercept(
       "GET",
-      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&created_after=2020-01-01T00:00:00.000Z",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&created_after=2020-01-01T00:00:00.000",
     ).as("getEventsCreatedAfterFilter");
 
     cy.intercept(
@@ -538,7 +538,7 @@ describe("ManageEvents.vue Filtering", () => {
     cy.get(".filter-name-text").should("have.text", "Created After:");
     cy.get('[data-cy="filter-chip-content"]').should(
       "have.text",
-      "2020-01-01T00:00:00.000Z",
+      "2020-01-01T00:00:00.000",
     );
 
     // Clear the end date
@@ -551,7 +551,7 @@ describe("ManageEvents.vue Filtering", () => {
   it("successfully sets and clears the date range picker end", () => {
     cy.intercept(
       "GET",
-      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&created_before=2020-01-01T00:00:00.000Z",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&created_before=2020-01-01T00:00:00.000",
     ).as("getEventsCreatedBeforeFilter");
 
     cy.intercept(
@@ -572,7 +572,7 @@ describe("ManageEvents.vue Filtering", () => {
     cy.get(".filter-name-text").should("have.text", "Created Before:");
     cy.get('[data-cy="filter-chip-content"]').should(
       "have.text",
-      "2020-01-01T00:00:00.000Z",
+      "2020-01-01T00:00:00.000",
     );
 
     // Clear the end date

@@ -947,71 +947,8 @@ describe("Manage Alerts - Save to Event", () => {
         url: "/manage_alerts",
         extraIntercepts: ["@getAlertsDefaultRows"],
       });
-    });
 
-    it("will only allow submission of event when alert(s) are selected and either an existing event is selected or a new event is selected and given a name ", () => {
-      cy.intercept(
-        "GET",
-        "/api/event/?status=OPEN&sort=created_time%7Casc&offset=0",
-      ).as("getOpenEvents");
-      cy.intercept(
-        "GET",
-        "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
-      ).as("getClosedEvents");
-
-      // Open disposition modal, select disposition, and open save to event modal
-      cy.get("[data-cy=disposition-button]").click();
-      cy.get('[aria-label="APPROVED_BUSINESS"]').click();
-      cy.get(".p-dialog-footer > .p-button-raised").click();
-
-      cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
-      cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
-
-      // No alerts selected, should be disabled
-      cy.get("[data-cy=save-to-event-submit-button]").should("be.disabled");
-      // Select an existing event, should be disabled
-      cy.get(
-        "[data-cy=event-options] > .p-listbox-list-wrapper > .p-listbox-list > .p-listbox-item",
-      )
-        .eq(0)
-        .click();
-      cy.get("[data-cy=save-to-event-submit-button]").should("be.disabled");
-      // Select new event, should be disabled
-      cy.get(":nth-child(1) > .p-tabview-nav-link").click();
-      cy.get("[data-cy=save-to-event-submit-button]").should("be.disabled");
-      // Add new event name, should be disabled
-      cy.get("[data-cy=new-event-name]").click().type("Test new event");
-      cy.get("[data-cy=save-to-event-submit-button]").should("be.disabled");
-
-      // Close both modals
-      cy.get(".p-dialog-header-close-icon").last().click();
-      cy.get(".p-dialog-header-close-icon").eq(0).click();
-
-      // Select all alerts and reopen modal
-      cy.get(
-        ".p-column-header-content > .p-checkbox > .p-checkbox-box",
-      ).click();
-      cy.get("[data-cy=disposition-button]").click();
-      cy.get(".p-dialog-footer > .p-button-raised").click();
-
-      cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
-      cy.wait("@getClosedEvents").its("state").should("eq", "Complete");
-
-      // No event selected, should be disabled
-      cy.get("[data-cy=save-to-event-submit-button]").should("be.disabled");
-      // Select an existing event, should not be disabled
-      cy.get(
-        "[data-cy=event-options] > .p-listbox-list-wrapper > .p-listbox-list > .p-listbox-item",
-      )
-        .eq(0)
-        .click();
-      cy.get("[data-cy=save-to-event-submit-button]").should("not.be.disabled");
-      // Select new event, should be disabled
-      cy.get(":nth-child(1) > .p-tabview-nav-link").click();
-      cy.get("[data-cy=save-to-event-submit-button]").should("be.disabled");
-      // Add new event name, should not be disabled
-      cy.get("[data-cy=new-event-name]").click().type("Test new event");
-      cy.get("[data-cy=save-to-event-submit-button]").should("not.be.disabled");
+      cy.get(".p-checkbox").first().click();
     });
 
     it("will correctly load the 'NEW' tab in the Save to Event modal", () => {

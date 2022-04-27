@@ -2,6 +2,7 @@
 <!-- The table where all currently filtered nodes are displayed, selected to take action, or link to an individual node page -->
 
 <template>
+  <Toast data-cy="node-table-error" />
   <DataTable
     ref="datatable"
     v-model:expandedRows="expandedRows"
@@ -9,12 +10,11 @@
     v-model:selection="selectedRows"
     data-key="uuid"
     :value="tableStore.visibleQueriedItemSummaries"
-    :global-filter-fields="selectedColumns.field"
     :resizable-columns="true"
     :loading="isLoading"
     column-resize-mode="expand"
     responsive-layout="scroll"
-    :sort-field="tableStore.sortField"
+    :sort-field="tableStore.sortField!"
     :sort-order="sortOrder"
     removable-sort
     @add-filter="addFilter"
@@ -41,7 +41,7 @@
             data-cy="table-column-select"
             option-label="header"
             placeholder="Select Columns"
-            @update:model-value="onColumnToggle"
+            @update:model-value="onColumnToggle($event as any)"
           />
         </template>
         <template #end>
@@ -49,7 +49,6 @@
           <span v-if="keywordSearch" class="p-input-icon-left p-m-1">
             <i class="pi pi-search" />
             <InputText
-              v-model="nodeTableFilter['global'].value"
               data-cy="table-keyword-search"
               placeholder="Search in table"
             />
@@ -68,12 +67,14 @@
             data-cy="export-table-button"
             class="p-button-rounded p-m-1"
             icon="pi pi-download"
-            @click="exportCSV($event)"
+            @click="exportCSV"
           />
           <slot name="tableHeaderEnd" />
         </template>
       </Toolbar>
     </template>
+
+    <template #empty> No {{ nodeType }} found. </template>
 
     <!-- EXPANSION ARROW COLUMN-->
     <Column
@@ -101,14 +102,16 @@
       <!-- DATA COLUMN CELL BODIES-->
       <template #body="{ data, field }">
         <div :class="cellClass(field)" @click="addFilter(data, field)">
-          <slot name="rowCell" :data="data" :col="col" :field="field"></slot>
+          <slot name="rowCell" :data="data" :col="col" :field="field">{{
+            data[field]
+          }}</slot>
         </div>
       </template>
     </Column>
 
     <!-- ROW EXPANSION -->
     <template #expansion="{ data }">
-      <slot name="rowExpansion" :data="data"></slot>
+      <slot name="rowExpansion" :data="data">No content provided.</slot>
     </template>
   </DataTable>
 
@@ -126,7 +129,7 @@
   ></Paginator>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import {
     computed,
     defineEmits,
@@ -134,9 +137,12 @@
     inject,
     onMounted,
     ref,
+    PropType,
   } from "vue";
 
   import { FilterMatchMode } from "primevue/api";
+  import { useToast } from "primevue/usetoast";
+  import Toast from "primevue/toast";
   import Button from "primevue/button";
   import Column from "primevue/column";
   import DataTable from "primevue/datatable";
@@ -151,9 +157,20 @@
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
 
   import { inputTypes } from "@/etc/constants/base";
+  import { propertyOption } from "@/models/base";
+  import { alertRead } from "@/models/alert";
+  import { eventRead } from "@/models/event";
+
+  interface column {
+    required?: boolean;
+    default: boolean;
+    field: string;
+    header: string;
+    sortable: boolean;
+  }
 
   const props = defineProps({
-    columns: { type: Array, required: true },
+    columns: { type: Array as PropType<column[]>, required: true },
     columnSelect: { type: Boolean, default: true },
     exportCSV: { type: Boolean, default: true },
     keywordSearch: { type: Boolean, default: true },
@@ -163,13 +180,17 @@
 
   defineEmits(["rowExpand", "rowCollapse"]);
 
-  const nodeType = inject("nodeType");
-  const availableFilters = inject("availableFilters");
+  const nodeType = inject("nodeType") as "alerts" | "events";
+  const availableFilters = inject("availableFilters") as Record<
+    string,
+    propertyOption[]
+  >;
 
   const tableStore = nodeTableStores[nodeType]();
   const selectedStore = nodeSelectedStores[nodeType]();
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const filterStore = useFilterStore();
+  const toast = useToast();
 
   const tableToolbarRequired =
     props.exportCSV ||
@@ -181,12 +202,12 @@
   const requiredColumns = props.columns.filter((col) => col.required);
   const defaultColumns = props.columns.filter((col) => col.default);
 
-  const datatable = ref(null);
-  const error = ref(null);
+  const datatable = ref();
+  const error = ref<string>();
   const expandedRows = ref([]);
   const isLoading = ref(false);
   const page = ref(0);
-  const selectedColumns = ref([]);
+  const selectedColumns = ref<column[]>([]);
 
   // Used for keyword search
   const nodeTableFilter = ref({
@@ -221,9 +242,7 @@
   });
 
   const selectedRows = computed(() => {
-    return tableStore.visibleQueriedItems.filter((node) =>
-      selectedStore.selected.includes(node.uuid),
-    );
+    return tableStore.visibleQueriedSelectedItems;
   });
 
   const sortOrder = computed(() => {
@@ -260,10 +279,10 @@
     // Initializes selected columns to default
     selectedColumns.value = defaultColumns;
     //
-    error.value = null;
+    error.value = undefined;
   };
 
-  const onColumnToggle = (val) => {
+  const onColumnToggle = (val: column[]) => {
     // Toggles selected columns to display
     // This method required/provided by Primevue 'ColToggle' docs
     selectedColumns.value = props.columns.filter((col) => val.includes(col));
@@ -275,21 +294,34 @@
     await loadNodes();
   };
 
+  const showError = (args: { detail: string }) => {
+    toast.add({
+      severity: "error",
+      summary: `Failed to fetch ${nodeType}`,
+      detail: args.detail,
+      life: 6000,
+    });
+  };
+
   const loadNodes = async () => {
     isLoading.value = true;
     try {
       await tableStore.readPage({
-        sort: tableStore.sortFilter,
+        sort: tableStore.sortFilter!,
         ...pageOptions.value,
         ...filterStore[nodeType],
       });
-    } catch (err) {
-      error.value = err.message || "Something went wrong!";
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        showError({ detail: e });
+      } else if (e instanceof Error) {
+        showError({ detail: e.message });
+      }
     }
     isLoading.value = false;
   };
 
-  const onPage = async (event) => {
+  const onPage = async (event: { rows: number; page: number }) => {
     selectedStore.unselectAll();
     tableStore.pageSize = event.rows;
     page.value = event.page;
@@ -302,7 +334,7 @@
     await loadNodes();
   };
 
-  const sort = async (event) => {
+  const sort = async (event: { sortField: string; sortOrder: number }) => {
     if (event.sortField) {
       tableStore.sortField = event.sortField;
       tableStore.sortOrder = event.sortOrder > 0 ? "asc" : "desc";
@@ -315,11 +347,11 @@
 
   const currentQueue = ref(
     currentUserSettingsStore.queues[nodeType]
-      ? currentUserSettingsStore.queues[nodeType].value
+      ? currentUserSettingsStore.queues[nodeType]?.value
       : undefined,
   );
 
-  const isFilterable = (field) => {
+  const isFilterable = (field: string) => {
     if (!availableFilters || !currentQueue.value) {
       return false;
     }
@@ -332,17 +364,17 @@
     return false;
   };
 
-  const cellClass = (field) => {
+  const cellClass = (field: string) => {
     return [{ filter: isFilterable(field) }];
   };
 
-  const addFilter = (data, field) => {
+  const addFilter = (data: alertRead | eventRead, field: string) => {
     const node = tableStore.visibleQueriedItemById(data.uuid);
-    if (isFilterable(field) && node) {
+    if (isFilterable(field) && node && node[field]) {
       filterStore.setFilter({
         nodeType: nodeType,
         filterName: field,
-        filterValue: node[field],
+        filterValue: node[field] as any,
       });
     }
   };

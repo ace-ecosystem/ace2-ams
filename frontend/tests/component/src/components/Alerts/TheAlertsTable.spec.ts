@@ -1,5 +1,4 @@
 import { mount } from "@cypress/vue";
-import { createPinia } from "pinia";
 
 import PrimeVue from "primevue/config";
 
@@ -11,6 +10,7 @@ import { alertReadFactory } from "@mocks/alert";
 import { NodeTree } from "@/services/api/nodeTree";
 import { observableReadFactory } from "@mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import ToastService from "primevue/toastservice";
 
 interface alertTableStoreState {
   visibleQueriedItems: alertRead[];
@@ -43,6 +43,7 @@ function factory(initialState: alertTableStoreState) {
           initialState: { alertTableStore: initialState },
         }),
         router,
+        ToastService,
       ],
       provide: {
         nodeType: "alerts",

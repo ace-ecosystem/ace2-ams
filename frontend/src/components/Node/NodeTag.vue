@@ -8,15 +8,16 @@
   </span>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import Tag from "primevue/tag";
 
-  import { defineProps, inject } from "vue";
+  import { defineProps, inject, PropType } from "vue";
   import { useRouter } from "vue-router";
   import { useFilterStore } from "@/stores/filter";
+  import { nodeTagRead } from "@/models/nodeTag";
 
   const router = useRouter();
-  const nodeType = inject("nodeType");
+  const nodeType = inject("nodeType") as "alerts" | "events";
   const nodeRoutes = {
     alerts: "/manage_alerts",
     events: "/manage_events",
@@ -25,8 +26,12 @@
   const filterStore = useFilterStore();
 
   const props = defineProps({
-    tag: { type: Object, required: true },
-    overrideNodeType: { type: String, required: false, default: null },
+    tag: { type: Object as PropType<nodeTagRead>, required: true },
+    overrideNodeType: {
+      type: String as PropType<"alerts" | "events">,
+      required: false,
+      default: null,
+    },
   });
 
   function filterByTags() {
@@ -36,7 +41,7 @@
     const route = nodeRoutes[preferredNodeType];
     if (route) {
       filterStore.bulkSetFilters({
-        nodeType: nodeType,
+        nodeType: preferredNodeType,
         filters: {
           tags: [props.tag.value],
         },

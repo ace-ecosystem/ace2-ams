@@ -1,8 +1,8 @@
-<!-- FilterTag.vue -->
-<!-- A tag that shows a currently applied filter (by type, ex. 'queue' or 'owner' -->
+<!-- FilterChip.vue -->
+<!-- A chip that shows a currently applied filter (by type, ex. 'queue' or 'owner' -->
 <!-- Contains actions to remove (and eventually edit/add) a filter through click actions -->
 <template>
-  <span style="padding: 2px" data-cy="filter=chip">
+  <span v-if="filterNameObject" style="padding: 2px" data-cy="filter-chip">
     <Chip>
       <span class="p-chip-text filter-name-text chip-content"
         >{{ filterLabel }}:</span
@@ -13,7 +13,7 @@
         style="padding-left: 2px; padding-right: 2px; font-weight: bold"
         @click="unsetFilter"
       >
-        {{ formatValue(filterValue) }}</span
+        {{ formatValue(filterValue as any) }}</span
       >
       <i
         data-cy="filter-chip-edit-button"
@@ -61,7 +61,7 @@
   </span>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { inject, computed, defineProps, ref } from "vue";
 
   import { useFilterStore } from "@/stores/filter";
@@ -75,18 +75,21 @@
   import OverlayPanel from "primevue/overlaypanel";
 
   import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
+  import { alertFilterValues } from "@/models/alert";
+  import { eventFilterValues } from "@/models/event";
+
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const filterStore = useFilterStore();
-  const nodeType = inject("nodeType");
+  const nodeType = inject("nodeType") as "alerts" | "events";
 
   const queue = computed(() => {
-    return currentUserSettingsStore.$state["queues"][nodeType]
-      ? currentUserSettingsStore.$state["queues"][nodeType].value
-      : null;
+    return currentUserSettingsStore.queues[nodeType] != null
+      ? currentUserSettingsStore.queues[nodeType]!.value
+      : "unknown";
   });
 
-  const op = ref(null);
-  const toggleQuickEditMenu = (event) => {
+  const op = ref();
+  const toggleQuickEditMenu = (event: unknown) => {
     op.value.toggle(event);
   };
 
@@ -129,7 +132,9 @@
     filterStore.setFilter({
       nodeType: nodeType,
       filterName: props.filterName,
-      filterValue: filterModel.value.propertyValue,
+      filterValue: filterModel.value.propertyValue as
+        | alertFilterValues
+        | eventFilterValues,
     });
   }
 
@@ -140,11 +145,15 @@
     });
   }
 
-  function formatValue(value) {
+  function formatValue(value: alertFilterValues | eventFilterValues) {
     if (filterNameObject) {
       if (filterNameObject.stringRepr) {
         return filterNameObject.stringRepr(value);
-      } else if (filterNameObject.optionProperty && isObject(value)) {
+      } else if (
+        filterNameObject.optionProperty &&
+        isObject(value) &&
+        !("category" in value)
+      ) {
         return value[filterNameObject.optionProperty];
       }
     }

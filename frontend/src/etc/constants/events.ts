@@ -49,7 +49,7 @@ export const eventEventTimeProperty: propertyOption = {
   label: "Event Time",
   type: inputTypes.DATE,
   stringRepr: (value: Date): string => {
-    return value.toISOString();
+    return value.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
@@ -60,7 +60,7 @@ export const eventAlertTimeProperty: propertyOption = {
   label: "Alert Time",
   type: inputTypes.DATE,
   stringRepr: (value: Date): string => {
-    return value.toISOString();
+    return value.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
@@ -71,7 +71,7 @@ export const eventOwnershipTimeProperty: propertyOption = {
   label: "Ownership Time",
   type: inputTypes.DATE,
   stringRepr: (value: Date): string => {
-    return value.toISOString();
+    return value.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
@@ -82,7 +82,7 @@ export const eventDispositionTimeProperty: propertyOption = {
   label: "Disposition Time",
   type: inputTypes.DATE,
   stringRepr: (value: Date): string => {
-    return value.toISOString();
+    return value.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
@@ -93,7 +93,7 @@ export const eventContainTimeProperty: propertyOption = {
   label: "Contain Time",
   type: inputTypes.DATE,
   stringRepr: (value: Date): string => {
-    return value.toISOString();
+    return value.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
@@ -104,7 +104,7 @@ export const eventRemediationTimeProperty: propertyOption = {
   label: "Remediation Time",
   type: inputTypes.DATE,
   stringRepr: (value: Date): string => {
-    return value.toISOString();
+    return value.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
@@ -198,7 +198,7 @@ export const eventCreatedAfterProperty: propertyOption = {
   label: "Created After",
   type: inputTypes.DATE,
   stringRepr: (value: Date) => {
-    return value.toISOString();
+    return value.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);
@@ -210,7 +210,7 @@ export const eventCreatedBeforeProperty: propertyOption = {
   label: "Created Before",
   type: inputTypes.DATE,
   stringRepr: (value: Date) => {
-    return value.toISOString();
+    return value.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);

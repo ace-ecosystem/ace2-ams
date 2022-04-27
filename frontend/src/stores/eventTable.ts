@@ -3,6 +3,7 @@ import { UUID } from "@/models/base";
 import { Event } from "@/services/api/event";
 import { eventFilterParams, eventRead, eventSummary } from "@/models/event";
 import { camelToSnakeCase } from "@/etc/helpers";
+import { useSelectedEventStore } from "./selectedEvent";
 
 export function parseEventSummary(event: eventRead): eventSummary {
   return {
@@ -65,6 +66,13 @@ export const useEventTableStore = defineStore({
 
     visibleQueriedItemsUuids(): UUID[] {
       return this.visibleQueriedItems.map((x) => x.uuid);
+    },
+
+    visibleQueriedSelectedItems(): eventRead[] {
+      const selectedStore = useSelectedEventStore();
+      return this.visibleQueriedItems.filter((x) =>
+        selectedStore.selected.includes(x.uuid),
+      );
     },
 
     visibleQueriedItemById: (state) => {

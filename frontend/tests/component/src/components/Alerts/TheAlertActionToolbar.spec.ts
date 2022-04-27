@@ -6,7 +6,11 @@ import PrimeVue from "primevue/config";
 import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
 import router from "@/router/index";
 
-const props = {
+interface TheAlertActionToolbarProps {
+  reloadObject: "node" | "table";
+}
+
+const props: TheAlertActionToolbarProps = {
   reloadObject: "node",
 };
 

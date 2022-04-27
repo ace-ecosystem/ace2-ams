@@ -54,6 +54,7 @@ export interface alertRead extends nodeRead {
   tool: alertToolRead | null;
   toolInstance: alertToolInstanceRead | null;
   type: alertTypeRead;
+  [key: string]: unknown;
 }
 
 // High-level alert data that will be displayed in Manage Alerts or in an event

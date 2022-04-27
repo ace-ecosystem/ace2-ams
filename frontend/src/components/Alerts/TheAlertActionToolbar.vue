@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, defineProps } from "vue";
+  import { ref, defineProps, PropType } from "vue";
 
   import Button from "primevue/button";
 
@@ -42,7 +42,10 @@
   import { useModalStore } from "@/stores/modal";
 
   const props = defineProps({
-    reloadObject: { type: String, required: true },
+    reloadObject: {
+      type: String as PropType<"table" | "node">,
+      required: true,
+    },
   });
 
   const modalStore = useModalStore();

@@ -59,25 +59,26 @@
   </div>
 </template>
 
-<script setup>
-  import { defineProps, ref, defineEmits } from "vue";
+<script setup lang="ts">
+  import { defineProps, ref, defineEmits, PropType } from "vue";
 
   import Button from "primevue/button";
   import InputText from "primevue/inputtext";
   import NodeComment from "@/components/Node/NodeComment.vue";
+  import { nodeCommentRead } from "@/models/nodeComment";
 
   const props = defineProps({
-    modelValue: { type: Array, required: true },
+    modelValue: { type: Array as PropType<nodeCommentRead[]>, required: true },
   });
 
   const emit = defineEmits(["update:modelValue"]);
 
-  const comments = ref(props.modelValue);
-  const editingCommentValue = ref(null);
-  const editingCommentUuid = ref(null);
+  const comments = ref<nodeCommentRead[]>(props.modelValue);
+  const editingCommentValue = ref<string>();
+  const editingCommentUuid = ref<string>();
   const editCommentPanelOpen = ref(false);
 
-  const openEditCommentPanel = (comment) => {
+  const openEditCommentPanel = (comment: nodeCommentRead) => {
     editingCommentValue.value = comment.value;
     editingCommentUuid.value = comment.uuid;
     editCommentPanelOpen.value = true;
@@ -85,16 +86,18 @@
 
   const closeEditCommentPanel = () => {
     editCommentPanelOpen.value = false;
-    editingCommentValue.value = null;
-    editingCommentUuid.value = null;
+    editingCommentValue.value = undefined;
+    editingCommentUuid.value = undefined;
   };
 
   const saveModelComment = () => {
     const modelCommentIndex = comments.value.findIndex(
       (comment) => comment.uuid === editingCommentUuid.value,
     );
-    comments.value[modelCommentIndex].value = editingCommentValue.value;
-    emit("update:modelValue", comments.value);
-    closeEditCommentPanel();
+    if (modelCommentIndex != -1 && editingCommentValue.value) {
+      comments.value[modelCommentIndex].value = editingCommentValue.value;
+      emit("update:modelValue", comments.value);
+      closeEditCommentPanel();
+    }
   };
 </script>
