@@ -42,6 +42,7 @@ export const analysisReadFactory = ({
   version: version,
   analysisModuleType: analysisModuleType,
   cachedUntil: cachedUntil,
+  childObservables: [],
   details: details,
   errorMessage: errorMessage,
   stackTrace: stackTrace,

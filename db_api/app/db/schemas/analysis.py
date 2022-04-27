@@ -3,6 +3,7 @@ from sqlalchemy.dialects.postgresql import ExcludeConstraint, JSONB, TSTZRANGE, 
 from sqlalchemy.orm import deferred, relationship
 
 from api_models.analysis import AnalysisNodeTreeRead
+from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
 from db.schemas.node import Node
 
 
@@ -16,6 +17,8 @@ class Analysis(Node):
     analysis_module_type_uuid = Column(UUID(as_uuid=True), ForeignKey("analysis_module_type.uuid"), nullable=False)
 
     cached_during = Column(TSTZRANGE(), nullable=False)
+
+    child_observables = relationship("Observable", secondary=analysis_child_observable_mapping, lazy="selectin")
 
     # Using deferred means that when you query the Analysis table, you will not select the details field unless
     # you explicitly ask for it. This is so that we can more efficiently load alert trees without selecting

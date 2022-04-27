@@ -45,19 +45,9 @@ class ObservableBase(NodeBase):
 
 
 class ObservableCreateBase(NodeCreate, ObservableBase):
-    uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the observable")
-
-
-class ObservableCreateWithAlert(ObservableCreateBase):
-    pass
-
-
-class ObservableCreate(ObservableCreateBase):
     directives: List[type_str] = Field(
         default_factory=list, description="A list of directives to add to the observable"
     )
-
-    node_tree: NodeTreeCreateWithNode = Field(description="This defines where in a Node Tree this observable fits")
 
     tags: List[type_str] = Field(default_factory=list, description="A list of tags to add to the observable")
 
@@ -66,6 +56,16 @@ class ObservableCreate(ObservableCreateBase):
     )
 
     threats: List[type_str] = Field(default_factory=list, description="A list of threats to add to the observable")
+
+    uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the observable")
+
+
+class ObservableCreateWithAlert(ObservableCreateBase):
+    pass
+
+
+class ObservableCreate(ObservableCreateBase):
+    node_tree: NodeTreeCreateWithNode = Field(description="This defines where in a Node Tree this observable fits")
 
 
 class ObservableRead(NodeRead, ObservableBase):

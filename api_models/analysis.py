@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import Field, Json, UUID4
+from pydantic import BaseModel, Field, Json, UUID4
 from typing import List, Optional
 from uuid import uuid4
 
@@ -7,6 +7,7 @@ from api_models import type_str
 from api_models.analysis_module_type import AnalysisModuleTypeNodeTreeRead, AnalysisModuleTypeRead
 from api_models.node import NodeBase, NodeCreate, NodeRead, NodeTreeCreateWithNode, NodeTreeItemRead, NodeUpdate
 from api_models.node_detection_point import NodeDetectionPointRead
+from api_models.observable import ObservableRead
 
 
 class AnalysisBase(NodeBase):
@@ -21,9 +22,21 @@ class AnalysisBase(NodeBase):
     summary: Optional[type_str] = Field(description="A short summary/description of what this analysis did or found")
 
 
+class AnalysisChildObservableCreate(BaseModel):
+    """Represents an observable created by an analysis."""
+
+    type: type_str = Field(description="The type of the observable")
+
+    value: type_str = Field(description="The value of the observable")
+
+
 class AnalysisCreate(NodeCreate, AnalysisBase):
     analysis_module_type_uuid: UUID4 = Field(
         description="""The UUID of the analysis module type that was used to perform this analysis."""
+    )
+
+    child_observables: List[AnalysisChildObservableCreate] = Field(
+        default_factory=list, description="The list of child observables produced by this analysis"
     )
 
     node_tree: NodeTreeCreateWithNode = Field(description="This defines where in a Node Tree this analysis fits")
@@ -54,6 +67,10 @@ class AnalysisRead(NodeRead, AnalysisBase):
     )
 
     cached_until: datetime = Field(description="The time at which the analysis expires from the cache")
+
+    child_observables: List[ObservableRead] = Field(
+        description="The list of child observables produced by this analysis"
+    )
 
     details: Optional[dict] = Field(description="A JSON representation of the details produced by the analysis")
 
