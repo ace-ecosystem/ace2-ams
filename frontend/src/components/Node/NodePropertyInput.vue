@@ -295,7 +295,11 @@
     let val = newValue;
     if (isObject(newValue)) {
       if ("value" in newValue) {
-        val = newValue.value;
+        if ("category" in newValue) {
+          val = newValue;
+        } else {
+          val = newValue.value;
+        }
       } else if (
         "target" in newValue &&
         isObject(newValue.target) &&
