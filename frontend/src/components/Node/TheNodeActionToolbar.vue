@@ -131,7 +131,6 @@
   }
 
   const requestReload = () => {
-    console.log("reqesting");
     if (props.reloadObject == "table") {
       tableStore.requestReload = true;
     } else if (props.reloadObject == "node") {

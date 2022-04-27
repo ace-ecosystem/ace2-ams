@@ -62,7 +62,7 @@ export const alertDispositionedAfterProperty: propertyOption = {
   label: "Dispositioned After",
   type: inputTypes.DATE,
   stringRepr: (filter: Date) => {
-    return filter.toISOString();
+    return filter.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);
@@ -74,7 +74,7 @@ export const alertDispositionedBeforeProperty: propertyOption = {
   label: "Dispositioned Before",
   type: inputTypes.DATE,
   stringRepr: (filter: Date) => {
-    return filter.toISOString();
+    return filter.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);
@@ -85,7 +85,7 @@ export const alertEventTimeAfterProperty: propertyOption = {
   label: "Event Time After",
   type: inputTypes.DATE,
   stringRepr: (filter: Date) => {
-    return filter.toISOString();
+    return filter.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);
@@ -97,7 +97,7 @@ export const alertEventTimeBeforeProperty: propertyOption = {
   label: "Event Time Before",
   type: inputTypes.DATE,
   stringRepr: (filter: Date) => {
-    return filter.toISOString();
+    return filter.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);
@@ -109,7 +109,7 @@ export const alertInsertTimeBeforeProperty: propertyOption = {
   label: "Insert Time Before",
   type: inputTypes.DATE,
   stringRepr: (filter: Date) => {
-    return filter.toISOString();
+    return filter.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);
@@ -121,7 +121,7 @@ export const alertInsertTimeAfterProperty: propertyOption = {
   label: "Insert Time After",
   type: inputTypes.DATE,
   stringRepr: (filter: Date) => {
-    return filter.toISOString();
+    return filter.toISOString().replace("Z", "");
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);

@@ -13,7 +13,7 @@
     <div class="flex flex-wrap">
       <NodePropertyInput
         v-for="(filter, index) in formFilters"
-        :key="filter.propertyType!"
+        :key="index!"
         v-model="formFilters[index]"
         class="w-12"
         :allow-delete="true"
