@@ -1,13 +1,17 @@
 import json
 import uuid
 
-from datetime import datetime, timedelta
-from sqlalchemy import func, select
+from datetime import datetime
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 from uuid import UUID
 
+from api_models.analysis import AnalysisCreate
+from api_models.analysis_module_type import AnalysisModuleTypeCreate
+from api_models.observable import ObservableCreate
+from api_models.observable_type import ObservableTypeCreate
 from core.auth import hash_password
 from db import crud
 from db.schemas.alert import Alert
@@ -15,8 +19,6 @@ from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.alert_tool import AlertTool
 from db.schemas.alert_tool_instance import AlertToolInstance
 from db.schemas.alert_type import AlertType
-from db.schemas.analysis import Analysis
-from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.event import Event
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_remediation import EventRemediation
@@ -37,7 +39,6 @@ from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
-from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.user import User, UserHistory
 from db.schemas.user_role import UserRole
@@ -108,16 +109,16 @@ def create_alert(
     diffs = []
 
     if update_time is None:
-        update_time = datetime.utcnow()
+        update_time = crud.helpers.utcnow()
 
     if alert_uuid is None:
         alert_uuid = uuid.uuid4()
 
     if event_time is None:
-        event_time = datetime.utcnow()
+        event_time = crud.helpers.utcnow()
 
     if insert_time is None:
-        insert_time = datetime.utcnow()
+        insert_time = crud.helpers.utcnow()
 
     alert = Alert(
         event_time=event_time,
@@ -194,123 +195,6 @@ def create_alert(
             )
 
     return node_tree
-
-
-def create_analysis(
-    db: Session,
-    parent_observable: Observable,
-    parent_tree: NodeTree,
-    amt_value: str = "test_module",
-    amt_cache_seconds: int = 90,
-    amt_description: Optional[str] = None,
-    amt_extended_version: Optional[dict] = None,
-    amt_manual: bool = False,
-    amt_observable_types: List[str] = None,
-    amt_required_directives: List[str] = None,
-    amt_required_tags: List[str] = None,
-    amt_version: str = "1.0.0",
-    check_for_cached: bool = True,
-    details: Optional[dict] = None,
-    node_metadata: Optional[Dict[str, object]] = None,
-    run_time: datetime = None,
-) -> NodeTree:
-    analysis_module_type = create_analysis_module_type(
-        value=amt_value,
-        cache_seconds=amt_cache_seconds,
-        description=amt_description,
-        extended_version=amt_extended_version,
-        manual=amt_manual,
-        observable_types=amt_observable_types,
-        required_directives=amt_required_directives,
-        required_tags=amt_required_tags,
-        version=amt_version,
-        db=db,
-    )
-
-    if run_time is None:
-        run_time = datetime.utcnow()
-
-    obj = None
-    if check_for_cached:
-        obj = crud.read_cached_analysis(
-            analysis_module_type_uuid=analysis_module_type.uuid, observable_uuid=parent_observable.uuid, db=db
-        )
-
-    if obj is None:
-        obj = Analysis(
-            analysis_module_type=analysis_module_type,
-            cached_during=func.tstzrange(
-                run_time, run_time + timedelta(seconds=analysis_module_type.cache_seconds), "[)"
-            ),
-            details=details,
-            parent_observable_uuid=parent_observable.uuid,
-            run_time=run_time,
-            uuid=uuid.uuid4(),
-            version=uuid.uuid4(),
-        )
-
-        db.add(obj)
-        crud.commit(db)
-
-    node_tree = crud.create_node_tree_leaf(
-        node_metadata=node_metadata,
-        root_node_uuid=parent_tree.root_node_uuid,
-        node_uuid=obj.uuid,
-        parent_tree_uuid=parent_tree.uuid,
-        db=db,
-    )
-
-    crud.commit(db)
-
-    return node_tree
-
-
-def create_analysis_module_type(
-    value: str,
-    db: Session,
-    cache_seconds: int = 90,
-    description: Optional[str] = None,
-    extended_version: Optional[dict] = None,
-    manual: bool = False,
-    observable_types: List[str] = None,
-    required_directives: List[str] = None,
-    required_tags: List[str] = None,
-    version: str = "1.0.0",
-) -> AnalysisModuleType:
-    existing = crud.read_by_value(value=value, db_table=AnalysisModuleType, db=db, err_on_not_found=False)
-    if existing and existing.version == version:
-        return existing
-
-    if observable_types:
-        observable_types = [create_observable_type(value=o, db=db) for o in observable_types]
-    else:
-        observable_types = []
-
-    if required_directives:
-        required_directives = [create_node_directive(value=d, db=db) for d in required_directives]
-    else:
-        required_directives = []
-
-    if required_tags:
-        required_tags = [create_node_tag(value=t, db=db) for t in required_tags]
-    else:
-        required_tags = []
-
-    obj = AnalysisModuleType(
-        value=value,
-        cache_seconds=cache_seconds,
-        description=description,
-        extended_version=extended_version,
-        manual=manual,
-        observable_types=observable_types,
-        required_directives=required_directives,
-        required_tags=required_tags,
-        uuid=uuid.uuid4(),
-        version=version,
-    )
-    db.add(obj)
-    crud.commit(db)
-    return obj
 
 
 def create_event(
@@ -480,7 +364,7 @@ def create_node_comment(
     insert_time: Optional[datetime] = None,
 ) -> NodeComment:
     if insert_time is None:
-        insert_time = datetime.utcnow()
+        insert_time = crud.helpers.utcnow()
 
     user = create_user(username=username, db=db)
 
@@ -508,7 +392,7 @@ def create_node_detection_point(
     insert_time: Optional[datetime] = None,
 ) -> NodeDetectionPoint:
     if insert_time is None:
-        insert_time = datetime.utcnow()
+        insert_time = crud.helpers.utcnow()
 
     obj = NodeDetectionPoint(insert_time=insert_time, node_uuid=node.uuid, uuid=uuid.uuid4(), value=value)
     db.add(obj)
@@ -589,79 +473,6 @@ def create_node_threat_type(value: str, db: Session, queues: List[str] = None) -
     return obj
 
 
-def create_observable(
-    type: str,
-    value: str,
-    parent_tree: NodeTree,
-    db: Session,
-    context: Optional[str] = None,
-    directives: Optional[List[str]] = None,
-    expires_on: Optional[datetime] = None,
-    for_detection: bool = False,
-    history_username: Optional[str] = None,
-    node_metadata: Optional[Dict[str, object]] = None,
-    redirection: Optional[Observable] = None,
-    tags: Optional[List[str]] = None,
-    threat_actors: Optional[List[str]] = None,
-    threats: Optional[List[str]] = None,
-    time: Optional[datetime] = None,
-) -> NodeTree:
-    if time is None:
-        time = datetime.utcnow()
-
-    obj = crud.read_observable(type=type, value=value, db=db)
-    if not obj:
-        obj = Observable(
-            context=context,
-            expires_on=expires_on,
-            for_detection=for_detection,
-            redirection=redirection,
-            time=time,
-            type=create_observable_type(value=type, db=db),
-            uuid=uuid.uuid4(),
-            value=value,
-            version=uuid.uuid4(),
-        )
-
-        if directives:
-            obj.directives = [create_node_directive(value=d, db=db) for d in directives]
-
-        if tags:
-            obj.tags = [create_node_tag(value=t, db=db) for t in tags]
-
-        if threat_actors:
-            obj.threat_actors = [create_node_threat_actor(value=threat_actor, db=db) for threat_actor in threat_actors]
-
-        if threats:
-            obj.threats = [create_node_threat(value=threat, db=db) for threat in threats]
-
-        db.add(obj)
-        crud.commit(db)
-
-    node_tree = crud.create_node_tree_leaf(
-        node_metadata=node_metadata,
-        root_node_uuid=parent_tree.root_node_uuid,
-        node_uuid=obj.uuid,
-        parent_tree_uuid=parent_tree.uuid,
-        db=db,
-    )
-
-    crud.commit(db)
-
-    if history_username:
-        crud.record_node_create_history(
-            record_node=obj,
-            action_by=create_user(username=history_username, db=db),
-            db=db,
-        )
-
-    return node_tree
-
-
-def create_observable_type(value: str, db: Session) -> ObservableType:
-    return _create_basic_object(db_table=ObservableType, value=value, db=db)
-
-
 def create_queue(value: str, db: Session) -> Queue:
     return _create_basic_object(db_table=Queue, value=value, db=db)
 
@@ -722,79 +533,43 @@ def create_user_role(value: str, db: Session) -> UserRole:
 
 
 def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) -> NodeTree:
-    def _create_analysis(a, parent_tree: NodeTree, parent_observable: Observable):
-        details = None
-        if "details" in a:
-            details = a["details"]
+    def _create_analysis(a, root_analysis_uuid: UUID, parent_observable: Observable):
+        if "observables" in a:
+            for observable in a["observables"]:
+                crud.observable_type.create(model=ObservableTypeCreate(value=observable["type"]), db=db)
 
-        observable_types = None
-        if "observable_types" in a:
-            observable_types = a["observable_types"]
-
-        node_metadata = None
-        if "node_metadata" in a:
-            node_metadata = a["node_metadata"]
-
-        required_directives = None
-        if "required_directives" in a:
-            required_directives = a["required_directives"]
-
-        required_tags = None
-        if "required_tags" in a:
-            required_tags = a["required_tags"]
-
-        leaf = create_analysis(
+        analysis_module_type = crud.analysis_module_type.create(
+            model=AnalysisModuleTypeCreate(value=a["type"], version=a["version"]), db=db
+        )
+        analysis = crud.analysis.create(
+            model=AnalysisCreate(
+                analysis_module_type_uuid=analysis_module_type.uuid,
+                child_observables=a["observables"] if "observables" in a else [],
+                details=json.dumps(a["details"]) if "details" in a else None,
+                parent_observable_uuid=parent_observable.uuid,
+                root_analysis_uuid=root_analysis_uuid,
+                run_time=crud.helpers.utcnow(),
+            ),
             db=db,
-            node_metadata=node_metadata,
-            parent_tree=parent_tree,
-            parent_observable=parent_observable,
-            amt_value=a["type"],
-            amt_observable_types=observable_types,
-            amt_required_directives=required_directives,
-            amt_required_tags=required_tags,
-            details=details,
         )
 
         if "observables" in a:
             for observable in a["observables"]:
-                _create_observable(o=observable, parent_tree=leaf)
-
-    def _create_observable(o, parent_tree: NodeTree):
-        node_metadata = None
-        if "node_metadata" in o:
-            node_metadata = o["node_metadata"]
-
-        tags = None
-        if "tags" in o:
-            tags = o["tags"]
-
-        for_detection = False
-        if "for_detection" in o:
-            for_detection = o["for_detection"]
-
-        leaf = create_observable(
-            db=db,
-            node_metadata=node_metadata,
-            parent_tree=parent_tree,
-            type=o["type"],
-            value=o["value"],
-            for_detection=for_detection,
-            tags=tags,
-        )
-
-        if "observable_relationships" in o:
-            for relationship in o["observable_relationships"]:
-                related_observable = crud.read_observable(
-                    type=relationship["o_type"], value=relationship["o_value"], db=db
+                analysis.child_observables.append(
+                    _create_observable(o=observable, root_analysis_uuid=root_analysis_uuid)
                 )
 
-                create_node_relationship(
-                    node=leaf.node, related_node=related_observable, type=relationship["type"], db=db
-                )
+        return analysis
+
+    def _create_observable(o, root_analysis_uuid: UUID):
+        crud.observable_type.create(model=ObservableTypeCreate(value=o["type"]), db=db)
+        observable = crud.observable.create(model=ObservableCreate(**o), db=db)
 
         if "analyses" in o:
             for analysis in o["analyses"]:
-                _create_analysis(a=analysis, parent_tree=leaf, parent_observable=leaf.node)
+                _create_analysis(a=analysis, root_analysis_uuid=root_analysis_uuid, parent_observable=observable)
+
+        return observable
 
     def _replace_tokens(text: str, token: str, base_replacement_string: str) -> str:
         for i in range(text.count(token)):
@@ -840,8 +615,11 @@ def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) ->
         updated_by_user=disposition_user,
     )
 
-    for observable in data["observables"]:
-        _create_observable(o=observable, parent_tree=node_tree)
+    for o in data["observables"]:
+        observable = _create_observable(o=o, root_analysis_uuid=node_tree.root_node_uuid)
+        crud.alert.add_root_observable_to_root_analysis(
+            observable_uuid=observable.uuid, root_analysis_uuid=node_tree.root_node_uuid, db=db
+        )
 
     return node_tree
 
@@ -852,3 +630,21 @@ def read_node_tree_leaf(root_node_uuid: UUID, node_uuid: UUID, db: Session) -> O
         .scalars()
         .one_or_none()
     )
+
+
+def stringify_alert_tree(alert_tree: dict):
+    def _stringify_children(children: list[dict], depth=0, string=""):
+        for child in children:
+            duplicate = "" if child["first_appearance"] else " (Duplicate)"
+            if child["node_type"] == "observable":
+                string += f"{' '*depth}{child['type']['value']}: {child['value']}{duplicate}\n"
+                if child["children"]:
+                    string = _stringify_children(children=child["children"], depth=depth + 2, string=string)
+            if child["node_type"] == "analysis":
+                string += f"{' '*depth}{child['analysis_module_type']['value']}{duplicate}\n"
+                if child["children"]:
+                    string = _stringify_children(children=child["children"], depth=depth + 2, string=string)
+
+        return string
+
+    return _stringify_children(children=alert_tree["children"])
