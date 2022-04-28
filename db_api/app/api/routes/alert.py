@@ -75,11 +75,12 @@ def create_alert(
 
     crud.commit(db)
 
-    # Add the observables to database
+    # Add the observables to the database
     for observable in alert.observables:
         db_observable = _create_observable(observable, db=db)
         db.add(db_observable)
-        observable.uuid = db_observable.uuid
+
+        new_alert.root_observables.append(db_observable)
 
         crud.commit(db)
 
@@ -90,16 +91,6 @@ def create_alert(
                 action_by=crud.read_user_by_username(username=history_username, db=db),
                 db=db,
             )
-
-    # Create a NodeTree with the alert as the root and link the observables to it
-    node_tree = crud.create_node_tree_leaf(root_node_uuid=new_alert.uuid, node_uuid=new_alert.uuid, db=db)
-
-    crud.commit(db)
-
-    for observable in alert.observables:
-        crud.create_node_tree_leaf(
-            root_node_uuid=new_alert.uuid, node_uuid=observable.uuid, parent_tree_uuid=node_tree.uuid, db=db
-        )
 
     crud.commit(db)
 
@@ -399,7 +390,7 @@ def get_all_alerts(
 
 
 def get_alert(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read_node_tree(root_node_uuid=uuid, db=db)
+    return crud.alert.read_tree(uuid=uuid, db=db)
 
 
 def get_alert_history(uuid: UUID, db: Session = Depends(get_db)):
