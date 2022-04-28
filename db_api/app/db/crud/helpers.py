@@ -21,7 +21,10 @@ def read_by_uuids(uuids: list[UUID], db_table: DeclarativeMeta, db: Session) -> 
 
     unique_uuids = list(set(uuids))
     result = db.execute(select(db_table).where(db_table.uuid.in_(unique_uuids))).scalars().all()
-    assert len(unique_uuids) == len(result)
+
+    if len(unique_uuids) != len(result):
+        raise ValueError("One or more UUIDs was not found in the database.")
+
     return result
 
 
@@ -41,7 +44,10 @@ def read_by_values(db_table: DeclarativeMeta, values: list[str], db: Session) ->
 
     unique_values = set(values)
     result = db.execute(select(db_table).where(db_table.value.in_(values))).scalars().all()
-    assert len(unique_values) == len(result)
+
+    if len(unique_values) != len(result):
+        raise ValueError("One or more values was not found in the database.")
+
     return result
 
 
