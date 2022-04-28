@@ -5,9 +5,9 @@ from uuid import uuid4
 
 from api_models import type_str
 from api_models.analysis_module_type import AnalysisModuleTypeNodeTreeRead, AnalysisModuleTypeRead
-from api_models.node import NodeBase, NodeCreate, NodeRead, NodeTreeCreateWithNode, NodeTreeItemRead, NodeUpdate
+from api_models.node import NodeBase, NodeCreate, NodeRead, NodeTreeItemRead, NodeUpdate
 from api_models.node_detection_point import NodeDetectionPointRead
-from api_models.observable import ObservableRead
+from api_models.observable import ObservableCreate, ObservableRead
 
 
 class AnalysisBase(NodeBase):
@@ -35,13 +35,13 @@ class AnalysisCreate(NodeCreate, AnalysisBase):
         description="""The UUID of the analysis module type that was used to perform this analysis."""
     )
 
-    child_observables: List[AnalysisChildObservableCreate] = Field(
-        default_factory=list, description="The list of child observables produced by this analysis"
+    child_observables: list[ObservableCreate] = Field(
+        default_factory=list, description="A list of child observables discovered during the analysis"
     )
 
-    node_tree: NodeTreeCreateWithNode = Field(description="This defines where in a Node Tree this analysis fits")
-
     parent_observable_uuid: UUID4 = Field(description="The UUID of the target observable for this analysis")
+
+    root_analysis_uuid: UUID4 = Field(description="The UUID of the Root Analysis that will contain this analysis")
 
     run_time: datetime = Field(description="The time at which the analysis was performed")
 
