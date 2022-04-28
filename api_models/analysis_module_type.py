@@ -59,6 +59,10 @@ class AnalysisModuleTypeBase(BaseModel):
 class AnalysisModuleTypeCreate(AnalysisModuleTypeBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis module type")
 
+    version: type_str = Field(
+        default="1.0.0", description="Version number of the analysis module type in SemVer format (ex: 1.0.0)"
+    )
+
 
 class AnalysisModuleTypeNodeTreeRead(BaseModel):
     """Model used to control which information for an AnalysisModuleType is displayed when getting an alert tree"""
