@@ -538,9 +538,7 @@ def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) ->
             for observable in a["observables"]:
                 crud.observable_type.create(model=ObservableTypeCreate(value=observable["type"]), db=db)
 
-        analysis_module_type = crud.analysis_module_type.create(
-            model=AnalysisModuleTypeCreate(value=a["type"], version=a["version"]), db=db
-        )
+        analysis_module_type = crud.analysis_module_type.create(model=AnalysisModuleTypeCreate(value=a["type"]), db=db)
         analysis = crud.analysis.create(
             model=AnalysisCreate(
                 analysis_module_type_uuid=analysis_module_type.uuid,
