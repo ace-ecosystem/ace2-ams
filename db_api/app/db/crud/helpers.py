@@ -12,7 +12,9 @@ def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session) -> Any:
     return db.execute(select(db_table).where(db_table.uuid == uuid)).scalars().one()
 
 
-def read_by_uuids(uuids: list[UUID], db_table: DeclarativeMeta, db: Session) -> list[Any]:
+def read_by_uuids(
+    uuids: list[UUID], db_table: DeclarativeMeta, db: Session, error_on_not_found: bool = True
+) -> list[Any]:
     """Returns a list of objects with the given UUIDs. Raises an exception if the number of objects
     returned from the database does not match the number of unique given UUIDs."""
 
@@ -22,7 +24,7 @@ def read_by_uuids(uuids: list[UUID], db_table: DeclarativeMeta, db: Session) -> 
     unique_uuids = list(set(uuids))
     result = db.execute(select(db_table).where(db_table.uuid.in_(unique_uuids))).scalars().all()
 
-    if len(unique_uuids) != len(result):
+    if error_on_not_found and len(unique_uuids) != len(result):
         raise ValueError("One or more UUIDs was not found in the database.")
 
     return result
@@ -34,7 +36,9 @@ def read_by_value(db_table: DeclarativeMeta, value: str, db: Session) -> Optiona
     return db.execute(select(db_table).where(db_table.value == value)).scalars().one_or_none()
 
 
-def read_by_values(db_table: DeclarativeMeta, values: list[str], db: Session) -> list[Any]:
+def read_by_values(
+    db_table: DeclarativeMeta, values: list[str], db: Session, error_on_not_found: bool = True
+) -> list[Any]:
     """Returns a list of objects with the specific values from the given database table. Raise an
     exception if the number of objects returned from the database does not match the number of
     unique given values."""
@@ -45,7 +49,7 @@ def read_by_values(db_table: DeclarativeMeta, values: list[str], db: Session) ->
     unique_values = set(values)
     result = db.execute(select(db_table).where(db_table.value.in_(values))).scalars().all()
 
-    if len(unique_values) != len(result):
+    if error_on_not_found and len(unique_values) != len(result):
         raise ValueError("One or more values was not found in the database.")
 
     return result
