@@ -4,7 +4,7 @@ from typing import List, Optional
 from uuid import uuid4
 
 from api_models import type_str, validators
-from api_models.node import NodeBase, NodeCreate, NodeRead, NodeTreeCreateWithNode, NodeTreeItemRead, NodeUpdate
+from api_models.node import NodeBase, NodeCreate, NodeRead, NodeTreeItemRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
 from api_models.node_detection_point import NodeDetectionPointRead
 from api_models.node_directive import NodeDirectiveRead
@@ -33,10 +33,6 @@ class ObservableBase(NodeBase):
         description="Whether or not this observable should be included in the observable detection exports",
     )
 
-    redirection_uuid: Optional[UUID4] = Field(
-        description="The UUID of another observable to which this one should point"
-    )
-
     time: datetime = Field(default_factory=datetime.utcnow, description="The time this observable was observed")
 
     type: type_str = Field(description="The type of the observable")
@@ -48,6 +44,8 @@ class ObservableCreateBase(NodeCreate, ObservableBase):
     directives: List[type_str] = Field(
         default_factory=list, description="A list of directives to add to the observable"
     )
+
+    redirection: Optional["ObservableCreate"] = Field(description="Another observable to which this one should point")
 
     tags: List[type_str] = Field(default_factory=list, description="A list of tags to add to the observable")
 
@@ -65,7 +63,7 @@ class ObservableCreateWithAlert(ObservableCreateBase):
 
 
 class ObservableCreate(ObservableCreateBase):
-    node_tree: NodeTreeCreateWithNode = Field(description="This defines where in a Node Tree this observable fits")
+    pass
 
 
 class ObservableRead(NodeRead, ObservableBase):
@@ -82,6 +80,8 @@ class ObservableRead(NodeRead, ObservableBase):
     observable_relationships: List["ObservableRelationshipRead"] = Field(
         description="A list of observable relationships for this observable"
     )
+
+    redirection: Optional["ObservableRead"] = Field(description="Another observable to which this one points")
 
     tags: List[NodeTagRead] = Field(description="A list of tags added to the observable")
 
