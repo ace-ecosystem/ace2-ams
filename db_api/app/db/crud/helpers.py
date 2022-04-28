@@ -6,7 +6,7 @@ from typing import Any, Optional
 from uuid import UUID
 
 
-def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session):
+def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session) -> Any:
     """Returns the object with the specific UUID from the given database table."""
     return db.execute(select(db_table).where(db_table.uuid == uuid)).scalars().one()
 
