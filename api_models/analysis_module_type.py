@@ -12,7 +12,7 @@ class AnalysisModuleTypeBase(BaseModel):
     """Represents a type of analysis module registered with the core."""
 
     cache_seconds: StrictInt = Field(
-        description="The number of seconds that analysis produced by this module is cached"
+        default=300, description="The number of seconds that analysis produced by this module is cached"
     )
 
     description: Optional[type_str] = Field(
