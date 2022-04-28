@@ -30,14 +30,14 @@ def add_root_observable_to_root_analysis(observable_uuid: UUID, root_analysis_uu
         )
 
 
-def read_alert_by_uuid(uuid: UUID, db: Session) -> Alert:
+def read_by_uuid(uuid: UUID, db: Session) -> Alert:
     return db.execute(select(Alert).where(Alert.uuid == uuid)).scalars().one()
 
 
 def read_tree(uuid: UUID, db: Session) -> dict:
     # The Alert db object has "analyses" list and "root_observables" list. Each observable in root_observables will
     # be a top-level key in the returned dictionary. The "analyses" list is every unique analysis object in the alert.
-    db_alert = read_alert_by_uuid(uuid=uuid, db=db)
+    db_alert = read_by_uuid(uuid=uuid, db=db)
 
     # Organize the root observables in a dictionary where their UUID is the key
     root_observables: dict[UUID, ObservableNodeTreeRead] = {
