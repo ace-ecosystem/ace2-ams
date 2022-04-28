@@ -8,18 +8,34 @@ from uuid import UUID
 
 def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session) -> Any:
     """Returns the object with the specific UUID from the given database table."""
+
     return db.execute(select(db_table).where(db_table.uuid == uuid)).scalars().one()
+
+
+def read_by_uuids(uuids: list[UUID], db_table: DeclarativeMeta, db: Session) -> list[Any]:
+    """Returns a list of objects with the given UUIDs. Raises an exception if the number of objects
+    returned from the database does not match the number of unique given UUIDs."""
+
+    if not uuids:
+        return uuids
+
+    unique_uuids = list(set(uuids))
+    result = db.execute(select(db_table).where(db_table.uuid.in_(unique_uuids))).scalars().all()
+    assert len(unique_uuids) == len(result)
+    return result
 
 
 def read_by_value(db_table: DeclarativeMeta, value: str, db: Session) -> Optional[Any]:
     """Returns the object with the specific value (if it exists) from the given database table."""
+
     return db.execute(select(db_table).where(db_table.value == value)).scalars().one_or_none()
 
 
 def read_by_values(db_table: DeclarativeMeta, values: list[str], db: Session) -> list[Any]:
-    """Returns all of the objects with the specific values (if they exist) from the given database table.
-    Raises an exception if the number of objects returned from the database does not match the number of
+    """Returns a list of objects with the specific values from the given database table. Raise an
+    exception if the number of objects returned from the database does not match the number of
     unique given values."""
+
     if not values:
         return []
 
@@ -31,4 +47,5 @@ def read_by_values(db_table: DeclarativeMeta, values: list[str], db: Session) ->
 
 def utcnow() -> datetime:
     """Returns a timezone-aware version of datetime.utcnow()."""
+
     return datetime.now(timezone.utc)
