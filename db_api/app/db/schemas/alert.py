@@ -10,9 +10,11 @@ from api_models.alert import AlertRead, AlertTreeRead
 from db.database import Base
 from db.schemas.alert_analysis_mapping import alert_analysis_mapping
 from db.schemas.alert_root_observable_mapping import alert_root_observable_mapping
+from db.schemas.analysis import Analysis
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.node import Node
+from db.schemas.observable import Observable
 
 
 class AlertHistory(Base, HistoryMixin):
@@ -26,7 +28,8 @@ class Alert(Node, HasHistory):
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
 
-    analyses = relationship("Analysis", secondary=alert_analysis_mapping, lazy="selectin")
+    # Analyses are lazy loaded and are not included by default when fetching an alert from the API.
+    analyses: list[Analysis] = relationship("Analysis", secondary=alert_analysis_mapping)
 
     description = Column(String)
 
@@ -71,7 +74,9 @@ class Alert(Node, HasHistory):
 
     queue_uuid = Column(UUID(as_uuid=True), ForeignKey("queue.uuid"), nullable=False, index=True)
 
-    root_observables = relationship("Observable", secondary=alert_root_observable_mapping, lazy="selectin")
+    root_observables: list[Observable] = relationship(
+        "Observable", secondary=alert_root_observable_mapping, lazy="selectin"
+    )
 
     tool = relationship("AlertTool", lazy="selectin")
 

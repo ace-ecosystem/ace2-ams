@@ -87,7 +87,7 @@ class Node(Base):
 
     threats = relationship("NodeThreat", secondary=node_threat_mapping, lazy="selectin")
 
-    version = Column(UUID(as_uuid=True), nullable=False)
+    version = Column(UUID(as_uuid=True), server_default=func.gen_random_uuid(), nullable=False)
 
     __mapper_args__ = {"polymorphic_identity": "node", "polymorphic_on": node_type, "with_polymorphic": "*"}
 
