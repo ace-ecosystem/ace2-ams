@@ -13,7 +13,7 @@ from api_models.node_comment import NodeCommentRead
 from api_models.node_tag import NodeTagRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
-from api_models.observable import ObservableCreateWithAlert
+from api_models.observable import ObservableCreate
 from api_models.queue import QueueRead
 from api_models.user import UserRead
 
@@ -42,15 +42,7 @@ class AlertBase(NodeBase):
 class AlertCreate(NodeCreate, AlertBase):
     name: type_str = Field(description="""The name of the alert""")
 
-    tool: Optional[type_str] = Field(description="The tool that created this alert")
-
-    tool_instance: Optional[type_str] = Field(description="The instance of the tool that created this alert")
-
-    type: type_str = Field(description="The type of this alert")
-
-    uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the alert")
-
-    observables: List[ObservableCreateWithAlert] = Field(
+    root_observables: List[ObservableCreate] = Field(
         description="A list of observables that should be added to the alert"
     )
 
@@ -61,6 +53,14 @@ class AlertCreate(NodeCreate, AlertBase):
     )
 
     threats: List[type_str] = Field(default_factory=list, description="A list of threats to add to the alert")
+
+    tool: Optional[type_str] = Field(description="The tool that created this alert")
+
+    tool_instance: Optional[type_str] = Field(description="The instance of the tool that created this alert")
+
+    type: type_str = Field(description="The type of this alert")
+
+    uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the alert")
 
 
 class AlertRead(NodeRead, AlertBase):

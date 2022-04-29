@@ -13,8 +13,10 @@ from db.crud import event_status
 from db.crud import event_type
 from db.crud import event_vector
 from db.crud import helpers
+from db.crud import history
 from db.crud import node_directive
 from db.crud import node_tag
+from db.crud import node_threat
 from db.crud import node_threat_actor
 from db.crud import node_threat_type
 from db.crud import observable_type

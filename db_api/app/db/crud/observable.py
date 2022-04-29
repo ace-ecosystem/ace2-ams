@@ -14,6 +14,8 @@ def create(
 ) -> Observable:
     obj = read_by_type_value(type=model.type, value=model.value, db=db)
 
+    # TODO: Add the Analysis objects if the ObservableCreate has analyses
+
     if obj is None:
         obj = Observable(
             context=model.context,

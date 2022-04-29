@@ -3,11 +3,13 @@ import json
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import insert, select
 from sqlalchemy.orm import Session
+from typing import Optional
 from uuid import UUID
 
-from api_models.alert import AlertTreeRead
+from api_models.alert import AlertCreate, AlertTreeRead
 from api_models.analysis import AnalysisNodeTreeRead
 from api_models.observable import ObservableNodeTreeRead
+from db import crud
 from db.schemas.alert import Alert
 from db.schemas.alert_root_observable_mapping import alert_root_observable_mapping
 
@@ -30,8 +32,32 @@ def add_root_observable_to_root_analysis(observable_uuid: UUID, root_analysis_uu
         )
 
 
-def read_by_uuid(uuid: UUID, db: Session) -> Alert:
-    return db.execute(select(Alert).where(Alert.uuid == uuid)).scalars().one()
+def create(model: AlertCreate, db: Session) -> Alert:
+    obj = Alert(
+        description=model.description,
+        event_time=model.event_time,
+        insert_time=model.insert_time,
+        instructions=model.instructions,
+        name=model.name,
+        queue=crud.queue.read_by_value(value=model.queue, db=db),
+        root_observables=[crud.observable.create(model=o, db=db) for o in model.root_observables],
+        tool=crud.alert_tool.read_by_value(value=model.tool, db=db),
+        tool_instance=crud.alert_tool_instance.read_by_value(value=model.tool_instance, db=db),
+        type=crud.alert_type.read_by_value(value=model.type, db=db),
+        uuid=model.uuid,
+    )
+
+    if model.owner is not None:
+        obj.owner = crud.user.read_by_username(username=model.owner, db=db)
+
+    db.add(obj)
+    db.flush()
+
+    return obj
+
+
+def read_by_uuid(uuid: UUID, db: Session) -> Optional[Alert]:
+    return db.execute(select(Alert).where(Alert.uuid == uuid)).scalars().one_or_none()
 
 
 def read_tree(uuid: UUID, db: Session) -> dict:

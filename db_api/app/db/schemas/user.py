@@ -44,6 +44,8 @@ class User(Base, HasHistory):
 
     password = Column(String, nullable=False)
 
+    refresh_token = Column(String)
+
     roles = relationship("UserRole", secondary=user_role_mapping, passive_deletes=True, lazy="selectin")
 
     timezone = Column(String, default="UTC", nullable=False)
@@ -51,8 +53,6 @@ class User(Base, HasHistory):
     training = Column(Boolean, default=True, nullable=False)
 
     username = Column(String, unique=True, nullable=False)
-
-    refresh_token = Column(String)
 
     @property
     def history_snapshot(self):
