@@ -754,12 +754,12 @@ def test_get_sort_by_type(client, db):
 
 
 def test_get_alert_tree(client, db):
-    alert_tree = helpers.create_alert_from_json_file(
+    alert = helpers.create_alert_from_json_file(
         db=db, json_path="/app/tests/alerts/small.json", alert_name="Test Alert"
     )
 
     # The small.json alert has 14 observables and 16 analyses. However, it only has two root observables.
-    get = client.get(f"/api/alert/{alert_tree.node_uuid}")
+    get = client.get(f"/api/alert/{alert.uuid}")
     assert str(get.json()["children"]).count("'observable'") == 14
     assert str(get.json()["children"]).count("'analysis'") == 16
     assert len(get.json()["children"]) == 2

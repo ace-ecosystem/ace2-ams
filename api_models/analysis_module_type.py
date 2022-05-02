@@ -12,7 +12,7 @@ class AnalysisModuleTypeBase(BaseModel):
     """Represents a type of analysis module registered with the core."""
 
     cache_seconds: StrictInt = Field(
-        description="The number of seconds that analysis produced by this module is cached"
+        default=300, description="The number of seconds that analysis produced by this module is cached"
     )
 
     description: Optional[type_str] = Field(
@@ -58,6 +58,10 @@ class AnalysisModuleTypeBase(BaseModel):
 
 class AnalysisModuleTypeCreate(AnalysisModuleTypeBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis module type")
+
+    version: type_str = Field(
+        default="1.0.0", description="Version number of the analysis module type in SemVer format (ex: 1.0.0)"
+    )
 
 
 class AnalysisModuleTypeNodeTreeRead(BaseModel):

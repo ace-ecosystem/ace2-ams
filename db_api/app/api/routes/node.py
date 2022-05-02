@@ -60,7 +60,7 @@ def create_node(
 
 def update_node(
     node_update: NodeUpdate, uuid: UUID, db_table: DeclarativeMeta, db: Session
-) -> tuple[Node, list[crud.Diff]]:
+) -> tuple[Node, list[crud.history.Diff]]:
     """
     Helper function when updating a Node that enforces version matching and updates the attributes inherited from Node.
     """
@@ -69,7 +69,7 @@ def update_node(
     db_node: Node = crud.read(uuid=uuid, db_table=db_table, db=db)
 
     # Capture all of the diffs that were made (for adding to the history tables)
-    diffs: list[crud.Diff] = []
+    diffs: list[crud.history.Diff] = []
 
     # Get the data that was given in the request and use it to update the database object
     update_data = node_update.dict(exclude_unset=True)

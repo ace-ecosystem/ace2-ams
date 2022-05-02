@@ -44,6 +44,7 @@ class AnalysisModuleType(Base):
     version = Column(String, nullable=False, index=True)
 
     __table_args__ = (
+        Index("value_version", value, version),
         Index(
             "amt_value_trgm",
             value,
