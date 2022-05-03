@@ -1,4 +1,5 @@
 from db.crud import alert
+from db.crud import alert_analysis_mapping
 from db.crud import alert_disposition
 from db.crud import alert_tool
 from db.crud import alert_tool_instance

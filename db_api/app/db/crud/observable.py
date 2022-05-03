@@ -14,8 +14,6 @@ def create(
 ) -> Observable:
     obj = read_by_type_value(type=model.type, value=model.value, db=db)
 
-    # TODO: Add the Analysis objects if the ObservableCreate has analyses
-
     if obj is None:
         obj = Observable(
             context=model.context,
@@ -29,6 +27,11 @@ def create(
 
         db.add(obj)
         db.flush()
+
+    for analysis in model.analyses:
+        analysis.parent_observable_uuid = obj.uuid
+
+        crud.analysis.create(model=analysis, db=db)
 
     return obj
 

@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: d96cc6a9639c
+Revision ID: 2cea556281ff
 Revises: 
-Create Date: 2022-04-28 18:35:46.191858
+Create Date: 2022-05-03 13:45:21.018267
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'd96cc6a9639c'
+revision = '2cea556281ff'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -410,10 +410,10 @@ def upgrade() -> None:
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('enabled', sa.Boolean(), nullable=False),
     sa.Column('password', sa.String(), nullable=False),
+    sa.Column('refresh_token', sa.String(), nullable=True),
     sa.Column('timezone', sa.String(), nullable=False),
     sa.Column('training', sa.Boolean(), nullable=False),
     sa.Column('username', sa.String(), nullable=False),
-    sa.Column('refresh_token', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['default_alert_queue_uuid'], ['queue.uuid'], ),
     sa.ForeignKeyConstraint(['default_event_queue_uuid'], ['queue.uuid'], ),
     sa.PrimaryKeyConstraint('uuid'),

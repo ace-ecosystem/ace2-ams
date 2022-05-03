@@ -1,5 +1,5 @@
 from datetime import timedelta
-from sqlalchemy import func, insert, select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from typing import Optional
 from uuid import UUID
@@ -13,23 +13,6 @@ from api_models.analysis_details import (
 )
 from db import crud
 from db.schemas.analysis import Analysis
-from db.schemas.alert_analysis_mapping import alert_analysis_mapping
-
-
-def associate_with_root_analysis(analysis_uuid: UUID, root_analysis_uuid: UUID, db: Session):
-    existing = (
-        db.execute(
-            select(alert_analysis_mapping).where(
-                alert_analysis_mapping.c.alert_uuid == root_analysis_uuid,
-                alert_analysis_mapping.c.analysis_uuid == analysis_uuid,
-            )
-        )
-        .scalars()
-        .one_or_none()
-    )
-
-    if existing is None:
-        db.execute(insert(alert_analysis_mapping).values(alert_uuid=root_analysis_uuid, analysis_uuid=analysis_uuid))
 
 
 def create(model: AnalysisCreate, db: Session) -> Analysis:
@@ -76,7 +59,7 @@ def create(model: AnalysisCreate, db: Session) -> Analysis:
         db.add(obj)
         db.flush()
 
-    associate_with_root_analysis(analysis_uuid=obj.uuid, root_analysis_uuid=model.root_analysis_uuid, db=db)
+    crud.alert_analysis_mapping.create(analysis_uuid=obj.uuid, root_analysis_uuid=model.root_analysis_uuid, db=db)
 
     return obj
 

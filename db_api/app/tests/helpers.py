@@ -350,45 +350,11 @@ def create_user_role(value: str, db: Session) -> UserRole:
 
 
 def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) -> Alert:
-    def _create_analysis(a, root_analysis_uuid: UUID, parent_observable: Observable):
-        if "observables" in a:
-            for observable in a["observables"]:
-                crud.observable_type.create(model=ObservableTypeCreate(value=observable["type"]), db=db)
-
-        analysis_module_type = crud.analysis_module_type.create(model=AnalysisModuleTypeCreate(value=a["type"]), db=db)
-        analysis = crud.analysis.create(
-            model=AnalysisCreate(
-                analysis_module_type_uuid=analysis_module_type.uuid,
-                child_observables=a["observables"] if "observables" in a else [],
-                details=json.dumps(a["details"]) if "details" in a else None,
-                parent_observable_uuid=parent_observable.uuid,
-                root_analysis_uuid=root_analysis_uuid,
-                run_time=crud.helpers.utcnow(),
-            ),
-            db=db,
-        )
-
-        if "observables" in a:
-            for observable in a["observables"]:
-                analysis.child_observables.append(
-                    _create_observable(o=observable, root_analysis_uuid=root_analysis_uuid)
-                )
-
-        return analysis
-
     def _create_observable(o, root_analysis_uuid: UUID) -> ObservableCreate:
-        # crud.observable_type.create(model=ObservableTypeCreate(value=o["type"]), db=db)
-        # observable = crud.observable.create(model=ObservableCreate(**o), db=db)
-
-        # if "analyses" in o:
-        #     for analysis in o["analyses"]:
-        #         _create_analysis(a=analysis, root_analysis_uuid=root_analysis_uuid, parent_observable=observable)
-
-        # return observable
-
         crud.observable_type.create(model=ObservableTypeCreate(value=o["type"]), db=db)
         observable = ObservableCreate(
             for_detection=o["for_detection"] if "for_detection" in o else False,
+            root_analysis_uuid=root_analysis_uuid,
             tags=o["tags"] if "tags" in o else [],
             type=o["type"],
             value=o["value"],
@@ -452,31 +418,6 @@ def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) ->
     if "owner" in data:
         owner = data["owner"]
 
-    # # Build the ObservableCreate and AnalysisCreate objects for the observables
-    # observables: list[ObservableCreate] = []
-    # for o in data["observables"]:
-    #     observable = ObservableCreate(
-    #         for_detection=o["for_detection"] if "for_detection" in o else False,
-    #         tags=o["tags"] if "tags" in o else [],
-    #         type=o["type"],
-    #         value=o["value"],
-    #     )
-    #     if "analyses" in o:
-    #         for a in o["analyses"]:
-    #             analysis_module_type = crud.analysis_module_type.create(
-    #                 AnalysisModuleTypeCreate(value=a["type"]), db=db
-    #             )
-    #             observable.analyses.append(
-    #                 AnalysisCreate(
-    #                     analysis_module_type_uuid=analysis_module_type.uuid,
-    #                     details=json.dumps(a["details"]) if "details" in a else None,
-    #                     parent_observable_uuid=observable.uuid,
-    #                     root_analysis_uuid=alert_uuid,
-    #                     run_time=crud.helpers.utcnow(),
-    #                 )
-    #             )
-    #     observables.append(observable)
-
     alert = factory.alert.create(
         db=db,
         alert_uuid=alert_uuid,
@@ -485,9 +426,6 @@ def create_alert_from_json_file(db: Session, json_path: str, alert_name: str) ->
         owner=owner,
         updated_by_user=disposition_user,
     )
-
-    # for o in data["observables"]:
-    #     _create_observable(o=o, root_analysis_uuid=alert.uuid)
 
     return alert
 

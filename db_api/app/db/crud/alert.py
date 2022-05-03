@@ -1,7 +1,7 @@
 import json
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import insert, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from typing import Optional
 from uuid import UUID
@@ -11,25 +11,6 @@ from api_models.analysis import AnalysisNodeTreeRead
 from api_models.observable import ObservableNodeTreeRead
 from db import crud
 from db.schemas.alert import Alert
-from db.schemas.alert_root_observable_mapping import alert_root_observable_mapping
-
-
-def add_root_observable_to_root_analysis(observable_uuid: UUID, root_analysis_uuid: UUID, db: Session):
-    existing = (
-        db.execute(
-            select(alert_root_observable_mapping).where(
-                alert_root_observable_mapping.c.alert_uuid == root_analysis_uuid,
-                alert_root_observable_mapping.c.observable_uuid == observable_uuid,
-            )
-        )
-        .scalars()
-        .one_or_none()
-    )
-
-    if existing is None:
-        db.execute(
-            insert(alert_root_observable_mapping).values(alert_uuid=root_analysis_uuid, observable_uuid=observable_uuid)
-        )
 
 
 def create(model: AlertCreate, db: Session) -> Alert:
@@ -40,7 +21,6 @@ def create(model: AlertCreate, db: Session) -> Alert:
         instructions=model.instructions,
         name=model.name,
         queue=crud.queue.read_by_value(value=model.queue, db=db),
-        root_observables=[crud.observable.create(model=o, db=db) for o in model.root_observables],
         tool=crud.alert_tool.read_by_value(value=model.tool, db=db),
         tool_instance=crud.alert_tool_instance.read_by_value(value=model.tool_instance, db=db),
         type=crud.alert_type.read_by_value(value=model.type, db=db),
@@ -52,6 +32,11 @@ def create(model: AlertCreate, db: Session) -> Alert:
 
     db.add(obj)
     db.flush()
+
+    # Associate the observables with the alert after the alert is flushed to the database. This is because
+    # the alert UUID is required if the observables also go on to create analyses since an analysis object
+    # gets linked to an existing alert.
+    obj.root_observables = [crud.observable.create(model=o, db=db) for o in model.root_observables]
 
     return obj
 

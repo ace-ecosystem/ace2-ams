@@ -58,14 +58,12 @@ class ObservableCreateBase(NodeCreate, ObservableBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the observable")
 
 
-class ObservableCreateWithAlert(ObservableCreateBase):
-    pass
-
-
 class ObservableCreate(ObservableCreateBase):
     analyses: "list[AnalysisCreate]" = Field(
         default_factory=list, description="A list of analysis results to add as children to the observable"
     )
+
+    root_analysis_uuid: UUID4 = Field(description="The UUID of the Root Analysis that will contain this observable")
 
 
 class ObservableRead(NodeRead, ObservableBase):
@@ -135,7 +133,7 @@ class ObservableRelationshipRead(NodeRelationshipRead):
 
 
 # This is needed for the circular relationship between ObservableRead and ObservableRelationshipRead
-# and Observable <-> Analysis.
+# and ObservableCreate <-> AnalysisCreate.
 from api_models.analysis import AnalysisCreate
 
 ObservableCreate.update_forward_refs()
