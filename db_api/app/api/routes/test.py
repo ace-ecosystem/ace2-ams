@@ -9,7 +9,7 @@ from api_models.test import AddTestAlert, AddTestEvent
 from core.config import is_in_testing_mode
 from db.database import get_db
 from seed import seed
-from tests import helpers as test_helpers
+from tests import factory
 
 
 router = APIRouter(
@@ -27,7 +27,7 @@ def add_test_alerts(alert: AddTestAlert, db: Session = Depends(get_db)):
     # Only proceed if the API is running in TESTING mode
     if is_in_testing_mode():
         for i in range(alert.count):
-            test_helpers.create_alert_from_json_file(
+            factory.alert.create_from_json_file(
                 db=db, json_path=f"/app/tests/alerts/{alert.template}", alert_name=f"Manual Alert {i}"
             )
 

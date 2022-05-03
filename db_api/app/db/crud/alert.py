@@ -38,6 +38,15 @@ def create(model: AlertCreate, db: Session) -> Alert:
     # gets linked to an existing alert.
     obj.root_observables = [crud.observable.create(model=o, db=db) for o in model.root_observables]
 
+    # Add an alert history entry if the history username was given. This would typically only be
+    # supplied by the GUI when an analyst creates a manual alert.
+    if model.history_username is not None:
+        crud.history.record_node_create_history(
+            record_node=obj,
+            action_by=crud.user.read_by_username(username=model.history_username, db=db),
+            db=db,
+        )
+
     return obj
 
 

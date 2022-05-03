@@ -28,6 +28,15 @@ def create(
         db.add(obj)
         db.flush()
 
+        # Add an observable history entry if the history username was given. This would typically only be
+        # supplied by the GUI when an analyst creates a manual alert or adds an observable to an alert.
+        if model.history_username is not None:
+            crud.history.record_node_create_history(
+                record_node=obj,
+                action_by=crud.user.read_by_username(username=model.history_username, db=db),
+                db=db,
+            )
+
     for analysis in model.analyses:
         analysis.parent_observable_uuid = obj.uuid
 

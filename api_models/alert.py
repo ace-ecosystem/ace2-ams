@@ -40,6 +40,10 @@ class AlertBase(NodeBase):
 
 
 class AlertCreate(NodeCreate, AlertBase):
+    history_username: Optional[type_str] = Field(
+        description="If given, an alert history record will be created and associated with the user"
+    )
+
     name: type_str = Field(description="""The name of the alert""")
 
     root_observables: List[ObservableCreate] = Field(

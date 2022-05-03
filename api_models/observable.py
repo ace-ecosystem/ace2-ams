@@ -45,6 +45,10 @@ class ObservableCreateBase(NodeCreate, ObservableBase):
         default_factory=list, description="A list of directives to add to the observable"
     )
 
+    history_username: Optional[type_str] = Field(
+        description="If given, an observable history record will be created and associated with the user"
+    )
+
     redirection: "Optional[ObservableCreate]" = Field(description="Another observable to which this one should point")
 
     tags: list[type_str] = Field(default_factory=list, description="A list of tags to add to the observable")
