@@ -48,3 +48,6 @@ export const alertRangeFilters = {
     end: alertPropertyTypes.INSERT_TIME_BEFORE_PROPERTY,
   },
 };
+
+export const FALSE_POSITIVE_DISPOSITION_STRING = "FALSE_POSITIVE";
+export const IGNORE_DISPOSITION_STRING = "IGNORE";

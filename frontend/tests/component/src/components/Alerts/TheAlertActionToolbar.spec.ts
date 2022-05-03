@@ -8,13 +8,15 @@ import router from "@/router/index";
 
 interface TheAlertActionToolbarProps {
   reloadObject: "node" | "table";
+  showFalsePositiveShortcut?: boolean;
+  showIgnoreShortcut?: boolean;
 }
 
-const props: TheAlertActionToolbarProps = {
+const defaultProps: TheAlertActionToolbarProps = {
   reloadObject: "node",
 };
 
-function factory() {
+function factory(props = defaultProps) {
   return mount(TheAlertActionToolbar, {
     global: {
       plugins: [PrimeVue, createPinia(), router],
@@ -36,5 +38,44 @@ describe("TheAlertActionToolbar", () => {
     factory();
     cy.contains("Disposition").click();
     cy.contains("Set Disposition").should("be.visible");
+  });
+  it("renders as expected when optional button props are enabled", () => {
+    factory({
+      reloadObject: "node",
+      showFalsePositiveShortcut: true,
+      showIgnoreShortcut: true,
+    });
+    cy.contains("FP").should("be.visible");
+    cy.contains("Ignore").should("be.visible");
+    cy.contains("Disposition").should("be.visible");
+    cy.contains("Remediate").should("be.visible");
+  });
+  it("should emit 'falsePositiveClicked' when FP button clicked", () => {
+    factory({
+      reloadObject: "node",
+      showFalsePositiveShortcut: true,
+    });
+    cy.contains("FP")
+      .click()
+      .then(() => {
+        cy.wrap(Cypress.vueWrapper.emitted()).should(
+          "have.property",
+          "falsePositiveClicked",
+        );
+      });
+  });
+  it("should emit 'ignoreClicked' when ignore button clicked", () => {
+    factory({
+      reloadObject: "node",
+      showIgnoreShortcut: true,
+    });
+    cy.contains("Ignore")
+      .click()
+      .then(() => {
+        cy.wrap(Cypress.vueWrapper.emitted()).should(
+          "have.property",
+          "ignoreClicked",
+        );
+      });
   });
 });

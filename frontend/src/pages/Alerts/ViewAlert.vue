@@ -1,7 +1,18 @@
 <!-- ViewAlert.vue -->
 
 <template>
-  <TheAlertActionToolbar reload-object="node" />
+  <div v-if="error" class="p-col">
+    <Message severity="error" @close="handleError" data-cy="error-message">{{
+      error
+    }}</Message>
+  </div>
+  <TheAlertActionToolbar
+    reload-object="node"
+    :show-false-positive-shortcut="true"
+    :show-ignore-shortcut="true"
+    @false-positive-clicked="dispositionAlert('falsePositive')"
+    @ignore-clicked="dispositionAlert('ignore')"
+  />
   <div v-if="alertStore.open">
     <TheAlertDetails />
     <br />
@@ -11,7 +22,7 @@
           <AlertTree
             id="alert-tree"
             :items="alertStore.open.children"
-            :alert-id="route.params.alertID"
+            :alert-id="alertID"
           />
         </div>
       </template>
@@ -19,10 +30,12 @@
   </div>
 </template>
 
-<script setup>
-  import { onBeforeMount, onUnmounted, provide } from "vue";
-  import Card from "primevue/card";
+<script setup lang="ts">
+  import { onBeforeMount, onUnmounted, provide, inject, ref } from "vue";
   import { useRoute } from "vue-router";
+
+  import Card from "primevue/card";
+  import Message from "primevue/message";
 
   import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
   import AlertTree from "@/components/Alerts/AlertTree.vue";
@@ -33,34 +46,70 @@
   const route = useRoute();
   const alertStore = useAlertStore();
   const selectedAlertStore = useSelectedAlertStore();
+  const alertID = route.params.alertID! as string;
+  const config = inject("config") as Record<string, any>;
+  const error = ref<string>();
 
   provide("nodeType", "alerts");
 
   onBeforeMount(async () => {
-    await initPage(route.params.alertID);
+    await initPage();
   });
 
   onUnmounted(() => {
     selectedAlertStore.unselectAll();
   });
 
+  const dispositionAlert = async (disposition: "falsePositive" | "ignore") => {
+    let dispositionString;
+
+    if (disposition == "falsePositive") {
+      dispositionString = config.alerts.FALSE_POSITIVE_DISPOSITION_STRING;
+    } else {
+      dispositionString = config.alerts.IGNORE_DISPOSITION_STRING;
+    }
+    if (dispositionString) {
+      try {
+        await alertStore.update([
+          {
+            uuid: alertID,
+            disposition: dispositionString,
+          },
+        ]);
+        await reloadPage();
+      } catch (e: unknown) {
+        if (typeof e === "string") {
+          error.value = e;
+        } else if (e instanceof Error) {
+          error.value = e.message;
+        }
+      }
+    } else {
+      error.value = `Contact admin: disposition could not be set; string for '${disposition}' must be configured`;
+    }
+  };
+
   alertStore.$subscribe(async (_, state) => {
     if (state.requestReload) {
-      await reloadPage(route.params.alertID);
+      await reloadPage();
     }
   });
 
   async function reloadPage() {
     alertStore.$reset();
-    await alertStore.read(route.params.alertID);
+    await alertStore.read(alertID);
   }
 
-  async function initPage(alertID) {
+  async function initPage() {
     selectedAlertStore.unselectAll();
     selectedAlertStore.select(alertID);
     alertStore.$reset();
     await alertStore.read(alertID);
   }
+  const handleError = () => {
+    error.value = undefined;
+    close();
+  };
 </script>
 
 <style>
