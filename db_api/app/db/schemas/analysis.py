@@ -66,5 +66,5 @@ class Analysis(Node):
     def cached_until(self):
         return self.cached_during.upper
 
-    def serialize_for_node_tree(self) -> AnalysisNodeTreeRead:
+    def convert_to_pydantic(self) -> AnalysisNodeTreeRead:
         return AnalysisNodeTreeRead(**self.__dict__)

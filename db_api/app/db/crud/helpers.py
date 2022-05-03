@@ -6,6 +6,12 @@ from typing import Any, Optional
 from uuid import UUID
 
 
+def read_all(db_table: DeclarativeMeta, db: Session) -> list[Any]:
+    """Returns all of the objects from the given database table."""
+
+    return db.execute(select(db_table)).scalars().all()
+
+
 def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session) -> Any:
     """Returns the object with the specific UUID from the given database table."""
 

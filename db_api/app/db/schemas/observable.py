@@ -72,7 +72,7 @@ class Observable(Node, HasHistory):
         UniqueConstraint("type_uuid", "value", name="type_value_uc"),
     )
 
-    def serialize_for_node_tree(self) -> ObservableNodeTreeRead:
+    def convert_to_pydantic(self) -> ObservableNodeTreeRead:
         return ObservableNodeTreeRead(**self.to_dict())
 
     def to_dict(self):

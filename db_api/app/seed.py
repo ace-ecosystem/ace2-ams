@@ -35,7 +35,7 @@ from db.schemas.user_role import UserRole
 def add_queueable_values(db: Session, db_table: DeclarativeMeta, queues: dict, data: dict, key: str, print_value: str):
     # Transform the data into a dictionary where the keys are the individual values from the config
     # and the values are lists of which queue they belong to.
-    transformed_data: Dict[str, List[str]] = dict()
+    transformed_data: dict[str, List[str]] = {}
 
     for queue in data[key]:
         for value in data[key][queue]:
@@ -54,7 +54,7 @@ def add_queueable_values(db: Session, db_table: DeclarativeMeta, queues: dict, d
 
 def seed(db: Session):
     # Quit early if the database was already seeded
-    if crud.read_all(db_table=Seed, db=db):
+    if crud.helpers.read_all(db_table=Seed, db=db):
         print("The database was already seeded!")
         sys.exit()
 
@@ -74,7 +74,7 @@ def seed(db: Session):
         sys.exit()
 
     # Add the queues to the database
-    queues = dict()
+    queues = {}
     if "queue" in data:
         for value in data["queue"]:
             queues[value] = Queue(value=value)
@@ -162,7 +162,7 @@ def seed(db: Session):
             db.add(ObservableType(value=value))
             print(f"Adding observable type: {value}")
 
-    user_roles = dict()
+    user_roles = {}
     if "user_role" in data:
         for value in data["user_role"]:
             user_roles[value] = UserRole(value=value)
@@ -189,11 +189,9 @@ def seed(db: Session):
     db.add(Seed())
 
     # Commit all of the changes
-    crud.commit(db)
+    db.commit()
 
 
-if __name__ == "__main__":
-    # Don't seed the database automatically if running in TESTING mode
-    if not is_in_testing_mode():
-        db: Session = next(get_db())
-        seed(db)
+if __name__ == "__main__" and not is_in_testing_mode():
+    db: Session = next(get_db())
+    seed(db)

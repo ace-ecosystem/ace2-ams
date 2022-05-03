@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 2cea556281ff
+Revision ID: cdf0572cd395
 Revises: 
-Create Date: 2022-05-03 13:45:21.018267
+Create Date: 2022-05-03 20:46:49.186167
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '2cea556281ff'
+revision = 'cdf0572cd395'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -371,20 +371,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_node_threat_type_queue_mapping_node_threat_type_uuid'), 'node_threat_type_queue_mapping', ['node_threat_type_uuid'], unique=False)
     op.create_index(op.f('ix_node_threat_type_queue_mapping_queue_uuid'), 'node_threat_type_queue_mapping', ['queue_uuid'], unique=False)
-    op.create_table('node_tree',
-    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
-    sa.Column('node_metadata', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('root_node_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('parent_tree_uuid', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.ForeignKeyConstraint(['node_uuid'], ['node.uuid'], ),
-    sa.ForeignKeyConstraint(['parent_tree_uuid'], ['node_tree.uuid'], ),
-    sa.ForeignKeyConstraint(['root_node_uuid'], ['node.uuid'], ),
-    sa.PrimaryKeyConstraint('uuid')
-    )
-    op.create_index(op.f('ix_node_tree_root_node_uuid'), 'node_tree', ['root_node_uuid'], unique=False)
-    op.create_index('uix_root_node', 'node_tree', ['root_node_uuid', 'node_uuid'], unique=True, postgresql_where=sa.text('parent_tree_uuid IS NULL'))
-    op.create_index('uix_root_node_parent', 'node_tree', ['root_node_uuid', 'node_uuid', 'parent_tree_uuid'], unique=True, postgresql_where=sa.text('parent_tree_uuid IS NOT NULL'))
     op.create_table('observable',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('context', sa.String(), nullable=True),
@@ -715,10 +701,6 @@ def downgrade() -> None:
     op.drop_index('type_value', table_name='observable')
     op.drop_index('observable_value_trgm', table_name='observable', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_table('observable')
-    op.drop_index('uix_root_node_parent', table_name='node_tree', postgresql_where=sa.text('parent_tree_uuid IS NOT NULL'))
-    op.drop_index('uix_root_node', table_name='node_tree', postgresql_where=sa.text('parent_tree_uuid IS NULL'))
-    op.drop_index(op.f('ix_node_tree_root_node_uuid'), table_name='node_tree')
-    op.drop_table('node_tree')
     op.drop_index(op.f('ix_node_threat_type_queue_mapping_queue_uuid'), table_name='node_threat_type_queue_mapping')
     op.drop_index(op.f('ix_node_threat_type_queue_mapping_node_threat_type_uuid'), table_name='node_threat_type_queue_mapping')
     op.drop_table('node_threat_type_queue_mapping')

@@ -39,32 +39,32 @@ class Node(Base):
     #
     # Finally, "viewonly" is used on the relationship to prevent attempts to add tags to this list.
 
-    child_tags = relationship(
-        "NodeTag",
-        secondary="join(NodeTag, node_tag_mapping, NodeTag.uuid == node_tag_mapping.c.tag_uuid)."
-        "join(NodeTree, NodeTree.node_uuid == node_tag_mapping.c.node_uuid)",
-        primaryjoin="and_(Node.uuid == NodeTree.root_node_uuid, Node.uuid != NodeTree.node_uuid)",
-        viewonly=True,
-        lazy="selectin",
-    )
+    # child_tags = relationship(
+    #     "NodeTag",
+    #     secondary="join(NodeTag, node_tag_mapping, NodeTag.uuid == node_tag_mapping.c.tag_uuid)."
+    #     "join(NodeTree, NodeTree.node_uuid == node_tag_mapping.c.node_uuid)",
+    #     primaryjoin="and_(Node.uuid == NodeTree.root_node_uuid, Node.uuid != NodeTree.node_uuid)",
+    #     viewonly=True,
+    #     lazy="selectin",
+    # )
 
-    child_threat_actors = relationship(
-        "NodeThreatActor",
-        secondary="join(NodeThreatActor, node_threat_actor_mapping, NodeThreatActor.uuid == node_threat_actor_mapping.c.threat_actor_uuid)."
-        "join(NodeTree, NodeTree.node_uuid == node_threat_actor_mapping.c.node_uuid)",
-        primaryjoin="and_(Node.uuid == NodeTree.root_node_uuid, Node.uuid != NodeTree.node_uuid)",
-        viewonly=True,
-        lazy="selectin",
-    )
+    # child_threat_actors = relationship(
+    #     "NodeThreatActor",
+    #     secondary="join(NodeThreatActor, node_threat_actor_mapping, NodeThreatActor.uuid == node_threat_actor_mapping.c.threat_actor_uuid)."
+    #     "join(NodeTree, NodeTree.node_uuid == node_threat_actor_mapping.c.node_uuid)",
+    #     primaryjoin="and_(Node.uuid == NodeTree.root_node_uuid, Node.uuid != NodeTree.node_uuid)",
+    #     viewonly=True,
+    #     lazy="selectin",
+    # )
 
-    child_threats = relationship(
-        "NodeThreat",
-        secondary="join(NodeThreat, node_threat_mapping, NodeThreat.uuid == node_threat_mapping.c.threat_uuid)."
-        "join(NodeTree, NodeTree.node_uuid == node_threat_mapping.c.node_uuid)",
-        primaryjoin="and_(Node.uuid == NodeTree.root_node_uuid, Node.uuid != NodeTree.node_uuid)",
-        viewonly=True,
-        lazy="selectin",
-    )
+    # child_threats = relationship(
+    #     "NodeThreat",
+    #     secondary="join(NodeThreat, node_threat_mapping, NodeThreat.uuid == node_threat_mapping.c.threat_uuid)."
+    #     "join(NodeTree, NodeTree.node_uuid == node_threat_mapping.c.node_uuid)",
+    #     primaryjoin="and_(Node.uuid == NodeTree.root_node_uuid, Node.uuid != NodeTree.node_uuid)",
+    #     viewonly=True,
+    #     lazy="selectin",
+    # )
 
     comments = relationship("NodeComment", lazy="selectin")
 
@@ -91,5 +91,5 @@ class Node(Base):
 
     __mapper_args__ = {"polymorphic_identity": "node", "polymorphic_on": node_type, "with_polymorphic": "*"}
 
-    def serialize_for_node_tree(self):
-        raise NotImplementedError("A Node subclass must implement serialize_for_node_tree")
+    def convert_to_pydantic(self):
+        raise NotImplementedError("A Node subclass must implement convert_to_pydantic")

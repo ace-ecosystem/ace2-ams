@@ -61,13 +61,13 @@ def read_tree(uuid: UUID, db: Session) -> dict:
 
     # Organize the root observables in a dictionary where their UUID is the key
     root_observables: dict[UUID, ObservableNodeTreeRead] = {
-        o.uuid: o.serialize_for_node_tree() for o in db_alert.root_observables
+        o.uuid: o.convert_to_pydantic() for o in db_alert.root_observables
     }
 
     # Organize the child observables in a dictionary where their UUID is the key
     db_child_observables = {co for a in db_alert.analyses for co in a.child_observables}
     child_observables: dict[UUID, ObservableNodeTreeRead] = {
-        o.uuid: o.serialize_for_node_tree() for o in db_child_observables
+        o.uuid: o.convert_to_pydantic() for o in db_child_observables
     }
 
     # Organize the analyses in a dictionary where their parent_observable_uuid is the key as well as
@@ -78,11 +78,11 @@ def read_tree(uuid: UUID, db: Session) -> dict:
         if db_analysis.parent_observable_uuid not in analyses_by_parent_observable:
             analyses_by_parent_observable[db_analysis.parent_observable_uuid] = []
 
-        analysis = db_analysis.serialize_for_node_tree()
+        analysis = db_analysis.convert_to_pydantic()
         analyses_by_parent_observable[db_analysis.parent_observable_uuid].append(analysis)
         analyses_by_uuid[db_analysis.uuid] = analysis
 
-        # If this analysis has child observables, add the serialized observable as a child to the serialized analysis.
+        # If this analysis has child observables, add the observable model as a child to the analysis model.
         for db_child_observable in db_analysis.child_observables:
             analyses_by_uuid[db_analysis.uuid].children.append(child_observables[db_child_observable.uuid])
 

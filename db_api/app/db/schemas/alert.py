@@ -101,7 +101,7 @@ class Alert(Node, HasHistory):
         ),
     )
 
-    def serialize_for_node_tree(self) -> AlertTreeRead:
+    def convert_to_pydantic(self) -> AlertTreeRead:
         return AlertTreeRead(**self.__dict__)
 
     @property

@@ -90,7 +90,7 @@ class Event(Node, HasHistory):
 
     __mapper_args__ = {"polymorphic_identity": "event", "polymorphic_load": "inline"}
 
-    def serialize_for_node_tree(self) -> EventRead:
+    def convert_to_pydantic(self) -> EventRead:
         return EventRead(**self.__dict__)
 
     @property

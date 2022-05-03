@@ -46,7 +46,6 @@ from db.schemas.node_threat_node_threat_type_mapping import node_threat_node_thr
 from db.schemas.node_threat_queue_mapping import node_threat_queue_mapping
 from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.node_threat_type_queue_mapping import node_threat_type_queue_mapping
-from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
