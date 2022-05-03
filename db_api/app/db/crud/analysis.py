@@ -44,6 +44,11 @@ def create(model: AnalysisCreate, db: Session) -> Analysis:
 
         obj = Analysis(
             analysis_module_type=analysis_module_type,
+            # The [) range operator is described here:
+            # https://www.postgresql.org/docs/current/rangetypes.html#RANGETYPES-INCLUSIVITY
+            #
+            # [ mean that the lower bound of the range is inclusive, and ) means that the upper bound of
+            # the range is exclusive.
             cached_during=func.tstzrange(
                 model.run_time, model.run_time + timedelta(seconds=analysis_module_type.cache_seconds), "[)"
             ),

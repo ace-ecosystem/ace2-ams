@@ -49,6 +49,10 @@ class Analysis(Node):
             parent_observable_uuid,
             cached_during,
         ),
+        # The PostgreSQL && operator is described here:
+        # https://www.postgresql.org/docs/14/functions-array.html
+        #
+        # It just means that the two ranges overlap.
         ExcludeConstraint(
             ("analysis_module_type_uuid", "="),
             ("parent_observable_uuid", "="),
