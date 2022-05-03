@@ -68,3 +68,6 @@ export const alertRangeFilters = {
     end: alertPropertyTypes.DISPOSITIONED_BEFORE_PROPERTY,
   },
 };
+
+export const FALSE_POSITIVE_DISPOSITION_STRING = "FALSE_POSITIVE";
+export const IGNORE_DISPOSITION_STRING = "IGNORE";
