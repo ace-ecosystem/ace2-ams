@@ -94,10 +94,10 @@
     { value: "tool", label: "Tool" },
     { value: "toolInstance", label: "Tool Instance" },
     { value: "type", label: "Type" },
-    { value: "disposition", label: "Disposition" },
+    { value: "dispositionWithUserAndTime", label: "Disposition" },
     { value: "eventUuid", label: "Event" },
     { value: "queue", label: "Queue" },
-    { value: "owner", label: "Owner" },
+    { value: "ownerWithTime", label: "Owner" },
     { value: "comments", label: "Comments" },
   ];
 
