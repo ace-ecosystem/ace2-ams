@@ -231,11 +231,17 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
     dispositionUser: alert.dispositionUser
       ? alert.dispositionUser.displayName
       : "None",
+    dispositionWithUserAndTime: alert.dispositionUser
+      ? `${alert.dispositionUser.displayName}`
+      : "None",
     eventTime: new Date(alert.eventTime),
     eventUuid: alert.eventUuid ? alert.eventUuid : "None",
     insertTime: new Date(alert.insertTime),
     name: alert.name,
     owner: alert.owner ? alert.owner.displayName : "None",
+    ownerWithTime: alert.owner
+      ? `${alert.owner.displayName} @ ${alert.dispositionTime}`
+      : "None",
     queue: alert.queue.value,
     tags: alert.tags,
     tool: alert.tool ? alert.tool.value : "None",

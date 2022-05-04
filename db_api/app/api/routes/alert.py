@@ -474,6 +474,7 @@ def update_alerts(
             diffs.append(crud.create_diff(field="owner", old=old, new=update_data["owner"]))
 
             db_alert.owner = crud.read_user_by_username(username=update_data["owner"], db=db)
+            db_alert.ownership_time = datetime.utcnow()
 
         if "queue" in update_data:
             diffs.append(crud.create_diff(field="queue", old=db_alert.queue.value, new=update_data["queue"]))
