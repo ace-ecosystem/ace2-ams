@@ -38,7 +38,7 @@ describe("TheAlertDetails", () => {
     cy.get("@getObservables").should("not.have.been.called");
     cy.contains("Test Alert").should("not.exist");
   });
-  it("renders correctly when there is an open alert that has no observables with detection points", () => {
+  it("renders correctly when there is an open alert that has no observables with detection points or instructions", () => {
     cy.stub(NodeTree, "readNodesOfNodeTree")
       .withArgs(["testAlertUuid"], "observable")
       .as("getObservables")
@@ -72,6 +72,26 @@ describe("TheAlertDetails", () => {
     cy.contains("Owner").siblings().should("have.text", "None");
     cy.contains("Comments").siblings().should("have.text", "None");
     cy.contains("No detections found").should("be.visible");
+  });
+  it("renders correctly when there is an open alert that has instructions available", () => {
+    cy.stub(NodeTree, "readNodesOfNodeTree")
+      .withArgs(["testAlertUuid"], "observable")
+      .as("getObservables")
+      .resolves([]);
+    factory({
+      open: alertReadFactory({
+        instructions: "alert instructions example",
+        tags: [genericObjectReadFactory({ value: "TestTag" })],
+      }),
+      requestReload: false,
+    });
+
+    cy.get("@getObservables").should("have.been.calledOnce");
+
+    cy.get("tr").should("have.length", 12);
+    cy.contains("Instructions")
+      .siblings()
+      .should("have.text", "alert instructions example");
   });
   it("renders correctly when there is an open alert that does have observables with detection points", () => {
     const detectionPointA = {
