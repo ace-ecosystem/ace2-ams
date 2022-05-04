@@ -9,6 +9,7 @@ import {
   nodeUpdate,
 } from "./node";
 import { nodeCommentRead } from "./nodeComment";
+import { nodeDetectionPointRead } from "./nodeDetectionPoint";
 import { nodeDirectiveRead } from "./nodeDirective";
 import { nodeRelationshipRead } from "./nodeRelationship";
 import { nodeTagRead } from "./nodeTag";
@@ -35,6 +36,7 @@ export interface observableCreate extends nodeCreate {
 export interface observableRead extends nodeRead {
   comments: nodeCommentRead[];
   context: string | null;
+  detectionPoints: nodeDetectionPointRead[];
   directives: nodeDirectiveRead[];
   expiresOn: Date | null;
   forDetection: boolean;
