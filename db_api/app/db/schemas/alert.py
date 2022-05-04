@@ -63,6 +63,9 @@ class Alert(Node, HasHistory):
 
     owner = relationship("User", foreign_keys=[owner_uuid], lazy="selectin")
 
+    # Stores the most recent time the alert changed owners
+    ownership_time = Column(DateTime(timezone=True), index=True)
+
     queue = relationship("Queue", lazy="selectin")
 
     queue_uuid = Column(UUID(as_uuid=True), ForeignKey("queue.uuid"), nullable=False, index=True)

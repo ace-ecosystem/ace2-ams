@@ -148,6 +148,7 @@ def create_alert(
 
     if owner:
         alert.owner = create_user(email=f"{owner}@{owner}.com", username=owner, db=db, alert_queue=alert_queue)
+        alert.ownership_time = update_time
         diffs.append(crud.create_diff(field="owner", old=None, new=owner))
 
     if tags:

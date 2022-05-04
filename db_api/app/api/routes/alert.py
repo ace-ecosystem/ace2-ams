@@ -64,6 +64,7 @@ def create_alert(
     # Set the various optional alert properties if they were given in the request.
     if alert.owner:
         new_alert.owner = crud.read_user_by_username(username=alert.owner, db=db)
+        new_alert.ownership_time = datetime.utcnow()
 
     if alert.tool:
         new_alert.tool = crud.read_by_value(value=alert.tool, db_table=AlertTool, db=db)
@@ -474,6 +475,7 @@ def update_alerts(
             diffs.append(crud.create_diff(field="owner", old=old, new=update_data["owner"]))
 
             db_alert.owner = crud.read_user_by_username(username=update_data["owner"], db=db)
+            db_alert.ownership_time = datetime.utcnow()
 
         if "queue" in update_data:
             diffs.append(crud.create_diff(field="queue", old=db_alert.queue.value, new=update_data["queue"]))
