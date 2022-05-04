@@ -52,6 +52,12 @@
                     {{ detection.value }}
                   </td>
                 </tr>
+                <tr v-if="alertStore.open['instructions']">
+                  <td class="header-cell">Instructions</td>
+                  <td class="content-cell">
+                    {{ alertStore.open["instructions"] }}
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
