@@ -4,17 +4,14 @@ import PrimeVue from "primevue/config";
 
 import ObservableLeaf from "@/components/Observables/ObservableLeaf.vue";
 import router from "@/router/index";
-import {
-  observableAction,
-  observableActionUrl,
-  observableTreeRead,
-} from "../../../../../src/models/observable";
-import { observableTreeReadFactory } from "../../../../mocks/observable";
+import { observableActionUrl, observableTreeRead } from "@/models/observable";
+import { observableTreeReadFactory } from "@mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { testConfiguration } from "@/etc/configuration/test";
 import { ObservableInstance } from "@/services/api/observable";
 import ToastService from "primevue/toastservice";
+import Tooltip from "primevue/tooltip";
 
 interface ObservableLeafProps {
   observable: observableTreeRead;
@@ -38,6 +35,7 @@ function factory(
 ) {
   mount(ObservableLeaf, {
     global: {
+      directives: { tooltip: Tooltip },
       plugins: [PrimeVue, ToastService, createCustomCypressPinia(), router],
       provide: {
         config: args.config,
@@ -58,6 +56,23 @@ const observableWithMetadata = observableTreeReadFactory({
   value: "Observable w/ Metadata",
   firstAppearance: true,
   nodeMetadata: { display: { type: "custom type", value: "custom value" } },
+});
+
+const observableWithDetectionPoints = observableTreeReadFactory({
+  value: "Observable w/ Detection Points",
+  firstAppearance: true,
+  detectionPoints: [
+    {
+      insertTime: new Date(),
+      nodeUuid: "1",
+      ...genericObjectReadFactory({ uuid: "1", value: "detection point A" }),
+    },
+    {
+      insertTime: new Date(),
+      nodeUuid: "1",
+      ...genericObjectReadFactory({ uuid: "2", value: "detection point B" }),
+    },
+  ],
 });
 
 const observableWithForDetectionEnabled = observableTreeReadFactory({
@@ -86,6 +101,7 @@ describe("ObservableLeaf", () => {
       .should("be.visible")
       .should("have.css", { color: "black" });
     cy.findByRole("button").should("not.exist");
+    cy.get("[data-cy=detection-point-symbol]").should("not.exist");
   });
   it("renders correctly with default props", () => {
     factory({
@@ -188,6 +204,18 @@ describe("ObservableLeaf", () => {
       "contain.text",
       "custom type (testObservableType): custom value",
     );
+  });
+  it("displays a fire emoji for every detection point belonging to the observable", () => {
+    factory({
+      props: { observable: observableWithDetectionPoints },
+      config: testConfiguration,
+    });
+    cy.get("span").should(
+      "contain.text",
+      "testObservableType: Observable w/ Detection Points",
+    );
+    cy.get("[data-cy=detection-point-symbol]").should("have.length", 2);
+    cy.get("[data-cy=detection-point-symbol]").eq(0).trigger("hover");
   });
   it("sets the alert filters to the an observable's type and value when clicked", () => {
     factory({
