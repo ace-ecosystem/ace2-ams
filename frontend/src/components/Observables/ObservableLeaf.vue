@@ -182,7 +182,9 @@
     const displayValue = `${type}: ${value}`;
 
     if (props.observable.time) {
-      return `${displayValue} @ ${props.observable.time.toISOString()}`;
+      return `${displayValue} @ ${new Date(
+        props.observable.time,
+      ).toISOString()}`;
     }
 
     return displayValue;
