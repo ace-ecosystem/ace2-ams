@@ -52,6 +52,12 @@ const observableWithTags = observableTreeReadFactory({
   tags: [genericObjectReadFactory({ value: "testTag" })],
 });
 
+const observableWithTime = observableTreeReadFactory({
+  value: "Observable w/ Time",
+  children: [],
+  time: new Date(2022, 5, 5, 12, 0, 0, 0),
+});
+
 const observableWithMetadata = observableTreeReadFactory({
   value: "Observable w/ Metadata",
   firstAppearance: true,
@@ -215,7 +221,16 @@ describe("ObservableLeaf", () => {
       "testObservableType: Observable w/ Detection Points",
     );
     cy.get("[data-cy=detection-point-symbol]").should("have.length", 2);
-    cy.get("[data-cy=detection-point-symbol]").eq(0).trigger("hover");
+  });
+  it("displays timestamp associated with observable, if available", () => {
+    factory({
+      props: { observable: observableWithTime },
+      config: testConfiguration,
+    });
+    cy.get("span").should(
+      "contain.text",
+      "testObservableType: Observable w/ Time @ 2022-06-05T16:00:00.000Z",
+    );
   });
   it("sets the alert filters to the an observable's type and value when clicked", () => {
     factory({
