@@ -179,7 +179,15 @@
       }
     }
 
-    return `${type}: ${value}`;
+    const displayValue = `${type}: ${value}`;
+
+    if (props.observable.time) {
+      return `${displayValue} @ ${new Date(
+        props.observable.time,
+      ).toISOString()}`;
+    }
+
+    return displayValue;
   });
 
   const itemClick = async (
