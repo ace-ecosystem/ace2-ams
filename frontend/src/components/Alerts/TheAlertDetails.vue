@@ -1,10 +1,6 @@
 <!-- TheAlertDetails.vue -->
 
 <template>
-  <Message v-if="error" severity="error" data-cy="error-message">{{
-    error
-  }}</Message>
-
   <Card v-if="alertStore.openAlertSummary">
     <template #title>
       {{ alertStore.open.name }}
@@ -35,14 +31,6 @@
                     ></AlertTableCell>
                   </td>
                 </tr>
-                <tr v-if="!alertDetectionPoints.length && !isLoading">
-                  <td class="header-cell">No detections found</td>
-                  <td></td>
-                </tr>
-                <tr v-if="isLoading">
-                  <td class="header-cell">Loading detections...</td>
-                  <td></td>
-                </tr>
                 <tr
                   v-for="detection in alertDetectionPoints"
                   :key="detection.uuid"
@@ -72,7 +60,6 @@
   import AccordionTab from "primevue/accordiontab";
   import Button from "primevue/button";
   import Card from "primevue/card";
-  import Message from "primevue/message";
 
   import NodeTagVue from "@/components/Node/NodeTag.vue";
 
@@ -81,10 +68,8 @@
   import { getAllAlertTags } from "@/etc/helpers";
   import AlertTableCell from "./AlertTableCell.vue";
   import { alertSummary } from "@/models/alert";
-  import { observableRead } from "@/models/observable";
-  import { NodeTree } from "@/services/api/nodeTree";
-  import { onMounted, ref } from "@pinia/testing/node_modules/vue-demi";
   import { nodeDetectionPointRead } from "@/models/nodeDetectionPoint";
+  import { computed } from "vue";
 
   const alertStore = useAlertStore();
 
@@ -101,40 +86,13 @@
     { value: "comments", label: "Comments" },
   ];
 
-  const alertDetectionPoints = ref<nodeDetectionPointRead[]>([]);
-  const isLoading = ref(false);
-  const error = ref<string>();
-
-  onMounted(async () => {
-    if (alertStore.openAlertSummary) {
-      isLoading.value = true;
-      await getAllDetectionPoints(alertStore.openAlertSummary.uuid);
-      isLoading.value = false;
-    }
+  const alertDetectionPoints = computed(() => {
+    let detections: nodeDetectionPointRead[] = [];
+    alertStore.openObservables.forEach((observable) => {
+      detections = [...detections, ...observable.detectionPoints];
+    });
+    return detections;
   });
-//todo convert to computed
-  const getAllDetectionPoints = async (uuid: string) => {
-    try {
-      const unsortedObservables = (await NodeTree.readNodesOfNodeTree(
-        [uuid],
-        "observable",
-      )) as unknown as observableRead[];
-
-      unsortedObservables.forEach((observable) => {
-        alertDetectionPoints.value = [
-          ...alertDetectionPoints.value,
-          ...observable.detectionPoints,
-        ];
-      });
-    } catch (e: unknown) {
-      if (typeof e === "string") {
-        error.value = e;
-      } else if (e instanceof Error) {
-        error.value = e.message;
-      }
-      return;
-    }
-  };
 
   function copyLink() {
     copyToClipboard(window.location.href);

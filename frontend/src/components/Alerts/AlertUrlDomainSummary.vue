@@ -2,77 +2,70 @@
 <!-- A simple table and chart of all URL domains in an alert and their frequency -->
 
 <template>
-  <div class="flex justify-content-evenly">
-    <Chart type="pie" :data="chartData" data-cy="url-domain-pie-chart" />
-    <div style="width: 33%">
-      <DataTable
-        :value="domains"
-        :loading="isLoading"
-        responsive-layout="scroll"
-        data-cy="url-domain-summary-table"
-      >
-        <Column field="domain" header="Domain" :sortable="true"></Column>
-        <Column field="count" header="Count" :sortable="true"></Column>
-      </DataTable>
+  <Panel
+    v-if="domainCounts.length"
+    v-model:collapsed="isCollapsed"
+    data-cy="url-domain-summary-panel"
+  >
+    <template #header>
+      <span style="cursor: pointer" @click="isCollapsed = !isCollapsed"
+        >URL Domain Summary <i :class="headerIcon"></i
+      ></span>
+    </template>
+    <div class="flex">
+      <div style="width: 33%">
+        <DataTable
+          :value="domainCounts"
+          responsive-layout="scroll"
+          data-cy="url-domain-summary-table"
+        >
+          <Column field="domain" header="Domain" :sortable="true"></Column>
+          <Column field="count" header="Count" :sortable="true"></Column>
+          <Column field="percent" header="Percent" :sortable="true"></Column>
+        </DataTable>
+      </div>
     </div>
-  </div>
+  </Panel>
 </template>
 
 <script setup lang="ts">
-  import Chart from "primevue/chart";
   import DataTable from "primevue/datatable";
   import Column from "primevue/column";
-  import Message from "primevue/message";
+  import Panel from "primevue/panel";
 
-  import { defineProps, ref, onMounted } from "vue";
-  import { Event } from "@/services/api/event";
-  import { urlDomainSummaryIndividual } from "@/models/eventSummaries";
+  import { ref, computed } from "vue";
+  import { useAlertStore } from "@/stores/alert";
 
-  const props = defineProps({
-    eventUuid: { type: String, required: true },
+  const alertStore = useAlertStore();
+  const isCollapsed = ref(true);
+
+  const headerIcon = computed(() => {
+    return isCollapsed.value ? "pi pi-chevron-down" : "pi pi-chevron-up";
   });
 
-  const error = ref<string>();
-  const isLoading = ref(false);
-  const domains = ref<urlDomainSummaryIndividual[]>([]);
-  const chartData = ref({
-    labels: [] as string[],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: ["#42A5F5", "#66BB6A", "#FFA726"],
-        hoverBackgroundColor: ["#64B5F6", "#81C784", "#FFB74D"],
-      },
-    ] as any[],
-  });
+  const domainCounts = computed(() => {
+    const total = alertStore.openObservables.length;
+    const domains = {};
+    const domainsCounts = [];
 
-  onMounted(async () => {
-    isLoading.value = true;
-
-    let urlDomainSummary;
-
-    try {
-      urlDomainSummary = await Event.readUrlDomainSummary(props.eventUuid);
-    } catch (e: unknown) {
-      if (typeof e === "string") {
-        error.value = e;
-      } else if (e instanceof Error) {
-        error.value = e.message;
+    alertStore.openObservables.forEach((obs) => {
+      if (obs.type.value == "fqdn") {
+        if (obs.value in domains) {
+          domains[obs.value] += 1;
+        } else {
+          domains[obs.value] = 1;
+        }
       }
+    });
+
+    for (const [key, value] of Object.entries(domains)) {
+      const percent = (value / total) * 100;
+      domainsCounts.push({
+        domain: key,
+        count: value,
+        percent: `${percent.toFixed(2)}%`,
+      });
     }
-
-    isLoading.value = false;
-
-    if (!urlDomainSummary) {
-      return;
-    }
-
-    domains.value = urlDomainSummary.domains;
-    chartData.value.labels = urlDomainSummary.domains.map(
-      (domainSummaryIndividual) => domainSummaryIndividual.domain,
-    );
-    chartData.value.datasets[0].data = urlDomainSummary.domains.map(
-      (domainSummaryIndividual) => domainSummaryIndividual.count,
-    );
+    return domainsCounts;
   });
 </script>
