@@ -136,7 +136,7 @@ export const eventEditableProperties: Record<string, propertyOption[]> = {
 };
 
 export const eventRangeFilters = {
-  "Created Time": {
+  "Created Time (UTC)": {
     start: eventPropertyTypes.CREATED_AFTER_PROPERTY,
     end: eventPropertyTypes.CREATED_BEFORE_PROPERTY,
   },
@@ -150,7 +150,12 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
       sortable: false,
       required: true,
     },
-    { field: "createdTime", header: "Created", sortable: true, default: true },
+    {
+      field: "createdTime",
+      header: "Created (UTC)",
+      sortable: true,
+      default: true,
+    },
     { field: "name", header: "Name", sortable: true, default: true },
     {
       field: "threatActors",
@@ -190,7 +195,12 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
       sortable: false,
       required: true,
     },
-    { field: "createdTime", header: "Created", sortable: true, default: true },
+    {
+      field: "createdTime",
+      header: "Created (UTC)",
+      sortable: true,
+      default: true,
+    },
     { field: "name", header: "Name", sortable: true, default: true },
     {
       field: "threatActors",
@@ -230,7 +240,12 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
       sortable: false,
       required: true,
     },
-    { field: "createdTime", header: "Created", sortable: true, default: true },
+    {
+      field: "createdTime",
+      header: "Created (UTC)",
+      sortable: true,
+      default: true,
+    },
     { field: "name", header: "Name", sortable: true, default: true },
     {
       field: "threatActors",

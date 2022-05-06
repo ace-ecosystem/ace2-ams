@@ -184,7 +184,7 @@
     if (props.observable.time) {
       return `${displayValue} @ ${new Date(
         props.observable.time,
-      ).toISOString()}`;
+      ).toLocaleString("en-US", { timeZone: "UTC" })} UTC`;
     }
 
     return displayValue;

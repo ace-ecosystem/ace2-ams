@@ -129,7 +129,7 @@
   });
 
   const columns = [
-    { field: "eventTime", header: "Event Time" },
+    { field: "eventTime", header: "Event Time (UTC)" },
     { field: "name", header: "Name" },
     { field: "owner", header: "Owner" },
     { field: "disposition", header: "Disposition" },

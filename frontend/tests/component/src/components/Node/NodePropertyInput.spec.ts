@@ -160,7 +160,7 @@ describe("NodePropertyInput", () => {
       },
     });
     cy.contains("Event Time After").should("be.visible");
-    cy.findByDisplayValue("05/25/2022 12:00").should("be.visible");
+    cy.findByDisplayValue("05/25/2022 16:00").should("be.visible");
   });
   it("renders multiselect-type property option correctly (observable types)", () => {
     factory({

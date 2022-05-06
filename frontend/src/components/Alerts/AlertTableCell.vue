@@ -58,21 +58,16 @@
 
   import { alertSummary } from "@/models/alert";
   import { getAllAlertTags, getAlertLink } from "@/etc/helpers";
-  import { isValidDate } from "@/etc/validators";
 
   const props = defineProps({
     data: { type: Object as PropType<alertSummary>, required: true },
     field: { type: String as PropType<keyof alertSummary>, required: true },
   });
 
-  const formatDateTime = (dateTime: unknown) => {
+  const formatDateTime = (dateTime: any) => {
     if (dateTime) {
-      if (isValidDate(dateTime)) {
-        const d = new Date(dateTime);
-        return d.toLocaleString("en-US", { timeZone: "UTC" });
-      } else {
-        return dateTime;
-      }
+      const d = new Date(dateTime);
+      return d.toLocaleString("en-US", { timeZone: "UTC" });
     }
 
     return "None";

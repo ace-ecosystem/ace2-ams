@@ -147,7 +147,9 @@
 
   function formatValue(value: alertFilterValues | eventFilterValues) {
     if (filterNameObject) {
-      if (filterNameObject.stringRepr) {
+      if (filterNameObject.displayRepr) {
+        return filterNameObject.displayRepr(value);
+      } else if (filterNameObject.stringRepr) {
         return filterNameObject.stringRepr(value);
       } else if (
         filterNameObject.optionProperty &&
