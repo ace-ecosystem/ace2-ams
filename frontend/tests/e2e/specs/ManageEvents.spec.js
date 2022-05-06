@@ -535,7 +535,7 @@ describe("ManageEvents.vue Filtering", () => {
       .should("eq", "Complete");
 
     // Check filter val in chip
-    cy.get(".filter-name-text").should("have.text", "Created After:");
+    cy.get(".filter-name-text").should("have.text", "Created After (UTC):");
     cy.get('[data-cy="filter-chip-content"]').should(
       "have.text",
       "2020-01-01T00:00:00.000",
@@ -569,7 +569,7 @@ describe("ManageEvents.vue Filtering", () => {
       .should("eq", "Complete");
 
     // Check filter val in chip
-    cy.get(".filter-name-text").should("have.text", "Created Before:");
+    cy.get(".filter-name-text").should("have.text", "Created Before (UTC):");
     cy.get('[data-cy="filter-chip-content"]').should(
       "have.text",
       "2020-01-01T00:00:00.000",
