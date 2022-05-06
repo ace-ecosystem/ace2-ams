@@ -275,8 +275,8 @@
     }
     // Set start and end date times to capture entierty of each day
     if (startDate && endDate) {
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 0);
+      startDate.setUTCHours(0, 0, 0, 0);
+      endDate.setUTCHours(23, 59, 59, 0);
       dateSelect(startDate, startFilter.value);
       dateSelect(endDate, endFilter.value);
     }

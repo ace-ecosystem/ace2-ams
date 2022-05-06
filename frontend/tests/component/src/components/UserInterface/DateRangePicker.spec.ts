@@ -46,14 +46,14 @@ describe("DateRangePicker", () => {
       },
     });
     // Make sure the "Event Time" filters are the ones that are showing
-    cy.findByDisplayValue("05/25/2022 08:00").should("be.visible");
-    cy.findByDisplayValue("05/30/2022 08:00").should("be.visible");
+    cy.findByDisplayValue("05/25/2022 12:00").should("be.visible");
+    cy.findByDisplayValue("05/30/2022 12:00").should("be.visible");
   });
   it("correctly sets the 'start' date filter when a date is entered enter the start input", () => {
     factory();
     cy.findAllByPlaceholderText("The beginning of time")
       .click()
-      .type("05/25/2022 08:00")
+      .type("05/25/2022 12:00")
       .type("{enter}");
     cy.get("@spy-2").should("be.calledOnceWith", {
       nodeType: "alerts",
@@ -81,7 +81,7 @@ describe("DateRangePicker", () => {
     factory();
     cy.findAllByPlaceholderText("Now")
       .click()
-      .type("05/25/2022 08:00")
+      .type("05/25/2022 12:00")
       .type("{enter}");
     cy.get("@spy-2").should("be.calledOnceWith", {
       nodeType: "alerts",
@@ -262,7 +262,7 @@ describe("DateRangePicker", () => {
     });
 
     // Now the set filters for "Insert Time" should be showing
-    cy.findByDisplayValue("03/25/2022 08:00").should("be.visible");
-    cy.findByDisplayValue("03/30/2022 08:00").should("be.visible");
+    cy.findByDisplayValue("03/25/2022 12:00").should("be.visible");
+    cy.findByDisplayValue("03/30/2022 12:00").should("be.visible");
   });
 });
