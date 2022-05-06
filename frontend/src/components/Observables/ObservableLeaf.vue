@@ -168,7 +168,15 @@
       }
     }
 
-    return `${type}: ${value}`;
+    const displayValue = `${type}: ${value}`;
+
+    if (props.observable.time) {
+      return `${displayValue} @ ${new Date(
+        props.observable.time,
+      ).toLocaleString("en-US", { timeZone: "UTC" })} UTC`;
+    }
+
+    return displayValue;
   });
 
   const itemClick = async (

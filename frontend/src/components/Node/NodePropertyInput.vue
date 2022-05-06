@@ -64,6 +64,7 @@
           mode="dateTime"
           class="inputfield w-16rem"
           is24hr
+          timezone="UTC"
           @update:model-value="updatePropertyValue"
         >
           <template #default="{ inputValue, inputEvents }">

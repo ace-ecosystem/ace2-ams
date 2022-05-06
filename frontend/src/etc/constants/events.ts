@@ -46,10 +46,14 @@ export const eventPropertyTypes: Record<string, string> = {
 };
 export const eventEventTimeProperty: propertyOption = {
   name: eventPropertyTypes.EVENT_TIME_PROPERTY,
-  label: "Event Time",
+  label: "Event Time (UTC)",
   type: inputTypes.DATE,
-  stringRepr: (value: Date): string => {
-    return value.toISOString().replace("Z", "");
+  stringRepr: (filter: Date) => {
+    return filter.toISOString().slice(0, -5);
+  },
+  displayRepr: (filter: Date) => {
+    const d = filter.toISOString().slice(0, -5);
+    return `${d} (UTC)`;
   },
   parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
@@ -57,10 +61,14 @@ export const eventEventTimeProperty: propertyOption = {
 };
 export const eventAlertTimeProperty: propertyOption = {
   name: eventPropertyTypes.ALERT_TIME_PROPERTY,
-  label: "Alert Time",
+  label: "Alert Time (UTC)",
   type: inputTypes.DATE,
-  stringRepr: (value: Date): string => {
-    return value.toISOString().replace("Z", "");
+  stringRepr: (filter: Date) => {
+    return filter.toISOString().slice(0, -5);
+  },
+  displayRepr: (filter: Date) => {
+    const d = filter.toISOString().slice(0, -5);
+    return `${d} (UTC)`;
   },
   parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
@@ -68,10 +76,14 @@ export const eventAlertTimeProperty: propertyOption = {
 };
 export const eventOwnershipTimeProperty: propertyOption = {
   name: eventPropertyTypes.OWNERSHIP_TIME_PROPERTY,
-  label: "Ownership Time",
+  label: "Ownership Time (UTC)",
   type: inputTypes.DATE,
-  stringRepr: (value: Date): string => {
-    return value.toISOString().replace("Z", "");
+  stringRepr: (filter: Date) => {
+    return filter.toISOString().slice(0, -5);
+  },
+  displayRepr: (filter: Date) => {
+    const d = filter.toISOString().slice(0, -5);
+    return `${d} (UTC)`;
   },
   parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
@@ -79,10 +91,14 @@ export const eventOwnershipTimeProperty: propertyOption = {
 };
 export const eventDispositionTimeProperty: propertyOption = {
   name: eventPropertyTypes.DISPOSITION_TIME_PROPERTY,
-  label: "Disposition Time",
+  label: "Disposition Time (UTC)",
   type: inputTypes.DATE,
-  stringRepr: (value: Date): string => {
-    return value.toISOString().replace("Z", "");
+  stringRepr: (filter: Date) => {
+    return filter.toISOString().slice(0, -5);
+  },
+  displayRepr: (filter: Date) => {
+    const d = filter.toISOString().slice(0, -5);
+    return `${d} (UTC)`;
   },
   parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
@@ -90,10 +106,14 @@ export const eventDispositionTimeProperty: propertyOption = {
 };
 export const eventContainTimeProperty: propertyOption = {
   name: eventPropertyTypes.CONTAIN_TIME_PROPERTY,
-  label: "Contain Time",
+  label: "Contain Time (UTC)",
   type: inputTypes.DATE,
-  stringRepr: (value: Date): string => {
-    return value.toISOString().replace("Z", "");
+  stringRepr: (filter: Date) => {
+    return filter.toISOString().slice(0, -5);
+  },
+  displayRepr: (filter: Date) => {
+    const d = filter.toISOString().slice(0, -5);
+    return `${d} (UTC)`;
   },
   parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
@@ -101,10 +121,14 @@ export const eventContainTimeProperty: propertyOption = {
 };
 export const eventRemediationTimeProperty: propertyOption = {
   name: eventPropertyTypes.REMEDIATION_TIME_PROPERTY,
-  label: "Remediation Time",
+  label: "Remediation Time (UTC)",
   type: inputTypes.DATE,
-  stringRepr: (value: Date): string => {
-    return value.toISOString().replace("Z", "");
+  stringRepr: (filter: Date) => {
+    return filter.toISOString().slice(0, -5);
+  },
+  displayRepr: (filter: Date) => {
+    const d = filter.toISOString().slice(0, -5);
+    return `${d} (UTC)`;
   },
   parseStringRepr: (valueString: string): Date => {
     return new Date(valueString);
@@ -195,7 +219,7 @@ export const eventVectorsProperty: propertyOption = {
 };
 export const eventCreatedAfterProperty: propertyOption = {
   name: eventPropertyTypes.CREATED_AFTER_PROPERTY,
-  label: "Created After",
+  label: "Created After (UTC)",
   type: inputTypes.DATE,
   stringRepr: (value: Date) => {
     return value.toISOString().replace("Z", "");
@@ -207,7 +231,7 @@ export const eventCreatedAfterProperty: propertyOption = {
 
 export const eventCreatedBeforeProperty: propertyOption = {
   name: eventPropertyTypes.CREATED_BEFORE_PROPERTY,
-  label: "Created Before",
+  label: "Created Before (UTC)",
   type: inputTypes.DATE,
   stringRepr: (value: Date) => {
     return value.toISOString().replace("Z", "");

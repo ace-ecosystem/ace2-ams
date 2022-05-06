@@ -39,11 +39,11 @@ export const alertFilters: Record<string, readonly propertyOption[]> = {
 } as const;
 
 export const alertRangeFilters = {
-  "Event Time": {
+  "Event Time (UTC)": {
     start: alertPropertyTypes.EVENT_TIME_AFTER_PROPERTY,
     end: alertPropertyTypes.EVENT_TIME_BEFORE_PROPERTY,
   },
-  "Insert Time": {
+  "Insert Time (UTC)": {
     start: alertPropertyTypes.INSERT_TIME_AFTER_PROPERTY,
     end: alertPropertyTypes.INSERT_TIME_BEFORE_PROPERTY,
   },

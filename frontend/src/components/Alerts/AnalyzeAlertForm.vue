@@ -21,25 +21,28 @@
           <Fieldset legend="Advanced" :toggleable="true" :collapsed="true">
             <div class="formgrid grid">
               <div class="field col-4">
-                <label for="alert-date">Alert Datetime</label>
-                <Calendar
-                  id="alert-date"
+                <label for="alert-date">Alert Datetime (UTC)</label>
+                <DatePicker
                   v-model="alertDate"
-                  class="inputfield w-full"
-                  :show-time="true"
-                  :show-seconds="true"
-                />
-              </div>
-            </div>
-            <div class="formgrid grid">
-              <div class="field col-4">
-                <label for="timezone">Timezone</label>
-                <Dropdown
-                  id="timezone"
-                  v-model="timezone"
-                  class="inputfield w-full"
-                  :options="timezones"
-                />
+                  mode="dateTime"
+                  class="inputfield w-16rem"
+                  is24hr
+                  timezone="UTC"
+                >
+                  <template #default="{ inputValue, inputEvents }">
+                    <div class="p-inputgroup">
+                      <InputText
+                        id="alert-date"
+                        data-cy="property-input-value"
+                        class="inputfield w-16rem"
+                        type="text"
+                        :value="inputValue"
+                        placeholder="Enter a date!"
+                        v-on="inputEvents"
+                      />
+                    </div>
+                  </template>
+                </DatePicker>
               </div>
             </div>
             <div class="formgrid grid">
@@ -80,7 +83,7 @@
           <div id="observables-list">
             <div class="formgrid grid">
               <div class="field col-2 px-1">
-                <label for="observable-time">Time</label>
+                <label for="observable-time">Time (UTC)</label>
               </div>
               <div class="field col-2 px-1">
                 <label for="observable-type">Type</label>
@@ -109,15 +112,27 @@
             >
               <div class="formgrid grid">
                 <div class="field col-2 px-1">
-                  <Calendar
+                  <DatePicker
                     v-model="observables[index].time"
-                    name="observable-time"
-                    placeholder="No time selected"
-                    class="inputfield w-full"
-                    :touch-u-i="true"
-                    :show-time="true"
-                    :show-seconds="true"
-                  />
+                    mode="dateTime"
+                    class="inputfield w-16rem"
+                    is24hr
+                    timezone="UTC"
+                  >
+                    <template #default="{ inputValue, inputEvents }">
+                      <div class="p-inputgroup">
+                        <InputText
+                          name="observable-time"
+                          data-cy="property-input-value"
+                          class="inputfield w-16rem"
+                          type="text"
+                          :value="inputValue"
+                          placeholder="No time selected"
+                          v-on="inputEvents"
+                        />
+                      </div>
+                    </template>
+                  </DatePicker>
                 </div>
                 <div class="field col-2 px-1">
                   <Dropdown
@@ -249,8 +264,7 @@
   import TabPanel from "primevue/tabpanel";
   import TabView from "primevue/tabview";
   import Textarea from "primevue/textarea";
-
-  import moment from "moment-timezone";
+  import { DatePicker } from "v-calendar";
 
   import { useAlertStore } from "@/stores/alert";
   import { useQueueStore } from "@/stores/queue";
@@ -287,12 +301,6 @@
   ]);
   const observables = ref([]);
   const showContinueButton = ref(false);
-  const timezone = ref(moment.tz.guess());
-  const timezones = moment.tz.names();
-
-  const adjustedAlertDate = computed(() => {
-    return adjustForTimezone(alertDate.value, timezone.value);
-  });
 
   const alertDescriptionFormatted = computed(() => {
     return `${alertDescription.value}${alertDescriptionAppendString.value}`;
@@ -330,10 +338,6 @@
     });
   };
 
-  const adjustForTimezone = (datetime, timezone) => {
-    return moment(datetime).tz(timezone).format();
-  };
-
   const deleteFormObservable = (index) => {
     observables.value.splice(index, 1);
   };
@@ -360,10 +364,7 @@
       value: observable.value,
     };
     if (observable.time) {
-      submissionObservable["time"] = adjustForTimezone(
-        observable.time,
-        timezone.value,
-      );
+      submissionObservable["time"] = observable.time;
     }
     return submissionObservable;
   };
@@ -384,7 +385,6 @@
       ? authStore.user.defaultAlertQueue.value
       : "default";
     errors.value = [];
-    timezone.value = moment.tz.guess();
     observables.value = [];
     addFormObservable();
   };
@@ -424,7 +424,7 @@
   const submitAlert = async (observables) => {
     const alert = {
       alertDescription: alertDescriptionFormatted.value,
-      eventTime: adjustedAlertDate.value,
+      eventTime: alertDate.value,
       name: alertDescriptionFormatted.value,
       observables: observables,
       owner: authStore.user.username,
