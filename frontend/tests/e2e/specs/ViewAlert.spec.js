@@ -50,17 +50,6 @@ describe("ViewAlert.vue", () => {
       cy.get(".p-tag").should("have.length", 8);
     });
 
-    it("should route to a 'View Analysis' page when analysis is clicked", () => {
-      // Click first 'Test Analysis' node
-      cy.get('[data-cy="Test Analysis"]').contains("Test Analysis").click();
-
-      //  Not perfect, but url should now be a child route of the test alert
-      cy.url().should(
-        "contain",
-        "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a/",
-      );
-    });
-
     it("will reroute to the Manage Alerts page with observable filter applied when observable clicked", () => {
       // Intercept the API call that loads the alerts
       cy.intercept(

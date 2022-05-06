@@ -7,6 +7,17 @@
       @click="filterByObservable(observable)"
       >{{ displayValue }}
     </span>
+    <span
+      v-for="detection in observable.detectionPoints"
+      :key="detection.uuid"
+      v-tooltip.right="{
+        value: detection.value,
+      }"
+      class="detection-point"
+      data-cy="detection-point-symbol"
+    >
+      &#128293;</span
+    >
     <Button
       v-if="showCopyToClipboard"
       data-cy="copy-to-clipboard-button"
@@ -268,5 +279,9 @@
     cursor: pointer;
     text-decoration: underline;
     font-weight: bold;
+  }
+
+  .detection-point:hover {
+    cursor: pointer;
   }
 </style>
