@@ -32,8 +32,7 @@
                   <template #default="{ inputValue, inputEvents }">
                     <div class="p-inputgroup">
                       <InputText
-                        id="alert-date"
-                        data-cy="property-input-value"
+                        data-cy="alert-date"
                         class="inputfield w-16rem"
                         type="text"
                         :value="inputValue"
@@ -123,7 +122,6 @@
                       <div class="p-inputgroup">
                         <InputText
                           name="observable-time"
-                          data-cy="property-input-value"
                           class="inputfield w-16rem"
                           type="text"
                           :value="inputValue"
