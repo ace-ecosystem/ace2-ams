@@ -229,7 +229,7 @@ describe("ObservableLeaf", () => {
     });
     cy.get("span").should(
       "contain.text",
-      "testObservableType: Observable w/ Time @ 2022-06-05T16:00:00.000Z",
+      "testObservableType: Observable w/ Time @ 6/5/2022, 4:00:00 PM",
     );
   });
   it("sets the alert filters to the an observable's type and value when clicked", () => {
