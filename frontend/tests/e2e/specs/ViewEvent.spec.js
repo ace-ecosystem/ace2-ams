@@ -1391,7 +1391,7 @@ describe("Email Analysis Details", () => {
     cy.get("tr").should("have.length", 2);
     // Check headers
     cy.get(".p-column-title").eq(0).should("have.text", "URL");
-    cy.get(".p-column-title").eq(1).should("have.text", "Time");
+    cy.get(".p-column-title").eq(1).should("have.text", "Time (UTC)");
     cy.get(".p-column-title").eq(2).should("have.text", "From");
     cy.get(".p-column-title").eq(3).should("have.text", "To");
     cy.get(".p-column-title").eq(4).should("have.text", "Subject");
