@@ -64,7 +64,7 @@
     field: { type: String as PropType<keyof alertSummary>, required: true },
   });
 
-  const formatDateTime = (dateTime: string) => {
+  const formatDateTime = (dateTime: any) => {
     if (dateTime) {
       const d = new Date(dateTime);
       return d.toLocaleString("en-US", { timeZone: "UTC" });
