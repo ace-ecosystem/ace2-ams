@@ -202,7 +202,7 @@ describe("TagModal", () => {
 
     cy.stub(NodeTag, "readAll")
       .as("readAllTags")
-      .rejects(new Error("404 request failed"));
+      .rejects(new Error("404 request failed !"));
 
     cy.stub(Alert, "update").as("updateAlert").resolves();
 
@@ -222,7 +222,7 @@ describe("TagModal", () => {
     cy.get("@createTag").should("have.been.calledOnce");
     cy.get("@readAllTags").should("have.been.calledOnce");
     cy.get("@updateAlert").should("not.have.been.called");
-    cy.contains("404 request failed").should("be.visible");
+    cy.contains("404 request failed !").should("be.visible");
   });
   it("shows error if request to create a new tag fails", () => {
     cy.stub(NodeTag, "create")
@@ -230,7 +230,7 @@ describe("TagModal", () => {
         value: "testTag",
       })
       .as("createTag")
-      .rejects(new Error("404 request failed"));
+      .rejects(new Error("404 request failed !"));
 
     cy.stub(NodeTag, "readAll").as("readAllTags").resolves();
 
@@ -252,7 +252,7 @@ describe("TagModal", () => {
     cy.get("@createTag").should("have.been.calledOnce");
     cy.get("@readAllTags").should("not.have.been");
     cy.get("@updateAlert").should("not.have.been");
-    cy.contains("404 request failed").should("be.visible");
+    cy.contains("404 request failed !").should("be.visible");
   });
   it("shows error if request to update node tags fails", () => {
     cy.stub(NodeTag, "create")
@@ -274,7 +274,7 @@ describe("TagModal", () => {
         },
       ])
       .as("updateAlert")
-      .rejects(new Error("404 request failed"));
+      .rejects(new Error("404 request failed !"));
 
     factory({
       selected: ["uuid"],
@@ -292,6 +292,6 @@ describe("TagModal", () => {
     cy.get("@createTag").should("have.been.calledOnce");
     cy.get("@readAllTags").should("have.been.calledOnce");
     cy.get("@updateAlert").should("have.been.calledOnce");
-    cy.contains("404 request failed").should("be.visible");
+    cy.contains("404 request failed !").should("be.visible");
   });
 });

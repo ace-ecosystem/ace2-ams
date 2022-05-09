@@ -119,42 +119,19 @@
 
   const addNodeTags = async () => {
     const nodeStore = nodeStores[nodeType]();
-    const tableStore = nodeTableStores[nodeType]();
 
-    const selectedNodes = props.observable
-      ? [props.observable.uuid]
-      : nodeSelectedStores[nodeType]().selected;
-    const updateData = selectedNodes.map((uuid) => ({
+    const selected = nodeSelectedStores[nodeType]().selected;
+    const updateData = selected.map((uuid) => ({
       uuid: uuid,
-      tags: [
-        ...existingNodeTagValues(uuid, nodeStore, tableStore),
-        ...formTagValues.value,
-      ],
+      tags: deduped([...existingNodeTagValues(uuid), ...formTagValues.value]),
     }));
 
     await nodeStore.update(updateData);
   };
 
-  const addObservableTags = async () => {
-    const observableStore = useObservableStore();
-    const observable = props.observable!;
-
-    await observableStore.update(observable.uuid, {
-      tags: [
-        ...observable.tags.map((tag) => tag.value),
-        ...formTagValues.value,
-      ],
-    });
-  };
-
-  const existingNodeTagValues = (
-    uuid: string,
-    nodeStore: any,
-    tableStore: any,
-  ) => {
-    if (props.observable) {
-      return props.observable.tags.map((tag) => tag.value);
-    }
+  const existingNodeTagValues = (uuid: string) => {
+    const nodeStore = nodeStores[nodeType]();
+    const tableStore = nodeTableStores[nodeType]();
 
     let nodeTags: nodeTagRead[] = [];
     if (props.reloadObject == "table") {
@@ -166,6 +143,19 @@
     return nodeTags.map((tag) => tag.value);
   };
 
+  const addObservableTags = async () => {
+    const observableStore = useObservableStore();
+
+    if (props.observable) {
+      await observableStore.update(props.observable.uuid, {
+        tags: deduped([
+          ...props.observable.tags.map((tag) => tag.value),
+          ...formTagValues.value,
+        ]),
+      });
+    }
+  };
+
   const createNewTags = async () => {
     for (const tag of uniqueNewTags.value) {
       await NodeTag.create({ value: tag });
@@ -174,7 +164,7 @@
   };
 
   const uniqueNewTags = computed(() => {
-    return [...new Set(formTagValues.value)].filter(
+    return deduped(formTagValues.value).filter(
       (tag) => !existingTagValues.value.includes(tag),
     );
   });
@@ -188,8 +178,16 @@
   }
 
   const allowSubmit = computed(() => {
-    return formTagValues.value.length;
+    if (props.observable) {
+      return formTagValues.value.length;
+    }
+    const selected = nodeSelectedStores[nodeType]().selected;
+    return selected.length && formTagValues.value.length;
   });
+
+  const deduped = (arr: string[]) => {
+    return [...new Set(arr)];
+  };
 
   const handleError = () => {
     error.value = undefined;
