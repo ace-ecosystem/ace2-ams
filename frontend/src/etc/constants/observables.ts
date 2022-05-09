@@ -1,4 +1,5 @@
 import UpdateDetectionExpirationVue from "@/components/Observables/ObservableActions/UpdateDetectionExpiration.vue";
+import TagModalVue from "@/components/Modals/TagModal.vue";
 import {
   observableActionModal,
   observableActionCommand,
@@ -38,4 +39,13 @@ export const updateDetectionExpiration: observableActionModal = {
   modal: UpdateDetectionExpirationVue,
   modalName: "UpdateDetectionExpiration",
   requirements: (obs: observableTreeRead) => obs.forDetection,
+};
+
+export const addTag: observableActionModal = {
+  label: "Add Tag",
+  description: "Add a tag to a given observable",
+  icon: "pi pi-tag",
+  type: "modal",
+  modal: TagModalVue,
+  modalName: "ObservableTagModal",
 };

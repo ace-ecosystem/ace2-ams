@@ -37,7 +37,14 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, defineEmits, defineProps, ref, inject } from "vue";
+  import {
+    computed,
+    defineEmits,
+    defineProps,
+    ref,
+    inject,
+    PropType,
+  } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -55,21 +62,25 @@
   import { useModalStore } from "@/stores/modal";
   import { useNodeTagStore } from "@/stores/nodeTag";
   import { nodeTagRead } from "@/models/nodeTag";
+  import { observableTreeRead } from "@/models/observable";
+  import { useObservableStore } from "@/stores/observable";
 
   const nodeType = inject("nodeType") as "alerts" | "events";
-
-  const nodeStore = nodeStores[nodeType]();
-  const tableStore = nodeTableStores[nodeType]();
-  const selectedStore = nodeSelectedStores[nodeType]();
-  const modalStore = useModalStore();
-  const nodeTagStore = useNodeTagStore();
-
-  const emit = defineEmits(["requestReload"]);
 
   const props = defineProps({
     name: { type: String, required: true },
     reloadObject: { type: String, required: true },
+    observable: {
+      type: Object as PropType<observableTreeRead>,
+      required: false,
+      default: undefined,
+    },
   });
+
+  const modalStore = useModalStore();
+  const nodeTagStore = useNodeTagStore();
+
+  const emit = defineEmits(["requestReload"]);
 
   const formTagValues = ref<string[]>([]);
   const existingTagValues = ref<string[]>([]);
@@ -85,13 +96,11 @@
     isLoading.value = true;
     try {
       await createNewTags();
-
-      const updateData = selectedStore.selected.map((uuid) => ({
-        uuid: uuid,
-        tags: [...existingNodeTagValues(uuid), ...uniqueNewTags.value],
-      }));
-
-      await nodeStore.update(updateData);
+      if (props.observable) {
+        await addObservableTags();
+      } else {
+        await addNodeTags();
+      }
     } catch (e: unknown) {
       console.log(e);
       if (typeof e === "string") {
@@ -108,7 +117,45 @@
     }
   }
 
-  const existingNodeTagValues = (uuid: string) => {
+  const addNodeTags = async () => {
+    const nodeStore = nodeStores[nodeType]();
+    const tableStore = nodeTableStores[nodeType]();
+
+    const selectedNodes = props.observable
+      ? [props.observable.uuid]
+      : nodeSelectedStores[nodeType]().selected;
+    const updateData = selectedNodes.map((uuid) => ({
+      uuid: uuid,
+      tags: [
+        ...existingNodeTagValues(uuid, nodeStore, tableStore),
+        ...formTagValues.value,
+      ],
+    }));
+
+    await nodeStore.update(updateData);
+  };
+
+  const addObservableTags = async () => {
+    const observableStore = useObservableStore();
+    const observable = props.observable!;
+
+    await observableStore.update(observable.uuid, {
+      tags: [
+        ...observable.tags.map((tag) => tag.value),
+        ...formTagValues.value,
+      ],
+    });
+  };
+
+  const existingNodeTagValues = (
+    uuid: string,
+    nodeStore: any,
+    tableStore: any,
+  ) => {
+    if (props.observable) {
+      return props.observable.tags.map((tag) => tag.value);
+    }
+
     let nodeTags: nodeTagRead[] = [];
     if (props.reloadObject == "table") {
       const node = tableStore.visibleQueriedItemById(uuid);
@@ -141,7 +188,7 @@
   }
 
   const allowSubmit = computed(() => {
-    return selectedStore.anySelected && formTagValues.value.length;
+    return formTagValues.value.length;
   });
 
   const handleError = () => {

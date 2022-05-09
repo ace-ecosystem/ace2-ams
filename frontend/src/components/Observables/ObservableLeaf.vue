@@ -57,6 +57,8 @@
         :is="component"
         :name="componentName"
         :observable="observable"
+        reload-object="node"
+        @request-reload="alertStore.requestReload = true"
       ></component>
     </span>
     <span v-if="showTags && observable.tags.length" class="leaf-element">
