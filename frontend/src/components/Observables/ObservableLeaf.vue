@@ -58,7 +58,7 @@
         :name="componentName"
         :observable="observable"
         reload-object="node"
-        @request-reload="alertStore.requestReload = true"
+        @request-reload="reload"
       ></component>
     </span>
     <span v-if="showTags && observable.tags.length" class="leaf-element">
@@ -270,6 +270,10 @@
       detail: args.detail,
       life: 6000,
     });
+  };
+
+  const reload = () => {
+    alertStore.requestReload = true;
   };
 
   const toggle = (event: unknown) => {

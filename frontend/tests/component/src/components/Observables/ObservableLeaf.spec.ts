@@ -12,6 +12,9 @@ import { testConfiguration } from "@/etc/configuration/test";
 import { ObservableInstance } from "@/services/api/observable";
 import ToastService from "primevue/toastservice";
 import Tooltip from "primevue/tooltip";
+import BaseModalVue from "@/components/Modals/BaseModal.vue";
+import TagModalVue from "@/components/Modals/TagModal.vue";
+import ObservableLeafVue from "@/components/Observables/ObservableLeaf.vue";
 
 interface ObservableLeafProps {
   observable: observableTreeRead;
@@ -33,7 +36,7 @@ function factory(
     config: testConfiguration,
   },
 ) {
-  mount(ObservableLeaf, {
+  return mount(ObservableLeaf, {
     global: {
       directives: { tooltip: Tooltip },
       plugins: [PrimeVue, ToastService, createCustomCypressPinia(), router],
@@ -247,6 +250,23 @@ describe("ObservableLeaf", () => {
         },
       },
     });
+  });
+  it.only("attempts to requestReload on the alert store when child component emits 'requestReload", () => {
+    let alertStore: any;
+    factory({
+      props: { observable: observableWithTags },
+      config: testConfiguration,
+    }).then((wrapper) => {
+      alertStore = wrapper.vm.alertStore;
+      cy.wrap(alertStore.requestReload).should("be.false");
+    });
+    cy.get('[data-cy="show-actions-menu-button"]').click();
+    cy.contains("Test Action")
+      .click()
+      .then(() => {
+        Cypress.vueWrapper.findComponent(TagModalVue).vm.$emit("requestReload");
+        cy.wrap(alertStore.requestReload).should("be.true");
+      });
   });
 });
 
