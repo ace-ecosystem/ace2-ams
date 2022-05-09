@@ -8,7 +8,7 @@ from api_models.alert_disposition import AlertDispositionRead
 from api_models.alert_tool import AlertToolRead
 from api_models.alert_tool_instance import AlertToolInstanceRead
 from api_models.alert_type import AlertTypeRead
-from api_models.node import NodeBase, NodeCreate, NodeRead, NodeTreeItemRead, NodeUpdate
+from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
 from api_models.node_tag import NodeTagRead
 from api_models.node_threat import NodeThreatRead
