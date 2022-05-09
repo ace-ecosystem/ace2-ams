@@ -129,11 +129,16 @@ describe("ObservableLeaf", () => {
       config: testConfiguration,
     });
 
-    const expectedMenuItems = ["Enable Detection", "Subheader", "IPV4 Command"];
+    const expectedMenuItems = [
+      "Test Action",
+      "Enable Detection",
+      "Subheader",
+      "IPV4 Command",
+    ];
 
     cy.get("[data-cy='show-actions-menu-button']").click();
     cy.findAllByRole("menuitem")
-      .should("have.length", 3)
+      .should("have.length", 4)
       .each((menuItem, index) => {
         cy.wrap(menuItem).should("have.text", expectedMenuItems[index]);
       });
