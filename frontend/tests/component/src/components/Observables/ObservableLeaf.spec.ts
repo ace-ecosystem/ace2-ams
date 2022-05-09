@@ -251,7 +251,7 @@ describe("ObservableLeaf", () => {
       },
     });
   });
-  it.only("attempts to requestReload on the alert store when child component emits 'requestReload", () => {
+  it("attempts to requestReload on the alert store when child component emits 'requestReload", () => {
     let alertStore: any;
     factory({
       props: { observable: observableWithTags },
