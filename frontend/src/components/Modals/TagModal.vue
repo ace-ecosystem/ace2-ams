@@ -2,14 +2,14 @@
 <!-- 'Tag' action modal, agnostic to what is being tagged -->
 
 <template>
-  <BaseModal :name="name" header="Add Tags" @show="loadTags">
+  <BaseModal :name="name" header="Add Tags" @show="loadAllExistingTags">
     <div>
       <div v-if="error" class="p-col">
         <Message severity="error" @close="handleError">{{ error }}</Message>
       </div>
     </div>
     <span class="p-fluid">
-      <Chips v-model="newTags" data-cy="chips-container" />
+      <Chips v-model="formTagValues" data-cy="chips-container" />
       <Dropdown
         :options="nodeTagStore.allItems"
         option-label="value"
@@ -30,14 +30,21 @@
         label="Add"
         icon="pi pi-check"
         :disabled="!allowSubmit"
-        @click="addTags"
+        @click="createAndAddTags"
       />
     </template>
   </BaseModal>
 </template>
 
 <script setup lang="ts">
-  import { computed, defineEmits, defineProps, ref, inject } from "vue";
+  import {
+    computed,
+    defineEmits,
+    defineProps,
+    ref,
+    inject,
+    PropType,
+  } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -55,43 +62,56 @@
   import { useModalStore } from "@/stores/modal";
   import { useNodeTagStore } from "@/stores/nodeTag";
   import { nodeTagRead } from "@/models/nodeTag";
+  import { observableTreeRead } from "@/models/observable";
+  import { useObservableStore } from "@/stores/observable";
 
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const props = defineProps({
+    name: { type: String, required: true },
+    reloadObject: { type: String, required: true },
+    nodeType: {
+      type: String as PropType<"alerts" | "events" | "observable">,
+      required: true,
+    },
+    observable: {
+      type: Object as PropType<observableTreeRead>,
+      required: false,
+      default: undefined,
+    },
+  });
 
-  const nodeStore = nodeStores[nodeType]();
-  const tableStore = nodeTableStores[nodeType]();
-  const selectedStore = nodeSelectedStores[nodeType]();
+  let nodeStore: any;
+  let tableStore: any;
+  let selected: string[];
+  if (!(props.nodeType === "observable")) {
+    nodeStore = nodeStores[props.nodeType]();
+    selected = nodeSelectedStores[props.nodeType]().selected;
+    tableStore = nodeTableStores[props.nodeType]();
+  }
+
   const modalStore = useModalStore();
   const nodeTagStore = useNodeTagStore();
 
   const emit = defineEmits(["requestReload"]);
 
-  const props = defineProps({
-    name: { type: String, required: true },
-    reloadObject: { type: String, required: true },
-  });
-
-  const newTags = ref<string[]>([]);
-  const storeTagValues = ref<string[]>([]);
+  const formTagValues = ref<string[]>([]);
+  const existingTagValues = ref<string[]>([]);
   const error = ref<string>();
   const isLoading = ref(false);
 
-  async function loadTags() {
+  async function loadAllExistingTags() {
     await nodeTagStore.readAll();
-    storeTagValues.value = tagValues(nodeTagStore.allItems);
+    existingTagValues.value = nodeTagStore.allItems.map((tag) => tag.value);
   }
 
-  async function addTags() {
+  async function createAndAddTags() {
     isLoading.value = true;
     try {
-      await createTags(newTags.value);
-
-      const updateData = selectedStore.selected.map((uuid) => ({
-        uuid: uuid,
-        tags: newNodeTags(uuid, newTags.value),
-      }));
-
-      await nodeStore.update(updateData);
+      await createNewTags();
+      if (props.nodeType == "observable") {
+        await addObservableTags();
+      } else {
+        await addNodeTags();
+      }
     } catch (e: unknown) {
       if (typeof e === "string") {
         error.value = e;
@@ -107,7 +127,16 @@
     }
   }
 
-  function newNodeTags(uuid: string, tags: string[]) {
+  const addNodeTags = async () => {
+    const updateData = selected.map((uuid) => ({
+      uuid: uuid,
+      tags: deduped([...existingNodeTagValues(uuid), ...formTagValues.value]),
+    }));
+
+    await nodeStore.update(updateData);
+  };
+
+  const existingNodeTagValues = (uuid: string) => {
     let nodeTags: nodeTagRead[] = [];
     if (props.reloadObject == "table") {
       const node = tableStore.visibleQueriedItemById(uuid);
@@ -115,41 +144,53 @@
     } else if (props.reloadObject == "node") {
       nodeTags = nodeStore.open.tags;
     }
-    return [...tagValues(nodeTags), ...tags];
-  }
+    return nodeTags.map((tag) => tag.value);
+  };
 
-  async function createTags(tags: string[]) {
-    for (const tag of tags) {
-      if (!tagExists(tag)) {
-        await NodeTag.create({ value: tag });
-        await loadTags();
-      }
+  const addObservableTags = async () => {
+    const observableStore = useObservableStore();
+
+    if (props.observable) {
+      await observableStore.update(props.observable.uuid, {
+        tags: deduped([
+          ...props.observable.tags.map((tag) => tag.value),
+          ...formTagValues.value,
+        ]),
+      });
     }
-  }
+  };
 
-  function tagExists(tagValue: string) {
-    return storeTagValues.value.includes(tagValue);
-  }
-
-  function tagValues(tags: nodeTagRead[]) {
-    let values = [];
-    for (const tag of tags) {
-      values.push(tag.value);
+  const createNewTags = async () => {
+    for (const tag of uniqueNewTags.value) {
+      await NodeTag.create({ value: tag });
     }
-    return values;
-  }
+    await loadAllExistingTags();
+  };
+
+  const uniqueNewTags = computed(() => {
+    return deduped(formTagValues.value).filter(
+      (tag) => !existingTagValues.value.includes(tag),
+    );
+  });
 
   interface tagEvent {
     value: nodeTagRead;
   }
   function addExistingTag(tagEvent: tagEvent) {
     // Add an existing tag to the list of tags to be added
-    newTags.value.push(tagEvent.value.value);
+    formTagValues.value.push(tagEvent.value.value);
   }
 
   const allowSubmit = computed(() => {
-    return selectedStore.anySelected && newTags.value.length;
+    if (props.nodeType == "observable") {
+      return formTagValues.value.length;
+    }
+    return selected.length && formTagValues.value.length;
   });
+
+  const deduped = (arr: string[]) => {
+    return [...new Set(arr)];
+  };
 
   const handleError = () => {
     error.value = undefined;
@@ -157,7 +198,7 @@
   };
 
   function close() {
-    newTags.value = [];
+    formTagValues.value = [];
     modalStore.close(props.name);
   }
 </script>

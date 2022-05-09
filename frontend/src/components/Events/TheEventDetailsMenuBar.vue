@@ -13,6 +13,7 @@
   <TagModal
     name="TagModal"
     reload-object="node"
+    node-type="events"
     @request-reload="requestReload"
   />
   <EditEventModal

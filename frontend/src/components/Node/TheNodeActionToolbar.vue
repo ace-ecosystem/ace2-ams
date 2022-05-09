@@ -55,6 +55,7 @@
         />
         <TagModal
           name="TagModal"
+          :node-type="nodeType"
           :reload-object="props.reloadObject"
           @request-reload="requestReload"
         />
