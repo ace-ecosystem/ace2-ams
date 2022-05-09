@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 0b6ae991c64c
+Revision ID: f9837a362014
 Revises: 
-Create Date: 2022-05-09 12:41:36.695072
+Create Date: 2022-05-09 14:50:50.508199
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '0b6ae991c64c'
+revision = 'f9837a362014'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -407,19 +407,18 @@ def upgrade() -> None:
     sa.UniqueConstraint('username')
     )
     op.create_table('analysis',
-    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('cached_during', postgresql.TSTZRANGE(), nullable=False),
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('cached_during', postgresql.TSTZRANGE(), nullable=True),
     sa.Column('details', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('error_message', sa.String(), nullable=True),
-    sa.Column('parent_observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('parent_observable_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('run_time', sa.DateTime(timezone=True), nullable=False),
     sa.Column('stack_trace', sa.String(), nullable=True),
     sa.Column('summary', sa.String(), nullable=True),
     postgresql.ExcludeConstraint((sa.column('analysis_module_type_uuid'), '='), (sa.column('parent_observable_uuid'), '='), (sa.column('cached_during'), '&&'), using='gist', name='cached_analysis_uc'),
     sa.ForeignKeyConstraint(['analysis_module_type_uuid'], ['analysis_module_type.uuid'], ),
     sa.ForeignKeyConstraint(['parent_observable_uuid'], ['observable.uuid'], ),
-    sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index('analysis_module_type_observable_cached_during_idx', 'analysis', ['analysis_module_type_uuid', 'parent_observable_uuid', 'cached_during'], unique=False)
