@@ -38,7 +38,7 @@ def create(
             )
 
     for analysis in model.analyses:
-        analysis.parent_observable_uuid = obj.uuid
+        analysis.target_uuid = obj.uuid
 
         crud.analysis.create(model=analysis, db=db)
 

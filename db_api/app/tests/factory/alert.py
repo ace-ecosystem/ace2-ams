@@ -91,9 +91,9 @@ def create(
             insert_time=insert_time,
             history_username=history_username,
             name=name,
+            observables=observables,
             owner=owner,
             queue=alert_queue,
-            root_observables=observables,
             tool=tool,
             tool_instance=tool_instance,
             type=alert_type,
@@ -162,9 +162,9 @@ def create_from_json_file(db: Session, json_path: str, alert_name: str) -> Alert
                         if "observables" in a
                         else [],
                         details=json.dumps(a["details"]) if "details" in a else None,
-                        parent_observable_uuid=observable_model.uuid,
                         root_analysis_uuid=root_analysis_uuid,
                         run_time=crud.helpers.utcnow(),
+                        target_uuid=observable_model.uuid,
                     )
                 )
 

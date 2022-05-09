@@ -15,7 +15,7 @@ class Analysis(Base):
 
     analysis_module_type = relationship("AnalysisModuleType", lazy="selectin")
 
-    # An analysis with NULL for analysis_module_type_uuid and parent_observable_uuid signifies it is a Root Analysis
+    # An analysis with NULL for analysis_module_type_uuid and target_uuid signifies it is a Root Analysis
     analysis_module_type_uuid = Column(UUID(as_uuid=True), ForeignKey("analysis_module_type.uuid"), nullable=True)
 
     cached_during = Column(TSTZRANGE(), nullable=True)
@@ -31,22 +31,22 @@ class Analysis(Base):
 
     error_message = Column(String)
 
-    # An analysis with NULL for analysis_module_type_uuid and parent_observable_uuid signifies it is a Root Analysis
-    parent_observable_uuid = Column(UUID(as_uuid=True), ForeignKey("observable.uuid"), nullable=True)
-
-    parent_observable: Observable = relationship("Observable", foreign_keys=[parent_observable_uuid], lazy="selectin")
-
-    run_time = Column(DateTime(timezone=True), index=True, nullable=False)
+    run_time = Column(DateTime(timezone=True), index=True, nullable=True)
 
     stack_trace = Column(String)
 
     summary = Column(String)
 
+    # An analysis with NULL for analysis_module_type_uuid and target_uuid signifies it is a Root Analysis
+    target_uuid = Column(UUID(as_uuid=True), ForeignKey("observable.uuid"), nullable=True)
+
+    target: Observable = relationship("Observable", foreign_keys=[target_uuid], lazy="selectin")
+
     __table_args__ = (
         Index(
-            "analysis_module_type_observable_cached_during_idx",
+            "analysis_module_type_target_cached_during_idx",
             analysis_module_type_uuid,
-            parent_observable_uuid,
+            target_uuid,
             cached_during,
         ),
         # The PostgreSQL && operator is described here:
@@ -55,7 +55,7 @@ class Analysis(Base):
         # It just means that the two ranges overlap.
         ExcludeConstraint(
             ("analysis_module_type_uuid", "="),
-            ("parent_observable_uuid", "="),
+            ("target_uuid", "="),
             ("cached_during", "&&"),
             name="cached_analysis_uc",
             using="gist",

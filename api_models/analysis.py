@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from api_models import type_str
 from api_models.analysis_module_type import AnalysisModuleTypeNodeTreeRead, AnalysisModuleTypeRead
-from api_models.node import NodeBase, NodeCreate, NodeRead, NodeTreeItemRead, NodeUpdate
+from api_models.node import NodeBase, NodeRead, NodeTreeItemRead, NodeUpdate
 from api_models.node_detection_point import NodeDetectionPointRead
 
 
@@ -21,20 +21,20 @@ class AnalysisBase(NodeBase):
     summary: Optional[type_str] = Field(description="A short summary/description of what this analysis did or found")
 
 
-class AnalysisCreate(NodeCreate, AnalysisBase):
+class AnalysisCreate(AnalysisBase):
     analysis_module_type_uuid: UUID4 = Field(
-        description="""The UUID of the analysis module type that was used to perform this analysis."""
+        description="""The UUID of the analysis module type that was used to perform this analysis"""
     )
 
     child_observables: "list[ObservableCreate]" = Field(
         default_factory=list, description="A list of child observables discovered during the analysis"
     )
 
-    parent_observable_uuid: UUID4 = Field(description="The UUID of the target observable for this analysis")
-
     root_analysis_uuid: UUID4 = Field(description="The UUID of the Root Analysis that will contain this analysis")
 
     run_time: datetime = Field(description="The time at which the analysis was performed")
+
+    target_uuid: UUID4 = Field(description="The UUID of the target observable for this analysis")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
 
@@ -45,6 +45,10 @@ class AnalysisNodeTreeRead(NodeTreeItemRead):
     analysis_module_type: Optional[AnalysisModuleTypeNodeTreeRead] = Field(
         description="The analysis module type that was used to perform this analysis"
     )
+
+    # Set a static string value so code displaying the tree structure knows which type of object this is.
+    # This is needed (for now) because the Analysis table no longer inherits from the Node table.
+    node_type: str = "analysis"
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
 

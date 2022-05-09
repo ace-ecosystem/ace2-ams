@@ -760,7 +760,7 @@ def test_get_alert_tree(client, db):
         db=db, json_path="/app/tests/alerts/small.json", alert_name="Test Alert"
     )
 
-    # The small.json alert has 14 observables and 16 analyses. However, it only has two root observables.
+    # The small.json alert has 14 observables and 16 analyses (the Root Analysis is not included in the tree).
     get = client.get(f"/api/alert/{alert.uuid}")
     assert str(get.json()["children"]).count("'observable'") == 14
     assert str(get.json()["children"]).count("'analysis'") == 16

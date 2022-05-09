@@ -33,7 +33,7 @@ def create(model: AnalysisCreate, db: Session) -> Analysis:
 
     obj = read_cached(
         analysis_module_type_uuid=model.analysis_module_type_uuid,
-        observable_uuid=model.parent_observable_uuid,
+        observable_uuid=model.target_uuid,
         db=db,
     )
 
@@ -55,16 +55,25 @@ def create(model: AnalysisCreate, db: Session) -> Analysis:
             child_observables=[crud.observable.create(model=co, db=db) for co in model.child_observables],
             details=model.details,
             error_message=model.error_message,
-            parent_observable_uuid=model.parent_observable_uuid,
             run_time=model.run_time,
             stack_trace=model.stack_trace,
             summary=model.summary,
+            target_uuid=model.target_uuid,
         )
 
         db.add(obj)
         db.flush()
 
-    crud.alert_analysis_mapping.create(analysis_uuid=obj.uuid, root_analysis_uuid=model.root_analysis_uuid, db=db)
+    crud.alert_analysis_mapping.create(analysis_uuid=obj.uuid, submission_uuid=model.root_analysis_uuid, db=db)
+
+    return obj
+
+
+def create_root(db: Session) -> Analysis:
+    obj = Analysis()
+
+    db.add(obj)
+    db.flush()
 
     return obj
 
@@ -82,7 +91,7 @@ def read_cached(
         db.execute(
             select(Analysis).where(
                 Analysis.analysis_module_type_uuid == analysis_module_type_uuid,
-                Analysis.parent_observable_uuid == observable_uuid,
+                Analysis.target_uuid == observable_uuid,
                 Analysis.cached_during.contains(crud.helpers.utcnow()),
             )
         )

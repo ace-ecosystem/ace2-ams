@@ -1,7 +1,6 @@
 from db.schemas.alert import Alert
 from db.schemas.alert_analysis_mapping import alert_analysis_mapping
 from db.schemas.alert_disposition import AlertDisposition
-from db.schemas.alert_root_observable_mapping import alert_root_observable_mapping
 from db.schemas.alert_tool import AlertTool
 from db.schemas.alert_tool_instance import AlertToolInstance
 from db.schemas.alert_type import AlertType

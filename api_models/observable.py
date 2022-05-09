@@ -67,8 +67,6 @@ class ObservableCreate(ObservableCreateBase):
         default_factory=list, description="A list of analysis results to add as children to the observable"
     )
 
-    root_analysis_uuid: UUID4 = Field(description="The UUID of the Root Analysis that will contain this observable")
-
 
 class ObservableRead(NodeRead, ObservableBase):
     comments: list[NodeCommentRead] = Field(

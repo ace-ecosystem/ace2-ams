@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: f9837a362014
+Revision ID: 37638142059d
 Revises: 
-Create Date: 2022-05-09 14:50:50.508199
+Create Date: 2022-05-09 18:29:31.644832
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'f9837a362014'
+revision = '37638142059d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -412,16 +412,16 @@ def upgrade() -> None:
     sa.Column('cached_during', postgresql.TSTZRANGE(), nullable=True),
     sa.Column('details', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('error_message', sa.String(), nullable=True),
-    sa.Column('parent_observable_uuid', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('run_time', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('run_time', sa.DateTime(timezone=True), nullable=True),
     sa.Column('stack_trace', sa.String(), nullable=True),
     sa.Column('summary', sa.String(), nullable=True),
-    postgresql.ExcludeConstraint((sa.column('analysis_module_type_uuid'), '='), (sa.column('parent_observable_uuid'), '='), (sa.column('cached_during'), '&&'), using='gist', name='cached_analysis_uc'),
+    sa.Column('target_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    postgresql.ExcludeConstraint((sa.column('analysis_module_type_uuid'), '='), (sa.column('target_uuid'), '='), (sa.column('cached_during'), '&&'), using='gist', name='cached_analysis_uc'),
     sa.ForeignKeyConstraint(['analysis_module_type_uuid'], ['analysis_module_type.uuid'], ),
-    sa.ForeignKeyConstraint(['parent_observable_uuid'], ['observable.uuid'], ),
+    sa.ForeignKeyConstraint(['target_uuid'], ['observable.uuid'], ),
     sa.PrimaryKeyConstraint('uuid')
     )
-    op.create_index('analysis_module_type_observable_cached_during_idx', 'analysis', ['analysis_module_type_uuid', 'parent_observable_uuid', 'cached_during'], unique=False)
+    op.create_index('analysis_module_type_target_cached_during_idx', 'analysis', ['analysis_module_type_uuid', 'target_uuid', 'cached_during'], unique=False)
     op.create_index(op.f('ix_analysis_run_time'), 'analysis', ['run_time'], unique=False)
     op.create_table('event',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -521,6 +521,7 @@ def upgrade() -> None:
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('owner_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('root_analysis_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('tool_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('tool_instance_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -529,6 +530,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['event_uuid'], ['event.uuid'], ),
     sa.ForeignKeyConstraint(['owner_uuid'], ['user.uuid'], ),
     sa.ForeignKeyConstraint(['queue_uuid'], ['queue.uuid'], ),
+    sa.ForeignKeyConstraint(['root_analysis_uuid'], ['analysis.uuid'], ),
     sa.ForeignKeyConstraint(['tool_instance_uuid'], ['alert_tool_instance.uuid'], ),
     sa.ForeignKeyConstraint(['tool_uuid'], ['alert_tool.uuid'], ),
     sa.ForeignKeyConstraint(['type_uuid'], ['alert_type.uuid'], ),
@@ -543,6 +545,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_alert_insert_time'), 'alert', ['insert_time'], unique=False)
     op.create_index(op.f('ix_alert_owner_uuid'), 'alert', ['owner_uuid'], unique=False)
     op.create_index(op.f('ix_alert_queue_uuid'), 'alert', ['queue_uuid'], unique=False)
+    op.create_index(op.f('ix_alert_root_analysis_uuid'), 'alert', ['root_analysis_uuid'], unique=False)
     op.create_index(op.f('ix_alert_tool_instance_uuid'), 'alert', ['tool_instance_uuid'], unique=False)
     op.create_index(op.f('ix_alert_tool_uuid'), 'alert', ['tool_uuid'], unique=False)
     op.create_index(op.f('ix_alert_type_uuid'), 'alert', ['type_uuid'], unique=False)
@@ -622,22 +625,10 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_alert_history_action_by_user_uuid'), 'alert_history', ['action_by_user_uuid'], unique=False)
     op.create_index(op.f('ix_alert_history_record_uuid'), 'alert_history', ['record_uuid'], unique=False)
-    op.create_table('alert_root_observable_mapping',
-    sa.Column('alert_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.ForeignKeyConstraint(['alert_uuid'], ['alert.uuid'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['observable_uuid'], ['observable.uuid'], ),
-    sa.PrimaryKeyConstraint('alert_uuid', 'observable_uuid')
-    )
-    op.create_index(op.f('ix_alert_root_observable_mapping_alert_uuid'), 'alert_root_observable_mapping', ['alert_uuid'], unique=False)
-    op.create_index(op.f('ix_alert_root_observable_mapping_observable_uuid'), 'alert_root_observable_mapping', ['observable_uuid'], unique=False)
     # ### end Alembic commands ###
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_index(op.f('ix_alert_root_observable_mapping_observable_uuid'), table_name='alert_root_observable_mapping')
-    op.drop_index(op.f('ix_alert_root_observable_mapping_alert_uuid'), table_name='alert_root_observable_mapping')
-    op.drop_table('alert_root_observable_mapping')
     op.drop_index(op.f('ix_alert_history_record_uuid'), table_name='alert_history')
     op.drop_index(op.f('ix_alert_history_action_by_user_uuid'), table_name='alert_history')
     op.drop_table('alert_history')
@@ -663,6 +654,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_alert_type_uuid'), table_name='alert')
     op.drop_index(op.f('ix_alert_tool_uuid'), table_name='alert')
     op.drop_index(op.f('ix_alert_tool_instance_uuid'), table_name='alert')
+    op.drop_index(op.f('ix_alert_root_analysis_uuid'), table_name='alert')
     op.drop_index(op.f('ix_alert_queue_uuid'), table_name='alert')
     op.drop_index(op.f('ix_alert_owner_uuid'), table_name='alert')
     op.drop_index(op.f('ix_alert_insert_time'), table_name='alert')
@@ -694,7 +686,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_event_alert_time'), table_name='event')
     op.drop_table('event')
     op.drop_index(op.f('ix_analysis_run_time'), table_name='analysis')
-    op.drop_index('analysis_module_type_observable_cached_during_idx', table_name='analysis')
+    op.drop_index('analysis_module_type_target_cached_during_idx', table_name='analysis')
     op.drop_table('analysis')
     op.drop_table('user')
     op.drop_index('type_value', table_name='observable')

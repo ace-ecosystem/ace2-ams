@@ -46,9 +46,7 @@ class AlertCreate(NodeCreate, AlertBase):
 
     name: type_str = Field(description="""The name of the alert""")
 
-    root_observables: list[ObservableCreate] = Field(
-        description="A list of observables that should be added to the alert"
-    )
+    observables: list[ObservableCreate] = Field(description="A list of observables that should be added to the alert")
 
     tags: list[type_str] = Field(default_factory=list, description="A list of tags to add to the alert")
 
