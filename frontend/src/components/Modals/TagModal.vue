@@ -2,14 +2,14 @@
 <!-- 'Tag' action modal, agnostic to what is being tagged -->
 
 <template>
-  <BaseModal :name="name" header="Add Tags" @show="loadTags">
+  <BaseModal :name="name" header="Add Tags" @show="loadAllExistingTags">
     <div>
       <div v-if="error" class="p-col">
         <Message severity="error" @close="handleError">{{ error }}</Message>
       </div>
     </div>
     <span class="p-fluid">
-      <Chips v-model="newTags" data-cy="chips-container" />
+      <Chips v-model="formTagValues" data-cy="chips-container" />
       <Dropdown
         :options="nodeTagStore.allItems"
         option-label="value"
@@ -30,7 +30,7 @@
         label="Add"
         icon="pi pi-check"
         :disabled="!allowSubmit"
-        @click="addTags"
+        @click="createAndAddTags"
       />
     </template>
   </BaseModal>
@@ -71,28 +71,29 @@
     reloadObject: { type: String, required: true },
   });
 
-  const newTags = ref<string[]>([]);
-  const storeTagValues = ref<string[]>([]);
+  const formTagValues = ref<string[]>([]);
+  const existingTagValues = ref<string[]>([]);
   const error = ref<string>();
   const isLoading = ref(false);
 
-  async function loadTags() {
+  async function loadAllExistingTags() {
     await nodeTagStore.readAll();
-    storeTagValues.value = tagValues(nodeTagStore.allItems);
+    existingTagValues.value = nodeTagStore.allItems.map((tag) => tag.value);
   }
 
-  async function addTags() {
+  async function createAndAddTags() {
     isLoading.value = true;
     try {
-      await createTags(newTags.value);
+      await createNewTags();
 
       const updateData = selectedStore.selected.map((uuid) => ({
         uuid: uuid,
-        tags: newNodeTags(uuid, newTags.value),
+        tags: [...existingNodeTagValues(uuid), ...uniqueNewTags.value],
       }));
 
       await nodeStore.update(updateData);
     } catch (e: unknown) {
+      console.log(e);
       if (typeof e === "string") {
         error.value = e;
       } else if (e instanceof Error) {
@@ -107,7 +108,7 @@
     }
   }
 
-  function newNodeTags(uuid: string, tags: string[]) {
+  const existingNodeTagValues = (uuid: string) => {
     let nodeTags: nodeTagRead[] = [];
     if (props.reloadObject == "table") {
       const node = tableStore.visibleQueriedItemById(uuid);
@@ -115,40 +116,32 @@
     } else if (props.reloadObject == "node") {
       nodeTags = nodeStore.open.tags;
     }
-    return [...tagValues(nodeTags), ...tags];
-  }
+    return nodeTags.map((tag) => tag.value);
+  };
 
-  async function createTags(tags: string[]) {
-    for (const tag of tags) {
-      if (!tagExists(tag)) {
-        await NodeTag.create({ value: tag });
-        await loadTags();
-      }
+  const createNewTags = async () => {
+    for (const tag of uniqueNewTags.value) {
+      await NodeTag.create({ value: tag });
     }
-  }
+    await loadAllExistingTags();
+  };
 
-  function tagExists(tagValue: string) {
-    return storeTagValues.value.includes(tagValue);
-  }
-
-  function tagValues(tags: nodeTagRead[]) {
-    let values = [];
-    for (const tag of tags) {
-      values.push(tag.value);
-    }
-    return values;
-  }
+  const uniqueNewTags = computed(() => {
+    return [...new Set(formTagValues.value)].filter(
+      (tag) => !existingTagValues.value.includes(tag),
+    );
+  });
 
   interface tagEvent {
     value: nodeTagRead;
   }
   function addExistingTag(tagEvent: tagEvent) {
     // Add an existing tag to the list of tags to be added
-    newTags.value.push(tagEvent.value.value);
+    formTagValues.value.push(tagEvent.value.value);
   }
 
   const allowSubmit = computed(() => {
-    return selectedStore.anySelected && newTags.value.length;
+    return selectedStore.anySelected && formTagValues.value.length;
   });
 
   const handleError = () => {
@@ -157,7 +150,7 @@
   };
 
   function close() {
-    newTags.value = [];
+    formTagValues.value = [];
     modalStore.close(props.name);
   }
 </script>

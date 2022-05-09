@@ -29,7 +29,7 @@ function factory(
             alertStore: {
               open: alertReadFactory({
                 uuid: "uuid",
-                tags: [existingTag],
+                tags: args.existingTags,
               }),
             },
             selectedAlertStore: {
@@ -107,20 +107,20 @@ describe("TagModal", () => {
   it("attempts to create new tags and update selected nodes with new and existing tags and 'Add' clicked", () => {
     cy.stub(NodeTag, "create")
       .withArgs({
-        value: "testTag",
+        value: "newTag",
       })
       .as("createTag")
       .resolves();
 
     cy.stub(NodeTag, "readAll")
       .as("readAllTags")
-      .resolves([testTag, existingTag, newTag]);
+      .resolves([testTag, existingTag]);
 
     cy.stub(Alert, "update")
       .withArgs([
         {
           uuid: "uuid",
-          tags: ["existingTag", "testTag", "newTag"],
+          tags: ["testTag", "existingTag", "newTag"],
         },
       ])
       .as("updateAlert")
@@ -213,13 +213,13 @@ describe("TagModal", () => {
 
     cy.stub(NodeTag, "readAll")
       .as("readAllTags")
-      .resolves([testTag, existingTag, newTag]);
+      .resolves([testTag, existingTag]);
 
     cy.stub(Alert, "update")
       .withArgs([
         {
           uuid: "uuid",
-          tags: ["existingTag", "testTag", "newTag"],
+          tags: ["testTag", "existingTag", "newTag"],
         },
       ])
       .as("updateAlert")
