@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import Field, UUID4
-from typing import List, Optional
+from typing import Optional
 from uuid import uuid4
 
 from api_models import type_str, validators
@@ -46,17 +46,17 @@ class AlertCreate(NodeCreate, AlertBase):
 
     name: type_str = Field(description="""The name of the alert""")
 
-    root_observables: List[ObservableCreate] = Field(
+    root_observables: list[ObservableCreate] = Field(
         description="A list of observables that should be added to the alert"
     )
 
-    tags: List[type_str] = Field(default_factory=list, description="A list of tags to add to the alert")
+    tags: list[type_str] = Field(default_factory=list, description="A list of tags to add to the alert")
 
-    threat_actors: List[type_str] = Field(
+    threat_actors: list[type_str] = Field(
         default_factory=list, description="A list of threat actors to add to the alert"
     )
 
-    threats: List[type_str] = Field(default_factory=list, description="A list of threats to add to the alert")
+    threats: list[type_str] = Field(default_factory=list, description="A list of threats to add to the alert")
 
     tool: Optional[type_str] = Field(description="The tool that created this alert")
 
@@ -68,19 +68,19 @@ class AlertCreate(NodeCreate, AlertBase):
 
 
 class AlertRead(NodeRead, AlertBase):
-    child_tags: List[NodeTagRead] = Field(
+    child_tags: list[NodeTagRead] = Field(
         description="A list of tags added to child Nodes in the alert's tree", default_factory=list
     )
 
-    child_threat_actors: List[NodeThreatActorRead] = Field(
+    child_threat_actors: list[NodeThreatActorRead] = Field(
         description="A list of threat actors added to child Nodes in the alert's tree", default_factory=list
     )
 
-    child_threats: List[NodeThreatRead] = Field(
+    child_threats: list[NodeThreatRead] = Field(
         description="A list of threats added to child Nodes in the alert's tree", default_factory=list
     )
 
-    comments: List[NodeCommentRead] = Field(description="A list of comments added to the alert", default_factory=list)
+    comments: list[NodeCommentRead] = Field(description="A list of comments added to the alert", default_factory=list)
 
     disposition: Optional[AlertDispositionRead] = Field(description="The disposition assigned to this alert")
 
@@ -96,11 +96,13 @@ class AlertRead(NodeRead, AlertBase):
 
     queue: QueueRead = Field(description="The queue containing this alert")
 
-    tags: List[NodeTagRead] = Field(description="A list of tags added to the alert")
+    tags: list[NodeTagRead] = Field(description="A list of tags added to the alert", default_factory=list)
 
-    threat_actors: List[NodeThreatActorRead] = Field(description="A list of threat actors added to the alert")
+    threat_actors: list[NodeThreatActorRead] = Field(
+        description="A list of threat actors added to the alert", default_factory=list
+    )
 
-    threats: List[NodeThreatRead] = Field(description="A list of threats added to the alert")
+    threats: list[NodeThreatRead] = Field(description="A list of threats added to the alert", default_factory=list)
 
     tool: Optional[AlertToolRead] = Field(description="The tool that created this alert")
 
@@ -123,11 +125,11 @@ class AlertUpdate(NodeUpdate, AlertBase):
 
     queue: Optional[type_str] = Field(description="The alert queue containing this alert")
 
-    tags: Optional[List[type_str]] = Field(description="A list of tags to add to the alert")
+    tags: Optional[list[type_str]] = Field(description="A list of tags to add to the alert")
 
-    threat_actors: Optional[List[type_str]] = Field(description="A list of threat actors to add to the alert")
+    threat_actors: Optional[list[type_str]] = Field(description="A list of threat actors to add to the alert")
 
-    threats: Optional[List[type_str]] = Field(description="A list of threats to add to the alert")
+    threats: Optional[list[type_str]] = Field(description="A list of threats to add to the alert")
 
     _prevent_none: classmethod = validators.prevent_none("queue", "tags", "threat_actors", "threats")
 

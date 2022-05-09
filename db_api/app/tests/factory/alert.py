@@ -7,6 +7,8 @@ from uuid import UUID, uuid4
 
 from api_models.alert import AlertCreate
 from api_models.alert_disposition import AlertDispositionCreate
+from api_models.alert_tool import AlertToolCreate
+from api_models.alert_tool_instance import AlertToolInstanceCreate
 from api_models.alert_type import AlertTypeCreate
 from api_models.analysis import AnalysisCreate
 from api_models.analysis_module_type import AnalysisModuleTypeCreate
@@ -14,6 +16,7 @@ from api_models.node_tag import NodeTagCreate
 from api_models.node_threat_actor import NodeThreatActorCreate
 from api_models.observable import ObservableCreate
 from api_models.observable_type import ObservableTypeCreate
+from api_models.queue import QueueCreate
 from db import crud
 from db.schemas.alert import Alert
 from db.schemas.event import Event
@@ -59,8 +62,19 @@ def create(
     if update_time is None:
         update_time = crud.helpers.utcnow()
 
+    # Create the alert queue
+    crud.queue.create(model=QueueCreate(value=alert_queue), db=db)
+
     # Create the alert type
     crud.alert_type.create(model=AlertTypeCreate(value=alert_type), db=db)
+
+    # Create the tool and tool instance
+    crud.alert_tool.create(model=AlertToolCreate(value=tool), db=db)
+    crud.alert_tool_instance.create(model=AlertToolInstanceCreate(value=tool_instance), db=db)
+
+    # Create the history user if one was given
+    if history_username is not None:
+        factory.user.create(username=history_username, db=db)
 
     # Create the owner user if one was given
     if owner is not None:
@@ -89,7 +103,10 @@ def create(
     )
 
     if disposition:
-        alert.disposition = crud.alert_disposition.create(model=AlertDispositionCreate(value=disposition), db=db)
+        existing_dispositions = crud.alert_disposition.read_all(db=db)
+        alert.disposition = crud.alert_disposition.create(
+            model=AlertDispositionCreate(value=disposition, rank=len(existing_dispositions) + 1), db=db
+        )
         alert.disposition_time = update_time
         alert.disposition_user = factory.user.create(username=updated_by_user, display_name=updated_by_user, db=db)
         diffs.append(crud.history.create_diff(field="disposition", old=None, new=disposition))
@@ -98,7 +115,7 @@ def create(
         alert.event = event
 
     if tags:
-        alert.tags = [crud.node_tag.create(model=NodeTagCreate(value=t)) for t in tags]
+        alert.tags = [crud.node_tag.create(model=NodeTagCreate(value=t), db=db) for t in tags]
 
     if threat_actors:
         alert.threat_actors = [

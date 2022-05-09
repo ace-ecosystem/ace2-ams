@@ -18,6 +18,10 @@ def create(model: AlertDispositionCreate, db: Session) -> AlertDisposition:
     return obj
 
 
+def read_all(db: Session) -> list[AlertDisposition]:
+    return crud.helpers.read_all(db_table=AlertDisposition, db=db)
+
+
 def read_by_uuid(uuid: UUID, db: Session) -> AlertDisposition:
     return crud.helpers.read_by_uuid(db_table=AlertDisposition, uuid=uuid, db=db)
 
