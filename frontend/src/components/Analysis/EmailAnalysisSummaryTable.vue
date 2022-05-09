@@ -17,7 +17,7 @@
         </span>
       </template></Column
     >
-    <Column field="time" header="Time" :sortable="true"
+    <Column field="time" header="Time (UTC)" :sortable="true"
       ><template #body="slotProps">
         <span class="flex align-items-center justify-content-center">
           {{ formatDateTime(slotProps.data.time) }}

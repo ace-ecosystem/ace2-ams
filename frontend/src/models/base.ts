@@ -48,6 +48,7 @@ export interface propertyOption {
   readonly store?: StoreDefinition;
   readonly queueDependent?: boolean;
   readonly stringRepr?: (filter: any) => string;
+  readonly displayRepr?: (filter: any) => string;
   readonly parseStringRepr?: (
     filter: string,
   ) => string[] | Date | { category: string; value: string };

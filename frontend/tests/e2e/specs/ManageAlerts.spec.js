@@ -231,7 +231,7 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.get(":nth-child(1) > .p-dropdown > .p-dropdown-trigger", {
         timeout: 10000,
       }).click();
-      cy.get('[aria-label="Insert Time"]').click();
+      cy.get('[aria-label="Insert Time (UTC)"]').click();
 
       // Manually type the given time
       cy.get("[data-cy=date-range-picker-start] > .p-inputgroup > .p-inputtext")
@@ -270,7 +270,7 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.get(":nth-child(1) > .p-dropdown > .p-dropdown-trigger", {
         timeout: 10000,
       }).click();
-      cy.get('[aria-label="Insert Time"]').click();
+      cy.get('[aria-label="Insert Time (UTC)"]').click();
 
       // Request to get alerts with no filters (aka a reset) should be made
       cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
@@ -323,7 +323,7 @@ describe("Manage Alerts - No Database Changes", () => {
         ".formgrid > :nth-child(1) > .p-dropdown > .p-dropdown-trigger",
       ).click();
       cy.get(".p-dropdown-items-wrapper").should("be.visible");
-      cy.get("[aria-label='Event Time After']").click();
+      cy.get("[aria-label='Event Time After (UTC)']").click();
       cy.get(".p-dropdown-items-wrapper").should("not.exist");
       cy.get("div.inputfield > .p-inputgroup > .p-inputtext")
         .invoke("attr", "placeholder")

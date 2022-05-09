@@ -59,7 +59,7 @@ describe("EmailAnalysisSummaryTable", () => {
 
     const emailSummaryTableCols = [
       "URL",
-      "Time",
+      "Time (UTC)",
       "From",
       "To",
       "Subject",

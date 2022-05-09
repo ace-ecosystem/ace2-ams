@@ -60,7 +60,7 @@ describe("TheAlertsTable", () => {
     const defaultColumnHeaders = [
       "",
       "",
-      "Event Time",
+      "Event Time (UTC)",
       "Name",
       "Owner",
       "Disposition",

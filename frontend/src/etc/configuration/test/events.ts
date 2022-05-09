@@ -79,7 +79,7 @@ export const eventEditableProperties: Record<string, propertyOption[]> = {
 };
 
 export const eventRangeFilters = {
-  "Created Time": {
+  "Created Time (UTC)": {
     start: eventPropertyTypes.CREATED_AFTER_PROPERTY,
     end: eventPropertyTypes.CREATED_BEFORE_PROPERTY,
   },

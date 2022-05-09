@@ -135,7 +135,7 @@
       return datetime;
     }
     const d = new Date(datetime);
-    return d.toLocaleString("en-US", { timeZone: "UTC" });
+    return `${d.toLocaleString("en-US", { timeZone: "UTC" })} UTC`;
   };
 
   const onColumnToggle = (val: any) => {

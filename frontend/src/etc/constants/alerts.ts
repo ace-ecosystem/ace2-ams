@@ -59,10 +59,14 @@ export const alertDispositionUserProperty: propertyOption = {
 
 export const alertDispositionedAfterProperty: propertyOption = {
   name: alertPropertyTypes.DISPOSITIONED_AFTER_PROPERTY,
-  label: "Dispositioned After",
+  label: "Dispositioned After (UTC)",
   type: inputTypes.DATE,
   stringRepr: (filter: Date) => {
-    return filter.toISOString().replace("Z", "");
+    return filter.toISOString().slice(0, -5);
+  },
+  displayRepr: (filter: Date) => {
+    const d = filter.toISOString().slice(0, -5);
+    return `${d} (UTC)`;
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);
@@ -71,10 +75,14 @@ export const alertDispositionedAfterProperty: propertyOption = {
 
 export const alertDispositionedBeforeProperty: propertyOption = {
   name: alertPropertyTypes.DISPOSITIONED_BEFORE_PROPERTY,
-  label: "Dispositioned Before",
+  label: "Dispositioned Before (UTC)",
   type: inputTypes.DATE,
   stringRepr: (filter: Date) => {
-    return filter.toISOString().replace("Z", "");
+    return filter.toISOString().slice(0, -5);
+  },
+  displayRepr: (filter: Date) => {
+    const d = filter.toISOString().slice(0, -5);
+    return `${d} (UTC)`;
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);
@@ -82,10 +90,14 @@ export const alertDispositionedBeforeProperty: propertyOption = {
 };
 export const alertEventTimeAfterProperty: propertyOption = {
   name: alertPropertyTypes.EVENT_TIME_AFTER_PROPERTY,
-  label: "Event Time After",
+  label: "Event Time After (UTC)",
   type: inputTypes.DATE,
   stringRepr: (filter: Date) => {
-    return filter.toISOString().replace("Z", "");
+    return filter.toISOString().slice(0, -5);
+  },
+  displayRepr: (filter: Date) => {
+    const d = filter.toISOString().slice(0, -5);
+    return `${d} (UTC)`;
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);
@@ -94,10 +106,14 @@ export const alertEventTimeAfterProperty: propertyOption = {
 
 export const alertEventTimeBeforeProperty: propertyOption = {
   name: alertPropertyTypes.EVENT_TIME_BEFORE_PROPERTY,
-  label: "Event Time Before",
+  label: "Event Time Before (UTC)",
   type: inputTypes.DATE,
   stringRepr: (filter: Date) => {
-    return filter.toISOString().replace("Z", "");
+    return filter.toISOString().slice(0, -5);
+  },
+  displayRepr: (filter: Date) => {
+    const d = filter.toISOString().slice(0, -5);
+    return `${d} (UTC)`;
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);
@@ -106,10 +122,14 @@ export const alertEventTimeBeforeProperty: propertyOption = {
 
 export const alertInsertTimeBeforeProperty: propertyOption = {
   name: alertPropertyTypes.INSERT_TIME_BEFORE_PROPERTY,
-  label: "Insert Time Before",
+  label: "Insert Time Before (UTC)",
   type: inputTypes.DATE,
   stringRepr: (filter: Date) => {
-    return filter.toISOString().replace("Z", "");
+    return filter.toISOString().slice(0, -5);
+  },
+  displayRepr: (filter: Date) => {
+    const d = filter.toISOString().slice(0, -5);
+    return `${d} (UTC)`;
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);
@@ -118,10 +138,14 @@ export const alertInsertTimeBeforeProperty: propertyOption = {
 
 export const alertInsertTimeAfterProperty: propertyOption = {
   name: alertPropertyTypes.INSERT_TIME_AFTER_PROPERTY,
-  label: "Insert Time After",
+  label: "Insert Time After (UTC)",
   type: inputTypes.DATE,
   stringRepr: (filter: Date) => {
-    return filter.toISOString().replace("Z", "");
+    return filter.toISOString().slice(0, -5);
+  },
+  displayRepr: (filter: Date) => {
+    const d = filter.toISOString().slice(0, -5);
+    return `${d} (UTC)`;
   },
   parseStringRepr: (valueString: string) => {
     return new Date(valueString);
