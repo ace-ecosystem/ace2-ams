@@ -38,7 +38,6 @@ from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.node_threat_type import NodeThreatType
-from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 from db.schemas.queue import Queue
 from db.schemas.user import User, UserHistory
@@ -347,11 +346,3 @@ def create_queue(value: str, db: Session) -> Queue:
 
 def create_user_role(value: str, db: Session) -> UserRole:
     return _create_basic_object(db_table=UserRole, value=value, db=db)
-
-
-def read_node_tree_leaf(root_node_uuid: UUID, node_uuid: UUID, db: Session) -> Optional[NodeTree]:
-    return (
-        db.execute(select(NodeTree).where(NodeTree.root_node_uuid == root_node_uuid, NodeTree.node_uuid == node_uuid))
-        .scalars()
-        .one_or_none()
-    )
