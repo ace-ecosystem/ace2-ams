@@ -65,17 +65,28 @@
   import { observableTreeRead } from "@/models/observable";
   import { useObservableStore } from "@/stores/observable";
 
-  const nodeType = inject("nodeType") as "alerts" | "events";
-
   const props = defineProps({
     name: { type: String, required: true },
     reloadObject: { type: String, required: true },
+    nodeType: {
+      type: String as PropType<"alerts" | "events" | "observable">,
+      required: true,
+    },
     observable: {
       type: Object as PropType<observableTreeRead>,
       required: false,
       default: undefined,
     },
   });
+
+  let nodeStore: any;
+  let tableStore: any;
+  let selected: string[];
+  if (!(props.nodeType === "observable")) {
+    nodeStore = nodeStores[props.nodeType]();
+    selected = nodeSelectedStores[props.nodeType]().selected;
+    tableStore = nodeTableStores[props.nodeType]();
+  }
 
   const modalStore = useModalStore();
   const nodeTagStore = useNodeTagStore();
@@ -96,13 +107,12 @@
     isLoading.value = true;
     try {
       await createNewTags();
-      if (props.observable) {
+      if (props.nodeType == "observable") {
         await addObservableTags();
       } else {
         await addNodeTags();
       }
     } catch (e: unknown) {
-      console.log(e);
       if (typeof e === "string") {
         error.value = e;
       } else if (e instanceof Error) {
@@ -118,9 +128,6 @@
   }
 
   const addNodeTags = async () => {
-    const nodeStore = nodeStores[nodeType]();
-
-    const selected = nodeSelectedStores[nodeType]().selected;
     const updateData = selected.map((uuid) => ({
       uuid: uuid,
       tags: deduped([...existingNodeTagValues(uuid), ...formTagValues.value]),
@@ -130,9 +137,6 @@
   };
 
   const existingNodeTagValues = (uuid: string) => {
-    const nodeStore = nodeStores[nodeType]();
-    const tableStore = nodeTableStores[nodeType]();
-
     let nodeTags: nodeTagRead[] = [];
     if (props.reloadObject == "table") {
       const node = tableStore.visibleQueriedItemById(uuid);
@@ -178,10 +182,9 @@
   }
 
   const allowSubmit = computed(() => {
-    if (props.observable) {
+    if (props.nodeType == "observable") {
       return formTagValues.value.length;
     }
-    const selected = nodeSelectedStores[nodeType]().selected;
     return selected.length && formTagValues.value.length;
   });
 

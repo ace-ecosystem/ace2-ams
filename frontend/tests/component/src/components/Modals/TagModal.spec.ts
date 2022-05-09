@@ -19,10 +19,12 @@ function factory(
   args: {
     selected: string[];
     existingTags: nodeTagRead[];
+    nodeType: "alerts" | "events" | "observable";
     observable: undefined | observableTreeRead;
   } = {
     selected: [],
     existingTags: [],
+    nodeType: "alerts",
     observable: undefined,
   },
 ) {
@@ -48,13 +50,11 @@ function factory(
           },
         }),
       ],
-      provide: {
-        nodeType: "alerts",
-      },
     },
     propsData: {
       name: "TagModal",
       reloadObject: "node",
+      nodeType: args.nodeType,
       observable: args.observable,
     },
   }).then((wrapper) => {
@@ -81,6 +81,8 @@ describe("TagModal", () => {
     factory({
       selected: [],
       existingTags: [testTag],
+      nodeType: "alerts",
+
       observable: undefined,
     });
     cy.contains("Select from existing tags").click();
@@ -91,6 +93,8 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [],
+      nodeType: "alerts",
+
       observable: undefined,
     });
     cy.get('[data-cy="chips-container"]')
@@ -111,6 +115,8 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [],
+      nodeType: "alerts",
+
       observable: undefined,
     });
     cy.findByText("Add").parent().should("be.disabled");
@@ -140,6 +146,8 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
+      nodeType: "alerts",
+
       observable: undefined,
     });
     cy.contains("Select from existing tags").click();
@@ -177,6 +185,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
+      nodeType: "observable",
       observable: observableTreeReadFactory({ tags: [testTag, existingTag] }),
     });
     cy.contains("Select from existing tags").click();
@@ -209,6 +218,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
+      nodeType: "alerts",
       observable: undefined,
     });
     cy.contains("Select from existing tags").click();
@@ -239,6 +249,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
+      nodeType: "alerts",
       observable: undefined,
     });
     cy.contains("Select from existing tags").click();
@@ -279,6 +290,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
+      nodeType: "alerts",
       observable: undefined,
     });
     cy.contains("Select from existing tags").click();

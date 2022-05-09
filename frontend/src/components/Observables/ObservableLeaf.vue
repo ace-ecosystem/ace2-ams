@@ -57,6 +57,7 @@
         :is="component"
         :name="componentName"
         :observable="observable"
+        node-type="observable"
         reload-object="node"
         @request-reload="reload"
       ></component>
