@@ -100,6 +100,7 @@ describe("RemoveTagModal", () => {
     factory({
       selected: [],
       existingTags: [existingTag, testTag, otherTag],
+      openAlertTags: [],
       nodeType: "observable",
       reloadObject: "node",
       observable: observableTreeReadFactory({
@@ -130,6 +131,7 @@ describe("RemoveTagModal", () => {
   it("enables 'Add' button when given nodeType is 'observable' and 1 or more tags added", () => {
     factory({
       selected: [],
+      openAlertTags: [],
       existingTags: [existingTag, testTag, otherTag],
       nodeType: "observable",
       reloadObject: "node",
@@ -161,6 +163,7 @@ describe("RemoveTagModal", () => {
   it("disables 'Add' button when given nodeType is 'observable' and no tags are added to form", () => {
     factory({
       selected: [],
+      openAlertTags: [],
       existingTags: [existingTag, testTag, otherTag],
       nodeType: "observable",
       reloadObject: "node",
@@ -173,6 +176,7 @@ describe("RemoveTagModal", () => {
   it("disables 'Add' button when given nodeType is not 'observable', selectedStore has 1 or more nodes selected, and no tags added", () => {
     factory({
       selected: ["uuid"],
+      openAlertTags: [],
       existingTags: [],
       nodeType: "alerts",
       reloadObject: "node",
@@ -183,6 +187,7 @@ describe("RemoveTagModal", () => {
   it("disables 'Add' button when given nodeType is not 'observable', selectedStore has no nodes selected, and 1 or more tags added", () => {
     factory({
       selected: [],
+      openAlertTags: [],
       existingTags: [],
       nodeType: "alerts",
       reloadObject: "node",
@@ -226,6 +231,7 @@ describe("RemoveTagModal", () => {
     factory({
       selected: [],
       existingTags: [existingTag, testTag, otherTag],
+      openAlertTags: [],
       nodeType: "observable",
       reloadObject: "node",
       observable: observableTreeReadFactory({
@@ -329,6 +335,7 @@ describe("RemoveTagModal", () => {
 
     factory({
       selected: [],
+      openAlertTags: [],
       existingTags: [existingTag, testTag, otherTag],
       nodeType: "observable",
       reloadObject: "node",
