@@ -113,7 +113,9 @@ def get_observable(uuid: UUID, db: Session = Depends(get_db)):
 
 
 def get_observable_history(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read_history_records(history_table=ObservableHistory, record_uuid=uuid, db=db)
+    return paginate(
+        conn=db, query=crud.history.build_read_history_query(history_table=ObservableHistory, record_uuid=uuid)
+    )
 
 
 helpers.api_route_read_all(router, get_all_observables, ObservableRead)

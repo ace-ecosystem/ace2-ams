@@ -7,6 +7,7 @@ from tests.factory import event_source
 from tests.factory import event_status
 from tests.factory import event_type
 from tests.factory import event_vector
+from tests.factory import node_tag
 from tests.factory import node_threat
 from tests.factory import node_threat_actor
 from tests.factory import observable

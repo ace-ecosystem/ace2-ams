@@ -5,12 +5,9 @@ from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from api_models.queue import QueueCreate
-from api_models.user import UserCreate
-from api_models.user_role import UserRoleCreate
-from db import crud
 from db.database import engine, get_db
 from main import app
+from tests import factory
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -27,22 +24,7 @@ def apply_migrations():
 
     # Add the analyst user so API calls that create history entries have a valid user to link to.
     session_db = next(get_db())
-
-    # TODO: Use the user factory function instead
-    crud.queue.create(model=QueueCreate(value="external"), db=session_db)
-    crud.user_role.create(model=UserRoleCreate(value="analyst"), db=session_db)
-    crud.user.create(
-        model=UserCreate(
-            default_alert_queue="external",
-            default_event_queue="external",
-            display_name="Analyst",
-            email="analyst@test.local",
-            password="asdfasdf",
-            roles=["analyst"],
-            username="analyst",
-        ),
-        db=session_db,
-    )
+    factory.user.create(username="analyst", db=session_db)
     session_db.commit()
 
     yield

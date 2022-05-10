@@ -12,6 +12,7 @@ from api_models.history import AlertHistoryRead
 from db import crud
 from db.database import get_db
 from db.schemas.alert import AlertHistory
+from exceptions.db import ValueNotFoundInDatabase
 
 
 router = APIRouter(
@@ -31,7 +32,10 @@ def create_alert(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    alert = crud.alert.create(model=alert, db=db)
+    try:
+        alert = crud.alert.create(model=alert, db=db)
+    except ValueNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=alert.uuid)
 

@@ -5,6 +5,8 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 from typing import Any, Optional
 from uuid import UUID
 
+from exceptions.db import ValueNotFoundInDatabase
+
 
 def read_all(db_table: DeclarativeMeta, db: Session) -> list[Any]:
     """Returns all of the objects from the given database table."""
@@ -59,7 +61,11 @@ def read_by_values(
     result = db.execute(select(db_table).where(db_table.value.in_(values))).scalars().all()
 
     if error_on_not_found and len(unique_values) != len(result):
-        raise ValueError("One or more values was not found in the database.")
+        for value in unique_values:
+            if all(r.value != value for r in result):
+                raise ValueNotFoundInDatabase(
+                    f"The '{value}' value was not found in the {db_table.__tablename__} table."
+                )
 
     return result
 

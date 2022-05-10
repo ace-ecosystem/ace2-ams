@@ -76,9 +76,8 @@ class Observable(Node, HasHistory):
         return ObservableNodeTreeRead(**self.to_dict())
 
     def to_dict(self):
-        values_dict = self.__dict__
-        values_dict["observable_relationships"] = self.observable_relationships
-        return values_dict
+        ignore_keys = ["convert_to_pydantic", "history", "history_snapshot", "to_dict"]
+        return {key: getattr(self, key) for key in self.__class__.__dict__ if key not in ignore_keys}
 
     @property
     def history_snapshot(self):
