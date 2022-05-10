@@ -63,7 +63,7 @@
       <!--      REMOVE TAG MODAL -->
       <div v-if="props.removeTag">
         <Button
-          data-cy="tag-button"
+          data-cy="remove-tag-button"
           class="p-m-1 p-button-sm"
           icon="pi pi-tags"
           label="Remove Tag(s)"

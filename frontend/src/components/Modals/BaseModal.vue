@@ -38,7 +38,7 @@
 
   const store = useModalStore();
 
-  const emit = defineEmits(["dialogClose", "show"]);
+  const emit = defineEmits(["dialogClose"]);
 
   const props = defineProps({
     name: { type: String, required: true },

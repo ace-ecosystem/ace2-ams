@@ -2,7 +2,7 @@ import { mount } from "@cypress/vue";
 import PrimeVue from "primevue/config";
 
 import RemoveTagModal from "@/components/Modals/RemoveTagModal.vue";
-import BaseModal from "@/components/Modals/BaseModal.vue";
+import Dialog from "primevue/dialog";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { nodeTagRead } from "@/models/nodeTag";
@@ -88,7 +88,7 @@ function factory(
     cy.contains("Select from existing tags").should("be.visible");
     cy.contains("Nevermind").should("be.visible");
     cy.findByText("Remove").should("be.visible");
-    Cypress.vueWrapper.findComponent(BaseModal).vm.$emit("show");
+    Cypress.vueWrapper.findComponent(Dialog).vm.$emit("show");
   });
 }
 
