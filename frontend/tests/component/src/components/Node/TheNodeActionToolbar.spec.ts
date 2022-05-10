@@ -11,6 +11,7 @@ interface TheNodeActionToolbarProps {
   assign?: boolean;
   comment?: boolean;
   tag?: boolean;
+  removeTag?: boolean;
   takeOwnership?: boolean;
 }
 
@@ -48,6 +49,8 @@ describe("TheNodeActionToolbar", () => {
     cy.get("@stub-14").should("have.been.calledWith", "AssignModal");
     cy.contains("Tag").should("be.visible").click();
     cy.get("@stub-14").should("have.been.calledWith", "TagModal");
+    cy.contains("Remove Tag").should("be.visible").click();
+    cy.get("@stub-14").should("have.been.calledWith", "RemoveTagModal");
   });
   it("correctly attempts to assign owner if 'Take Ownership' button clicked", () => {
     factory({
@@ -94,6 +97,7 @@ describe("TheNodeActionToolbar", () => {
         reloadObject: "node",
         assign: false,
         tag: false,
+        removeTag: false,
         comment: false,
         takeOwnership: false,
       },

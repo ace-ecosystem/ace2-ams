@@ -4,6 +4,7 @@ import {
   disableDetection,
   updateDetectionExpiration,
   addTag,
+  removeTag,
 } from "../constants/observables";
 
 type FILE = "file";
@@ -16,6 +17,7 @@ type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
 
 export const commonObservableActions = [
   addTag,
+  removeTag,
   enableDetection,
   disableDetection,
   updateDetectionExpiration,

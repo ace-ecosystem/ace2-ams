@@ -305,6 +305,8 @@ def create(model: AlertCreate, db: Session) -> Alert:
     obj.instructions = model.instructions
     obj.name = model.name
     obj.owner = crud.user.read_by_username(username=model.owner, db=db)
+    if model.owner:
+        obj.ownership_time = crud.helpers.utcnow()
     obj.queue = crud.queue.read_by_value(value=model.queue, db=db)
     obj.root_analysis = crud.analysis.create_root(db=db)
     obj.tool = crud.alert_tool.read_by_value(value=model.tool, db=db)
@@ -453,6 +455,7 @@ def update(model: AlertUpdate, db: Session):
         old_value = alert.owner.username if alert.owner else None
         diffs.append(crud.history.create_diff(field="owner", old=old_value, new=update_data["owner"]))
         alert.owner = crud.user.read_by_username(username=update_data["owner"], db=db)
+        alert.ownership_time = crud.helpers.utcnow()
 
     if "queue" in update_data:
         diffs.append(crud.history.create_diff(field="queue", old=alert.queue.value, new=update_data["queue"]))

@@ -10,6 +10,7 @@ import { alertRead } from "@/models/alert";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { NodeTree } from "@/services/api/nodeTree";
 import { observableReadFactory } from "@mocks/observable";
+import { userReadFactory } from "@mocks/user";
 
 function factory(initialAlertStoreState: {
   open: null | alertRead;
@@ -72,6 +73,42 @@ describe("TheAlertDetails", () => {
     cy.contains("Owner").siblings().should("have.text", "None");
     cy.contains("Comments").siblings().should("have.text", "None");
     cy.contains("No detections found").should("be.visible");
+  });
+  it("renders correctly when there is an open alert has an owner and disposition set (uses the correct alertSummary fields)", () => {
+    const date = new Date(2020, 5, 4, 12, 0, 0, 0);
+    cy.stub(NodeTree, "readNodesOfNodeTree")
+      .withArgs(["testAlertUuid"], "observable")
+      .as("getObservables")
+      .resolves([]);
+    factory({
+      open: alertReadFactory({
+        tags: [genericObjectReadFactory({ value: "TestTag" })],
+        owner: userReadFactory(),
+        ownershipTime: date,
+        disposition: {
+          rank: 0,
+          ...genericObjectReadFactory({ value: "FALSE POSITIVE" }),
+        },
+        dispositionUser: userReadFactory(),
+        dispositionTime: date,
+      }),
+      requestReload: false,
+    });
+
+    cy.get("@getObservables").should("have.been.calledOnce");
+
+    // Should still have all the same rows
+    cy.get("tr").should("have.length", 11);
+    // Check these specific fields
+    cy.contains("Disposition")
+      .siblings()
+      .should(
+        "have.text",
+        "FALSE POSITIVE by Test Analyst @ 2020-06-04T16:00:00.000Z",
+      );
+    cy.contains("Owner")
+      .siblings()
+      .should("have.text", "Test Analyst @ 2020-06-04T16:00:00.000Z");
   });
   it("renders correctly when there is an open alert that has instructions available", () => {
     cy.stub(NodeTree, "readNodesOfNodeTree")

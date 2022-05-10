@@ -6,6 +6,7 @@ import {
   observableTreeRead,
 } from "@/models/observable";
 import { ObservableInstance } from "@/services/api/observable";
+import RemoveTagModalVue from "@/components/Modals/RemoveTagModal.vue";
 
 export const enableDetection: observableActionCommand = {
   label: "Enable Detection",
@@ -48,4 +49,13 @@ export const addTag: observableActionModal = {
   type: "modal",
   modal: TagModalVue,
   modalName: "ObservableTagModal",
+};
+
+export const removeTag: observableActionModal = {
+  label: "Remove Tag(s)",
+  description: "Remove a tag from this observable",
+  icon: "pi pi-tag",
+  type: "modal",
+  modal: RemoveTagModalVue,
+  modalName: "ObservableRemoveTagModal",
 };

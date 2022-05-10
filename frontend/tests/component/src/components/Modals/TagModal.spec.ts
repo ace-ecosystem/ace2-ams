@@ -20,11 +20,13 @@ function factory(
     selected: string[];
     existingTags: nodeTagRead[];
     nodeType: "alerts" | "events" | "observable";
+    reloadObject: "node" | "table";
     observable: undefined | observableTreeRead;
   } = {
     selected: [],
     existingTags: [],
     nodeType: "alerts",
+    reloadObject: "node",
     observable: undefined,
   },
 ) {
@@ -41,6 +43,19 @@ function factory(
                 tags: args.existingTags,
               }),
             },
+            alertTableStore: {
+              visibleQueriedItems: [
+                alertReadFactory({ uuid: "uuidA" }),
+                alertReadFactory({ uuid: "uuidB" }),
+              ],
+              totalItems: 0,
+              sortField: "eventTime",
+              sortOrder: "desc",
+              pageSize: 10,
+              requestReload: false,
+              stateFiltersLoaded: false,
+              routeFiltersLoaded: false,
+            },
             selectedAlertStore: {
               selected: args.selected,
             },
@@ -53,7 +68,7 @@ function factory(
     },
     propsData: {
       name: "TagModal",
-      reloadObject: "node",
+      reloadObject: args.reloadObject,
       nodeType: args.nodeType,
       observable: args.observable,
     },
@@ -82,6 +97,7 @@ describe("TagModal", () => {
       selected: [],
       existingTags: [testTag],
       nodeType: "alerts",
+      reloadObject: "node",
 
       observable: undefined,
     });
@@ -94,6 +110,7 @@ describe("TagModal", () => {
       selected: ["uuid"],
       existingTags: [],
       nodeType: "alerts",
+      reloadObject: "node",
 
       observable: undefined,
     });
@@ -116,6 +133,7 @@ describe("TagModal", () => {
       selected: ["uuid"],
       existingTags: [],
       nodeType: "alerts",
+      reloadObject: "node",
 
       observable: undefined,
     });
@@ -147,6 +165,7 @@ describe("TagModal", () => {
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
       nodeType: "alerts",
+      reloadObject: "node",
 
       observable: undefined,
     });
@@ -161,6 +180,45 @@ describe("TagModal", () => {
     cy.get("@createTag").should("have.been.calledOnce");
     cy.get("@readAllTags").should("have.been.calledOnce");
     cy.get("@updateAlert").should("have.been.calledOnce");
+    cy.get("[data-cy=TagModal]").should("not.exist");
+  });
+  it("attempts to update multiple alerts if multiple are selected in 'table' mode, tags are added to form, and 'Add' clicked", () => {
+    const updateStub = cy.stub(Alert, "update");
+    updateStub
+      .withArgs([
+        {
+          uuid: "uuidA",
+          tags: ["testTag", "existingTag"],
+        },
+        {
+          uuid: "uuidB",
+          tags: ["testTag", "existingTag"],
+        },
+      ])
+      .as("updateAlerts")
+      .resolves();
+
+    factory({
+      selected: ["uuidA", "uuidB"],
+      existingTags: [testTag, existingTag],
+      nodeType: "alerts",
+      reloadObject: "table",
+      observable: undefined,
+    });
+    // test that the tags are dedup'd with testTag
+    cy.contains("Select from existing tags").click();
+    cy.contains("testTag").click();
+    cy.get('[data-cy="chips-container"]')
+      .click()
+      .type("testTag")
+      .type("{enter}");
+    cy.get('[data-cy="chips-container"]')
+      .click()
+      .type("existingTag")
+      .type("{enter}");
+    cy.findByText("Add").click();
+
+    cy.get("@updateAlerts").should("have.been.calledOnce");
     cy.get("[data-cy=TagModal]").should("not.exist");
   });
   it("attempts to create new tags and update a given observable with new and existing tags and 'Add' clicked", () => {
@@ -179,13 +237,15 @@ describe("TagModal", () => {
       .withArgs("observableUuid1", {
         tags: ["testTag", "existingTag", "newTag"],
       })
-      .as("updateAlert")
+      .as("updateObservable")
       .resolves();
 
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
       nodeType: "observable",
+      reloadObject: "node",
+
       observable: observableTreeReadFactory({ tags: [testTag, existingTag] }),
     });
     cy.contains("Select from existing tags").click();
@@ -198,13 +258,13 @@ describe("TagModal", () => {
 
     cy.get("@createTag").should("have.been.calledOnce");
     cy.get("@readAllTags").should("have.been.calledOnce");
-    cy.get("@updateAlert").should("have.been.calledOnce");
+    cy.get("@updateObservable").should("have.been.calledOnce");
     cy.get("[data-cy=TagModal]").should("not.exist");
   });
   it("shows error if existing tags cannot be fetched", () => {
     cy.stub(NodeTag, "create")
       .withArgs({
-        value: "testTag",
+        value: "newTag",
       })
       .as("createTag")
       .resolves();
@@ -219,6 +279,8 @@ describe("TagModal", () => {
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
       nodeType: "alerts",
+      reloadObject: "node",
+
       observable: undefined,
     });
     cy.contains("Select from existing tags").click();
@@ -237,7 +299,7 @@ describe("TagModal", () => {
   it("shows error if request to create a new tag fails", () => {
     cy.stub(NodeTag, "create")
       .withArgs({
-        value: "testTag",
+        value: "newTag",
       })
       .as("createTag")
       .rejects(new Error("404 request failed !"));
@@ -250,6 +312,8 @@ describe("TagModal", () => {
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
       nodeType: "alerts",
+      reloadObject: "node",
+
       observable: undefined,
     });
     cy.contains("Select from existing tags").click();
@@ -268,7 +332,7 @@ describe("TagModal", () => {
   it("shows error if request to update node tags fails", () => {
     cy.stub(NodeTag, "create")
       .withArgs({
-        value: "testTag",
+        value: "newTag",
       })
       .as("createTag")
       .resolves();
@@ -291,6 +355,8 @@ describe("TagModal", () => {
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
       nodeType: "alerts",
+      reloadObject: "node",
+
       observable: undefined,
     });
     cy.contains("Select from existing tags").click();
