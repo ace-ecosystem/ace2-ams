@@ -121,7 +121,7 @@ def test_get_filter_disposition_user_multiple(client, db):
 
     # analyst re-dispositions alice's alert
     update = client.patch(
-        "/api/alert/?history_username=analyst", json=[{"disposition": "DELIVERY", "uuid": str(alert.uuid)}]
+        "/api/alert/", json=[{"disposition": "DELIVERY", "history_username": "analyst", "uuid": str(alert.uuid)}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
 

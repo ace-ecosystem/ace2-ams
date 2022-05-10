@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from sqlalchemy import select
 from sqlalchemy.orm import DeclarativeMeta, Session
+from sqlalchemy.sql.selectable import Select
 from typing import Optional, Union
 from uuid import UUID
 
@@ -20,6 +22,12 @@ class Diff:
     new_value: Optional[Union[str, list[str]]] = None
     added_to_list: Optional[list[str]] = None
     removed_from_list: Optional[list[str]] = None
+
+
+def build_read_history_query(history_table: DeclarativeMeta, record_uuid: UUID) -> Select:
+    return (
+        select(history_table).where(history_table.record_uuid == record_uuid).order_by(history_table.action_time.asc())
+    )
 
 
 def create_diff(

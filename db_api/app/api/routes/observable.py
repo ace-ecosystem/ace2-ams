@@ -6,7 +6,6 @@ from typing import List, Optional
 from uuid import UUID
 
 from api.routes import helpers
-from api.routes.node import create_node, update_node
 from api_models.history import ObservableHistoryRead
 from api_models.observable import ObservableCreate, ObservableRead, ObservableUpdate
 from db import crud

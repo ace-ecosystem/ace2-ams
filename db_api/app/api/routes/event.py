@@ -17,7 +17,6 @@ from api.routes.event_summaries import (
     get_url_domain_summary,
     get_user_summary,
 )
-from api.routes.node import create_node, update_node
 from api_models.create import Create
 from api_models.event import EventCreate, EventRead, EventUpdateMultiple
 from api_models.event_summaries import (

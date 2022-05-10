@@ -123,6 +123,10 @@ class AlertUpdate(NodeUpdate, AlertBase):
 
     event_uuid: Optional[UUID4] = Field(description="The UUID of the event containing this alert")
 
+    history_username: Optional[type_str] = Field(
+        description="If given, an alert history record will be created and associated with the user"
+    )
+
     queue: Optional[type_str] = Field(description="The alert queue containing this alert")
 
     tags: Optional[list[type_str]] = Field(description="A list of tags to add to the alert")
@@ -131,11 +135,9 @@ class AlertUpdate(NodeUpdate, AlertBase):
 
     threats: Optional[list[type_str]] = Field(description="A list of threats to add to the alert")
 
+    uuid: UUID4 = Field(description="The UUID of the alert to update")
+
     _prevent_none: classmethod = validators.prevent_none("queue", "tags", "threat_actors", "threats")
-
-
-class AlertUpdateMultiple(AlertUpdate):
-    uuid: UUID4 = Field(description="The UUID of the alert")
 
 
 class AlertTreeRead(AlertRead):

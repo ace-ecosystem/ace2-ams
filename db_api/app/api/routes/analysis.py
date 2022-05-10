@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 
 from api.routes import helpers
-from api.routes.node import update_node
 from api_models.analysis import AnalysisCreate, AnalysisRead, AnalysisUpdate
 from db import crud
 from db.database import get_db

@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+from typing import Optional
+from uuid import UUID
 
 from api_models.event import EventCreate
 from db import crud
@@ -32,3 +34,7 @@ def create(model: EventCreate, db: Session) -> Event:
         )
 
     return obj
+
+
+def read_by_uuid(uuid: UUID, db: Session) -> Event:
+    return crud.helpers.read_by_uuid(db_table=Event, uuid=uuid, db=db)
