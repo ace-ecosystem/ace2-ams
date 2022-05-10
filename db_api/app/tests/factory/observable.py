@@ -56,7 +56,7 @@ def create(
         obj.redirection = redirection
 
     if tags is not None:
-        obj.tags = [crud.node_tag.create(model=NodeTagCreate(value=t)) for t in tags]
+        obj.tags = [crud.node_tag.create(model=NodeTagCreate(value=t), db=db) for t in tags]
 
     if threat_actors:
         obj.threat_actors = [factory.node_threat_actor.create(value=t, db=db) for t in threat_actors]

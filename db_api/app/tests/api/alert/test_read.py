@@ -440,7 +440,7 @@ def test_get_filter_queue(client, db):
 
 def test_get_filter_tags(client, db):
     alert1 = factory.alert.create(db=db, tags=["alert_tag"])
-    factory.observable.create(type="fqdn", value="bad.com", parent_tree=alert1, db=db, tags=["obs1"])
+    factory.observable.create(type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, tags=["obs1"])
     factory.alert.create(db=db, tags=["tag1"])
     factory.alert.create(db=db, tags=["tag2", "tag3", "tag4"])
 
