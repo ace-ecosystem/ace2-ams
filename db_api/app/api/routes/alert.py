@@ -123,6 +123,7 @@ def _join_as_subquery(query: select, subquery: select):
 
 def get_all_alerts(
     db: Session = Depends(get_db),
+    alert_type: Optional[str] = None,
     disposition: Optional[str] = None,
     disposition_user: Optional[str] = None,
     dispositioned_after: Optional[datetime] = None,
@@ -162,7 +163,6 @@ def get_all_alerts(
     threats: Optional[str] = None,
     tool: Optional[str] = None,
     tool_instance: Optional[str] = None,
-    type: Optional[str] = None,
 ):
     query = select(Alert)
 
@@ -319,8 +319,8 @@ def get_all_alerts(
         tool_instance_query = select(Alert).join(AlertToolInstance).where(AlertToolInstance.value == tool_instance)
         query = _join_as_subquery(query, tool_instance_query)
 
-    if type:
-        type_query = select(Alert).join(AlertType).where(AlertType.value == type)
+    if alert_type:
+        type_query = select(Alert).join(AlertType).where(AlertType.value == alert_type)
         query = _join_as_subquery(query, type_query)
 
     if sort:
@@ -387,7 +387,7 @@ def get_all_alerts(
                 query = query.join(Queue).order_by(Queue.value.desc())
 
         # Only sort by type if we are not also filtering by type
-        elif sort_by.lower() == "type" and not type:
+        elif sort_by.lower() == "type" and not alert_type:
             if order == "asc":
                 query = query.join(AlertType).order_by(AlertType.value.asc())
             else:
