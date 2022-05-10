@@ -1,8 +1,8 @@
-<!-- TagModal.vue -->
-<!-- 'Tag' action modal, agnostic to what is being tagged -->
+<!-- RemoveTagModal.vue -->
+<!-- 'Remove Tag' action modal, agnostic to what is being tagged -->
 
 <template>
-  <BaseModal :name="name" header="Add Tags" @show="loadAllExistingTags">
+  <BaseModal :name="name" header="Remove Tag(s)" @show="initTagOptions">
     <div>
       <div v-if="error" class="p-col">
         <Message severity="error" @close="handleError">{{ error }}</Message>
@@ -11,12 +11,12 @@
     <span class="p-fluid">
       <Chips v-model="formTagValues" data-cy="chips-container" />
       <Dropdown
-        :options="nodeTagStore.allItems"
+        :options="tagOptions"
         option-label="value"
         :filter="true"
         placeholder="Select from existing tags"
         filter-placeholder="Search tags"
-        @change="addExistingTag($event as unknown as tagEvent)"
+        @change="addExistingTagToForm($event as unknown as tagEvent)"
       />
     </span>
     <template #footer>
@@ -27,24 +27,18 @@
         @click="close"
       />
       <Button
-        label="Add"
+        data-cy="remove-button"
+        label="Remove"
         icon="pi pi-check"
         :disabled="!allowSubmit"
-        @click="createAndAddTags"
+        @click="removeTags"
       />
     </template>
   </BaseModal>
 </template>
 
 <script setup lang="ts">
-  import {
-    computed,
-    defineEmits,
-    defineProps,
-    ref,
-    inject,
-    PropType,
-  } from "vue";
+  import { computed, defineEmits, defineProps, ref, PropType } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -53,7 +47,6 @@
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
 
-  import { NodeTag } from "@/services/api/nodeTag";
   import {
     nodeStores,
     nodeSelectedStores,
@@ -94,23 +87,36 @@
   const emit = defineEmits(["requestReload"]);
 
   const formTagValues = ref<string[]>([]);
+  const tagOptions = ref<nodeTagRead[]>([]);
   const error = ref<string>();
   const isLoading = ref(false);
 
-  async function loadAllExistingTags() {
-    await nodeTagStore.readAll();
-  }
+  const initTagOptions = async () => {
+    if (props.nodeType === "observable" && props.observable) {
+      tagOptions.value = props.observable.tags;
+    } else if (props.reloadObject == "node") {
+      tagOptions.value = nodeStore.open.tags;
+    } else {
+      try {
+        await nodeTagStore.readAll();
+        tagOptions.value = nodeTagStore.allItems;
+      } catch (e: unknown) {
+        if (typeof e === "string") {
+          error.value = e;
+        } else if (e instanceof Error) {
+          error.value = e.message;
+        }
+      }
+    }
+  };
 
-  async function createAndAddTags() {
+  async function removeTags() {
     isLoading.value = true;
     try {
-      if (uniqueNewTags.value.length) {
-        await createNewTags();
-      }
       if (props.nodeType == "observable") {
-        await addObservableTags();
+        await removeObservableTags();
       } else {
-        await addNodeTags();
+        await removeNodeTags();
       }
     } catch (e: unknown) {
       if (typeof e === "string") {
@@ -127,10 +133,13 @@
     }
   }
 
-  const addNodeTags = async () => {
+  const removeNodeTags = async () => {
     const updateData = selectedStore.selected.map((uuid: any) => ({
       uuid: uuid,
-      tags: deduped([...existingNodeTagValues(uuid), ...formTagValues.value]),
+      tags: deduped([
+        ...existingNodeTagValues(uuid),
+        ...formTagValues.value,
+      ]).filter((tag) => !formTagValues.value.includes(tag)),
     }));
 
     await nodeStore.update(updateData);
@@ -147,7 +156,7 @@
     return nodeTags.map((tag) => tag.value);
   };
 
-  const addObservableTags = async () => {
+  const removeObservableTags = async () => {
     const observableStore = useObservableStore();
 
     if (props.observable) {
@@ -155,32 +164,15 @@
         tags: deduped([
           ...props.observable.tags.map((tag) => tag.value),
           ...formTagValues.value,
-        ]),
+        ]).filter((tag) => !formTagValues.value.includes(tag)),
       });
     }
   };
 
-  const createNewTags = async () => {
-    for (const tag of uniqueNewTags.value) {
-      await NodeTag.create({ value: tag });
-    }
-    await loadAllExistingTags();
-  };
-
-  const uniqueNewTags = computed(() => {
-    return deduped(formTagValues.value).filter(
-      (tag) => !existingTagValues.value.includes(tag),
-    );
-  });
-
-  const existingTagValues = computed(() => {
-    return nodeTagStore.allItems.map((tag) => tag.value);
-  });
-
   interface tagEvent {
     value: nodeTagRead;
   }
-  function addExistingTag(tagEvent: tagEvent) {
+  function addExistingTagToForm(tagEvent: tagEvent) {
     // Add an existing tag to the list of tags to be added
     formTagValues.value.push(tagEvent.value.value);
   }
