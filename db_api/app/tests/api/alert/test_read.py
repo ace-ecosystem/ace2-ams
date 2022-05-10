@@ -586,7 +586,7 @@ def test_get_multiple_filters(client, db):
     assert get.json()["total"] == 3
 
     # There should only be 1 alert when we filter by the alert type and disposition
-    get = client.get("/api/alert/?type=test_type1&disposition=FALSE_POSITIVE")
+    get = client.get("/api/alert/?alert_type=test_type1&disposition=FALSE_POSITIVE")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["type"]["value"] == "test_type1"
     assert get.json()["items"][0]["disposition"]["value"] == "FALSE_POSITIVE"
