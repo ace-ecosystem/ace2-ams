@@ -7,6 +7,17 @@
       @click="filterByObservable(observable)"
       >{{ displayValue }}
     </span>
+    <span
+      v-for="detection in observable.detectionPoints"
+      :key="detection.uuid"
+      v-tooltip.right="{
+        value: detection.value,
+      }"
+      class="detection-point"
+      data-cy="detection-point-symbol"
+    >
+      &#128293;</span
+    >
     <Button
       v-if="showCopyToClipboard"
       data-cy="copy-to-clipboard-button"
@@ -46,6 +57,9 @@
         :is="component"
         :name="componentName"
         :observable="observable"
+        node-type="observable"
+        reload-object="node"
+        @request-reload="reload"
       ></component>
     </span>
     <span v-if="showTags && observable.tags.length" class="leaf-element">
@@ -168,7 +182,15 @@
       }
     }
 
-    return `${type}: ${value}`;
+    const displayValue = `${type}: ${value}`;
+
+    if (props.observable.time) {
+      return `${displayValue} @ ${new Date(
+        props.observable.time,
+      ).toLocaleString("en-US", { timeZone: "UTC" })} UTC`;
+    }
+
+    return displayValue;
   });
 
   const itemClick = async (
@@ -251,6 +273,10 @@
     });
   };
 
+  const reload = () => {
+    alertStore.requestReload = true;
+  };
+
   const toggle = (event: unknown) => {
     menu.value.toggle(event);
   };
@@ -260,5 +286,9 @@
     cursor: pointer;
     text-decoration: underline;
     font-weight: bold;
+  }
+
+  .detection-point:hover {
+    cursor: pointer;
   }
 </style>

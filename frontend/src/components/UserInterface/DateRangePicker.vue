@@ -68,6 +68,7 @@
     mode="dateTime"
     is24hr
     data-cy="date-range-picker-start"
+    :timezone="'UTC'"
     @update:model-value="dateSelect($event, startFilter)"
     @update:model-value.delete="dateSelect(null)"
   >
@@ -75,8 +76,8 @@
       <div class="p-inputgroup">
         <InputText
           v-tooltip.top="{
-            value: startDateUTC,
-            disabled: !startDateUTC,
+            value: startDateLocal,
+            disabled: !startDateLocal,
           }"
           data-cy="date-range-picker-start-input"
           type="text"
@@ -99,6 +100,7 @@
     mode="dateTime"
     is24hr
     data-cy="date-range-picker-end"
+    :timezone="'UTC'"
     @update:model-value="dateSelect($event, endFilter)"
     @update:model-value.delete="dateSelect(null)"
   >
@@ -106,8 +108,8 @@
       <div class="p-inputgroup">
         <InputText
           v-tooltip.top="{
-            value: endDateUTC,
-            disabled: !endDateUTC,
+            value: endDateLocal,
+            disabled: !endDateLocal,
           }"
           data-cy="date-range-picker-end-input"
           type="text"
@@ -182,12 +184,16 @@
       : null;
   });
 
-  const startDateUTC = computed(() => {
-    return startDate.value ? startDate.value.toUTCString() : null;
+  const startDateLocal = computed(() => {
+    return startDate.value
+      ? startDate.value.toLocaleString("en-US", { timeZoneName: "short" })
+      : null;
   });
 
-  const endDateUTC = computed(() => {
-    return endDate.value ? endDate.value.toUTCString() : null;
+  const endDateLocal = computed(() => {
+    return endDate.value
+      ? endDate.value.toLocaleString("en-US", { timeZoneName: "short" })
+      : null;
   });
 
   const rangeFilterOptions = computed(() => {
@@ -269,8 +275,8 @@
     }
     // Set start and end date times to capture entierty of each day
     if (startDate && endDate) {
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 0);
+      startDate.setUTCHours(0, 0, 0, 0);
+      endDate.setUTCHours(23, 59, 59, 0);
       dateSelect(startDate, startFilter.value);
       dateSelect(endDate, endFilter.value);
     }

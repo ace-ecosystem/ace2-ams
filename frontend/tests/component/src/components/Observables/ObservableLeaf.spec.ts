@@ -4,17 +4,17 @@ import PrimeVue from "primevue/config";
 
 import ObservableLeaf from "@/components/Observables/ObservableLeaf.vue";
 import router from "@/router/index";
-import {
-  observableAction,
-  observableActionUrl,
-  observableTreeRead,
-} from "../../../../../src/models/observable";
-import { observableTreeReadFactory } from "../../../../mocks/observable";
+import { observableActionUrl, observableTreeRead } from "@/models/observable";
+import { observableTreeReadFactory } from "@mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { testConfiguration } from "@/etc/configuration/test";
 import { ObservableInstance } from "@/services/api/observable";
 import ToastService from "primevue/toastservice";
+import Tooltip from "primevue/tooltip";
+import BaseModalVue from "@/components/Modals/BaseModal.vue";
+import TagModalVue from "@/components/Modals/TagModal.vue";
+import ObservableLeafVue from "@/components/Observables/ObservableLeaf.vue";
 
 interface ObservableLeafProps {
   observable: observableTreeRead;
@@ -36,8 +36,9 @@ function factory(
     config: testConfiguration,
   },
 ) {
-  mount(ObservableLeaf, {
+  return mount(ObservableLeaf, {
     global: {
+      directives: { tooltip: Tooltip },
       plugins: [PrimeVue, ToastService, createCustomCypressPinia(), router],
       provide: {
         config: args.config,
@@ -54,10 +55,33 @@ const observableWithTags = observableTreeReadFactory({
   tags: [genericObjectReadFactory({ value: "testTag" })],
 });
 
+const observableWithTime = observableTreeReadFactory({
+  value: "Observable w/ Time",
+  children: [],
+  time: new Date(2022, 5, 5, 12, 0, 0, 0),
+});
+
 const observableWithMetadata = observableTreeReadFactory({
   value: "Observable w/ Metadata",
   firstAppearance: true,
   nodeMetadata: { display: { type: "custom type", value: "custom value" } },
+});
+
+const observableWithDetectionPoints = observableTreeReadFactory({
+  value: "Observable w/ Detection Points",
+  firstAppearance: true,
+  detectionPoints: [
+    {
+      insertTime: new Date(),
+      nodeUuid: "1",
+      ...genericObjectReadFactory({ uuid: "1", value: "detection point A" }),
+    },
+    {
+      insertTime: new Date(),
+      nodeUuid: "1",
+      ...genericObjectReadFactory({ uuid: "2", value: "detection point B" }),
+    },
+  ],
 });
 
 const observableWithForDetectionEnabled = observableTreeReadFactory({
@@ -86,6 +110,7 @@ describe("ObservableLeaf", () => {
       .should("be.visible")
       .should("have.css", { color: "black" });
     cy.findByRole("button").should("not.exist");
+    cy.get("[data-cy=detection-point-symbol]").should("not.exist");
   });
   it("renders correctly with default props", () => {
     factory({
@@ -104,11 +129,16 @@ describe("ObservableLeaf", () => {
       config: testConfiguration,
     });
 
-    const expectedMenuItems = ["Enable Detection", "Subheader", "IPV4 Command"];
+    const expectedMenuItems = [
+      "Test Action",
+      "Enable Detection",
+      "Subheader",
+      "IPV4 Command",
+    ];
 
     cy.get("[data-cy='show-actions-menu-button']").click();
     cy.findAllByRole("menuitem")
-      .should("have.length", 3)
+      .should("have.length", 4)
       .each((menuItem, index) => {
         cy.wrap(menuItem).should("have.text", expectedMenuItems[index]);
       });
@@ -189,6 +219,27 @@ describe("ObservableLeaf", () => {
       "custom type (testObservableType): custom value",
     );
   });
+  it("displays a fire emoji for every detection point belonging to the observable", () => {
+    factory({
+      props: { observable: observableWithDetectionPoints },
+      config: testConfiguration,
+    });
+    cy.get("span").should(
+      "contain.text",
+      "testObservableType: Observable w/ Detection Points",
+    );
+    cy.get("[data-cy=detection-point-symbol]").should("have.length", 2);
+  });
+  it("displays timestamp associated with observable, if available", () => {
+    factory({
+      props: { observable: observableWithTime },
+      config: testConfiguration,
+    });
+    cy.get("span").should(
+      "contain.text",
+      "testObservableType: Observable w/ Time @ 6/5/2022, 4:00:00 PM",
+    );
+  });
   it("sets the alert filters to the an observable's type and value when clicked", () => {
     factory({
       props: { observable: observableWithTags },
@@ -204,6 +255,23 @@ describe("ObservableLeaf", () => {
         },
       },
     });
+  });
+  it("attempts to requestReload on the alert store when child component emits 'requestReload", () => {
+    let alertStore: any;
+    factory({
+      props: { observable: observableWithTags },
+      config: testConfiguration,
+    }).then((wrapper) => {
+      alertStore = wrapper.vm.alertStore;
+      cy.wrap(alertStore.requestReload).should("be.false");
+    });
+    cy.get('[data-cy="show-actions-menu-button"]').click();
+    cy.contains("Test Action")
+      .click()
+      .then(() => {
+        Cypress.vueWrapper.findComponent(TagModalVue).vm.$emit("requestReload");
+        cy.wrap(alertStore.requestReload).should("be.true");
+      });
   });
 });
 

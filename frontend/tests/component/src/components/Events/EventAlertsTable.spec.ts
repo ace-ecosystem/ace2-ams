@@ -52,7 +52,7 @@ describe("EventAlertsTable", () => {
     ]);
     const columnValues = [
       { value: "", header: "" }, // Checkbox column
-      { value: "3/24/2022, 12:00:00 AM", header: "Event Time" },
+      { value: "3/24/2022, 12:00:00 AM", header: "Event Time (UTC)" },
       { value: "Test Alert A", header: "Name" },
       { value: "None", header: "Owner" },
       { value: "OPEN", header: "Disposition" },

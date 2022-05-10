@@ -81,14 +81,12 @@ describe("AnalyzeAlertForm - Advanced Panel", () => {
     cy.get("div").contains("Advanced").click();
     // Should have additional visible inputs
     cy.contains("Alert Datetime").should("be.visible");
-    cy.contains("Timezone").should("be.visible");
     cy.contains("Alert Type").should("be.visible");
     cy.contains("Queue").should("be.visible");
 
     // Close and the inputs should no longer be visible
     cy.get("div").contains("Advanced").click();
     cy.contains("Alert Datetime").should("not.be.visible");
-    cy.contains("Timezone").should("not.be.visible");
     cy.contains("Alert Type").should("not.be.visible");
     cy.contains("Queue").should("not.be.visible");
   });
@@ -98,7 +96,7 @@ describe("AnalyzeAlertForm - Advanced Panel", () => {
     // Click to open advanced panel
     cy.get("div").contains("Advanced").click();
     // Should have additional visible inputs
-    cy.get("#alert-date").should("have.value", "03/29/2022 08:00:00");
+    cy.get('[data-cy="alert-date"]').should("have.value", "03/29/2022 12:00");
     cy.get("#timezone").should("not.be.empty");
     cy.get("#type").should("have.text", "testAlertTypeA");
     cy.get("#queue").should("have.text", "testQueueA");
@@ -109,7 +107,7 @@ describe("AnalyzeAlertForm - Observables", () => {
   it("renders initial observable correctly", () => {
     factory();
     // Make sure all the observable labels are there
-    cy.findByText("Time").should("be.visible");
+    cy.findByText("Time (UTC)").should("be.visible");
     cy.findByText("Type").should("be.visible");
     cy.findByText("Value").should("be.visible");
     cy.findByText("Directives").should("be.visible");
@@ -203,7 +201,7 @@ const expectedCreateAlert = {
   owner: "analyst",
   queue: "testQueueA",
   type: "testAlertTypeA",
-  eventTime: "2022-03-29T08:00:00-04:00",
+  eventTime: new Date("2022-03-29T12:00:00"),
 };
 
 describe("AnalyzeAlertForm - Form submission", () => {

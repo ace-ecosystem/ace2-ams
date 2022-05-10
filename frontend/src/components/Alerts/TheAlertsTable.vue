@@ -50,17 +50,22 @@
   const columns: column[] = [
     {
       field: "dispositionTime",
-      header: "Dispositioned Time",
+      header: "Dispositioned Time (UTC)",
       sortable: true,
       default: false,
     },
     {
       field: "insertTime",
-      header: "Insert Time",
+      header: "Insert Time (UTC)",
       sortable: true,
       default: false,
     },
-    { field: "eventTime", header: "Event Time", sortable: true, default: true },
+    {
+      field: "eventTime",
+      header: "Event Time (UTC)",
+      sortable: true,
+      default: true,
+    },
     { field: "name", header: "Name", sortable: true, default: true },
     { field: "owner", header: "Owner", sortable: true, default: true },
     {

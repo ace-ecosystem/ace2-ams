@@ -3,6 +3,7 @@ import {
   enableDetection,
   disableDetection,
   updateDetectionExpiration,
+  addTag,
 } from "../constants/observables";
 
 type FILE = "file";
@@ -14,6 +15,7 @@ type knownObservables = FILE | URL | IPV4;
 type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
 
 export const commonObservableActions = [
+  addTag,
   enableDetection,
   disableDetection,
   updateDetectionExpiration,
