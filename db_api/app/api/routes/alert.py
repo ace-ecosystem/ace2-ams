@@ -229,17 +229,21 @@ def get_all_alerts(
         name_query = select(Alert).where(Alert.name.ilike(f"%{name}%"))
         query = _join_as_subquery(query, name_query)
 
-    # if observable:
-    #     observable_split = observable.split("|", maxsplit=1)
-    #     observable_query = (
-    #         select(Alert)
-    #         .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
-    #         .join(Observable, onclause=Observable.uuid == NodeTree.node_uuid)
-    #         .join(ObservableType)
-    #         .where(ObservableType.value == observable_split[0], Observable.value == observable_split[1])
-    #     )
+    if observable:
+        observable_split = observable.split("|", maxsplit=1)
+        observable_types_query = (
+            select(Alert)
+            .join(alert_analysis_mapping, onclause=alert_analysis_mapping.c.alert_uuid == Alert.uuid)
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid == alert_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .join(ObservableType)
+            .where(ObservableType.value == observable_split[0], Observable.value == observable_split[1])
+        )
 
-    #     query = _join_as_subquery(query, observable_query)
+        query = _join_as_subquery(query, observable_types_query)
 
     if observable_types:
         type_filters = [func.count(1).filter(ObservableType.value == t) > 0 for t in observable_types.split(",")]
