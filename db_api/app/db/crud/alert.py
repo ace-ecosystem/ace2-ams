@@ -14,22 +14,22 @@ from db.schemas.alert import Alert
 
 
 def create(model: AlertCreate, db: Session) -> Alert:
-    obj = Alert(
-        description=model.description,
-        event_time=model.event_time,
-        insert_time=model.insert_time,
-        instructions=model.instructions,
-        name=model.name,
-        queue=crud.queue.read_by_value(value=model.queue, db=db),
-        root_analysis=crud.analysis.create_root(db=db),
-        tool=crud.alert_tool.read_by_value(value=model.tool, db=db),
-        tool_instance=crud.alert_tool_instance.read_by_value(value=model.tool_instance, db=db),
-        type=crud.alert_type.read_by_value(value=model.type, db=db),
-        uuid=model.uuid,
-    )
+    # Create the new alert Node using the data from the request
+    obj: Alert = crud.node.create(model=model, db_node_type=Alert, db=db, exclude={"history_username", "observables"})
 
-    if model.owner is not None:
-        obj.owner = crud.user.read_by_username(username=model.owner, db=db)
+    # Set the various alert properties
+    obj.description = model.description
+    obj.event_time = model.event_time
+    obj.insert_time = model.insert_time
+    obj.instructions = model.instructions
+    obj.name = model.name
+    obj.owner = crud.user.read_by_username(username=model.owner, db=db)
+    obj.queue = crud.queue.read_by_value(value=model.queue, db=db)
+    obj.root_analysis = crud.analysis.create_root(db=db)
+    obj.tool = crud.alert_tool.read_by_value(value=model.tool, db=db)
+    obj.tool_instance = crud.alert_tool_instance.read_by_value(value=model.tool_instance, db=db)
+    obj.type = crud.alert_type.read_by_value(value=model.type, db=db)
+    obj.uuid = model.uuid
 
     db.add(obj)
     db.flush()

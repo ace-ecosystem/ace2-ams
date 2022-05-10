@@ -36,8 +36,11 @@ def read_by_uuids(
     return result
 
 
-def read_by_value(db_table: DeclarativeMeta, value: str, db: Session) -> Optional[Any]:
+def read_by_value(db_table: DeclarativeMeta, value: Optional[str], db: Session) -> Optional[Any]:
     """Returns the object with the specific value (if it exists) from the given database table."""
+
+    if value is None:
+        return None
 
     return db.execute(select(db_table).where(db_table.value == value)).scalars().one_or_none()
 

@@ -11,7 +11,11 @@ def create(model: EventRemediationCreate, db: Session) -> EventRemediation:
     obj = read_by_value(value=model.value, db=db)
 
     if obj is None:
-        obj = EventRemediation(**model.dict())
+        obj = EventRemediation(
+            description=model.description,
+            queues=[crud.queue.read_by_value(value=q, db=db) for q in model.queues],
+            value=model.value,
+        )
         db.add(obj)
         db.flush()
 
@@ -24,3 +28,7 @@ def read_by_uuid(uuid: UUID, db: Session) -> EventRemediation:
 
 def read_by_value(value: str, db: Session) -> Optional[EventRemediation]:
     return crud.helpers.read_by_value(db_table=EventRemediation, value=value, db=db)
+
+
+def read_by_values(values: list[str], db: Session) -> list[EventRemediation]:
+    return crud.helpers.read_by_values(db_table=EventRemediation, values=values, db=db)

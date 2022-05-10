@@ -40,5 +40,8 @@ def create(model: UserCreate, db: Session) -> User:
     return obj
 
 
-def read_by_username(username: str, db: Session) -> Optional[User]:
+def read_by_username(username: Optional[str], db: Session) -> Optional[User]:
+    if username is None:
+        return None
+
     return db.execute(select(User).where(User.username == username)).scalars().one_or_none()

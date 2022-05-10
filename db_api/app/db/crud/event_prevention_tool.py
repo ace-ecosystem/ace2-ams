@@ -11,7 +11,11 @@ def create(model: EventPreventionToolCreate, db: Session) -> EventPreventionTool
     obj = read_by_value(value=model.value, db=db)
 
     if obj is None:
-        obj = EventPreventionTool(**model.dict())
+        obj = EventPreventionTool(
+            description=model.description,
+            queues=[crud.queue.read_by_value(value=q, db=db) for q in model.queues],
+            value=model.value,
+        )
         db.add(obj)
         db.flush()
 
@@ -24,3 +28,7 @@ def read_by_uuid(uuid: UUID, db: Session) -> EventPreventionTool:
 
 def read_by_value(value: str, db: Session) -> Optional[EventPreventionTool]:
     return crud.helpers.read_by_value(db_table=EventPreventionTool, value=value, db=db)
+
+
+def read_by_values(values: list[str], db: Session) -> list[EventPreventionTool]:
+    return crud.helpers.read_by_values(db_table=EventPreventionTool, values=values, db=db)

@@ -29,3 +29,7 @@ def read_by_uuid(uuid: UUID, db: Session) -> NodeThreat:
 
 def read_by_value(value: str, db: Session) -> Optional[NodeThreat]:
     return crud.helpers.read_by_value(db_table=NodeThreat, value=value, db=db)
+
+
+def read_by_values(values: list[str], db: Session) -> list[NodeThreat]:
+    return crud.helpers.read_by_values(db_table=NodeThreat, values=values, db=db)

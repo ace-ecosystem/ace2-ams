@@ -11,7 +11,11 @@ def create(model: EventStatusCreate, db: Session) -> EventStatus:
     obj = read_by_value(value=model.value, db=db)
 
     if obj is None:
-        obj = EventStatus(**model.dict())
+        obj = EventStatus(
+            description=model.description,
+            queues=[crud.queue.read_by_value(value=q, db=db) for q in model.queues],
+            value=model.value,
+        )
         db.add(obj)
         db.flush()
 

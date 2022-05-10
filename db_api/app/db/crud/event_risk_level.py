@@ -11,7 +11,11 @@ def create(model: EventRiskLevelCreate, db: Session) -> EventRiskLevel:
     obj = read_by_value(value=model.value, db=db)
 
     if obj is None:
-        obj = EventRiskLevel(**model.dict())
+        obj = EventRiskLevel(
+            description=model.description,
+            queues=[crud.queue.read_by_value(value=q, db=db) for q in model.queues],
+            value=model.value,
+        )
         db.add(obj)
         db.flush()
 

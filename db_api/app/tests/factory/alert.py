@@ -13,7 +13,6 @@ from api_models.alert_type import AlertTypeCreate
 from api_models.analysis import AnalysisCreate
 from api_models.analysis_module_type import AnalysisModuleTypeCreate
 from api_models.node_tag import NodeTagCreate
-from api_models.node_threat_actor import NodeThreatActorCreate
 from api_models.observable import ObservableCreate
 from api_models.observable_type import ObservableTypeCreate
 from api_models.queue import QueueCreate
@@ -78,7 +77,7 @@ def create(
 
     # Create the owner user if one was given
     if owner is not None:
-        factory.user.create(email=f"{owner}@{owner}.com", username=owner, db=db, alert_queue=alert_queue)
+        factory.user.create(username=owner, alert_queue=alert_queue, db=db)
         diffs.append(crud.history.create_diff(field="owner", old=None, new=owner))
 
     # Create the actual alert

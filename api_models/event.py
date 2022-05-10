@@ -71,6 +71,10 @@ class EventBase(NodeBase):
 
 
 class EventCreate(NodeCreate, EventBase):
+    history_username: Optional[type_str] = Field(
+        description="If given, an event history record will be created and associated with the user"
+    )
+
     tags: List[type_str] = Field(default_factory=list, description="A list of tags to add to the event")
 
     threat_actors: List[type_str] = Field(
