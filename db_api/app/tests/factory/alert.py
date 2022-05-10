@@ -81,17 +81,13 @@ def create(
         factory.user.create(email=f"{owner}@{owner}.com", username=owner, db=db, alert_queue=alert_queue)
         diffs.append(crud.history.create_diff(field="owner", old=None, new=owner))
 
-    # Create observable types for each observable that was given
-    for observable in observables:
-        crud.observable_type.create(model=ObservableTypeCreate(value=observable.type), db=db)
-
+    # Create the actual alert
     alert = crud.alert.create(
         model=AlertCreate(
             event_time=event_time,
             insert_time=insert_time,
             history_username=history_username,
             name=name,
-            observables=observables,
             owner=owner,
             queue=alert_queue,
             tool=tool,
@@ -101,6 +97,11 @@ def create(
         ),
         db=db,
     )
+
+    # Add the observables to the alert
+    for observable in observables:
+        crud.observable_type.create(model=ObservableTypeCreate(value=observable.type), db=db)
+        alert.root_analysis.child_observables.append(crud.observable.create(model=observable, db=db))
 
     if disposition:
         existing_dispositions = crud.alert_disposition.read_all(db=db)

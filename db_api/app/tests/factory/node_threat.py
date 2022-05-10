@@ -17,6 +17,6 @@ def create(value: str, db: Session, queues: list[str] = None, types: list[str] =
         types = ["test_type"]
 
     for type in types:
-        crud.node_threat_type.create(model=NodeThreatTypeCreate(value=type), db=db)
+        crud.node_threat_type.create(model=NodeThreatTypeCreate(queues=queues, value=type), db=db)
 
     return crud.node_threat.create(model=NodeThreatCreate(queues=queues, types=types, value=value), db=db)

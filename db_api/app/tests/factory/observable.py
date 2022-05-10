@@ -9,6 +9,7 @@ from api_models.node_threat_actor import NodeThreatActorCreate
 from api_models.observable import ObservableCreate
 from api_models.observable_type import ObservableTypeCreate
 from db import crud
+from db.schemas.analysis import Analysis
 from db.schemas.observable import Observable
 from tests import factory
 
@@ -16,6 +17,7 @@ from tests import factory
 def create(
     type: str,
     value: str,
+    parent_analysis: Analysis,
     db: Session,
     context: Optional[str] = None,
     directives: Optional[list[str]] = None,
@@ -61,5 +63,8 @@ def create(
 
     if threats:
         obj.threats = [factory.node_threat.create(value=t, db=db) for t in threats]
+
+    # Add the observable to its parent analysis
+    parent_analysis.child_observables.append(obj)
 
     return obj

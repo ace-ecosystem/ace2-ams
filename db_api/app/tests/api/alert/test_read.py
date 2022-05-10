@@ -500,7 +500,9 @@ def test_get_filter_threat_actors(client, db):
 
 def test_get_filter_threats(client, db):
     alert1 = factory.alert.create(db=db)
-    factory.observable.create(type="fqdn", value="bad.com", parent_tree=alert1, db=db, threats=["malz"])
+    factory.observable.create(
+        type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, threats=["malz"]
+    )
     factory.alert.create(db=db, threats=["threat1"])
     factory.alert.create(db=db, threats=["threat2", "threat3", "threat4"])
 
