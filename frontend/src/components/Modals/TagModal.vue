@@ -81,10 +81,10 @@
 
   let nodeStore: any;
   let tableStore: any;
-  let selected: string[];
+  let selectedStore: any;
   if (!(props.nodeType === "observable")) {
     nodeStore = nodeStores[props.nodeType]();
-    selected = nodeSelectedStores[props.nodeType]().selected;
+    selectedStore = nodeSelectedStores[props.nodeType]();
     tableStore = nodeTableStores[props.nodeType]();
   }
 
@@ -94,19 +94,19 @@
   const emit = defineEmits(["requestReload"]);
 
   const formTagValues = ref<string[]>([]);
-  const existingTagValues = ref<string[]>([]);
   const error = ref<string>();
   const isLoading = ref(false);
 
   async function loadAllExistingTags() {
     await nodeTagStore.readAll();
-    existingTagValues.value = nodeTagStore.allItems.map((tag) => tag.value);
   }
 
   async function createAndAddTags() {
     isLoading.value = true;
     try {
-      await createNewTags();
+      if (uniqueNewTags.value.length) {
+        await createNewTags();
+      }
       if (props.nodeType == "observable") {
         await addObservableTags();
       } else {
@@ -128,7 +128,7 @@
   }
 
   const addNodeTags = async () => {
-    const updateData = selected.map((uuid) => ({
+    const updateData = selectedStore.selected.map((uuid: any) => ({
       uuid: uuid,
       tags: deduped([...existingNodeTagValues(uuid), ...formTagValues.value]),
     }));
@@ -173,6 +173,10 @@
     );
   });
 
+  const existingTagValues = computed(() => {
+    return nodeTagStore.allItems.map((tag) => tag.value);
+  });
+
   interface tagEvent {
     value: nodeTagRead;
   }
@@ -185,7 +189,7 @@
     if (props.nodeType == "observable") {
       return formTagValues.value.length;
     }
-    return selected.length && formTagValues.value.length;
+    return selectedStore.selected.length && formTagValues.value.length;
   });
 
   const deduped = (arr: string[]) => {
