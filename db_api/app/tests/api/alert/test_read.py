@@ -66,6 +66,20 @@ def test_get_all_empty(client):
     assert get.json() == {"items": [], "limit": 50, "offset": 0, "total": 0}
 
 
+def test_get_filter_alert_type(client, db):
+    factory.alert.create(db=db, alert_type="test_type")
+    factory.alert.create(db=db, alert_type="test_type2")
+
+    # There should be 2 total alerts
+    get = client.get("/api/alert/")
+    assert get.json()["total"] == 2
+
+    # There should only be 1 alert when we filter by the alert type
+    get = client.get("/api/alert/?alert_type=test_type")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["type"]["value"] == "test_type"
+
+
 def test_get_filter_disposition(client, db):
     factory.alert.create(db=db)
     factory.alert.create(db=db, disposition="FALSE_POSITIVE")
@@ -560,20 +574,6 @@ def test_get_filter_tool_instance(client, db):
     get = client.get("/api/alert/?tool_instance=test_tool_instance1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["tool_instance"]["value"] == "test_tool_instance1"
-
-
-def test_get_filter_type(client, db):
-    factory.alert.create(db=db, alert_type="test_type")
-    factory.alert.create(db=db, alert_type="test_type2")
-
-    # There should be 2 total alerts
-    get = client.get("/api/alert/")
-    assert get.json()["total"] == 2
-
-    # There should only be 1 alert when we filter by the alert type
-    get = client.get("/api/alert/?type=test_type")
-    assert get.json()["total"] == 1
-    assert get.json()["items"][0]["type"]["value"] == "test_type"
 
 
 def test_get_multiple_filters(client, db):
