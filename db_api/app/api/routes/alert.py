@@ -241,18 +241,22 @@ def get_all_alerts(
 
     #     query = _join_as_subquery(query, observable_query)
 
-    # if observable_types:
-    #     type_filters = [func.count(1).filter(ObservableType.value == t) > 0 for t in observable_types.split(",")]
-    #     observable_types_query = (
-    #         select(Alert)
-    #         .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
-    #         .join(Observable, onclause=Observable.uuid == NodeTree.node_uuid)
-    #         .join(ObservableType)
-    #         .having(and_(*type_filters))
-    #         .group_by(Alert.uuid, Node.uuid)
-    #     )
+    if observable_types:
+        type_filters = [func.count(1).filter(ObservableType.value == t) > 0 for t in observable_types.split(",")]
+        observable_types_query = (
+            select(Alert)
+            .join(alert_analysis_mapping, onclause=alert_analysis_mapping.c.alert_uuid == Alert.uuid)
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid == alert_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .join(ObservableType)
+            .having(and_(*type_filters))
+            .group_by(Alert.uuid, Node.uuid)
+        )
 
-    #     query = _join_as_subquery(query, observable_types_query)
+        query = _join_as_subquery(query, observable_types_query)
 
     if observable_value:
         observable_value_query = (
