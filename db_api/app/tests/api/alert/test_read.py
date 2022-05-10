@@ -360,16 +360,16 @@ def test_get_filter_observable_value(client, db):
 
     # Create some alerts with one observable
     alert1 = factory.alert.create(db=db)
-    factory.observable.create(parent_tree=alert1, type="test_type1", value="test_value1", db=db)
+    factory.observable.create(parent_analysis=alert1.root_analysis, type="test_type1", value="test_value1", db=db)
 
     alert2 = factory.alert.create(db=db)
-    factory.observable.create(parent_tree=alert2, type="test_type2", value="test_value2", db=db)
+    factory.observable.create(parent_analysis=alert2.root_analysis, type="test_type2", value="test_value2", db=db)
 
     # Create an alert with multiple observables
     alert3 = factory.alert.create(db=db)
-    factory.observable.create(parent_tree=alert3, type="test_type1", value="test_value_asdf", db=db)
-    factory.observable.create(parent_tree=alert3, type="test_type2", value="test_value1", db=db)
-    factory.observable.create(parent_tree=alert3, type="test_type2", value="test_value2", db=db)
+    factory.observable.create(parent_analysis=alert3.root_analysis, type="test_type1", value="test_value_asdf", db=db)
+    factory.observable.create(parent_analysis=alert3.root_analysis, type="test_type2", value="test_value1", db=db)
+    factory.observable.create(parent_analysis=alert3.root_analysis, type="test_type2", value="test_value2", db=db)
 
     # There should be 4 total alerts
     get = client.get("/api/alert/")

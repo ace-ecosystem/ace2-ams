@@ -15,10 +15,12 @@ from api_models.history import AlertHistoryRead
 from db import crud
 from db.database import get_db
 from db.schemas.alert import Alert, AlertHistory
+from db.schemas.alert_analysis_mapping import alert_analysis_mapping
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.alert_tool import AlertTool
 from db.schemas.alert_tool_instance import AlertToolInstance
 from db.schemas.alert_type import AlertType
+from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
 from db.schemas.event import Event
 from db.schemas.node import Node
 from db.schemas.node_tag import NodeTag
@@ -252,15 +254,19 @@ def get_all_alerts(
 
     #     query = _join_as_subquery(query, observable_types_query)
 
-    # if observable_value:
-    #     observable_value_query = (
-    #         select(Alert)
-    #         .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
-    #         .join(Observable, onclause=Observable.uuid == NodeTree.node_uuid)
-    #         .where(Observable.value == observable_value)
-    #     )
+    if observable_value:
+        observable_value_query = (
+            select(Alert)
+            .join(alert_analysis_mapping, onclause=alert_analysis_mapping.c.alert_uuid == Alert.uuid)
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid == alert_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .where(Observable.value == observable_value)
+        )
 
-    #     query = _join_as_subquery(query, observable_value_query)
+        query = _join_as_subquery(query, observable_value_query)
 
     if owner:
         owner_query = select(Alert).join(User, onclause=Alert.owner_uuid == User.uuid).where(User.username == owner)
