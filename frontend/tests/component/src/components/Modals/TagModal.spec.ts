@@ -46,7 +46,7 @@ function factory(
             alertTableStore: {
               visibleQueriedItems: [
                 alertReadFactory({ uuid: "uuidA" }),
-                alertReadFactory({ uuid: "uuidA" }),
+                alertReadFactory({ uuid: "uuidB" }),
               ],
               totalItems: 0,
               sortField: "eventTime",
@@ -237,7 +237,7 @@ describe("TagModal", () => {
       .withArgs("observableUuid1", {
         tags: ["testTag", "existingTag", "newTag"],
       })
-      .as("updateAlert")
+      .as("updateObservable")
       .resolves();
 
     factory({
