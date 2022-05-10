@@ -47,6 +47,7 @@ export interface alertRead extends nodeRead {
   instructions: string | null;
   name: string;
   owner: userRead | null;
+  ownershipTime: Date | null;
   queue: queueRead;
   tags: nodeTagRead[];
   threatActors: nodeThreatActorRead[];
@@ -65,11 +66,14 @@ export interface alertSummary {
   disposition: string;
   dispositionTime: Date | null;
   dispositionUser: string;
+  dispositionWithUserAndTime: string;
   eventTime: Date;
   eventUuid: string;
   insertTime: Date;
   name: string;
   owner: string;
+  ownershipTime: Date | null;
+  ownerWithTime: string;
   queue: string;
   tags: nodeTagRead[];
   tool: string;

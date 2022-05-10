@@ -87,6 +87,8 @@ class AlertRead(NodeRead, AlertBase):
     name: type_str = Field(description="""The name of the alert""")
 
     owner: Optional[UserRead] = Field(description="The user who has taken ownership of this alert")
+    
+    ownership_time: Optional[datetime] = Field(description="The time this alert was most recently taken ownership")
 
     queue: QueueRead = Field(description="The queue containing this alert")
 

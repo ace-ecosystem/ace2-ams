@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 5f818dc4ffb9
+Revision ID: cd3759eb65db
 Revises: 
-Create Date: 2022-04-21 16:24:01.513318
+Create Date: 2022-05-10 12:08:51.749633
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '5f818dc4ffb9'
+revision = 'cd3759eb65db'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -534,6 +534,7 @@ def upgrade() -> None:
     sa.Column('instructions', sa.String(), nullable=True),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('owner_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('ownership_time', sa.DateTime(timezone=True), nullable=True),
     sa.Column('queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('tool_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('tool_instance_uuid', postgresql.UUID(as_uuid=True), nullable=True),
@@ -556,6 +557,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_alert_event_uuid'), 'alert', ['event_uuid'], unique=False)
     op.create_index(op.f('ix_alert_insert_time'), 'alert', ['insert_time'], unique=False)
     op.create_index(op.f('ix_alert_owner_uuid'), 'alert', ['owner_uuid'], unique=False)
+    op.create_index(op.f('ix_alert_ownership_time'), 'alert', ['ownership_time'], unique=False)
     op.create_index(op.f('ix_alert_queue_uuid'), 'alert', ['queue_uuid'], unique=False)
     op.create_index(op.f('ix_alert_tool_instance_uuid'), 'alert', ['tool_instance_uuid'], unique=False)
     op.create_index(op.f('ix_alert_tool_uuid'), 'alert', ['tool_uuid'], unique=False)
@@ -654,6 +656,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_alert_tool_uuid'), table_name='alert')
     op.drop_index(op.f('ix_alert_tool_instance_uuid'), table_name='alert')
     op.drop_index(op.f('ix_alert_queue_uuid'), table_name='alert')
+    op.drop_index(op.f('ix_alert_ownership_time'), table_name='alert')
     op.drop_index(op.f('ix_alert_owner_uuid'), table_name='alert')
     op.drop_index(op.f('ix_alert_insert_time'), table_name='alert')
     op.drop_index(op.f('ix_alert_event_uuid'), table_name='alert')
