@@ -29,6 +29,16 @@ class Alert(Node, HasHistory):
     # Analyses are lazy loaded and are not included by default when fetching an alert from the API.
     analyses: list[Analysis] = relationship("Analysis", secondary=alert_analysis_mapping)
 
+    child_threat_actors = relationship(
+        "NodeThreatActor",
+        secondary="join(NodeThreatActor, node_threat_actor_mapping, NodeThreatActor.uuid == node_threat_actor_mapping.c.threat_actor_uuid)."
+        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == node_threat_actor_mapping.c.node_uuid)."
+        "join(alert_analysis_mapping, alert_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
+        primaryjoin="Alert.uuid == alert_analysis_mapping.c.alert_uuid",
+        viewonly=True,
+        lazy="selectin",
+    )
+
     child_threats = relationship(
         "NodeThreat",
         secondary="join(NodeThreat, node_threat_mapping, NodeThreat.uuid == node_threat_mapping.c.threat_uuid)."

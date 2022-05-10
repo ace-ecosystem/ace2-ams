@@ -475,7 +475,9 @@ def test_get_filter_tags(client, db):
 
 def test_get_filter_threat_actors(client, db):
     alert1 = factory.alert.create(db=db)
-    factory.observable.create(type="fqdn", value="bad.com", parent_tree=alert1, db=db, threat_actors=["bad_guys"])
+    factory.observable.create(
+        type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, threat_actors=["bad_guys"]
+    )
     factory.alert.create(db=db, threat_actors=["test_actor"])
 
     # There should be 2 total alerts

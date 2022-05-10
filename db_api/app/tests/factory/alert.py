@@ -119,9 +119,7 @@ def create(
         alert.tags = [crud.node_tag.create(model=NodeTagCreate(value=t), db=db) for t in tags]
 
     if threat_actors:
-        alert.threat_actors = [
-            crud.node_threat_actor.create(model=NodeThreatActorCreate(value=t)) for t in threat_actors
-        ]
+        alert.threat_actors = [factory.node_threat_actor.create(value=t, db=db) for t in threat_actors]
 
     if threats:
         alert.threats = [factory.node_threat.create(value=threat, db=db) for threat in threats]
