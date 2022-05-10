@@ -61,7 +61,7 @@
         />
       </div>
       <!--      REMOVE TAG MODAL -->
-      <div v-if="props.tag">
+      <div v-if="props.removeTag">
         <Button
           data-cy="tag-button"
           class="p-m-1 p-button-sm"
@@ -112,6 +112,7 @@
     assign: { type: Boolean, default: true },
     comment: { type: Boolean, default: true },
     tag: { type: Boolean, default: true },
+    removeTag: { type: Boolean, default: true },
     takeOwnership: { type: Boolean, default: true },
   });
 
