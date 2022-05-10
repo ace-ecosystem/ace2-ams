@@ -258,7 +258,7 @@ describe("TagModal", () => {
 
     cy.get("@createTag").should("have.been.calledOnce");
     cy.get("@readAllTags").should("have.been.calledOnce");
-    cy.get("@updateAlert").should("have.been.calledOnce");
+    cy.get("@updateObservable").should("have.been.calledOnce");
     cy.get("[data-cy=TagModal]").should("not.exist");
   });
   it("shows error if existing tags cannot be fetched", () => {
