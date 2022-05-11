@@ -55,6 +55,24 @@
         />
         <TagModal
           name="TagModal"
+          :node-type="nodeType"
+          :reload-object="props.reloadObject"
+          @request-reload="requestReload"
+        />
+      </div>
+      <!--      REMOVE TAG MODAL -->
+      <div v-if="props.removeTag">
+        <Button
+          data-cy="remove-tag-button"
+          class="p-m-1 p-button-sm"
+          icon="pi pi-tags"
+          label="Remove Tag(s)"
+          @click="open('RemoveTagModal')"
+          @request-reload="requestReload"
+        />
+        <RemoveTagModal
+          name="RemoveTagModal"
+          :node-type="nodeType"
           :reload-object="props.reloadObject"
           @request-reload="requestReload"
         />
@@ -76,6 +94,7 @@
   import AssignModal from "@/components/Modals/AssignModal.vue";
   import CommentModal from "@/components/Modals/CommentModal.vue";
   import TagModal from "@/components/Modals/TagModal.vue";
+  import RemoveTagModal from "@/components/Modals/RemoveTagModal.vue";
 
   import {
     nodeStores,
@@ -93,6 +112,7 @@
     assign: { type: Boolean, default: true },
     comment: { type: Boolean, default: true },
     tag: { type: Boolean, default: true },
+    removeTag: { type: Boolean, default: true },
     takeOwnership: { type: Boolean, default: true },
   });
 

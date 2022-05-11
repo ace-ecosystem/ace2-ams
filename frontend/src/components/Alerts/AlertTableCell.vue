@@ -83,6 +83,10 @@
   });
 
   const formatDateTime = (dateTime: any) => {
+    if (typeof dateTime === "string") {
+      return dateTime;
+    }
+
     if (dateTime) {
       const d = new Date(dateTime);
       return d.toLocaleString("en-US", { timeZone: "UTC" });

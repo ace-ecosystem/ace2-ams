@@ -1,5 +1,8 @@
+import BaseModalVue from "@/components/Modals/BaseModal.vue";
+import TagModalVue from "@/components/Modals/TagModal.vue";
 import {
   observableActionCommand,
+  observableActionModal,
   observableTreeRead,
 } from "@/models/observable";
 import { observableTypeMetaData } from "@/models/observableType";
@@ -17,7 +20,17 @@ type knownObservables = FILE | URL | IPV4;
 
 type PartialRecord<K extends keyof any, T> = Partial<Record<K, T>>;
 
+export const testModalAction: observableActionModal = {
+  label: "Test Action",
+  description: "Test Modal Action",
+  icon: "pi pi-tag",
+  type: "modal",
+  modal: TagModalVue,
+  modalName: "testModal",
+};
+
 export const commonObservableActions = [
+  testModalAction,
   enableDetection,
   disableDetection,
   updateDetectionExpiration,

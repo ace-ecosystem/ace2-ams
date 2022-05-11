@@ -1,10 +1,12 @@
 import UpdateDetectionExpirationVue from "@/components/Observables/ObservableActions/UpdateDetectionExpiration.vue";
+import TagModalVue from "@/components/Modals/TagModal.vue";
 import {
   observableActionModal,
   observableActionCommand,
   observableTreeRead,
 } from "@/models/observable";
 import { ObservableInstance } from "@/services/api/observable";
+import RemoveTagModalVue from "@/components/Modals/RemoveTagModal.vue";
 
 export const enableDetection: observableActionCommand = {
   label: "Enable Detection",
@@ -38,4 +40,22 @@ export const updateDetectionExpiration: observableActionModal = {
   modal: UpdateDetectionExpirationVue,
   modalName: "UpdateDetectionExpiration",
   requirements: (obs: observableTreeRead) => obs.forDetection,
+};
+
+export const addTag: observableActionModal = {
+  label: "Add Tag",
+  description: "Add a tag to a given observable",
+  icon: "pi pi-tag",
+  type: "modal",
+  modal: TagModalVue,
+  modalName: "ObservableTagModal",
+};
+
+export const removeTag: observableActionModal = {
+  label: "Remove Tag(s)",
+  description: "Remove a tag from this observable",
+  icon: "pi pi-tag",
+  type: "modal",
+  modal: RemoveTagModalVue,
+  modalName: "ObservableRemoveTagModal",
 };
