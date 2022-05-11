@@ -51,3 +51,8 @@ export const alertRangeFilters = {
 
 export const FALSE_POSITIVE_DISPOSITION_STRING = "FALSE_POSITIVE";
 export const IGNORE_DISPOSITION_STRING = "IGNORE";
+
+// {alertType.value: iconFilename}
+export const alertIconTypeMapping = {
+  testType: "test.png",
+};

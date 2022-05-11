@@ -8,6 +8,8 @@ import { alertSummary } from "@/models/alert";
 import { alertSummaryFactory } from "@mocks/alert";
 import { commentReadFactory } from "@mocks/comment";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { testConfiguration } from "@/etc/configuration/test";
+
 import router from "@/router/index";
 
 interface AlertTableCellProps {
@@ -34,7 +36,7 @@ function factory(
   return mount(AlertTableCell, {
     global: {
       plugins: [createPinia(), PrimeVue, router],
-      provide: { nodeType: "alerts" },
+      provide: { nodeType: "alerts", config: testConfiguration },
     },
     propsData: args.props,
   });
@@ -44,7 +46,23 @@ describe("AlertTableCell", () => {
   it("renders", () => {
     factory();
   });
-  it("correctly renders an alert name cell with any tags and comments", () => {
+  it("correctly renders an alert name cell with icon, if available in config", () => {
+    const props: AlertTableCellProps = {
+      data: alertSummaryFactory({
+        name: "Test",
+        type: "testType",
+      }),
+      field: "name",
+    };
+    factory({ props: props });
+    // Icon
+    cy.get("[data-cy='alert-icon']").should("be.visible");
+    // Alert name & link
+    cy.contains("Test")
+      .invoke("attr", "href")
+      .should("contain", "/alert/testAlertUuid");
+  });
+  it("correctly renders an alert name cell with any tags and comments, but will not display icon if not available", () => {
     const props: AlertTableCellProps = {
       data: mockAlert,
       field: "name",
@@ -58,6 +76,8 @@ describe("AlertTableCell", () => {
     cy.contains("testTag");
     // Comments
     cy.contains("(Test Analyst) Test comment");
+    // Should not be an icon
+    cy.get("[data-cy='alert-icon']").should("not.exist");
   });
   it("correctly renders an alert time-type cell", () => {
     const props: AlertTableCellProps = {
