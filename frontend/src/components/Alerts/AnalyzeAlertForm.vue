@@ -143,33 +143,20 @@
                   />
                 </div>
                 <div class="field col-3 px-1" name="observable-value">
-                  <div
-                    v-if="observables[index].type == 'file'"
-                    name="observable-file-upload"
-                  >
-                    <FileUpload
-                      mode="basic"
-                      class="inputfield w-full"
-                    ></FileUpload>
-                  </div>
-                  <div v-else class="p-inputgroup">
-                    <InputText
-                      v-if="!observables[index].multiAdd"
-                      v-model="observables[index].value"
-                      placeholder="Enter a value"
-                      class="inputfield w-full"
-                      type="text"
-                    ></InputText>
-                    <Textarea
-                      v-else
-                      v-model="observables[index].value"
-                      placeholder="Enter a comma or newline-delimited list of values"
-                      class="inputfield w-full"
-                    ></Textarea>
-                    <Button
-                      icon="pi pi-list"
-                      @click="toggleMultiObservable(index)"
-                    />
+                  <div class="inputfield w-full" style="display: inline-block">
+                    <span style="display: inline">
+                      <ObservableInput
+                        v-model="observables[index].value"
+                        :multi-add="observables[index].multiAdd"
+                        :type="observables[index].type"
+                      ></ObservableInput>
+                    </span>
+                    <span style="float: right">
+                      <Button
+                        icon="pi pi-list"
+                        @click="toggleMultiObservable(index)"
+                      />
+                    </span>
                   </div>
                 </div>
                 <div class="field col-3 px-1">
@@ -263,6 +250,8 @@
   import TabView from "primevue/tabview";
   import Textarea from "primevue/textarea";
   import { DatePicker } from "v-calendar";
+
+  import ObservableInput from "@/components/Observables/ObservableInput.vue";
 
   import { useAlertStore } from "@/stores/alert";
   import { useQueueStore } from "@/stores/queue";
