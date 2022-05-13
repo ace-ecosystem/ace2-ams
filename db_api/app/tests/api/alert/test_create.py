@@ -101,9 +101,9 @@ def test_create_invalid_node_fields(client, key, values):
     ],
 )
 def test_create_duplicate_unique_fields(client, db, key):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     # Create an object
     create1_json = {
@@ -129,8 +129,8 @@ def test_create_duplicate_unique_fields(client, db, key):
 
 
 def test_create_nonexistent_observable_type(client, db):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
 
     # Create an object
     create = client.post(
@@ -147,9 +147,9 @@ def test_create_nonexistent_observable_type(client, db):
 
 
 def test_create_nonexistent_owner(client, db):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     # Create an object
     create = client.post(
@@ -167,8 +167,8 @@ def test_create_nonexistent_owner(client, db):
 
 
 def test_create_nonexistent_queue(client, db):
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     # Create an object
     create = client.post(
@@ -185,9 +185,9 @@ def test_create_nonexistent_queue(client, db):
 
 
 def test_create_nonexistent_tool(client, db):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     # Create an object
     create = client.post(
@@ -205,9 +205,9 @@ def test_create_nonexistent_tool(client, db):
 
 
 def test_create_nonexistent_tool_instance(client, db):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     # Create an object
     create = client.post(
@@ -225,8 +225,8 @@ def test_create_nonexistent_tool_instance(client, db):
 
 
 def test_create_nonexistent_type(client, db):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     # Create an object
     create = client.post(
@@ -247,9 +247,9 @@ def test_create_nonexistent_type(client, db):
     [("tags"), ("threat_actors"), ("threats")],
 )
 def test_create_nonexistent_node_fields(client, db, key):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     create = client.post(
         "/api/alert/",
@@ -271,9 +271,9 @@ def test_create_nonexistent_node_fields(client, db, key):
 
 
 def test_create_verify_history(client, db):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     alert_uuid = str(uuid.uuid4())
     create = client.post(
@@ -326,9 +326,9 @@ def test_create_verify_history(client, db):
     ],
 )
 def test_create_valid_optional_fields(client, db, key, value):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     # Create the alert
     create = client.post(
@@ -354,9 +354,9 @@ def test_create_valid_optional_fields(client, db, key, value):
 
 
 def test_create_valid_owner(client, db):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     # Create a user
     factory.user.create(username="johndoe", db=db)
@@ -380,9 +380,9 @@ def test_create_valid_owner(client, db):
 
 
 def test_create_valid_tool(client, db):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     # Create an alert tool
     crud.alert_tool.create(model=AlertToolCreate(value="test_tool"), db=db)
@@ -406,12 +406,12 @@ def test_create_valid_tool(client, db):
 
 
 def test_create_valid_tool_instance(client, db):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     # Create an alert tool instance
-    crud.alert_tool_instance.create(model=AlertToolInstanceCreate(value="test_tool_instance"), db=db)
+    crud.alert_tool_instance.create_or_read(model=AlertToolInstanceCreate(value="test_tool_instance"), db=db)
 
     # Use the tool instance to create a new alert
     create = client.post(
@@ -432,9 +432,9 @@ def test_create_valid_tool_instance(client, db):
 
 
 def test_create_valid_required_fields(client, db):
-    crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-    crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-    crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+    crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     # Create the alert
     create = client.post(
@@ -478,9 +478,9 @@ def test_create_valid_node_fields(client, db, key, value_lists, helper_create_fu
         for value in value_list:
             helper_create_func(value=value, db=db)
 
-        crud.queue.create(model=QueueCreate(value="test_queue"), db=db)
-        crud.alert_type.create(model=AlertTypeCreate(value="test_type"), db=db)
-        crud.observable_type.create(model=ObservableTypeCreate(value="o_type"), db=db)
+        crud.queue.create_or_read(model=QueueCreate(value="test_queue"), db=db)
+        crud.alert_type.create_or_read(model=AlertTypeCreate(value="test_type"), db=db)
+        crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
         create = client.post(
             "/api/alert/",

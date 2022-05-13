@@ -1,17 +1,32 @@
+import contextlib
+
 from datetime import datetime, timezone
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
-from typing import Any, Optional
+from sqlalchemy.sql.selectable import Select
+from typing import Any
 from uuid import UUID
 
 from exceptions.db import ValueNotFoundInDatabase
 
 
-def read_all(db_table: DeclarativeMeta, db: Session) -> list[Any]:
-    """Returns all of the objects from the given database table."""
+def build_read_all_query(db_table: DeclarativeMeta) -> Select:
+    return select(db_table)
 
-    return db.execute(select(db_table)).scalars().all()
+
+def create(obj: Any, db: Session) -> bool:
+    """Uses a nested transaction to attempt to add the given object to the database. If it fails due
+    to an IntegrityError, only the nested transaction is rolled back."""
+
+    with db.begin_nested():
+        with contextlib.suppress(IntegrityError):
+            db.add(obj)
+            db.flush()
+            return True
+
+    return False
 
 
 def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session) -> Any:
@@ -38,13 +53,10 @@ def read_by_uuids(
     return result
 
 
-def read_by_value(db_table: DeclarativeMeta, value: Optional[str], db: Session) -> Optional[Any]:
+def read_by_value(db_table: DeclarativeMeta, value: str, db: Session) -> Any:
     """Returns the object with the specific value (if it exists) from the given database table."""
 
-    if value is None:
-        return None
-
-    return db.execute(select(db_table).where(db_table.value == value)).scalars().one_or_none()
+    return db.execute(select(db_table).where(db_table.value == value)).scalars().one()
 
 
 def read_by_values(

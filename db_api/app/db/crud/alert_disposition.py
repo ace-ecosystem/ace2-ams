@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from typing import Optional
 from uuid import UUID
 
 from api_models.alert_disposition import AlertDispositionCreate
@@ -7,15 +6,13 @@ from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 
 
-def create(model: AlertDispositionCreate, db: Session) -> AlertDisposition:
-    obj = read_by_value(value=model.value, db=db)
+def create_or_read(model: AlertDispositionCreate, db: Session) -> AlertDisposition:
+    obj = AlertDisposition(**model.dict())
 
-    if obj is None:
-        obj = AlertDisposition(**model.dict())
-        db.add(obj)
-        db.flush()
+    if crud.helpers.create(obj=obj, db=db):
+        return obj
 
-    return obj
+    return read_by_value(value=model.value, db=db)
 
 
 def read_all(db: Session) -> list[AlertDisposition]:
@@ -26,5 +23,5 @@ def read_by_uuid(uuid: UUID, db: Session) -> AlertDisposition:
     return crud.helpers.read_by_uuid(db_table=AlertDisposition, uuid=uuid, db=db)
 
 
-def read_by_value(value: str, db: Session) -> Optional[AlertDisposition]:
+def read_by_value(value: str, db: Session) -> AlertDisposition:
     return crud.helpers.read_by_value(db_table=AlertDisposition, value=value, db=db)

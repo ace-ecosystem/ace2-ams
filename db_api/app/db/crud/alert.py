@@ -294,7 +294,7 @@ def build_read_all_query(
     return query
 
 
-def create(model: AlertCreate, db: Session) -> Alert:
+def create_or_read(model: AlertCreate, db: Session) -> Alert:
     # Create the new alert Node using the data from the request
     obj: Alert = crud.node.create(model=model, db_node_type=Alert, db=db, exclude={"history_username", "observables"})
 
@@ -314,14 +314,16 @@ def create(model: AlertCreate, db: Session) -> Alert:
     obj.type = crud.alert_type.read_by_value(value=model.type, db=db)
     obj.uuid = model.uuid
 
-    db.add(obj)
-    db.flush()
+    # If the alert could not be created, that implies that one already exists with the given UUID.
+    # This is really only going to happen during testing when sometimes we add an alert with a predefined UUID.
+    if not crud.helpers.create(obj=obj, db=db):
+        return read_by_uuid(uuid=model.uuid, db=db)
 
     # Associate the root analysis with the submission
     crud.alert_analysis_mapping.create(analysis_uuid=obj.root_analysis_uuid, submission_uuid=obj.uuid, db=db)
 
     # Associate the root analysis with its observables
-    obj.root_analysis.child_observables = [crud.observable.create(model=o, db=db) for o in model.observables]
+    obj.root_analysis.child_observables = [crud.observable.create_or_read(model=o, db=db) for o in model.observables]
 
     # Add an alert history entry if the history username was given. This would typically only be
     # supplied by the GUI when an analyst creates a manual alert.
@@ -335,11 +337,11 @@ def create(model: AlertCreate, db: Session) -> Alert:
     return obj
 
 
-def read_by_uuid(uuid: UUID, db: Session) -> Optional[Alert]:
-    return db.execute(select(Alert).where(Alert.uuid == uuid)).scalars().one_or_none()
+def read_by_uuid(uuid: UUID, db: Session) -> Alert:
+    return db.execute(select(Alert).where(Alert.uuid == uuid)).scalars().one()
 
 
-def read_tree(uuid: UUID, db: Session) -> Optional[dict]:
+def read_tree(uuid: UUID, db: Session) -> dict:
     # The Alert db object has an "analyses" list that contains every analysis object regardless
     # of where it appears in the tree structure.
     db_alert = read_by_uuid(uuid=uuid, db=db)

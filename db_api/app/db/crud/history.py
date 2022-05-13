@@ -34,7 +34,7 @@ def create_diff(
     field: str,
     old: Union[None, str, list[str], datetime, UUID] = None,
     new: Union[None, str, list[str], datetime, UUID] = None,
-) -> Optional[Diff]:
+) -> Diff:
     # Convert datetime objects to UTC strings
     if isinstance(old, datetime):
         old = old.astimezone(timezone.utc).isoformat()

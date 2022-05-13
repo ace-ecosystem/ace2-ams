@@ -33,7 +33,7 @@ def create_alert(
     db: Session = Depends(get_db),
 ):
     try:
-        alert = crud.alert.create(model=alert, db=db)
+        alert = crud.alert.create_or_read(model=alert, db=db)
     except ValueNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 

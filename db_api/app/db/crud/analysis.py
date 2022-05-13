@@ -13,57 +13,44 @@ from api_models.analysis_details import (
 )
 from db import crud
 from db.schemas.analysis import Analysis
+from db.schemas.analysis_module_type import AnalysisModuleType
 
 
-def create(model: AnalysisCreate, db: Session) -> Analysis:
-    def _validate_analysis_details():
-        # The GUI depends on specific analysis details when showing event pages. Because of
-        # this, we want to ensure that these details conform to what the GUI expects.
-        if analysis_module_type.value == "Email Analysis":
-            EmailAnalysisDetails(**model.details)
+def create_or_read(model: AnalysisCreate, db: Session) -> Analysis:
+    # Validate the analysis details
+    analysis_module_type = crud.analysis_module_type.read_by_uuid(uuid=model.analysis_module_type_uuid, db=db)
+    validate_analysis_details(analysis_module_type=analysis_module_type, details=model.details)
 
-        elif analysis_module_type.value.startswith("FA Queue"):
-            FAQueueAnalysisDetails(**model.details)
-
-        elif analysis_module_type.value.startswith("Sandbox Analysis"):
-            SandboxAnalysisDetails(**model.details)
-
-        elif analysis_module_type.value == "User Analysis":
-            UserAnalysisDetails(**model.details)
-
-    obj = read_cached(
-        analysis_module_type_uuid=model.analysis_module_type_uuid,
-        observable_uuid=model.target_uuid,
-        db=db,
+    obj = Analysis(
+        analysis_module_type=analysis_module_type,
+        # The [) range operator is described here:
+        # https://www.postgresql.org/docs/current/rangetypes.html#RANGETYPES-INCLUSIVITY
+        #
+        # [ mean that the lower bound of the range is inclusive, and ) means that the upper bound of
+        # the range is exclusive.
+        cached_during=func.tstzrange(
+            model.run_time, model.run_time + timedelta(seconds=analysis_module_type.cache_seconds), "[)"
+        ),
+        details=model.details,
+        error_message=model.error_message,
+        run_time=model.run_time,
+        stack_trace=model.stack_trace,
+        summary=model.summary,
+        target_uuid=model.target_uuid,
     )
 
-    if obj is None:
-        analysis_module_type = crud.analysis_module_type.read_by_uuid(uuid=model.analysis_module_type_uuid, db=db)
-
-        _validate_analysis_details()
-
-        obj = Analysis(
-            analysis_module_type=analysis_module_type,
-            # The [) range operator is described here:
-            # https://www.postgresql.org/docs/current/rangetypes.html#RANGETYPES-INCLUSIVITY
-            #
-            # [ mean that the lower bound of the range is inclusive, and ) means that the upper bound of
-            # the range is exclusive.
-            cached_during=func.tstzrange(
-                model.run_time, model.run_time + timedelta(seconds=analysis_module_type.cache_seconds), "[)"
-            ),
-            child_observables=[crud.observable.create(model=co, db=db) for co in model.child_observables],
-            details=model.details,
-            error_message=model.error_message,
-            run_time=model.run_time,
-            stack_trace=model.stack_trace,
-            summary=model.summary,
-            target_uuid=model.target_uuid,
+    # If the analysis cannot be created, that implies there is already a cached version
+    if not crud.helpers.create(obj=obj, db=db):
+        obj = read_cached(
+            analysis_module_type_uuid=model.analysis_module_type_uuid,
+            observable_uuid=model.target_uuid,
+            db=db,
         )
 
-        db.add(obj)
-        db.flush()
+    # Associate the child observables with the analysis
+    obj.child_observables = [crud.observable.create_or_read(model=co, db=db) for co in model.child_observables]
 
+    # Associate the analysis with its submission
     crud.alert_analysis_mapping.create(analysis_uuid=obj.uuid, submission_uuid=model.root_analysis_uuid, db=db)
 
     return obj
@@ -86,7 +73,7 @@ def read_cached(
     analysis_module_type_uuid: UUID,
     observable_uuid: UUID,
     db: Session,
-) -> Optional[Analysis]:
+) -> Analysis:
     return (
         db.execute(
             select(Analysis).where(
@@ -96,5 +83,25 @@ def read_cached(
             )
         )
         .scalars()
-        .one_or_none()
+        .one()
     )
+
+
+def validate_analysis_details(analysis_module_type: AnalysisModuleType, details: Optional[dict]):
+    """
+    The GUI depends on specific analysis details when showing event pages. Because of this,
+    this function is used to ensure these details conform to what the GUI expects.
+    """
+
+    if details:
+        if analysis_module_type.value == "Email Analysis":
+            EmailAnalysisDetails(**details)
+
+        elif analysis_module_type.value.startswith("FA Queue"):
+            FAQueueAnalysisDetails(**details)
+
+        elif analysis_module_type.value.startswith("Sandbox Analysis"):
+            SandboxAnalysisDetails(**details)
+
+        elif analysis_module_type.value == "User Analysis":
+            UserAnalysisDetails(**details)

@@ -10,6 +10,6 @@ def create(value: str, db: Session, queues: list[str] = None):
         queues = ["external"]
 
     for queue in queues:
-        crud.queue.create(model=QueueCreate(value=queue), db=db)
+        crud.queue.create_or_read(model=QueueCreate(value=queue), db=db)
 
-    return crud.event_remediation.create(model=EventRemediationCreate(queues=queues, value=value), db=db)
+    return crud.event_remediation.create_or_read(model=EventRemediationCreate(queues=queues, value=value), db=db)

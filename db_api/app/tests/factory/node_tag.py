@@ -5,4 +5,4 @@ from db import crud
 
 
 def create(value: str, db: Session):
-    return crud.node_tag.create(model=NodeTagCreate(value=value), db=db)
+    return crud.node_tag.create_or_read(model=NodeTagCreate(value=value), db=db)

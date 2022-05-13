@@ -20,8 +20,8 @@ def create(
     refresh_token: str = "asdf",
     roles: list[str] = None,
 ):
-    crud.queue.create(model=QueueCreate(value=alert_queue), db=db)
-    crud.queue.create(model=QueueCreate(value=event_queue), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value=alert_queue), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value=event_queue), db=db)
 
     if email is None:
         email = f"{username}@test.com"
@@ -30,9 +30,9 @@ def create(
         roles = ["test_role"]
 
     for role in roles:
-        crud.user_role.create(UserRoleCreate(value=role), db=db)
+        crud.user_role.create_or_read(UserRoleCreate(value=role), db=db)
 
-    user = crud.user.create(
+    user = crud.user.create_or_read(
         model=UserCreate(
             default_alert_queue=alert_queue,
             default_event_queue=event_queue,

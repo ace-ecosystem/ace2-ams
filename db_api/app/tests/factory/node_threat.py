@@ -11,12 +11,12 @@ def create(value: str, db: Session, queues: list[str] = None, types: list[str] =
         queues = ["external"]
 
     for queue in queues:
-        crud.queue.create(model=QueueCreate(value=queue), db=db)
+        crud.queue.create_or_read(model=QueueCreate(value=queue), db=db)
 
     if types is None:
         types = ["test_type"]
 
     for type in types:
-        crud.node_threat_type.create(model=NodeThreatTypeCreate(queues=queues, value=type), db=db)
+        crud.node_threat_type.create_or_read(model=NodeThreatTypeCreate(queues=queues, value=type), db=db)
 
-    return crud.node_threat.create(model=NodeThreatCreate(queues=queues, types=types, value=value), db=db)
+    return crud.node_threat.create_or_read(model=NodeThreatCreate(queues=queues, types=types, value=value), db=db)

@@ -20,28 +20,24 @@ def auth(username: str, password: str, db: Session) -> Optional[User]:
     return None
 
 
-def create(model: UserCreate, db: Session) -> User:
-    obj = read_by_username(username=model.username, db=db)
+def create_or_read(model: UserCreate, db: Session) -> User:
+    obj = User(
+        default_alert_queue=crud.queue.read_by_value(value=model.default_alert_queue, db=db),
+        default_event_queue=crud.queue.read_by_value(value=model.default_event_queue, db=db),
+        display_name=model.display_name,
+        email=model.email,
+        enabled=model.enabled,
+        password=hash_password(model.password),
+        roles=crud.user_role.read_by_values(values=model.roles, db=db),
+        username=model.username,
+    )
 
-    if obj is None:
-        obj = User(
-            default_alert_queue=crud.queue.read_by_value(value=model.default_alert_queue, db=db),
-            default_event_queue=crud.queue.read_by_value(value=model.default_event_queue, db=db),
-            display_name=model.display_name,
-            email=model.email,
-            enabled=model.enabled,
-            password=hash_password(model.password),
-            roles=[crud.user_role.read_by_value(value=ur, db=db) for ur in model.roles],
-            username=model.username,
-        )
-        db.add(obj)
-        db.flush()
+    if crud.helpers.create(obj=obj, db=db):
+        return obj
 
-    return obj
+    return read_by_username(username=model.username, db=db)
 
 
-def read_by_username(username: Optional[str], db: Session) -> Optional[User]:
-    if username is None:
-        return None
+def read_by_username(username: Optional[str], db: Session) -> User:
 
-    return db.execute(select(User).where(User.username == username)).scalars().one_or_none()
+    return db.execute(select(User).where(User.username == username)).scalars().one()

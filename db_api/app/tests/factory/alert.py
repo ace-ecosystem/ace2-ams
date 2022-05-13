@@ -62,14 +62,14 @@ def create(
         update_time = crud.helpers.utcnow()
 
     # Create the alert queue
-    crud.queue.create(model=QueueCreate(value=alert_queue), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value=alert_queue), db=db)
 
     # Create the alert type
-    crud.alert_type.create(model=AlertTypeCreate(value=alert_type), db=db)
+    crud.alert_type.create_or_read(model=AlertTypeCreate(value=alert_type), db=db)
 
     # Create the tool and tool instance
-    crud.alert_tool.create(model=AlertToolCreate(value=tool), db=db)
-    crud.alert_tool_instance.create(model=AlertToolInstanceCreate(value=tool_instance), db=db)
+    crud.alert_tool.create_or_read(model=AlertToolCreate(value=tool), db=db)
+    crud.alert_tool_instance.create_or_read(model=AlertToolInstanceCreate(value=tool_instance), db=db)
 
     # Create the history user if one was given
     if history_username is not None:
@@ -81,7 +81,7 @@ def create(
         diffs.append(crud.history.create_diff(field="owner", old=None, new=owner))
 
     # Create the actual alert
-    alert = crud.alert.create(
+    alert = crud.alert.create_or_read(
         model=AlertCreate(
             event_time=event_time,
             insert_time=insert_time,
@@ -99,12 +99,12 @@ def create(
 
     # Add the observables to the alert
     for observable in observables:
-        crud.observable_type.create(model=ObservableTypeCreate(value=observable.type), db=db)
-        alert.root_analysis.child_observables.append(crud.observable.create(model=observable, db=db))
+        crud.observable_type.create_or_read(model=ObservableTypeCreate(value=observable.type), db=db)
+        alert.root_analysis.child_observables.append(crud.observable.create_or_read(model=observable, db=db))
 
     if disposition:
         existing_dispositions = crud.alert_disposition.read_all(db=db)
-        alert.disposition = crud.alert_disposition.create(
+        alert.disposition = crud.alert_disposition.create_or_read(
             model=AlertDispositionCreate(value=disposition, rank=len(existing_dispositions) + 1), db=db
         )
         alert.disposition_time = update_time
@@ -115,7 +115,7 @@ def create(
         alert.event = event
 
     if tags:
-        alert.tags = [crud.node_tag.create(model=NodeTagCreate(value=t), db=db) for t in tags]
+        alert.tags = [crud.node_tag.create_or_read(model=NodeTagCreate(value=t), db=db) for t in tags]
 
     if threat_actors:
         alert.threat_actors = [factory.node_threat_actor.create(value=t, db=db) for t in threat_actors]
@@ -138,7 +138,7 @@ def create(
 
 def create_from_json_file(db: Session, json_path: str, alert_name: str) -> Alert:
     def _create_observable(o, root_analysis_uuid: UUID) -> ObservableCreate:
-        crud.observable_type.create(model=ObservableTypeCreate(value=o["type"]), db=db)
+        crud.observable_type.create_or_read(model=ObservableTypeCreate(value=o["type"]), db=db)
         observable_model = ObservableCreate(
             for_detection=o["for_detection"] if "for_detection" in o else False,
             root_analysis_uuid=root_analysis_uuid,
@@ -148,7 +148,7 @@ def create_from_json_file(db: Session, json_path: str, alert_name: str) -> Alert
         )
         if "analyses" in o:
             for a in o["analyses"]:
-                analysis_module_type = crud.analysis_module_type.create(
+                analysis_module_type = crud.analysis_module_type.create_or_read(
                     AnalysisModuleTypeCreate(value=a["type"]), db=db
                 )
                 observable_model.analyses.append(
@@ -187,9 +187,6 @@ def create_from_json_file(db: Session, json_path: str, alert_name: str) -> Alert
 
     if "alert_uuid" in data:
         alert_uuid = data["alert_uuid"]
-        existing_alert = crud.alert.read_by_uuid(uuid=alert_uuid, db=db)
-        if existing_alert is not None:
-            return existing_alert
     else:
         alert_uuid = uuid4()
 

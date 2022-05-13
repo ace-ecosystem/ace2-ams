@@ -7,26 +7,23 @@ from db import crud
 from db.schemas.analysis_module_type import AnalysisModuleType
 
 
-def create(model: AnalysisModuleTypeCreate, db: Session) -> AnalysisModuleType:
-    obj = read_by_value_version(value=model.value, version=model.version, db=db)
+def create_or_read(model: AnalysisModuleTypeCreate, db: Session) -> AnalysisModuleType:
+    obj = AnalysisModuleType(
+        cache_seconds=model.cache_seconds,
+        description=model.description,
+        extended_version=model.extended_version,
+        manual=model.manual,
+        observable_types=crud.observable_type.read_by_values(values=model.observable_types, db=db),
+        required_directives=crud.node_directive.read_by_values(values=model.required_directives, db=db),
+        required_tags=crud.node_tag.read_by_values(values=model.required_tags, db=db),
+        value=model.value,
+        version=model.version,
+    )
 
-    if obj is None:
-        obj = AnalysisModuleType(
-            cache_seconds=model.cache_seconds,
-            description=model.description,
-            extended_version=model.extended_version,
-            manual=model.manual,
-            observable_types=crud.observable_type.read_by_values(values=model.observable_types, db=db),
-            required_directives=crud.node_directive.read_by_values(values=model.required_directives, db=db),
-            required_tags=crud.node_tag.read_by_values(values=model.required_tags, db=db),
-            value=model.value,
-            version=model.version,
-        )
+    if crud.helpers.create(obj=obj, db=db):
+        return obj
 
-        db.add(obj)
-        db.flush()
-
-    return obj
+    return read_by_value_version(value=model.value, version=model.version, db=db)
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> AnalysisModuleType:
@@ -39,5 +36,5 @@ def read_by_value_version(value: str, version: str, db: Session) -> AnalysisModu
             select(AnalysisModuleType).where(AnalysisModuleType.value == value, AnalysisModuleType.version == version)
         )
         .scalars()
-        .one_or_none()
+        .one()
     )

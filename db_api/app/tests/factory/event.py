@@ -51,7 +51,7 @@ def create(
         vectors = []
 
     # Create the objects the event will need
-    crud.queue.create(model=QueueCreate(value=event_queue), db=db)
+    crud.queue.create_or_read(model=QueueCreate(value=event_queue), db=db)
 
     if event_type:
         factory.event_type.create(value=event_type, queues=[event_queue], db=db)
@@ -74,7 +74,7 @@ def create(
     factory.event_status.create(value=status, queues=[event_queue], db=db)
 
     for t in tags:
-        crud.node_tag.create(model=NodeTagCreate(value=t), db=db)
+        crud.node_tag.create_or_read(model=NodeTagCreate(value=t), db=db)
 
     for t in threat_actors:
         factory.node_threat_actor.create(value=t, queues=[event_queue], db=db)

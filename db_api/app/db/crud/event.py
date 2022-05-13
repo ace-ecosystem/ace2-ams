@@ -1,5 +1,4 @@
 from sqlalchemy.orm import Session
-from typing import Optional
 from uuid import UUID
 
 from api_models.event import EventCreate
