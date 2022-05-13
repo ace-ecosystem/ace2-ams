@@ -146,7 +146,8 @@
                   <div class="inputfield w-full" style="display: inline-block">
                     <span style="display: inline">
                       <ObservableInput
-                        v-model="observables[index].value"
+                        v-model:modelValue="observables[index].value"
+                        v-model:invalid="observables[index].invalid"
                         :multi-add="observables[index].multiAdd"
                         :type="observables[index].type"
                       ></ObservableInput>
@@ -197,11 +198,14 @@
       <br />
     </TabPanel>
   </TabView>
+  <small v-if="anyObservablesInvalid" class="p-error"
+    >Please check observable input</small
+  >
   <div class="pl-3">
     <SplitButton
       label="Analyze!"
       :loading="alertCreateLoading"
-      :disabled="showContinueButton"
+      :disabled="anyObservablesInvalid"
       :model="splitButtonOptions"
       class="p-button-lg"
       @click="submitSingleAlert"
@@ -237,18 +241,15 @@
   import { useRouter } from "vue-router";
 
   import Button from "primevue/button";
-  import Calendar from "primevue/calendar";
   import Card from "primevue/card";
   import Dropdown from "primevue/dropdown";
   import Fieldset from "primevue/fieldset";
-  import FileUpload from "primevue/fileupload";
   import InputText from "primevue/inputtext";
   import Message from "primevue/message";
   import MultiSelect from "primevue/multiselect";
   import SplitButton from "primevue/splitbutton";
   import TabPanel from "primevue/tabpanel";
   import TabView from "primevue/tabview";
-  import Textarea from "primevue/textarea";
   import { DatePicker } from "v-calendar";
 
   import ObservableInput from "@/components/Observables/ObservableInput.vue";
@@ -301,6 +302,11 @@
     return observables.value.length - 1;
   });
 
+  const anyObservablesInvalid = computed(() => {
+    const invalid = observables.value.filter((obs) => obs.invalid);
+    return invalid.length;
+  });
+
   onMounted(() => {
     initData();
   });
@@ -322,6 +328,7 @@
       multiAdd: false,
       value: null,
       directives: [],
+      invalid: false,
     });
   };
 

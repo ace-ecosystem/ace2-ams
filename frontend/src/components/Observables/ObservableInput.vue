@@ -36,11 +36,15 @@
 
   const config = inject("config") as Record<string, any>;
 
-  const emit = defineEmits(["update:modelValue"]);
+  const emit = defineEmits(["update:observableValue", "update:invalid"]);
 
   const props = defineProps({
-    modelValue: {
+    observableValue: {
       type: null as PropType<string | null>,
+      required: true,
+    },
+    invalid: {
+      type: Boolean,
       required: true,
     },
     multiAdd: {
@@ -53,7 +57,7 @@
     },
   });
 
-  const value = ref(props.modelValue);
+  const value = ref(props.observableValue);
 
   const styleClasses = computed(() => {
     if (!inputIsValid.value) {
@@ -94,6 +98,11 @@
   });
 
   watch(value, () => {
-    emit("update:modelValue", value);
+    emit("update:observableValue", value);
+    if (inputIsValid.value) {
+      emit("update:invalid", false);
+    } else {
+      emit("update:invalid", true);
+    }
   });
 </script>
