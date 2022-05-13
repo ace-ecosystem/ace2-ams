@@ -1,23 +1,22 @@
 <template>
-  <FileUpload
-    v-if="type == 'file'"
-    mode="basic"
-    class="inputfield"
-  ></FileUpload>
+  <span v-if="type == 'file'" name="observable-file-upload">
+    <FileUpload mode="basic" class="inputfield"></FileUpload>
+  </span>
   <span v-else>
     <InputText
       v-if="!multiAdd"
       v-model="value"
-      placeholder="Enter a value"
-      class="inputfield"
+      :placeholder="placeholder"
+      :class="styleClasses"
       type="text"
     ></InputText>
     <Textarea
       v-else
       v-model="value"
-      placeholder="Enter a comma or newline-delimited list of values"
-      class="inputfield"
+      :placeholder="placeholder"
+      :class="styleClasses"
     ></Textarea>
+    <small v-if="!inputIsValid" class="p-error">{{ type }} is malformed</small>
   </span>
 </template>
 <script setup lang="ts">
@@ -55,6 +54,33 @@
   });
 
   const value = ref(props.modelValue);
+
+  const styleClasses = computed(() => {
+    if (!inputIsValid.value) {
+      return ["inputfield", "p-invalid"];
+    }
+    return ["inputfield"];
+  });
+
+  const inputIsValid = computed(() => {
+    if (value.value == null || value.value.length == 0) {
+      return true;
+    }
+    if (observableMetadata.value.validator) {
+      return observableMetadata.value.validator(value.value);
+    }
+    return true;
+  });
+
+  const placeholder = computed(() => {
+    if (observableMetadata.value.placeholder && !props.multiAdd) {
+      return observableMetadata.value.placeholder;
+    } else if (props.multiAdd) {
+      return "Enter a comma or newline-delimited list of values";
+    } else {
+      return "Enter a value";
+    }
+  });
 
   const observableMetadata = computed(() => {
     const observableMetadata = config.observables.observableMetadata;
