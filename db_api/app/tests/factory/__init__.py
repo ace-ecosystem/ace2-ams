@@ -1,4 +1,5 @@
 from tests.factory import alert
+from tests.factory import alert_disposition
 from tests.factory import event
 from tests.factory import event_prevention_tool
 from tests.factory import event_remediation

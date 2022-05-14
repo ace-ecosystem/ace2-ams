@@ -1,3 +1,4 @@
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 from uuid import UUID
 
@@ -12,11 +13,19 @@ def create_or_read(model: AlertDispositionCreate, db: Session) -> AlertDispositi
     if crud.helpers.create(obj=obj, db=db):
         return obj
 
-    return read_by_value(value=model.value, db=db)
-
-
-def read_all(db: Session) -> list[AlertDisposition]:
-    return crud.helpers.read_all(db_table=AlertDisposition, db=db)
+    return (
+        db.execute(
+            select(AlertDisposition).where(
+                or_(
+                    AlertDisposition.rank == model.rank,
+                    AlertDisposition.uuid == model.uuid,
+                    AlertDisposition.value == model.value,
+                )
+            )
+        )
+        .scalars()
+        .one()
+    )
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> AlertDisposition:

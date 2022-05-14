@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 """
@@ -23,7 +23,7 @@ def test_delete_invalid_uuid(client):
 
 def test_delete_nonexistent_uuid(client):
     delete = client.delete(f"/api/alert/disposition/{uuid.uuid4()}")
-    assert delete.status_code == status.HTTP_404_NOT_FOUND
+    assert delete.status_code == status.HTTP_400_BAD_REQUEST
 
 
 #
@@ -33,12 +33,8 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete(client, db):
     # Create the object
-    obj = helpers.create_alert_disposition(value="test", rank=1, db=db)
+    obj = factory.alert_disposition.create(value="test", rank=1, db=db)
 
     # Delete it
     delete = client.delete(f"/api/alert/disposition/{obj.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
-
-    # Make sure it is gone
-    get = client.get(f"/api/alert/disposition/{obj.uuid}")
-    assert get.status_code == status.HTTP_404_NOT_FOUND

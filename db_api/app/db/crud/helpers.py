@@ -1,15 +1,16 @@
 import contextlib
 
 from datetime import datetime, timezone
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
+from pydantic import BaseModel
+from sqlalchemy import delete as sql_delete, select, update as sql_update
+from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.sql.selectable import Select
 from typing import Any
 from uuid import UUID
 
-from exceptions.db import ValueNotFoundInDatabase
+from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 
 def build_read_all_query(db_table: DeclarativeMeta) -> Select:
@@ -29,10 +30,27 @@ def create(obj: Any, db: Session) -> bool:
     return False
 
 
+def delete(uuid: UUID, db_table: DeclarativeMeta, db: Session) -> bool:
+    """Uses a nested transaction to attempt to delete the given object from the database. If it fails due
+    to an IntegrityError, only the nested transaction is rolled back."""
+
+    with db.begin_nested():
+        try:
+            result = db.execute(sql_delete(db_table).where(db_table.uuid == uuid))
+            return result.rowcount == 1
+        except IntegrityError:
+            db.rollback()
+
+    return False
+
+
 def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session) -> Any:
     """Returns the object with the specific UUID from the given database table."""
 
-    return db.execute(select(db_table).where(db_table.uuid == uuid)).scalars().one()
+    try:
+        return db.execute(select(db_table).where(db_table.uuid == uuid)).scalars().one()
+    except NoResultFound as e:
+        raise UuidNotFoundInDatabase(f"UUID {uuid} was not found in the {db_table.__tablename__} table.") from e
 
 
 def read_by_uuids(
@@ -56,7 +74,12 @@ def read_by_uuids(
 def read_by_value(db_table: DeclarativeMeta, value: str, db: Session) -> Any:
     """Returns the object with the specific value (if it exists) from the given database table."""
 
-    return db.execute(select(db_table).where(db_table.value == value)).scalars().one()
+    try:
+        return db.execute(select(db_table).where(db_table.value == value)).scalars().one()
+    except NoResultFound as e:
+        raise ValueNotFoundInDatabase(
+            f"The '{value}' value was not found in the {db_table.__tablename__} table."
+        ) from e
 
 
 def read_by_values(
@@ -80,6 +103,28 @@ def read_by_values(
                 )
 
     return result
+
+
+def update(uuid: UUID, update_model: BaseModel, db_table: DeclarativeMeta, db: Session) -> bool:
+    """Uses a nested transaction to attempt to update the given object in the database. If it fails due
+    to an IntegrityError, only the nested transaction is rolled back."""
+
+    with db.begin_nested():
+        try:
+            result = db.execute(
+                sql_update(db_table)
+                .where(db_table.uuid == uuid)
+                .values(
+                    # exclude_unset is needed so that any values in the Pydantic model that are not
+                    # being updated are not set to None. Instead they will be removed from the dict.
+                    **update_model.dict(exclude_unset=True)
+                )
+            )
+            return result.rowcount == 1
+        except IntegrityError:
+            db.rollback()
+
+    return False
 
 
 def utcnow() -> datetime:
