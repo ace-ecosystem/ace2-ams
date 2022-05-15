@@ -72,10 +72,13 @@ def update_disposition(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    if not crud.helpers.update(uuid=uuid, update_model=disposition, db_table=AlertDisposition, db=db):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update alert disposition {uuid}"
-        )
+    try:
+        if not crud.helpers.update(uuid=uuid, update_model=disposition, db_table=AlertDisposition, db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update alert disposition {uuid}"
+            )
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
     response.headers["Content-Location"] = request.url_for("get_disposition", uuid=uuid)
 
@@ -89,10 +92,13 @@ helpers.api_route_update(router, update_disposition)
 
 
 def delete_disposition(uuid: UUID, db: Session = Depends(get_db)):
-    if not crud.helpers.delete(uuid=uuid, db_table=AlertDisposition, db=db):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete alert disposition {uuid}"
-        )
+    try:
+        if not crud.helpers.delete(uuid=uuid, db_table=AlertDisposition, db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete alert disposition {uuid}"
+            )
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 helpers.api_route_delete(router, delete_disposition)

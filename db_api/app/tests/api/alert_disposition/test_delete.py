@@ -23,7 +23,7 @@ def test_delete_invalid_uuid(client):
 
 def test_delete_nonexistent_uuid(client):
     delete = client.delete(f"/api/alert/disposition/{uuid.uuid4()}")
-    assert delete.status_code == status.HTTP_400_BAD_REQUEST
+    assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
 #

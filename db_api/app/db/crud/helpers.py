@@ -34,6 +34,8 @@ def delete(uuid: UUID, db_table: DeclarativeMeta, db: Session) -> bool:
     """Uses a nested transaction to attempt to delete the given object from the database. If it fails due
     to an IntegrityError, only the nested transaction is rolled back."""
 
+    ensure_record_exists(uuid=uuid, db_table=db_table, db=db)
+
     with db.begin_nested():
         try:
             result = db.execute(sql_delete(db_table).where(db_table.uuid == uuid))
@@ -42,6 +44,15 @@ def delete(uuid: UUID, db_table: DeclarativeMeta, db: Session) -> bool:
             db.rollback()
 
     return False
+
+
+def ensure_record_exists(uuid: UUID, db_table: DeclarativeMeta, db: Session):
+    """Raises an exception if the given UUID does not exist in the given table."""
+
+    try:
+        read_by_uuid(db_table=db_table, uuid=uuid, db=db)
+    except NoResultFound as e:
+        raise UuidNotFoundInDatabase(f"UUID {uuid} was not found in the {db_table.__tablename__} table.") from e
 
 
 def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session) -> Any:
@@ -108,6 +119,8 @@ def read_by_values(
 def update(uuid: UUID, update_model: BaseModel, db_table: DeclarativeMeta, db: Session) -> bool:
     """Uses a nested transaction to attempt to update the given object in the database. If it fails due
     to an IntegrityError, only the nested transaction is rolled back."""
+
+    ensure_record_exists(uuid=uuid, db_table=db_table, db=db)
 
     with db.begin_nested():
         try:

@@ -36,7 +36,7 @@ def test_update_invalid_uuid(client):
 
 def test_update_nonexistent_uuid(client):
     update = client.patch(f"/api/alert/disposition/{uuid.uuid4()}", json={"value": "test"})
-    assert update.status_code == status.HTTP_400_BAD_REQUEST
+    assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
 #
