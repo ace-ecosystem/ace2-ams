@@ -20,3 +20,4 @@ from tests.factory import observable
 from tests.factory import observable_type
 from tests.factory import queue
 from tests.factory import user
+from tests.factory import user_role
