@@ -3,7 +3,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -31,9 +31,9 @@ from tests import helpers
         ("value", ""),
     ],
 )
-def test_create_invalid_fields(client, key, value):
-    create_json = {"value": "test", "queues": ["default"]}
-    create_json[key] = value
+def test_create_invalid_fields(client, db, key, value):
+    factory.queue.create_or_read(value="default", db=db)
+    create_json = {"value": "test", key: value}
     create = client.post("/api/event/vector/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -41,33 +41,11 @@ def test_create_invalid_fields(client, key, value):
 @pytest.mark.parametrize(
     "key",
     [
-        ("uuid"),
         ("value"),
     ],
 )
-def test_create_duplicate_unique_fields(client, db, key):
-    # Create an object
-    helpers.create_queue(value="default", db=db)
-    create1_json = {"uuid": str(uuid.uuid4()), "value": "test", "queues": ["default"]}
-    client.post("/api/event/vector/", json=create1_json)
-
-    # Ensure you cannot create another object with the same unique field value
-    create2_json = {"value": "test2", "queues": ["default"]}
-    create2_json[key] = create1_json[key]
-    create2 = client.post("/api/event/vector/", json=create2_json)
-    assert create2.status_code == status.HTTP_409_CONFLICT
-
-
-@pytest.mark.parametrize(
-    "key",
-    [
-        ("queues"),
-        ("value"),
-    ],
-)
-def test_create_missing_required_fields(client, db, key):
-    helpers.create_queue(value="default", db=db)
-    create_json = {"value": "test", "queues": ["default"]}
+def test_create_missing_required_fields(client, key):
+    create_json = {"value": "test"}
     del create_json[key]
     create = client.post("/api/event/vector/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -84,10 +62,8 @@ def test_create_missing_required_fields(client, db, key):
 )
 def test_create_valid_optional_fields(client, db, key, value):
     # Create the object
-    helpers.create_queue(value="default", db=db)
-    create = client.post(
-        "/api/event/vector/", json={key: value, "value": "test", "queues": ["default"]}
-    )
+    factory.queue.create_or_read(value="test_queue", db=db)
+    create = client.post("/api/event/vector/", json={key: value, "value": "test", "queues": ["test_queue"]})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
@@ -97,8 +73,8 @@ def test_create_valid_optional_fields(client, db, key, value):
 
 def test_create_valid_required_fields(client, db):
     # Create the object
-    helpers.create_queue(value="default", db=db)
-    create = client.post("/api/event/vector/", json={"value": "test", "queues": ["default"]})
+    factory.queue.create_or_read(value="test_queue", db=db)
+    create = client.post("/api/event/vector/", json={"value": "test", "queues": ["test_queue"]})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back

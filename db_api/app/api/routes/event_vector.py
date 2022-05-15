@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.routes import helpers
@@ -12,8 +11,8 @@ from api_models.event_vector import (
 )
 from db import crud
 from db.database import get_db
-from db.schemas.queue import Queue
 from db.schemas.event_vector import EventVector
+from exceptions.db import UuidNotFoundInDatabase
 
 
 router = APIRouter(
@@ -33,9 +32,7 @@ def create_event_vector(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    queues = crud.read_by_values(values=create.queues, db_table=Queue, db=db)
-    obj: EventVector = crud.create(obj=create, db_table=EventVector, db=db, exclude=["queues"])
-    obj.queues = queues
+    obj = crud.event_vector.create_or_read(model=create, db=db)
 
     response.headers["Content-Location"] = request.url_for("get_event_vector", uuid=obj.uuid)
 
@@ -49,11 +46,14 @@ helpers.api_route_create(router, create_event_vector)
 
 
 def get_all_event_vectors(db: Session = Depends(get_db)):
-    return paginate(db, select(EventVector).order_by(EventVector.value))
+    return paginate(conn=db, query=crud.helpers.build_read_all_query(EventVector).order_by(EventVector.value))
 
 
 def get_event_vector(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read(uuid=uuid, db_table=EventVector, db=db)
+    try:
+        return crud.event_vector.read_by_uuid(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 helpers.api_route_read_all(router, get_all_event_vectors, EventVectorRead)
@@ -67,25 +67,16 @@ helpers.api_route_read(router, get_event_vector, EventVectorRead)
 
 def update_event_vector(
     uuid: UUID,
-    update: EventVectorUpdate,
+    event_vector: EventVectorUpdate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    db_obj: EventVector = crud.read(uuid=uuid, db_table=EventVector, db=db)
-
-    update_data = update.dict(exclude_unset=True)
-
-    if "description" in update_data:
-        db_obj.description = update_data["description"]
-
-    if "queues" in update_data:
-        db_obj.queues = crud.read_by_values(values=update_data["queues"], db_table=Queue, db=db)
-
-    if "value" in update_data:
-        db_obj.value = update_data["value"]
-
-    crud.commit(db)
+    try:
+        if not crud.helpers.update(uuid=uuid, update_model=event_vector, db_table=EventVector, db=db):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update event vector {uuid}")
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
     response.headers["Content-Location"] = request.url_for("get_event_vector", uuid=uuid)
 
@@ -99,7 +90,11 @@ helpers.api_route_update(router, update_event_vector)
 
 
 def delete_event_vector(uuid: UUID, db: Session = Depends(get_db)):
-    crud.delete(uuid=uuid, db_table=EventVector, db=db)
+    try:
+        if not crud.helpers.delete(uuid=uuid, db_table=EventVector, db=db):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete event vector {uuid}")
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 helpers.api_route_delete(router, delete_event_vector)
