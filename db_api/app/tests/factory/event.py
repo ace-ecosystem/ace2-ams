@@ -54,36 +54,36 @@ def create(
     crud.queue.create_or_read(model=QueueCreate(value=event_queue), db=db)
 
     if event_type:
-        factory.event_type.create(value=event_type, queues=[event_queue], db=db)
+        factory.event_type.create_or_read(value=event_type, queues=[event_queue], db=db)
 
     if owner:
-        factory.user.create(username=owner, event_queue=event_queue, db=db)
+        factory.user.create_or_read(username=owner, event_queue=event_queue, db=db)
 
     for p in prevention_tools:
-        factory.event_prevention_tool.create(value=p, queues=[event_queue], db=db)
+        factory.event_prevention_tool.create_or_read(value=p, queues=[event_queue], db=db)
 
     for r in remediations:
-        factory.event_remediation.create(value=r, queues=[event_queue], db=db)
+        factory.event_remediation.create_or_read(value=r, queues=[event_queue], db=db)
 
     if risk_level:
-        factory.event_risk_level.create(value=risk_level, queues=[event_queue], db=db)
+        factory.event_risk_level.create_or_read(value=risk_level, queues=[event_queue], db=db)
 
     if source:
-        factory.event_source.create(value=source, queues=[event_queue], db=db)
+        factory.event_source.create_or_read(value=source, queues=[event_queue], db=db)
 
-    factory.event_status.create(value=status, queues=[event_queue], db=db)
+    factory.event_status.create_or_read(value=status, queues=[event_queue], db=db)
 
     for t in tags:
         crud.node_tag.create_or_read(model=NodeTagCreate(value=t), db=db)
 
     for t in threat_actors:
-        factory.node_threat_actor.create(value=t, queues=[event_queue], db=db)
+        factory.node_threat_actor.create_or_read(value=t, queues=[event_queue], db=db)
 
     for t in threats:
-        factory.node_threat.create(value=t, queues=[event_queue], db=db)
+        factory.node_threat.create_or_read(value=t, queues=[event_queue], db=db)
 
     for v in vectors:
-        factory.event_vector.create(value=v, queues=[event_queue], db=db)
+        factory.event_vector.create_or_read(value=v, queues=[event_queue], db=db)
 
     return crud.event.create(
         model=EventCreate(

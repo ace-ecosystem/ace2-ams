@@ -359,7 +359,7 @@ def test_create_valid_owner(client, db):
     crud.observable_type.create_or_read(model=ObservableTypeCreate(value="o_type"), db=db)
 
     # Create a user
-    factory.user.create(username="johndoe", db=db)
+    factory.user.create_or_read(username="johndoe", db=db)
 
     # Use the user to create a new alert
     create = client.post(
@@ -468,9 +468,9 @@ def test_create_valid_required_fields(client, db):
 @pytest.mark.parametrize(
     "key,value_lists,helper_create_func",
     [
-        ("tags", VALID_LIST_STRING_VALUES, factory.node_tag.create),
-        ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create),
-        ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create),
+        ("tags", VALID_LIST_STRING_VALUES, factory.node_tag.create_or_read),
+        ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
+        ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
     ],
 )
 def test_create_valid_node_fields(client, db, key, value_lists, helper_create_func):

@@ -7,7 +7,7 @@ from api_models.user_role import UserRoleCreate
 from db import crud
 
 
-def create(
+def create_or_read(
     username: str,
     db: Session,
     alert_queue: str = "external",

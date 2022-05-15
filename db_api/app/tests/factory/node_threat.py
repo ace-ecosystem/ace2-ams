@@ -6,7 +6,7 @@ from api_models.queue import QueueCreate
 from db import crud
 
 
-def create(value: str, db: Session, queues: list[str] = None, types: list[str] = None):
+def create_or_read(value: str, db: Session, queues: list[str] = None, types: list[str] = None):
     if queues is None:
         queues = ["external"]
 

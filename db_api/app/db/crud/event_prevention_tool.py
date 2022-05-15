@@ -10,6 +10,7 @@ def create_or_read(model: EventPreventionToolCreate, db: Session) -> EventPreven
     obj = EventPreventionTool(
         description=model.description,
         queues=crud.queue.read_by_values(values=model.queues, db=db),
+        uuid=model.uuid,
         value=model.value,
     )
 

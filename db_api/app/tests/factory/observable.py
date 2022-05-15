@@ -13,7 +13,7 @@ from db.schemas.observable import Observable
 from tests import factory
 
 
-def create(
+def create_or_read(
     type: str,
     value: str,
     parent_analysis: Analysis,
@@ -58,10 +58,10 @@ def create(
         obj.tags = [crud.node_tag.create_or_read(model=NodeTagCreate(value=t), db=db) for t in tags]
 
     if threat_actors:
-        obj.threat_actors = [factory.node_threat_actor.create(value=t, db=db) for t in threat_actors]
+        obj.threat_actors = [factory.node_threat_actor.create_or_read(value=t, db=db) for t in threat_actors]
 
     if threats:
-        obj.threats = [factory.node_threat.create(value=t, db=db) for t in threats]
+        obj.threats = [factory.node_threat.create_or_read(value=t, db=db) for t in threats]
 
     # Add the observable to its parent analysis
     parent_analysis.child_observables.append(obj)

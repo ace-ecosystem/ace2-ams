@@ -309,16 +309,26 @@ def test_get_filter_observable(client, db):
 
     # Create some alerts with one observable
     alert1 = factory.alert.create(db=db)
-    factory.observable.create(parent_analysis=alert1.root_analysis, type="test_type1", value="test_value1", db=db)
+    factory.observable.create_or_read(
+        parent_analysis=alert1.root_analysis, type="test_type1", value="test_value1", db=db
+    )
 
     alert2 = factory.alert.create(db=db)
-    factory.observable.create(parent_analysis=alert2.root_analysis, type="test_type2", value="test_value2", db=db)
+    factory.observable.create_or_read(
+        parent_analysis=alert2.root_analysis, type="test_type2", value="test_value2", db=db
+    )
 
     # Create an alert with multiple observables
     alert3 = factory.alert.create(db=db)
-    factory.observable.create(parent_analysis=alert3.root_analysis, type="test_type1", value="test_value_asdf", db=db),
-    factory.observable.create(parent_analysis=alert3.root_analysis, type="test_type2", value="test_value1", db=db),
-    factory.observable.create(parent_analysis=alert3.root_analysis, type="test_type2", value="test_value2", db=db),
+    factory.observable.create_or_read(
+        parent_analysis=alert3.root_analysis, type="test_type1", value="test_value_asdf", db=db
+    ),
+    factory.observable.create_or_read(
+        parent_analysis=alert3.root_analysis, type="test_type2", value="test_value1", db=db
+    ),
+    factory.observable.create_or_read(
+        parent_analysis=alert3.root_analysis, type="test_type2", value="test_value2", db=db
+    ),
 
     # There should be 4 total alerts
     get = client.get("/api/alert/")
@@ -342,13 +352,21 @@ def test_get_filter_observable_types(client, db):
 
     # Create an alert with one observable
     alert1 = factory.alert.create(db=db)
-    factory.observable.create(parent_analysis=alert1.root_analysis, type="test_type1", value="test_value1", db=db)
+    factory.observable.create_or_read(
+        parent_analysis=alert1.root_analysis, type="test_type1", value="test_value1", db=db
+    )
 
     # Create an alert with multiple observables
     alert2 = factory.alert.create(db=db)
-    factory.observable.create(parent_analysis=alert2.root_analysis, type="test_type1", value="test_value_asdf", db=db)
-    factory.observable.create(parent_analysis=alert2.root_analysis, type="test_type2", value="test_value1", db=db)
-    factory.observable.create(parent_analysis=alert2.root_analysis, type="test_type2", value="test_value2", db=db)
+    factory.observable.create_or_read(
+        parent_analysis=alert2.root_analysis, type="test_type1", value="test_value_asdf", db=db
+    )
+    factory.observable.create_or_read(
+        parent_analysis=alert2.root_analysis, type="test_type2", value="test_value1", db=db
+    )
+    factory.observable.create_or_read(
+        parent_analysis=alert2.root_analysis, type="test_type2", value="test_value2", db=db
+    )
 
     # There should be 3 total alerts
     get = client.get("/api/alert/")
@@ -372,16 +390,26 @@ def test_get_filter_observable_value(client, db):
 
     # Create some alerts with one observable
     alert1 = factory.alert.create(db=db)
-    factory.observable.create(parent_analysis=alert1.root_analysis, type="test_type1", value="test_value1", db=db)
+    factory.observable.create_or_read(
+        parent_analysis=alert1.root_analysis, type="test_type1", value="test_value1", db=db
+    )
 
     alert2 = factory.alert.create(db=db)
-    factory.observable.create(parent_analysis=alert2.root_analysis, type="test_type2", value="test_value2", db=db)
+    factory.observable.create_or_read(
+        parent_analysis=alert2.root_analysis, type="test_type2", value="test_value2", db=db
+    )
 
     # Create an alert with multiple observables
     alert3 = factory.alert.create(db=db)
-    factory.observable.create(parent_analysis=alert3.root_analysis, type="test_type1", value="test_value_asdf", db=db)
-    factory.observable.create(parent_analysis=alert3.root_analysis, type="test_type2", value="test_value1", db=db)
-    factory.observable.create(parent_analysis=alert3.root_analysis, type="test_type2", value="test_value2", db=db)
+    factory.observable.create_or_read(
+        parent_analysis=alert3.root_analysis, type="test_type1", value="test_value_asdf", db=db
+    )
+    factory.observable.create_or_read(
+        parent_analysis=alert3.root_analysis, type="test_type2", value="test_value1", db=db
+    )
+    factory.observable.create_or_read(
+        parent_analysis=alert3.root_analysis, type="test_type2", value="test_value2", db=db
+    )
 
     # There should be 4 total alerts
     get = client.get("/api/alert/")
@@ -405,12 +433,18 @@ def test_get_filter_observable_and_observable_types(client, db):
 
     # Create an alert with multiple observables
     alert2 = factory.alert.create(db=db)
-    factory.observable.create(parent_analysis=alert2.root_analysis, type="test_type1", value="test_value1", db=db)
-    factory.observable.create(parent_analysis=alert2.root_analysis, type="test_type2", value="test_value2", db=db)
+    factory.observable.create_or_read(
+        parent_analysis=alert2.root_analysis, type="test_type1", value="test_value1", db=db
+    )
+    factory.observable.create_or_read(
+        parent_analysis=alert2.root_analysis, type="test_type2", value="test_value2", db=db
+    )
 
     # Create an alert with one observable
     alert3 = factory.alert.create(db=db)
-    factory.observable.create(parent_analysis=alert3.root_analysis, type="test_type1", value="test_value1", db=db)
+    factory.observable.create_or_read(
+        parent_analysis=alert3.root_analysis, type="test_type1", value="test_value1", db=db
+    )
 
     # There should be 3 total alerts
     get = client.get("/api/alert/")
@@ -452,7 +486,9 @@ def test_get_filter_queue(client, db):
 
 def test_get_filter_tags(client, db):
     alert1 = factory.alert.create(db=db, tags=["alert_tag"])
-    factory.observable.create(type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, tags=["obs1"])
+    factory.observable.create_or_read(
+        type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, tags=["obs1"]
+    )
     factory.alert.create(db=db, tags=["tag1"])
     factory.alert.create(db=db, tags=["tag2", "tag3", "tag4"])
 
@@ -487,7 +523,7 @@ def test_get_filter_tags(client, db):
 
 def test_get_filter_threat_actors(client, db):
     alert1 = factory.alert.create(db=db)
-    factory.observable.create(
+    factory.observable.create_or_read(
         type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, threat_actors=["bad_guys"]
     )
     factory.alert.create(db=db, threat_actors=["test_actor"])
@@ -514,7 +550,7 @@ def test_get_filter_threat_actors(client, db):
 
 def test_get_filter_threats(client, db):
     alert1 = factory.alert.create(db=db)
-    factory.observable.create(
+    factory.observable.create_or_read(
         type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, threats=["malz"]
     )
     factory.alert.create(db=db, threats=["threat1"])

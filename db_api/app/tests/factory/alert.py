@@ -73,11 +73,11 @@ def create(
 
     # Create the history user if one was given
     if history_username is not None:
-        factory.user.create(username=history_username, db=db)
+        factory.user.create_or_read(username=history_username, db=db)
 
     # Create the owner user if one was given
     if owner is not None:
-        factory.user.create(username=owner, alert_queue=alert_queue, db=db)
+        factory.user.create_or_read(username=owner, alert_queue=alert_queue, db=db)
         diffs.append(crud.history.create_diff(field="owner", old=None, new=owner))
 
     # Create the actual alert
@@ -108,7 +108,9 @@ def create(
             model=AlertDispositionCreate(value=disposition, rank=len(existing_dispositions) + 1), db=db
         )
         alert.disposition_time = update_time
-        alert.disposition_user = factory.user.create(username=updated_by_user, display_name=updated_by_user, db=db)
+        alert.disposition_user = factory.user.create_or_read(
+            username=updated_by_user, display_name=updated_by_user, db=db
+        )
         diffs.append(crud.history.create_diff(field="disposition", old=None, new=disposition))
 
     if event:
@@ -118,16 +120,16 @@ def create(
         alert.tags = [crud.node_tag.create_or_read(model=NodeTagCreate(value=t), db=db) for t in tags]
 
     if threat_actors:
-        alert.threat_actors = [factory.node_threat_actor.create(value=t, db=db) for t in threat_actors]
+        alert.threat_actors = [factory.node_threat_actor.create_or_read(value=t, db=db) for t in threat_actors]
 
     if threats:
-        alert.threats = [factory.node_threat.create(value=threat, db=db) for threat in threats]
+        alert.threats = [factory.node_threat.create_or_read(value=threat, db=db) for threat in threats]
 
     if history_username:
         if diffs and updated_by_user:
             crud.history.record_node_update_history(
                 record_node=alert,
-                action_by=factory.user.create(username=updated_by_user, db=db),
+                action_by=factory.user.create_or_read(username=updated_by_user, db=db),
                 action_time=update_time,
                 diffs=diffs,
                 db=db,
