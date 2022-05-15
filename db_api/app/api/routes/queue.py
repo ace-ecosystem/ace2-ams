@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.routes import helpers
@@ -9,6 +8,7 @@ from api_models.queue import QueueCreate, QueueRead, QueueUpdate
 from db import crud
 from db.database import get_db
 from db.schemas.queue import Queue
+from exceptions.db import UuidNotFoundInDatabase
 
 
 router = APIRouter(
@@ -28,7 +28,7 @@ def create_queue(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    obj: Queue = crud.create(obj=create, db_table=Queue, db=db)
+    obj = crud.queue.create_or_read(model=create, db=db)
 
     response.headers["Content-Location"] = request.url_for("get_queue", uuid=obj.uuid)
 
@@ -42,11 +42,14 @@ helpers.api_route_create(router, create_queue)
 
 
 def get_all_queues(db: Session = Depends(get_db)):
-    return paginate(db, select(Queue).order_by(Queue.value))
+    return paginate(conn=db, query=crud.helpers.build_read_all_query(Queue).order_by(Queue.value))
 
 
 def get_queue(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read(uuid=uuid, db_table=Queue, db=db)
+    try:
+        return crud.queue.read_by_uuid(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 helpers.api_route_read_all(router, get_all_queues, QueueRead)
@@ -65,7 +68,11 @@ def update_queue(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    crud.update(uuid=uuid, obj=queue, db_table=Queue, db=db)
+    try:
+        if not crud.helpers.update(uuid=uuid, update_model=queue, db_table=Queue, db=db):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update queue tool {uuid}")
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
     response.headers["Content-Location"] = request.url_for("get_queue", uuid=uuid)
 
@@ -79,7 +86,11 @@ helpers.api_route_update(router, update_queue)
 
 
 def delete_queue(uuid: UUID, db: Session = Depends(get_db)):
-    crud.delete(uuid=uuid, db_table=Queue, db=db)
+    try:
+        if not crud.helpers.delete(uuid=uuid, db_table=Queue, db=db):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete queue tool {uuid}")
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 helpers.api_route_delete(router, delete_queue)

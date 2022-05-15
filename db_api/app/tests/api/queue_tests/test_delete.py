@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 """
@@ -33,12 +33,8 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete(client, db):
     # Create the object
-    obj = helpers.create_queue(value="test", db=db)
+    obj = factory.queue.create_or_read(value="test", db=db)
 
     # Delete it
     delete = client.delete(f"/api/queue/{obj.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
-
-    # Make sure it is gone
-    get = client.get(f"/api/queue/{obj.uuid}")
-    assert get.status_code == status.HTTP_404_NOT_FOUND
