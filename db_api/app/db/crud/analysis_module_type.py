@@ -3,6 +3,9 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 
 from api_models.analysis_module_type import AnalysisModuleTypeCreate
+from api_models.node_directive import NodeDirectiveCreate
+from api_models.node_tag import NodeTagCreate
+from api_models.observable_type import ObservableTypeCreate
 from db import crud
 from db.schemas.analysis_module_type import AnalysisModuleType
 
@@ -13,9 +16,14 @@ def create_or_read(model: AnalysisModuleTypeCreate, db: Session) -> AnalysisModu
         description=model.description,
         extended_version=model.extended_version,
         manual=model.manual,
-        observable_types=crud.observable_type.read_by_values(values=model.observable_types, db=db),
-        required_directives=crud.node_directive.read_by_values(values=model.required_directives, db=db),
-        required_tags=crud.node_tag.read_by_values(values=model.required_tags, db=db),
+        observable_types=[
+            crud.observable_type.create_or_read(model=ObservableTypeCreate(value=o), db=db)
+            for o in model.observable_types
+        ],
+        required_directives=[
+            crud.node_directive.create_or_read(NodeDirectiveCreate(value=d), db=db) for d in model.required_directives
+        ],
+        required_tags=[crud.node_tag.create_or_read(model=NodeTagCreate(value=t), db=db) for t in model.required_tags],
         value=model.value,
         version=model.version,
     )
