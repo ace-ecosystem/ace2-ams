@@ -17,7 +17,7 @@ from exceptions.db import UuidNotFoundInDatabase
 
 router = APIRouter(
     prefix="/event/prevention_tool",
-    tags=["Event PreventionTool"],
+    tags=["Event Prevention Tool"],
 )
 
 

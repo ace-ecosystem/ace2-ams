@@ -13,7 +13,7 @@ from exceptions.db import UuidNotFoundInDatabase
 
 router = APIRouter(
     prefix="/alert/tool/instance",
-    tags=["Alert Tool"],
+    tags=["Alert Tool Instance"],
 )
 
 

@@ -17,7 +17,7 @@ from exceptions.db import UuidNotFoundInDatabase
 
 router = APIRouter(
     prefix="/node/threat_actor",
-    tags=["Event PrnodeionTool"],
+    tags=["Node Threat Actor"],
 )
 
 

@@ -15,6 +15,7 @@ from tests.factory import event_vector
 from tests.factory import node_tag
 from tests.factory import node_threat
 from tests.factory import node_threat_actor
+from tests.factory import node_threat_type
 from tests.factory import observable
 from tests.factory import queue
 from tests.factory import user

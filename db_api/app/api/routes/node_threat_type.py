@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.routes import helpers
@@ -13,7 +12,7 @@ from api_models.node_threat_type import (
 from db import crud
 from db.database import get_db
 from db.schemas.node_threat_type import NodeThreatType
-from db.schemas.queue import Queue
+from exceptions.db import UuidNotFoundInDatabase
 
 
 router = APIRouter(
@@ -33,9 +32,7 @@ def create_node_threat_type(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    queues = crud.read_by_values(values=create.queues, db_table=Queue, db=db)
-    obj: NodeThreatType = crud.create(obj=create, db_table=NodeThreatType, db=db, exclude=["queues"])
-    obj.queues = queues
+    obj = crud.node_threat_type.create_or_read(model=create, db=db)
 
     response.headers["Content-Location"] = request.url_for("get_node_threat_type", uuid=obj.uuid)
 
@@ -49,11 +46,14 @@ helpers.api_route_create(router, create_node_threat_type)
 
 
 def get_all_node_threat_types(db: Session = Depends(get_db)):
-    return paginate(db, select(NodeThreatType).order_by(NodeThreatType.value))
+    return paginate(conn=db, query=crud.helpers.build_read_all_query(NodeThreatType).order_by(NodeThreatType.value))
 
 
 def get_node_threat_type(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read(uuid=uuid, db_table=NodeThreatType, db=db)
+    try:
+        return crud.node_threat_type.read_by_uuid(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 helpers.api_route_read_all(router, get_all_node_threat_types, NodeThreatTypeRead)
@@ -67,25 +67,18 @@ helpers.api_route_read(router, get_node_threat_type, NodeThreatTypeRead)
 
 def update_node_threat_type(
     uuid: UUID,
-    update: NodeThreatTypeUpdate,
+    node_threat_type: NodeThreatTypeUpdate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    db_obj: NodeThreatType = crud.read(uuid=uuid, db_table=NodeThreatType, db=db)
-
-    update_data = update.dict(exclude_unset=True)
-
-    if "description" in update_data:
-        db_obj.description = update_data["description"]
-
-    if "queues" in update_data:
-        db_obj.queues = crud.read_by_values(values=update_data["queues"], db_table=Queue, db=db)
-
-    if "value" in update_data:
-        db_obj.value = update_data["value"]
-
-    crud.commit(db)
+    try:
+        if not crud.helpers.update(uuid=uuid, update_model=node_threat_type, db_table=NodeThreatType, db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update node threat_type {uuid}"
+            )
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
     response.headers["Content-Location"] = request.url_for("get_node_threat_type", uuid=uuid)
 
@@ -99,7 +92,13 @@ helpers.api_route_update(router, update_node_threat_type)
 
 
 def delete_node_threat_type(uuid: UUID, db: Session = Depends(get_db)):
-    crud.delete(uuid=uuid, db_table=NodeThreatType, db=db)
+    try:
+        if not crud.helpers.delete(uuid=uuid, db_table=NodeThreatType, db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete node threat_type {uuid}"
+            )
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 helpers.api_route_delete(router, delete_node_threat_type)

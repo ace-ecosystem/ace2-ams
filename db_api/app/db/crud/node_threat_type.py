@@ -10,6 +10,7 @@ def create_or_read(model: NodeThreatTypeCreate, db: Session) -> NodeThreatType:
     obj = NodeThreatType(
         description=model.description,
         queues=crud.queue.read_by_values(values=model.queues, db=db),
+        uuid=model.uuid,
         value=model.value,
     )
 
