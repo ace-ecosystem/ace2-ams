@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.routes import helpers
@@ -12,13 +11,13 @@ from api_models.event_risk_level import (
 )
 from db import crud
 from db.database import get_db
-from db.schemas.queue import Queue
 from db.schemas.event_risk_level import EventRiskLevel
+from exceptions.db import UuidNotFoundInDatabase
 
 
 router = APIRouter(
     prefix="/event/risk_level",
-    tags=["Event Risk Level"],
+    tags=["Event RiskLevel"],
 )
 
 
@@ -33,9 +32,7 @@ def create_event_risk_level(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    queues = crud.read_by_values(values=create.queues, db_table=Queue, db=db)
-    obj: EventRiskLevel = crud.create(obj=create, db_table=EventRiskLevel, db=db, exclude=["queues"])
-    obj.queues = queues
+    obj = crud.event_risk_level.create_or_read(model=create, db=db)
 
     response.headers["Content-Location"] = request.url_for("get_event_risk_level", uuid=obj.uuid)
 
@@ -49,11 +46,14 @@ helpers.api_route_create(router, create_event_risk_level)
 
 
 def get_all_event_risk_levels(db: Session = Depends(get_db)):
-    return paginate(db, select(EventRiskLevel).order_by(EventRiskLevel.value))
+    return paginate(conn=db, query=crud.helpers.build_read_all_query(EventRiskLevel).order_by(EventRiskLevel.value))
 
 
 def get_event_risk_level(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read(uuid=uuid, db_table=EventRiskLevel, db=db)
+    try:
+        return crud.event_risk_level.read_by_uuid(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 helpers.api_route_read_all(router, get_all_event_risk_levels, EventRiskLevelRead)
@@ -67,25 +67,18 @@ helpers.api_route_read(router, get_event_risk_level, EventRiskLevelRead)
 
 def update_event_risk_level(
     uuid: UUID,
-    update: EventRiskLevelUpdate,
+    event_risk_level: EventRiskLevelUpdate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    db_obj: EventRiskLevel = crud.read(uuid=uuid, db_table=EventRiskLevel, db=db)
-
-    update_data = update.dict(exclude_unset=True)
-
-    if "description" in update_data:
-        db_obj.description = update_data["description"]
-
-    if "queues" in update_data:
-        db_obj.queues = crud.read_by_values(values=update_data["queues"], db_table=Queue, db=db)
-
-    if "value" in update_data:
-        db_obj.value = update_data["value"]
-
-    crud.commit(db)
+    try:
+        if not crud.helpers.update(uuid=uuid, update_model=event_risk_level, db_table=EventRiskLevel, db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update event risk_level {uuid}"
+            )
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
     response.headers["Content-Location"] = request.url_for("get_event_risk_level", uuid=uuid)
 
@@ -99,7 +92,13 @@ helpers.api_route_update(router, update_event_risk_level)
 
 
 def delete_event_risk_level(uuid: UUID, db: Session = Depends(get_db)):
-    crud.delete(uuid=uuid, db_table=EventRiskLevel, db=db)
+    try:
+        if not crud.helpers.delete(uuid=uuid, db_table=EventRiskLevel, db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete event risk_level {uuid}"
+            )
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 helpers.api_route_delete(router, delete_event_risk_level)
