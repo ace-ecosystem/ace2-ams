@@ -15,8 +15,8 @@ from tests import factory
 )
 def test_update_duplicate_unique_fields(db, key):
     # Create some objects
-    obj1 = factory.alert_disposition.create(value="test", rank=1, db=db)
-    obj2 = factory.alert_disposition.create(value="test2", rank=2, db=db)
+    obj1 = factory.alert_disposition.create_or_read(value="test", rank=1, db=db)
+    obj2 = factory.alert_disposition.create_or_read(value="test2", rank=2, db=db)
 
     # Ensure you cannot update a unique field to a value that already exists
     update_model = AlertDispositionUpdate()

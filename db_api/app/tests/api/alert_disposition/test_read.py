@@ -27,8 +27,8 @@ def test_get_nonexistent_uuid(client):
 
 def test_get_all(client, db):
     # Create some objects
-    factory.alert_disposition.create(value="test", rank=1, db=db)
-    factory.alert_disposition.create(value="test2", rank=2, db=db)
+    factory.alert_disposition.create_or_read(value="test", rank=1, db=db)
+    factory.alert_disposition.create_or_read(value="test2", rank=2, db=db)
 
     # Read them back
     get = client.get("/api/alert/disposition/")

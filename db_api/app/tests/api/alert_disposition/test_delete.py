@@ -33,7 +33,7 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete(client, db):
     # Create the object
-    obj = factory.alert_disposition.create(value="test", rank=1, db=db)
+    obj = factory.alert_disposition.create_or_read(value="test", rank=1, db=db)
 
     # Delete it
     delete = client.delete(f"/api/alert/disposition/{obj.uuid}")

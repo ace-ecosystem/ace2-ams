@@ -57,7 +57,7 @@ def test_update_nonexistent_uuid(client):
 )
 def test_update(client, db, key, initial_value, updated_value):
     # Create the object
-    obj = factory.alert_disposition.create(value="test", rank=1, db=db)
+    obj = factory.alert_disposition.create_or_read(value="test", rank=1, db=db)
 
     # Set the initial value
     setattr(obj, key, initial_value)
