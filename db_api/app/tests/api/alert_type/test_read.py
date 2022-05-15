@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -27,8 +27,8 @@ def test_get_nonexistent_uuid(client):
 
 def test_get_all(client, db):
     # Create some objects
-    helpers.create_alert_type(value="test", db=db)
-    helpers.create_alert_type(value="test2", db=db)
+    factory.alert_type.create_or_read(value="test", db=db)
+    factory.alert_type.create_or_read(value="test2", db=db)
 
     # Read them back
     get = client.get("/api/alert/type/")
