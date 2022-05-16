@@ -142,8 +142,8 @@
                     :options="observableTypeStore.items"
                   />
                 </div>
-                <div class="field col-3 px-1" name="observable-value">
-                  <div class="inputfield w-full" style="display: inline-block">
+                <div class="field px-1" name="observable-value">
+                  <span class="inputfield">
                     <span style="display: inline">
                       <ObservableInput
                         v-model:modelValue="observables[index].value"
@@ -152,13 +152,13 @@
                         :type="observables[index].type"
                       ></ObservableInput>
                     </span>
-                    <span style="float: right">
+                    <span>
                       <Button
                         icon="pi pi-list"
                         @click="toggleMultiObservable(index)"
                       />
                     </span>
-                  </div>
+                  </span>
                 </div>
                 <div class="field col-3 px-1">
                   <MultiSelect

@@ -1,6 +1,12 @@
 <template>
   <span v-if="type == 'file'" name="observable-file-upload">
-    <FileUpload mode="basic" class="inputfield"></FileUpload>
+    <FileUpload
+      mode="basic"
+      class="inputfield"
+      :multiple="multiAdd"
+      :choose-label="fileUploadLabel"
+    >
+    </FileUpload>
   </span>
   <span v-else>
     <InputText
@@ -40,7 +46,7 @@
 
   const props = defineProps({
     observableValue: {
-      type: null as PropType<string | null>,
+      type: String as PropType<string | undefined>,
       required: true,
     },
     invalid: {
@@ -64,6 +70,13 @@
       return ["inputfield", "p-invalid"];
     }
     return ["inputfield"];
+  });
+
+  const fileUploadLabel = computed(() => {
+    if (!props.multiAdd) {
+      return "Choose";
+    }
+    return "Choose multiple";
   });
 
   const inputIsValid = computed(() => {
