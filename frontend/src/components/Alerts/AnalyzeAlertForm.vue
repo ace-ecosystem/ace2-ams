@@ -146,7 +146,7 @@
                   <span class="inputfield">
                     <span style="display: inline">
                       <ObservableInput
-                        v-model:modelValue="observables[index].value"
+                        v-model:observableValue="observables[index].value"
                         v-model:invalid="observables[index].invalid"
                         :multi-add="observables[index].multiAdd"
                         :type="observables[index].type"
@@ -326,7 +326,7 @@
       time: null,
       type: "file",
       multiAdd: false,
-      value: null,
+      value: "",
       directives: [],
       invalid: false,
     });

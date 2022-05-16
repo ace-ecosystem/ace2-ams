@@ -11,6 +11,7 @@ import { userReadFactory } from "@mocks/user";
 import { alertReadFactory } from "@mocks/alert";
 import { Alert } from "@/services/api/alert";
 import { TestingOptions } from "@pinia/testing";
+import { testConfiguration } from "@/etc/configuration/test/index";
 
 const testAlertTypeA = "testAlertTypeA";
 const testAlertTypeB = "testAlertTypeB";
@@ -59,6 +60,7 @@ function factory(options: TestingOptions = {}) {
         PrimeVue,
         router,
       ],
+      provide: { config: testConfiguration },
     },
   });
 }
@@ -156,10 +158,7 @@ describe("AnalyzeAlertForm - Observables", () => {
 
     // Should be input box
     cy.get("[name=observable-type]").should("have.text", "ipv4");
-    cy.get("[name=observable-value] input")
-      .should("be.visible")
-      .invoke("attr", "placeholder")
-      .should("contain", "Enter a value");
+    cy.get("[name=observable-value] input").should("be.visible");
     cy.get("[name=observable-file-upload]").should("not.exist");
 
     // Switch back to 'file,' should be the file input again
