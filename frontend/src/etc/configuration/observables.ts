@@ -32,5 +32,16 @@ export const observableMetadata: PartialRecord<
   },
   ipv4: {
     style: { color: "blue" },
+    placeholder: "ex. 1.2.3.4",
+    validator: (ipv4: string) => {
+      const regex = new RegExp(
+        "((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(.|$)){4}",
+      );
+      return regex.test(ipv4);
+    },
+  },
+  url: {
+    style: { color: "blue" },
+    placeholder: "ex. https://www.google.com",
   },
 };
