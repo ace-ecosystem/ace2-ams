@@ -19,6 +19,7 @@ from db.schemas.event_source import EventSource
 from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
+from db.schemas.node_directive import NodeDirective
 from db.schemas.node_relationship_type import NodeRelationshipType
 from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.observable_type import ObservableType
@@ -156,6 +157,11 @@ def seed(db: Session):
             key="node_threat_type",
             print_value="node threat type",
         )
+
+    if "node_directive" in data:
+        for directive in data["node_directive"]:
+            db.add(NodeDirective(value=directive["value"],description=directive["description"] ))
+            print(f"Adding node directive type: {value}")
 
     if "observable_type" in data:
         for value in data["observable_type"]:

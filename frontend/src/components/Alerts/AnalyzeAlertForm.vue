@@ -166,10 +166,21 @@
                     name="observable-directives"
                     placeholder="No directives selected"
                     class="inputfield w-full"
+                    display="chip"
                     option-label="value"
                     option-value="value"
                     :options="nodeDirectiveStore.items"
-                  />
+                  >
+                    <template #option="slotProps">
+                      <div class="country-item">
+                        <div>
+                          <span v-tooltip="slotProps.option.description">
+                            {{ slotProps.option.value }}</span
+                          >
+                        </div>
+                      </div>
+                    </template>
+                  </MultiSelect>
                 </div>
                 <div class="field col-1">
                   <Button
@@ -359,6 +370,9 @@
     };
     if (observable.time) {
       submissionObservable["time"] = observable.time;
+    }
+    if (observable.directives) {
+      submissionObservable["directives"] = observable.directives;
     }
     return submissionObservable;
   };
