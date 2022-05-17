@@ -371,7 +371,7 @@
     if (observable.time) {
       submissionObservable["time"] = observable.time;
     }
-    if (observable.directives) {
+    if (observable.directives && observable.directives.length) {
       submissionObservable["directives"] = observable.directives;
     }
     return submissionObservable;

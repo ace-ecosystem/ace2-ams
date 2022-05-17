@@ -4,6 +4,7 @@ import PrimeVue from "primevue/config";
 
 import AnalyzeAlertForm from "@/components/Alerts/AnalyzeAlertForm.vue";
 import router from "@/router/index";
+import Tooltip from "primevue/tooltip";
 
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
@@ -55,6 +56,7 @@ const initialState = {
 function factory(options: TestingOptions = {}) {
   return mount(AnalyzeAlertForm, {
     global: {
+      directives: { tooltip: Tooltip },
       plugins: [
         createCustomCypressPinia({ ...options, initialState: initialState }),
         PrimeVue,
@@ -233,6 +235,42 @@ describe("AnalyzeAlertForm - Form submission", () => {
     cy.get("[name=observable-type]").eq(1).click();
     cy.get('[aria-label="ipv4"]').eq(1).click();
     cy.get("[name=observable-value] input").eq(1).type(testObservableValueB);
+
+    // Submit
+    cy.contains("Analyze!").eq(0).click();
+    cy.get("@CreateAlertA").should("have.been.called");
+
+    // Should route to last created alert
+    cy.url().should("contain", "alertA");
+  });
+  it("correctly creates an alert with observables with directives attached", () => {
+    cy.clock(testTime);
+
+    const stub = cy.stub(Alert, "createAndRead");
+    stub
+      .withArgs({
+        ...expectedCreateAlert,
+        alertDescription: "Manual Alert",
+        name: "Manual Alert",
+        observables: [
+          {
+            type: "ipv4",
+            value: testObservableValueA,
+            directives: ["testNodeDirective"],
+          },
+        ],
+      })
+      .as("CreateAlertA")
+      .resolves(alertReadFactory({ uuid: "alertA" }));
+
+    factory({ stubActions: false });
+
+    // Add first observable
+    cy.get("[name=observable-type]").click();
+    cy.get('[aria-label="ipv4"]').click();
+    cy.get("[name=observable-value] input").type(testObservableValueA);
+    cy.contains("No directives selected").click();
+    cy.contains("testNodeDirective").click();
 
     // Submit
     cy.contains("Analyze!").eq(0).click();
