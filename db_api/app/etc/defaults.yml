@@ -161,6 +161,11 @@ node_relationship_type:
   - IS_HASH_OF
   - LOGGED_INTO
   - REDIRECTED_FROM
+node_directive:
+  - value: sandbox
+    description: submit observable to sandbox
+  - value: crawl
+    description: crawl observable
 observable_type:
   - file
   - ipv4
