@@ -164,7 +164,7 @@
     if (props.reloadObject == "node" && nodeStore.open) {
       if ("owner" in nodeStore.open) {
         const authStore = useAuthStore();
-        return nodeStore.open.owner.uuid == authStore.user.uuid;
+        return nodeStore.open.owner?.uuid == authStore.user.uuid;
       }
     }
     return false;
