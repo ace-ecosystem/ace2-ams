@@ -4,7 +4,7 @@
 <template>
   <div>
     <TheNodeActionToolbarVue ref="toolbar" :reload-object="props.reloadObject">
-      <template #start>
+      <template #start-left>
         <!-- FALSE POSITIVE -->
         <Button
           v-if="showFalsePositiveShortcut"
@@ -18,7 +18,7 @@
         <Button
           v-if="showIgnoreShortcut"
           data-cy="ignore-button"
-          class="p-m-1 p-button-sm"
+          class="p-m-1 p-button-normal p-button-secondary"
           icon="pi pi-check"
           label="Ignore"
           @click="emit('ignoreClicked')"
@@ -26,7 +26,7 @@
         <!-- DISPOSITION -->
         <Button
           data-cy="disposition-button"
-          class="p-m-1 p-button-sm"
+          class="p-m-1 p-button-normal p-button-secondary"
           icon="pi pi-thumbs-up"
           label="Disposition"
           @click="open('DispositionModal')"
@@ -35,10 +35,12 @@
           name="DispositionModal"
           @request-reload="requestReload"
         />
+      </template>
+      <template #start-right>
         <!-- REMEDIATE MODAL -->
         <Button
           data-cy="remediate-button"
-          class="p-m-1 p-button-sm"
+          class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
           icon="pi pi-times-circle"
           label="Remediate"
           disabled

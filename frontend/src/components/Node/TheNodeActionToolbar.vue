@@ -9,34 +9,35 @@
   </div>
   <Toolbar id="ActionToolbar">
     <template #start>
-      <slot name="start"></slot>
-      <!--      COMMENT -->
-      <div v-if="props.comment">
-        <Button
-          data-cy="comment-button"
-          class="p-m-1 p-button-sm"
-          icon="pi pi-comment"
-          label="Comment"
-          @click="open('CommentModal')"
-        />
-        <CommentModal name="CommentModal" @request-reload="requestReload" />
-      </div>
+      <slot name="start-left"></slot>
       <!--      TAKE OWNERSHIP -- NO MODAL -->
       <div v-if="props.takeOwnership">
         <Button
           data-cy="take-ownership-button"
-          class="p-m-1 p-button-sm"
+          class="p-m-1 p-button-normal p-button-secondary"
+          style="width: 170px"
           icon="pi pi-briefcase"
           label="Take Ownership"
           :disabled="!selectedStore.anySelected"
           @click="takeOwnership"
         />
       </div>
+      <!--      COMMENT -->
+      <div v-if="props.comment">
+        <Button
+          data-cy="comment-button"
+          class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
+          icon="pi pi-comment"
+          label="Comment"
+          @click="open('CommentModal')"
+        />
+        <CommentModal name="CommentModal" @request-reload="requestReload" />
+      </div>
       <!--      ASSIGN -->
       <div v-if="props.assign">
         <Button
           data-cy="assign-button"
-          class="p-m-1 p-button-sm"
+          class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
           icon="pi pi-user"
           label="Assign"
           @click="open('AssignModal')"
@@ -47,7 +48,7 @@
       <div v-if="props.tag">
         <Button
           data-cy="tag-button"
-          class="p-m-1 p-button-sm"
+          class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
           icon="pi pi-tags"
           label="Tag"
           @click="open('TagModal')"
@@ -64,7 +65,8 @@
       <div v-if="props.removeTag">
         <Button
           data-cy="remove-tag-button"
-          class="p-m-1 p-button-sm"
+          class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
+          style="width: 142px"
           icon="pi pi-tags"
           label="Remove Tag(s)"
           @click="open('RemoveTagModal')"
@@ -77,6 +79,7 @@
           @request-reload="requestReload"
         />
       </div>
+      <slot name="start-right"></slot>
     </template>
     <template #end>
       <slot name="end"></slot>
