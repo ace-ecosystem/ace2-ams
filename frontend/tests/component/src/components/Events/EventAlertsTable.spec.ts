@@ -9,6 +9,7 @@ import router from "@/router";
 import EventAlertsTable from "@/components/Events/EventAlertsTable.vue";
 import { Alert } from "@/services/api/alert";
 import { alertReadFactory } from "@mocks/alert";
+import { testConfiguration } from "@/etc/configuration/test";
 
 const mockAlertA = alertReadFactory({ uuid: "uuid1", name: "Test Alert A" });
 const mockAlertB = alertReadFactory({ uuid: "uuid2", name: "Test Alert B" });
@@ -18,7 +19,7 @@ function factory() {
   return mount(EventAlertsTable, {
     global: {
       plugins: [router, PrimeVue, createPinia()],
-      provide: { nodeType: "events" },
+      provide: { nodeType: "events", config: testConfiguration },
     },
     propsData: {
       eventUuid: "uuid1",

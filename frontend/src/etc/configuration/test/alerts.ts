@@ -15,6 +15,7 @@ import {
   nodeThreatsProperty,
   queueProperty,
   ownerProperty,
+  BLUE,
 } from "@/etc/constants/common";
 
 const defaultAlertFilters = [
@@ -57,4 +58,6 @@ export const alertIconTypeMapping = {
   testType: "test.png",
 };
 
-export const alertDispositionMetadata: Record<string, string> = {};
+export const alertDispositionMetadata: Record<string, string> = {
+  test: BLUE,
+};

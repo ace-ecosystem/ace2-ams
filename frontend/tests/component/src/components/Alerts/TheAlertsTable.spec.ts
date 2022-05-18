@@ -11,6 +11,7 @@ import { NodeTree } from "@/services/api/nodeTree";
 import { observableReadFactory } from "@mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import ToastService from "primevue/toastservice";
+import { testConfiguration } from "@/etc/configuration/test/index";
 
 interface alertTableStoreState {
   visibleQueriedItems: alertRead[];
@@ -47,6 +48,7 @@ function factory(initialState: alertTableStoreState) {
       ],
       provide: {
         nodeType: "alerts",
+        config: testConfiguration,
       },
     },
   });
