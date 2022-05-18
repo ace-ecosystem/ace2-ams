@@ -14,10 +14,10 @@
       <div v-if="props.takeOwnership">
         <Button
           data-cy="take-ownership-button"
-          class="p-m-1 p-button-normal p-button-secondary"
-          style="width: 170px"
+          :class="takeOwnershipClasses"
+          style="width: 180px"
           icon="pi pi-briefcase"
-          label="Take Ownership"
+          :label="takeOwnershipText"
           :disabled="!selectedStore.anySelected"
           @click="takeOwnership"
         />
@@ -88,7 +88,14 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, defineProps, defineExpose, inject, PropType } from "vue";
+  import {
+    ref,
+    computed,
+    defineProps,
+    defineExpose,
+    inject,
+    PropType,
+  } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -152,6 +159,26 @@
       requestReload();
     }
   }
+
+  const ownedByCurrentUser = computed(() => {
+    if (props.reloadObject == "node" && nodeStore.open) {
+      if ("owner" in nodeStore.open) {
+        const authStore = useAuthStore();
+        return nodeStore.open.owner.uuid == authStore.user.uuid;
+      }
+    }
+    return false;
+  });
+
+  const takeOwnershipText = computed(() => {
+    return ownedByCurrentUser.value ? "Assigned to you!" : "Take Ownership";
+  });
+
+  const takeOwnershipClasses = computed(() => {
+    return ownedByCurrentUser.value
+      ? ["p-m-1", "p-button-sm", "p-button-secondary", "p-button-outlined"]
+      : ["p-m-1", "p-button-normal", "p-button-secondary"];
+  });
 
   const requestReload = () => {
     if (props.reloadObject == "table") {
