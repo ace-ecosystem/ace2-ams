@@ -7,7 +7,7 @@
       <Message severity="error" @close="handleError">{{ error }}</Message>
     </div>
   </div>
-  <Toolbar id="ActionToolbar" style="overflow-x: auto">
+  <Toolbar id="ActionToolbar">
     <template #start>
       <slot name="start"></slot>
       <!--      COMMENT -->

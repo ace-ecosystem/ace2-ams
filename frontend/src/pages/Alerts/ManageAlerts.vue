@@ -2,7 +2,7 @@
 
 <template>
   <br />
-  <div id="AlertActionToolbar">
+  <div id="AlertActionToolbar" style="position: sticky; top: 3.5em; z-index: 1">
     <TheAlertActionToolbar reload-object="table" />
   </div>
   <br />

@@ -2,7 +2,7 @@
 
 <template>
   <br />
-  <div id="EventActionToolbar">
+  <div id="EventActionToolbar" style="position: sticky; top: 3.5em; z-index: 1">
     <TheNodeActionToolbarVue reload-object="table" />
   </div>
   <br />
