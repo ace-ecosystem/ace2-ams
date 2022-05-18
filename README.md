@@ -1,17 +1,6 @@
-# ACE2 Service Library
-This library provides base classes for creating new ACE2 services such as analysis and collectors.
-
-## Installation
-```bash
-python3 -m pip install git+ssh://git@github.info53.com/Fifth-Third/ice2.git
-```
+# Analysis Correlation Engine 2.0
 
 ## Testing
-Clone the repo
-```bash
-git clone git@github.info53.com:Fifth-Third/ice2.git
-```
-
 Install tox if it is not already installed
 ```bash
 python3 -m pip install tox
@@ -19,7 +8,6 @@ python3 -m pip install tox
 
 Run tox from the project root dir with the recreate options to install any newly added dependencies
 ```bash
-cd ace2
 tox -r
 ```
 
