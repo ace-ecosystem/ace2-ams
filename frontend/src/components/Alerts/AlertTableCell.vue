@@ -51,6 +51,13 @@
     />
   </div>
 
+  <!-- Alert Disposition -->
+  <div v-else-if="props.field === 'disposition'">
+    <AlertDispositionTag
+      :disposition="props.data[props.field]"
+    ></AlertDispositionTag>
+  </div>
+
   <!-- Everything else -->
   <span v-else> {{ props.data[props.field] }}</span>
 </template>
@@ -58,6 +65,7 @@
 <script setup lang="ts">
   import { defineProps, PropType, inject, computed } from "vue";
 
+  import AlertDispositionTag from "@/components/Alerts/AlertDispositionTag.vue";
   import NodeTagVue from "@/components/Node/NodeTag.vue";
   import NodeComment from "@/components/Node/NodeComment.vue";
 

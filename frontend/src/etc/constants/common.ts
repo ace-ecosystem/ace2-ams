@@ -135,3 +135,9 @@ export const queueProperty: propertyOption = {
   optionProperty: "value",
   valueProperty: "value",
 };
+
+export const WHITE = "#FFFFFF";
+export const RED = "#FF0000";
+export const BLUE = "#00BFFF";
+export const GREEN = "#32CD32";
+export const ORANGE = "#FF8C00";

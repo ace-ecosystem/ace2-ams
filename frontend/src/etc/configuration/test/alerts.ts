@@ -56,3 +56,5 @@ export const IGNORE_DISPOSITION_STRING = "IGNORE";
 export const alertIconTypeMapping = {
   testType: "test.png",
 };
+
+export const alertDispositionMetadata: Record<string, string> = {};

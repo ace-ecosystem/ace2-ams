@@ -16,7 +16,13 @@
           option-label="value"
           list-style="max-height:250px"
           style="width: 70vw"
-        />
+        >
+          <template #option="slotProps">
+            <AlertDispositionTag
+              :disposition="slotProps.option.value"
+            ></AlertDispositionTag>
+          </template>
+        </Listbox>
       </div>
       <div class="p-field p-col">
         <Textarea
@@ -59,6 +65,7 @@
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
   import SaveToEventModal from "@/components/Modals/SaveToEventModal.vue";
+  import AlertDispositionTag from "@/components/Alerts/AlertDispositionTag.vue";
 
   import { NodeComment } from "@/services/api/nodeComment";
 
