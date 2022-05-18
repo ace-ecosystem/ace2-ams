@@ -2,17 +2,19 @@
 
 <template>
   <div v-if="error" class="p-col">
-    <Message severity="error" @close="handleError" data-cy="error-message">{{
+    <Message severity="error" data-cy="error-message" @close="handleError">{{
       error
     }}</Message>
   </div>
-  <TheAlertActionToolbar
-    reload-object="node"
-    :show-false-positive-shortcut="true"
-    :show-ignore-shortcut="true"
-    @false-positive-clicked="dispositionAlert('falsePositive')"
-    @ignore-clicked="dispositionAlert('ignore')"
-  />
+  <div style="position: sticky; top: 3.5em; z-index: 1">
+    <TheAlertActionToolbar
+      reload-object="node"
+      :show-false-positive-shortcut="true"
+      :show-ignore-shortcut="true"
+      @false-positive-clicked="dispositionAlert('falsePositive')"
+      @ignore-clicked="dispositionAlert('ignore')"
+    />
+  </div>
   <div v-if="alertStore.open">
     <TheAlertDetails />
     <br />
