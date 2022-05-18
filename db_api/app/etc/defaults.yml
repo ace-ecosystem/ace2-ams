@@ -32,8 +32,8 @@ user:
 # Dispositions added here will receive an automated rank number based on the order they appear.
 # Example: The first disposition listed here will receive rank 0 and will appear first when shown in the GUI.
 alert_disposition:
-  - FALSE_POSITIVE
   - IGNORE
+  - FALSE_POSITIVE
   - APPROVED_BUSINESS
   - APPROVED_PERSONAL
   - UNKNOWN

@@ -1,15 +1,14 @@
 import { mount } from "@cypress/vue";
-import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 
 import DispositionModal from "@/components/Modals/DispositionModal.vue";
 import { alertDispositionRead } from "@/models/alertDisposition";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import SaveToEventModalVue from "@/components/Modals/SaveToEventModal.vue";
 import { Alert } from "@/services/api/alert";
 import { NodeComment } from "@/services/api/nodeComment";
 import { userReadFactory } from "@mocks/user";
+import { testConfiguration } from "@/etc/configuration/test";
 
 function factory(
   args: { dipsositions: alertDispositionRead[]; selected: string[] } = {
@@ -36,6 +35,7 @@ function factory(
       ],
       provide: {
         nodeType: "alerts",
+        config: testConfiguration,
       },
     },
     propsData: {
