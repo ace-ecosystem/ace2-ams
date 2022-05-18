@@ -55,6 +55,12 @@ def ensure_record_exists(uuid: UUID, db_table: DeclarativeMeta, db: Session):
         raise UuidNotFoundInDatabase(f"UUID {uuid} was not found in the {db_table.__tablename__} table.") from e
 
 
+def read_all(db_table: DeclarativeMeta, db: Session) -> list[Any]:
+    """Returns all of the objects from the given database table."""
+
+    return db.execute(select(db_table)).all()
+
+
 def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session) -> Any:
     """Returns the object with the specific UUID from the given database table."""
 

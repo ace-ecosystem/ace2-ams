@@ -33,6 +33,7 @@ def create_event_type(
     db: Session = Depends(get_db),
 ):
     obj = crud.event_type.create_or_read(model=create, db=db)
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_event_type", uuid=obj.uuid)
 
@@ -78,6 +79,8 @@ def update_event_type(
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
+    db.commit()
+
     response.headers["Content-Location"] = request.url_for("get_event_type", uuid=uuid)
 
 
@@ -95,6 +98,8 @@ def delete_event_type(uuid: UUID, db: Session = Depends(get_db)):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete event type {uuid}")
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+    db.commit()
 
 
 helpers.api_route_delete(router, delete_event_type)

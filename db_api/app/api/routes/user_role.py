@@ -29,6 +29,7 @@ def create_user_role(
     db: Session = Depends(get_db),
 ):
     obj = crud.user_role.create_or_read(model=create, db=db)
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_user_role", uuid=obj.uuid)
 
@@ -74,6 +75,8 @@ def update_user_role(
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
+    db.commit()
+
     response.headers["Content-Location"] = request.url_for("get_user_role", uuid=uuid)
 
 
@@ -91,6 +94,8 @@ def delete_user_role(uuid: UUID, db: Session = Depends(get_db)):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete user role {uuid}")
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+    db.commit()
 
 
 helpers.api_route_delete(router, delete_user_role)

@@ -28,6 +28,7 @@ from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.user import User
+from exceptions.db import ValueNotFoundInDatabase
 
 
 def build_read_all_query(
@@ -304,13 +305,15 @@ def create_or_read(model: AlertCreate, db: Session) -> Alert:
     obj.insert_time = model.insert_time
     obj.instructions = model.instructions
     obj.name = model.name
-    obj.owner = crud.user.read_by_username(username=model.owner, db=db)
     if model.owner:
+        obj.owner = crud.user.read_by_username(username=model.owner, db=db)
         obj.ownership_time = crud.helpers.utcnow()
     obj.queue = crud.queue.read_by_value(value=model.queue, db=db)
     obj.root_analysis = crud.analysis.create_root(db=db)
-    obj.tool = crud.alert_tool.read_by_value(value=model.tool, db=db)
-    obj.tool_instance = crud.alert_tool_instance.read_by_value(value=model.tool_instance, db=db)
+    if model.tool:
+        obj.tool = crud.alert_tool.read_by_value(value=model.tool, db=db)
+    if model.tool_instance:
+        obj.tool_instance = crud.alert_tool_instance.read_by_value(value=model.tool_instance, db=db)
     obj.type = crud.alert_type.read_by_value(value=model.type, db=db)
     obj.uuid = model.uuid
 
@@ -338,7 +341,7 @@ def create_or_read(model: AlertCreate, db: Session) -> Alert:
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> Alert:
-    return db.execute(select(Alert).where(Alert.uuid == uuid)).scalars().one()
+    return crud.helpers.read_by_uuid(db_table=Alert, uuid=uuid, db=db)
 
 
 def read_tree(uuid: UUID, db: Session) -> dict:
@@ -346,71 +349,68 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     # of where it appears in the tree structure.
     db_alert = read_by_uuid(uuid=uuid, db=db)
 
-    if db_alert is not None:
-        # The analyses and observables need to be organized in a few dictionaries so that the tree
-        # structure can be easily built:
-        #
-        # Dictionary of analysis objects where their UUID is the key
-        # Dictionary of analysis objects where their target observable UUID is the key
-        # Dictionary of observables where their UUID is the key
-        analyses_by_target: dict[UUID, list[AnalysisNodeTreeRead]] = {}
-        analyses_by_uuid: dict[UUID, AnalysisNodeTreeRead] = {}
-        child_observables: dict[UUID, ObservableNodeTreeRead] = {}
-        for db_analysis in db_alert.analyses:
-            # Create an empty list if this target observable UUID has not been seen yet.
-            if db_analysis.target_uuid not in analyses_by_target:
-                analyses_by_target[db_analysis.target_uuid] = []
+    # The analyses and observables need to be organized in a few dictionaries so that the tree
+    # structure can be easily built:
+    #
+    # Dictionary of analysis objects where their UUID is the key
+    # Dictionary of analysis objects where their target observable UUID is the key
+    # Dictionary of observables where their UUID is the key
+    analyses_by_target: dict[UUID, list[AnalysisNodeTreeRead]] = {}
+    analyses_by_uuid: dict[UUID, AnalysisNodeTreeRead] = {}
+    child_observables: dict[UUID, ObservableNodeTreeRead] = {}
+    for db_analysis in db_alert.analyses:
+        # Create an empty list if this target observable UUID has not been seen yet.
+        if db_analysis.target_uuid not in analyses_by_target:
+            analyses_by_target[db_analysis.target_uuid] = []
 
-            # Add the analysis model to the two analysis dictionaries
-            analysis = db_analysis.convert_to_pydantic()
-            analyses_by_target[db_analysis.target_uuid].append(analysis)
-            analyses_by_uuid[db_analysis.uuid] = analysis
+        # Add the analysis model to the two analysis dictionaries
+        analysis = db_analysis.convert_to_pydantic()
+        analyses_by_target[db_analysis.target_uuid].append(analysis)
+        analyses_by_uuid[db_analysis.uuid] = analysis
 
-            for db_child_observable in db_analysis.child_observables:
-                # Add the observable model to the dictionary if it has not been seen yet.
-                if db_child_observable.uuid not in child_observables:
-                    child_observables[db_child_observable.uuid] = db_child_observable.convert_to_pydantic()
+        for db_child_observable in db_analysis.child_observables:
+            # Add the observable model to the dictionary if it has not been seen yet.
+            if db_child_observable.uuid not in child_observables:
+                child_observables[db_child_observable.uuid] = db_child_observable.convert_to_pydantic()
 
-                # Add the observable as a child to the analysis model.
-                analyses_by_uuid[db_analysis.uuid].children.append(child_observables[db_child_observable.uuid])
+            # Add the observable as a child to the analysis model.
+            analyses_by_uuid[db_analysis.uuid].children.append(child_observables[db_child_observable.uuid])
 
-        # Loop over each overvable and add its analysis as a child
-        for observable_uuid, observable in child_observables.items():
+    # Loop over each overvable and add its analysis as a child
+    for observable_uuid, observable in child_observables.items():
 
-            if observable_uuid in analyses_by_target:
-                observable.children = analyses_by_target[observable_uuid]
+        if observable_uuid in analyses_by_target:
+            observable.children = analyses_by_target[observable_uuid]
 
-        # Create the AlertTree object and set its children to be the root analysis children.
-        alert_tree = AlertTreeRead(**db_alert.__dict__)
-        alert_tree.children = analyses_by_uuid[db_alert.root_analysis_uuid].children
+    # Create the AlertTree object and set its children to be the root analysis children.
+    alert_tree = AlertTreeRead(**db_alert.__dict__)
+    alert_tree.children = analyses_by_uuid[db_alert.root_analysis_uuid].children
 
-        # Now that the tree structure is built, we need to walk it to mark which of the leaves have
-        # already appeared in the tree. This is useful for when you might not want to display or
-        # process a leaf in the tree if it is a duplicate (ex: the GUI auto-collapses duplicate leaves).
-        #
-        # But before the tree can be traversed, it needs to be serialized into JSON. If an observable or analysis
-        # is repeated in the tree, it is just a reference to the same object, so updating its "first_appearance"
-        # property would change the value for every instance of the object (which we do not want).
-        #
-        # Adapted from: https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
-        alert_tree_json: dict = json.loads(alert_tree.json(encoder=jsonable_encoder))
-        unique_uuids: set[UUID] = set()
-        unvisited = [alert_tree_json]
-        while unvisited:
-            current = unvisited.pop(0)
+    # Now that the tree structure is built, we need to walk it to mark which of the leaves have
+    # already appeared in the tree. This is useful for when you might not want to display or
+    # process a leaf in the tree if it is a duplicate (ex: the GUI auto-collapses duplicate leaves).
+    #
+    # But before the tree can be traversed, it needs to be serialized into JSON. If an observable or analysis
+    # is repeated in the tree, it is just a reference to the same object, so updating its "first_appearance"
+    # property would change the value for every instance of the object (which we do not want).
+    #
+    # Adapted from: https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
+    alert_tree_json: dict = json.loads(alert_tree.json(encoder=jsonable_encoder))
+    unique_uuids: set[UUID] = set()
+    unvisited = [alert_tree_json]
+    while unvisited:
+        current = unvisited.pop(0)
 
-            if current["uuid"] in unique_uuids:
-                current["first_appearance"] = False
-            else:
-                current["first_appearance"] = True
-                unique_uuids.add(current["uuid"])
+        if current["uuid"] in unique_uuids:
+            current["first_appearance"] = False
+        else:
+            current["first_appearance"] = True
+            unique_uuids.add(current["uuid"])
 
-            for idx in range(len(current["children"]) - 1, -1, -1):
-                unvisited.insert(0, current["children"][idx])
+        for idx in range(len(current["children"]) - 1, -1, -1):
+            unvisited.insert(0, current["children"][idx])
 
-        return alert_tree_json
-
-    return None
+    return alert_tree_json
 
 
 def update(model: AlertUpdate, db: Session):
@@ -429,9 +429,12 @@ def update(model: AlertUpdate, db: Session):
     if "disposition" in update_data and model.history_username:
         old_value = alert.disposition.value if alert.disposition else None
         diffs.append(crud.history.create_diff(field="disposition", old=old_value, new=update_data["disposition"]))
-        alert.disposition = crud.alert_disposition.read_by_value(value=update_data["disposition"], db=db)
-        alert.disposition_time = crud.helpers.utcnow()
-        alert.disposition_user = crud.user.read_by_username(username=model.history_username, db=db)
+        if update_data["disposition"]:
+            alert.disposition = crud.alert_disposition.read_by_value(value=update_data["disposition"], db=db)
+            alert.disposition_time = crud.helpers.utcnow()
+            alert.disposition_user = crud.user.read_by_username(username=model.history_username, db=db)
+        else:
+            alert.disposition = None
 
     if "event_uuid" in update_data:
         diffs.append(crud.history.create_diff(field="event_uuid", old=alert.event_uuid, new=update_data["event_uuid"]))
@@ -456,8 +459,11 @@ def update(model: AlertUpdate, db: Session):
     if "owner" in update_data:
         old_value = alert.owner.username if alert.owner else None
         diffs.append(crud.history.create_diff(field="owner", old=old_value, new=update_data["owner"]))
-        alert.owner = crud.user.read_by_username(username=update_data["owner"], db=db)
-        alert.ownership_time = crud.helpers.utcnow()
+        if update_data["owner"]:
+            alert.owner = crud.user.read_by_username(username=update_data["owner"], db=db)
+            alert.ownership_time = crud.helpers.utcnow()
+        else:
+            alert.owner = None
 
     if "queue" in update_data:
         diffs.append(crud.history.create_diff(field="queue", old=alert.queue.value, new=update_data["queue"]))
@@ -472,3 +478,5 @@ def update(model: AlertUpdate, db: Session):
             diffs=diffs,
             db=db,
         )
+
+    db.flush()

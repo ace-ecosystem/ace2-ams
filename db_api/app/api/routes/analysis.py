@@ -27,6 +27,7 @@ def create_analysis(
     db: Session = Depends(get_db),
 ):
     db_analysis = crud.analysis.create_or_read(model=analysis, db=db)
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_analysis", uuid=db_analysis.uuid)
 

@@ -4,3 +4,7 @@ class UuidNotFoundInDatabase(Exception):
 
 class ValueNotFoundInDatabase(Exception):
     pass
+
+
+class VersionMismatch(Exception):
+    pass

@@ -33,6 +33,7 @@ def create_node_threat_type(
     db: Session = Depends(get_db),
 ):
     obj = crud.node_threat_type.create_or_read(model=create, db=db)
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_node_threat_type", uuid=obj.uuid)
 
@@ -80,6 +81,8 @@ def update_node_threat_type(
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
+    db.commit()
+
     response.headers["Content-Location"] = request.url_for("get_node_threat_type", uuid=uuid)
 
 
@@ -99,6 +102,8 @@ def delete_node_threat_type(uuid: UUID, db: Session = Depends(get_db)):
             )
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+    db.commit()
 
 
 helpers.api_route_delete(router, delete_node_threat_type)

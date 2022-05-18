@@ -12,7 +12,7 @@ from api_models.history import AlertHistoryRead
 from db import crud
 from db.database import get_db
 from db.schemas.alert import AlertHistory
-from exceptions.db import ValueNotFoundInDatabase
+from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase, VersionMismatch
 
 
 router = APIRouter(
@@ -36,6 +36,8 @@ def create_alert(
         alert = crud.alert.create_or_read(model=alert, db=db)
     except ValueNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=alert.uuid)
 
@@ -123,12 +125,10 @@ def get_all_alerts(
 
 
 def get_alert(uuid: UUID, db: Session = Depends(get_db)):
-    alert_tree = crud.alert.read_tree(uuid=uuid, db=db)
-
-    if alert_tree is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Alert {uuid} does not exist")
-
-    return alert_tree
+    try:
+        return crud.alert.read_tree(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Alert {uuid} does not exist") from e
 
 
 def get_alert_history(uuid: UUID, db: Session = Depends(get_db)):
@@ -152,9 +152,18 @@ def update_alerts(
     db: Session = Depends(get_db),
 ):
     for alert in alerts:
-        crud.alert.update(model=alert, db=db)
+        try:
+            crud.alert.update(model=alert, db=db)
+        except UuidNotFoundInDatabase as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+        except ValueNotFoundInDatabase as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+        except VersionMismatch as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
         response.headers["Content-Location"] = request.url_for("get_alert", uuid=alert.uuid)
+
+    db.commit()
 
 
 helpers.api_route_update(router, update_alerts, path="/")

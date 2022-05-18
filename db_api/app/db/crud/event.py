@@ -12,13 +12,17 @@ def create(model: EventCreate, db: Session) -> Event:
 
     # Set the various event properties
     obj.prevention_tools = crud.event_prevention_tool.read_by_values(values=model.prevention_tools, db=db)
-    obj.owner = crud.user.read_by_username(username=model.owner, db=db)
+    if model.owner:
+        obj.owner = crud.user.read_by_username(username=model.owner, db=db)
     obj.queue = crud.queue.read_by_value(value=model.queue, db=db)
     obj.remediations = crud.event_remediation.read_by_values(values=model.remediations, db=db)
-    obj.risk_level = crud.event_risk_level.read_by_value(value=model.risk_level, db=db)
-    obj.source = crud.event_source.read_by_value(value=model.source, db=db)
+    if model.risk_level:
+        obj.risk_level = crud.event_risk_level.read_by_value(value=model.risk_level, db=db)
+    if model.source:
+        obj.source = crud.event_source.read_by_value(value=model.source, db=db)
     obj.status = crud.event_status.read_by_value(value=model.status, db=db)
-    obj.type = crud.event_type.read_by_value(value=model.type, db=db)
+    if model.type:
+        obj.type = crud.event_type.read_by_value(value=model.type, db=db)
     obj.vectors = crud.event_vector.read_by_values(values=model.vectors, db=db)
 
     db.add(obj)

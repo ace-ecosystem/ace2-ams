@@ -29,6 +29,7 @@ def create_alert_tool_instance(
     db: Session = Depends(get_db),
 ):
     obj = crud.alert_tool_instance.create_or_read(model=create, db=db)
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_alert_tool_instance", uuid=obj.uuid)
 
@@ -78,6 +79,8 @@ def update_alert_tool_instance(
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
+    db.commit()
+
     response.headers["Content-Location"] = request.url_for("get_alert_tool_instance", uuid=uuid)
 
 
@@ -97,6 +100,8 @@ def delete_alert_tool_instance(uuid: UUID, db: Session = Depends(get_db)):
             )
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+    db.commit()
 
 
 helpers.api_route_delete(router, delete_alert_tool_instance)

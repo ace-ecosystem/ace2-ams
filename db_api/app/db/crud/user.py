@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -6,6 +7,7 @@ from api_models.user import UserCreate
 from core.auth import hash_password, verify_password
 from db import crud
 from db.schemas.user import User
+from exceptions.db import ValueNotFoundInDatabase
 
 
 def auth(username: str, password: str, db: Session) -> Optional[User]:
@@ -39,5 +41,7 @@ def create_or_read(model: UserCreate, db: Session) -> User:
 
 
 def read_by_username(username: Optional[str], db: Session) -> User:
-
-    return db.execute(select(User).where(User.username == username)).scalars().one()
+    try:
+        return db.execute(select(User).where(User.username == username)).scalars().one()
+    except NoResultFound as e:
+        raise ValueNotFoundInDatabase(f"The '{username}' user was not found in the user table.") from e

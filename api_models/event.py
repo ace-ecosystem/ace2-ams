@@ -71,6 +71,8 @@ class EventBase(NodeBase):
 
 
 class EventCreate(NodeCreate, EventBase):
+    creation_time: datetime = Field(default_factory=datetime.utcnow, description="The time the event was created")
+
     history_username: Optional[type_str] = Field(
         description="If given, an event history record will be created and associated with the user"
     )

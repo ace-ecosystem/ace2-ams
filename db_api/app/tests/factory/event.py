@@ -3,8 +3,6 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from api_models.event import EventCreate
-from api_models.node_tag import NodeTagCreate
-from api_models.queue import QueueCreate
 from db import crud
 from tests import factory
 
@@ -32,6 +30,8 @@ def create(
     vectors: Optional[list[str]] = None,
 ):
     # Set default values
+    if created_time is None:
+        created_time = crud.helpers.utcnow()
     if prevention_tools is None:
         prevention_tools = []
 
@@ -51,7 +51,7 @@ def create(
         vectors = []
 
     # Create the objects the event will need
-    crud.queue.create_or_read(model=QueueCreate(value=event_queue), db=db)
+    factory.queue.create_or_read(value=event_queue, db=db)
 
     if event_type:
         factory.event_type.create_or_read(value=event_type, queues=[event_queue], db=db)
@@ -74,7 +74,7 @@ def create(
     factory.event_status.create_or_read(value=status, queues=[event_queue], db=db)
 
     for t in tags:
-        crud.node_tag.create_or_read(model=NodeTagCreate(value=t), db=db)
+        factory.node_tag.create_or_read(value=t, db=db)
 
     for t in threat_actors:
         factory.node_threat_actor.create_or_read(value=t, queues=[event_queue], db=db)

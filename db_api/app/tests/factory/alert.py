@@ -62,14 +62,14 @@ def create(
         update_time = crud.helpers.utcnow()
 
     # Create the alert queue
-    crud.queue.create_or_read(model=QueueCreate(value=alert_queue), db=db)
+    factory.queue.create_or_read(value=alert_queue, db=db)
 
     # Create the alert type
-    crud.alert_type.create_or_read(model=AlertTypeCreate(value=alert_type), db=db)
+    factory.alert_type.create_or_read(value=alert_type, db=db)
 
     # Create the tool and tool instance
-    crud.alert_tool.create_or_read(model=AlertToolCreate(value=tool), db=db)
-    crud.alert_tool_instance.create_or_read(model=AlertToolInstanceCreate(value=tool_instance), db=db)
+    factory.alert_tool.create_or_read(value=tool, db=db)
+    factory.alert_tool_instance.create_or_read(value=tool_instance, db=db)
 
     # Create the history user if one was given
     if history_username is not None:
@@ -99,7 +99,7 @@ def create(
 
     # Add the observables to the alert
     for observable in observables:
-        crud.observable_type.create_or_read(model=ObservableTypeCreate(value=observable.type), db=db)
+        factory.observable_type.create_or_read(value=observable.type, db=db)
         alert.root_analysis.child_observables.append(crud.observable.create_or_read(model=observable, db=db))
 
     if disposition:
@@ -117,7 +117,7 @@ def create(
         alert.event = event
 
     if tags:
-        alert.tags = [crud.node_tag.create_or_read(model=NodeTagCreate(value=t), db=db) for t in tags]
+        alert.tags = [factory.node_tag.create_or_read(value=t, db=db) for t in tags]
 
     if threat_actors:
         alert.threat_actors = [factory.node_threat_actor.create_or_read(value=t, db=db) for t in threat_actors]
@@ -125,15 +125,14 @@ def create(
     if threats:
         alert.threats = [factory.node_threat.create_or_read(value=threat, db=db) for threat in threats]
 
-    if history_username:
-        if diffs and updated_by_user:
-            crud.history.record_node_update_history(
-                record_node=alert,
-                action_by=factory.user.create_or_read(username=updated_by_user, db=db),
-                action_time=update_time,
-                diffs=diffs,
-                db=db,
-            )
+    if history_username and diffs and updated_by_user:
+        crud.history.record_node_update_history(
+            record_node=alert,
+            action_by=factory.user.create_or_read(username=updated_by_user, db=db),
+            action_time=update_time,
+            diffs=diffs,
+            db=db,
+        )
 
     return alert
 

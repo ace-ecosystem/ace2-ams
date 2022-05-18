@@ -95,7 +95,7 @@ class Event(Node, HasHistory):
 
     @property
     def history_snapshot(self):
-        return json.loads(EventRead(**self.__dict__).json())
+        return json.loads(self.convert_to_pydantic().json())
 
     @property
     def auto_alert_time(self) -> Optional[datetime]:

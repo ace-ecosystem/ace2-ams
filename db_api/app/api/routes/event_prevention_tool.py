@@ -33,6 +33,7 @@ def create_event_prevention_tool(
     db: Session = Depends(get_db),
 ):
     obj = crud.event_prevention_tool.create_or_read(model=create, db=db)
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_event_prevention_tool", uuid=obj.uuid)
 
@@ -82,6 +83,8 @@ def update_event_prevention_tool(
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
+    db.commit()
+
     response.headers["Content-Location"] = request.url_for("get_event_prevention_tool", uuid=uuid)
 
 
@@ -101,6 +104,8 @@ def delete_event_prevention_tool(uuid: UUID, db: Session = Depends(get_db)):
             )
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+    db.commit()
 
 
 helpers.api_route_delete(router, delete_event_prevention_tool)

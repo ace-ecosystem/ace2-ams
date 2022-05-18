@@ -120,6 +120,7 @@ def test_get_filter_disposition_user_multiple(client, db):
     factory.alert.create(db=db, disposition="FALSE_POSITIVE", updated_by_user="analyst", history_username="analyst")
 
     # analyst re-dispositions alice's alert
+    factory.alert_disposition.create_or_read(value="DELIVERY", rank=2, db=db)
     update = client.patch(
         "/api/alert/", json=[{"disposition": "DELIVERY", "history_username": "analyst", "uuid": str(alert.uuid)}]
     )

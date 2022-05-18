@@ -1,3 +1,4 @@
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from uuid import UUID, uuid4
@@ -5,6 +6,7 @@ from uuid import UUID, uuid4
 from api_models.node import NodeCreate, NodeUpdate
 from db import crud
 from db.schemas.node import Node
+from exceptions.db import UuidNotFoundInDatabase, VersionMismatch
 
 
 def create(
@@ -37,7 +39,12 @@ def read_by_uuid(uuid: UUID, db: Session) -> Node:
 def update(
     model: NodeUpdate, uuid: UUID, db_table: DeclarativeMeta, db: Session
 ) -> tuple[Node, list[crud.history.Diff]]:
-    node: Node = crud.helpers.read_by_uuid(db_table=db_table, uuid=uuid, db=db)
+    try:
+        node: Node = crud.helpers.read_by_uuid(db_table=db_table, uuid=uuid, db=db)
+    except NoResultFound as e:
+        raise UuidNotFoundInDatabase(
+            f"The {uuid} UUID does not exist in the {db_table.__tablename__} database table"
+        ) from e
 
     # Capture all of the diffs that were made (for adding to the history tables)
     diffs: list[crud.history.Diff] = []
@@ -47,7 +54,9 @@ def update(
 
     # Return an exception if the passed in version does not match the Node's current version
     if "version" in update_data and update_data["version"] != node.version:
-        raise ValueError(f"Node version {update_data['version']} does not match the database version {node.version}")
+        raise VersionMismatch(
+            f"Node version {update_data['version']} does not match the database version {node.version}"
+        )
 
     if "directives" in update_data:
         diffs.append(
