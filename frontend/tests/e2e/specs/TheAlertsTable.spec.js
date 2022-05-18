@@ -294,7 +294,7 @@ describe("TheAlertsTable.vue", () => {
     cy.get("td ul").should("exist").should("be.visible");
     // Find and click the first observable tag in list
     cy.get(":nth-child(1) > .tag > .p-tag")
-      .eq(0)
+      .eq(1)
       .should("contain.text", "tag0")
       .click();
     // Wait for the filtered view to be requested

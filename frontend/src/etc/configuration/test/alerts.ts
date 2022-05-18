@@ -15,6 +15,7 @@ import {
   nodeThreatsProperty,
   queueProperty,
   ownerProperty,
+  BLUE,
 } from "@/etc/constants/common";
 
 const defaultAlertFilters = [
@@ -55,4 +56,8 @@ export const IGNORE_DISPOSITION_STRING = "IGNORE";
 // {alertType.value: iconFilename}
 export const alertIconTypeMapping = {
   testType: "test.png",
+};
+
+export const alertDispositionMetadata: Record<string, string> = {
+  test: BLUE,
 };
