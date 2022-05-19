@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.routes import helpers
@@ -13,9 +12,7 @@ from api_models.analysis_module_type import (
 from db import crud
 from db.database import get_db
 from db.schemas.analysis_module_type import AnalysisModuleType
-from db.schemas.node_directive import NodeDirective
-from db.schemas.node_tag import NodeTag
-from db.schemas.observable_type import ObservableType
+from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 
 router = APIRouter(
@@ -35,38 +32,11 @@ def create_analysis_module_type(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    # Create the new analysis module type using the data from the request
-    new_analysis_module_type = AnalysisModuleType(**analysis_module_type.dict())
+    obj = crud.analysis_module_type.create_or_read(model=analysis_module_type, db=db)
 
-    # If observable types were given, get them from the database and use them in the new analysis module type
-    db_observable_types = []
-    if analysis_module_type.observable_types:
-        db_observable_types = crud.read_by_values(
-            values=analysis_module_type.observable_types, db_table=ObservableType, db=db
-        )
-    new_analysis_module_type.observable_types = db_observable_types
+    db.commit()
 
-    # If required directives were given, get them from the database and use them in the new analysis module type
-    db_required_directives = []
-    if analysis_module_type.required_directives:
-        db_required_directives = crud.read_by_values(
-            values=analysis_module_type.required_directives, db_table=NodeDirective, db=db
-        )
-    new_analysis_module_type.required_directives = db_required_directives
-
-    # If required tags were given, get them from the database and use them in the new analysis module type
-    db_required_tags = []
-    if analysis_module_type.required_tags:
-        db_required_tags = crud.read_by_values(values=analysis_module_type.required_tags, db_table=NodeTag, db=db)
-    new_analysis_module_type.required_tags = db_required_tags
-
-    # Save the new analysis module type to the database
-    db.add(new_analysis_module_type)
-    crud.commit(db)
-
-    response.headers["Content-Location"] = request.url_for(
-        "get_analysis_module_type", uuid=new_analysis_module_type.uuid
-    )
+    response.headers["Content-Location"] = request.url_for("get_analysis_module_type", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_analysis_module_type)
@@ -78,11 +48,16 @@ helpers.api_route_create(router, create_analysis_module_type)
 
 
 def get_all_analysis_module_types(db: Session = Depends(get_db)):
-    return paginate(db, select(AnalysisModuleType).order_by(AnalysisModuleType.value, AnalysisModuleType.version))
+    return paginate(conn=db, query=crud.analysis_module_type.build_read_all_query())
 
 
 def get_analysis_module_type(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read(uuid=uuid, db_table=AnalysisModuleType, db=db)
+    try:
+        return crud.analysis_module_type.read_by_uuid(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"Analysis module type {uuid} does not exist"
+        ) from e
 
 
 helpers.api_route_read_all(router, get_all_analysis_module_types, AnalysisModuleTypeRead)
@@ -101,46 +76,15 @@ def update_analysis_module_type(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    # Read the current analysis module type from the database
-    db_analysis_module_type: AnalysisModuleType = crud.read(uuid=uuid, db_table=AnalysisModuleType, db=db)
+    try:
+        if not crud.analysis_module_type.update(uuid=uuid, model=analysis_module_type, db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update analysis module type {uuid}"
+            )
+    except (UuidNotFoundInDatabase, ValueNotFoundInDatabase) as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
-    # Get the data that was given in the request and use it to update the database object
-    update_data = analysis_module_type.dict(exclude_unset=True)
-
-    if "cache_seconds" in update_data:
-        db_analysis_module_type.cache_seconds = update_data["cache_seconds"]
-
-    if "description" in update_data:
-        db_analysis_module_type.description = update_data["description"]
-
-    if "extended_version" in update_data:
-        db_analysis_module_type.extended_version = update_data["extended_version"]
-
-    if "manual" in update_data:
-        db_analysis_module_type.manual = update_data["manual"]
-
-    if "value" in update_data:
-        db_analysis_module_type.value = update_data["value"]
-
-    if "observable_types" in update_data:
-        db_analysis_module_type.observable_types = crud.read_by_values(
-            values=update_data["observable_types"], db_table=ObservableType, db=db
-        )
-
-    if "required_directives" in update_data:
-        db_analysis_module_type.required_directives = crud.read_by_values(
-            values=update_data["required_directives"], db_table=NodeDirective, db=db
-        )
-
-    if "required_tags" in update_data:
-        db_analysis_module_type.required_tags = crud.read_by_values(
-            values=update_data["required_tags"], db_table=NodeTag, db=db
-        )
-
-    if "version" in update_data:
-        db_analysis_module_type.version = update_data["version"]
-
-    crud.commit(db)
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_analysis_module_type", uuid=uuid)
 
@@ -154,7 +98,15 @@ helpers.api_route_update(router, update_analysis_module_type)
 
 
 def delete_analysis_module_type(uuid: UUID, db: Session = Depends(get_db)):
-    crud.delete(uuid=uuid, db_table=AnalysisModuleType, db=db)
+    try:
+        if not crud.helpers.delete(uuid=uuid, db_table=AnalysisModuleType, db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete analysis module type {uuid}"
+            )
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+    db.commit()
 
 
 helpers.api_route_delete(router, delete_analysis_module_type)

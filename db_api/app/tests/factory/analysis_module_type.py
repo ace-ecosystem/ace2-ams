@@ -6,13 +6,13 @@ from db import crud
 
 def create_or_read(
     value: str,
-    version: str,
     db: Session,
     cache_seconds: int = 300,
     manual: bool = False,
     observable_types: list[str] = None,
     required_directives: list[str] = None,
     required_tags: list[str] = None,
+    version: str = "1.0.0",
 ):
     if observable_types is None:
         observable_types = []

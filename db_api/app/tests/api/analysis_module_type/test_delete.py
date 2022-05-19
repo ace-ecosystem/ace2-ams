@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 """
@@ -33,16 +33,13 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete(client, db):
     # Create an analysis module type
-    analysis_module_type = helpers.create_analysis_module_type(
+    analysis_module_type = factory.analysis_module_type.create_or_read(
         value="test",
         observable_types=["test_type"],
         required_directives=["test_directive"],
         required_tags=["test_tag"],
         db=db,
     )
-    directive_uuid = analysis_module_type.required_directives[0].uuid
-    observable_type_uuid = analysis_module_type.observable_types[0].uuid
-    tag_uuid = analysis_module_type.required_tags[0].uuid
 
     # Read it back
     get = client.get(f"/api/analysis/module_type/{analysis_module_type.uuid}")
@@ -57,16 +54,16 @@ def test_delete(client, db):
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
     # Make sure the node directive is still there
-    get = client.get(f"/api/node/directive/{directive_uuid}")
+    get = client.get(f"/api/node/directive/")
     assert get.status_code == status.HTTP_200_OK
-    assert get.json()["value"] == "test_directive"
+    assert get.json()["total"] == 1
 
     # Make sure the node tag is still there
-    get = client.get(f"/api/node/tag/{tag_uuid}")
+    get = client.get(f"/api/node/tag/")
     assert get.status_code == status.HTTP_200_OK
-    assert get.json()["value"] == "test_tag"
+    assert get.json()["total"] == 1
 
     # Make sure the observable type is still there
-    get = client.get(f"/api/observable/type/{observable_type_uuid}")
+    get = client.get(f"/api/observable/type/")
     assert get.status_code == status.HTTP_200_OK
-    assert get.json()["value"] == "test_type"
+    assert get.json()["total"] == 1

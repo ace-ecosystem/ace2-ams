@@ -90,7 +90,7 @@ def read_cached(
 
 
 def update(uuid: UUID, model: AnalysisUpdate, db: Session):
-    obj = crud.analysis.read_by_uuid(uuid=uuid, db=db)
+    obj = read_by_uuid(uuid=uuid, db=db)
 
     # Get the data that was given in the request and use it to update the database object
     update_data = model.dict(exclude_unset=True)
