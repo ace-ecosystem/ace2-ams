@@ -50,9 +50,9 @@
                   <td class="header-cell">Detection</td>
                   <td class="content-cell">
                     <span>
-                      <span style="vertical-align: baseline">
-                        {{ detection.value }}
-                      </span>
+                      <span style="vertical-align: baseline">{{
+                        detection.value
+                      }}</span>
                       <Button
                         style="vertical-align: baseline"
                         icon="pi pi-directions"

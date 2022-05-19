@@ -174,16 +174,16 @@ describe("TheAlertDetails", () => {
     cy.findAllByText("Detection")
       .eq(0)
       .siblings()
-      .should("have.text", "detectionC");
+      .should("contain.text", "detectionC");
     cy.findAllByText("Detection");
     cy.findAllByText("Detection")
       .eq(1)
       .siblings()
-      .should("have.text", "detectionB");
+      .should("contain.text", "detectionB");
     cy.findAllByText("Detection")
       .eq(2)
       .siblings()
-      .should("have.text", "detectionA");
+      .should("contain.text", "detectionA");
   });
   it("displays error if request to fetch observables fails", () => {
     cy.stub(NodeTree, "readNodesOfNodeTree")
