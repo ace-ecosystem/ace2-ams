@@ -49,7 +49,17 @@
                 >
                   <td class="header-cell">Detection</td>
                   <td class="content-cell">
-                    {{ detection.value }}
+                    <span>
+                      <span style="vertical-align: baseline">
+                        {{ detection.value }}
+                      </span>
+                      <Button
+                        style="vertical-align: baseline"
+                        icon="pi pi-directions"
+                        class="p-button-rounded p-button-secondary p-button-text"
+                        @click="scrollToElement(detection.uuid)"
+                      />
+                    </span>
                   </td>
                 </tr>
                 <tr v-if="alertStore.open['instructions']">
@@ -112,6 +122,15 @@
       isLoading.value = false;
     }
   });
+
+  const scrollToElement = (detectionUuid: string) => {
+    const detection = document.getElementById(detectionUuid);
+
+    if (detection) {
+      // Use el.scrollIntoView() to instantly scroll to the element
+      detection.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
 
   const getAllDetectionPoints = async (uuid: string) => {
     try {
