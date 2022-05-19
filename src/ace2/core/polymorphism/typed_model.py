@@ -1,8 +1,6 @@
 from __future__ import annotations
 from pydantic import BaseModel, Field
-import re
-
-camel_case = re.compile(r'([a-z0-9])([A-Z])')
+from .utility import camel_to_snake
 
 model_types = {}
 
@@ -42,8 +40,8 @@ class TypedModel(BaseModel):
         if base == cls:
             return
 
-        # generate type for this class
-        cls.type = cls.get_type_string()
+        # use the snake case of the class name as the type
+        cls.type = camel_to_snake(cls.__name__)
 
         # add a mapping dictionary for this base type if it does not already exist
         if base.__name__ not in model_types:
@@ -58,16 +56,6 @@ class TypedModel(BaseModel):
                 '__init_subclass__': lambda x : None, # NOTE: prevents infinite recursion loop registering new class
             }
         )
-
-    @classmethod
-    def get_type_string(cls) -> str:
-        ''' converts class name from camel case to snake case 
-
-        Returns:
-            str: class name in snake case
-        '''
-
-        return camel_case.sub(r'\1_\2', cls.__name__).lower()
 
     @classmethod
     def get_base_type(cls, target):
