@@ -156,6 +156,10 @@ class EventRead(NodeRead, EventBase):
 
 
 class EventUpdate(NodeUpdate, EventBase):
+    history_username: Optional[type_str] = Field(
+        description="If given, an event history record will be created and associated with the user"
+    )
+
     name: Optional[type_str] = Field(description="The name of the event")
 
     queue: Optional[type_str] = Field(description="The event queue containing this event")

@@ -239,7 +239,7 @@ def test_get_filter_event_time_before(client, db):
 
 def test_get_filter_event_uuid(client, db):
     # Create an event
-    event = factory.event.create(name="Test Event", db=db)
+    event = factory.event.create_or_read(name="Test Event", db=db)
 
     # Create some alerts
     factory.alert.create(db=db)

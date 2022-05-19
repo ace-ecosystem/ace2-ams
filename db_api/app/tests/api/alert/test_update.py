@@ -163,7 +163,7 @@ def test_update_event_uuid(client, db):
     initial_alert_version = alert.version
 
     # Create an event
-    event = factory.event.create(name="test", db=db, history_username="analyst")
+    event = factory.event.create_or_read(name="test", db=db, history_username="analyst")
     initial_event_version = event.version
 
     # Update the alert to add it to the event

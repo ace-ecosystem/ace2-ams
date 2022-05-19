@@ -7,7 +7,7 @@ from db import crud
 from tests import factory
 
 
-def create(
+def create_or_read(
     name: str,
     db: Session,
     alert_time: Optional[datetime] = None,
@@ -85,7 +85,7 @@ def create(
     for v in vectors:
         factory.event_vector.create_or_read(value=v, queues=[event_queue], db=db)
 
-    return crud.event.create(
+    return crud.event.create_or_read(
         model=EventCreate(
             alert_time=alert_time,
             contain_time=contain_time,
