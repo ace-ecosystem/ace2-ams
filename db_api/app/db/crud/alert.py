@@ -9,7 +9,7 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from api_models.alert import AlertCreate, AlertTreeRead, AlertUpdate
-from api_models.analysis import AnalysisNodeTreeRead
+from api_models.analysis import AnalysisRead
 from api_models.observable import ObservableNodeTreeRead
 from db import crud
 from db.schemas.alert import Alert, AlertHistory
@@ -28,7 +28,6 @@ from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.user import User
-from exceptions.db import ValueNotFoundInDatabase
 
 
 def build_read_all_query(
@@ -355,8 +354,8 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     # Dictionary of analysis objects where their UUID is the key
     # Dictionary of analysis objects where their target observable UUID is the key
     # Dictionary of observables where their UUID is the key
-    analyses_by_target: dict[UUID, list[AnalysisNodeTreeRead]] = {}
-    analyses_by_uuid: dict[UUID, AnalysisNodeTreeRead] = {}
+    analyses_by_target: dict[UUID, list[AnalysisRead]] = {}
+    analyses_by_uuid: dict[UUID, AnalysisRead] = {}
     child_observables: dict[UUID, ObservableNodeTreeRead] = {}
     for db_analysis in db_alert.analyses:
         # Create an empty list if this target observable UUID has not been seen yet.

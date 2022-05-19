@@ -2,7 +2,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, func, Index, String
 from sqlalchemy.dialects.postgresql import ExcludeConstraint, JSONB, TSTZRANGE, UUID
 from sqlalchemy.orm import deferred, relationship
 
-from api_models.analysis import AnalysisNodeTreeRead
+from api_models.analysis import AnalysisRead
 from db.database import Base
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
 from db.schemas.observable import Observable
@@ -66,5 +66,5 @@ class Analysis(Base):
     def cached_until(self):
         return self.cached_during.upper
 
-    def convert_to_pydantic(self) -> AnalysisNodeTreeRead:
-        return AnalysisNodeTreeRead(**self.__dict__)
+    def convert_to_pydantic(self) -> AnalysisRead:
+        return AnalysisRead(**self.__dict__)

@@ -3,6 +3,7 @@ from tests.factory import alert_disposition
 from tests.factory import alert_tool
 from tests.factory import alert_tool_instance
 from tests.factory import alert_type
+from tests.factory import analysis
 from tests.factory import analysis_module_type
 from tests.factory import event
 from tests.factory import event_prevention_tool

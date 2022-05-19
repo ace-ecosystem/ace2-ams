@@ -7,15 +7,10 @@ from uuid import UUID, uuid4
 
 from api_models.alert import AlertCreate
 from api_models.alert_disposition import AlertDispositionCreate
-from api_models.alert_tool import AlertToolCreate
-from api_models.alert_tool_instance import AlertToolInstanceCreate
-from api_models.alert_type import AlertTypeCreate
 from api_models.analysis import AnalysisCreate
 from api_models.analysis_module_type import AnalysisModuleTypeCreate
-from api_models.node_tag import NodeTagCreate
 from api_models.observable import ObservableCreate
 from api_models.observable_type import ObservableTypeCreate
-from api_models.queue import QueueCreate
 from db import crud
 from db.schemas.alert import Alert
 from db.schemas.event import Event

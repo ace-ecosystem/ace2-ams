@@ -1,15 +1,13 @@
 from datetime import datetime
-from pydantic import Field, Json, UUID4
+from pydantic import BaseModel, Field, Json, UUID4
 from typing import Optional
 from uuid import uuid4
 
 from api_models import type_str
-from api_models.analysis_module_type import AnalysisModuleTypeNodeTreeRead, AnalysisModuleTypeRead
-from api_models.node import NodeBase, NodeRead, NodeTreeItemRead, NodeUpdate
-from api_models.node_detection_point import NodeDetectionPointRead
+from api_models.analysis_module_type import AnalysisModuleTypeRead
 
 
-class AnalysisBase(NodeBase):
+class AnalysisBase(BaseModel):
     """Represents an individual analysis that was performed."""
 
     details: Optional[Json] = Field(description="A JSON representation of the details produced by the analysis")
@@ -30,33 +28,16 @@ class AnalysisCreate(AnalysisBase):
         default_factory=list, description="A list of child observables discovered during the analysis"
     )
 
-    root_analysis_uuid: UUID4 = Field(description="The UUID of the Root Analysis that will contain this analysis")
-
     run_time: datetime = Field(description="The time at which the analysis was performed")
+
+    submission_uuid: UUID4 = Field(description="The UUID of the submission that will contain this analysis")
 
     target_uuid: UUID4 = Field(description="The UUID of the target observable for this analysis")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
 
 
-class AnalysisNodeTreeRead(NodeTreeItemRead):
-    """Model used to control which information for an Analysis is displayed when getting an alert tree"""
-
-    analysis_module_type: Optional[AnalysisModuleTypeNodeTreeRead] = Field(
-        description="The analysis module type that was used to perform this analysis"
-    )
-
-    # Set a static string value so code displaying the tree structure knows which type of object this is.
-    # This is needed (for now) because the Analysis table no longer inherits from the Node table.
-    node_type: str = "analysis"
-
-    uuid: UUID4 = Field(description="The UUID of the analysis")
-
-    class Config:
-        orm_mode = True
-
-
-class AnalysisRead(NodeRead, AnalysisBase):
+class AnalysisRead(AnalysisBase):
     analysis_module_type: Optional[AnalysisModuleTypeRead] = Field(
         description="The analysis module type that was used to perform this analysis"
     )
@@ -69,9 +50,9 @@ class AnalysisRead(NodeRead, AnalysisBase):
 
     details: Optional[dict] = Field(description="A JSON representation of the details produced by the analysis")
 
-    detection_points: list[NodeDetectionPointRead] = Field(
-        description="A list of detection points added to the analysis"
-    )
+    # Set a static string value so code displaying the tree structure knows which type of object this is.
+    # This is needed (for now) because the Analysis table no longer inherits from the Node table.
+    node_type: str = "analysis"
 
     run_time: datetime = Field(description="The time at which the analysis was performed")
 
@@ -81,7 +62,7 @@ class AnalysisRead(NodeRead, AnalysisBase):
         orm_mode = True
 
 
-class AnalysisUpdate(NodeUpdate, AnalysisBase):
+class AnalysisUpdate(AnalysisBase):
     details: Optional[Json] = Field(description="A JSON representation of the details produced by the analysis")
 
     error_message: Optional[type_str] = Field(description="An optional error message that occurred during analysis")

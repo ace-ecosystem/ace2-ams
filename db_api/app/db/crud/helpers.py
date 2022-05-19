@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from pydantic import BaseModel
 from sqlalchemy import delete as sql_delete, select, update as sql_update
 from sqlalchemy.exc import IntegrityError, NoResultFound
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, undefer
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.sql.selectable import Select
 from typing import Any
@@ -61,11 +61,15 @@ def read_all(db_table: DeclarativeMeta, db: Session) -> list[Any]:
     return db.execute(select(db_table)).all()
 
 
-def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session) -> Any:
+def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session, undefer_column: str = None) -> Any:
     """Returns the object with the specific UUID from the given database table."""
 
+    query = select(db_table).where(db_table.uuid == uuid)
+    if undefer_column is not None:
+        query = query.options(undefer(undefer_column))
+
     try:
-        return db.execute(select(db_table).where(db_table.uuid == uuid)).scalars().one()
+        return db.execute(query).scalars().one()
     except NoResultFound as e:
         raise UuidNotFoundInDatabase(f"UUID {uuid} was not found in the {db_table.__tablename__} table.") from e
 

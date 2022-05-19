@@ -6,7 +6,6 @@ from uuid import uuid4
 from api_models.node_directive import NodeDirectiveCreate
 from api_models.node_tag import NodeTagCreate
 from api_models.observable import ObservableCreate
-from api_models.observable_type import ObservableTypeCreate
 from db import crud
 from db.schemas.analysis import Analysis
 from db.schemas.observable import Observable
@@ -29,7 +28,7 @@ def create_or_read(
     threats: Optional[list[str]] = None,
     time: Optional[datetime] = None,
 ) -> Observable:
-    crud.observable_type.create_or_read(model=ObservableTypeCreate(value=type), db=db)
+    factory.observable_type.create_or_read(value=type, db=db)
 
     obj = crud.observable.create_or_read(
         model=ObservableCreate(

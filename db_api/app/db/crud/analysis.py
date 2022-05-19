@@ -1,10 +1,11 @@
 from datetime import timedelta
+from pydantic import ValidationError
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from typing import Optional
 from uuid import UUID
 
-from api_models.analysis import AnalysisCreate
+from api_models.analysis import AnalysisCreate, AnalysisUpdate
 from api_models.analysis_details import (
     EmailAnalysisDetails,
     FAQueueAnalysisDetails,
@@ -37,6 +38,7 @@ def create_or_read(model: AnalysisCreate, db: Session) -> Analysis:
         stack_trace=model.stack_trace,
         summary=model.summary,
         target_uuid=model.target_uuid,
+        uuid=model.uuid,
     )
 
     # If the analysis cannot be created, that implies there is already a cached version
@@ -51,7 +53,7 @@ def create_or_read(model: AnalysisCreate, db: Session) -> Analysis:
     obj.child_observables = [crud.observable.create_or_read(model=co, db=db) for co in model.child_observables]
 
     # Associate the analysis with its submission
-    crud.alert_analysis_mapping.create(analysis_uuid=obj.uuid, submission_uuid=model.root_analysis_uuid, db=db)
+    crud.alert_analysis_mapping.create(analysis_uuid=obj.uuid, submission_uuid=model.submission_uuid, db=db)
 
     return obj
 
@@ -66,7 +68,7 @@ def create_root(db: Session) -> Analysis:
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> Analysis:
-    return crud.helpers.read_by_uuid(db_table=Analysis, uuid=uuid, db=db)
+    return crud.helpers.read_by_uuid(db_table=Analysis, uuid=uuid, db=db, undefer_column="details")
 
 
 def read_cached(
@@ -85,6 +87,17 @@ def read_cached(
         .scalars()
         .one()
     )
+
+
+def update(uuid: UUID, model: AnalysisUpdate, db: Session):
+    obj = crud.analysis.read_by_uuid(uuid=uuid, db=db)
+
+    # Get the data that was given in the request and use it to update the database object
+    update_data = model.dict(exclude_unset=True)
+    for key in update_data:
+        setattr(obj, key, update_data[key])
+
+    db.flush()
 
 
 def validate_analysis_details(analysis_module_type: AnalysisModuleType, details: Optional[dict]):

@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 from uuid import UUID
 
@@ -6,7 +7,7 @@ from api.routes import helpers
 from api_models.analysis import AnalysisCreate, AnalysisRead, AnalysisUpdate
 from db import crud
 from db.database import get_db
-from db.schemas.analysis import Analysis
+from exceptions.db import UuidNotFoundInDatabase
 
 
 router = APIRouter(
@@ -26,10 +27,16 @@ def create_analysis(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    db_analysis = crud.analysis.create_or_read(model=analysis, db=db)
+    try:
+        obj = crud.analysis.create_or_read(model=analysis, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+    except ValidationError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
+
     db.commit()
 
-    response.headers["Content-Location"] = request.url_for("get_analysis", uuid=db_analysis.uuid)
+    response.headers["Content-Location"] = request.url_for("get_analysis", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_analysis)
@@ -45,7 +52,10 @@ helpers.api_route_create(router, create_analysis)
 
 
 def get_analysis(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read(uuid=uuid, db_table=Analysis, undefer_column="details", db=db)
+    try:
+        return crud.analysis.read_by_uuid(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Analysis {uuid} does not exist") from e
 
 
 # It does not make sense to have a get_all_analysis route at this point (and certainly not without pagination).
@@ -65,27 +75,14 @@ def update_analysis(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    # Update the Node attributes
-    db_analysis, diffs = update_node(node_update=analysis, uuid=uuid, db_table=Analysis, db=db)
-
-    # Get the data that was given in the request and use it to update the database object
-    update_data = analysis.dict(exclude_unset=True)
-
-    if "details" in update_data:
-        db_analysis.details = update_data["details"]
-
-    if "error_message" in update_data:
-        db_analysis.error_message = update_data["error_message"]
-
-    if "stack_trace" in update_data:
-        db_analysis.stack_trace = update_data["stack_trace"]
-
-    if "summary" in update_data:
-        db_analysis.summary = update_data["summary"]
-
-    crud.commit(db)
+    try:
+        crud.analysis.update(uuid=uuid, model=analysis, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
     response.headers["Content-Location"] = request.url_for("get_analysis", uuid=uuid)
+
+    db.commit()
 
 
 helpers.api_route_update(router, update_analysis)
