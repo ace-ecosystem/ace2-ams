@@ -9,15 +9,17 @@
     </span>
     <span
       v-for="detection in observable.detectionPoints"
+      :id="detection.uuid"
       :key="detection.uuid"
       v-tooltip.right="{
         value: detection.value,
       }"
       class="detection-point"
       data-cy="detection-point-symbol"
+      style="font-size: 2rem; width: 100%"
     >
-      &#128293;</span
-    >
+      &#128293;
+    </span>
     <Button
       v-if="showCopyToClipboard"
       data-cy="copy-to-clipboard-button"
