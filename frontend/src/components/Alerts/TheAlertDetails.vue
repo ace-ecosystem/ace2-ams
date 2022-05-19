@@ -57,7 +57,7 @@
                         style="vertical-align: baseline"
                         icon="pi pi-directions"
                         class="p-button-rounded p-button-secondary p-button-text"
-                        @click="scrollToElement(detection.uuid)"
+                        @click="scrollToDetection(detection.uuid)"
                       />
                     </span>
                   </td>
@@ -123,11 +123,10 @@
     }
   });
 
-  const scrollToElement = (detectionUuid: string) => {
+  const scrollToDetection = (detectionUuid: string) => {
     const detection = document.getElementById(detectionUuid);
 
     if (detection) {
-      // Use el.scrollIntoView() to instantly scroll to the element
       detection.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
