@@ -5,9 +5,6 @@ import CommentModal from "@/components/Modals/CommentModal.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { NodeComment } from "@/services/api/nodeComment";
 import { userReadFactory } from "@mocks/user";
-import Message from "primevue/message";
-import { VueWrapper } from "@vue/test-utils";
-import { ComponentPublicInstance } from "vue";
 
 function factory(args: { selected: string[] } = { selected: [] }) {
   return mount(CommentModal, {
@@ -22,6 +19,9 @@ function factory(args: { selected: string[] } = { selected: [] }) {
             },
             selectedAlertStore: {
               selected: args.selected,
+            },
+            recentCommentsStore: {
+              recentComments: ["test"],
             },
           },
         }),
@@ -59,6 +59,26 @@ describe("CommentModal", () => {
     factory({ selected: ["uuid"] });
     cy.findAllByText("Add").parent().should("be.disabled");
   });
+  it.only("correctly makes request to create comment upon adding comment text via NodeCommentAutocomplete and submit", () => {
+    cy.stub(NodeComment, "create")
+      .withArgs([
+        {
+          username: "analyst",
+          nodeUuid: "uuid",
+          value: "test extra content",
+        },
+      ])
+      .as("addComment")
+      .resolves();
+    factory({ selected: ["uuid"] });
+    cy.get(".p-autocomplete > .p-button").click();
+    cy.contains("test").click();
+    cy.get(".p-inputtextarea").click().type(" extra content");
+    cy.findByText("Add").click();
+    cy.get("@addComment").should("have.been.calledOnce");
+    cy.get("@spy-10").should("have.been.calledOnceWith", "test extra content"); // Add comment to recentCommentsStore
+    cy.get("[data-cy=CommentModal]").should("not.exist");
+  });
   it("correctly makes request to create comment upon adding comment text and submit", () => {
     cy.stub(NodeComment, "create")
       .withArgs([
@@ -74,6 +94,7 @@ describe("CommentModal", () => {
     cy.findAllByPlaceholderText("Add a comment...").click().type("Testing");
     cy.findByText("Add").click();
     cy.get("@addComment").should("have.been.calledOnce");
+    cy.get("@spy-10").should("have.been.calledOnceWith", "Testing"); // Add comment to recentCommentsStore
     cy.get("[data-cy=CommentModal]").should("not.exist");
   });
   it("correctly shows error if request to assign owner fails", () => {

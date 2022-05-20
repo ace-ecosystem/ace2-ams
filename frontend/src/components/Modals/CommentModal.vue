@@ -18,6 +18,9 @@
           placeholder="Add a comment..."
         />
       </div>
+      <NodeCommentAutocomplete
+        @comment-clicked="recentCommentClicked($event)"
+      ></NodeCommentAutocomplete>
     </div>
     <template #footer>
       <Button
@@ -44,6 +47,7 @@
   import Textarea from "primevue/textarea";
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
+  import NodeCommentAutocomplete from "@/components/Node/NodeCommentAutocomplete.vue";
 
   import { NodeComment } from "@/services/api/nodeComment";
 
@@ -103,6 +107,10 @@
   const allowSubmit = computed(() => {
     return selectedStore.anySelected && newComment.value.length;
   });
+
+  const recentCommentClicked = (comment: string) => {
+    newComment.value = comment;
+  };
 
   const handleError = () => {
     error.value = undefined;

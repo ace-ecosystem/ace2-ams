@@ -7,7 +7,7 @@
       :disabled="!recentCommentStore.recentComments.length"
       force-selection
       @complete="searchComment($event)"
-      @dropdown-click="emit('commentClicked', $event.query)"
+      @item-select="itemSelect($event.value)"
     >
       <template #item="slotProps">
         <div>
@@ -59,6 +59,10 @@
       selected.value = undefined;
     }
   });
+
+  const itemSelect = (comment: string) => {
+    emit("commentClicked", comment);
+  };
 
   const removeComment = (comment: string) => {
     recentCommentStore.removeComment(comment);
