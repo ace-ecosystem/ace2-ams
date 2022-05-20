@@ -28,8 +28,9 @@ setup(
     zip_safe=False,
     python_requires='>=3.9',
     install_requires = [
-        'pydantic',
         'boto3',
+        'pydantic',
+        'pyyaml',
     ],
     cmdclass = {
         'install': Install,
