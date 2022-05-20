@@ -325,7 +325,7 @@ describe("SaveToEventModal", () => {
     cy.get("@updateAlert").should("have.been.calledOnce");
     cy.get("[data-cy='save-to-event-modal']").should("not.exist");
   });
-  it.only("attempts to create and save to new event when new event, and disposition comment when is selected, comment is given using NodeCommentAutocomplete, and the 'Save' button is clicked", () => {
+  it("attempts to create and save to new event when new event, and disposition comment when is selected, comment is given using NodeCommentAutocomplete, and the 'Save' button is clicked", () => {
     cy.stub(Event, "create")
       .withArgs(
         {
