@@ -7,6 +7,17 @@ def read(file_name):
     with io.open(os.path.join(os.path.dirname(__file__), file_name), encoding='utf-8') as f:
         return f.read()
 
+def readlines(file_name):
+    path = os.path.join(os.path.dirname(__file__), file_name)
+    if os.path.isfile(path):
+        with io.open(os.path.join(os.path.dirname(__file__), file_name), encoding='utf-8') as f:
+            return f.readlines()
+    else:
+        return []
+
+install_requires = readlines('src/ace2/core/requires.txt')
+install_requires.extend(readlines('src/ace2/mods/requires.txt'))
+
 class Install(install):
     def run(self):
         # TODO: install other stuff like apt packages
@@ -27,11 +38,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     python_requires='>=3.9',
-    install_requires = [
-        'boto3',
-        'pydantic',
-        'pyyaml',
-    ],
+    install_requires = install_requires,
     cmdclass = {
         'install': Install,
     }
