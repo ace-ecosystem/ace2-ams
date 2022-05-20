@@ -50,6 +50,7 @@
   import { useAuthStore } from "@/stores/auth";
   import { nodeSelectedStores } from "@/stores/index";
   import { useModalStore } from "@/stores/modal";
+  import { useRecentCommentsStore } from "@/stores/recentComments";
 
   const emit = defineEmits(["requestReload"]);
 
@@ -61,6 +62,7 @@
   const authStore = useAuthStore();
   const selectedStore = nodeSelectedStores[nodeType]();
   const modalStore = useModalStore();
+  const recentCommentsStore = useRecentCommentsStore();
 
   const error = ref<string>();
   const isLoading = ref(false);
@@ -86,6 +88,7 @@
 
     isLoading.value = false;
     if (!error.value) {
+      recentCommentsStore.addComment(newComment.value);
       close();
       emit("requestReload");
     }

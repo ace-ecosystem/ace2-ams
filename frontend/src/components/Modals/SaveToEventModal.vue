@@ -108,6 +108,8 @@
   import { useEventStatusStore } from "@/stores/eventStatus";
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
+  import { useRecentCommentsStore } from "@/stores/recentComments";
+
   import { eventRead, eventSummary } from "@/models/event";
   import { eventStatusRead } from "@/models/eventStatus";
 
@@ -116,6 +118,7 @@
   const eventStatusStore = useEventStatusStore();
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
+  const recentCommentsStore = useRecentCommentsStore();
 
   const props = defineProps({
     name: { type: String, required: true },
@@ -240,6 +243,9 @@
               return;
             }
           }
+        }
+        if (newEventComment.value) {
+          recentCommentsStore.addComment(newEventComment.value);
         }
       }
     } else {

@@ -74,6 +74,8 @@
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
+  import { useRecentCommentsStore } from "@/stores/recentComments";
+
   import { alertDispositionRead } from "@/models/alertDisposition";
   import { nodeCommentCreate } from "@/models/nodeComment";
 
@@ -82,6 +84,7 @@
   const authStore = useAuthStore();
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
+  const recentCommentsStore = useRecentCommentsStore();
 
   const emit = defineEmits(["requestReload"]);
 
@@ -134,6 +137,9 @@
     isLoading.value = false;
 
     if (!error.value) {
+      if (dispositionComment.value) {
+        recentCommentsStore.addComment(dispositionComment.value);
+      }
       close();
       emit("requestReload");
     }
