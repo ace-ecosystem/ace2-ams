@@ -45,6 +45,9 @@
                   cols="30"
                 />
                 <label for="newEventComment">Event Comment</label>
+                <NodeCommentAutocomplete
+                  @comment-clicked="recentCommentClicked($event)"
+                ></NodeCommentAutocomplete>
               </span>
             </div>
           </div>
@@ -98,6 +101,7 @@
   import Textarea from "primevue/textarea";
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
+  import NodeCommentAutocomplete from "@/components/Node/NodeCommentAutocomplete.vue";
 
   import { Event } from "@/services/api/event";
   import { NodeComment } from "@/services/api/nodeComment";
@@ -301,6 +305,10 @@
   const newEventSelected = computed(() => {
     return selectedEventStatusOption.value === 0;
   });
+
+  const recentCommentClicked = (comment: string) => {
+    newEventComment.value = comment;
+  };
 
   const handleError = () => {
     error.value = undefined;
