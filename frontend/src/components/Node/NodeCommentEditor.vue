@@ -42,6 +42,9 @@
         data-cy="updated-comment-value"
       />
     </div>
+    <NodeCommentAutocomplete
+      @comment-clicked="recentCommentClicked($event)"
+    ></NodeCommentAutocomplete>
     <div class="field col-fixed">
       <Button
         icon="pi pi-times"
@@ -65,6 +68,7 @@
   import Button from "primevue/button";
   import InputText from "primevue/inputtext";
   import NodeComment from "@/components/Node/NodeComment.vue";
+  import NodeCommentAutocomplete from "@/components/Node/NodeCommentAutocomplete.vue";
   import { nodeCommentRead } from "@/models/nodeComment";
 
   const props = defineProps({
@@ -99,5 +103,9 @@
       emit("update:modelValue", comments.value);
       closeEditCommentPanel();
     }
+  };
+
+  const recentCommentClicked = (comment: string) => {
+    editingCommentValue.value = comment;
   };
 </script>
