@@ -106,7 +106,7 @@ describe("NodeCommentEditor", () => {
       "be.visible",
     );
   });
-  it.only("correctly updates comment data when selecting from recent comments", () => {
+  it("correctly updates comment data when selecting from recent comments", () => {
     factory([
       commentReadFactory({ insertTime: new Date(2022, 4, 25, 12, 0, 0, 0) }),
     ]);
