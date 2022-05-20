@@ -15,16 +15,16 @@ def test_config_map():
 
     # test that default value works
     config = MyMap()
-    assert config.hello.foo == 'bar'
+    assert config.Hello.foo == 'bar'
 
     # test that override works
     d = {
-        'hello': {
+        'Hello': {
             'foo': 'world',
         },
     }
     config = MyMap(**d)
-    assert config.hello.foo == 'world'
+    assert config.Hello.foo == 'world'
 
     # add a required field to the config map
     class Required(BaseModel):

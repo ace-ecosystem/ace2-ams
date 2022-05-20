@@ -26,7 +26,7 @@ def test_observable():
         'value': 'bar',
         'metadata': [
             {
-                'type': 'tag',
+                'type': 'Tag',
                 'value': 'beep',
             },
         ],
@@ -48,3 +48,12 @@ def test_observable():
     assert observable.display_value == observable.value
     observable.add(DisplayValue, 'hello')
     assert observable.display_value == 'hello'
+
+    # test adding new observable type
+    class Hello(Observable):
+        def __init__(self, value, **kwargs):
+            super().__init__(self.type, value, **kwargs)
+    observable = Observable('Hello', 'world')
+    assert isinstance(observable, Hello)
+    assert observable.type == 'Hello'
+    assert observable.value == 'world'

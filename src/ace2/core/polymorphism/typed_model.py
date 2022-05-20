@@ -1,6 +1,5 @@
 from __future__ import annotations
 from pydantic import BaseModel, Field
-from .utility import camel_to_snake
 
 model_types = {}
 
@@ -40,8 +39,8 @@ class TypedModel(BaseModel):
         if base == cls:
             return
 
-        # use the snake case of the class name as the type
-        cls.type = camel_to_snake(cls.__name__)
+        # use the class name as the type
+        cls.type = cls.__name__
 
         # add a mapping dictionary for this base type if it does not already exist
         if base.__name__ not in model_types:

@@ -5,7 +5,7 @@ def test_uri_path():
     observable = UriPath('/yada/yada/yada')
 
     # verify attributes
-    assert observable.type == 'uri_path'
+    assert observable.type == 'UriPath'
     assert observable.value == '/yada/yada/yada'
 
     # save then load
@@ -14,5 +14,5 @@ def test_uri_path():
 
     # verify class instatnce
     assert isinstance(observable, UriPath)
-    assert observable.type == 'uri_path'
+    assert observable.type == 'UriPath'
     assert observable.value == '/yada/yada/yada'

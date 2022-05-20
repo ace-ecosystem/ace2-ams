@@ -1,6 +1,6 @@
 from .observable import Observable
 
-class Fqdn(Observable):
+class FQDN(Observable):
     ''' Observable that represents a fully qualified domain name '''
 
     def __init__(self, value:str, **kwargs):

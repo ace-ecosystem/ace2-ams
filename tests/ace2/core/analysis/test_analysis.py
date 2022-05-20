@@ -3,8 +3,8 @@ from ace2.core import *
 class MyAnalysis(Analysis):
     def execute(self, observable):
         # verify observable is passed correctly
-        assert isinstance(observable, Ipv4)
-        assert observable.type == 'ipv4'
+        assert isinstance(observable, IPv4)
+        assert observable.type == 'IPv4'
         assert observable.value == '127.0.0.1'
 
         # pretend that we submitted something to a sandbox or whatever
@@ -15,8 +15,8 @@ class MyAnalysis(Analysis):
 
     def get_results(self, observable):
         # verify observable is passed correctly
-        assert isinstance(observable, Ipv4)
-        assert observable.type == 'ipv4'
+        assert isinstance(observable, IPv4)
+        assert observable.type == 'IPv4'
         assert observable.value == '127.0.0.1'
 
         # make sure the state was kept
@@ -37,10 +37,10 @@ class MyAnalysis(Analysis):
         assert len(self.observables) == 1
 
         # add a typed child observble
-        observable = self.add(Ipv4, '127.0.0.1')
+        observable = self.add(IPv4, '127.0.0.1')
         assert len(self.observables) == 2
-        assert isinstance(observable, Ipv4)
-        assert observable.type == 'ipv4'
+        assert isinstance(observable, IPv4)
+        assert observable.type == 'IPv4'
         assert observable.value == '127.0.0.1'
 
         # set the summary
@@ -52,7 +52,7 @@ def test_analysis(monkeypatch, mock_datetime):
         'id': 1,
         'type': 'my_analysis',
         'target': {
-            'type': 'ipv4',
+            'type': 'IPv4',
             'value': '127.0.0.1',
         },
     }
@@ -65,7 +65,7 @@ def test_analysis(monkeypatch, mock_datetime):
         'id': 1,
         'type': 'my_analysis',
         'target': {
-            'type': 'ipv4',
+            'type': 'IPv4',
             'value': '127.0.0.1',
             'metadata': [],
         },
@@ -89,7 +89,7 @@ def test_analysis(monkeypatch, mock_datetime):
         'id': 1,
         'type': 'my_analysis',
         'target': {
-            'type': 'ipv4',
+            'type': 'IPv4',
             'value': '127.0.0.1',
             'metadata': [],
         },
@@ -104,7 +104,7 @@ def test_analysis(monkeypatch, mock_datetime):
                 'metadata': [],
             },
             {
-                'type': 'ipv4',
+                'type': 'IPv4',
                 'value': '127.0.0.1',
                 'metadata': [],
             },

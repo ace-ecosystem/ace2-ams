@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from pydantic.fields import ModelField
-from ..polymorphism.utility import camel_to_snake
 
 class ConfigMap(BaseModel):
     ''' Base class for creating config sections that are appended to at runtime '''
@@ -19,10 +18,10 @@ class ConfigMap(BaseModel):
         except:
             default = ...
 
-        # use snake case of class name as the field name and remove config from end
-        name = camel_to_snake(type.__name__)
-        if name.endswith('_config'):
-            name = name[:-len('_config')]
+        # use class name minus Config on the end as the field name
+        name = type.__name__
+        if name.endswith('Config'):
+            name = name[:-len('Config')]
 
         # add the field
         cls.__fields__[name] = ModelField.infer(

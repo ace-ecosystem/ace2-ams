@@ -25,13 +25,3 @@ def find_subclasses(name:str, file:str, base:type) -> dict:
             if isclass(attribute) and attribute != base and issubclass(attribute, base):
                 subclasses[attribute_name] = attribute
     return subclasses
-
-camel_case = re.compile(r'([a-z0-9])([A-Z])')
-def camel_to_snake(value:str) -> str:
-    ''' converts string value from camel case to snake case
-
-    Returns:
-        str: snake case version of the string value
-    '''
-
-    return camel_case.sub(r'\1_\2', value).lower()

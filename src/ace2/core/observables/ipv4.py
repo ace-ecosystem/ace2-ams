@@ -1,6 +1,6 @@
 from .observable import Observable
 
-class Ipv4(Observable):
+class IPv4(Observable):
     ''' Observable that represents an internet protocol version 4 address '''
 
     def __init__(self, value:str, **kwargs):

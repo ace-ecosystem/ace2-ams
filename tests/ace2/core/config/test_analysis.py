@@ -7,16 +7,16 @@ def test_analysis_config():
 
     # test default
     analysis = AnalysisConfigs()
-    assert analysis.my_analysis.foo == 'bar'
+    assert analysis.MyAnalysis.foo == 'bar'
 
     # test specified
     d = {
-        'my_analysis': {
+        'MyAnalysis': {
             'foo': 'hello',
         },
     }
     analysis = AnalysisConfigs(**d)
-    assert analysis.my_analysis.foo == 'hello'
+    assert analysis.MyAnalysis.foo == 'hello'
 
     # test required analysis config
     class MyRequiredAnalysisConfig(AnalysisConfig):
