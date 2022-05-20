@@ -37,27 +37,13 @@ class Analysis(TypedModel):
         # call the current callback function which then tells us what to execute after that
         self.callback = self.callback.execute(self, self.target)
 
+        # submit analysis if complete
+        if self.callback is None:
+            analysis = self.dict(exclude={'callback', 'state'})
+            # TODO: submit the analysis sans callback and state
+
         # return the dictionary representation of the analysis
         return self.dict()
-
-    @classmethod
-    def submit(cls, state:dict, context:dict):
-        ''' AWS Lambda function handler for running the analysis
-
-        Args:
-            state (dict): the current analysis state
-            context (dict): the context object passed from AWS
-
-        Returns:
-            dict: the updated analysis state
-        '''
-        # load the analusis from the state
-        self = cls(**state)
-
-        # save the analysis excluding non analysis fields
-        analysis = self.dict(exclude={'callback', 'state'})
-
-        # TODO: submit the analysis to the db api
 
     def add(self, observable_type:Type[Observable], *args, **kwargs) -> Observable:
         ''' Adds an observable to the analysis. If the observable is already in the analysis then the metadata is merged
