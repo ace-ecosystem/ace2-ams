@@ -30,6 +30,9 @@ function factory(
             selectedAlertStore: {
               selected: args.selected,
             },
+            recentCommentsStore: {
+              recentComments: ["test"],
+            },
           },
         }),
       ],
@@ -147,6 +150,34 @@ describe("DispositionModal", () => {
     cy.findAllByPlaceholderText("Add a comment...")
       .click()
       .type("Test comment");
+    cy.contains("Save").click();
+    cy.get("@setDisposition").should("have.been.calledOnce");
+    cy.get("@createComment").should("have.been.calledOnce");
+    cy.get("[data-cy=DispositionModal]").should("not.exist");
+  });
+  it("attempts to set disposition and create comment when save button clicked and comment is given using NodeCommentAutocomplete", () => {
+    cy.stub(Alert, "update")
+      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .as("setDisposition")
+      .resolves();
+    cy.stub(NodeComment, "create")
+      .withArgs([
+        {
+          username: "analyst",
+          nodeUuid: "uuid",
+          value: "test extra content",
+        },
+      ])
+      .as("createComment")
+      .resolves();
+    factory({
+      dipsositions: [falsePositive, badDisposition],
+      selected: ["uuid"],
+    });
+    cy.contains("Bad").click();
+    cy.get(".p-autocomplete > .p-button").click();
+    cy.contains("test").click();
+    cy.findByDisplayValue("test").click().type(" extra content");
     cy.contains("Save").click();
     cy.get("@setDisposition").should("have.been.calledOnce");
     cy.get("@createComment").should("have.been.calledOnce");

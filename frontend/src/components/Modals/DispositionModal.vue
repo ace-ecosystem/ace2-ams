@@ -32,6 +32,9 @@
           cols="30"
           placeholder="Add a comment..."
         />
+        <NodeCommentAutocomplete
+          @comment-clicked="recentCommentClicked($event)"
+        ></NodeCommentAutocomplete>
       </div>
     </div>
 
@@ -68,6 +71,7 @@
   import AlertDispositionTag from "@/components/Alerts/AlertDispositionTag.vue";
 
   import { NodeComment } from "@/services/api/nodeComment";
+  import NodeCommentAutocomplete from "@/components/Node/NodeCommentAutocomplete.vue";
 
   import { useAlertDispositionStore } from "@/stores/alertDisposition";
   import { useAlertStore } from "@/stores/alert";
@@ -152,6 +156,10 @@
     }
     return false;
   });
+
+  const recentCommentClicked = (comment: string) => {
+    dispositionComment.value = comment;
+  };
 
   const handleError = () => {
     error.value = undefined;
