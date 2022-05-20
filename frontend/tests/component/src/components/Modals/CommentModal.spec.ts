@@ -59,7 +59,7 @@ describe("CommentModal", () => {
     factory({ selected: ["uuid"] });
     cy.findAllByText("Add").parent().should("be.disabled");
   });
-  it.only("correctly makes request to create comment upon adding comment text via NodeCommentAutocomplete and submit", () => {
+  it("correctly makes request to create comment upon adding comment text via NodeCommentAutocomplete and submit", () => {
     cy.stub(NodeComment, "create")
       .withArgs([
         {
