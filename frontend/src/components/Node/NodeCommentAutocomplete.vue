@@ -6,6 +6,7 @@
       :dropdown="true"
       :disabled="!recentCommentStore.recentComments.length"
       force-selection
+      auto-highlight
       @complete="searchComment($event)"
       @item-select="itemSelect($event.value)"
     >
@@ -61,7 +62,10 @@
   });
 
   const itemSelect = (comment: string) => {
-    emit("commentClicked", comment);
+    if (recentCommentStore.recentComments.includes(selected.value)) {
+      emit("commentClicked", comment);
+    }
+    selected.value = undefined;
   };
 
   const removeComment = (comment: string) => {

@@ -57,7 +57,7 @@ describe("NodeCommentAutocomplete", () => {
       cy.contains("Choose a recent comment").should("be.visible");
       cy.get(".p-button").click();
       cy.contains("example").click();
-      cy.get("input").should("have.value", "example");
+      cy.get("input").should("have.value", "");
       expect("commentClicked" in wrapper.emitted());
       expect(wrapper.emitted()["commentClicked"] === "example");
     });
