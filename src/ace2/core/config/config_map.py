@@ -28,6 +28,4 @@ class ConfigMap(BaseModel):
             name = name,
             value = default,
             annotation = type,
-            class_validators = None,
-            config = cls.__config__
         )
