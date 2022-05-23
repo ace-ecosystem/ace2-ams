@@ -81,10 +81,12 @@
   import { propertyOption } from "@/models/base";
   import { nodeCommentRead } from "@/models/nodeComment";
   import { populateEventStores } from "@/stores/helpers";
+  import { useRecentCommentsStore } from "@/stores/recentComments";
 
   const authStore = useAuthStore();
   const modalStore = useModalStore();
   const eventStore = useEventStore();
+  const recentCommentsStore = useRecentCommentsStore();
 
   const props = defineProps({
     name: { type: String, required: true },
@@ -230,6 +232,7 @@
           username: authStore.user.username,
           value: comment.value,
         });
+        recentCommentsStore.addComment(comment.value!);
       }
     }
   };
