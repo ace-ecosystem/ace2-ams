@@ -2,7 +2,7 @@ from __future__ import annotations
 from pydantic import Field
 from typing import List, Optional
 from ..metadata import *
-from ..polymorphism import TypedModel
+from ..utility.polymorphism import TypedModel
 
 class Observable(TypedModel):
     ''' Default observable class '''

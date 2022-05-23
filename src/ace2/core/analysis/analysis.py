@@ -3,7 +3,7 @@ from typing import List, Optional, Type
 import sys
 from ..callback import Callback
 from ..observables import Observable
-from ..polymorphism import TypedModel
+from ..utility.polymorphism import TypedModel
 
 class Analysis(TypedModel):
     ''' Base Analysis class for building ICE2 analysis '''
