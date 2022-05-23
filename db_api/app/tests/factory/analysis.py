@@ -1,3 +1,5 @@
+import json
+
 from datetime import datetime
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -32,7 +34,7 @@ def create_or_read(
         model=AnalysisCreate(
             analysis_module_type_uuid=analysis_module_type.uuid,
             child_observables=child_observables,
-            details=details,
+            details=json.dumps(details),
             error_message=error_message,
             run_time=run_time,
             stack_trace=stack_trace,

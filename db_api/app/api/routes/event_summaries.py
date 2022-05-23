@@ -27,107 +27,15 @@ from db.schemas.observable_type import ObservableType
 
 
 def get_detection_point_summary(uuid: UUID, db: Session = Depends(get_db)):
-    # # Get the event from the database
-    # event: Event = crud.read(uuid=uuid, db_table=Event, db=db)
-
-    # # Get all the detection points (and their parent NodeTree UUIDs) performed in the event.
-    # # The query results are turned into a dictionary with the parent NodeTree UUID as the key.
-    # query = (
-    #     select([NodeTree.root_node_uuid, NodeDetectionPoint])
-    #     .select_from(join(NodeTree, Node, NodeTree.node_uuid == Node.uuid))
-    #     .join(
-    #         NodeDetectionPoint,
-    #         onclause=and_(
-    #             NodeDetectionPoint.node_uuid == NodeTree.node_uuid,
-    #             NodeTree.root_node_uuid.in_(event.alert_uuids),
-    #         ),
-    #     )
-    # )
-
-    # alert_uuid_and_detection: List[Tuple[UUID, NodeDetectionPoint]] = db.execute(query).unique().fetchall()
-
-    # # Loop through the database results to count the number of times each detection point value occurred
-    # results: Dict[str, NodeDetectionPoint] = dict()
-    # for alert_uuid, detection_point in alert_uuid_and_detection:
-    #     if detection_point.value not in results:
-    #         results[detection_point.value] = detection_point
-    #         results[detection_point.value].count = 1
-    #         results[detection_point.value].alert_uuid = alert_uuid
-    #     else:
-    #         results[detection_point.value].count += 1
-
-    # # Return the summaries sorted by their values
-    # return sorted(results.values(), key=lambda x: x.value)
-    return []
+    return crud.event.read_summary_detection_point(uuid=uuid, db=db)
 
 
 def get_email_headers_body_summary(uuid: UUID, db: Session = Depends(get_db)):
-    # # Get the event from the database
-    # event: Event = crud.read(uuid=uuid, db_table=Event, db=db)
-
-    # # Get all the email analyses (and their root Node UUIDs) performed in the event.
-    # query = (
-    #     select([NodeTree.root_node_uuid, Analysis])
-    #     .select_from(join(NodeTree, Node, NodeTree.node_uuid == Node.uuid))
-    #     .join(
-    #         Analysis,
-    #         onclause=and_(
-    #             Node.node_type == "analysis",
-    #             Analysis.uuid == NodeTree.node_uuid,
-    #             Analysis.analysis_module_type.has(AnalysisModuleType.value == "Email Analysis"),
-    #             NodeTree.root_node_uuid.in_(event.alert_uuids),
-    #         ),
-    #     )
-    #     .options(Load(Analysis).undefer("details"))
-    # )
-
-    # alert_uuid_and_analysis: List[Tuple[UUID, Analysis]] = db.execute(query).unique().fetchall()
-
-    # # Return the headers and body of the earliest email in the event
-    # if alert_uuid_and_analysis:
-    #     sorted_alert_and_analysis = sorted(alert_uuid_and_analysis, key=lambda x: x[1].details["time"])
-    #     return EmailHeadersBody(**sorted_alert_and_analysis[0][1].details, alert_uuid=sorted_alert_and_analysis[0][0])
-    return None
+    return crud.event.read_summary_email_headers_body(uuid=uuid, db=db)
 
 
 def get_email_summary(uuid: UUID, db: Session = Depends(get_db)):
-    # # Get the event from the database
-    # event: Event = crud.read(uuid=uuid, db_table=Event, db=db)
-
-    # # Get all the email analyses (and their root Node UUIDs) performed in the event.
-    # query = (
-    #     select([NodeTree.root_node_uuid, Analysis])
-    #     .select_from(join(NodeTree, Node, NodeTree.node_uuid == Node.uuid))
-    #     .join(
-    #         Analysis,
-    #         onclause=and_(
-    #             Node.node_type == "analysis",
-    #             Analysis.uuid == NodeTree.node_uuid,
-    #             Analysis.analysis_module_type.has(AnalysisModuleType.value == "Email Analysis"),
-    #             NodeTree.root_node_uuid.in_(event.alert_uuids),
-    #         ),
-    #     )
-    #     .options(Load(Analysis).undefer("details"))
-    # )
-
-    # alert_uuid_and_analysis: List[Tuple[UUID, Analysis]] = db.execute(query).unique().fetchall()
-
-    # # Build a list of EmailSummary objects from the unique email analyses
-    # results: List[EmailSummary] = []
-    # unique_emails = []
-    # for alert_uuid, analysis in alert_uuid_and_analysis:
-    #     # Skip this email if it is a duplicate
-    #     details_hash = DeepHash(analysis.details)[analysis.details]
-    #     if details_hash in unique_emails:
-    #         continue
-    #     else:
-    #         unique_emails.append(details_hash)
-
-    #     results.append(EmailSummary(**analysis.details, alert_uuid=alert_uuid))
-
-    # # Return the summaries by the email time
-    # return sorted(results, key=lambda x: x.time)
-    return []
+    return crud.event.read_summary_email(uuid=uuid, db=db)
 
 
 def get_observable_summary(uuid: UUID, db: Session = Depends(get_db)):

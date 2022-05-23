@@ -153,28 +153,9 @@ def get_all_events(
 
 def get_event(uuid: UUID, db: Session = Depends(get_db)):
     try:
-        return crud.event.read_by_uuid(uuid=uuid, db=db)
+        return crud.event.read_by_uuid(uuid=uuid, db=db, inject_analysis_types=True)
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Alert {uuid} does not exist") from e
-
-    # # Figure out which analysis types are in the event
-    # query = (
-    #     select(AnalysisModuleType)
-    #     .join(Analysis, onclause=Analysis.analysis_module_type_uuid == AnalysisModuleType.uuid)
-    #     .join(NodeTree, onclause=NodeTree.node_uuid == Analysis.uuid)
-    #     .join(Alert, onclause=Alert.uuid == NodeTree.root_node_uuid)
-    #     .where(Alert.event_uuid == uuid)
-    #     .distinct()
-    #     .order_by(AnalysisModuleType.value)
-    # )
-
-    # results: List[AnalysisModuleType] = db.execute(query).scalars().all()
-
-    # # Inject the analysis type values into the event object
-    # event.analysis_types = [x.value for x in results]
-    event.analysis_types = []
-
-    return event
 
 
 def get_event_history(uuid: UUID, db: Session = Depends(get_db)):

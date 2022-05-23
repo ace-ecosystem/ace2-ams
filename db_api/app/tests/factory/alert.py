@@ -129,6 +129,7 @@ def create(
             db=db,
         )
 
+    db.commit()
     return alert
 
 

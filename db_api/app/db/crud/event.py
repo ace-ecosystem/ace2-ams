@@ -1,14 +1,20 @@
 from datetime import datetime
+from deepdiff import DeepHash
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
-from typing import Optional
+from typing import Optional, Tuple
 from uuid import UUID
 
 from api_models.event import EventCreate, EventUpdate
+from api_models.event_summaries import DetectionSummary, EmailHeadersBody, EmailSummary
 from db import crud
 from db.schemas.alert import Alert, AlertHistory
+from db.schemas.alert_analysis_mapping import alert_analysis_mapping
 from db.schemas.alert_disposition import AlertDisposition
+from db.schemas.analysis import Analysis
+from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
+from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.event import Event
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_remediation import EventRemediation
@@ -18,6 +24,12 @@ from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
 from db.schemas.node import Node
+from db.schemas.node_detection_point import NodeDetectionPoint
+from db.schemas.node_tag import NodeTag
+from db.schemas.node_threat import NodeThreat
+from db.schemas.node_threat_actor import NodeThreatActor
+from db.schemas.observable import Observable
+from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.user import User
 
@@ -135,43 +147,55 @@ def build_read_all_query(
         name_query = select(Event).where(Event.name.ilike(f"%{name}%"))
         query = _join_as_subquery(query, name_query)
 
-    # if observable:
-    #     observable_split = observable.split("|", maxsplit=1)
-    #     observable_query = (
-    #         select(Event)
-    #         .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-    #         .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
-    #         .join(Observable, onclause=Observable.uuid == NodeTree.node_uuid)
-    #         .join(ObservableType)
-    #         .where(ObservableType.value == observable_split[0], Observable.value == observable_split[1])
-    #     )
+    if observable:
+        observable_split = observable.split("|", maxsplit=1)
+        observable_types_query = (
+            select(Event)
+            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
+            .join(alert_analysis_mapping, onclause=alert_analysis_mapping.c.alert_uuid == Alert.uuid)
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid == alert_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .join(ObservableType)
+            .where(ObservableType.value == observable_split[0], Observable.value == observable_split[1])
+        )
 
-    #     query = _join_as_subquery(query, observable_query)
+        query = _join_as_subquery(query, observable_types_query)
 
-    # if observable_types:
-    #     type_filters = [func.count(1).filter(ObservableType.value == t) > 0 for t in observable_types.split(",")]
-    #     observable_types_query = (
-    #         select(Event)
-    #         .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-    #         .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
-    #         .join(Observable, onclause=Observable.uuid == NodeTree.node_uuid)
-    #         .join(ObservableType)
-    #         .having(and_(*type_filters))
-    #         .group_by(Event.uuid, Node.uuid)
-    #     )
+    if observable_types:
+        type_filters = [func.count(1).filter(ObservableType.value == t) > 0 for t in observable_types.split(",")]
+        observable_types_query = (
+            select(Event)
+            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
+            .join(alert_analysis_mapping, onclause=alert_analysis_mapping.c.alert_uuid == Alert.uuid)
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid == alert_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .join(ObservableType)
+            .having(and_(*type_filters))
+            .group_by(Event.uuid, Node.uuid)
+        )
 
-    #     query = _join_as_subquery(query, observable_types_query)
+        query = _join_as_subquery(query, observable_types_query)
 
-    # if observable_value:
-    #     observable_value_query = (
-    #         select(Event)
-    #         .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-    #         .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
-    #         .join(Observable, onclause=Observable.uuid == NodeTree.node_uuid)
-    #         .where(Observable.value == observable_value)
-    #     )
+    if observable_value:
+        observable_value_query = (
+            select(Event)
+            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
+            .join(alert_analysis_mapping, onclause=alert_analysis_mapping.c.alert_uuid == Alert.uuid)
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid == alert_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .where(Observable.value == observable_value)
+        )
 
-    #     query = _join_as_subquery(query, observable_value_query)
+        query = _join_as_subquery(query, observable_value_query)
 
     if owner:
         owner_query = select(Event).join(User, onclause=Event.owner_uuid == User.uuid).where(User.username == owner)
@@ -217,64 +241,47 @@ def build_read_all_query(
         status_query = select(Event).join(EventStatus).where(EventStatus.value == status)
         query = _join_as_subquery(query, status_query)
 
-    # if tags:
-    #     tag_filters = [func.count(1).filter(NodeTag.value == t) > 0 for t in tags.split(",")]
-    #     tags_query = (
-    #         select(Event)
-    #         .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-    #         .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
-    #         .join(
-    #             node_tag_mapping,
-    #             onclause=or_(
-    #                 node_tag_mapping.c.node_uuid == Event.uuid, node_tag_mapping.c.node_uuid == NodeTree.node_uuid
-    #             ),
-    #         )
-    #         .join(NodeTag, onclause=NodeTag.uuid == node_tag_mapping.c.tag_uuid)
-    #         .having(and_(*tag_filters))
-    #         .group_by(Event.uuid, Node.uuid)
-    #     )
+    if tags:
+        tag_filters = []
+        for tag in tags.split(","):
+            tag_filters.append(
+                or_(
+                    Event.tags.any(NodeTag.value == tag),
+                    Event.alerts.any(Alert.tags.any(NodeTag.value == tag)),
+                    Event.alerts.any(Alert.child_tags.any(NodeTag.value == tag)),
+                )
+            )
+        tags_query = select(Event).where(and_(*tag_filters))
 
-    #     query = _join_as_subquery(query, tags_query)
+        query = _join_as_subquery(query, tags_query)
 
-    # if threat_actors:
-    #     threat_actor_filters = [func.count(1).filter(NodeThreatActor.value == t) > 0 for t in threat_actors.split(",")]
-    #     threat_actor_query = (
-    #         select(Event)
-    #         .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-    #         .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
-    #         .join(
-    #             node_threat_actor_mapping,
-    #             onclause=or_(
-    #                 node_threat_actor_mapping.c.node_uuid == Event.uuid,
-    #                 node_threat_actor_mapping.c.node_uuid == NodeTree.node_uuid,
-    #             ),
-    #         )
-    #         .join(NodeThreatActor, onclause=NodeThreatActor.uuid == node_threat_actor_mapping.c.threat_actor_uuid)
-    #         .having(and_(*threat_actor_filters))
-    #         .group_by(Event.uuid, Node.uuid)
-    #     )
+    if threat_actors:
+        threat_actor_filters = []
+        for threat in threat_actors.split(","):
+            threat_actor_filters.append(
+                or_(
+                    Event.threat_actors.any(NodeThreatActor.value == threat),
+                    Event.alerts.any(Alert.threat_actors.any(NodeThreatActor.value == threat)),
+                    Event.alerts.any(Alert.child_threat_actors.any(NodeThreatActor.value == threat)),
+                )
+            )
+        threat_actors_query = select(Event).where(and_(*threat_actor_filters))
 
-    #     query = _join_as_subquery(query, threat_actor_query)
+        query = _join_as_subquery(query, threat_actors_query)
 
-    # if threats:
-    #     threat_filters = [func.count(1).filter(NodeThreat.value == t) > 0 for t in threats.split(",")]
-    #     threat_query = (
-    #         select(Event)
-    #         .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-    #         .join(NodeTree, onclause=NodeTree.root_node_uuid == Alert.uuid)
-    #         .join(
-    #             node_threat_mapping,
-    #             onclause=or_(
-    #                 node_threat_mapping.c.node_uuid == Event.uuid,
-    #                 node_threat_mapping.c.node_uuid == NodeTree.node_uuid,
-    #             ),
-    #         )
-    #         .join(NodeThreat, onclause=NodeThreat.uuid == node_threat_mapping.c.threat_uuid)
-    #         .having(and_(*threat_filters))
-    #         .group_by(Event.uuid, Node.uuid)
-    #     )
+    if threats:
+        threat_filters = []
+        for threat in threats.split(","):
+            threat_filters.append(
+                or_(
+                    Event.threats.any(NodeThreat.value == threat),
+                    Event.alerts.any(Alert.threats.any(NodeThreat.value == threat)),
+                    Event.alerts.any(Alert.child_threats.any(NodeThreat.value == threat)),
+                )
+            )
+        threats_query = select(Event).where(and_(*threat_filters))
 
-    #     query = _join_as_subquery(query, threat_query)
+        query = _join_as_subquery(query, threats_query)
 
     if type:
         type_query = select(Event).join(EventType).where(EventType.value == type)
@@ -384,8 +391,122 @@ def create_or_read(model: EventCreate, db: Session) -> Event:
     return obj
 
 
-def read_by_uuid(uuid: UUID, db: Session) -> Event:
-    return crud.helpers.read_by_uuid(db_table=Event, uuid=uuid, db=db)
+def read_by_uuid(uuid: UUID, db: Session, inject_analysis_types: bool = False) -> Event:
+    obj = crud.helpers.read_by_uuid(db_table=Event, uuid=uuid, db=db)
+
+    if inject_analysis_types:
+        query = (
+            select(AnalysisModuleType)
+            .join(Analysis, onclause=Analysis.analysis_module_type_uuid == AnalysisModuleType.uuid)
+            .join(alert_analysis_mapping, onclause=alert_analysis_mapping.c.analysis_uuid == Analysis.uuid)
+            .join(Alert, onclause=Alert.uuid == alert_analysis_mapping.c.alert_uuid)
+            .where(Alert.event_uuid == uuid)
+            .order_by(AnalysisModuleType.value)
+            .distinct()
+        )
+
+        analysis_types: list[AnalysisModuleType] = db.execute(query).scalars().all()
+        obj.analysis_types = [x.value for x in analysis_types]
+
+    return obj
+
+
+def read_summary_detection_point(uuid: UUID, db: Session) -> list[DetectionSummary]:
+    # Get all the detection points (and their parent alert UUIDs) performed in the event.
+    # The query results are turned into a dictionary with the parent alert UUID as the key.
+    query = (
+        select([Alert.uuid, NodeDetectionPoint])
+        .join(Observable, onclause=Observable.uuid == NodeDetectionPoint.node_uuid)
+        .join(
+            analysis_child_observable_mapping,
+            onclause=analysis_child_observable_mapping.c.observable_uuid == Observable.uuid,
+        )
+        .join(
+            alert_analysis_mapping,
+            onclause=alert_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid,
+        )
+        .join(Alert, onclause=and_(Alert.uuid == alert_analysis_mapping.c.alert_uuid, Alert.event_uuid == uuid))
+    )
+
+    alert_uuid_and_detection: list[Tuple[UUID, NodeDetectionPoint]] = db.execute(query).unique().all()
+
+    # Loop through the database results to count the number of times each detection point value occurred
+    results: dict[UUID, DetectionSummary] = {}
+    for alert_uuid, detection_point in alert_uuid_and_detection:
+        if detection_point.value not in results:
+            results[detection_point.value] = detection_point
+            results[detection_point.value].count = 1
+            results[detection_point.value].alert_uuid = alert_uuid
+        else:
+            results[detection_point.value].count += 1
+
+    # Return the summaries sorted by their values
+    return sorted(results.values(), key=lambda x: x.value)
+
+
+def read_summary_email(uuid: UUID, db: Session) -> list[EmailSummary]:
+    # Get all the email analyses (and their parent alert UUIDs) performed in the event.
+    query = (
+        select([Alert.uuid, Analysis])
+        .join(
+            alert_analysis_mapping,
+            onclause=alert_analysis_mapping.c.analysis_uuid == Analysis.uuid,
+        )
+        .join(
+            AnalysisModuleType,
+            onclause=and_(
+                AnalysisModuleType.uuid == Analysis.analysis_module_type_uuid,
+                AnalysisModuleType.value == "Email Analysis",
+            ),
+        )
+        .join(Alert, onclause=and_(Alert.uuid == alert_analysis_mapping.c.alert_uuid, Alert.event_uuid == uuid))
+    )
+
+    alert_uuid_and_analysis: list[Tuple[UUID, Analysis]] = db.execute(query).unique().all()
+
+    # Build a list of EmailSummary objects from the unique email analyses
+    results: list[EmailSummary] = []
+    unique_emails = []
+    for alert_uuid, analysis in alert_uuid_and_analysis:
+        # Skip this email if it is a duplicate
+        details_hash = DeepHash(analysis.details)[analysis.details]
+        if details_hash in unique_emails:
+            continue
+        else:
+            unique_emails.append(details_hash)
+
+        results.append(EmailSummary(**analysis.details, alert_uuid=alert_uuid))
+
+    # Return the summaries by the email time
+    return sorted(results, key=lambda x: x.time)
+
+
+def read_summary_email_headers_body(uuid: UUID, db: Session) -> Optional[EmailHeadersBody]:
+    # Get all the email analyses (and their parent alert UUIDs) performed in the event.
+    query = (
+        select([Alert.uuid, Analysis])
+        .join(
+            alert_analysis_mapping,
+            onclause=alert_analysis_mapping.c.analysis_uuid == Analysis.uuid,
+        )
+        .join(
+            AnalysisModuleType,
+            onclause=and_(
+                AnalysisModuleType.uuid == Analysis.analysis_module_type_uuid,
+                AnalysisModuleType.value == "Email Analysis",
+            ),
+        )
+        .join(Alert, onclause=and_(Alert.uuid == alert_analysis_mapping.c.alert_uuid, Alert.event_uuid == uuid))
+    )
+
+    alert_uuid_and_analysis: list[Tuple[UUID, Analysis]] = db.execute(query).unique().all()
+
+    # Return the headers and body of the earliest email in the event
+    if alert_uuid_and_analysis:
+        sorted_alert_and_analysis = sorted(alert_uuid_and_analysis, key=lambda x: x[1].details["time"])
+        return EmailHeadersBody(**sorted_alert_and_analysis[0][1].details, alert_uuid=sorted_alert_and_analysis[0][0])
+
+    return None
 
 
 def update(uuid: UUID, model: EventUpdate, db: Session):
