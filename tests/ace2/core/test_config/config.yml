@@ -1,0 +1,9 @@
+somedict:
+    key:
+        foo: "bar"
+
+# a comment
+somelist:
+  - 1
+  - 2
+  - 3

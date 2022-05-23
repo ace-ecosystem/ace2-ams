@@ -29,9 +29,40 @@ def find_subclasses(name:str, file:str, base:type) -> dict:
                 subclasses[attribute_name] = attribute
     return subclasses
 
+class Private():
+    ''' container class for model's private attributes '''
+
+    def __getattr__(self, name):
+        ''' changes get attribute behavior to return None if the attribute does not exist
+
+        Args:
+            name (str): the name of the attribute to get
+        '''
+
+        # return the attribute if it exists
+        if name in self.__dict__:
+            return self.__dict__[name]
+
+        # return None if the attribute does not exist
+        return None
+
+class PrivateBaseModel(BaseModel):
+    ''' BaseModel with a private attribute for storing private attributes '''
+
+    # pydantic uses some thing called slots to have attributes that are not in the model
+    __slots__ = ('private',)
+
+    def __init__(self, **kwargs):
+        ''' initializes the Model with a private attribute for storing private attributes '''
+
+        # init the model
+        super().__init__(**kwargs)
+
+        # add the private attribute for storing private attributes
+        object.__setattr__(self, 'private', Private())
 
 model_types = {}
-class TypedModel(BaseModel):
+class TypedModel(PrivateBaseModel):
     ''' Model class that allows for polymorphic subclass loading '''
 
     type: str = Field(description='the type string used to identify sub types')
