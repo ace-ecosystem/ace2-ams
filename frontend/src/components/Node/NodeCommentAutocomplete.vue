@@ -41,7 +41,7 @@
   const recentCommentStore = useRecentCommentsStore();
   const filteredComments = ref<string[]>();
 
-  const searchComment = (event) => {
+  const searchComment = (event: { query: string }) => {
     setTimeout(() => {
       if (!event.query.trim().length) {
         filteredComments.value = [...recentCommentStore.recentComments];
@@ -56,13 +56,19 @@
   };
 
   watch(recentCommentStore, () => {
-    if (!recentCommentStore.recentComments.includes(selected.value)) {
+    if (
+      selected.value &&
+      !recentCommentStore.recentComments.includes(selected.value)
+    ) {
       selected.value = undefined;
     }
   });
 
   const itemSelect = (comment: string) => {
-    if (recentCommentStore.recentComments.includes(selected.value)) {
+    if (
+      selected.value &&
+      recentCommentStore.recentComments.includes(selected.value)
+    ) {
       emit("commentClicked", comment);
     }
     selected.value = undefined;
@@ -70,6 +76,10 @@
 
   const removeComment = (comment: string) => {
     recentCommentStore.removeComment(comment);
-    filteredComments.value = filteredComments.value.filter((c) => c != comment);
+    if (filteredComments.value) {
+      filteredComments.value = filteredComments.value.filter(
+        (c) => c != comment,
+      );
+    }
   };
 </script>
