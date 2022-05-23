@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pydantic import Field
-from ..utility.polymorphism import TypedModel
+from ..models import TypedModel
 
 class Metadata(TypedModel):
     ''' base metadata class '''

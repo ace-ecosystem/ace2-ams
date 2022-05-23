@@ -1,8 +1,9 @@
 import datetime
-from pydantic import BaseModel, Field, validator
+from pydantic import Field, validator
 from typing import Union, Optional
+from .models import PrivateModel
 
-class Callback(BaseModel):
+class Callback(PrivateModel):
     ''' The Callback class is used to execute a function sometime in the future '''
 
     method: str = Field(description='the name of the method to call when the callback is executed')

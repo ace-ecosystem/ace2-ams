@@ -1,4 +1,4 @@
-from ace2.core.utility.polymorphism import TypedModel
+from ace2.core.models import TypedModel
 
 class Foo(TypedModel):
     pass

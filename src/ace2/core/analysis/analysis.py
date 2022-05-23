@@ -1,10 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 from typing import List, Optional, Type
 import sys
 from .. import config
 from ..callback import Callback
 from ..observables import Observable
-from ..utility.polymorphism import TypedModel
+from ..models import TypedModel, PrivateModel
 
 class Analysis(TypedModel):
     ''' Base Analysis class for building ICE2 analysis '''
@@ -20,7 +20,7 @@ class Analysis(TypedModel):
         description='callback to execute when running analysis. If None then analysis is complete'
     )
 
-    class Config(BaseModel):
+    class Config(PrivateModel):
         ''' Subclasses can override the config class to add new config fields '''
         pass
 

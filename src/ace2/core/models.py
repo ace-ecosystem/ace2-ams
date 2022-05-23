@@ -5,14 +5,13 @@ from pathlib import Path
 from pkgutil import iter_modules
 from pydantic import BaseModel, Field
 import re
+import sys
 
-
-def find_subclasses(name:str, file:str, base:type) -> dict:
+def find(name:str, base:type) -> dict:
     ''' finds all subclasses of base in module (not recursive)
 
     Args:
         name (str): the name of the module we are importing from
-        file (str): the __init__.py file path to search the parent dir of
         base (type): the base class to search for subclasses of
 
     Returns:
@@ -20,11 +19,12 @@ def find_subclasses(name:str, file:str, base:type) -> dict:
     '''
 
     subclasses = {}
-    package_dir = Path(file).resolve().parent
+    module = sys.modules[name]
+    package_dir = Path(module.__file__).resolve().parent
     for (_, module_name, _) in iter_modules([package_dir]):
-        module = import_module(f"{name}.{module_name}")
-        for attribute_name in dir(module):
-            attribute = getattr(module, attribute_name)
+        sub_module = import_module(f"{module.__name__}.{module_name}")
+        for attribute_name in dir(sub_module):
+            attribute = getattr(sub_module, attribute_name)
             if isclass(attribute) and attribute != base and issubclass(attribute, base):
                 subclasses[attribute_name] = attribute
     return subclasses
@@ -46,7 +46,7 @@ class Private():
         # return None if the attribute does not exist
         return None
 
-class PrivateBaseModel(BaseModel):
+class PrivateModel(BaseModel):
     ''' BaseModel with a private attribute for storing private attributes '''
 
     # pydantic uses some thing called slots to have attributes that are not in the model
@@ -62,7 +62,7 @@ class PrivateBaseModel(BaseModel):
         object.__setattr__(self, 'private', Private())
 
 model_types = {}
-class TypedModel(PrivateBaseModel):
+class TypedModel(PrivateModel):
     ''' Model class that allows for polymorphic subclass loading '''
 
     type: str = Field(description='the type string used to identify sub types')
