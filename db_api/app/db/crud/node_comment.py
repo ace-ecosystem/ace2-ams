@@ -35,16 +35,15 @@ def create_or_read(model: NodeCommentCreate, db: Session) -> NodeComment:
 
 
 def delete(uuid: UUID, history_username: str, db: Session):
-    # Read the comment and Node from the database
+    # Read the comment from the database
     comment = read_by_uuid(uuid=uuid, db=db)
-    node = crud.node.read_by_uuid(uuid=comment.node_uuid, db=db)
 
     # Deleting the comment counts as modifying the Node, so it should receive a new version
-    node.version = uuid4()
+    comment.node.version = uuid4()
 
     # Add an entry to the appropriate node history table for deleting the comment
     crud.history.record_node_update_history(
-        record_node=node,
+        record_node=comment.node,
         action_by=crud.user.read_by_username(username=history_username, db=db),
         diffs=[crud.history.Diff(field="comments", added_to_list=[], removed_from_list=[comment.value])],
         db=db,
@@ -66,9 +65,8 @@ def read_by_uuid(uuid: UUID, db: Session) -> NodeComment:
 
 
 def update(uuid: UUID, model: NodeCommentUpdate, db: Session):
-    # Read the comment and Node from the database
+    # Read the comment from the database
     comment = read_by_uuid(uuid=uuid, db=db)
-    node = crud.node.read_by_uuid(uuid=comment.node_uuid, db=db)
 
     # Update the user and timestamp on the comment
     comment.user = crud.user.read_by_username(username=model.username, db=db)
@@ -79,11 +77,11 @@ def update(uuid: UUID, model: NodeCommentUpdate, db: Session):
     comment.value = model.value
 
     # Modifying the comment counts as modifying the Node, so it should receive a new version
-    node.version = uuid4()
+    comment.node.version = uuid4()
 
     # Add an entry to the appropriate node history table for updating the comment
     crud.history.record_node_update_history(
-        record_node=node,
+        record_node=comment.node,
         action_by=comment.user,
         diffs=[diff],
         db=db,

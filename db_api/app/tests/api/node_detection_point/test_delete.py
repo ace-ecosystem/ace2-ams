@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 """
@@ -33,14 +33,14 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete(client, db):
     # Create a detection point
-    alert_tree = helpers.create_alert(db=db, history_username="analyst")
-    observable = helpers.create_observable(
-        type="test_type", value="test_value", parent_tree=alert_tree, db=db, history_username="analyst"
+    alert = factory.alert.create(db=db, history_username="analyst")
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )
-    detection_point = helpers.create_node_detection_point(
-        node=observable.node, value="test", db=db, history_username="analyst"
+    detection_point = factory.node_detection_point.create_or_read(
+        node=observable, value="test", db=db, history_username="analyst"
     )
-    assert observable.node.detection_points[0].value == "test"
+    assert observable.detection_points[0].value == "test"
 
     # Delete it
     delete = client.delete(f"/api/node/detection_point/{detection_point.uuid}?history_username=analyst")
@@ -51,14 +51,14 @@ def test_delete(client, db):
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
     # And make sure the node no longer shows the detection point
-    assert len(observable.node.detection_points) == 0
+    assert len(observable.detection_points) == 0
 
     # Verify the history record
-    history = client.get(f"/api/observable/{observable.node_uuid}/history")
+    history = client.get(f"/api/observable/{observable.uuid}/history")
     assert history.json()["total"] == 3
     assert history.json()["items"][2]["action"] == "UPDATE"
     assert history.json()["items"][2]["action_by"]["username"] == "analyst"
-    assert history.json()["items"][2]["record_uuid"] == str(observable.node_uuid)
+    assert history.json()["items"][2]["record_uuid"] == str(observable.uuid)
     assert history.json()["items"][2]["field"] == "detection_points"
     assert history.json()["items"][2]["diff"]["old_value"] is None
     assert history.json()["items"][2]["diff"]["new_value"] is None

@@ -1,8 +1,12 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from uuid import UUID, uuid4
 
 from api_models.observable import ObservableCreate
 from db import crud
+from db.schemas.alert import Alert
+from db.schemas.alert_analysis_mapping import alert_analysis_mapping
+from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 
@@ -51,3 +55,36 @@ def read_by_type_value(type: str, value: str, db: Session) -> Observable:
         .scalars()
         .one()
     )
+
+
+def read_by_uuid(uuid: UUID, db: Session) -> Observable:
+    return crud.helpers.read_by_uuid(db_table=Observable, uuid=uuid, db=db)
+
+
+def update_version(uuid: UUID, db: Session):
+    """Updates the given observable's version as well as any alerts' versions that contain this observable"""
+
+    # Update the observable's version
+    observable = read_by_uuid(uuid=uuid, db=db)
+    observable.version = uuid4()
+
+    # Query the database for every alert that contains this observable
+    query = (
+        select(Alert)
+        .join(
+            alert_analysis_mapping,
+            onclause=alert_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid,
+        )
+        .join(
+            analysis_child_observable_mapping,
+            onclause=analysis_child_observable_mapping.c.observable_uuid == uuid,
+        )
+    )
+
+    alerts: list[Alert] = db.execute(query).unique().scalars().all()
+
+    # Update each alert's version
+    for alert in alerts:
+        alert.version = uuid4()
+
+    db.flush()

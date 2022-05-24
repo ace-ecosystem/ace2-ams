@@ -7,6 +7,9 @@ from db.schemas.node import Node
 
 
 def create_or_read(node: Node, value: str, db: Session, history_username: Optional[str] = None):
-    return crud.node_detection_point.create_or_read(
+    obj = crud.node_detection_point.create_or_read(
         model=NodeDetectionPointCreate(history_username=history_username, node_uuid=node.uuid, value=value), db=db
     )
+
+    db.commit()
+    return obj

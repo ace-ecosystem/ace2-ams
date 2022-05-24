@@ -32,6 +32,10 @@ class NodeDetectionPointRead(NodeDetectionPointBase):
 
 
 class NodeDetectionPointUpdate(BaseModel):
+    history_username: Optional[type_str] = Field(
+        description="If given, a history record will be created and associated with the user"
+    )
+
     # The only thing that makes sense to be able to update is the actual value of the detection point.
     # Otherwise, you would delete the detection point and create a new one.
     value: type_str = Field(description="The value of the detection point")
