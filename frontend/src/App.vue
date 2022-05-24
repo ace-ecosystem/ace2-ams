@@ -2,7 +2,7 @@
 <!-- Main Entrypoint to the app -->
 
 <template>
-  <TheHeader />
+  <TheHeader style="position: sticky; top: 0; z-index: 1" />
   <router-view />
 </template>
 

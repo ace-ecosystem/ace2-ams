@@ -7,36 +7,37 @@
       <Message severity="error" @close="handleError">{{ error }}</Message>
     </div>
   </div>
-  <Toolbar id="ActionToolbar" style="overflow-x: auto">
+  <Toolbar id="ActionToolbar">
     <template #start>
-      <slot name="start"></slot>
+      <slot name="start-left"></slot>
+      <!--      TAKE OWNERSHIP -- NO MODAL -->
+      <div v-if="props.takeOwnership">
+        <Button
+          data-cy="take-ownership-button"
+          :class="takeOwnershipClasses"
+          style="width: 180px"
+          icon="pi pi-briefcase"
+          :label="takeOwnershipText"
+          :disabled="!selectedStore.anySelected"
+          @click="takeOwnership"
+        />
+      </div>
       <!--      COMMENT -->
       <div v-if="props.comment">
         <Button
           data-cy="comment-button"
-          class="p-m-1 p-button-sm"
+          class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
           icon="pi pi-comment"
           label="Comment"
           @click="open('CommentModal')"
         />
         <CommentModal name="CommentModal" @request-reload="requestReload" />
       </div>
-      <!--      TAKE OWNERSHIP -- NO MODAL -->
-      <div v-if="props.takeOwnership">
-        <Button
-          data-cy="take-ownership-button"
-          class="p-m-1 p-button-sm"
-          icon="pi pi-briefcase"
-          label="Take Ownership"
-          :disabled="!selectedStore.anySelected"
-          @click="takeOwnership"
-        />
-      </div>
       <!--      ASSIGN -->
       <div v-if="props.assign">
         <Button
           data-cy="assign-button"
-          class="p-m-1 p-button-sm"
+          class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
           icon="pi pi-user"
           label="Assign"
           @click="open('AssignModal')"
@@ -47,7 +48,7 @@
       <div v-if="props.tag">
         <Button
           data-cy="tag-button"
-          class="p-m-1 p-button-sm"
+          class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
           icon="pi pi-tags"
           label="Tag"
           @click="open('TagModal')"
@@ -64,7 +65,8 @@
       <div v-if="props.removeTag">
         <Button
           data-cy="remove-tag-button"
-          class="p-m-1 p-button-sm"
+          class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
+          style="width: 142px"
           icon="pi pi-tags"
           label="Remove Tag(s)"
           @click="open('RemoveTagModal')"
@@ -77,6 +79,7 @@
           @request-reload="requestReload"
         />
       </div>
+      <slot name="start-right"></slot>
     </template>
     <template #end>
       <slot name="end"></slot>
@@ -85,7 +88,14 @@
 </template>
 
 <script setup lang="ts">
-  import { ref, defineProps, defineExpose, inject, PropType } from "vue";
+  import {
+    ref,
+    computed,
+    defineProps,
+    defineExpose,
+    inject,
+    PropType,
+  } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -149,6 +159,26 @@
       requestReload();
     }
   }
+
+  const ownedByCurrentUser = computed(() => {
+    if (props.reloadObject == "node" && nodeStore.open) {
+      if ("owner" in nodeStore.open) {
+        const authStore = useAuthStore();
+        return nodeStore.open.owner?.uuid == authStore.user.uuid;
+      }
+    }
+    return false;
+  });
+
+  const takeOwnershipText = computed(() => {
+    return ownedByCurrentUser.value ? "Assigned to you!" : "Take Ownership";
+  });
+
+  const takeOwnershipClasses = computed(() => {
+    return ownedByCurrentUser.value
+      ? ["p-m-1", "p-button-sm", "p-button-secondary", "p-button-outlined"]
+      : ["p-m-1", "p-button-normal", "p-button-secondary"];
+  });
 
   const requestReload = () => {
     if (props.reloadObject == "table") {

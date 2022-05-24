@@ -3,6 +3,7 @@ import PrimeVue from "primevue/config";
 
 import TheNodeActionToolbar from "@/components/Node/TheNodeActionToolbar.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
+import { alertTreeReadFactory } from "@mocks/alert";
 import { userReadFactory } from "@mocks/user";
 import CommentModalVue from "@/components/Modals/CommentModal.vue";
 
@@ -70,6 +71,18 @@ describe("TheNodeActionToolbar", () => {
         owner: "analyst",
       },
     ]);
+  });
+  it("displays correct alternate text if reloadObject is node, and the open node's owner is the current user", () => {
+    factory({
+      props: { reloadObject: "node" },
+      initialState: {
+        authStore: { user: userReadFactory() },
+        alertStore: {
+          open: alertTreeReadFactory({ owner: userReadFactory() }),
+        },
+      },
+    });
+    cy.contains("Assigned to you!").should("be.visible");
   });
   it("attempts to reload the node if the given 'reloadObject' is 'node'", () => {
     factory({

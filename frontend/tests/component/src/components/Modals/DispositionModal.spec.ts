@@ -1,15 +1,14 @@
 import { mount } from "@cypress/vue";
-import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 
 import DispositionModal from "@/components/Modals/DispositionModal.vue";
 import { alertDispositionRead } from "@/models/alertDisposition";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import SaveToEventModalVue from "@/components/Modals/SaveToEventModal.vue";
 import { Alert } from "@/services/api/alert";
 import { NodeComment } from "@/services/api/nodeComment";
 import { userReadFactory } from "@mocks/user";
+import { testConfiguration } from "@/etc/configuration/test";
 
 function factory(
   args: { dipsositions: alertDispositionRead[]; selected: string[] } = {
@@ -31,11 +30,15 @@ function factory(
             selectedAlertStore: {
               selected: args.selected,
             },
+            recentCommentsStore: {
+              recentComments: ["test"],
+            },
           },
         }),
       ],
       provide: {
         nodeType: "alerts",
+        config: testConfiguration,
       },
     },
     propsData: {
@@ -147,6 +150,34 @@ describe("DispositionModal", () => {
     cy.findAllByPlaceholderText("Add a comment...")
       .click()
       .type("Test comment");
+    cy.contains("Save").click();
+    cy.get("@setDisposition").should("have.been.calledOnce");
+    cy.get("@createComment").should("have.been.calledOnce");
+    cy.get("[data-cy=DispositionModal]").should("not.exist");
+  });
+  it("attempts to set disposition and create comment when save button clicked and comment is given using NodeCommentAutocomplete", () => {
+    cy.stub(Alert, "update")
+      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .as("setDisposition")
+      .resolves();
+    cy.stub(NodeComment, "create")
+      .withArgs([
+        {
+          username: "analyst",
+          nodeUuid: "uuid",
+          value: "test extra content",
+        },
+      ])
+      .as("createComment")
+      .resolves();
+    factory({
+      dipsositions: [falsePositive, badDisposition],
+      selected: ["uuid"],
+    });
+    cy.contains("Bad").click();
+    cy.get(".p-autocomplete > .p-button").click();
+    cy.contains("test").click();
+    cy.findByDisplayValue("test").click().type(" extra content");
     cy.contains("Save").click();
     cy.get("@setDisposition").should("have.been.calledOnce");
     cy.get("@createComment").should("have.been.calledOnce");

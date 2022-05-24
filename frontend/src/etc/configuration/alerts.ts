@@ -23,6 +23,10 @@ import {
   nodeThreatActorProperty,
   nodeThreatsProperty,
   queueProperty,
+  BLUE,
+  GREEN,
+  ORANGE,
+  RED,
 } from "@/etc/constants/common";
 
 const defaultAlertFilters = [
@@ -71,3 +75,23 @@ export const alertRangeFilters = {
 
 export const FALSE_POSITIVE_DISPOSITION_STRING = "FALSE_POSITIVE";
 export const IGNORE_DISPOSITION_STRING = "IGNORE";
+
+export const alertIconTypeMapping = {};
+
+export const alertDispositionMetadata: Record<string, string> = {
+  false_positive: GREEN,
+  authorized: GREEN,
+  unknown: BLUE,
+  reviewed: BLUE,
+  grayware: BLUE,
+  policy_violation: ORANGE,
+  reconnaissance: ORANGE,
+  weaponization: RED,
+  delivery: RED,
+  exploitation: RED,
+  installation: RED,
+  command_and_control: RED,
+  data_control: RED,
+  exfil: RED,
+  damage: RED,
+};

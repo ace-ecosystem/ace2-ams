@@ -59,6 +59,9 @@ function factory(
             eventStatusStore: {
               items: [openStatus, closedStatus],
             },
+            recentCommentsStore: {
+              recentComments: ["test"],
+            },
           },
         }),
       ],
@@ -316,6 +319,59 @@ describe("SaveToEventModal", () => {
     cy.contains("NEW").click();
     cy.findByLabelText("Event Name").click().type("Test Name");
     cy.findByLabelText("Event Comment").click().type("Test Comment");
+    cy.findByText("Save").click();
+    cy.get("@createEvent").should("have.been.calledOnce");
+    cy.get("@createComment").should("have.been.calledOnce");
+    cy.get("@updateAlert").should("have.been.calledOnce");
+    cy.get("[data-cy='save-to-event-modal']").should("not.exist");
+  });
+  it("attempts to create and save to new event when new event, and disposition comment when is selected, comment is given using NodeCommentAutocomplete, and the 'Save' button is clicked", () => {
+    cy.stub(Event, "create")
+      .withArgs(
+        {
+          name: "Test Name",
+          queue: "testObject",
+          owner: "analyst",
+          status: "OPEN",
+        },
+        true,
+      )
+      .as("createEvent")
+      .returns(eventReadFactory());
+    cy.stub(NodeComment, "create")
+      .withArgs([
+        {
+          username: "analyst",
+          nodeUuid: "testEvent1",
+          user: "analyst",
+          value: "test extra content",
+        },
+      ])
+      .as("createComment")
+      .resolves();
+    cy.stub(Alert, "update")
+      .withArgs([
+        {
+          uuid: "uuid",
+          eventUuid: "testEvent1",
+        },
+      ])
+      .as("updateAlert")
+      .resolves();
+    factory({
+      selected: ["uuid"],
+      openEvents: [
+        eventReadFactory({ name: "Test Open Event", status: openStatus }),
+      ],
+      closedEvents: [
+        eventReadFactory({ name: "Test Closed Event", status: closedStatus }),
+      ],
+    });
+    cy.contains("NEW").click();
+    cy.findByLabelText("Event Name").click().type("Test Name");
+    cy.get(".p-autocomplete > .p-button").click();
+    cy.contains("test").click();
+    cy.findByDisplayValue("test").click().type(" extra content");
     cy.findByText("Save").click();
     cy.get("@createEvent").should("have.been.calledOnce");
     cy.get("@createComment").should("have.been.calledOnce");

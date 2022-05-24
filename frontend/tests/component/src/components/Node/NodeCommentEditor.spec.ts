@@ -1,5 +1,5 @@
 import { mount } from "@cypress/vue";
-import { createPinia } from "pinia";
+import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import PrimeVue from "primevue/config";
 
 import { commentReadFactory } from "@mocks/comment";
@@ -18,7 +18,16 @@ let comments = [
 function factory(props: nodeCommentRead[] = comments) {
   mount(NodeCommentEditor, {
     global: {
-      plugins: [PrimeVue, createPinia()],
+      plugins: [
+        PrimeVue,
+        createCustomCypressPinia({
+          initialState: {
+            recentCommentsStore: {
+              recentComments: ["example"],
+            },
+          },
+        }),
+      ],
     },
     propsData: { modelValue: props },
   });
@@ -96,5 +105,23 @@ describe("NodeCommentEditor", () => {
     cy.contains("5/25/2022, 12:00:00 PM (Test Analyst) A test comment").should(
       "be.visible",
     );
+  });
+  it("correctly updates comment data when selecting from recent comments", () => {
+    factory([
+      commentReadFactory({ insertTime: new Date(2022, 4, 25, 12, 0, 0, 0) }),
+    ]);
+    cy.get('[data-cy="edit-comment-button"]').first().click();
+    cy.contains("5/25/2022, 12:00:00 PM (Test Analyst) A test comment").should(
+      "be.visible",
+    );
+    cy.get('[data-cy="edit-comment-panel"]').should("be.visible");
+    cy.get(".p-autocomplete > .p-button").click();
+    cy.contains("example").click();
+    cy.findAllByDisplayValue("example").type(" extra text");
+    cy.get('[data-cy="save-comment-button"]').click();
+    cy.get('[data-cy="edit-comment-panel"]').should("not.exist");
+    cy.contains(
+      "5/25/2022, 12:00:00 PM (Test Analyst) example extra text",
+    ).should("be.visible");
   });
 });

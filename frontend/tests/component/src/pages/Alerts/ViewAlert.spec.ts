@@ -14,13 +14,21 @@ import { alertTreeReadFactory } from "@mocks/alert";
 import TheAlertActionToolbarVue from "@/components/Alerts/TheAlertActionToolbar.vue";
 import TheAlertDetailsVue from "@/components/Alerts/TheAlertDetails.vue";
 import AlertTreeVue from "@/components/Alerts/AlertTree.vue";
+import { userReadFactory } from "@mocks/user";
 
 function factory(stubActions = true) {
   return mount(ViewAlert, {
     global: {
       plugins: [
         PrimeVue,
-        createCustomCypressPinia({ stubActions: stubActions }),
+        createCustomCypressPinia({
+          stubActions: stubActions,
+          initialState: {
+            authStore: {
+              user: userReadFactory(),
+            },
+          },
+        }),
         router,
       ],
       provide: { config: testConfiguration },

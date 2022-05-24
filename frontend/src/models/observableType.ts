@@ -19,5 +19,7 @@ export type observableTypeUpdate = genericObjectUpdate;
 
 export type observableTypeMetaData = {
   actions?: observableAction[] | observableActionSection[];
+  placeholder?: string;
+  validator?: (value: string) => boolean;
   style?: CSS.Properties;
 };

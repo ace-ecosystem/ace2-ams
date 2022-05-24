@@ -2,50 +2,54 @@
 <!-- Toolbar containing alert-specific actions, such as Disposition and Remediation -->
 
 <template>
-  <TheNodeActionToolbarVue ref="toolbar" :reload-object="props.reloadObject">
-    <template #start>
-      <!-- FALSE POSITIVE -->
-      <Button
-        v-if="showFalsePositiveShortcut"
-        data-cy="false-positive-button"
-        class="p-m-1 p-button-normal p-button-success"
-        icon="pi pi-thumbs-up"
-        label="FP"
-        @click="emit('falsePositiveClicked')"
-      />
-      <!-- IGNORE -->
-      <Button
-        v-if="showIgnoreShortcut"
-        data-cy="ignore-button"
-        class="p-m-1 p-button-sm"
-        icon="pi pi-check"
-        label="Ignore"
-        @click="emit('ignoreClicked')"
-      />
-      <!-- DISPOSITION -->
-      <Button
-        data-cy="disposition-button"
-        class="p-m-1 p-button-sm"
-        icon="pi pi-thumbs-up"
-        label="Disposition"
-        @click="open('DispositionModal')"
-      />
-      <DispositionModal
-        name="DispositionModal"
-        @request-reload="requestReload"
-      />
-      <!-- REMEDIATE MODAL -->
-      <Button
-        data-cy="remediate-button"
-        class="p-m-1 p-button-sm"
-        icon="pi pi-times-circle"
-        label="Remediate"
-        disabled
-        @click="open('RemediationModal')"
-      />
-      <RemediationModal />
-    </template>
-  </TheNodeActionToolbarVue>
+  <div>
+    <TheNodeActionToolbarVue ref="toolbar" :reload-object="props.reloadObject">
+      <template #start-left>
+        <!-- FALSE POSITIVE -->
+        <Button
+          v-if="showFalsePositiveShortcut"
+          data-cy="false-positive-button"
+          class="p-m-1 p-button-normal p-button-success"
+          icon="pi pi-thumbs-up"
+          label="FP"
+          @click="emit('falsePositiveClicked')"
+        />
+        <!-- IGNORE -->
+        <Button
+          v-if="showIgnoreShortcut"
+          data-cy="ignore-button"
+          class="p-m-1 p-button-normal p-button-secondary"
+          icon="pi pi-check"
+          label="Ignore"
+          @click="emit('ignoreClicked')"
+        />
+        <!-- DISPOSITION -->
+        <Button
+          data-cy="disposition-button"
+          class="p-m-1 p-button-normal p-button-secondary"
+          icon="pi pi-thumbs-up"
+          label="Disposition"
+          @click="open('DispositionModal')"
+        />
+        <DispositionModal
+          name="DispositionModal"
+          @request-reload="requestReload"
+        />
+      </template>
+      <template #start-right>
+        <!-- REMEDIATE MODAL -->
+        <Button
+          data-cy="remediate-button"
+          class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
+          icon="pi pi-times-circle"
+          label="Remediate"
+          disabled
+          @click="open('RemediationModal')"
+        />
+        <RemediationModal />
+      </template>
+    </TheNodeActionToolbarVue>
+  </div>
 </template>
 
 <script setup lang="ts">

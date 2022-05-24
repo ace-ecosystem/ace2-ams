@@ -2,21 +2,23 @@
 
 <template>
   <div v-if="error" class="p-col">
-    <Message severity="error" @close="handleError" data-cy="error-message">{{
+    <Message severity="error" data-cy="error-message" @close="handleError">{{
       error
     }}</Message>
   </div>
-  <TheAlertActionToolbar
-    reload-object="node"
-    :show-false-positive-shortcut="true"
-    :show-ignore-shortcut="true"
-    @false-positive-clicked="dispositionAlert('falsePositive')"
-    @ignore-clicked="dispositionAlert('ignore')"
-  />
+  <div style="position: sticky; top: 3.5em; z-index: 1">
+    <TheAlertActionToolbar
+      reload-object="node"
+      :show-false-positive-shortcut="true"
+      :show-ignore-shortcut="true"
+      @false-positive-clicked="dispositionAlert('falsePositive')"
+      @ignore-clicked="dispositionAlert('ignore')"
+    />
+  </div>
   <div v-if="alertStore.open">
     <TheAlertDetails />
     <br />
-    <Card>
+    <Card style="overflow-x: scroll">
       <template #content>
         <div class="p-tree p-component p-tree-wrapper" style="border: none">
           <AlertTree
@@ -24,6 +26,7 @@
             :items="alertStore.open.children"
             :alert-id="alertID"
           />
+          <ScrollTop />
         </div>
       </template>
     </Card>
@@ -36,6 +39,7 @@
 
   import Card from "primevue/card";
   import Message from "primevue/message";
+  import ScrollTop from "primevue/scrolltop";
 
   import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
   import AlertTree from "@/components/Alerts/AlertTree.vue";

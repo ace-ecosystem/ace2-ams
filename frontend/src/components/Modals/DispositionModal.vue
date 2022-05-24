@@ -16,7 +16,13 @@
           option-label="value"
           list-style="max-height:250px"
           style="width: 70vw"
-        />
+        >
+          <template #option="slotProps">
+            <AlertDispositionTag
+              :disposition="slotProps.option.value"
+            ></AlertDispositionTag>
+          </template>
+        </Listbox>
       </div>
       <div class="p-field p-col">
         <Textarea
@@ -26,6 +32,9 @@
           cols="30"
           placeholder="Add a comment..."
         />
+        <NodeCommentAutocomplete
+          @comment-clicked="recentCommentClicked($event)"
+        ></NodeCommentAutocomplete>
       </div>
     </div>
 
@@ -59,14 +68,18 @@
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
   import SaveToEventModal from "@/components/Modals/SaveToEventModal.vue";
+  import AlertDispositionTag from "@/components/Alerts/AlertDispositionTag.vue";
 
   import { NodeComment } from "@/services/api/nodeComment";
+  import NodeCommentAutocomplete from "@/components/Node/NodeCommentAutocomplete.vue";
 
   import { useAlertDispositionStore } from "@/stores/alertDisposition";
   import { useAlertStore } from "@/stores/alert";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
+  import { useRecentCommentsStore } from "@/stores/recentComments";
+
   import { alertDispositionRead } from "@/models/alertDisposition";
   import { nodeCommentCreate } from "@/models/nodeComment";
 
@@ -75,6 +88,7 @@
   const authStore = useAuthStore();
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
+  const recentCommentsStore = useRecentCommentsStore();
 
   const emit = defineEmits(["requestReload"]);
 
@@ -127,6 +141,9 @@
     isLoading.value = false;
 
     if (!error.value) {
+      if (dispositionComment.value) {
+        recentCommentsStore.addComment(dispositionComment.value);
+      }
       close();
       emit("requestReload");
     }
@@ -139,6 +156,10 @@
     }
     return false;
   });
+
+  const recentCommentClicked = (comment: string) => {
+    dispositionComment.value = comment;
+  };
 
   const handleError = () => {
     error.value = undefined;

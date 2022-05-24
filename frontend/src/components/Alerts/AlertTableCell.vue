@@ -4,6 +4,11 @@
 <template>
   <!-- Alert Name -->
   <div v-if="props.field === 'name'">
+    <img
+      v-if="alertIconPath"
+      data-cy="alert-icon"
+      src="@/assets/alertIcons/test.png"
+    />
     <!-- Name w/ Link to Alert -->
     <span class="p-m-1" data-cy="alertName">
       <router-link :to="getAlertLink(props.data)">{{
@@ -46,22 +51,43 @@
     />
   </div>
 
+  <!-- Alert Disposition -->
+  <div v-else-if="props.field === 'disposition'">
+    <AlertDispositionTag
+      :disposition="props.data[props.field]"
+    ></AlertDispositionTag>
+  </div>
+
   <!-- Everything else -->
   <span v-else> {{ props.data[props.field] }}</span>
 </template>
 
 <script setup lang="ts">
-  import { defineProps, PropType } from "vue";
+  import { defineProps, PropType, inject, computed } from "vue";
 
+  import AlertDispositionTag from "@/components/Alerts/AlertDispositionTag.vue";
   import NodeTagVue from "@/components/Node/NodeTag.vue";
   import NodeComment from "@/components/Node/NodeComment.vue";
 
   import { alertSummary } from "@/models/alert";
   import { getAllAlertTags, getAlertLink } from "@/etc/helpers";
 
+  const config = inject("config") as Record<string, any>;
+
   const props = defineProps({
     data: { type: Object as PropType<alertSummary>, required: true },
     field: { type: String as PropType<keyof alertSummary>, required: true },
+  });
+
+  const alertIconPath = computed(() => {
+    if (config && config.alerts) {
+      if (props.data.type in config.alerts.alertIconTypeMapping) {
+        return `@/assets/alertIcons/${
+          config.alerts.alertIconTypeMapping[props.data.type]
+        }`;
+      }
+    }
+    return undefined;
   });
 
   const formatDateTime = (dateTime: any) => {

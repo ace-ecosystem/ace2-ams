@@ -142,35 +142,23 @@
                     :options="observableTypeStore.items"
                   />
                 </div>
-                <div class="field col-3 px-1" name="observable-value">
-                  <div
-                    v-if="observables[index].type == 'file'"
-                    name="observable-file-upload"
-                  >
-                    <FileUpload
-                      mode="basic"
-                      class="inputfield w-full"
-                    ></FileUpload>
-                  </div>
-                  <div v-else class="p-inputgroup">
-                    <InputText
-                      v-if="!observables[index].multiAdd"
-                      v-model="observables[index].value"
-                      placeholder="Enter a value"
-                      class="inputfield w-full"
-                      type="text"
-                    ></InputText>
-                    <Textarea
-                      v-else
-                      v-model="observables[index].value"
-                      placeholder="Enter a comma or newline-delimited list of values"
-                      class="inputfield w-full"
-                    ></Textarea>
-                    <Button
-                      icon="pi pi-list"
-                      @click="toggleMultiObservable(index)"
-                    />
-                  </div>
+                <div class="field px-1" name="observable-value">
+                  <span class="inputfield">
+                    <span style="display: inline">
+                      <ObservableInput
+                        v-model:observableValue="observables[index].value"
+                        v-model:invalid="observables[index].invalid"
+                        :multi-add="observables[index].multiAdd"
+                        :type="observables[index].type"
+                      ></ObservableInput>
+                    </span>
+                    <span>
+                      <Button
+                        icon="pi pi-list"
+                        @click="toggleMultiObservable(index)"
+                      />
+                    </span>
+                  </span>
                 </div>
                 <div class="field col-3 px-1">
                   <MultiSelect
@@ -178,10 +166,21 @@
                     name="observable-directives"
                     placeholder="No directives selected"
                     class="inputfield w-full"
+                    display="chip"
                     option-label="value"
                     option-value="value"
                     :options="nodeDirectiveStore.items"
-                  />
+                  >
+                    <template #option="slotProps">
+                      <div class="country-item">
+                        <div>
+                          <span v-tooltip="slotProps.option.description">
+                            {{ slotProps.option.value }}</span
+                          >
+                        </div>
+                      </div>
+                    </template>
+                  </MultiSelect>
                 </div>
                 <div class="field col-1">
                   <Button
@@ -210,11 +209,14 @@
       <br />
     </TabPanel>
   </TabView>
+  <small v-if="anyObservablesInvalid" class="p-error"
+    >Please check observable input</small
+  >
   <div class="pl-3">
     <SplitButton
       label="Analyze!"
       :loading="alertCreateLoading"
-      :disabled="showContinueButton"
+      :disabled="anyObservablesInvalid"
       :model="splitButtonOptions"
       class="p-button-lg"
       @click="submitSingleAlert"
@@ -250,19 +252,18 @@
   import { useRouter } from "vue-router";
 
   import Button from "primevue/button";
-  import Calendar from "primevue/calendar";
   import Card from "primevue/card";
   import Dropdown from "primevue/dropdown";
   import Fieldset from "primevue/fieldset";
-  import FileUpload from "primevue/fileupload";
   import InputText from "primevue/inputtext";
   import Message from "primevue/message";
   import MultiSelect from "primevue/multiselect";
   import SplitButton from "primevue/splitbutton";
   import TabPanel from "primevue/tabpanel";
   import TabView from "primevue/tabview";
-  import Textarea from "primevue/textarea";
   import { DatePicker } from "v-calendar";
+
+  import ObservableInput from "@/components/Observables/ObservableInput.vue";
 
   import { useAlertStore } from "@/stores/alert";
   import { useQueueStore } from "@/stores/queue";
@@ -312,6 +313,11 @@
     return observables.value.length - 1;
   });
 
+  const anyObservablesInvalid = computed(() => {
+    const invalid = observables.value.filter((obs) => obs.invalid);
+    return invalid.length;
+  });
+
   onMounted(() => {
     initData();
   });
@@ -331,8 +337,9 @@
       time: null,
       type: "file",
       multiAdd: false,
-      value: null,
+      value: "",
       directives: [],
+      invalid: false,
     });
   };
 
@@ -363,6 +370,9 @@
     };
     if (observable.time) {
       submissionObservable["time"] = observable.time;
+    }
+    if (observable.directives && observable.directives.length) {
+      submissionObservable["directives"] = observable.directives;
     }
     return submissionObservable;
   };
