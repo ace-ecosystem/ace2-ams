@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from uuid import UUID
 
 from api_models.node_tag import NodeTagCreate
 from db import crud
@@ -12,6 +13,10 @@ def create_or_read(model: NodeTagCreate, db: Session) -> NodeTag:
         return obj
 
     return read_by_value(value=model.value, db=db)
+
+
+def read_by_uuid(uuid: UUID, db: Session) -> NodeTag:
+    return crud.helpers.read_by_uuid(db_table=NodeTag, uuid=uuid, db=db)
 
 
 def read_by_value(value: str, db: Session) -> NodeTag:

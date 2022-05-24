@@ -76,7 +76,7 @@ def update_node_threat_type(
     try:
         if not crud.helpers.update(uuid=uuid, update_model=node_threat_type, db_table=NodeThreatType, db=db):
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update node threat_type {uuid}"
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update node threat type {uuid}"
             )
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
@@ -98,7 +98,7 @@ def delete_node_threat_type(uuid: UUID, db: Session = Depends(get_db)):
     try:
         if not crud.helpers.delete(uuid=uuid, db_table=NodeThreatType, db=db):
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete node threat_type {uuid}"
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete node threat type {uuid}"
             )
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e

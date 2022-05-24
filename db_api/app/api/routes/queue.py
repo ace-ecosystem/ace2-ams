@@ -71,7 +71,7 @@ def update_queue(
 ):
     try:
         if not crud.helpers.update(uuid=uuid, update_model=queue, db_table=Queue, db=db):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update queue tool {uuid}")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update queue {uuid}")
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
@@ -91,7 +91,7 @@ helpers.api_route_update(router, update_queue)
 def delete_queue(uuid: UUID, db: Session = Depends(get_db)):
     try:
         if not crud.helpers.delete(uuid=uuid, db_table=Queue, db=db):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete queue tool {uuid}")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete queue {uuid}")
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 

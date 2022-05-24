@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 """
@@ -33,7 +33,7 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete(client, db):
     # Create the object
-    obj = helpers.create_node_tag(value="test", db=db)
+    obj = factory.node_tag.create_or_read(value="test", db=db)
 
     # Read it back
     get = client.get(f"/api/node/tag/{obj.uuid}")
