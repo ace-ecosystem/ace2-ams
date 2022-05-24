@@ -6,16 +6,17 @@ from pkgutil import iter_modules
 from pydantic import BaseModel, Field
 import re
 import sys
+from typing import Any
 
 def find(name:str, base:type) -> dict:
     ''' finds all subclasses of base in module (not recursive)
 
     Args:
-        name (str): the name of the module we are importing from
-        base (type): the base class to search for subclasses of
+        name: the name of the module we are importing from
+        base: the base class to search for subclasses of
 
     Returns:
-        dict: a mapping of attribute name to attribute of the found subclasses
+        a mapping of attribute name to attribute of the found subclasses
     '''
 
     subclasses = {}
@@ -32,11 +33,14 @@ def find(name:str, base:type) -> dict:
 class Private():
     ''' container class for model's private attributes '''
 
-    def __getattr__(self, name):
-        ''' changes get attribute behavior to return None if the attribute does not exist
+    def __getattr__(self, name:str) -> Any:
+        ''' changes get_attribute behavior to return None if the attribute does not exist
 
         Args:
-            name (str): the name of the attribute to get
+            name: the name of the attribute to get
+
+        Returns:
+            The attribute value or None if the attribute does not exist
         '''
 
         # return the attribute if it exists
@@ -47,13 +51,17 @@ class Private():
         return None
 
 class PrivateModel(BaseModel):
-    ''' BaseModel with a private attribute for storing private attributes '''
+    ''' BaseModel with a private slot for storing private attributes '''
 
-    # pydantic uses some thing called slots to have attributes that are not in the model
+    # pydantic uses slots to have attributes that are not in the model
     __slots__ = ('private',)
 
     def __init__(self, **kwargs):
-        ''' initializes the Model with a private attribute for storing private attributes '''
+        ''' initializes the Model with a private attribute for storing private attributes
+        
+        Args:
+            **kwargs: key word arguments to pass through
+        '''
 
         # init the model
         super().__init__(**kwargs)
@@ -67,14 +75,16 @@ class TypedModel(PrivateModel):
 
     type: str = Field(description='the type string used to identify sub types')
 
-    def __new__(cls, type:str, *args, **kwargs):
+    def __new__(cls, type:str, *args, **kwargs) -> TypedModel:
         ''' Uses type to construct the correct subclass if one is registered, otherwise constructs the current class
 
         Args:
-            type (str): the type string to lookup the subclass with
+            type: the type string to lookup the subclass with
+            *args: positional arguments to pass through
+            **kwargs: key word arguments to pass through
 
         Returns:
-            cls: an instantiated cls object
+            the new TypedModel object
         '''
 
         # get the subclass from the mapping via type string
@@ -85,11 +95,7 @@ class TypedModel(PrivateModel):
         return super().__new__(cls)
 
     def __init_subclass__(cls):
-        ''' maps all subclasses using the type value so they can be found when constructing new instances
-        
-        Args:
-            cls (type): the subclass to init
-        '''
+        ''' maps all subclasses using the type value so they can be found when constructing new instances '''
 
         # find the base type
         base = TypedModel.get_base_type(cls)
@@ -116,15 +122,16 @@ class TypedModel(PrivateModel):
         )
 
     @classmethod
-    def get_base_type(cls, target):
-        ''' recursviely walks the base classes to find the base model that subclasses TypeModel
+    def get_base_type(cls, target:Type[TypedModel]) -> Type[TypedModel]:
+        ''' recursviely walks the base classes to find the base model that directly subclasses TypeModel
 
         Args:
-            target (type): the class to find the base model for
+            target: the class to find the base model for
 
         Returns:
-            type: the base class that subclasses TypeModel
+            the base class that directly subclasses TypeModel
         '''
+
         for base in target.__bases__:
             if base == TypedModel:
                 return target

@@ -6,6 +6,7 @@ class Service():
     ''' Base class for making configurable services '''
 
     class Config(PrivateModel):
+        ''' base service config class. Subclasses can override this to define their config fields '''
         pass
 
     def __init__(self, instance:Optional[str]=None):

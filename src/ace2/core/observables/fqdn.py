@@ -7,7 +7,8 @@ class FQDN(Observable):
         ''' Initializes a fqdn observable
 
         Args:
-            value (str): the fqdn
+            value: the fqdn
+            **kawrgs: key word arguments to pass through
         '''
 
         # call super class constructor with our type and given value

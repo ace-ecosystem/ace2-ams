@@ -7,7 +7,8 @@ class IPv4(Observable):
         ''' Initializes an ipv4 observable
 
         Args:
-            value (str): the ipv4
+            value: the ipv4
+            **kwargs: key word arguments to pass through
         '''
 
         # call super class constructor with our type and given value

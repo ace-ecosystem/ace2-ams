@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pydantic import Field
 from typing import List, Optional, Type
 import sys
@@ -25,15 +26,14 @@ class Analysis(TypedModel):
         pass
 
     @classmethod
-    def run(cls, state:dict, context:dict) -> dict:
-        ''' AWS Lambda function handler for running the analysis
+    def run(cls, state:dict) -> dict:
+        ''' runs the analysis from state
 
         Args:
-            state (dict): the current analysis state
-            context (dict): the context object passed from AWS
+            state: the current analysis state
 
         Returns:
-            dict: the updated analysis state
+            the updated analysis state
         '''
 
         # load the analysis from the analysis state
@@ -51,8 +51,8 @@ class Analysis(TypedModel):
         return self.dict()
 
     @property
-    def config(self):
-        ''' property shortcut for getting the analysis config from the global config '''
+    def config(self) -> Analysis.Config:
+        ''' the analysis config '''
 
         # load config into cache if we need to
         if self.private.config == None:
@@ -62,15 +62,15 @@ class Analysis(TypedModel):
         return self.private.config
 
     def add(self, observable_type:Type[Observable], *args, **kwargs) -> Observable:
-        ''' Adds an observable to the analysis. If the observable is already in the analysis then the metadata is merged
+        ''' Adds an observable to the analysis
 
         Args:
-            observable_type (Type[Observable]): the class of the observable to add
+            observable_type: the class of the observable to add
             *args: the args to pass to the observable constructor
             *kwargs: the keyword args to pass to the observable constructor
 
         Returns:
-            Observable: the added observable
+            the added observable instance
         '''
 
         # create the observable
@@ -85,13 +85,13 @@ class Analysis(TypedModel):
         return self.observables[self.observables.index(observable)]
 
     def should_run(self, observable:Observable) -> bool:
-        ''' returns True if the analysis should run on the observable, False otherwise
+        ''' Determines if the analysis should run on the observable
 
         Args:
-            observable (Observable): the observable we are checking to see if we run on
+            observable: the observable to consider
 
         Returns:
-            bool: True if we should run
+            True if the analysis should run
         '''
 
         # TODO: default behavior should check required observables and required directives
@@ -101,10 +101,10 @@ class Analysis(TypedModel):
         ''' This is the entry point for running analysis. Subclasses must override this function.
 
         Args:
-            observable (Observable): the target observable to run analysis on
+            observable: the target observable to run analysis on
 
         Returns:
-            Callback (optional): The callback to continue analysis or None if analysis is complete
+            The callback to continue analysis or None if analysis is complete
         '''
 
         raise NotImplementedError()

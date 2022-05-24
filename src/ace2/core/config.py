@@ -1,13 +1,23 @@
 from yaml import safe_load
 
-_config = None
-_config_path = 'config.yml'
-def load():
-    # load config if it isnt already
-    global _config
-    if _config is None:
-        with open(_config_path) as f:
-            _config = safe_load(f.read()) or {}
+# the raw config dictionary or None if it has yet to be loaded
+raw_config = None
 
-    # return the loaded config
-    return _config
+# the location of the config yaml
+path = 'config.yml'
+
+def load() -> dict:
+    ''' loads the config yaml if it is not already loaded and returns the raw config dictionary
+
+    Returns:
+        the raw config dictionary
+    '''
+
+    # load raw config dictionary from yaml if it is not loaded yet
+    global raw_config
+    if raw_config is None:
+        with open(path) as f:
+            raw_config = safe_load(f.read()) or {}
+
+    # return raw config dictionary
+    return raw_config

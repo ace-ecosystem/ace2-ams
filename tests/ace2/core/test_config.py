@@ -14,8 +14,8 @@ def test_config():
         ],
     }
 
-    # add something to the cached config and load again to make sure that we use the cached version
-    config._config['tricky'] = 'hello'
+    # add something to the raw_config and load again to make sure that we use the cached version
+    config.raw_config['tricky'] = 'hello'
     assert config.load() == {
         'somedict': {
             'key': {

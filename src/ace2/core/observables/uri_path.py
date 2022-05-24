@@ -7,7 +7,8 @@ class UriPath(Observable):
         ''' Initializes a uri path observable
 
         Args:
-            value (str): the uri path
+            value: the uri path
+            **kwargs: key word arguments to pass through
         '''
 
         # call super class constructor with our type and given value

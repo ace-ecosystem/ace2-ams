@@ -64,7 +64,7 @@ def test_analysis(monkeypatch, mock_datetime):
     }
 
     # run the analysis with the lambda handler function
-    analysis = MyAnalysis.run(analysis, None)
+    analysis = MyAnalysis.run(analysis)
 
     # verify result
     assert analysis == {
@@ -88,7 +88,7 @@ def test_analysis(monkeypatch, mock_datetime):
     }
 
     # run again to test the callback
-    analysis = MyAnalysis.run(analysis, None)
+    analysis = MyAnalysis.run(analysis)
 
     # verify result
     assert analysis == {

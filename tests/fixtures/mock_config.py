@@ -3,8 +3,8 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def mock_config(monkeypatch, datadir):
-    # reset config before each test
-    ace2.core.config._config = None
+    # reset raw_config before each test
+    ace2.core.config.raw_config = None
 
     # patch config path to use test datadir
-    monkeypatch.setattr('ace2.core.config._config_path', str(datadir / 'config.yml'))
+    monkeypatch.setattr('ace2.core.config.path', str(datadir / 'config.yml'))
