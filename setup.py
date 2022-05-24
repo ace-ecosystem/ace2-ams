@@ -1,11 +1,20 @@
-import io
 import os
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 
+# locate project directory both inside and outside of tox
+project_dir = os.path.dirname(os.environ['TOX_WORK_DIR']) if 'TOX_WORK_DIR' in os.environ else os.path.dirname(__file__)
+
 def read(file_name):
-    with io.open(os.path.join(os.path.dirname(__file__), file_name), encoding='utf-8') as f:
+    with open(os.path.join(project_dir, file_name)) as f:
         return f.read()
+
+# read install requirements from both core and mods if there are any
+install_requires = read('src/ace2/core/requires.txt').splitlines()
+try:
+    install_requires.extend(read('src/ace2/mods/requires.txt').splitlines())
+except FileNotFoundError:
+    pass
 
 class Install(install):
     def run(self):
@@ -27,10 +36,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     python_requires='>=3.9',
-    install_requires = [
-        'pydantic',
-        'boto3',
-    ],
+    install_requires = install_requires,
     cmdclass = {
         'install': Install,
     }

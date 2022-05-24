@@ -1,13 +1,14 @@
 from .observable import Observable
 
-class Fqdn(Observable):
+class FQDN(Observable):
     ''' Observable that represents a fully qualified domain name '''
 
     def __init__(self, value:str, **kwargs):
         ''' Initializes a fqdn observable
 
         Args:
-            value (str): the fqdn
+            value: the fqdn
+            **kawrgs: key word arguments to pass through
         '''
 
         # call super class constructor with our type and given value

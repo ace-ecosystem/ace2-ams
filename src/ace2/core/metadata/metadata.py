@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pydantic import Field
-from ..polymorphism import TypedModel
+from ..models import TypedModel
 
 class Metadata(TypedModel):
     ''' base metadata class '''
@@ -11,8 +11,9 @@ class Metadata(TypedModel):
         ''' Initializes a metadata object
 
         Args:
-            type (str): the type of the metadata
-            value (str): the value of the metadata
+            type: the type of the metadata
+            value: the value of the metadata
+            **kwargs: key word arguments to pass through
         '''
 
         # pass type and value to super class as kwargs
@@ -22,10 +23,10 @@ class Metadata(TypedModel):
         ''' determines if two instances of metadata are equal
         
         Args:
-            other (Metadata): the other metadata to compare to
+            other: the metadata to compare
 
         Returns:
-            bool: True if other is the same metadata as self
+            True if other is the same as self
         '''
 
         # equal if type and value match

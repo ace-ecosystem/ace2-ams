@@ -9,13 +9,12 @@ from .. import storage
 class File(Observable):
     ''' Observable that represents a file '''
 
-    local_path: Optional[str] = Field(exclude=True, default=None, description='the local path of the file')
-
     def __init__(self, path:str, **kwargs):
         ''' Initializes a file observable
 
         Args:
-            path (str): the local file path
+            path: the local file path
+            **kwargs: key word arguments to pass through
         '''
 
         # upload the file to storage
@@ -25,16 +24,18 @@ class File(Observable):
         super().__init__(self.type, storage_id, **kwargs)
 
         # set the local path so we use it instead of downloading another copy
-        self.local_path = path
+        self.private.path = path
 
         # use the basename of path as the display value
         self.add(DisplayValue, basename(path))
 
     @property
-    def path(self):
+    def path(self) -> str:
+        ''' the local path to the file. Triggers download of file if it does not exist locally '''
+
         # download file from storage if we do not have a local copy
-        if self.local_path is None:
-            self.local_path = storage.download(self.value)
+        if self.private.path is None:
+            self.private.path = storage.download(self.value)
 
         # return the local path to the file
-        return self.local_path
+        return self.private.path

@@ -1,13 +1,14 @@
 from .observable import Observable
 
-class Ipv4(Observable):
+class IPv4(Observable):
     ''' Observable that represents an internet protocol version 4 address '''
 
     def __init__(self, value:str, **kwargs):
         ''' Initializes an ipv4 observable
 
         Args:
-            value (str): the ipv4
+            value: the ipv4
+            **kwargs: key word arguments to pass through
         '''
 
         # call super class constructor with our type and given value

@@ -7,7 +7,8 @@ class Directive(Metadata):
         ''' initializes a directive object
 
         Args:
-            value (str): the directive value
+            value: the directive value
+            **kwargs: key word arguments to pass through
         '''
 
         super().__init__(self.type, value, **kwargs)

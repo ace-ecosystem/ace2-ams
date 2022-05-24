@@ -7,7 +7,8 @@ class DisplayValue(Metadata):
         ''' initializes display value
 
         Args:
-            value (str): the value to display in place of the actual observable value
+            value: the value to display in place of the actual observable value
+            **kwargs: key word arguments to pass through
         '''
 
         super().__init__(self.type, value, **kwargs)

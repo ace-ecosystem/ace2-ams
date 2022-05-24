@@ -7,7 +7,8 @@ class DetectionPoint(Metadata):
         ''' initializes a detection point object
 
         Args:
-            value (str): the detection point value
+            value: the detection point value
+            **kwargs: key word arguments to pass through
         '''
 
         super().__init__(self.type, value, **kwargs)

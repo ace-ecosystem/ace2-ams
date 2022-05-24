@@ -15,8 +15,12 @@ tox -r
 The following is an example of how to make a new Analysis subclass
 ```python
 from ace2 import *
+from pydantic import Field
 
 class MyAnalysis(Analysis):
+    class Config(Analysis.Config):
+        foo: str = Field(default='bar', description='this adds a foo field to the MyAnalysis config')
+    
     def execute_analysis(self, observable):
         # pretend to submit something to a service using state to store non analysis info
         self.state['search_id'] = '123'
@@ -25,8 +29,8 @@ class MyAnalysis(Analysis):
         return Callback(self.get_results, seconds=1)
 
     def get_results(self, observable):
-        # add generic analysis details
-        self.details['foo'] = 'bar'
+        # add generic analysis details from config
+        self.details['foo'] = self.config.foo
 
         # add analysis details via custom analysis class
         self.results = '127.0.0.1'

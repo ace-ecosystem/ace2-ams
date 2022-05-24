@@ -1,9 +1,11 @@
-from pydantic import BaseModel, Field
+from __future__ import annotations
+from pydantic import Field
 from typing import List, Optional, Type
 import sys
+from .. import config
 from ..callback import Callback
 from ..observables import Observable
-from ..polymorphism import TypedModel
+from ..models import TypedModel, PrivateModel
 
 class Analysis(TypedModel):
     ''' Base Analysis class for building ICE2 analysis '''
@@ -19,16 +21,19 @@ class Analysis(TypedModel):
         description='callback to execute when running analysis. If None then analysis is complete'
     )
 
+    class Config(PrivateModel):
+        ''' Subclasses can override the config class to add new config fields '''
+        pass
+
     @classmethod
-    def run(cls, state:dict, context:dict) -> dict:
-        ''' AWS Lambda function handler for running the analysis
+    def run(cls, state:dict) -> dict:
+        ''' runs the analysis from state
 
         Args:
-            state (dict): the current analysis state
-            context (dict): the context object passed from AWS
+            state: the current analysis state
 
         Returns:
-            dict: the updated analysis state
+            the updated analysis state
         '''
 
         # load the analysis from the analysis state
@@ -37,38 +42,35 @@ class Analysis(TypedModel):
         # call the current callback function which then tells us what to execute after that
         self.callback = self.callback.execute(self, self.target)
 
+        # submit analysis if complete
+        if self.callback is None:
+            analysis = self.dict(exclude={'callback', 'state'})
+            # TODO: submit the analysis excluding callback and state
+
         # return the dictionary representation of the analysis
         return self.dict()
 
-    @classmethod
-    def submit(cls, state:dict, context:dict):
-        ''' AWS Lambda function handler for running the analysis
+    @property
+    def config(self) -> Analysis.Config:
+        ''' the analysis config '''
 
-        Args:
-            state (dict): the current analysis state
-            context (dict): the context object passed from AWS
+        # load config into cache if we need to
+        if self.private.config == None:
+            self.private.config = type(self).Config(**config.load()['analysis'][type(self).__name__])
 
-        Returns:
-            dict: the updated analysis state
-        '''
-        # load the analusis from the state
-        self = cls(**state)
-
-        # save the analysis excluding non analysis fields
-        analysis = self.dict(exclude={'callback', 'state'})
-
-        # TODO: submit the analysis to the db api
+        # returned loaded config
+        return self.private.config
 
     def add(self, observable_type:Type[Observable], *args, **kwargs) -> Observable:
-        ''' Adds an observable to the analysis. If the observable is already in the analysis then the metadata is merged
+        ''' Adds an observable to the analysis
 
         Args:
-            observable_type (Type[Observable]): the class of the observable to add
+            observable_type: the class of the observable to add
             *args: the args to pass to the observable constructor
             *kwargs: the keyword args to pass to the observable constructor
 
         Returns:
-            Observable: the added observable
+            the added observable instance
         '''
 
         # create the observable
@@ -82,14 +84,27 @@ class Analysis(TypedModel):
         # otherwise return the exiting observable
         return self.observables[self.observables.index(observable)]
 
+    def should_run(self, observable:Observable) -> bool:
+        ''' Determines if the analysis should run on the observable
+
+        Args:
+            observable: the observable to consider
+
+        Returns:
+            True if the analysis should run
+        '''
+
+        # TODO: default behavior should check required observables and required directives
+        raise NotImplementedError()
+
     def execute(self, observable:Observable) -> Optional[Callback]:
         ''' This is the entry point for running analysis. Subclasses must override this function.
 
         Args:
-            observable (Observable): the target observable to run analysis on
+            observable: the target observable to run analysis on
 
         Returns:
-            Callback (optional): The callback to continue analysis or None if analysis is complete
+            The callback to continue analysis or None if analysis is complete
         '''
 
         raise NotImplementedError()

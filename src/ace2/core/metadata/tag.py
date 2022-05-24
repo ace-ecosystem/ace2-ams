@@ -7,7 +7,8 @@ class Tag(Metadata):
         ''' initializes a tag object
 
         Args:
-            value (str): the tag value
+            value: the tag value
+            **kwargs: key word arguments to pass through
         '''
 
         super().__init__(self.type, value, **kwargs)

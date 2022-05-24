@@ -1,8 +1,9 @@
 import datetime
-from pydantic import BaseModel, Field, validator
-from typing import Union, Optional
+from pydantic import Field, validator
+from typing import Any, Union, Optional
+from .models import PrivateModel
 
-class Callback(BaseModel):
+class Callback(PrivateModel):
     ''' The Callback class is used to execute a function sometime in the future '''
 
     method: str = Field(description='the name of the method to call when the callback is executed')
@@ -12,9 +13,9 @@ class Callback(BaseModel):
         ''' Initializes the Callback object
         
         Args:
-            method (Union[str, callable]): the method or method name to call
-            timestamp (datetime): time when the callback should be called
-            **kwargs: if no timestamp is given then kwargs are passed to datetime.timedelta to determine how long to wait
+            method: the method or method name to call
+            timestamp: time when the callback should be called
+            **kwargs: if no timestamp is given then kwargs are passed to datetime.timedelta to create one
         '''
 
         # if method is a string we can use it directly, otherwise use the name of the callable
@@ -35,44 +36,53 @@ class Callback(BaseModel):
         }
 
     @validator('timestamp', pre=True)
-    def parse_timestamp(cls, value):
+    def parse_timestamp(cls, value:Union[str,datetime.datetime]) -> datetime.datetime:
         ''' validates and parses the timestamp field 
         
         Args:
-            value (str): the serialized timestamp value
+            value: the serialized or deserialized timestamp value
 
         Returns:
-            datetime.datetime: the deserialized timestamp value
+            the deserialized timestamp value
         '''
 
         # parse timestamp str into datetime object
         if isinstance(value, str):
             return datetime.datetime.strptime(value, '%Y-%m-%dT%H:%M:%SZ')
-        else:
-            return value
+
+        # value is already a datetime so we are good to use it as is
+        return value
 
     def dict(self, *args, **kwargs):
         ''' override the dict function to convert timestamp to a string
+
+        Args:
+            *args: the positional arguments to pass through
+            **kwargs: the key word arguments to pass through
         
         Returns:
             dict: the dictionary representation of this object
         '''
 
-        # make the dict form the super class
+        # make the dict from the super class
         d = super().dict(*args, **kwargs)
 
         # convert timestamp in the dict to str
         d['timestamp'] = d['timestamp'].strftime('%Y-%m-%dT%H:%M:%SZ')
 
+        # return the modified dictionary
         return d
 
-    def execute(self, instance, *args, **kwargs):
+    def execute(self, instance:object, *args, **kwargs) -> Any:
         ''' Executes the callback on the given instatnce
         
         Args:
-            instance (object): the object whose method we will call
+            instance: the object whose method we will call
             *args: list of arguments to pass to the method
             **kwargs: list of keyword arguments to pass to the method
+
+        Returns:
+            whatever the instance method returns
         '''
 
         # find the instance method and call it
