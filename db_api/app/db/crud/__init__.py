@@ -20,6 +20,7 @@ from db.crud import node
 from db.crud import node_comment
 from db.crud import node_detection_point
 from db.crud import node_directive
+from db.crud import node_relationship_type
 from db.crud import node_tag
 from db.crud import node_threat
 from db.crud import node_threat_actor

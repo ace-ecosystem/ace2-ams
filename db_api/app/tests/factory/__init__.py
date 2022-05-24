@@ -16,6 +16,7 @@ from tests.factory import event_vector
 from tests.factory import node_comment
 from tests.factory import node_detection_point
 from tests.factory import node_directive
+from tests.factory import node_relationship_type
 from tests.factory import node_tag
 from tests.factory import node_threat
 from tests.factory import node_threat_actor
