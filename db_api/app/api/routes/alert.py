@@ -154,9 +154,7 @@ def update_alerts(
     for alert in alerts:
         try:
             crud.alert.update(model=alert, db=db)
-        except UuidNotFoundInDatabase as e:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
-        except ValueNotFoundInDatabase as e:
+        except (UuidNotFoundInDatabase, ValueNotFoundInDatabase) as e:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
         except VersionMismatch as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e

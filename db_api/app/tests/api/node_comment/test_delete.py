@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 """
@@ -17,12 +17,12 @@ are in place in order to account for this.
 
 
 def test_delete_invalid_uuid(client):
-    delete = client.delete("/api/node/comment/1")
+    delete = client.delete("/api/node/comment/1?history_username=analyst")
     assert delete.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_delete_nonexistent_uuid(client):
-    delete = client.delete(f"/api/node/comment/{uuid.uuid4()}")
+    delete = client.delete(f"/api/node/comment/{uuid.uuid4()}?history_username=analyst")
     assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -33,11 +33,9 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete_alerts(client, db):
     # Create a comment
-    alert_tree = helpers.create_alert(db=db, history_username="analyst")
-    comment = helpers.create_node_comment(
-        node=alert_tree.node, username="johndoe", value="test", db=db, history_username="analyst"
-    )
-    assert alert_tree.node.comments[0].value == "test"
+    alert = factory.alert.create(db=db, history_username="analyst")
+    comment = factory.node_comment.create_or_read(node=alert, username="analyst", value="test", db=db)
+    assert alert.comments[0].value == "test"
 
     # Delete it
     delete = client.delete(f"/api/node/comment/{comment.uuid}?history_username=analyst")
@@ -48,14 +46,14 @@ def test_delete_alerts(client, db):
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
     # And make sure the node no longer shows the comment
-    assert len(alert_tree.node.comments) == 0
+    assert len(alert.comments) == 0
 
     # Verify the history record
-    history = client.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    history = client.get(f"/api/alert/{alert.uuid}/history")
     assert history.json()["total"] == 3
     assert history.json()["items"][2]["action"] == "UPDATE"
     assert history.json()["items"][2]["action_by"]["username"] == "analyst"
-    assert history.json()["items"][2]["record_uuid"] == str(alert_tree.node_uuid)
+    assert history.json()["items"][2]["record_uuid"] == str(alert.uuid)
     assert history.json()["items"][2]["field"] == "comments"
     assert history.json()["items"][2]["diff"]["old_value"] is None
     assert history.json()["items"][2]["diff"]["new_value"] is None
@@ -66,10 +64,8 @@ def test_delete_alerts(client, db):
 
 def test_delete_events(client, db):
     # Create a comment
-    event = helpers.create_event(name="Test Event", db=db, history_username="analyst")
-    comment = helpers.create_node_comment(
-        node=event, username="johndoe", value="test", db=db, history_username="analyst"
-    )
+    event = factory.event.create_or_read(name="Test Event", db=db, history_username="analyst")
+    comment = factory.node_comment.create_or_read(node=event, username="analyst", value="test", db=db)
     assert event.comments[0].value == "test"
 
     # Delete it
@@ -99,14 +95,12 @@ def test_delete_events(client, db):
 
 def test_delete_observables(client, db):
     # Create a comment
-    alert_tree = helpers.create_alert(db=db, history_username="analyst")
-    observable_tree = helpers.create_observable(
-        type="test_type", value="test_value", parent_tree=alert_tree, db=db, history_username="analyst"
+    alert = factory.alert.create(db=db, history_username="analyst")
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )
-    comment = helpers.create_node_comment(
-        node=observable_tree.node, username="johndoe", value="test", db=db, history_username="analyst"
-    )
-    assert observable_tree.node.comments[0].value == "test"
+    comment = factory.node_comment.create_or_read(node=observable, username="analyst", value="test", db=db)
+    assert observable.comments[0].value == "test"
 
     # Delete it
     delete = client.delete(f"/api/node/comment/{comment.uuid}?history_username=analyst")
@@ -117,14 +111,14 @@ def test_delete_observables(client, db):
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
     # And make sure the node no longer shows the comment
-    assert len(alert_tree.node.comments) == 0
+    assert len(observable.comments) == 0
 
     # Verify the history record
-    history = client.get(f"/api/observable/{observable_tree.node_uuid}/history")
+    history = client.get(f"/api/observable/{observable.uuid}/history")
     assert history.json()["total"] == 3
     assert history.json()["items"][2]["action"] == "UPDATE"
     assert history.json()["items"][2]["action_by"]["username"] == "analyst"
-    assert history.json()["items"][2]["record_uuid"] == str(observable_tree.node_uuid)
+    assert history.json()["items"][2]["record_uuid"] == str(observable.uuid)
     assert history.json()["items"][2]["field"] == "comments"
     assert history.json()["items"][2]["diff"]["old_value"] is None
     assert history.json()["items"][2]["diff"]["new_value"] is None
