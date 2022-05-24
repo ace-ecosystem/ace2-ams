@@ -18,15 +18,6 @@ from api_models.event_summaries import (
 )
 from api_models.history import EventHistoryRead
 from api.routes import helpers
-from api.routes.event_summaries import (
-    get_detection_point_summary,
-    get_email_headers_body_summary,
-    get_email_summary,
-    get_observable_summary,
-    get_sandbox_summary,
-    get_url_domain_summary,
-    get_user_summary,
-)
 from db import crud
 from db.database import get_db
 from db.schemas.event import EventHistory
@@ -155,7 +146,7 @@ def get_event(uuid: UUID, db: Session = Depends(get_db)):
     try:
         return crud.event.read_by_uuid(uuid=uuid, db=db, inject_analysis_types=True)
     except UuidNotFoundInDatabase as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Alert {uuid} does not exist") from e
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Event {uuid} does not exist") from e
 
 
 def get_event_history(uuid: UUID, db: Session = Depends(get_db)):
@@ -180,7 +171,7 @@ def update_events(
 ):
     for event in events:
         try:
-            crud.event.update(model=event, db=db)
+            crud.event.update(uuid=event.uuid, model=event, db=db)
         except UuidNotFoundInDatabase as e:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
         except ValueNotFoundInDatabase as e:
@@ -207,6 +198,56 @@ helpers.api_route_update(router, update_events, path="/")
 #
 # SUMMARIES
 #
+
+
+def get_detection_point_summary(uuid: UUID, db: Session = Depends(get_db)):
+    try:
+        return crud.event.read_summary_detection_point(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Event {uuid} does not exist") from e
+
+
+def get_email_headers_body_summary(uuid: UUID, db: Session = Depends(get_db)):
+    try:
+        return crud.event.read_summary_email_headers_body(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Event {uuid} does not exist") from e
+
+
+def get_email_summary(uuid: UUID, db: Session = Depends(get_db)):
+    try:
+        return crud.event.read_summary_email(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Event {uuid} does not exist") from e
+
+
+def get_observable_summary(uuid: UUID, db: Session = Depends(get_db)):
+    try:
+        return crud.event.read_summary_observable(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Event {uuid} does not exist") from e
+
+
+def get_sandbox_summary(uuid: UUID, db: Session = Depends(get_db)):
+    try:
+        return crud.event.read_summary_sandbox(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Event {uuid} does not exist") from e
+
+
+def get_url_domain_summary(uuid: UUID, db: Session = Depends(get_db)):
+    try:
+        return crud.event.read_summary_url_domain(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Event {uuid} does not exist") from e
+
+
+def get_user_summary(uuid: UUID, db: Session = Depends(get_db)):
+    try:
+        return crud.event.read_summary_user(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Event {uuid} does not exist") from e
+
 
 helpers.api_route_read(
     router, get_detection_point_summary, List[DetectionSummary], path="/{uuid}/summary/detection_point"

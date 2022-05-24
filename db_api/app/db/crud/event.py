@@ -1,13 +1,24 @@
 from datetime import datetime
 from deepdiff import DeepHash
 from sqlalchemy import and_, func, or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Load, Session
 from sqlalchemy.sql.selectable import Select
 from typing import Optional, Tuple
+from urllib.parse import urlparse
 from uuid import UUID
+from api_models.analysis_details import FAQueueAnalysisDetails, SandboxProcess
 
 from api_models.event import EventCreate, EventUpdate
-from api_models.event_summaries import DetectionSummary, EmailHeadersBody, EmailSummary
+from api_models.event_summaries import (
+    DetectionSummary,
+    EmailHeadersBody,
+    EmailSummary,
+    ObservableSummary,
+    SandboxSummary,
+    URLDomainSummary,
+    URLDomainSummaryIndividual,
+    UserSummary,
+)
 from db import crud
 from db.schemas.alert import Alert, AlertHistory
 from db.schemas.alert_analysis_mapping import alert_analysis_mapping
@@ -391,6 +402,39 @@ def create_or_read(model: EventCreate, db: Session) -> Event:
     return obj
 
 
+def read_analysis_type_from_event(
+    analysis_module_type: str, uuid: UUID, db: Session, starts_with: bool = False
+) -> list[Tuple[UUID, Analysis]]:
+    """
+    Returns a list of tuples containing the alert UUID and the analysis object where the list contains every
+    analysis of the given type that was performed in the given event UUID.
+    """
+    if starts_with:
+        clause = AnalysisModuleType.value.startswith(analysis_module_type)
+    else:
+        clause = AnalysisModuleType.value == analysis_module_type
+
+    # Get all the email analyses (and their parent alert UUIDs) performed in the event.
+    query = (
+        select([Alert.uuid, Analysis])
+        .join(
+            alert_analysis_mapping,
+            onclause=alert_analysis_mapping.c.analysis_uuid == Analysis.uuid,
+        )
+        .join(
+            AnalysisModuleType,
+            onclause=and_(
+                AnalysisModuleType.uuid == Analysis.analysis_module_type_uuid,
+                clause,
+            ),
+        )
+        .join(Alert, onclause=and_(Alert.uuid == alert_analysis_mapping.c.alert_uuid, Alert.event_uuid == uuid))
+        .options(Load(Analysis).undefer("details"))
+    )
+
+    return db.execute(query).unique().all()
+
+
 def read_by_uuid(uuid: UUID, db: Session, inject_analysis_types: bool = False) -> Event:
     obj = crud.helpers.read_by_uuid(db_table=Event, uuid=uuid, db=db)
 
@@ -411,7 +455,28 @@ def read_by_uuid(uuid: UUID, db: Session, inject_analysis_types: bool = False) -
     return obj
 
 
+def read_observable_type_from_event(observable_type: str, uuid: UUID, db: Session) -> list[Observable]:
+    query = (
+        select(Observable)
+        .join(
+            analysis_child_observable_mapping,
+            onclause=analysis_child_observable_mapping.c.observable_uuid == Observable.uuid,
+        )
+        .join(
+            alert_analysis_mapping,
+            onclause=alert_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid,
+        )
+        .join(Alert, onclause=and_(Alert.uuid == alert_analysis_mapping.c.alert_uuid, Alert.event_uuid == uuid))
+        .where(Observable.type.has(ObservableType.value == observable_type))
+    )
+
+    return db.execute(query).unique().scalars().all()
+
+
 def read_summary_detection_point(uuid: UUID, db: Session) -> list[DetectionSummary]:
+    # Verify the event exists
+    read_by_uuid(uuid=uuid, db=db)
+
     # Get all the detection points (and their parent alert UUIDs) performed in the event.
     # The query results are turned into a dictionary with the parent alert UUID as the key.
     query = (
@@ -445,26 +510,10 @@ def read_summary_detection_point(uuid: UUID, db: Session) -> list[DetectionSumma
 
 
 def read_summary_email(uuid: UUID, db: Session) -> list[EmailSummary]:
-    # Get all the email analyses (and their parent alert UUIDs) performed in the event.
-    query = (
-        select([Alert.uuid, Analysis])
-        .join(
-            alert_analysis_mapping,
-            onclause=alert_analysis_mapping.c.analysis_uuid == Analysis.uuid,
-        )
-        .join(
-            AnalysisModuleType,
-            onclause=and_(
-                AnalysisModuleType.uuid == Analysis.analysis_module_type_uuid,
-                AnalysisModuleType.value == "Email Analysis",
-            ),
-        )
-        .join(Alert, onclause=and_(Alert.uuid == alert_analysis_mapping.c.alert_uuid, Alert.event_uuid == uuid))
-    )
+    # Verify the event exists
+    read_by_uuid(uuid=uuid, db=db)
 
-    alert_uuid_and_analysis: list[Tuple[UUID, Analysis]] = db.execute(query).unique().all()
-
-    # Build a list of EmailSummary objects from the unique email analyses
+    alert_uuid_and_analysis = read_analysis_type_from_event(analysis_module_type="Email Analysis", uuid=uuid, db=db)
     results: list[EmailSummary] = []
     unique_emails = []
     for alert_uuid, analysis in alert_uuid_and_analysis:
@@ -482,31 +531,131 @@ def read_summary_email(uuid: UUID, db: Session) -> list[EmailSummary]:
 
 
 def read_summary_email_headers_body(uuid: UUID, db: Session) -> Optional[EmailHeadersBody]:
-    # Get all the email analyses (and their parent alert UUIDs) performed in the event.
-    query = (
-        select([Alert.uuid, Analysis])
-        .join(
-            alert_analysis_mapping,
-            onclause=alert_analysis_mapping.c.analysis_uuid == Analysis.uuid,
-        )
-        .join(
-            AnalysisModuleType,
-            onclause=and_(
-                AnalysisModuleType.uuid == Analysis.analysis_module_type_uuid,
-                AnalysisModuleType.value == "Email Analysis",
-            ),
-        )
-        .join(Alert, onclause=and_(Alert.uuid == alert_analysis_mapping.c.alert_uuid, Alert.event_uuid == uuid))
-    )
+    # Verify the event exists
+    read_by_uuid(uuid=uuid, db=db)
 
-    alert_uuid_and_analysis: list[Tuple[UUID, Analysis]] = db.execute(query).unique().all()
-
-    # Return the headers and body of the earliest email in the event
-    if alert_uuid_and_analysis:
+    if alert_uuid_and_analysis := read_analysis_type_from_event(
+        analysis_module_type="Email Analysis", uuid=uuid, db=db
+    ):
+        # Return the earliest email
         sorted_alert_and_analysis = sorted(alert_uuid_and_analysis, key=lambda x: x[1].details["time"])
         return EmailHeadersBody(**sorted_alert_and_analysis[0][1].details, alert_uuid=sorted_alert_and_analysis[0][0])
 
     return None
+
+
+def read_summary_observable(uuid: UUID, db: Session) -> list[ObservableSummary]:
+    # Verify the event exists
+    read_by_uuid(uuid=uuid, db=db)
+
+    alert_uuid_and_analysis = read_analysis_type_from_event(
+        analysis_module_type="FA Queue", starts_with=True, uuid=uuid, db=db
+    )
+
+    # Loop over the FA Queue analyses and inject their results into the observables to create
+    # the observable summaries.
+    results = set()
+    for _, faqueue_analysis in alert_uuid_and_analysis:
+        analysis_details = FAQueueAnalysisDetails(**faqueue_analysis.details)
+        faqueue_analysis.target.faqueue_hits = analysis_details.hits
+        faqueue_analysis.target.faqueue_link = analysis_details.link
+        results.add(faqueue_analysis.target)
+
+    # Return the observables sorted by their type then value
+    return sorted(results, key=lambda x: (x.type.value, x.value))
+
+
+def read_summary_sandbox(uuid: UUID, db: Session) -> list[SandboxSummary]:
+    def _prettify_process_tree(processes: list[SandboxProcess], text="", depth=0) -> str:
+        if not text:
+            pids = [proc.pid for proc in processes]
+            root_pids = [proc.pid for proc in processes if proc.parent_pid not in pids]
+
+            for process in processes:
+                process.children = [proc for proc in processes if proc.parent_pid == process.pid]
+
+            processes = [proc for proc in processes if proc.pid in root_pids]
+
+        for process in processes:
+            text += f"{'    ' * depth}{process.command}\n"
+
+            if process.children:
+                text = _prettify_process_tree(process.children, text=text, depth=depth + 1)
+
+        return text
+
+    # Verify the event exists
+    read_by_uuid(uuid=uuid, db=db)
+
+    alert_uuid_and_analysis = read_analysis_type_from_event(
+        analysis_module_type="Sandbox Analysis", starts_with=True, uuid=uuid, db=db
+    )
+
+    # Build a list of SandboxSummary objects from the unique sandbox analyses
+    results: list[SandboxSummary] = []
+    lookup = set()
+    for alert_uuid, sandbox_analysis in alert_uuid_and_analysis:
+        # Skip this sandbox report if it is a duplicate
+        details_hash = DeepHash(sandbox_analysis.details)[sandbox_analysis.details]
+        if details_hash in lookup:
+            continue
+        else:
+            lookup.add(details_hash)
+
+        # Create the SandboxSummary object and prettyify its process tree if there are processes
+        report_summary = SandboxSummary(**sandbox_analysis.details, alert_uuid=alert_uuid)
+        if report_summary.processes:
+            report_summary.process_tree = _prettify_process_tree(report_summary.processes).strip()
+
+        results.append(report_summary)
+
+    # Return the summaries by the filename
+    return sorted(results, key=lambda x: x.filename)
+
+
+def read_summary_url_domain(uuid: UUID, db: Session) -> URLDomainSummary:
+    # Verify the event exists
+    read_by_uuid(uuid=uuid, db=db)
+
+    # Loop through the URL observables to count the domains. The key is the URL, and the value is
+    # a URLDomainSummary object.
+    # NOTE: This assumes the URL values are validated as they are added to the database.
+    urls = read_observable_type_from_event(observable_type="url", uuid=uuid, db=db)
+    domain_count: dict[str, URLDomainSummaryIndividual] = dict()
+    for url in urls:
+        parsed_url = urlparse(url.value)
+        if parsed_url.hostname not in domain_count:
+            domain_count[parsed_url.hostname] = URLDomainSummaryIndividual(domain=parsed_url.hostname, count=1)
+        else:
+            domain_count[parsed_url.hostname].count += 1
+
+    # Return a list of the URLDomainSummary objects sorted by their count (highest first) then the domain.
+    # There isn't a built-in way to do this type of sort, so first sort by the secondary value (the domain).
+    # Then sort by the primary value (the count).
+    sorted_results = sorted(domain_count.values(), key=lambda x: x.domain)
+    sorted_results = sorted(sorted_results, key=lambda x: x.count, reverse=True)
+
+    return URLDomainSummary(domains=sorted_results, total=len(urls))
+
+
+def read_summary_user(uuid: UUID, db: Session) -> list[UserSummary]:
+    # Verify the event exists
+    read_by_uuid(uuid=uuid, db=db)
+
+    # Get the unique user analysis details
+    alert_uuid_and_analysis = read_analysis_type_from_event(analysis_module_type="User Analysis", uuid=uuid, db=db)
+    results: list[UserSummary] = []
+    lookup = set()
+    for _, user_analysis in alert_uuid_and_analysis:
+        if user_analysis.details["email"] in lookup:
+            continue
+        else:
+            lookup.add(user_analysis.details["email"])
+
+        results.append(UserSummary(**user_analysis.details))
+
+    # Return the analysis details sorted by the email addresses
+    return sorted(results, key=lambda x: (x.email))
 
 
 def update(uuid: UUID, model: EventUpdate, db: Session):
