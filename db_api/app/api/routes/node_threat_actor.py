@@ -12,7 +12,7 @@ from api_models.node_threat_actor import (
 from db import crud
 from db.database import get_db
 from db.schemas.node_threat_actor import NodeThreatActor
-from exceptions.db import UuidNotFoundInDatabase
+from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 
 router = APIRouter(
@@ -32,8 +32,11 @@ def create_node_threat_actor(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    obj = crud.node_threat_actor.create_or_read(model=create, db=db)
-    db.commit()
+    try:
+        obj = crud.node_threat_actor.create_or_read(model=create, db=db)
+        db.commit()
+    except ValueNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
     response.headers["Content-Location"] = request.url_for("get_node_threat_actor", uuid=obj.uuid)
 

@@ -12,7 +12,7 @@ from api_models.event_source import (
 from db import crud
 from db.database import get_db
 from db.schemas.event_source import EventSource
-from exceptions.db import UuidNotFoundInDatabase
+from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 
 router = APIRouter(
@@ -32,8 +32,11 @@ def create_event_source(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    obj = crud.event_source.create_or_read(model=create, db=db)
-    db.commit()
+    try:
+        obj = crud.event_source.create_or_read(model=create, db=db)
+        db.commit()
+    except ValueNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
     response.headers["Content-Location"] = request.url_for("get_event_source", uuid=obj.uuid)
 
