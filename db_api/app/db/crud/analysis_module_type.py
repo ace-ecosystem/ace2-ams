@@ -48,6 +48,18 @@ def read_by_uuid(uuid: UUID, db: Session) -> AnalysisModuleType:
     return crud.helpers.read_by_uuid(db_table=AnalysisModuleType, uuid=uuid, db=db)
 
 
+def read_by_value_latest_version(value: str, db: Session) -> AnalysisModuleType:
+    return (
+        db.execute(
+            select(AnalysisModuleType)
+            .where(AnalysisModuleType.value == value)
+            .order_by(AnalysisModuleType.version.desc())
+        )
+        .scalars()
+        .first()
+    )
+
+
 def read_by_value_version(value: str, version: str, db: Session) -> AnalysisModuleType:
     return (
         db.execute(

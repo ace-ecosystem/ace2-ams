@@ -5,7 +5,7 @@ from fastapi import status
 
 from db.schemas.observable import Observable
 from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
-from tests import helpers
+from tests import factory
 
 
 #
@@ -24,9 +24,14 @@ from tests import helpers
         ("for_detection", 123),
         ("for_detection", None),
         ("for_detection", "True"),
-        ("redirection_uuid", 123),
-        ("redirection_uuid", ""),
-        ("redirection_uuid", "abc"),
+        ("parent_analysis_uuid", 123),
+        ("parent_analysis_uuid", ""),
+        ("parent_analysis_uuid", "abc"),
+        ("redirection", ""),
+        ("redirection", 123),
+        ("redirection", {"abc": 123}),
+        ("redirection", {"type": "test_type"}),
+        ("redirection", {"value": "test_value"}),
         ("time", None),
         ("time", ""),
         ("time", "Monday"),
@@ -45,15 +50,13 @@ from tests import helpers
     ],
 )
 def test_create_invalid_fields(client, key, value):
-    create_json = {
-        "node_tree": {"root_node_uuid": str(uuid.uuid4())},
-        "type": "test_type",
-        "value": "test",
-    }
-    create_json[key] = value
+    create_json = {"type": "test_type", "value": "test", key: value}
     create = client.post("/api/observable/", json=[create_json])
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert len(create.json()["detail"]) == 1
+    if key == "redirection":
+        assert len(create.json()["detail"]) <= 2
+    else:
+        assert len(create.json()["detail"]) == 1
     assert key in create.json()["detail"][0]["loc"]
 
 
@@ -70,84 +73,10 @@ def test_create_invalid_node_fields(client, key, values):
     for value in values:
         create = client.post(
             "/api/observable/",
-            json=[
-                {
-                    key: value,
-                    "node_tree": {"root_node_uuid": str(uuid.uuid4())},
-                    "type": "test_type",
-                    "value": "test",
-                }
-            ],
+            json=[{key: value, "type": "test_type", "value": "test"}],
         )
         assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert key in create.json()["detail"][0]["loc"]
-
-
-@pytest.mark.parametrize(
-    "key",
-    [
-        ("uuid"),
-    ],
-)
-def test_create_duplicate_unique_fields(client, db, key):
-    # Create an alert
-    node_tree = helpers.create_alert(db=db)
-
-    # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
-
-    # Create an object
-    create1_json = {
-        "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
-        "type": "test_type",
-        "uuid": str(uuid.uuid4()),
-        "value": "test",
-    }
-    client.post("/api/observable/", json=[create1_json])
-
-    # Ensure you cannot create another object with the same unique field value
-    create2_json = {
-        "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
-        "type": "test_type",
-        "value": "test2",
-    }
-    create2_json[key] = create1_json[key]
-    create2 = client.post("/api/observable/", json=[create2_json])
-    assert create2.status_code == status.HTTP_409_CONFLICT
-
-
-def test_create_duplicate_type_value(client, db):
-    # Create an alert
-    node_tree = helpers.create_alert(db=db)
-
-    # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
-
-    # Create an object
-    client.post(
-        "/api/observable/",
-        json=[
-            {
-                "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
-                "type": "test_type",
-                "value": "test",
-            }
-        ],
-    )
-
-    # Ensure you cannot create another observable with the same type+value combination in the same node tree location
-    create = client.post(
-        "/api/observable/",
-        json=[
-            {
-                "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
-                "type": "test_type",
-                "value": "test",
-            }
-        ],
-    )
-
-    assert create.status_code == status.HTTP_409_CONFLICT
 
 
 @pytest.mark.parametrize(
@@ -164,14 +93,14 @@ def test_create_missing_required_fields(client, key):
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_create_nonexistent_alert(client, db):
+def test_create_nonexistent_parent_analysis(client, db):
     # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="test_type", db=db)
 
     nonexistent_uuid = str(uuid.uuid4())
     create = client.post(
         "/api/observable/",
-        json=[{"node_tree": {"root_node_uuid": nonexistent_uuid}, "type": "test_type", "value": "test"}],
+        json=[{"parent_analysis_uuid": nonexistent_uuid, "type": "test_type", "value": "test"}],
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert nonexistent_uuid in create.text
@@ -182,61 +111,23 @@ def test_create_nonexistent_alert(client, db):
     [("directives"), ("tags"), ("threat_actors"), ("threats")],
 )
 def test_create_nonexistent_node_fields(client, db, key):
-    # Create an alert
-    node_tree = helpers.create_alert(db=db)
-
     # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="test_type", db=db)
 
     create = client.post(
         "/api/observable/",
-        json=[
-            {
-                key: ["abc"],
-                "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
-                "type": "test_type",
-                "value": "test",
-            }
-        ],
+        json=[{key: ["abc"], "type": "test_type", "value": "test"}],
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "abc" in create.text
 
 
-def test_create_nonexistent_redirection(client, db):
-    # Create an alert
-    node_tree = helpers.create_alert(db=db)
-
-    # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
-
-    nonexistent_uuid = str(uuid.uuid4())
-    create = client.post(
-        "/api/observable/",
-        json=[
-            {
-                "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
-                "redirection_uuid": nonexistent_uuid,
-                "type": "test_type",
-                "value": "test",
-            }
-        ],
-    )
-
-    assert create.status_code == status.HTTP_404_NOT_FOUND
-    assert nonexistent_uuid in create.text
-
-
 def test_create_nonexistent_type(client, db):
-    # Create an alert
-    node_tree = helpers.create_alert(db=db)
-
     nonexistent_type = "test_type"
     create = client.post(
         "/api/observable/",
         json=[
             {
-                "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
                 "type": nonexistent_type,
                 "value": "test",
             }
@@ -252,24 +143,15 @@ def test_create_nonexistent_type(client, db):
 
 
 def test_create_verify_history(client, db):
-    # Create an alert
-    node_tree = helpers.create_alert(db=db, history_username="analyst")
-
     # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="test_type", db=db)
 
     # Create some observables
-    observables = []
-    for i in range(3):
-        observables.append(
-            {
-                "uuid": str(uuid.uuid4()),
-                "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
-                "type": "test_type",
-                "value": f"test{i}",
-            }
-        )
-    create = client.post("/api/observable/?history_username=analyst", json=observables)
+    observables = [
+        {"uuid": str(uuid.uuid4()), "type": "test_type", "value": f"test{i}", "history_username": "analyst"}
+        for i in range(3)
+    ]
+    create = client.post("/api/observable/", json=observables)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history records
@@ -286,22 +168,18 @@ def test_create_verify_history(client, db):
 
 def test_create_bulk(client, db):
     # Create an alert
-    node_tree = helpers.create_alert(db=db)
-    initial_alert_version = node_tree.root_node.version
+    alert = factory.alert.create(db=db)
+    initial_alert_version = alert.version
 
     # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="test_type", db=db)
 
     # Create some observables
-    observables = []
-    for i in range(3):
-        observables.append(
-            {
-                "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
-                "type": "test_type",
-                "value": f"test{i}",
-            }
-        )
+    observables = [
+        {"type": "test_type", "value": f"test{i}", "parent_analysis_uuid": str(alert.root_analysis_uuid)}
+        for i in range(3)
+    ]
+
     create = client.post("/api/observable/", json=observables)
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -310,38 +188,7 @@ def test_create_bulk(client, db):
     assert len(observables) == 3
 
     # Additionally, creating an observable should trigger the alert to get a new version.
-    assert node_tree.root_node.version != initial_alert_version
-
-
-def test_create_node_metadata(client, db):
-    # Create an alert
-    node_tree = helpers.create_alert(db=db)
-
-    # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
-
-    # Create the object
-    create = client.post(
-        "/api/observable/",
-        json=[
-            {
-                "node_tree": {
-                    "node_metadata": {"display": {"type": "override_type", "value": "override_value"}},
-                    "parent_tree_uuid": str(node_tree.uuid),
-                    "root_node_uuid": str(node_tree.root_node_uuid),
-                },
-                "type": "test_type",
-                "value": "test",
-            }
-        ],
-    )
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Read the alert back to get its tree structure that contains the observable to verify its node_metadata
-    get = client.get(f"http://testserver/api/alert/{node_tree.root_node_uuid}")
-    assert get.json()["children"][0]["node_metadata"] == {
-        "display": {"type": "override_type", "value": "override_value"}
-    }
+    assert alert.version != initial_alert_version
 
 
 @pytest.mark.parametrize(
@@ -366,23 +213,13 @@ def test_create_node_metadata(client, db):
     ],
 )
 def test_create_valid_optional_fields(client, db, key, value):
-    # Create an alert
-    node_tree = helpers.create_alert(db=db)
-
     # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="test_type", db=db)
 
     # Create the object
     create = client.post(
         "/api/observable/",
-        json=[
-            {
-                key: value,
-                "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
-                "type": "test_type",
-                "value": "test",
-            }
-        ],
+        json=[{key: value, "type": "test_type", "value": "test"}],
     )
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -390,60 +227,38 @@ def test_create_valid_optional_fields(client, db, key, value):
     get = client.get(create.headers["Content-Location"])
 
     # If the test is for expires_on, make sure that the retrieved value matches the proper UTC timestamp
-    if (key == "expires_on" or key == "time") and value:
+    if key in ["expires_on", "time"] and value:
         assert get.json()[key] == "2022-01-01T00:00:00+00:00"
     else:
         assert get.json()[key] == value
 
 
 def test_create_valid_redirection(client, db):
-    # Create an alert
-    node_tree = helpers.create_alert(db=db)
-
     # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="test_type", db=db)
 
-    # Create an observable
-    observable_uuid = str(uuid.uuid4())
+    # Create an observable that has a redirection
     create_json = {
-        "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
+        "redirection": {"type": "test_type", "value": "test2"},
         "type": "test_type",
-        "uuid": observable_uuid,
         "value": "test",
     }
-    client.post("/api/observable/", json=[create_json])
-
-    # Create another observable that redirects to the previously created one
-    create_json = {
-        "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
-        "redirection_uuid": observable_uuid,
-        "type": "test_type",
-        "value": "test2",
-    }
     create = client.post("/api/observable/", json=[create_json])
+    assert create.status_code == status.HTTP_201_CREATED
 
-    # Read it back
-    get = client.get(create.headers["Content-Location"])
-    assert get.json()["redirection_uuid"] == observable_uuid
+    # There should be 2 observables in the database
+    observables = db.query(Observable).all()
+    assert len(observables) == 2
 
 
 def test_create_valid_required_fields(client, db):
-    # Create an alert
-    node_tree = helpers.create_alert(db=db)
-
     # Create an observable type
-    helpers.create_observable_type(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="test_type", db=db)
 
     # Create the object
     create = client.post(
         "/api/observable/",
-        json=[
-            {
-                "node_tree": {"parent_tree_uuid": str(node_tree.uuid), "root_node_uuid": str(node_tree.root_node_uuid)},
-                "type": "test_type",
-                "value": "test",
-            }
-        ],
+        json=[{"type": "test_type", "value": "test"}],
     )
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -455,10 +270,10 @@ def test_create_valid_required_fields(client, db):
 @pytest.mark.parametrize(
     "key,value_lists,helper_create_func",
     [
-        ("directives", VALID_LIST_STRING_VALUES, helpers.create_node_directive),
-        ("tags", VALID_LIST_STRING_VALUES, helpers.create_node_tag),
-        ("threat_actors", VALID_LIST_STRING_VALUES, helpers.create_node_threat_actor),
-        ("threats", VALID_LIST_STRING_VALUES, helpers.create_node_threat),
+        ("directives", VALID_LIST_STRING_VALUES, factory.node_directive.create_or_read),
+        ("tags", VALID_LIST_STRING_VALUES, factory.node_tag.create_or_read),
+        ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
+        ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
     ],
 )
 def test_create_valid_node_fields(client, db, key, value_lists, helper_create_func):
@@ -466,25 +281,12 @@ def test_create_valid_node_fields(client, db, key, value_lists, helper_create_fu
         for value in value_list:
             helper_create_func(value=value, db=db)
 
-        # Create an alert
-        node_tree = helpers.create_alert(db=db)
-
         # Create an observable type
-        helpers.create_observable_type(value="test_type", db=db)
+        factory.observable_type.create_or_read(value="test_type", db=db)
 
         create = client.post(
             "/api/observable/",
-            json=[
-                {
-                    key: value_list,
-                    "node_tree": {
-                        "parent_tree_uuid": str(node_tree.uuid),
-                        "root_node_uuid": str(node_tree.root_node_uuid),
-                    },
-                    "type": "test_type",
-                    "value": f"{key}{value_list}",
-                }
-            ],
+            json=[{key: value_list, "type": "test_type", "value": f"{key}{value_list}"}],
         )
         assert create.status_code == status.HTTP_201_CREATED
 

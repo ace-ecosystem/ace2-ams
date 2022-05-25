@@ -96,13 +96,7 @@ class NodeTreeItemRead(NodeRead):
     children: List[Dict] = Field(default_factory=list, description="A list of this Node's child Nodes")
 
     first_appearance: bool = Field(
-        default=True, description="Whether or not this is the first time the Node appears in the tree"
-    )
-
-    node_metadata: Optional[NodeTreeMetadata] = Field(description="Optional metadata included with the Node")
-
-    parent_tree_uuid: Optional[UUID4] = Field(
-        description="The node's parent leaf UUID if the node is inside a NodeTree"
+        default=True, description="Whether or not this is the first time the object appears in the tree"
     )
 
 

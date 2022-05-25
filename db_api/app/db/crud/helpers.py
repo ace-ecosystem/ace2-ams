@@ -13,8 +13,15 @@ from uuid import UUID
 from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 
-def build_read_all_query(db_table: DeclarativeMeta) -> Select:
-    return select(db_table)
+def build_read_all_query(db_table: DeclarativeMeta, joins: list[DeclarativeMeta] = None) -> Select:
+    if joins is None:
+        joins = []
+
+    query = select(db_table)
+    for j in joins:
+        query = query.join(j)
+
+    return query
 
 
 def create(obj: Any, db: Session) -> bool:

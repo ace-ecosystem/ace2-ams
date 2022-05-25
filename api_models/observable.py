@@ -1,7 +1,7 @@
 from datetime import datetime
 from pydantic import Field, StrictBool, UUID4
 from typing import Optional
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from api_models import type_str, validators
 from api_models.node import NodeBase, NodeCreate, NodeRead, NodeTreeItemRead, NodeUpdate
@@ -67,6 +67,10 @@ class ObservableCreate(ObservableCreateBase):
         default_factory=list, description="A list of analysis results to add as children to the observable"
     )
 
+    parent_analysis_uuid: Optional[UUID] = Field(
+        description="If given, the observable will be added to this analysis' child observables"
+    )
+
 
 class ObservableRead(NodeRead, ObservableBase):
     comments: list[NodeCommentRead] = Field(
@@ -112,6 +116,12 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
     for_detection: Optional[StrictBool] = Field(
         description="Whether or not this observable should be included in the observable detection exports"
     )
+
+    history_username: Optional[type_str] = Field(
+        description="If given, an observable history record will be created and associated with the user"
+    )
+
+    redirection_uuid: Optional[UUID] = Field(description="The observable UUID to which the observable should redirect")
 
     tags: Optional[list[type_str]] = Field(description="A list of tags to add to the observable")
 

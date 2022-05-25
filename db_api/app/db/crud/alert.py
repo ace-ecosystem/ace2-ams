@@ -479,3 +479,23 @@ def update(model: AlertUpdate, db: Session):
         )
 
     db.flush()
+
+
+def update_alert_versions(analysis_uuid: UUID, db: Session):
+    """Updates the version of any alert in the database that contains the given analysis UUID."""
+
+    # Query the database for every alert that contains this analysis
+    query = select(Alert).join(
+        alert_analysis_mapping,
+        onclause=and_(
+            alert_analysis_mapping.c.alert_uuid == Alert.uuid, alert_analysis_mapping.c.analysis_uuid == analysis_uuid
+        ),
+    )
+
+    alerts: list[Alert] = db.execute(query).unique().scalars().all()
+
+    # Update each alert's version
+    for alert in alerts:
+        crud.node.update_version(node=alert, db=db)
+
+    db.flush()
