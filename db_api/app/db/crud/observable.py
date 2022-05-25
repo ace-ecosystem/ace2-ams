@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from api_models.observable import ObservableCreate
 from db import crud
@@ -66,7 +66,7 @@ def update_version(uuid: UUID, db: Session):
 
     # Update the observable's version
     observable = read_by_uuid(uuid=uuid, db=db)
-    observable.version = uuid4()
+    crud.node.update_version(node=observable, db=db)
 
     # Query the database for every alert that contains this observable
     query = (
@@ -85,6 +85,6 @@ def update_version(uuid: UUID, db: Session):
 
     # Update each alert's version
     for alert in alerts:
-        alert.version = uuid4()
+        crud.node.update_version(node=alert, db=db)
 
     db.flush()

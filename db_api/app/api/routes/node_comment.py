@@ -86,7 +86,7 @@ helpers.api_route_update(router, update_node_comment)
 #
 
 
-def delete_node_comment(uuid: UUID, history_username: str = None, db: Session = Depends(get_db)):
+def delete_node_comment(uuid: UUID, history_username: str, db: Session = Depends(get_db)):
     try:
         crud.node_comment.delete(uuid=uuid, history_username=history_username, db=db)
     except (UuidNotFoundInDatabase, ValueNotFoundInDatabase) as e:

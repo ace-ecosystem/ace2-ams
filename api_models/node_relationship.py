@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field, UUID4
+from typing import Optional
 from uuid import uuid4
 
 from api_models import type_str
@@ -13,6 +14,10 @@ class NodeRelationshipBase(BaseModel):
 
 
 class NodeRelationshipCreate(NodeRelationshipBase):
+    history_username: Optional[type_str] = Field(
+        description="If given, a history record will be created and associated with the user"
+    )
+
     related_node_uuid: UUID4 = Field(description="The UUID of the related node")
 
     type: type_str = Field(description="The type of the node relationship")

@@ -59,7 +59,7 @@ def test_delete_alerts(client, db):
     assert history.json()["items"][2]["diff"]["new_value"] is None
     assert history.json()["items"][2]["diff"]["added_to_list"] == []
     assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
-    assert history.json()["items"][2]["snapshot"]["name"] == "Test Alert"
+    assert history.json()["items"][2]["snapshot"]["comments"] == []
 
 
 def test_delete_events(client, db):
@@ -90,7 +90,7 @@ def test_delete_events(client, db):
     assert history.json()["items"][2]["diff"]["new_value"] is None
     assert history.json()["items"][2]["diff"]["added_to_list"] == []
     assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
-    assert history.json()["items"][2]["snapshot"]["name"] == "Test Event"
+    assert history.json()["items"][2]["snapshot"]["comments"] == []
 
 
 def test_delete_observables(client, db):
@@ -124,4 +124,4 @@ def test_delete_observables(client, db):
     assert history.json()["items"][2]["diff"]["new_value"] is None
     assert history.json()["items"][2]["diff"]["added_to_list"] == []
     assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
-    assert history.json()["items"][2]["snapshot"]["value"] == "test_value"
+    assert history.json()["items"][2]["snapshot"]["comments"] == []

@@ -92,7 +92,7 @@ helpers.api_route_update(router, update_node_detection_point)
 #
 
 
-def delete_node_detection_point(uuid: UUID, history_username: str = None, db: Session = Depends(get_db)):
+def delete_node_detection_point(uuid: UUID, history_username: str, db: Session = Depends(get_db)):
     try:
         crud.node_detection_point.delete(uuid=uuid, history_username=history_username, db=db)
     except (UuidNotFoundInDatabase, ValueNotFoundInDatabase) as e:

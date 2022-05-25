@@ -61,6 +61,9 @@ def record_create_history(
     record: Union[Node, User, HasHistory],
     db: Session,
 ):
+    # Refresh the database object so that its history snapshot is up to date
+    db.refresh(instance=record)
+
     db.add(
         history_table(
             action="CREATE",
@@ -147,6 +150,9 @@ def record_update_history(
 ):
     if action_time is None:
         action_time = crud.helpers.utcnow()
+
+    # Refresh the database object so that its history snapshot is up to date
+    db.refresh(instance=record)
 
     for diff in diffs:
         if diff:

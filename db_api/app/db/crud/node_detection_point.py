@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from api_models.node_detection_point import NodeDetectionPointCreate, NodeDetectionPointUpdate
 from db import crud
@@ -12,7 +12,7 @@ def create_or_read(model: NodeDetectionPointCreate, db: Session) -> NodeDetectio
 
     if crud.helpers.create(obj=obj, db=db):
         # Adding a detection point counts as modifying the Node, so update its version
-        obj.node.version = uuid4()
+        crud.node.update_version(node=obj.node, db=db)
 
         # Add a history entry
         if model.history_username:
@@ -29,12 +29,15 @@ def create_or_read(model: NodeDetectionPointCreate, db: Session) -> NodeDetectio
     return read_by_node_value(node_uuid=model.node_uuid, value=model.value, db=db)
 
 
-def delete(uuid: UUID, history_username: str, db: Session):
+def delete(uuid: UUID, history_username: str, db: Session) -> bool:
     # Read detection point from the database
     detection_point = read_by_uuid(uuid=uuid, db=db)
 
     # Deleting the detection point counts as modifying the Node, so it should receive a new version
-    detection_point.node.version = uuid4()
+    crud.node.update_version(node=detection_point.node, db=db)
+
+    # Delete the detection point
+    result = crud.helpers.delete(uuid=uuid, db_table=NodeDetectionPoint, db=db)
 
     # Add an entry to the appropriate node history table for deleting the detection point
     crud.history.record_node_update_history(
@@ -46,7 +49,7 @@ def delete(uuid: UUID, history_username: str, db: Session):
         db=db,
     )
 
-    crud.helpers.delete(uuid=uuid, db_table=NodeDetectionPoint, db=db)
+    return result
 
 
 def read_by_node_value(node_uuid: UUID, value: str, db: Session) -> NodeDetectionPoint:
@@ -79,7 +82,7 @@ def update(uuid: UUID, model: NodeDetectionPointUpdate, db: Session):
     detection_point.value = model.value
 
     # Modifying the detection point counts as modifying the Node, so it should receive a new version
-    detection_point.node.version = uuid4()
+    crud.node.update_version(node=detection_point.node, db=db)
 
     # Add an entry to the appropriate node history table for updating the detection point
     if model.history_username:

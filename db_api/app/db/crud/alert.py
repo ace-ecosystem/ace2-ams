@@ -6,7 +6,7 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
 from typing import Optional
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from api_models.alert import AlertCreate, AlertTreeRead, AlertUpdate
 from api_models.analysis import AnalysisRead
@@ -441,7 +441,7 @@ def update(model: AlertUpdate, db: Session):
             alert.event = crud.event.read_by_uuid(uuid=update_data["event_uuid"], db=db)
 
             # This counts as editing the event, so it should receive a new version.
-            alert.event.version = uuid4()
+            crud.node.update_version(node=alert.event, db=db)
         else:
             alert.event = None
 

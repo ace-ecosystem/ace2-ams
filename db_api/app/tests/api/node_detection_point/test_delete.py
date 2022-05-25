@@ -17,12 +17,12 @@ are in place in order to account for this.
 
 
 def test_delete_invalid_uuid(client):
-    delete = client.delete("/api/node/detection_point/1")
+    delete = client.delete("/api/node/detection_point/1?history_username=analyst")
     assert delete.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_delete_nonexistent_uuid(client):
-    delete = client.delete(f"/api/node/detection_point/{uuid.uuid4()}")
+    delete = client.delete(f"/api/node/detection_point/{uuid.uuid4()}?history_username=analyst")
     assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -64,4 +64,4 @@ def test_delete(client, db):
     assert history.json()["items"][2]["diff"]["new_value"] is None
     assert history.json()["items"][2]["diff"]["added_to_list"] == []
     assert history.json()["items"][2]["diff"]["removed_from_list"] == ["test"]
-    assert history.json()["items"][2]["snapshot"]["value"] == "test_value"
+    assert history.json()["items"][2]["snapshot"]["detection_points"] == []

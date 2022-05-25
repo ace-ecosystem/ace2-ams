@@ -86,6 +86,13 @@ def update(
         node.threats = crud.node_threat.read_by_values(values=update_data["threats"], db=db)
 
     # Update the node version
-    node.version = uuid4()
+    update_version(node=node, db=db)
 
     return node, diffs
+
+
+def update_version(node: Node, db: Session):
+    """Updates the given Node's version and flushes the change to the database."""
+
+    node.version = uuid4()
+    db.flush()
