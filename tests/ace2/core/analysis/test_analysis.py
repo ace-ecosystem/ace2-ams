@@ -5,6 +5,14 @@ def test_analysis(monkeypatch, mock_datetime):
         class Config(Analysis.Config):
             foo: str
 
+        @property
+        def valid_observables(self):
+            return [ IPv4, 'FQDN' ]
+
+        @property
+        def required_directives(self):
+            return [ 'do_it', 'no_really' ]
+
         def execute(self, observable):
             # verify observable is passed correctly
             assert isinstance(observable, IPv4)
@@ -56,7 +64,7 @@ def test_analysis(monkeypatch, mock_datetime):
     # create analysis to run
     analysis = {
         'id': 1,
-        'type': 'my_analysis',
+        'type': 'MyAnalysis',
         'target': {
             'type': 'IPv4',
             'value': '127.0.0.1',
@@ -64,12 +72,12 @@ def test_analysis(monkeypatch, mock_datetime):
     }
 
     # run the analysis with the lambda handler function
-    analysis = MyAnalysis.run(analysis)
+    analysis = Analysis(**analysis).run()
 
     # verify result
     assert analysis == {
         'id': 1,
-        'type': 'my_analysis',
+        'type': 'MyAnalysis',
         'target': {
             'type': 'IPv4',
             'value': '127.0.0.1',
@@ -88,12 +96,12 @@ def test_analysis(monkeypatch, mock_datetime):
     }
 
     # run again to test the callback
-    analysis = MyAnalysis.run(analysis)
+    analysis = Analysis(**analysis).run()
 
     # verify result
     assert analysis == {
         'id': 1,
-        'type': 'my_analysis',
+        'type': 'MyAnalysis',
         'target': {
             'type': 'IPv4',
             'value': '127.0.0.1',
@@ -120,3 +128,83 @@ def test_analysis(monkeypatch, mock_datetime):
             'submission_id': '123',
         },
     }
+
+    # test should run with type
+    analysis = {
+        'id': 1,
+        'type': 'MyAnalysis',
+        'target': {
+            'type': 'IPv4',
+            'value': '127.0.0.1',
+            'metadata' : [
+                {
+                    'type': 'Directive',
+                    'value': 'do_it',
+                },
+                {
+                    'type': 'Directive',
+                    'value': 'no_really',
+                },
+            ],
+        },
+    }
+    assert Analysis(**analysis).should_run()
+
+    # test should run with string
+    analysis = {
+        'id': 1,
+        'type': 'MyAnalysis',
+        'target': {
+            'type': 'FQDN',
+            'value': '127.0.0.1',
+            'metadata' : [
+                {
+                    'type': 'Directive',
+                    'value': 'do_it',
+                },
+                {
+                    'type': 'Directive',
+                    'value': 'no_really',
+                },
+            ],
+        },
+    }
+    assert Analysis(**analysis).should_run()
+
+    # make sure not to run if missing directive
+    analysis = {
+        'id': 1,
+        'type': 'MyAnalysis',
+        'target': {
+            'type': 'IPv4',
+            'value': '127.0.0.1',
+            'metadata' : [
+                {
+                    'type': 'Directive',
+                    'value': 'do_it',
+                },
+            ],
+        },
+    }
+    assert not Analysis(**analysis).should_run()
+
+    # make sure not to run if wrong observable type
+    analysis = {
+        'id': 1,
+        'type': 'MyAnalysis',
+        'target': {
+            'type': 'nope',
+            'value': '127.0.0.1',
+            'metadata' : [
+                {
+                    'type': 'Directive',
+                    'value': 'do_it',
+                },
+                {
+                    'type': 'Directive',
+                    'value': 'no_really',
+                },
+            ],
+        },
+    }
+    assert not Analysis(**analysis).should_run()

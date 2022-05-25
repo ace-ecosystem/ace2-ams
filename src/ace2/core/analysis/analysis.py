@@ -25,19 +25,54 @@ class Analysis(TypedModel):
         ''' Subclasses can override the config class to add new config fields '''
         pass
 
-    @classmethod
-    def run(cls, state:dict) -> dict:
-        ''' runs the analysis from state
+    @property
+    def config(self) -> Analysis.Config:
+        ''' the analysis config '''
 
-        Args:
-            state: the current analysis state
+        # load config into cache if we need to
+        if self.private.config == None:
+            self.private.config = type(self).Config(**config.load()['analysis'][type(self).__name__])
+
+        # returned loaded config
+        return self.private.config
+
+    @property
+    def valid_observable_types(self) -> List[Union[str,Type[Observable]]]:
+        ''' which observable types to run on '''
+
+        return []
+
+    @property
+    def required_directives(self) -> List[str]:
+        ''' directives the target must have in order to run analysis '''
+
+        return []
+
+    def should_run(self) -> bool:
+        ''' Determines if the analysis should run on the observable
+
+        Returns:
+            True if the analysis should run
+        '''
+
+        # do not run if the target type is not valid for this analysis
+        if self.target.type not in [t if isinstance(t, str) else t.type for t in self.valid_observables]:
+            return False
+
+        # do not run if the observable is missing a required directive
+        for directive in self.required_directives:
+            if directive not in self.target.directives:
+                return False
+
+        # analysis should run on this target
+        return True
+
+    def run(self) -> dict:
+        ''' runs the analysis
 
         Returns:
             the updated analysis state
         '''
-
-        # load the analysis from the analysis state
-        self = cls(**state)
 
         # call the current callback function which then tells us what to execute after that
         self.callback = self.callback.execute(self, self.target)
@@ -50,16 +85,17 @@ class Analysis(TypedModel):
         # return the dictionary representation of the analysis
         return self.dict()
 
-    @property
-    def config(self) -> Analysis.Config:
-        ''' the analysis config '''
+    def execute(self, observable:Observable) -> Optional[Callback]:
+        ''' This is the entry point for running analysis. Subclasses must override this function.
 
-        # load config into cache if we need to
-        if self.private.config == None:
-            self.private.config = type(self).Config(**config.load()['analysis'][type(self).__name__])
+        Args:
+            observable: the target observable to run analysis on
 
-        # returned loaded config
-        return self.private.config
+        Returns:
+            The callback to continue analysis or None if analysis is complete
+        '''
+
+        raise NotImplementedError()
 
     def add(self, observable_type:Type[Observable], *args, **kwargs) -> Observable:
         ''' Adds an observable to the analysis
@@ -83,28 +119,3 @@ class Analysis(TypedModel):
 
         # otherwise return the exiting observable
         return self.observables[self.observables.index(observable)]
-
-    def should_run(self, observable:Observable) -> bool:
-        ''' Determines if the analysis should run on the observable
-
-        Args:
-            observable: the observable to consider
-
-        Returns:
-            True if the analysis should run
-        '''
-
-        # TODO: default behavior should check required observables and required directives
-        raise NotImplementedError()
-
-    def execute(self, observable:Observable) -> Optional[Callback]:
-        ''' This is the entry point for running analysis. Subclasses must override this function.
-
-        Args:
-            observable: the target observable to run analysis on
-
-        Returns:
-            The callback to continue analysis or None if analysis is complete
-        '''
-
-        raise NotImplementedError()
