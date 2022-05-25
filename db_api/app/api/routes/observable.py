@@ -88,7 +88,8 @@ def update_observable(
     db: Session = Depends(get_db),
 ):
     try:
-        crud.observable.update(uuid=uuid, model=observable, db=db)
+        if not crud.observable.update(uuid=uuid, model=observable, db=db):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update observable {uuid}")
     except (UuidNotFoundInDatabase, ValueNotFoundInDatabase) as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
     except VersionMismatch as e:

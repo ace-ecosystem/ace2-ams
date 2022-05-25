@@ -32,13 +32,14 @@ def create_or_read(
     for role in roles:
         crud.user_role.create_or_read(UserRoleCreate(value=role), db=db)
 
-    user = crud.user.create_or_read(
+    obj = crud.user.create_or_read(
         model=UserCreate(
             default_alert_queue=alert_queue,
             default_event_queue=event_queue,
             display_name=display_name,
             email=email,
             enabled=enabled,
+            history_username=history_username,
             password=password,
             roles=roles,
             username=username,
@@ -46,12 +47,6 @@ def create_or_read(
         db=db,
     )
 
-    # if history_username:
-    #     crud.record_create_history(
-    #         history_table=UserHistory,
-    #         action_by=obj,
-    #         record=obj,
-    #         db=db,
-    #     )
+    obj.refresh_token = refresh_token
 
-    return user
+    return obj

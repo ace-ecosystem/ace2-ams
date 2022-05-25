@@ -3,7 +3,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -67,51 +67,11 @@ def test_create_invalid_fields(client, key, value):
         "password": "abcd1234",
         "roles": ["test_role"],
         "username": "johndoe",
+        key: value,
     }
-    create_json[key] = value
+
     create = client.post("/api/user/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-
-
-@pytest.mark.parametrize(
-    "key",
-    [
-        ("email"),
-        ("username"),
-        ("uuid"),
-    ],
-)
-def test_create_duplicate_unique_fields(client, db, key):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_user_role(value="test_role", db=db)
-
-    # Create an object
-    create1_json = {
-        "default_alert_queue": "test_queue",
-        "default_event_queue": "test_queue",
-        "display_name": "John Doe",
-        "email": "john@test.com",
-        "password": "abcd1234",
-        "roles": ["test_role"],
-        "username": "johndoe",
-        "uuid": str(uuid.uuid4()),
-    }
-    client.post("/api/user/", json=create1_json)
-
-    # Ensure you cannot create another object with the same unique field value
-    create2_json = {
-        "default_alert_queue": "test_queue",
-        "default_event_queue": "test_queue",
-        "display_name": "Jane Doe",
-        "email": "jane@test.com",
-        "password": "wxyz6789",
-        "roles": ["test_role"],
-        "username": "janedoe",
-        "uuid": str(uuid.uuid4()),
-    }
-    create2_json[key] = create1_json[key]
-    create2 = client.post("/api/user/", json=create2_json)
-    assert create2.status_code == status.HTTP_409_CONFLICT
 
 
 @pytest.mark.parametrize(
@@ -147,8 +107,8 @@ def test_create_missing_required_fields(client, key):
 
 
 def test_create_verify_history(client, db):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_user_role(value="test_role", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.user_role.create_or_read(value="test_role", db=db)
 
     # Create the object
     user_uuid = str(uuid.uuid4())
@@ -161,8 +121,9 @@ def test_create_verify_history(client, db):
         "roles": ["test_role"],
         "username": "johndoe",
         "uuid": user_uuid,
+        "history_username": "analyst",
     }
-    create = client.post("/api/user/?history_username=analyst", json=create_json)
+    create = client.post("/api/user/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
@@ -181,8 +142,8 @@ def test_create_verify_history(client, db):
     [("enabled", False), ("timezone", "America/New_York"), ("training", False), ("uuid", str(uuid.uuid4()))],
 )
 def test_create_valid_optional_fields(client, db, key, value):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_user_role(value="test_role", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.user_role.create_or_read(value="test_role", db=db)
 
     # Create the object
     create_json = {
@@ -193,8 +154,9 @@ def test_create_valid_optional_fields(client, db, key, value):
         "password": "abcd1234",
         "roles": ["test_role"],
         "username": "johndoe",
+        key: value,
     }
-    create_json[key] = value
+
     create = client.post("/api/user/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -204,8 +166,8 @@ def test_create_valid_optional_fields(client, db, key, value):
 
 
 def test_create_valid_required_fields(client, db):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_user_role(value="test_role", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.user_role.create_or_read(value="test_role", db=db)
 
     # Create the object
     create_json = {

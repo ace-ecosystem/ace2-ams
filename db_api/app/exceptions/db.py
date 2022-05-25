@@ -1,3 +1,11 @@
+class ReusedToken(Exception):
+    pass
+
+
+class UserIsDisabled(Exception):
+    pass
+
+
 class UuidNotFoundInDatabase(Exception):
     pass
 
