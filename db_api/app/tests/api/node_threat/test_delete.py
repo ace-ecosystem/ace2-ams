@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 """
@@ -33,10 +33,10 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete(client, db):
     # Create a node threat type
-    threat_type = helpers.create_node_threat_type(value="test_type", db=db)
+    threat_type = factory.node_threat_type.create_or_read(value="test_type", db=db)
 
     # Create a node threat
-    threat = helpers.create_node_threat(value="test", types=["test_type"], db=db)
+    threat = factory.node_threat.create_or_read(value="test", types=["test_type"], db=db)
 
     # Delete it
     delete = client.delete(f"/api/node/threat/{threat.uuid}")

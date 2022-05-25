@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -27,9 +27,9 @@ def test_get_nonexistent_uuid(client):
 
 def test_get_all(client, db):
     # Create some objects
-    helpers.create_node_threat(value="test", queues=["internal"], types=["test_type"], db=db)
-    helpers.create_node_threat(value="test2", queues=["external"], types=["test_type"], db=db)
-    helpers.create_node_threat(value="test3", queues=["internal", "external"], types=["test_type"], db=db)
+    factory.node_threat.create_or_read(value="test", queues=["internal"], types=["test_type"], db=db)
+    factory.node_threat.create_or_read(value="test2", queues=["external"], types=["test_type"], db=db)
+    factory.node_threat.create_or_read(value="test3", queues=["internal", "external"], types=["test_type"], db=db)
 
     # Read them back
     get = client.get("/api/node/threat/")
