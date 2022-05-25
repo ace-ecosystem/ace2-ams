@@ -57,3 +57,7 @@ def test_observable():
     assert isinstance(observable, Hello)
     assert observable.type == 'Hello'
     assert observable.value == 'world'
+
+    # add directive
+    observable.add(Directive, 'just do it')
+    assert 'just do it' in observable.directives

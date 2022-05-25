@@ -79,6 +79,13 @@ class Observable(TypedModel):
         return self.get_metadata_by_type(Tag)
 
     @property
+    def directives(self) -> List[str]:
+        ''' list of directive values '''
+
+        # get all metadata in observable with type of Directive
+        return self.get_metadata_by_type(Directive)
+
+    @property
     def display_value(self) -> str:
         ''' The display value of the observable. If none is set then use the value as the display value '''
 
