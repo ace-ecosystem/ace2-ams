@@ -1,7 +1,9 @@
 from __future__ import annotations
 from pydantic import Field
-from typing import List, Optional, Type
+from pydantic.fields import ModelField
+from typing import List, Optional, Type, Tuple
 import sys
+
 from .. import config
 from ..callback import Callback
 from ..observables import Observable
@@ -13,7 +15,6 @@ class Analysis(TypedModel):
     id: int = Field(description='the id of the analysis in the database')
     target: Observable = Field(description='the observable that the analysis is performed on')
     summary: Optional[str] = Field(default=None, description='the analysis summary to display in the GUI')
-    details: Optional[dict] = Field(default_factory=dict, description='the analysis details')
     observables: Optional[List[Observable]] = Field(default_factory=list, description='the child observables')
     state: Optional[dict] = Field(default_factory=dict, description='non analysis data storage space')
     callback: Optional[Callback] = Field(
@@ -25,9 +26,56 @@ class Analysis(TypedModel):
         ''' Subclasses can override the config class to add new config fields '''
         pass
 
+    class Details(PrivateModel):
+        ''' Subclasses can override the details class to add new details fields '''
+        pass
+
+    class Requirements():
+        ''' Subclass can override the requirements class to alter the requirements '''
+        observables: Union[str, Type[Observable], Tuple[Union[str,Type[Observable]]]] = ()
+        directives: Union[str, Tuple[str]] = ()
+
+    def requirements_met(self) -> bool:
+        ''' Determines if the analysis should run
+
+        Returns:
+            True if the analysis should run
+        '''
+
+        # do not run if the target type is not valid for this analysis
+        observables = self.Requirements.observables 
+        if not isinstance(self.Requirements.observables, tuple):
+            observables = (self.Requirements.observables,)
+        if self.target.type not in [t if isinstance(t, str) else t.type for t in observables]:
+            return False
+
+        # do not run if the observable is missing a required directive
+        directives = self.Requirements.directives 
+        if not isinstance(self.Requirements.directives, tuple):
+            directives = (self.Requirements.directives,)
+        for directive in directives:
+            if directive not in self.target.directives:
+                return False
+
+        # analysis should run on this target
+        return True
+
+    def __init_subclass__(cls):
+        ''' Add details field to all subclasses '''
+        
+        cls.__fields__['details'] = ModelField.infer(
+            name = 'details',
+            annotation = cls.Details,
+            value = cls.Details(),
+            class_validators = None,
+            config = cls.__config__,
+        )
+
+        super().__init_subclass__()
+
     @property
     def config(self) -> Analysis.Config:
-        ''' the analysis config '''
+        ''' the loaded analysis config '''
 
         # load config into cache if we need to
         if self.private.config == None:
@@ -35,37 +83,6 @@ class Analysis(TypedModel):
 
         # returned loaded config
         return self.private.config
-
-    @property
-    def valid_observable_types(self) -> List[Union[str,Type[Observable]]]:
-        ''' which observable types to run on '''
-
-        return []
-
-    @property
-    def required_directives(self) -> List[str]:
-        ''' directives the target must have in order to run analysis '''
-
-        return []
-
-    def should_run(self) -> bool:
-        ''' Determines if the analysis should run on the observable
-
-        Returns:
-            True if the analysis should run
-        '''
-
-        # do not run if the target type is not valid for this analysis
-        if self.target.type not in [t if isinstance(t, str) else t.type for t in self.valid_observables]:
-            return False
-
-        # do not run if the observable is missing a required directive
-        for directive in self.required_directives:
-            if directive not in self.target.directives:
-                return False
-
-        # analysis should run on this target
-        return True
 
     def run(self) -> dict:
         ''' runs the analysis
