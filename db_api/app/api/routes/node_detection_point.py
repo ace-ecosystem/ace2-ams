@@ -75,7 +75,10 @@ def update_node_detection_point(
     db: Session = Depends(get_db),
 ):
     try:
-        crud.node_detection_point.update(uuid=uuid, model=node_detection_point, db=db)
+        if not crud.node_detection_point.update(uuid=uuid, model=node_detection_point, db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update node detection point {uuid}"
+            )
     except (UuidNotFoundInDatabase, ValueNotFoundInDatabase) as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 

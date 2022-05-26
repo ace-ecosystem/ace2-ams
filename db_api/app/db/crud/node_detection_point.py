@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from uuid import UUID
 
@@ -68,18 +69,26 @@ def read_by_uuid(uuid: UUID, db: Session) -> NodeDetectionPoint:
     return crud.helpers.read_by_uuid(db_table=NodeDetectionPoint, uuid=uuid, db=db)
 
 
-def update(uuid: UUID, model: NodeDetectionPointUpdate, db: Session):
-    # Read detection point from the database
-    detection_point = read_by_uuid(uuid=uuid, db=db)
+def update(uuid: UUID, model: NodeDetectionPointUpdate, db: Session) -> bool:
+    with db.begin_nested():
+        # Read detection point from the database
+        detection_point = read_by_uuid(uuid=uuid, db=db)
 
-    # Update the timestamp on the detection point
-    detection_point.insert_time = crud.helpers.utcnow()
+        # Update the timestamp on the detection point
+        detection_point.insert_time = crud.helpers.utcnow()
 
-    # Set the new detection point value
-    diff = crud.history.Diff(
-        field="detection_points", added_to_list=[model.value], removed_from_list=[detection_point.value]
-    )
-    detection_point.value = model.value
+        # Set the new detection point value
+        diff = crud.history.Diff(
+            field="detection_points", added_to_list=[model.value], removed_from_list=[detection_point.value]
+        )
+        detection_point.value = model.value
+
+        # Try to flush the changes to the database
+        try:
+            db.flush()
+        except IntegrityError:
+            db.rollback()
+            return False
 
     # Modifying the detection point counts as modifying the Node, so it should receive a new version
     crud.node.update_version(node=detection_point.node, db=db)
@@ -93,4 +102,4 @@ def update(uuid: UUID, model: NodeDetectionPointUpdate, db: Session):
             db=db,
         )
 
-    db.flush()
+    return True
