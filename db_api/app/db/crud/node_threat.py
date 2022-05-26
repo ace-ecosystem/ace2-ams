@@ -35,28 +35,28 @@ def read_by_values(values: list[str], db: Session) -> list[NodeThreat]:
 
 
 def update(uuid: UUID, model: NodeThreatUpdate, db: Session) -> bool:
-    obj = read_by_uuid(uuid=uuid, db=db)
-
-    # Get the data that was given in the request and use it to update the database object
-    update_data = model.dict(exclude_unset=True)
-
-    if "description" in update_data:
-        obj.description = update_data["description"]
-
-    if "queues" in update_data:
-        obj.queues = crud.queue.read_by_values(values=update_data["queues"], db=db)
-
-    if "value" in update_data:
-        obj.value = update_data["value"]
-
-    if "types" in update_data:
-        obj.types = crud.node_threat_type.read_by_values(values=update_data["types"], db=db)
-
     with db.begin_nested():
+        obj = read_by_uuid(uuid=uuid, db=db)
+
+        # Get the data that was given in the request and use it to update the database object
+        update_data = model.dict(exclude_unset=True)
+
+        if "description" in update_data:
+            obj.description = update_data["description"]
+
+        if "queues" in update_data:
+            obj.queues = crud.queue.read_by_values(values=update_data["queues"], db=db)
+
+        if "value" in update_data:
+            obj.value = update_data["value"]
+
+        if "types" in update_data:
+            obj.types = crud.node_threat_type.read_by_values(values=update_data["types"], db=db)
+
         try:
             db.flush()
-            return True
         except IntegrityError:
             db.rollback()
+            return False
 
-    return False
+    return True
