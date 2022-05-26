@@ -1,4 +1,5 @@
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from uuid import UUID
 
@@ -67,17 +68,25 @@ def read_by_uuid(uuid: UUID, db: Session) -> NodeComment:
     return crud.helpers.read_by_uuid(db_table=NodeComment, uuid=uuid, db=db)
 
 
-def update(uuid: UUID, model: NodeCommentUpdate, db: Session):
-    # Read the comment from the database
-    comment = read_by_uuid(uuid=uuid, db=db)
+def update(uuid: UUID, model: NodeCommentUpdate, db: Session) -> bool:
+    with db.begin_nested():
+        # Read the comment from the database
+        comment = read_by_uuid(uuid=uuid, db=db)
 
-    # Update the user and timestamp on the comment
-    comment.user = crud.user.read_by_username(username=model.username, db=db)
-    comment.insert_time = crud.helpers.utcnow()
+        # Update the user and timestamp on the comment
+        comment.user = crud.user.read_by_username(username=model.username, db=db)
+        comment.insert_time = crud.helpers.utcnow()
 
-    # Set the new comment value
-    diff = crud.history.Diff(field="comments", added_to_list=[model.value], removed_from_list=[comment.value])
-    comment.value = model.value
+        # Set the new comment value
+        diff = crud.history.Diff(field="comments", added_to_list=[model.value], removed_from_list=[comment.value])
+        comment.value = model.value
+
+        # Try to flush the changes to the database
+        try:
+            db.flush()
+        except IntegrityError:
+            db.rollback()
+            return False
 
     # Modifying the comment counts as modifying the Node, so it should receive a new version
     crud.node.update_version(node=comment.node, db=db)
@@ -89,3 +98,5 @@ def update(uuid: UUID, model: NodeCommentUpdate, db: Session):
         diffs=[diff],
         db=db,
     )
+
+    return True
