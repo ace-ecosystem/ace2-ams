@@ -1,10 +1,12 @@
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from typing import Optional
 from uuid import UUID
 
 from api_models.observable import ObservableCreate, ObservableUpdate
 from db import crud
+from db.schemas.analysis import Analysis
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 
@@ -12,6 +14,7 @@ from db.schemas.observable_type import ObservableType
 def create_or_read(
     model: ObservableCreate,
     db: Session,
+    parent_analysis: Optional[Analysis] = None,
 ) -> Observable:
     # Create the new observable Node using the data from the request
     obj: Observable = crud.node.create(
@@ -49,11 +52,12 @@ def create_or_read(
 
     # If a parent analysis UUID was given, add the new observable to the analysis' child observables and
     # update the alerts that contain the parent analysis.
-    if model.parent_analysis_uuid:
+    if parent_analysis is None:
         parent_analysis = crud.analysis.read_by_uuid(uuid=model.parent_analysis_uuid, db=db)
-        parent_analysis.child_observables.append(obj)
+    parent_analysis.child_observables.append(obj)
 
-        crud.alert.update_alert_versions(analysis_uuid=model.parent_analysis_uuid, db=db)
+    # Update the alert versions that contain the parent analysis
+    crud.alert.update_alert_versions(analysis_uuid=parent_analysis.uuid, db=db)
 
     db.flush()
     return obj

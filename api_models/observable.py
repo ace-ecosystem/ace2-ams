@@ -68,7 +68,7 @@ class ObservableCreate(ObservableCreateBase):
     )
 
     parent_analysis_uuid: Optional[UUID] = Field(
-        description="If given, the observable will be added to this analysis' child observables"
+        description="The UUID of the analysis that will contain this observable. This can be NULL if you pass in an Analysis object when creating an observable."
     )
 
 

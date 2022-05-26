@@ -49,7 +49,9 @@ def create_or_read(model: AnalysisCreate, db: Session) -> Analysis:
         )
 
     # Associate the child observables with the analysis
-    obj.child_observables = [crud.observable.create_or_read(model=co, db=db) for co in model.child_observables]
+    obj.child_observables = [
+        crud.observable.create_or_read(model=co, parent_analysis=obj, db=db) for co in model.child_observables
+    ]
 
     # Associate the analysis with its submission
     crud.alert_analysis_mapping.create(analysis_uuid=obj.uuid, submission_uuid=model.submission_uuid, db=db)

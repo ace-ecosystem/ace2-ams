@@ -14,13 +14,13 @@ from tests import factory
 def create_or_read(
     type: str,
     value: str,
+    parent_analysis: Analysis,
     db: Session,
     context: Optional[str] = None,
     directives: Optional[list[str]] = None,
     expires_on: Optional[datetime] = None,
     for_detection: bool = False,
     history_username: Optional[str] = None,
-    parent_analysis: Optional[Analysis] = None,
     redirection: Optional[Observable] = None,
     tags: Optional[list[str]] = None,
     threat_actors: Optional[list[str]] = None,
@@ -35,11 +35,11 @@ def create_or_read(
             expires_on=expires_on,
             for_detection=for_detection,
             history_username=history_username,
-            parent_analysis_uuid=parent_analysis.uuid if parent_analysis else None,
             time=time or crud.helpers.utcnow(),
             type=type,
             value=value,
         ),
+        parent_analysis=parent_analysis,
         db=db,
     )
 
@@ -61,7 +61,6 @@ def create_or_read(
         obj.threats = [factory.node_threat.create_or_read(value=t, db=db) for t in threats]
 
     # Add the observable to its parent analysis
-    if parent_analysis:
-        parent_analysis.child_observables.append(obj)
+    parent_analysis.child_observables.append(obj)
 
     return obj

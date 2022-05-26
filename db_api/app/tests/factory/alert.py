@@ -134,31 +134,53 @@ def create(
 
 
 def create_from_json_file(db: Session, json_path: str, alert_name: str) -> Alert:
-    def _create_observable(o, root_analysis_uuid: UUID) -> ObservableCreate:
-        crud.observable_type.create_or_read(model=ObservableTypeCreate(value=o["type"]), db=db)
+    def _build_observable_model(o: dict, submission_uuid: UUID) -> ObservableCreate:
+        """Helper function used to construct an ObservableCreate model with child AnalysisCreate models.
+
+        Args:
+            o: The observable dictionary from the alert JSON file.
+            submission_uuid: The UUID of the submission (alert) containing the observable.
+
+        Returns:
+            An ObservableCreate model
+        """
+        # Make sure the observable type exists
+        factory.observable_type.create_or_read(value=o["type"], db=db)
+
+        # Make sure that any tags the observable has exist
+        if "tags" in o:
+            for tag in o["tags"]:
+                factory.node_tag.create_or_read(value=tag, db=db)
+
+        # Build the ObservableCreate model
         observable_model = ObservableCreate(
-            for_detection=o["for_detection"] if "for_detection" in o else False,
-            root_analysis_uuid=root_analysis_uuid,
-            tags=o["tags"] if "tags" in o else [],
-            type=o["type"],
-            value=o["value"],
+            for_detection=o.get("for_detection", False), tags=o.get("tags", []), type=o["type"], value=o["value"]
         )
+
+        # If the observable in the JSON file has any child analyses, build AnalysisCreate models
+        # and add them to the ObservableCreate model. This is what creates the recursive tree structure.
         if "analyses" in o:
             for a in o["analyses"]:
-                analysis_module_type = crud.analysis_module_type.create_or_read(
-                    AnalysisModuleTypeCreate(value=a["type"]), db=db
+                # Create the analysis module type object
+                analysis_module_type = factory.analysis_module_type.create_or_read(
+                    value=a["type"],
+                    observable_types=a["observable_types"] if "observable_types" in a else None,
+                    required_directives=a["required_directives"] if "required_directives" in a else None,
+                    required_tags=a["required_tags"] if "required_tags" in a else None,
+                    db=db,
                 )
+
+                # Build the AnalysisCreate model and add it to the ObservableCreate model's list of analyses
                 observable_model.analyses.append(
                     AnalysisCreate(
                         analysis_module_type_uuid=analysis_module_type.uuid,
                         child_observables=[
-                            _create_observable(o=co, root_analysis_uuid=root_analysis_uuid) for co in a["observables"]
+                            _build_observable_model(o=co, submission_uuid=submission_uuid) for co in a["observables"]
                         ]
                         if "observables" in a
                         else [],
                         details=json.dumps(a["details"]) if "details" in a else None,
-                        root_analysis_uuid=root_analysis_uuid,
-                        run_time=crud.helpers.utcnow(),
+                        submission_uuid=submission_uuid,
                         target_uuid=observable_model.uuid,
                     )
                 )
@@ -180,39 +202,23 @@ def create_from_json_file(db: Session, json_path: str, alert_name: str) -> Alert
         text = _replace_tokens(text, "<O_VALUE>", "o_value")
         text = _replace_tokens(text, "<TAG>", "tag")
 
-        data = json.loads(text)
+        data: dict = json.loads(text)
 
-    if "alert_uuid" in data:
-        alert_uuid = data["alert_uuid"]
-    else:
-        alert_uuid = uuid4()
-
-    disposition_user = None
-    if "disposition_user" in data:
-        disposition_user = data["disposition_user"]
-
-    name = "Test Alert"
-    if "name" in data:
-        name = data["name"]
-
-    owner = None
-    if "owner" in data:
-        owner = data["owner"]
-
-    updated_by_user = "analyst"
-    if disposition_user is not None:
-        updated_by_user = disposition_user
-    elif owner is not None:
-        updated_by_user = owner
-
+    # Create the alert object
     alert = create(
         db=db,
-        alert_uuid=alert_uuid,
-        name=name,
-        observables=[_create_observable(o=o, root_analysis_uuid=alert_uuid) for o in data["observables"]],
-        owner=owner,
-        updated_by_user=updated_by_user,
+        alert_uuid=data.get("alert_uuid", uuid4()),
+        name=data.get("name", "Test Alert"),
+        owner=data.get("owner", None),
+        updated_by_user=data.get("disposition_user", None) or data.get("owner", None) or "analyst",
     )
+
+    # Build all of the ObservableCreate models
+    observable_create_models = [_build_observable_model(o=o, submission_uuid=alert.uuid) for o in data["observables"]]
+
+    # Create all of the observables using the alert's root analysis as the parent analysis
+    for model in observable_create_models:
+        crud.observable.create_or_read(model=model, parent_analysis=alert.root_analysis, db=db)
 
     return alert
 
