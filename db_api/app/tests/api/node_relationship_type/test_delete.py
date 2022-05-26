@@ -5,12 +5,6 @@ from fastapi import status
 from tests import factory
 
 
-"""
-NOTE: There are no tests for the foreign key constraints. The DELETE endpoint will need to be updated once the endpoints
-are in place in order to account for this.
-"""
-
-
 #
 # INVALID TESTS
 #
@@ -26,6 +20,20 @@ def test_delete_nonexistent_uuid(client):
     assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_delete_used(client, db):
+    # Create an object
+    obj = factory.node_relationship_type.create_or_read(value="test", db=db)
+
+    # Assign it to another object
+    alert1 = factory.alert.create(db=db)
+    alert2 = factory.alert.create(db=db)
+    factory.node_relationship.create_or_read(node=alert1, related_node=alert2, type="test", db=db)
+
+    # Ensure you cannot delete it now that it is in use
+    delete = client.delete(f"/api/node/relationship/type/{obj.uuid}")
+    assert delete.status_code == status.HTTP_400_BAD_REQUEST
+
+
 #
 # VALID TESTS
 #
@@ -35,14 +43,6 @@ def test_delete(client, db):
     # Create the object
     obj = factory.node_relationship_type.create_or_read(value="test", db=db)
 
-    # Read it back
-    get = client.get(f"/api/node/relationship/type/{obj.uuid}")
-    assert get.status_code == status.HTTP_200_OK
-
     # Delete it
     delete = client.delete(f"/api/node/relationship/type/{obj.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
-
-    # Make sure it is gone
-    get = client.get(f"/api/node/relationship/type/{obj.uuid}")
-    assert get.status_code == status.HTTP_404_NOT_FOUND

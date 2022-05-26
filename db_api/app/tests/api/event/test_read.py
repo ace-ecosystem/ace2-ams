@@ -1,4 +1,5 @@
 import json
+import pytest
 import uuid
 
 from datetime import datetime, timedelta
@@ -29,6 +30,23 @@ def test_get_invalid_uuid(client):
 
 def test_get_nonexistent_uuid(client):
     get = client.get(f"/api/event/{uuid.uuid4()}")
+    assert get.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ("/summary/detection_point"),
+        ("/summary/email_headers_body"),
+        ("/summary/email"),
+        ("/summary/observable"),
+        ("/summary/sandbox"),
+        ("/summary/user"),
+        ("/summary/url_domain"),
+    ],
+)
+def test_get_summary_nonexistent_event(client, path):
+    get = client.get(f"/api/event/{uuid.uuid4()}{path}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 

@@ -5,12 +5,6 @@ from fastapi import status
 from tests import factory
 
 
-"""
-NOTE: There are no tests for the foreign key constraints. The DELETE endpoint will need to be updated once the endpoints
-are in place in order to account for this.
-"""
-
-
 #
 # INVALID TESTS
 #
@@ -26,44 +20,31 @@ def test_delete_nonexistent_uuid(client):
     assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_delete_used(client, db):
+    # Create an object
+    obj = factory.analysis_module_type.create_or_read(value="test", db=db)
+
+    # Assign it to another object
+    alert = factory.alert.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test", value="test", parent_analysis=alert.root_analysis, db=db
+    )
+    factory.analysis.create_or_read(analysis_module_type=obj, submission=alert, target=observable, db=db)
+
+    # Ensure you cannot delete it now that it is in use
+    delete = client.delete(f"/api/analysis/module_type/{obj.uuid}")
+    assert delete.status_code == status.HTTP_400_BAD_REQUEST
+
+
 #
 # VALID TESTS
 #
 
 
 def test_delete(client, db):
-    # Create an analysis module type
-    analysis_module_type = factory.analysis_module_type.create_or_read(
-        value="test",
-        observable_types=["test_type"],
-        required_directives=["test_directive"],
-        required_tags=["test_tag"],
-        db=db,
-    )
-
-    # Read it back
-    get = client.get(f"/api/analysis/module_type/{analysis_module_type.uuid}")
-    assert get.status_code == status.HTTP_200_OK
+    # Create an object
+    obj = factory.analysis_module_type.create_or_read(value="test", db=db)
 
     # Delete it
-    delete = client.delete(f"/api/analysis/module_type/{analysis_module_type.uuid}")
+    delete = client.delete(f"/api/analysis/module_type/{obj.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
-
-    # Make sure it is gone
-    get = client.get(f"/api/analysis/module_type/{analysis_module_type.uuid}")
-    assert get.status_code == status.HTTP_404_NOT_FOUND
-
-    # Make sure the node directive is still there
-    get = client.get(f"/api/node/directive/")
-    assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 1
-
-    # Make sure the node tag is still there
-    get = client.get(f"/api/node/tag/")
-    assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 1
-
-    # Make sure the observable type is still there
-    get = client.get(f"/api/observable/type/")
-    assert get.status_code == status.HTTP_200_OK
-    assert get.json()["total"] == 1

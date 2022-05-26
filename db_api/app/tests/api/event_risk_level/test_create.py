@@ -51,6 +51,11 @@ def test_create_missing_required_fields(client, key):
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
+def test_create_nonexistent_queue(client):
+    create = client.post("/api/event/risk_level/", json={"value": "test", "queues": ["nonexistent_queue"]})
+    assert create.status_code == status.HTTP_404_NOT_FOUND
+
+
 #
 # VALID TESTS
 #

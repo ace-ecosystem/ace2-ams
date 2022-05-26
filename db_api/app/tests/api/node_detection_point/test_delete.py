@@ -5,12 +5,6 @@ from fastapi import status
 from tests import factory
 
 
-"""
-NOTE: There are no tests for the foreign key constraints. The DELETE endpoint will need to be updated once the endpoints
-are in place in order to account for this.
-"""
-
-
 #
 # INVALID TESTS
 #
