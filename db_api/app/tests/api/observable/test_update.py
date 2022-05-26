@@ -89,7 +89,7 @@ def test_update_duplicate_type_value(client, db):
         type="test_type", value="test", parent_analysis=alert.root_analysis, db=db
     )
     observable2 = factory.observable.create_or_read(
-        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db
+        type="test_type", value="test2", parent_analysis=alert.root_analysis, db=db
     )
 
     # Ensure you cannot update an observable to have a duplicate type+value combination
