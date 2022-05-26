@@ -12,4 +12,4 @@ def run(event:dict, context:dict) -> dict:
     '''
 
     # load the analysis, run it and return the new state
-    return Analysis().run(event)
+    return Analysis(**event).run()

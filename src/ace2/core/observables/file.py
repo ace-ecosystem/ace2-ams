@@ -1,4 +1,4 @@
-from os.path import basename
+from os.path import basename, splitext
 from pydantic import Field
 from typing import Optional
 
@@ -39,3 +39,17 @@ class File(Observable):
 
         # return the local path to the file
         return self.private.path
+
+    @property
+    def extension(self) -> Optional[str]:
+        ''' the file extension or None if the file has no extension '''
+
+        # get extension
+        ext = splitext(self.display_value)[1].lower()
+
+        # remove leading period from extension
+        if ext.startswith('.'):
+            ext = ext[1:]
+
+        # retrun ext or None if it is empty string
+        return ext or None

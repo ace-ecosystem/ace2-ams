@@ -15,6 +15,7 @@ def test_storage(monkeypatch, datadir, tmp_path):
             assert bucket == 'bucket'
             copyfile(datadir / storage_id, tmp_path / path)
     monkeypatch.setattr('ace2.storage.client', mock_client)
+    monkeypatch.setattr('os.environ', { 'FILE_STORAGE_BUCKET': 'bucket' })
 
     # test upload
     storage_id = upload(datadir / 'hello.txt')
