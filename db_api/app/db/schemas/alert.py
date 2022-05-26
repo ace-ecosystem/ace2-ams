@@ -29,6 +29,22 @@ class Alert(Node, HasHistory):
     # Analyses are lazy loaded and are not included by default when fetching an alert from the API.
     analyses: list[Analysis] = relationship("Analysis", secondary=alert_analysis_mapping)
 
+    # The child_tags field uses a composite join relationship to get a list of the tags that
+    # are applied to any observables that exist in this alert's tree structure. For example, this is
+    # used on the Manage Alerts page so that we can display ALL of the tags for an alert and
+    # its children.
+    #
+    # While there is nothing too complicated about this SQL query, SQLAlchemy does not have a
+    # straightforward way to handle these types of relationships with intermediate tables.
+    # To solve this, you have to use the composite join relationship, which is described here:
+    # https://docs.sqlalchemy.org/en/14/orm/join_conditions.html#composite-secondary-joins
+    #
+    # The overall goal is that you use the "secondary" parameter in the relationship to construct
+    # the intermediate table that you need. You then use the "primaryjoin" and, if needed, the
+    # "secondaryjoin" parameters to tell SQLAlchemy how to join the child object against the
+    # parent object (where in this case Alert is the parent, and NodeTag is the child).
+    #
+    # Finally, "viewonly" is used on the relationship to prevent attempts to add tags to this list.
     child_tags = relationship(
         "NodeTag",
         secondary="join(NodeTag, node_tag_mapping, NodeTag.uuid == node_tag_mapping.c.tag_uuid)."
