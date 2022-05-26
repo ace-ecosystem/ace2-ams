@@ -101,6 +101,31 @@ def test_create_missing_required_fields(client, key):
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
+@pytest.mark.parametrize(
+    "key,value",
+    [("default_alert_queue", "abc"), ("default_event_queue", "abc"), ("roles", ["abc"])],
+)
+def test_create_nonexistent_fields(client, db, key, value):
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.user_role.create_or_read(value="test_role", db=db)
+
+    create = client.post(
+        "/api/user/",
+        json={
+            "default_alert_queue": "test_queue",
+            "default_event_queue": "test_queue",
+            "display_name": "John Doe",
+            "email": "john@test.com",
+            "password": "abcd1234",
+            "roles": ["test_role"],
+            "username": "johndoe",
+            key: value,
+        },
+    )
+    assert create.status_code == status.HTTP_404_NOT_FOUND
+    assert "abc" in create.text
+
+
 #
 # VALID TESTS
 #
