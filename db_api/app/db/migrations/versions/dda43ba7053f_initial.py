@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 571c5f2f08b2
+Revision ID: dda43ba7053f
 Revises: 
-Create Date: 2022-05-10 20:29:04.043217
+Create Date: 2022-05-25 20:56:19.020246
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '571c5f2f08b2'
+revision = 'dda43ba7053f'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -412,7 +412,7 @@ def upgrade() -> None:
     sa.Column('cached_during', postgresql.TSTZRANGE(), nullable=True),
     sa.Column('details', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('error_message', sa.String(), nullable=True),
-    sa.Column('run_time', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('run_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
     sa.Column('stack_trace', sa.String(), nullable=True),
     sa.Column('summary', sa.String(), nullable=True),
     sa.Column('target_uuid', postgresql.UUID(as_uuid=True), nullable=True),

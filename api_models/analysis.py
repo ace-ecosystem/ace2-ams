@@ -4,7 +4,7 @@ from typing import Optional
 from uuid import uuid4
 
 from api_models import type_str
-from api_models.analysis_module_type import AnalysisModuleTypeRead
+from api_models.analysis_module_type import AnalysisModuleTypeRead, AnalysisModuleTypeNodeTreeRead
 
 
 class AnalysisBase(BaseModel):
@@ -28,7 +28,9 @@ class AnalysisCreate(AnalysisBase):
         default_factory=list, description="A list of child observables discovered during the analysis"
     )
 
-    run_time: datetime = Field(description="The time at which the analysis was performed")
+    run_time: datetime = Field(
+        default_factory=datetime.utcnow, description="The time at which the analysis was performed"
+    )
 
     submission_uuid: UUID4 = Field(description="The UUID of the submission that will contain this analysis")
 
@@ -37,12 +39,36 @@ class AnalysisCreate(AnalysisBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
 
 
+class AnalysisNodeTreeRead(BaseModel):
+    """Model used to control which information for an Analysis is displayed when getting an alert tree"""
+
+    analysis_module_type: Optional[AnalysisModuleTypeNodeTreeRead] = Field(
+        description="The analysis module type that was used to perform this analysis"
+    )
+
+    children: list[dict] = Field(default_factory=list, description="A list of this analysis' child objects")
+
+    first_appearance: bool = Field(
+        default=True, description="Whether or not this is the first time the object appears in the tree"
+    )
+
+    # This is needed since Analysis no longer inherits from the Node table
+    node_type: str = "analysis"
+
+    uuid: UUID4 = Field(description="The UUID of the analysis")
+
+    class Config:
+        orm_mode = True
+
+
 class AnalysisRead(AnalysisBase):
     analysis_module_type: Optional[AnalysisModuleTypeRead] = Field(
         description="The analysis module type that was used to perform this analysis"
     )
 
-    cached_until: datetime = Field(description="The time at which the analysis expires from the cache")
+    cached_until: Optional[datetime] = Field(
+        description="The time at which the analysis expires from the cache. This is NULL for root analyses."
+    )
 
     child_observables: "list[ObservableRead]" = Field(
         description="The list of child observables produced by this analysis"

@@ -1,10 +1,13 @@
+from datetime import datetime
 from sqlalchemy import Column, DateTime, ForeignKey, func, Index, String
 from sqlalchemy.dialects.postgresql import ExcludeConstraint, JSONB, TSTZRANGE, UUID
 from sqlalchemy.orm import deferred, relationship
+from typing import Optional
 
-from api_models.analysis import AnalysisRead
+from api_models.analysis import AnalysisNodeTreeRead
 from db.database import Base
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
+from db.schemas.helpers import utcnow
 from db.schemas.observable import Observable
 
 
@@ -31,7 +34,7 @@ class Analysis(Base):
 
     error_message = Column(String)
 
-    run_time = Column(DateTime(timezone=True), index=True, nullable=True)
+    run_time = Column(DateTime(timezone=True), server_default=utcnow(), index=True, nullable=False)
 
     stack_trace = Column(String)
 
@@ -63,8 +66,8 @@ class Analysis(Base):
     )
 
     @property
-    def cached_until(self):
-        return self.cached_during.upper
+    def cached_until(self) -> Optional[datetime]:
+        return self.cached_during.upper if self.cached_during else None
 
-    def convert_to_pydantic(self) -> AnalysisRead:
-        return AnalysisRead(**self.__dict__)
+    def convert_to_pydantic(self) -> AnalysisNodeTreeRead:
+        return AnalysisNodeTreeRead(**self.__dict__)

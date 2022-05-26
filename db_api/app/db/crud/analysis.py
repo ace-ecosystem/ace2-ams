@@ -1,5 +1,4 @@
 from datetime import timedelta
-from pydantic import ValidationError
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from typing import Optional
