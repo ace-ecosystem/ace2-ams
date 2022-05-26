@@ -86,84 +86,83 @@ def read_by_uuid(uuid: UUID, db: Session) -> User:
 
 
 def update(uuid: UUID, model: UserUpdate, db: Session) -> bool:
-    # Read the current user from the database
-    user = read_by_uuid(uuid=uuid, db=db)
-
-    # Get the data that was given in the request and use it to update the database object
-    update_data = model.dict(exclude_unset=True)
-
-    # Keep track of all the diffs that were made
-    diffs: list[crud.history.Diff] = []
-
-    if "default_alert_queue" in update_data:
-        diffs.append(
-            crud.history.create_diff(
-                field="default_alert_queue",
-                old=user.default_alert_queue.value,
-                new=update_data["default_alert_queue"],
-            )
-        )
-
-        user.default_alert_queue = crud.queue.read_by_value(value=update_data["default_alert_queue"], db=db)
-
-    if "default_event_queue" in update_data:
-        diffs.append(
-            crud.history.create_diff(
-                field="default_event_queue",
-                old=user.default_event_queue.value,
-                new=update_data["default_event_queue"],
-            )
-        )
-
-        user.default_event_queue = crud.queue.read_by_value(value=update_data["default_event_queue"], db=db)
-
-    if "display_name" in update_data:
-        diffs.append(
-            crud.history.create_diff(field="display_name", old=user.display_name, new=update_data["display_name"])
-        )
-        user.display_name = update_data["display_name"]
-
-    if "email" in update_data:
-        diffs.append(crud.history.create_diff(field="email", old=user.email, new=update_data["email"]))
-        user.email = update_data["email"]
-
-    if "enabled" in update_data:
-        diffs.append(crud.history.create_diff(field="enabled", old=user.enabled, new=update_data["enabled"]))
-        user.enabled = update_data["enabled"]
-
-    if "password" in update_data:
-        diffs.append(crud.history.create_diff(field="password", old=None, new=None))
-        user.password = hash_password(update_data["password"])
-
-    if "roles" in update_data:
-        diffs.append(
-            crud.history.create_diff(field="roles", old=[x.value for x in user.roles], new=update_data["roles"])
-        )
-        user.roles = crud.user_role.read_by_values(values=update_data["roles"], db=db)
-
-    if "timezone" in update_data:
-        diffs.append(crud.history.create_diff(field="timezone", old=user.timezone, new=update_data["timezone"]))
-        user.timezone = update_data["timezone"]
-
-    if "training" in update_data:
-        diffs.append(crud.history.create_diff(field="training", old=user.training, new=update_data["training"]))
-        user.training = update_data["training"]
-
-    if "username" in update_data:
-        diffs.append(crud.history.create_diff(field="username", old=user.username, new=update_data["username"]))
-        user.username = update_data["username"]
-
-    # Try to flush the changes to the database
-    result = False
     with db.begin_nested():
+        # Read the current user from the database
+        user = read_by_uuid(uuid=uuid, db=db)
+
+        # Get the data that was given in the request and use it to update the database object
+        update_data = model.dict(exclude_unset=True)
+
+        # Keep track of all the diffs that were made
+        diffs: list[crud.history.Diff] = []
+
+        if "default_alert_queue" in update_data:
+            diffs.append(
+                crud.history.create_diff(
+                    field="default_alert_queue",
+                    old=user.default_alert_queue.value,
+                    new=update_data["default_alert_queue"],
+                )
+            )
+
+            user.default_alert_queue = crud.queue.read_by_value(value=update_data["default_alert_queue"], db=db)
+
+        if "default_event_queue" in update_data:
+            diffs.append(
+                crud.history.create_diff(
+                    field="default_event_queue",
+                    old=user.default_event_queue.value,
+                    new=update_data["default_event_queue"],
+                )
+            )
+
+            user.default_event_queue = crud.queue.read_by_value(value=update_data["default_event_queue"], db=db)
+
+        if "display_name" in update_data:
+            diffs.append(
+                crud.history.create_diff(field="display_name", old=user.display_name, new=update_data["display_name"])
+            )
+            user.display_name = update_data["display_name"]
+
+        if "email" in update_data:
+            diffs.append(crud.history.create_diff(field="email", old=user.email, new=update_data["email"]))
+            user.email = update_data["email"]
+
+        if "enabled" in update_data:
+            diffs.append(crud.history.create_diff(field="enabled", old=user.enabled, new=update_data["enabled"]))
+            user.enabled = update_data["enabled"]
+
+        if "password" in update_data:
+            diffs.append(crud.history.create_diff(field="password", old=None, new=None))
+            user.password = hash_password(update_data["password"])
+
+        if "roles" in update_data:
+            diffs.append(
+                crud.history.create_diff(field="roles", old=[x.value for x in user.roles], new=update_data["roles"])
+            )
+            user.roles = crud.user_role.read_by_values(values=update_data["roles"], db=db)
+
+        if "timezone" in update_data:
+            diffs.append(crud.history.create_diff(field="timezone", old=user.timezone, new=update_data["timezone"]))
+            user.timezone = update_data["timezone"]
+
+        if "training" in update_data:
+            diffs.append(crud.history.create_diff(field="training", old=user.training, new=update_data["training"]))
+            user.training = update_data["training"]
+
+        if "username" in update_data:
+            diffs.append(crud.history.create_diff(field="username", old=user.username, new=update_data["username"]))
+            user.username = update_data["username"]
+
+        # Try to flush the changes to the database
         try:
             db.flush()
-            result = True
         except IntegrityError:
             db.rollback()
+            return False
 
     # Add a user history entry if the history username was given.
-    if result and model.history_username:
+    if model.history_username:
         crud.history.record_update_history(
             history_table=UserHistory,
             action_by=crud.user.read_by_username(username=model.history_username, db=db),
@@ -172,7 +171,7 @@ def update(uuid: UUID, model: UserUpdate, db: Session) -> bool:
             db=db,
         )
 
-    return result
+    return True
 
 
 def validate_refresh_token(data: ValidateRefreshToken, db: Session) -> User:
