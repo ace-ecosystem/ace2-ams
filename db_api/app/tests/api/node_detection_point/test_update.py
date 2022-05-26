@@ -30,6 +30,21 @@ def test_update_invalid_uuid(client):
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
+def test_update_duplicate_node_uuid_value(client, db):
+    alert = factory.alert.create(db=db, history_username="analyst")
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
+    )
+
+    # Create some detection points
+    detection_point1 = factory.node_detection_point.create_or_read(node=observable, value="test", db=db)
+    detection_point2 = factory.node_detection_point.create_or_read(node=observable, value="test2", db=db)
+
+    # Make sure you cannot update a detection point on a node to one that already exists
+    update = client.patch(f"/api/node/detection_point/{detection_point2.uuid}", json={"value": detection_point1.value})
+    assert update.status_code == status.HTTP_400_BAD_REQUEST
+
+
 def test_update_nonexistent_uuid(client):
     update = client.patch(f"/api/node/detection_point/{uuid.uuid4()}", json={"value": "test"})
     assert update.status_code == status.HTTP_404_NOT_FOUND

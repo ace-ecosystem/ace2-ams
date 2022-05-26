@@ -31,6 +31,22 @@ def test_update_invalid_uuid(client):
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
+@pytest.mark.parametrize(
+    "key",
+    [
+        ("value"),
+    ],
+)
+def test_update_duplicate_unique_fields(client, db, key):
+    # Create some objects
+    obj1 = factory.node_relationship_type.create_or_read(value="test", db=db)
+    obj2 = factory.node_relationship_type.create_or_read(value="test2", db=db)
+
+    # Ensure you cannot update a unique field to a value that already exists
+    update = client.patch(f"/api/node/relationship/type/{obj2.uuid}", json={key: getattr(obj1, key)})
+    assert update.status_code == status.HTTP_400_BAD_REQUEST
+
+
 def test_update_nonexistent_uuid(client):
     update = client.patch(f"/api/node/relationship/type/{uuid.uuid4()}", json={"value": "test"})
     assert update.status_code == status.HTTP_404_NOT_FOUND

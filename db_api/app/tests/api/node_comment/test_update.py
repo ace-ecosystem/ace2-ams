@@ -30,6 +30,18 @@ def test_update_invalid_uuid(client):
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
+def test_update_duplicate_node_uuid_value(client, db):
+    alert = factory.alert.create(db=db)
+
+    # Create some comments
+    comment1 = factory.node_comment.create_or_read(node=alert, username="johndoe", value="test", db=db)
+    comment2 = factory.node_comment.create_or_read(node=alert, username="johndoe", value="test2", db=db)
+
+    # Make sure you cannot update a comment on a node to one that already exists
+    update = client.patch(f"/api/node/comment/{comment2.uuid}", json={"value": comment1.value, "username": "johndoe"})
+    assert update.status_code == status.HTTP_400_BAD_REQUEST
+
+
 def test_update_nonexistent_uuid(client):
     update = client.patch(f"/api/node/comment/{uuid.uuid4()}", json={"value": "test", "username": "analyst"})
     assert update.status_code == status.HTTP_404_NOT_FOUND

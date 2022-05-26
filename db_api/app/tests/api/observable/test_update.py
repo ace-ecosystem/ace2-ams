@@ -83,6 +83,20 @@ def test_update_invalid_version(client, db):
     assert update.status_code == status.HTTP_400_BAD_REQUEST
 
 
+def test_update_duplicate_type_value(client, db):
+    alert = factory.alert.create(db=db)
+    observable1 = factory.observable.create_or_read(
+        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db
+    )
+    observable2 = factory.observable.create_or_read(
+        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db
+    )
+
+    # Ensure you cannot update an observable to have a duplicate type+value combination
+    update = client.patch(f"/api/observable/{observable2.uuid}", json={"value": observable1.value})
+    assert update.status_code == status.HTTP_400_BAD_REQUEST
+
+
 def test_update_nonexistent_redirection_uuid(client, db):
     alert = factory.alert.create(db=db)
     observable_tree = factory.observable.create_or_read(
