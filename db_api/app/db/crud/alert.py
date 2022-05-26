@@ -324,8 +324,9 @@ def create_or_read(model: AlertCreate, db: Session) -> Alert:
     # Associate the root analysis with the submission
     crud.alert_analysis_mapping.create(analysis_uuid=obj.root_analysis_uuid, submission_uuid=obj.uuid, db=db)
 
-    # Associate the root analysis with its observables
-    obj.root_analysis.child_observables = [crud.observable.create_or_read(model=o, db=db) for o in model.observables]
+    # Create any child observables
+    for observable in model.observables:
+        crud.observable.create_or_read(model=observable, parent_analysis=obj.root_analysis, db=db)
 
     # Add an alert history entry if the history username was given. This would typically only be
     # supplied by the GUI when an analyst creates a manual alert.

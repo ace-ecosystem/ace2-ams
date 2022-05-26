@@ -50,8 +50,8 @@ def create_or_read(
         analysis.target_uuid = obj.uuid
         crud.analysis.create_or_read(model=analysis, db=db)
 
-    # If a parent analysis UUID was given, add the new observable to the analysis' child observables and
-    # update the alerts that contain the parent analysis.
+    # If a parent analysis UUID was given, look up the analysis from the database.
+    # Then add the observable to the parent analysis' list of child observables.
     if parent_analysis is None:
         parent_analysis = crud.analysis.read_by_uuid(uuid=model.parent_analysis_uuid, db=db)
     parent_analysis.child_observables.append(obj)
