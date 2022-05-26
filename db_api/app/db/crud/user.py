@@ -13,16 +13,13 @@ from db.schemas.user import User, UserHistory
 from exceptions.db import ReusedToken, UserIsDisabled, ValueNotFoundInDatabase
 
 
-def auth(username: str, password: str, db: Session) -> Optional[User]:
+def auth(username: str, password: str, db: Session) -> User:
     user = read_by_username(username=username, db=db)
 
-    if user is not None:
-        if not user.enabled or not verify_password(password, user.password):
-            raise ValueError("Invalid username or password")
+    if not user.enabled or not verify_password(password, user.password):
+        raise ValueError("Invalid username or password")
 
-        return user
-
-    return None
+    return user
 
 
 def build_read_all_query(
