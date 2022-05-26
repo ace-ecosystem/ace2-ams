@@ -26,7 +26,10 @@ def test_get_nonexistent_uuid(client):
 
 
 def test_get(client, db):
-    observable = factory.observable.create_or_read(type="test_type", value="test_value", db=db)
+    alert = factory.alert.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db
+    )
 
     get = client.get(f"/api/observable/{observable.uuid}")
     assert get.status_code == status.HTTP_200_OK
@@ -73,9 +76,16 @@ def test_observable_relationships(client, db):
     #   o2
     #   o3 - IS_HASH_OF o1, IS_EQUAL_TO o2, BLAH analysis
 
-    obs1 = factory.observable.create_or_read(type="test_type", value="test_value", db=db)
-    obs2 = factory.observable.create_or_read(type="test_type", value="test_value2", db=db)
-    obs3 = factory.observable.create_or_read(type="test_type", value="test_value3", db=db)
+    alert = factory.alert.create(db=db)
+    obs1 = factory.observable.create_or_read(
+        type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db
+    )
+    obs2 = factory.observable.create_or_read(
+        type="test_type", value="test_value2", parent_analysis=alert.root_analysis, db=db
+    )
+    obs3 = factory.observable.create_or_read(
+        type="test_type", value="test_value3", parent_analysis=alert.root_analysis, db=db
+    )
     factory.node_relationship.create_or_read(node=obs3, related_node=obs1, type="IS_HASH_OF", db=db)
     factory.node_relationship.create_or_read(node=obs3, related_node=obs2, type="IS_EQUAL_TO", db=db)
 

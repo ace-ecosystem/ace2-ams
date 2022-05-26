@@ -37,6 +37,8 @@ def create_observables(
         except (UuidNotFoundInDatabase, ValueNotFoundInDatabase) as e:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
+    db.commit()
+
     response.headers["Content-Location"] = request.url_for("get_observable", uuid=obj.uuid)
 
 

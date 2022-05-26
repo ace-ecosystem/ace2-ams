@@ -72,7 +72,10 @@ def test_update_invalid_uuid(client):
 
 
 def test_update_invalid_version(client, db):
-    observable = factory.observable.create_or_read(type="test_type", value="test", db=db)
+    alert = factory.alert.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db
+    )
 
     # Make sure you cannot update it using an invalid version. The version is
     # optional, but if given, it must match.
@@ -81,7 +84,10 @@ def test_update_invalid_version(client, db):
 
 
 def test_update_nonexistent_redirection_uuid(client, db):
-    observable_tree = factory.observable.create_or_read(type="test_type", value="test", db=db)
+    alert = factory.alert.create(db=db)
+    observable_tree = factory.observable.create_or_read(
+        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db
+    )
 
     # Make sure you cannot update it to use a nonexistent redirection UUID
     update = client.patch(
@@ -96,7 +102,10 @@ def test_update_nonexistent_redirection_uuid(client, db):
     [("directives"), ("tags"), ("threat_actors"), ("threats")],
 )
 def test_update_nonexistent_node_fields(client, db, key):
-    observable = factory.observable.create_or_read(type="test_type", value="test", db=db)
+    alert = factory.alert.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db
+    )
 
     # Make sure you cannot update it to use a nonexistent node field value
     update = client.patch(f"/api/observable/{observable.uuid}", json={key: ["abc"]})
@@ -115,7 +124,10 @@ def test_update_nonexistent_uuid(client):
 
 
 def test_update_type(client, db):
-    observable = factory.observable.create_or_read(type="test_type", value="test", db=db, history_username="analyst")
+    alert = factory.alert.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
+    )
     assert observable.type.value == "test_type"
 
     # Create a new observable type
@@ -140,12 +152,17 @@ def test_update_type(client, db):
 
 
 def test_update_redirection_uuid(client, db):
-    obs1 = factory.observable.create_or_read(type="test_type", value="test", db=db, history_username="analyst")
+    alert = factory.alert.create(db=db)
+    obs1 = factory.observable.create_or_read(
+        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
+    )
     initial_observable_version = obs1.version
     assert obs1.redirection is None
 
     # Create a second observable to use for redirection
-    obs2 = factory.observable.create_or_read(type="test_type", value="test2", db=db, history_username="analyst")
+    obs2 = factory.observable.create_or_read(
+        type="test_type", value="test2", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
+    )
 
     # Update the redirection UUID
     update = client.patch(
@@ -194,6 +211,8 @@ def test_update_redirection_uuid(client, db):
     ],
 )
 def test_update_valid_node_fields(client, db, key, value_lists, helper_create_func):
+    alert = factory.alert.create(db=db)
+
     for i in range(len(value_lists)):
         value_list = value_lists[i]
 
@@ -204,6 +223,7 @@ def test_update_valid_node_fields(client, db, key, value_lists, helper_create_fu
             tags=["remove_me"],
             threat_actors=["remove_me"],
             threats=["remove_me"],
+            parent_analysis=alert.root_analysis,
             db=db,
             history_username="analyst",
         )
@@ -259,7 +279,10 @@ def test_update_valid_node_fields(client, db, key, value_lists, helper_create_fu
     ],
 )
 def test_update(client, db, key, initial_value, updated_value):
-    observable = factory.observable.create_or_read(type="test_type", value="test", db=db, history_username="analyst")
+    alert = factory.alert.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
+    )
 
     # Set the initial value
     if key == "expires_on" and initial_value:

@@ -69,11 +69,19 @@ def test_create_invalid_fields(client, key, value):
         ("threats", INVALID_LIST_STRING_VALUES),
     ],
 )
-def test_create_invalid_node_fields(client, key, values):
+def test_create_invalid_node_fields(client, db, key, values):
+    alert = factory.alert.create(db=db)
     for value in values:
         create = client.post(
             "/api/observable/",
-            json=[{key: value, "type": "test_type", "value": "test"}],
+            json=[
+                {
+                    key: value,
+                    "type": "test_type",
+                    "value": "test",
+                    "parent_analysis_uuid": str(alert.root_analysis_uuid),
+                }
+            ],
         )
         assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert key in create.json()["detail"][0]["loc"]
@@ -86,15 +94,15 @@ def test_create_invalid_node_fields(client, key, values):
         ("value"),
     ],
 )
-def test_create_missing_required_fields(client, key):
-    create_json = {"type": "test_type", "value": "test"}
+def test_create_missing_required_fields(client, db, key):
+    alert = factory.alert.create(db=db)
+    create_json = {"type": "test_type", "value": "test", "parent_analysis_uuid": str(alert.root_analysis_uuid)}
     del create_json[key]
     create = client.post("/api/observable/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_create_nonexistent_parent_analysis(client, db):
-    # Create an observable type
     factory.observable_type.create_or_read(value="test_type", db=db)
 
     nonexistent_uuid = str(uuid.uuid4())
@@ -111,27 +119,25 @@ def test_create_nonexistent_parent_analysis(client, db):
     [("directives"), ("tags"), ("threat_actors"), ("threats")],
 )
 def test_create_nonexistent_node_fields(client, db, key):
-    # Create an observable type
+    alert = factory.alert.create(db=db)
     factory.observable_type.create_or_read(value="test_type", db=db)
 
     create = client.post(
         "/api/observable/",
-        json=[{key: ["abc"], "type": "test_type", "value": "test"}],
+        json=[
+            {key: ["abc"], "type": "test_type", "value": "test", "parent_analysis_uuid": str(alert.root_analysis_uuid)}
+        ],
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert "abc" in create.text
 
 
 def test_create_nonexistent_type(client, db):
+    alert = factory.alert.create(db=db)
     nonexistent_type = "test_type"
     create = client.post(
         "/api/observable/",
-        json=[
-            {
-                "type": nonexistent_type,
-                "value": "test",
-            }
-        ],
+        json=[{"type": nonexistent_type, "value": "test", "parent_analysis_uuid": str(alert.root_analysis_uuid)}],
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
     assert nonexistent_type in create.text
@@ -143,12 +149,18 @@ def test_create_nonexistent_type(client, db):
 
 
 def test_create_verify_history(client, db):
-    # Create an observable type
+    alert = factory.alert.create(db=db)
     factory.observable_type.create_or_read(value="test_type", db=db)
 
     # Create some observables
     observables = [
-        {"uuid": str(uuid.uuid4()), "type": "test_type", "value": f"test{i}", "history_username": "analyst"}
+        {
+            "uuid": str(uuid.uuid4()),
+            "type": "test_type",
+            "value": f"test{i}",
+            "history_username": "analyst",
+            "parent_analysis_uuid": str(alert.root_analysis_uuid),
+        }
         for i in range(3)
     ]
     create = client.post("/api/observable/", json=observables)
@@ -213,13 +225,15 @@ def test_create_bulk(client, db):
     ],
 )
 def test_create_valid_optional_fields(client, db, key, value):
-    # Create an observable type
+    alert = factory.alert.create(db=db)
     factory.observable_type.create_or_read(value="test_type", db=db)
 
     # Create the object
     create = client.post(
         "/api/observable/",
-        json=[{key: value, "type": "test_type", "value": "test"}],
+        json=[
+            {key: value, "type": "test_type", "value": "test", "parent_analysis_uuid": str(alert.root_analysis_uuid)}
+        ],
     )
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -234,14 +248,15 @@ def test_create_valid_optional_fields(client, db, key, value):
 
 
 def test_create_valid_redirection(client, db):
-    # Create an observable type
+    alert = factory.alert.create(db=db)
     factory.observable_type.create_or_read(value="test_type", db=db)
 
     # Create an observable that has a redirection
     create_json = {
-        "redirection": {"type": "test_type", "value": "test2"},
+        "redirection": {"type": "test_type", "value": "test2", "parent_analysis_uuid": str(alert.root_analysis_uuid)},
         "type": "test_type",
         "value": "test",
+        "parent_analysis_uuid": str(alert.root_analysis_uuid),
     }
     create = client.post("/api/observable/", json=[create_json])
     assert create.status_code == status.HTTP_201_CREATED
@@ -252,13 +267,13 @@ def test_create_valid_redirection(client, db):
 
 
 def test_create_valid_required_fields(client, db):
-    # Create an observable type
+    alert = factory.alert.create(db=db)
     factory.observable_type.create_or_read(value="test_type", db=db)
 
     # Create the object
     create = client.post(
         "/api/observable/",
-        json=[{"type": "test_type", "value": "test"}],
+        json=[{"type": "test_type", "value": "test", "parent_analysis_uuid": str(alert.root_analysis_uuid)}],
     )
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -277,6 +292,8 @@ def test_create_valid_required_fields(client, db):
     ],
 )
 def test_create_valid_node_fields(client, db, key, value_lists, helper_create_func):
+    alert = factory.alert.create(db=db)
+
     for value_list in value_lists:
         for value in value_list:
             helper_create_func(value=value, db=db)
@@ -286,7 +303,14 @@ def test_create_valid_node_fields(client, db, key, value_lists, helper_create_fu
 
         create = client.post(
             "/api/observable/",
-            json=[{key: value_list, "type": "test_type", "value": f"{key}{value_list}"}],
+            json=[
+                {
+                    key: value_list,
+                    "type": "test_type",
+                    "value": f"{key}{value_list}",
+                    "parent_analysis_uuid": str(alert.root_analysis_uuid),
+                }
+            ],
         )
         assert create.status_code == status.HTTP_201_CREATED
 

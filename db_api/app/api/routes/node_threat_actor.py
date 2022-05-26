@@ -34,9 +34,10 @@ def create_node_threat_actor(
 ):
     try:
         obj = crud.node_threat_actor.create_or_read(model=create, db=db)
-        db.commit()
     except ValueNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_node_threat_actor", uuid=obj.uuid)
 

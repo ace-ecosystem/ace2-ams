@@ -34,9 +34,10 @@ def create_event_risk_level(
 ):
     try:
         obj = crud.event_risk_level.create_or_read(model=create, db=db)
-        db.commit()
     except ValueNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_event_risk_level", uuid=obj.uuid)
 
