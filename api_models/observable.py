@@ -40,13 +40,21 @@ class ObservableBase(NodeBase):
     value: type_str = Field(description="The value of the observable")
 
 
-class ObservableCreateBase(NodeCreate, ObservableBase):
+class ObservableCreate(NodeCreate, ObservableBase):
+    analyses: "list[AnalysisCreate]" = Field(
+        default_factory=list, description="A list of analysis results to add as children to the observable"
+    )
+
     directives: list[type_str] = Field(
         default_factory=list, description="A list of directives to add to the observable"
     )
 
     history_username: Optional[type_str] = Field(
         description="If given, an observable history record will be created and associated with the user"
+    )
+
+    parent_analysis_uuid: Optional[UUID] = Field(
+        description="The UUID of the analysis that will contain this observable. This can be NULL if you pass in an Analysis object when creating an observable."
     )
 
     redirection: "Optional[ObservableCreate]" = Field(description="Another observable to which this one should point")
@@ -60,16 +68,6 @@ class ObservableCreateBase(NodeCreate, ObservableBase):
     threats: list[type_str] = Field(default_factory=list, description="A list of threats to add to the observable")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the observable")
-
-
-class ObservableCreate(ObservableCreateBase):
-    analyses: "list[AnalysisCreate]" = Field(
-        default_factory=list, description="A list of analysis results to add as children to the observable"
-    )
-
-    parent_analysis_uuid: Optional[UUID] = Field(
-        description="The UUID of the analysis that will contain this observable. This can be NULL if you pass in an Analysis object when creating an observable."
-    )
 
 
 class ObservableRead(NodeRead, ObservableBase):
