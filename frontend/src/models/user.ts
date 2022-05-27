@@ -1,8 +1,8 @@
-import { UUID } from "./base";
+import { historyUsername, UUID } from "./base";
 import { queueRead } from "./queue";
 import { userRoleRead } from "./userRole";
 
-export interface userCreate {
+export interface userCreate extends historyUsername {
   defaultAlertQueue: string;
   defaultEventQueue: string;
   displayName: string;
@@ -38,7 +38,7 @@ export interface userReadPage {
   total: number;
 }
 
-export interface userUpdate {
+export interface userUpdate extends historyUsername {
   defaultAlertQueue?: string;
   defaultEventQueue?: string;
   displayName?: string;

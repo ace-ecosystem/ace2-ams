@@ -1,13 +1,7 @@
 import { Component } from "vue";
 import { analysisTreeRead } from "./analysis";
-import { UUID } from "./base";
-import {
-  nodeCreate,
-  nodeMetadata,
-  nodeRead,
-  nodeTreeCreate,
-  nodeUpdate,
-} from "./node";
+import { historyUsername, UUID } from "./base";
+import { nodeCreate, nodeRead, nodeUpdate } from "./node";
 import { nodeCommentRead } from "./nodeComment";
 import { nodeDetectionPointRead } from "./nodeDetectionPoint";
 import { nodeDirectiveRead } from "./nodeDirective";
@@ -17,13 +11,15 @@ import { nodeThreatRead } from "./nodeThreat";
 import { nodeThreatActorRead } from "./nodeThreatActor";
 import { observableTypeRead } from "./observableType";
 
-export interface observableCreate extends nodeCreate {
+export interface observableCreate extends nodeCreate, historyUsername {
+  // The backend API actually allows you to specify a list of AnalysisCreate objects
+  // when creating an observable, but we have not exposed that functionality in the GUI (yet).
   context?: string;
   directives?: string[];
   expiresOn?: Date;
   forDetection?: boolean;
-  nodeTree?: nodeTreeCreate;
-  redirectionUuid?: UUID;
+  parentAnalysisUuid: UUID;
+  redirection?: observableCreate;
   tags?: string[];
   threatActors?: string[];
   threats?: string[];
@@ -41,7 +37,7 @@ export interface observableRead extends nodeRead {
   expiresOn: Date | null;
   forDetection: boolean;
   observableRelationships: observableRelationshipRead[];
-  redirectionUuid: UUID | null;
+  redirection: observableRead | null;
   tags: nodeTagRead[];
   threatActors: nodeThreatActorRead[];
   threats: nodeThreatRead[];
@@ -60,12 +56,9 @@ export interface observableReadPage {
 export interface observableTreeRead extends observableRead {
   children: analysisTreeRead[];
   firstAppearance?: boolean;
-  nodeMetadata?: nodeMetadata;
-  parentTreeUuid: UUID | null;
-  treeUuid: UUID;
 }
 
-export interface observableUpdate extends nodeUpdate {
+export interface observableUpdate extends nodeUpdate, historyUsername {
   context?: string;
   directives?: string[];
   expiresOn?: Date | null;

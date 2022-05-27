@@ -8,9 +8,13 @@ const MOCK_ALERT_CREATE: alertCreate = {
   queue: "Default",
   type: "test",
   observables: [],
+  historyUsername: "analyst",
 };
 
-const MOCK_ALERT_UPDATE: alertUpdate = { uuid: "uuid" };
+const MOCK_ALERT_UPDATE: alertUpdate = {
+  uuid: "uuid",
+  historyUsername: "analyst",
+};
 const MOCK_PARAMS: alertFilterParams = {
   limit: 10,
   offset: 10,
@@ -27,8 +31,8 @@ const MOCK_PARAMS: alertFilterParams = {
   ],
   tags: ["tagA", "tagB"],
   threats: [
-    { value: "threatA", description: null, types: [], uuid: "1" },
-    { value: "threatB", description: null, types: [], uuid: "2" },
+    { value: "threatA", description: null, queues: [], types: [], uuid: "1" },
+    { value: "threatB", description: null, queues: [], types: [], uuid: "2" },
   ],
   observable: {
     category: { value: "test", description: null, uuid: "1" },

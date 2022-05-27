@@ -1,4 +1,4 @@
-import { pageOptionParams, UUID } from "./base";
+import { historyUsername, pageOptionParams, UUID } from "./base";
 import { nodeCreate, nodeRead, nodeReadPage, nodeUpdate } from "./node";
 import { alertDispositionRead } from "./alertDisposition";
 import { alertToolRead } from "./alertTool";
@@ -8,19 +8,19 @@ import { analysisTreeRead } from "./analysis";
 import { userRead } from "./user";
 import { nodeCommentRead } from "./nodeComment";
 import { nodeTagRead } from "./nodeTag";
-import { observableTreeRead } from "./observable";
+import { observableCreate, observableTreeRead } from "./observable";
 import { observableTypeRead } from "./observableType";
 import { nodeThreatActorRead } from "./nodeThreatActor";
 import { nodeThreatRead } from "./nodeThreat";
 import { queueRead } from "./queue";
 
-export interface alertCreate extends nodeCreate {
+export interface alertCreate extends nodeCreate, historyUsername {
   description?: string;
   eventTime?: Date;
   insertTime?: Date;
   instructions?: string;
   name: string;
-  observables: { type: string; value: string }[];
+  observables: observableCreate[];
   owner?: string;
   queue: string;
   tags?: string[];
@@ -84,16 +84,13 @@ export interface alertSummary {
 
 export interface alertTreeRead extends alertRead {
   children: (analysisTreeRead | observableTreeRead)[];
-  firstAppearance?: boolean;
-  parentTreeUuid: UUID | null;
-  treeUuid: UUID;
 }
 
 export interface alertReadPage extends nodeReadPage {
   items: alertRead[];
 }
 
-export interface alertUpdate extends nodeUpdate {
+export interface alertUpdate extends nodeUpdate, historyUsername {
   description?: string | null;
   disposition?: string;
   eventTime?: Date;
