@@ -133,6 +133,12 @@ def validate_refresh_token(
             detail="Invalid token",
             headers={"WWW-Authenticate": "Bearer"},
         ) from e
+    except ValueNotFoundInDatabase as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from e
 
 
 helpers.api_route_auth(

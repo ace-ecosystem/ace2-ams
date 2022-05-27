@@ -5,10 +5,10 @@ import PrimeVue from "primevue/config";
 
 import TheAlertDetails from "@/components/Alerts/TheAlertDetails.vue";
 import router from "@/router/index";
+import { Alert } from "@/services/api/alert";
 import { alertReadFactory } from "@mocks/alert";
 import { alertRead } from "@/models/alert";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import { NodeTree } from "@/services/api/nodeTree";
 import { observableReadFactory } from "@mocks/observable";
 import { userReadFactory } from "@mocks/user";
 
@@ -31,7 +31,7 @@ function factory(initialAlertStoreState: {
 
 describe("TheAlertDetails", () => {
   it("renders correctly when there is not an open alert", () => {
-    cy.stub(NodeTree, "readNodesOfNodeTree").as("getObservables").resolves([]);
+    cy.stub(Alert, "readObservables").as("getObservables").resolves([]);
     factory({
       open: null,
       requestReload: false,
@@ -40,8 +40,8 @@ describe("TheAlertDetails", () => {
     cy.contains("Test Alert").should("not.exist");
   });
   it("renders correctly when there is an open alert that has no observables with detection points or instructions", () => {
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(["testAlertUuid"], "observable")
+    cy.stub(Alert, "readObservables")
+      .withArgs(["testAlertUuid"])
       .as("getObservables")
       .resolves([]);
     factory({
@@ -76,8 +76,8 @@ describe("TheAlertDetails", () => {
   });
   it("renders correctly when there is an open alert has an owner and disposition set (uses the correct alertSummary fields)", () => {
     const date = new Date(2020, 5, 4, 12, 0, 0, 0);
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(["testAlertUuid"], "observable")
+    cy.stub(Alert, "readObservables")
+      .withArgs(["testAlertUuid"])
       .as("getObservables")
       .resolves([]);
     factory({
@@ -111,8 +111,8 @@ describe("TheAlertDetails", () => {
       .should("have.text", "Test Analyst @ 2020-06-04T16:00:00.000Z");
   });
   it("renders correctly when there is an open alert that has instructions available", () => {
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(["testAlertUuid"], "observable")
+    cy.stub(Alert, "readObservables")
+      .withArgs(["testAlertUuid"])
       .as("getObservables")
       .resolves([]);
     factory({
@@ -150,8 +150,8 @@ describe("TheAlertDetails", () => {
       value: "detectionC",
     };
 
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(["testAlertUuid"], "observable")
+    cy.stub(Alert, "readObservables")
+      .withArgs(["testAlertUuid"])
       .as("getObservables")
       .resolves([
         observableReadFactory({
@@ -186,8 +186,8 @@ describe("TheAlertDetails", () => {
       .should("contain.text", "detectionA");
   });
   it("displays error if request to fetch observables fails", () => {
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(["testAlertUuid"], "observable")
+    cy.stub(Alert, "readObservables")
+      .withArgs(["testAlertUuid"])
       .as("getObservables")
       .rejects(new Error("404 request failed"));
     factory({

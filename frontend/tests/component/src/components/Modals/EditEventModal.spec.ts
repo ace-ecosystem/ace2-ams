@@ -9,7 +9,10 @@ import { Event } from "@/services/api/event";
 import { eventReadFactory, mockEventUUID } from "@mocks/events";
 import { testConfiguration } from "@/etc/configuration/test/index";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import {
+  genericObjectReadFactory,
+  queueableObjectReadFactory,
+} from "@mocks/genericObject";
 import ToastService from "primevue/toastservice";
 
 import Tooltip from "primevue/tooltip";
@@ -59,14 +62,14 @@ function factory(args = { stubActions: true }) {
 describe("EditEventModal", () => {
   beforeEach(() => {
     cy.stub(EventPreventionTool, "readAll").returns([
-      genericObjectReadFactory({
+      queueableObjectReadFactory({
         value: "Test Prevention Tool",
         queues: [genericObjectReadFactory({ value: "external" })],
       }),
     ]);
     cy.stub(EventRiskLevel, "readAll").returns([]);
     cy.stub(EventRemediation, "readAll").returns([
-      genericObjectReadFactory({
+      queueableObjectReadFactory({
         value: "Test Remediation",
         queues: [genericObjectReadFactory({ value: "external" })],
       }),

@@ -1,10 +1,12 @@
+import logging
+
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
 from typing import Optional
 from uuid import UUID
-from api_models.auth import ValidateRefreshToken
+from api_models.auth import Auth, ValidateRefreshToken
 
 from api_models.user import UserCreate, UserUpdate
 from core.auth import hash_password, verify_password
@@ -13,11 +15,15 @@ from db.schemas.user import User, UserHistory
 from exceptions.db import ReusedToken, UserIsDisabled, ValueNotFoundInDatabase
 
 
-def auth(username: str, password: str, db: Session) -> User:
-    user = read_by_username(username=username, db=db)
+def auth(auth: Auth, db: Session) -> User:
+    user = read_by_username(username=auth.username, db=db)
 
-    if not user.enabled or not verify_password(password, user.password):
+    if not user.enabled or not verify_password(auth.password, user.password):
         raise ValueError("Invalid username or password")
+
+    # Save the new refresh token to the database
+    user.refresh_token = auth.new_refresh_token
+    db.flush()
 
     return user
 
@@ -183,6 +189,8 @@ def validate_refresh_token(data: ValidateRefreshToken, db: Session) -> User:
     # that someone is trying to use an old refresh token. In this case, remove the current refresh token from the
     # database to require the user to fully log in again.
     if data.refresh_token != user.refresh_token:
+        logging.critical(f"!!!!! db token = {user.refresh_token}")
+        logging.critical(f"!!!!! token = {data.refresh_token}")
         user.refresh_token = None
         db.commit()
         raise ReusedToken("Detected a potentially reused token")

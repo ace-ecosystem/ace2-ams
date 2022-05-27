@@ -42,6 +42,15 @@ def test_validate_refresh_token_invalid_token(client, db):
     assert auth.status_code == status.HTTP_401_UNAUTHORIZED
 
 
+def test_validate_refresh_token_nonexistent_user(client, db):
+    # Try to validate the refresh token
+    auth = client.post(
+        "/api/user/validate_refresh_token",
+        json={"username": "johndoe", "refresh_token": "asdf", "new_refresh_token": "1234"},
+    )
+    assert auth.status_code == status.HTTP_401_UNAUTHORIZED
+
+
 #
 # VALID TESTS
 #

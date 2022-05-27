@@ -1,14 +1,15 @@
 import json
 
 from datetime import datetime
-from fastapi import APIRouter, Depends, Query, Request, Response
-from typing import List, Optional
+from fastapi import APIRouter, Depends, Query, Request, Response, status
+from typing import Optional
 from uuid import UUID
 
 from api import db_api
 from api.routes import helpers
-from api_models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
+from api_models.alert import AlertCreate, AlertRead, AlertUpdate
 from api_models.history import AlertHistoryRead
+from api_models.observable import ObservableRead
 from core.auth import validate_access_token
 
 
@@ -166,9 +167,14 @@ def get_alert_history(uuid: UUID, limit: Optional[int] = Query(50, le=100), offs
     return db_api.get(f"/alert/{uuid}/history{query_params}")
 
 
+def get_alerts_observables(uuids: list[UUID]):
+    return db_api.post(path="/alert/observables", payload=[str(u) for u in uuids], expected_status=status.HTTP_200_OK)
+
+
 helpers.api_route_read_all(router, get_all_alerts, AlertRead)
 helpers.api_route_read(router, get_alert, dict)
 helpers.api_route_read_all(router, get_alert_history, AlertHistoryRead, path="/{uuid}/history")
+helpers.api_route_read(router, get_alerts_observables, list[ObservableRead], methods=["POST"], path="/observables")
 
 
 #
@@ -177,7 +183,7 @@ helpers.api_route_read_all(router, get_alert_history, AlertHistoryRead, path="/{
 
 
 def update_alerts(
-    alerts: List[AlertUpdateMultiple],
+    alerts: list[AlertUpdate],
     request: Request,
     response: Response,
     claims: dict = Depends(validate_access_token),

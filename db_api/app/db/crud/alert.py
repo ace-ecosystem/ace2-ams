@@ -9,7 +9,7 @@ from typing import Optional
 from uuid import UUID
 
 from api_models.alert import AlertCreate, AlertTreeRead, AlertUpdate
-from api_models.analysis import AnalysisRead
+from api_models.analysis import AnalysisNodeTreeRead
 from api_models.observable import ObservableNodeTreeRead
 from db import crud
 from db.schemas.alert import Alert, AlertHistory
@@ -344,6 +344,27 @@ def read_by_uuid(uuid: UUID, db: Session) -> Alert:
     return crud.helpers.read_by_uuid(db_table=Alert, uuid=uuid, db=db)
 
 
+def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
+    """Returns a list of the unique observables contained within the given alert UUIDs."""
+
+    query = (
+        select(Observable)
+        .join(
+            analysis_child_observable_mapping,
+            onclause=analysis_child_observable_mapping.c.observable_uuid == Observable.uuid,
+        )
+        .join(
+            alert_analysis_mapping,
+            onclause=alert_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid,
+        )
+        .join(ObservableType, onclause=ObservableType.uuid == Observable.type_uuid)
+        .join(Alert, onclause=and_(Alert.uuid == alert_analysis_mapping.c.alert_uuid, Alert.uuid.in_(uuids)))
+        .order_by(ObservableType.value, Observable.value)
+    )
+
+    return db.execute(query).unique().scalars().all()
+
+
 def read_tree(uuid: UUID, db: Session) -> dict:
     # The Alert db object has an "analyses" list that contains every analysis object regardless
     # of where it appears in the tree structure.
@@ -355,8 +376,8 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     # Dictionary of analysis objects where their UUID is the key
     # Dictionary of analysis objects where their target observable UUID is the key
     # Dictionary of observables where their UUID is the key
-    analyses_by_target: dict[UUID, list[AnalysisRead]] = {}
-    analyses_by_uuid: dict[UUID, AnalysisRead] = {}
+    analyses_by_target: dict[UUID, list[AnalysisNodeTreeRead]] = {}
+    analyses_by_uuid: dict[UUID, AnalysisNodeTreeRead] = {}
     child_observables: dict[UUID, ObservableNodeTreeRead] = {}
     for db_analysis in db_alert.analyses:
         # Create an empty list if this target observable UUID has not been seen yet.

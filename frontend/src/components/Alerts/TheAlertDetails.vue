@@ -92,7 +92,7 @@
   import AlertTableCell from "./AlertTableCell.vue";
   import { alertSummary } from "@/models/alert";
   import { observableRead } from "@/models/observable";
-  import { NodeTree } from "@/services/api/nodeTree";
+  import { Alert } from "@/services/api/alert";
   import { onMounted, ref } from "@pinia/testing/node_modules/vue-demi";
   import { nodeDetectionPointRead } from "@/models/nodeDetectionPoint";
 
@@ -133,12 +133,11 @@
 
   const getAllDetectionPoints = async (uuid: string) => {
     try {
-      const unsortedObservables = (await NodeTree.readNodesOfNodeTree(
-        [uuid],
-        "observable",
-      )) as unknown as observableRead[];
+      const observables = (await Alert.readObservables([
+        uuid,
+      ])) as unknown as observableRead[];
 
-      unsortedObservables.forEach((observable) => {
+      observables.forEach((observable) => {
         alertDetectionPoints.value = [
           ...alertDetectionPoints.value,
           ...observable.detectionPoints,

@@ -3,6 +3,7 @@ import uuid
 from datetime import timedelta
 from fastapi import status
 from urllib.parse import urlencode
+from api_models import analysis_module_type
 
 from db import crud
 from tests import factory
@@ -804,3 +805,47 @@ def test_get_alert_tree(client, db):
     assert str(get.json()["children"]).count("'observable'") == 14
     assert str(get.json()["children"]).count("'analysis'") == 16
     assert len(get.json()["children"]) == 2
+
+
+def test_get_alerts_observables(client, db):
+    # Create an alert tree where the same observable type+value appears twice
+    #
+    # alert
+    #   o1
+    #     a
+    #       o1
+    #   o2
+    alert = factory.alert.create(db=db)
+    observable1 = factory.observable.create_or_read(
+        type="fqdn", value="bad.com", parent_analysis=alert.root_analysis, db=db
+    )
+    analysis_module_type = factory.analysis_module_type.create_or_read(value="test", db=db)
+    analysis = factory.analysis.create_or_read(
+        analysis_module_type=analysis_module_type, submission=alert, target=observable1, db=db
+    )
+    factory.observable.create_or_read(type="fqdn", value="bad.com", parent_analysis=analysis, db=db)
+    factory.observable.create_or_read(type="ipv4", value="127.0.0.1", parent_analysis=alert.root_analysis, db=db)
+
+    # Create a second alert tree with a duplicate observable from the first alert
+    #
+    # alert
+    #   o2
+    #   o3
+    alert2 = factory.alert.create(db=db)
+    factory.observable.create_or_read(type="ipv4", value="127.0.0.1", parent_analysis=alert2.root_analysis, db=db)
+    factory.observable.create_or_read(
+        type="email_address", value="badguy@bad.com", parent_analysis=alert2.root_analysis, db=db
+    )
+
+    # Fetching the list of observables in the alerts should only show three observables since
+    # there were duplicates. Additionally, they should be sorted by the types then values:
+    #
+    # email_address: badguy@bad.com
+    # fqdn: bad.com
+    # ipv4: 127.0.0.1
+    get = client.post("/api/alert/observables", json=[str(alert.uuid), str(alert2.uuid)])
+    assert get.status_code == status.HTTP_200_OK
+    assert len(get.json()) == 3
+    assert any(o["type"]["value"] == "email_address" and o["value"] == "badguy@bad.com" for o in get.json())
+    assert any(o["type"]["value"] == "fqdn" and o["value"] == "bad.com" for o in get.json())
+    assert any(o["type"]["value"] == "ipv4" and o["value"] == "127.0.0.1" for o in get.json())

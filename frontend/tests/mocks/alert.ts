@@ -12,11 +12,13 @@ export const alertCreateFactory = ({
   observables = [],
   queue = "",
   type = "",
+  historyUsername = "analyst",
 }: Partial<alertCreate> = {}): alertCreate => ({
   name: name,
   observables: observables,
   queue: queue,
   type: type,
+  historyUsername: historyUsername,
 });
 
 export const alertTreeReadFactory = ({

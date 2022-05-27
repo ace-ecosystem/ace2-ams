@@ -23,7 +23,7 @@
   import Listbox from "primevue/listbox";
   import Message from "primevue/message";
 
-  import { NodeTree } from "@/services/api/nodeTree";
+  import { Alert } from "@/services/api/alert";
   import { copyToClipboard } from "@/etc/helpers";
   import { observableRead } from "@/models/observable";
 
@@ -42,10 +42,7 @@
 
   const getAllObservables = async () => {
     try {
-      const allObservables = await NodeTree.readNodesOfNodeTree(
-        props.eventAlertUuids,
-        "observable",
-      );
+      const allObservables = await Alert.readObservables(props.eventAlertUuids);
       return allObservables as unknown as observableRead[];
     } catch (e: unknown) {
       if (typeof e === "string") {

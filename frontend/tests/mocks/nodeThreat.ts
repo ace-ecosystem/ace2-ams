@@ -5,9 +5,11 @@ export const nodeThreatReadFactory = ({
   uuid = "nodeThreat1",
   value = "nodeThreat",
   types = [],
+  queues = [],
 }: Partial<nodeThreatRead> = {}): nodeThreatRead => ({
   description: description,
   uuid: uuid,
   value: value,
   types: types,
+  queues: queues,
 });

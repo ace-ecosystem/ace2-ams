@@ -34,7 +34,7 @@
 
   import { observableRead } from "@/models/observable";
 
-  import { NodeTree } from "@/services/api/nodeTree";
+  import { Alert } from "@/services/api/alert";
   import { alertSummary } from "@/models/alert";
 
   type alertSummaryKeys = keyof alertSummary;
@@ -90,27 +90,14 @@
     const alertUuid = event.data.uuid;
     // Set to null first so AlertTableExpansion can show loading
     alertObservables.value[alertUuid] = null;
-    alertObservables.value[alertUuid] = await getObservables(alertUuid);
+    alertObservables.value[alertUuid] = await Alert.readObservables([
+      alertUuid,
+    ]);
   };
 
   const onRowCollapse = (event: { data: alertSummary }) => {
     const alertUuid = event.data.uuid;
     delete alertObservables.value[alertUuid];
-  };
-
-  const getObservables = async (uuid: string) => {
-    const unsortedObservables = (await NodeTree.readNodesOfNodeTree(
-      [uuid],
-      "observable",
-    )) as unknown as observableRead[];
-
-    return unsortedObservables.sort((a: observableRead, b: observableRead) => {
-      if (a.type.value === b.type.value) {
-        return a.value < b.value ? -1 : 1;
-      } else {
-        return a.type.value < b.type.value ? -1 : 1;
-      }
-    });
   };
 </script>
 

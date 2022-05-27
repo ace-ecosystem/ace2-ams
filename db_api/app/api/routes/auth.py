@@ -26,9 +26,13 @@ def auth(data: Auth, db: Session = Depends(get_db)):
     """
 
     try:
-        return crud.user.auth(username=data.username, password=data.password, db=db)
+        user = crud.user.auth(auth=data, db=db)
     except (ValueError, ValueNotFoundInDatabase) as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid username or password") from e
+
+    db.commit()
+
+    return user
 
 
 helpers.api_route_auth(

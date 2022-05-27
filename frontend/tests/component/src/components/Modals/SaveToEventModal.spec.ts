@@ -3,7 +3,7 @@ import PrimeVue from "primevue/config";
 
 import SaveToEventModal from "@/components/Modals/SaveToEventModal.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import { queueableObjectReadFactory } from "@mocks/genericObject";
 import { Event } from "@/services/api/event";
 import { eventReadFactory } from "@mocks/events";
 import { eventRead } from "@/models/event";
@@ -11,8 +11,8 @@ import { Alert } from "@/services/api/alert";
 import { NodeComment } from "@/services/api/nodeComment";
 import { userReadFactory } from "@mocks/user";
 
-const openStatus = genericObjectReadFactory({ value: "OPEN" });
-const closedStatus = genericObjectReadFactory({ value: "CLOSED" });
+const openStatus = queueableObjectReadFactory({ value: "OPEN" });
+const closedStatus = queueableObjectReadFactory({ value: "CLOSED" });
 
 const defaultReadAllPagesOpen = {
   status: openStatus,

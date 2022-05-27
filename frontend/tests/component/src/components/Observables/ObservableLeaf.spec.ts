@@ -12,9 +12,7 @@ import { testConfiguration } from "@/etc/configuration/test";
 import { ObservableInstance } from "@/services/api/observable";
 import ToastService from "primevue/toastservice";
 import Tooltip from "primevue/tooltip";
-import BaseModalVue from "@/components/Modals/BaseModal.vue";
 import TagModalVue from "@/components/Modals/TagModal.vue";
-import ObservableLeafVue from "@/components/Observables/ObservableLeaf.vue";
 
 interface ObservableLeafProps {
   observable: observableTreeRead;
@@ -59,12 +57,6 @@ const observableWithTime = observableTreeReadFactory({
   value: "Observable w/ Time",
   children: [],
   time: new Date(2022, 5, 5, 12, 0, 0, 0),
-});
-
-const observableWithMetadata = observableTreeReadFactory({
-  value: "Observable w/ Metadata",
-  firstAppearance: true,
-  nodeMetadata: { display: { type: "custom type", value: "custom value" } },
 });
 
 const observableWithDetectionPoints = observableTreeReadFactory({
@@ -208,16 +200,6 @@ describe("ObservableLeaf", () => {
       .contains("404 request failed")
       .should("be.visible");
     cy.findByRole("menu").should("not.exist"); // Menu should have been closed
-  });
-  it("displays an observables value using node metadata if available", () => {
-    factory({
-      props: { observable: observableWithMetadata },
-      config: testConfiguration,
-    });
-    cy.get("span").should(
-      "contain.text",
-      "custom type (testObservableType): custom value",
-    );
   });
   it("displays a fire emoji for every detection point belonging to the observable", () => {
     factory({

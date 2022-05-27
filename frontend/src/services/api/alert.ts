@@ -9,6 +9,7 @@ import {
 } from "@/models/alert";
 import { UUID } from "@/models/base";
 import { alertHistoryReadPage } from "@/models/history";
+import { observableRead } from "@/models/observable";
 import { BaseApi } from "./base";
 
 const api = new BaseApi();
@@ -41,6 +42,9 @@ export const Alert = {
     const formattedParams = formatNodeFiltersForAPI(validAlertFilters, params);
     return api.readAll(endpoint, formattedParams);
   },
+
+  readObservables: async (uuids: Array<UUID>): Promise<observableRead[]> =>
+    await api.baseRequest(`${endpoint}observables`, "POST", { data: uuids }),
 
   update: (data: alertUpdate[]): Promise<void> => api.update(endpoint, data),
 };

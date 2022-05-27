@@ -9,6 +9,7 @@ from api.routes import helpers
 from api_models.alert import AlertCreate, AlertRead, AlertUpdate
 from api_models.create import Create
 from api_models.history import AlertHistoryRead
+from api_models.observable import ObservableRead
 from db import crud
 from db.database import get_db
 from db.schemas.alert import AlertHistory
@@ -135,9 +136,14 @@ def get_alert_history(uuid: UUID, db: Session = Depends(get_db)):
     return paginate(conn=db, query=crud.history.build_read_history_query(history_table=AlertHistory, record_uuid=uuid))
 
 
+def get_alerts_observables(uuids: list[UUID], db: Session = Depends(get_db)):
+    return crud.alert.read_observables(uuids=uuids, db=db)
+
+
 helpers.api_route_read_all(router, get_all_alerts, AlertRead)
 helpers.api_route_read(router, get_alert, dict)
 helpers.api_route_read_all(router, get_alert_history, AlertHistoryRead, path="/{uuid}/history")
+helpers.api_route_read(router, get_alerts_observables, list[ObservableRead], methods=["POST"], path="/observables")
 
 
 #

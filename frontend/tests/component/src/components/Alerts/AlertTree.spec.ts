@@ -18,7 +18,6 @@ import ToastService from "primevue/toastservice";
 const childObservable = observableTreeReadFactory({
   value: "Child Observable",
   firstAppearance: true,
-  nodeMetadata: { display: { type: "custom type", value: "custom value" } },
 });
 const childAnalysis = analysisTreeReadFactory({
   analysisModuleType: analysisModuleTypeNodeTreeReadFactory({
