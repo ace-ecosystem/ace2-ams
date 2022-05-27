@@ -61,8 +61,9 @@ class Analysis(TypedModel):
         return True
 
     def __init_subclass__(cls):
-        ''' Add details field to all subclasses '''
+        ''' Modify all subclasses of Analysis '''
         
+        # add details field
         cls.__fields__['details'] = ModelField.infer(
             name = 'details',
             annotation = cls.Details,
@@ -71,6 +72,10 @@ class Analysis(TypedModel):
             config = cls.__config__,
         )
 
+        # add run funciton to module so aws lambda can find it
+        sys.modules[cls.__module__].run = cls.run
+
+        # init base subclasses
         super().__init_subclass__()
 
     @property
@@ -84,12 +89,20 @@ class Analysis(TypedModel):
         # returned loaded config
         return self.private.config
 
-    def run(self) -> dict:
-        ''' runs the analysis
+    @classmethod
+    def run(cls, event:dict, context:dict) -> dict:
+        ''' AWS lambda function handler that runs analysis passed in the event message
+
+        Args:
+            event: the analysis state dictionary
+            context: aws runtime context (we do not use this)
 
         Returns:
-            the updated analysis state
+            the updated analysis state dictionary
         '''
+
+        # create an analysis object
+        self = cls(**event)
 
         # call the current callback function which then tells us what to execute after that
         self.callback = self.callback.execute(self, self.target)
