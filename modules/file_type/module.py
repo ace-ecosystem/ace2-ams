@@ -29,6 +29,9 @@ class FileType(Analysis):
         # TODO: handle stderr
         self.details.mime_type = process.stdout.strip()
 
+        # set the summary
+        self.summary = f'File Type Analysis: ({self.details.file_type}) ({self.details.mime_type})'
+
         # determine if file is ole
         with open(target.path, 'rb') as f:
             if f.read(8) == b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1':
