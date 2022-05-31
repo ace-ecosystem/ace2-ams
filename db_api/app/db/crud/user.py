@@ -1,5 +1,3 @@
-import logging
-
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
@@ -189,8 +187,6 @@ def validate_refresh_token(data: ValidateRefreshToken, db: Session) -> User:
     # that someone is trying to use an old refresh token. In this case, remove the current refresh token from the
     # database to require the user to fully log in again.
     if data.refresh_token != user.refresh_token:
-        logging.critical(f"!!!!! db token = {user.refresh_token}")
-        logging.critical(f"!!!!! token = {data.refresh_token}")
         user.refresh_token = None
         db.commit()
         raise ReusedToken("Detected a potentially reused token")
