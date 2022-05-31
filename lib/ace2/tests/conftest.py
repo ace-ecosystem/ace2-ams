@@ -1,1 +1,1 @@
-from .fixtures import *
+from ace2.test import *
