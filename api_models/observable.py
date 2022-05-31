@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import Field, StrictBool, UUID4
+from pydantic import BaseModel, Field, StrictBool, UUID4
 from typing import Optional
 from uuid import UUID, uuid4
 
@@ -51,6 +51,10 @@ class ObservableCreate(NodeCreate, ObservableBase):
 
     history_username: Optional[type_str] = Field(
         description="If given, an observable history record will be created and associated with the user"
+    )
+
+    observable_relationships: "list[ObservableRelationshipCreate]" = Field(
+        default_factory=list, description="A list of observable relationships to add to this observable"
     )
 
     parent_analysis_uuid: Optional[UUID] = Field(
@@ -136,6 +140,14 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
     _prevent_none: classmethod = validators.prevent_none(
         "directives", "for_detection", "tags", "threat_actors", "threats", "time", "type", "value"
     )
+
+
+class ObservableRelationshipCreate(BaseModel):
+    relationship_type: type_str = Field(description="The type of the observable relationship")
+
+    type: type_str = Field(description="The related observable's type")
+
+    value: type_str = Field(description="The related observable's value")
 
 
 class ObservableRelationshipRead(NodeRelationshipRead):

@@ -147,6 +147,11 @@ def create_from_json_file(db: Session, json_path: str, alert_name: str) -> Alert
         # Make sure the observable type exists
         factory.observable_type.create_or_read(value=o["type"], db=db)
 
+        # Make sure that any relationships the observable has exist
+        if "observable_relationships" in o:
+            for relationship in o["observable_relationships"]:
+                factory.node_relationship_type.create_or_read(value=relationship["type"], db=db)
+
         # Make sure that any tags the observable has exist
         if "tags" in o:
             for tag in o["tags"]:
@@ -154,7 +159,11 @@ def create_from_json_file(db: Session, json_path: str, alert_name: str) -> Alert
 
         # Build the ObservableCreate model
         observable_model = ObservableCreate(
-            for_detection=o.get("for_detection", False), tags=o.get("tags", []), type=o["type"], value=o["value"]
+            for_detection=o.get("for_detection", False),
+            observable_relationships=o.get("observable_relationships", []),
+            tags=o.get("tags", []),
+            type=o["type"],
+            value=o["value"],
         )
 
         # If the observable in the JSON file has any child analyses, build AnalysisCreate models

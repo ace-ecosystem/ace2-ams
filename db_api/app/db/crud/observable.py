@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from typing import Optional
 from uuid import UUID
+from api_models.node_relationship import NodeRelationshipCreate
 
 from api_models.observable import ObservableCreate, ObservableUpdate
 from db import crud
@@ -21,7 +22,7 @@ def create_or_read(
         model=model,
         db_node_type=Observable,
         db=db,
-        exclude={"analyses", "history_username", "parent_analysis_uuid", "redirection"},
+        exclude={"analyses", "history_username", "observable_relationships", "parent_analysis_uuid", "redirection"},
     )
 
     # Set the various observable properties
@@ -44,6 +45,19 @@ def create_or_read(
             )
     else:
         obj = read_by_type_value(type=model.type, value=model.value, db=db)
+
+    # Create any relationships that were given
+    for relationship in model.observable_relationships:
+        related_observable = read_by_type_value(type=relationship.type, value=relationship.value, db=db)
+        crud.node_relationship.create_or_read(
+            model=NodeRelationshipCreate(
+                history_username=model.history_username,
+                node_uuid=obj.uuid,
+                related_node_uuid=related_observable.uuid,
+                type=relationship.relationship_type,
+            ),
+            db=db,
+        )
 
     # Create any analyses that were given
     for analysis in model.analyses:
