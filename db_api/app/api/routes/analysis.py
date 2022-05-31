@@ -47,10 +47,6 @@ helpers.api_route_create(router, create_analysis)
 #
 
 
-# def get_all_analysis(db: Session = Depends(get_db)):
-#     return crud.read_all(db_table=Analysis, db=db)
-
-
 def get_analysis(uuid: UUID, db: Session = Depends(get_db)):
     try:
         return crud.analysis.read_by_uuid(uuid=uuid, db=db)
@@ -58,8 +54,6 @@ def get_analysis(uuid: UUID, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Analysis {uuid} does not exist") from e
 
 
-# It does not make sense to have a get_all_analysis route at this point (and certainly not without pagination).
-# helpers.api_route_read_all(router, get_all_analysis, List[AnalysisRead])
 helpers.api_route_read(router, get_analysis, AnalysisRead)
 
 
@@ -86,11 +80,3 @@ def update_analysis(
 
 
 helpers.api_route_update(router, update_analysis)
-
-
-#
-# DELETE
-#
-
-
-# We currently do not support deleting any Nodes.

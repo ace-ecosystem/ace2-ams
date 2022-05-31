@@ -103,14 +103,6 @@ helpers.api_route_update(router, update_user)
 
 
 #
-# DELETE
-#
-
-
-# Deleting users is not currently supported (mark them as disabled instead)
-
-
-#
 # VALIDATE REFRESH TOKEN
 #
 

@@ -102,11 +102,3 @@ def update_observable(
 
 
 helpers.api_route_update(router, update_observable)
-
-
-#
-# DELETE
-#
-
-
-# We currently do not support deleting observables

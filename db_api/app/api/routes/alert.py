@@ -171,11 +171,3 @@ def update_alerts(
 
 
 helpers.api_route_update(router, update_alerts, path="/")
-
-
-#
-# DELETE
-#
-
-
-# We currently do not support deleting any Nodes.

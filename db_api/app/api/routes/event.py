@@ -188,14 +188,6 @@ helpers.api_route_update(router, update_events, path="/")
 
 
 #
-# DELETE
-#
-
-
-# We currently do not support deleting any Nodes.
-
-
-#
 # SUMMARIES
 #
 
