@@ -2,6 +2,6 @@
 FROM ace2-base AS FileType
 
 # add the module script to the image
-ADD analysis.py analysis.py
+ADD module.py module.py
 
 # install dependencies

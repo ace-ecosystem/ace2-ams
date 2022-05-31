@@ -15,6 +15,7 @@ def mock_storage(monkeypatch, tmp_path, datadir):
         for directory in [tmp_path, datadir]:
             if os.path.exists(str(directory / storage_id)):
                 return str(directory / storage_id)
+        raise FileNotFoundError(storage_id)
 
     monkeypatch.setattr('ace2.storage.upload', upload)
     monkeypatch.setattr('ace2.storage.download', download)
