@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
-from typing import List
 from uuid import UUID
 
 from api.routes import helpers
@@ -23,7 +22,7 @@ router = APIRouter(
 
 
 def create_node_detection_points(
-    node_detection_points: List[NodeDetectionPointCreate],
+    node_detection_points: list[NodeDetectionPointCreate],
     request: Request,
     response: Response,
     db: Session = Depends(get_db),

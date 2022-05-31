@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from typing import List
 from uuid import UUID
 
 from api.routes import helpers
@@ -26,7 +25,7 @@ router = APIRouter(
 
 
 def create_observables(
-    observables: List[ObservableCreate],
+    observables: list[ObservableCreate],
     request: Request,
     response: Response,
     db: Session = Depends(get_db),

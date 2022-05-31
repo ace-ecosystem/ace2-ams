@@ -1,8 +1,8 @@
 import json
 
 from datetime import datetime
-from fastapi import APIRouter, Depends, Query, Request, Response
-from typing import List, Optional
+from fastapi import APIRouter, Query, Request, Response
+from typing import Optional
 from uuid import UUID
 
 from api import db_api
@@ -18,7 +18,6 @@ from api_models.event_summaries import (
     URLDomainSummary,
 )
 from api_models.history import EventHistoryRead
-from core.auth import validate_access_token
 
 
 router = APIRouter(
@@ -36,9 +35,8 @@ def create_event(
     event: EventCreate,
     request: Request,
     response: Response,
-    claims: dict = Depends(validate_access_token),
 ):
-    result = db_api.post(path=f"/event/?history_username={claims['sub']}", payload=json.loads(event.json()))
+    result = db_api.post(path="/event/", payload=json.loads(event.json()))
 
     response.headers["Content-Location"] = request.url_for("get_event", uuid=result["uuid"])
 
@@ -207,15 +205,11 @@ helpers.api_route_read_all(router, get_event_history, EventHistoryRead, path="/{
 
 
 def update_events(
-    events: List[EventUpdateMultiple],
+    events: list[EventUpdateMultiple],
     request: Request,
     response: Response,
-    claims: dict = Depends(validate_access_token),
 ):
-    db_api.patch(
-        path=f"/event/?history_username={claims['sub']}",
-        payload=[json.loads(e.json(exclude_unset=True)) for e in events],
-    )
+    db_api.patch(path="/event/", payload=[json.loads(e.json(exclude_unset=True)) for e in events])
 
     response.headers["Content-Location"] = request.url_for("get_event", uuid=events[-1].uuid)
 
@@ -257,13 +251,13 @@ def get_url_domain_summary(uuid: UUID):
 
 
 helpers.api_route_read(
-    router, get_detection_point_summary, List[DetectionSummary], path="/{uuid}/summary/detection_point"
+    router, get_detection_point_summary, list[DetectionSummary], path="/{uuid}/summary/detection_point"
 )
 helpers.api_route_read(
     router, get_email_headers_body_summary, Optional[EmailHeadersBody], path="/{uuid}/summary/email_headers_body"
 )
-helpers.api_route_read(router, get_email_summary, List[EmailSummary], path="/{uuid}/summary/email")
-helpers.api_route_read(router, get_observable_summary, List[ObservableSummary], path="/{uuid}/summary/observable")
-helpers.api_route_read(router, get_sandbox_summary, List[SandboxSummary], path="/{uuid}/summary/sandbox")
-helpers.api_route_read(router, get_user_summary, List[UserSummary], path="/{uuid}/summary/user")
+helpers.api_route_read(router, get_email_summary, list[EmailSummary], path="/{uuid}/summary/email")
+helpers.api_route_read(router, get_observable_summary, list[ObservableSummary], path="/{uuid}/summary/observable")
+helpers.api_route_read(router, get_sandbox_summary, list[SandboxSummary], path="/{uuid}/summary/sandbox")
+helpers.api_route_read(router, get_user_summary, list[UserSummary], path="/{uuid}/summary/user")
 helpers.api_route_read(router, get_url_domain_summary, URLDomainSummary, path="/{uuid}/summary/url_domain")

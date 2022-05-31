@@ -1,13 +1,11 @@
 import json
 
-from fastapi import APIRouter, Depends, Request, Response, status
-from typing import List
+from fastapi import APIRouter, Request, Response, status
 from uuid import UUID
 
 from api import db_api
 from api.routes import helpers
 from api_models.node_comment import NodeCommentCreate, NodeCommentRead, NodeCommentUpdate
-from core.auth import validate_access_token
 
 
 router = APIRouter(
@@ -22,13 +20,12 @@ router = APIRouter(
 
 
 def create_node_comments(
-    node_comments: List[NodeCommentCreate],
+    node_comments: list[NodeCommentCreate],
     request: Request,
     response: Response,
-    claims: dict = Depends(validate_access_token),
 ):
     db_api.post(
-        path=f"/node/comment/?history_username={claims['sub']}",
+        path="/node/comment/",
         payload=[json.loads(c.json(exclude_unset=True)) for c in node_comments],
         expected_status=status.HTTP_201_CREATED,
     )
@@ -63,7 +60,7 @@ def update_comment(
     response: Response,
 ):
     db_api.patch(
-        path=f"/node/comment/{uuid}?history_username={node_comment.username}",
+        path=f"/node/comment/{uuid}",
         payload=json.loads(node_comment.json()),
     )
 

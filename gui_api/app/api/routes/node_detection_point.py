@@ -1,7 +1,6 @@
 import json
 
 from fastapi import APIRouter, Request, Response
-from typing import List
 from uuid import UUID
 
 from api import db_api
@@ -21,11 +20,11 @@ router = APIRouter(
 
 
 def create_node_detection_points(
-    node_detection_points: List[NodeDetectionPointCreate],
+    node_detection_points: list[NodeDetectionPointCreate],
     request: Request,
     response: Response,
 ):
-    result = db_api.post(path=f"/node/detection_point", payload=[json.loads(d.json()) for d in node_detection_points])
+    result = db_api.post(path="/node/detection_point", payload=[json.loads(d.json()) for d in node_detection_points])
 
     response.headers["Content-Location"] = request.url_for("get_node_detection_point", uuid=result["uuid"])
 

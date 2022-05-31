@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
-from typing import List
 from uuid import UUID
 
 from api.routes import helpers
@@ -22,7 +21,7 @@ router = APIRouter(
 
 
 def create_node_comments(
-    node_comments: List[NodeCommentCreate],
+    node_comments: list[NodeCommentCreate],
     request: Request,
     response: Response,
     db: Session = Depends(get_db),

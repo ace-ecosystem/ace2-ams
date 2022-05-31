@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, Json, StrictBool, StrictInt, UUID4
-from typing import List, Optional
+from typing import Optional
 from uuid import uuid4
 
 from api_models import type_str, validators
@@ -31,19 +31,19 @@ class AnalysisModuleTypeBase(BaseModel):
         description="Whether or not this analysis module type runs in manual mode.",
     )
 
-    observable_types: List[type_str] = Field(
+    observable_types: list[type_str] = Field(
         default_factory=list,
         description="""A list of observable types this analysis module type knows how to analyze.
         An empty list means it supports ALL observable types.""",
     )
 
-    required_directives: List[type_str] = Field(
+    required_directives: list[type_str] = Field(
         default_factory=list,
         description="""A list of directives an observable must have in order to be analyzed by this module. An empty
         list means that no directives are required.""",
     )
 
-    required_tags: List[type_str] = Field(
+    required_tags: list[type_str] = Field(
         default_factory=list,
         description="""A list of tags an observable must have in order to be analyzed by this module. An empty list
         means that no tags are required.""",
@@ -83,17 +83,17 @@ class AnalysisModuleTypeRead(AnalysisModuleTypeBase):
         include the version of the data that was used at the time of analysis."""
     )
 
-    observable_types: List[ObservableTypeRead] = Field(
+    observable_types: list[ObservableTypeRead] = Field(
         description="""A list of observable types this analysis module type knows how to analyze.
         An empty list means it supports ALL observable types."""
     )
 
-    required_directives: List[NodeDirectiveRead] = Field(
+    required_directives: list[NodeDirectiveRead] = Field(
         description="""A list of directives an observable must have in order to be analyzed by this module. An empty
         list means that no directives are required.""",
     )
 
-    required_tags: List[NodeTagRead] = Field(
+    required_tags: list[NodeTagRead] = Field(
         description="""A list of tags an observable must have in order to be analyzed by this module. An empty list
         means that no tags are required.""",
     )
@@ -111,17 +111,17 @@ class AnalysisModuleTypeUpdate(AnalysisModuleTypeBase):
 
     manual: Optional[StrictBool] = Field(description="Whether or not this analysis module type runs in manual mode.")
 
-    observable_types: Optional[List[type_str]] = Field(
+    observable_types: Optional[list[type_str]] = Field(
         description="""A list of observable types this analysis module type knows how to analyze.
         An empty list means it supports ALL observable types.""",
     )
 
-    required_directives: Optional[List[type_str]] = Field(
+    required_directives: Optional[list[type_str]] = Field(
         description="""A list of directives an observable must have in order to be analyzed by this module. An empty
         list means that no directives are required.""",
     )
 
-    required_tags: Optional[List[type_str]] = Field(
+    required_tags: Optional[list[type_str]] = Field(
         description="""A list of tags an observable must have in order to be analyzed by this module. An empty list
         means that no tags are required.""",
     )

@@ -11,7 +11,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from typing import List
 
 from api_models.observable import ObservableNodeTreeRead, ObservableRead, ObservableRelationshipRead
 from db.database import Base
@@ -84,10 +83,10 @@ class Observable(Node, HasHistory):
         return json.loads(ObservableRead(**self.to_dict()).json())
 
     @property
-    def observable_relationships(self) -> List[ObservableRelationshipRead]:
+    def observable_relationships(self) -> list[ObservableRelationshipRead]:
         """Returns the list of observable relationships for this observable sorted by the
         related observable's type then value"""
 
-        results: List[NodeRelationship] = [r for r in self.relationships if isinstance(r.related_node, Observable)]
+        results: list[NodeRelationship] = [r for r in self.relationships if isinstance(r.related_node, Observable)]
 
         return sorted(results, key=lambda x: (x.related_node.type.value, x.related_node.value))

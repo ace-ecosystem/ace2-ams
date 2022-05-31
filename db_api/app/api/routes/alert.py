@@ -2,7 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
 
 from api.routes import helpers
@@ -152,7 +152,7 @@ helpers.api_route_read(router, get_alerts_observables, list[ObservableRead], met
 
 
 def update_alerts(
-    alerts: List[AlertUpdate],
+    alerts: list[AlertUpdate],
     request: Request,
     response: Response,
     db: Session = Depends(get_db),

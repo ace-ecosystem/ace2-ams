@@ -1,5 +1,5 @@
 from pydantic import BaseModel, constr, EmailStr, Field, StrictBool, UUID4
-from typing import List, Optional
+from typing import Optional
 from uuid import uuid4
 
 from api_models import type_list_str, type_str, validators
@@ -58,7 +58,7 @@ class UserRead(UserBase):
         description="The default queue the user will see on the event management page"
     )
 
-    roles: List[UserRoleRead] = Field(description="A list of roles assigned to the user")
+    roles: list[UserRoleRead] = Field(description="A list of roles assigned to the user")
 
     uuid: UUID4 = Field(description="The UUID of the user")
 

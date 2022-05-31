@@ -1,7 +1,7 @@
 import json
 
 from datetime import datetime
-from fastapi import APIRouter, Depends, Query, Request, Response, status
+from fastapi import APIRouter, Query, Request, Response, status
 from typing import Optional
 from uuid import UUID
 
@@ -10,7 +10,6 @@ from api.routes import helpers
 from api_models.alert import AlertCreate, AlertRead, AlertUpdate
 from api_models.history import AlertHistoryRead
 from api_models.observable import ObservableRead
-from core.auth import validate_access_token
 
 
 router = APIRouter(
@@ -28,9 +27,8 @@ def create_alert(
     alert: AlertCreate,
     request: Request,
     response: Response,
-    claims: dict = Depends(validate_access_token),
 ):
-    result = db_api.post(path=f"/alert/?history_username={claims['sub']}", payload=json.loads(alert.json()))
+    result = db_api.post(path="/alert/", payload=json.loads(alert.json()))
 
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=result["uuid"])
 
@@ -186,12 +184,8 @@ def update_alerts(
     alerts: list[AlertUpdate],
     request: Request,
     response: Response,
-    claims: dict = Depends(validate_access_token),
 ):
-    db_api.patch(
-        path=f"/alert/?history_username={claims['sub']}",
-        payload=[json.loads(a.json(exclude_unset=True)) for a in alerts],
-    )
+    db_api.patch(path="/alert/", payload=[json.loads(a.json(exclude_unset=True)) for a in alerts])
 
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=alerts[-1].uuid)
 
