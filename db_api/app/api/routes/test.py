@@ -31,6 +31,8 @@ def add_test_alerts(alert: AddTestAlert, db: Session = Depends(get_db)):
                 db=db, json_path=f"/app/tests/alerts/{alert.template}", alert_name=f"Manual Alert {i}"
             )
 
+        db.commit()
+
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     else:
         raise HTTPException(status_code=403, detail="Unable to add test alerts when not running in TESTING mode")
