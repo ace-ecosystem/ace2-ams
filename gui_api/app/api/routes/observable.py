@@ -1,12 +1,11 @@
 import json
 
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Request, Response
 from uuid import UUID
 
 from api import db_api
 from api.routes import helpers
 from api_models.observable import ObservableRead, ObservableUpdate
-from core.auth import validate_access_token
 
 
 router = APIRouter(
@@ -37,12 +36,8 @@ def update_observable(
     observable: ObservableUpdate,
     request: Request,
     response: Response,
-    claims: dict = Depends(validate_access_token),
 ):
-    db_api.patch(
-        path=f"/observable/{uuid}?history_username={claims['sub']}",
-        payload=json.loads(observable.json(exclude_unset=True)),
-    )
+    db_api.patch(path=f"/observable/{uuid}", payload=json.loads(observable.json(exclude_unset=True)))
 
     response.headers["Content-Location"] = request.url_for("get_observable", uuid=uuid)
 
