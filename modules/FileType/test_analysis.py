@@ -1,6 +1,6 @@
-from module import FileType
+from analysis import FileType
 
-def test_file_type():
+def test_analysis():
     # create analysis to run
     analysis = {
         'id': 1,

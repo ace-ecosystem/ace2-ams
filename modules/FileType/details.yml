@@ -1,0 +1,3 @@
+version: 1
+cache_seconds: null
+run_condition: target.type == 'File'

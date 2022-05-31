@@ -5,8 +5,7 @@ import subprocess
 from typing import Optional
 from zipfile import ZipFile
 
-from .analysis import Analysis
-from ..observables import *
+from ace2 import *
 
 class FileType(Analysis):
     ''' Determines the type of a file '''
