@@ -796,6 +796,8 @@ def update(uuid: UUID, model: EventUpdate, db: Session):
         else:
             event.vectors = []
 
+    db.flush()
+
     # Add an event history entry if the history username was given. This would typically only be
     # supplied by the GUI when an analyst updates an event.
     if model.history_username is not None:
@@ -805,5 +807,3 @@ def update(uuid: UUID, model: EventUpdate, db: Session):
             diffs=diffs,
             db=db,
         )
-
-    db.flush()

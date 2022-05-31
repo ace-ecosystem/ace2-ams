@@ -490,6 +490,8 @@ def update(model: AlertUpdate, db: Session):
         diffs.append(crud.history.create_diff(field="queue", old=alert.queue.value, new=update_data["queue"]))
         alert.queue = crud.queue.read_by_value(value=update_data["queue"], db=db)
 
+    db.flush()
+
     # Add an alert history entry if the history username was given. This would typically only be
     # supplied by the GUI when an analyst updates an alert.
     if model.history_username is not None:
@@ -499,8 +501,6 @@ def update(model: AlertUpdate, db: Session):
             diffs=diffs,
             db=db,
         )
-
-    db.flush()
 
 
 def update_alert_versions(analysis_uuid: UUID, db: Session):
