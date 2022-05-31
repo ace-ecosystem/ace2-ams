@@ -596,7 +596,7 @@ describe("Observable Summary Details - Affect State", () => {
     cy.wait("@getObservableSummary").its("state").should("eq", "Complete");
   });
 
-  it.only("correctly updates observables for detection status when 'Save Detection Status' button clicked", () => {
+  it("correctly updates observables for detection status when 'Save Detection Status' button clicked", () => {
     cy.intercept("PATCH", "/api/observable/*").as("updateObservable");
     // Select the first two observables and de-select the third (already checked)
     cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box").eq(0).click();
