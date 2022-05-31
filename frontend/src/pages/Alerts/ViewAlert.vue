@@ -45,8 +45,10 @@
   import AlertTree from "@/components/Alerts/AlertTree.vue";
   import TheAlertDetails from "@/components/Alerts/TheAlertDetails.vue";
   import { useAlertStore } from "@/stores/alert";
+  import { useAuthStore } from "@/stores/auth";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
 
+  const authStore = useAuthStore();
   const route = useRoute();
   const alertStore = useAlertStore();
   const selectedAlertStore = useSelectedAlertStore();
@@ -78,6 +80,7 @@
           {
             uuid: alertID,
             disposition: dispositionString,
+            historyUsername: authStore.user.username,
           },
         ]);
         await reloadPage();

@@ -170,6 +170,7 @@
   import { Event } from "@/services/api/event";
   import { ObservableInstance } from "@/services/api/observable";
 
+  import { useAuthStore } from "@/stores/auth";
   import { useObservableTypeStore } from "@/stores/observableType";
   import { observableSummary } from "@/models/eventSummaries";
 
@@ -178,6 +179,7 @@
     eventUuid: { type: String, required: true },
   });
 
+  const authStore = useAuthStore();
   const observableTypeStore = useObservableTypeStore();
 
   const currentlyEnabledForDetection = ref<observableSummary[]>([]);
@@ -270,7 +272,10 @@
     forDetection: boolean,
   ) => {
     try {
-      await ObservableInstance.update(uuid, { forDetection: forDetection });
+      await ObservableInstance.update(uuid, {
+        historyUsername: authStore.user.username,
+        forDetection: forDetection,
+      });
     } catch (e: unknown) {
       if (typeof e === "string") {
         error.value = `Could not update observables: ${e}`;

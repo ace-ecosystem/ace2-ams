@@ -486,7 +486,7 @@ describe("URL Summary Details", () => {
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("POST", "/api/node/tree/observable").as("getObservables");
+    cy.intercept("POST", "/api/alert/observables").as("getObservables");
 
     // Add the test event to the database
     cy.request({
@@ -596,7 +596,7 @@ describe("Observable Summary Details - Affect State", () => {
     cy.wait("@getObservableSummary").its("state").should("eq", "Complete");
   });
 
-  it("correctly updates observables for detection status when 'Save Detection Status' button clicked", () => {
+  it.only("correctly updates observables for detection status when 'Save Detection Status' button clicked", () => {
     cy.intercept("PATCH", "/api/observable/*").as("updateObservable");
     // Select the first two observables and de-select the third (already checked)
     cy.get(".p-selection-column > .p-checkbox > .p-checkbox-box").eq(0).click();

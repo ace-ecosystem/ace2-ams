@@ -7,6 +7,7 @@ import router from "@/router/index";
 import { observableActionUrl, observableTreeRead } from "@/models/observable";
 import { observableTreeReadFactory } from "@mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { userReadFactory } from "@mocks/user";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { testConfiguration } from "@/etc/configuration/test";
 import { ObservableInstance } from "@/services/api/observable";
@@ -37,7 +38,18 @@ function factory(
   return mount(ObservableLeaf, {
     global: {
       directives: { tooltip: Tooltip },
-      plugins: [PrimeVue, ToastService, createCustomCypressPinia(), router],
+      plugins: [
+        PrimeVue,
+        ToastService,
+        createCustomCypressPinia({
+          initialState: {
+            authStore: {
+              user: userReadFactory(),
+            },
+          },
+        }),
+        router,
+      ],
       provide: {
         config: args.config,
         nodeType: "alerts",
@@ -165,7 +177,10 @@ describe("ObservableLeaf", () => {
   });
   it("attempts to run command when 'command'-type observable action clicked", () => {
     cy.stub(ObservableInstance, "update")
-      .withArgs("observableUuid1", { forDetection: true })
+      .withArgs("observableUuid1", {
+        forDetection: true,
+        historyUsername: "analyst",
+      })
       .as("updateObservable")
       .resolves();
 
@@ -181,7 +196,10 @@ describe("ObservableLeaf", () => {
   });
   it("displays error message if 'command'-type observable action clicked, but command fails", () => {
     cy.stub(ObservableInstance, "update")
-      .withArgs("observableUuid1", { forDetection: true })
+      .withArgs("observableUuid1", {
+        forDetection: true,
+        historyUsername: "analyst",
+      })
       .as("updateObservable")
       .rejects(new Error("404 request failed"));
 

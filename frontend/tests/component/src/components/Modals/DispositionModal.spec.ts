@@ -113,7 +113,9 @@ describe("DispositionModal", () => {
   });
   it("attempts to set disposition when save button clicked and no comment is given", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .withArgs([
+        { uuid: "uuid", disposition: "Bad", historyUsername: "analyst" },
+      ])
       .as("setDisposition")
       .resolves();
     cy.stub(NodeComment, "create").as("createComment");
@@ -129,7 +131,9 @@ describe("DispositionModal", () => {
   });
   it("attempts to set disposition and create comment when save button clicked and comment is given", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .withArgs([
+        { uuid: "uuid", disposition: "Bad", historyUsername: "analyst" },
+      ])
       .as("setDisposition")
       .resolves();
     cy.stub(NodeComment, "create")
@@ -157,7 +161,9 @@ describe("DispositionModal", () => {
   });
   it("attempts to set disposition and create comment when save button clicked and comment is given using NodeCommentAutocomplete", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .withArgs([
+        { uuid: "uuid", disposition: "Bad", historyUsername: "analyst" },
+      ])
       .as("setDisposition")
       .resolves();
     cy.stub(NodeComment, "create")
@@ -185,7 +191,9 @@ describe("DispositionModal", () => {
   });
   it("displays error if attempt to set disposition fails", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .withArgs([
+        { uuid: "uuid", disposition: "Bad", historyUsername: "analyst" },
+      ])
       .as("setDisposition")
       .rejects(new Error("404 request failed"));
     cy.stub(NodeComment, "create").as("createComment");
@@ -205,7 +213,9 @@ describe("DispositionModal", () => {
   });
   it("displays error if attempt to create comment fails with non-409 error code", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .withArgs([
+        { uuid: "uuid", disposition: "Bad", historyUsername: "analyst" },
+      ])
       .as("setDisposition")
       .resolves();
     cy.stub(NodeComment, "create")
@@ -233,7 +243,9 @@ describe("DispositionModal", () => {
   });
   it("does not display error if attempt to create comment fails with 409 error code", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .withArgs([
+        { uuid: "uuid", disposition: "Bad", historyUsername: "analyst" },
+      ])
       .as("setDisposition")
       .resolves();
     cy.stub(NodeComment, "create")

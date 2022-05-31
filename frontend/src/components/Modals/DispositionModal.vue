@@ -108,6 +108,7 @@
       const updateData = selectedAlertStore.selected.map((uuid) => ({
         uuid: uuid,
         disposition: newDisposition.value?.value,
+        historyUsername: authStore.user.username,
       }));
       await alertStore.update(updateData);
 

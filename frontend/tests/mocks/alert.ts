@@ -23,8 +23,6 @@ export const alertCreateFactory = ({
 
 export const alertTreeReadFactory = ({
   children = [],
-  parentTreeUuid = "parentTreeUuid1",
-  treeUuid = "treeUuid1",
   childTags = [],
   childThreatActors = [],
   childThreats = [],
@@ -52,8 +50,6 @@ export const alertTreeReadFactory = ({
   version = "testAlertVersion",
 }: Partial<alertTreeRead> = {}): alertTreeRead => ({
   children: children,
-  parentTreeUuid: parentTreeUuid,
-  treeUuid: treeUuid,
   childTags: childTags,
   childThreatActors: childThreatActors,
   childThreats: childThreats,

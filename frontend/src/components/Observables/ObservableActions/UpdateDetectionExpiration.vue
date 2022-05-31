@@ -58,11 +58,13 @@
   import InputSwitch from "primevue/inputswitch";
   import { ObservableInstance } from "@/services/api/observable";
   import { useAlertStore } from "@/stores/alert";
+  import { useAuthStore } from "@/stores/auth";
   import Message from "primevue/message";
 
   const newExpirationTime = ref<Date>();
   const currentExpirationTime = ref<string>();
 
+  const authStore = useAuthStore();
   const modalStore = useModalStore();
   const neverExpires = ref(false);
   const error = ref<string>();
@@ -96,6 +98,7 @@
     try {
       await ObservableInstance.update(props.observable.uuid, {
         expiresOn: newValue,
+        historyUsername: authStore.user.username,
       });
       alertStore.requestReload = true;
       close();

@@ -218,6 +218,7 @@ describe("SaveToEventModal", () => {
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
@@ -244,6 +245,7 @@ describe("SaveToEventModal", () => {
           queue: "testObject",
           owner: "analyst",
           status: "OPEN",
+          historyUsername: "analyst",
         },
         true,
       )
@@ -254,6 +256,7 @@ describe("SaveToEventModal", () => {
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
@@ -282,6 +285,7 @@ describe("SaveToEventModal", () => {
           queue: "testObject",
           owner: "analyst",
           status: "OPEN",
+          historyUsername: "analyst",
         },
         true,
       )
@@ -303,6 +307,7 @@ describe("SaveToEventModal", () => {
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
@@ -333,6 +338,7 @@ describe("SaveToEventModal", () => {
           queue: "testObject",
           owner: "analyst",
           status: "OPEN",
+          historyUsername: "analyst",
         },
         true,
       )
@@ -354,6 +360,7 @@ describe("SaveToEventModal", () => {
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
@@ -384,6 +391,7 @@ describe("SaveToEventModal", () => {
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
@@ -410,6 +418,7 @@ describe("SaveToEventModal", () => {
           queue: "testObject",
           owner: "analyst",
           status: "OPEN",
+          historyUsername: "analyst",
         },
         true,
       )
@@ -440,6 +449,7 @@ describe("SaveToEventModal", () => {
           queue: "testObject",
           owner: "analyst",
           status: "OPEN",
+          historyUsername: "analyst",
         },
         true,
       )
@@ -461,6 +471,7 @@ describe("SaveToEventModal", () => {
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
@@ -490,6 +501,7 @@ describe("SaveToEventModal", () => {
           queue: "testObject",
           owner: "analyst",
           status: "OPEN",
+          historyUsername: "analyst",
         },
         true,
       )
@@ -511,6 +523,7 @@ describe("SaveToEventModal", () => {
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
