@@ -1,0 +1,4 @@
+FROM public.ecr.aws/lambda/python:3.9
+#Assuming we are in root of repo
+ADD lib/ace2 ace2
+RUN python3 -m pip install ./ace2

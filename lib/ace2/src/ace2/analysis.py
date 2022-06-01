@@ -1,8 +1,8 @@
 from __future__ import annotations
-import boto3
+import json
 from pydantic import Field
 from pydantic.fields import ModelField
-from typing import List, Optional, Type, Tuple
+from typing import List, Optional, Type
 import sys
 
 from . import config, queue
@@ -70,7 +70,8 @@ class Analysis(TypedModel):
         '''
 
         # create an analysis object
-        analysis = message['Body']
+        message = message['Records'][0]
+        analysis = json.loads(message['body'])
         self = cls(**analysis)
 
         # call the current callback function which then tells us what to execute after that
@@ -85,7 +86,7 @@ class Analysis(TypedModel):
             queue.add('Submission', self.dict(exclude={'callback', 'state'}))
 
         # delete original message from the analysis queue
-        queue.remove(self.type, message['ReceiptHandle'])
+        queue.remove(self.type, message['receiptHandle'])
 
     def execute(self, observable:Observable) -> Optional[Callback]:
         ''' This is the entry point for running analysis. Subclasses must override this function.
