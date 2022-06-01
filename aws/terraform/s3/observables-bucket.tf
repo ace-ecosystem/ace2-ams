@@ -3,8 +3,10 @@ resource "aws_s3_bucket" "file_storage_bucket" {
 }
 
 resource "aws_s3_bucket_versioning" "file_storage_versioning" {
-  bucket = aws_s3_bucket.file_storage_bucket.bucket
-  enabled = true
+  bucket = aws_s3_bucket.file_storage_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "file_storage_encryption" {
