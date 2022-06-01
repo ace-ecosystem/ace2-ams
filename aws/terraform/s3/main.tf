@@ -12,5 +12,9 @@ terraform {
   }
 }
 
+provider "aws" {
+  region = "us-east-2"
+}
+
 #Get info about current session
 data "aws_caller_identity" "current" {}
