@@ -26,6 +26,12 @@ import { inputTypes } from "./base";
 
 // ** Events ** //
 
+// NOTE: If alerts and events share a property name (like how they both originally had the "type" property),
+// care must be taken... The event type field is queueable, whereas the alert type field is not. This will
+// cause issues in the "formatNodeFiltersForAPI" function when you have properties that share a name but
+// one is queueable and the other not. The fix for this is to rename the fields. So now there is the "alertType"
+// property and the "eventType" property.
+
 export const eventPropertyTypes: Record<string, string> = {
   CREATED_AFTER_PROPERTY: "createdAfter",
   CREATED_BEFORE_PROPERTY: "createdBefore",
