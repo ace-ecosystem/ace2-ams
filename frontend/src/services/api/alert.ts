@@ -47,7 +47,6 @@ export const Alert = {
     await api.baseRequest(`${endpoint}observables`, "POST", { data: uuids }),
 
   update: (data: alertUpdate[]): Promise<void> => {
-    console.log("hihi?");
     return api.update(endpoint, data);
   },
 };

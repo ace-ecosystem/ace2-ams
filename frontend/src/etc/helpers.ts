@@ -181,7 +181,6 @@ export function formatNodeFiltersForAPI(
 ): Record<string, string> | Record<string, number> {
   const formattedParams = {} as alertFilterParams;
   for (const param in params) {
-    console.log("param", param);
     let paramValue = params[param] as any;
 
     //  check if the given param is specific to node and not pageOptionParams, i.e. disposition
@@ -191,7 +190,6 @@ export function formatNodeFiltersForAPI(
 
     // if so, check if the param's value needs to be formatted, and replace with the newly formatted val
     if (filterType) {
-      console.log("filterType", filterType);
       // First check if there is a method provided to get string representation
       if (filterType.stringRepr) {
         paramValue = filterType.stringRepr(paramValue) as never;
@@ -203,7 +201,6 @@ export function formatNodeFiltersForAPI(
 
     formattedParams[param] = paramValue;
   }
-  console.log("formattedParams", formattedParams);
   return formattedParams;
 }
 
