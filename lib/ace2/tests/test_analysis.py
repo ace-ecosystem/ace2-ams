@@ -7,10 +7,6 @@ def test_analysis(monkeypatch, mock_datetime):
         class Config(Analysis.Config):
             foo: str
 
-        class Requirements(Analysis.Requirements):
-            observables = IPv4, 'FQDN'
-            directives = 'do_it', 'no_really'
-
         class Details(Analysis.Details):
             result: str = Field(default=None, description='some details field')
 
@@ -62,7 +58,7 @@ def test_analysis(monkeypatch, mock_datetime):
             # set the summary
             self.summary = f'hey, {self.details.result}'
 
-    # create analysis to run
+    # add analysis to the queue
     analysis = {
         'id': 1,
         'type': 'MyAnalysis',
@@ -71,12 +67,19 @@ def test_analysis(monkeypatch, mock_datetime):
             'value': '127.0.0.1',
         },
     }
+    queue.add('MyAnalysis', analysis)
+
+    # get a message from the queue
+    message = queue.get('MyAnalysis')
 
     # run the analysis with the lambda handler function
-    analysis = run(analysis, None)
+    run(message, None)
+
+    # make sure message was requeued
+    message = queue.get('MyAnalysis')
 
     # verify result
-    assert analysis == {
+    assert message['Body'] == {
         'id': 1,
         'type': 'MyAnalysis',
         'target': {
@@ -91,7 +94,6 @@ def test_analysis(monkeypatch, mock_datetime):
         'observables': [],
         'callback': {
             'method': 'get_results',
-            'timestamp': mock_datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
         },
         'state': {
             'submission_id': '123',
@@ -99,10 +101,13 @@ def test_analysis(monkeypatch, mock_datetime):
     }
 
     # run again to test the callback
-    analysis = run(analysis, None)
+    run(message, None)
+
+    # make sure message was submitted
+    message = queue.get('Submission')
 
     # verify result
-    assert analysis == {
+    assert message['Body'] == {
         'id': 1,
         'type': 'MyAnalysis',
         'target': {
@@ -126,130 +131,4 @@ def test_analysis(monkeypatch, mock_datetime):
                 'metadata': [],
             },
         ],
-        'callback': None,
-        'state': {
-            'submission_id': '123',
-        },
     }
-
-    # test should run with type
-    analysis = {
-        'id': 1,
-        'type': 'MyAnalysis',
-        'target': {
-            'type': 'IPv4',
-            'value': '127.0.0.1',
-            'metadata' : [
-                {
-                    'type': 'Directive',
-                    'value': 'do_it',
-                },
-                {
-                    'type': 'Directive',
-                    'value': 'no_really',
-                },
-            ],
-        },
-    }
-    assert Analysis(**analysis).requirements_met()
-
-    # test should run with string
-    analysis = {
-        'id': 1,
-        'type': 'MyAnalysis',
-        'target': {
-            'type': 'FQDN',
-            'value': '127.0.0.1',
-            'metadata' : [
-                {
-                    'type': 'Directive',
-                    'value': 'do_it',
-                },
-                {
-                    'type': 'Directive',
-                    'value': 'no_really',
-                },
-            ],
-        },
-    }
-    assert Analysis(**analysis).requirements_met()
-
-    # make sure not to run if missing directive
-    analysis = {
-        'id': 1,
-        'type': 'MyAnalysis',
-        'target': {
-            'type': 'IPv4',
-            'value': '127.0.0.1',
-            'metadata' : [
-                {
-                    'type': 'Directive',
-                    'value': 'do_it',
-                },
-            ],
-        },
-    }
-    assert not Analysis(**analysis).requirements_met()
-
-    # make sure not to run if wrong observable type
-    analysis = {
-        'id': 1,
-        'type': 'MyAnalysis',
-        'target': {
-            'type': 'nope',
-            'value': '127.0.0.1',
-            'metadata' : [
-                {
-                    'type': 'Directive',
-                    'value': 'do_it',
-                },
-                {
-                    'type': 'Directive',
-                    'value': 'no_really',
-                },
-            ],
-        },
-    }
-    assert not Analysis(**analysis).requirements_met()
-
-    # test non tuple requirements
-    class MyAnalysis(Analysis):
-        class Requirements(Analysis.Requirements):
-            observables = IPv4
-            directives = 'do_it'
-    analysis = {
-        'id': 1,
-        'type': 'MyAnalysis',
-        'target': {
-            'type': 'IPv4',
-            'value': '127.0.0.1',
-            'metadata' : [
-                {
-                    'type': 'Directive',
-                    'value': 'do_it',
-                },
-            ],
-        },
-    }
-    assert Analysis(**analysis).requirements_met()
-    analysis['target']['type'] = 'FQDN'
-    assert not Analysis(**analysis).requirements_met()
-    analysis['target']['type'] = 'IPv4'
-    analysis['target']['metadata'] =  []
-    assert not Analysis(**analysis).requirements_met()
-
-    # test non tuple str requirement
-    class MyAnalysis(Analysis):
-        class Requirements(Analysis.Requirements):
-            observables = 'IPv4'
-    analysis = {
-        'id': 1,
-        'type': 'MyAnalysis',
-        'target': {
-            'type': 'IPv4',
-            'value': '127.0.0.1',
-        },
-    }
-    assert Analysis(**analysis).requirements_met()
-    analysis['target']['type'] = 'FQDN'
-    assert not Analysis(**analysis).requirements_met()

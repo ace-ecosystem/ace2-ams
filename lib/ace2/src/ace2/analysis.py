@@ -1,10 +1,11 @@
 from __future__ import annotations
+import boto3
 from pydantic import Field
 from pydantic.fields import ModelField
 from typing import List, Optional, Type, Tuple
 import sys
 
-from . import config
+from . import config, queue
 from .callback import Callback
 from .observables import Observable
 from .models import TypedModel, PrivateModel
@@ -29,36 +30,6 @@ class Analysis(TypedModel):
     class Details(PrivateModel):
         ''' Subclasses can override the details class to add new details fields '''
         pass
-
-    class Requirements():
-        ''' Subclass can override the requirements class to alter the requirements '''
-        observables: Union[str, Type[Observable], Tuple[Union[str,Type[Observable]]]] = ()
-        directives: Union[str, Tuple[str]] = ()
-
-    def requirements_met(self) -> bool:
-        ''' Determines if the analysis should run
-
-        Returns:
-            True if the analysis should run
-        '''
-
-        # do not run if the target type is not valid for this analysis
-        observables = self.Requirements.observables 
-        if not isinstance(self.Requirements.observables, tuple):
-            observables = (self.Requirements.observables,)
-        if self.target.type not in [t if isinstance(t, str) else t.type for t in observables]:
-            return False
-
-        # do not run if the observable is missing a required directive
-        directives = self.Requirements.directives 
-        if not isinstance(self.Requirements.directives, tuple):
-            directives = (self.Requirements.directives,)
-        for directive in directives:
-            if directive not in self.target.directives:
-                return False
-
-        # analysis should run on this target
-        return True
 
     def __init_subclass__(cls):
         ''' Modify all subclasses of Analysis '''
@@ -90,30 +61,31 @@ class Analysis(TypedModel):
         return self.private.config
 
     @classmethod
-    def run(cls, event:dict, context:dict) -> dict:
+    def run(cls, message:dict, context:dict):
         ''' AWS lambda function handler that runs analysis passed in the event message
 
         Args:
-            event: the analysis state dictionary
+            message: the analysis queue message
             context: aws runtime context (we do not use this)
-
-        Returns:
-            the updated analysis state dictionary
         '''
 
         # create an analysis object
-        self = cls(**event)
+        analysis = message['Body']
+        self = cls(**analysis)
 
         # call the current callback function which then tells us what to execute after that
         self.callback = self.callback.execute(self, self.target)
 
-        # submit analysis if complete
-        if self.callback is None:
-            analysis = self.dict(exclude={'callback', 'state'})
-            # TODO: submit the analysis excluding callback and state
+        # if analysis is not complete then push it back onto the analysis queue
+        if self.callback:
+            queue.add(self.type, self.dict(), delay=self.callback.seconds)
 
-        # return the dictionary representation of the analysis
-        return self.dict()
+        # if analysis is complete then push it (excluding state info) onto the submission queue
+        else:
+            queue.add('Submission', self.dict(exclude={'callback', 'state'}))
+
+        # delete original message from the analysis queue
+        queue.remove(self.type, message['ReceiptHandle'])
 
     def execute(self, observable:Observable) -> Optional[Callback]:
         ''' This is the entry point for running analysis. Subclasses must override this function.

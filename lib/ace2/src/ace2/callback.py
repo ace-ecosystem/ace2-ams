@@ -6,7 +6,7 @@ class Callback(PrivateModel):
     ''' The Callback class is used to execute a function after a specified delay '''
 
     method: str = Field(description='the name of the method to call when the callback is executed')
-    seconds: int = Field(default=0, description='the number of seconds to delay before callback is executed')
+    seconds: int = Field(exclude=True, default=0, description='the number of seconds to delay before callback is executed')
 
     def __init__(self, method:Union[str,callable], seconds:Optional[int]=0):
         ''' Initializes the Callback object
@@ -19,16 +19,6 @@ class Callback(PrivateModel):
         # if method is a string we can use it directly, otherwise use the name of the callable
         method = method if isinstance(method, str) else method.__name__
         super().__init__(method=method, seconds=seconds)
-
-    def dict(self) -> dict:
-        ''' override dict function to prevent writing the seconds field
-        
-        Returns:
-            dict: the dict state of the callback excluding the seconds field
-        '''
-
-        # exlude the seconds field
-        return super().dict(exclude={'seconds'})
 
     def execute(self, instance:object, *args, **kwargs) -> Any:
         ''' Executes the callback on the given instatnce
