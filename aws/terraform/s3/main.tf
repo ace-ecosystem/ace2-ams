@@ -1,5 +1,5 @@
 ##############################################################
-### Configure Backend Remote State
+### Configure Backend Remote State and Providers
 ##############################################################
 
 terraform {
@@ -12,6 +12,7 @@ terraform {
   }
 }
 
+#Declare AWS provider
 provider "aws" {
   region = "us-east-2"
 }
