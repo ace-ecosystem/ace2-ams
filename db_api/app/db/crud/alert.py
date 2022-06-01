@@ -226,8 +226,15 @@ def build_read_all_query(
         sort_by = sort_split[0]
         order = sort_split[1]
 
+        # Only sort by type if we are not also filtering by type
+        if sort_by.lower() == "alert_type" and not alert_type:
+            if order == "asc":
+                query = query.join(AlertType).order_by(AlertType.value.asc())
+            else:
+                query = query.join(AlertType).order_by(AlertType.value.desc())
+
         # Only sort by disposition if we are not also filtering by disposition
-        if sort_by.lower() == "disposition" and not disposition:
+        elif sort_by.lower() == "disposition" and not disposition:
             if order == "asc":
                 query = query.outerjoin(AlertDisposition).order_by(AlertDisposition.value.asc())
             else:
@@ -283,13 +290,6 @@ def build_read_all_query(
                 query = query.join(Queue).order_by(Queue.value.asc())
             else:
                 query = query.join(Queue).order_by(Queue.value.desc())
-
-        # Only sort by type if we are not also filtering by type
-        elif sort_by.lower() == "type" and not alert_type:
-            if order == "asc":
-                query = query.join(AlertType).order_by(AlertType.value.asc())
-            else:
-                query = query.join(AlertType).order_by(AlertType.value.desc())
 
     return query
 

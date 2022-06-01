@@ -317,6 +317,16 @@ def build_read_all_query(
             else:
                 query = query.order_by(Event.creation_time.desc())
 
+        # Only sort by event_type if we are not also filtering by event_type
+        elif sort_by.lower() == "event_type" and not event_type:
+            query = query.outerjoin(EventType, onclause=EventType.uuid == Event.type_uuid).group_by(
+                Event.uuid, Node.uuid, EventType.value
+            )
+            if order == "asc":
+                query = query.order_by(EventType.value.asc())
+            else:
+                query = query.order_by(EventType.value.desc())
+
         elif sort_by.lower() == "name":
             if order == "asc":
                 query = query.order_by(Event.name.asc())
@@ -352,16 +362,6 @@ def build_read_all_query(
                 query = query.order_by(EventStatus.value.asc())
             else:
                 query = query.order_by(EventStatus.value.desc())
-
-        # Only sort by type if we are not also filtering by type
-        elif sort_by.lower() == "type" and not type:
-            query = query.outerjoin(EventType, onclause=EventType.uuid == Event.type_uuid).group_by(
-                Event.uuid, Node.uuid, EventType.value
-            )
-            if order == "asc":
-                query = query.order_by(EventType.value.asc())
-            else:
-                query = query.order_by(EventType.value.desc())
 
     return query
 

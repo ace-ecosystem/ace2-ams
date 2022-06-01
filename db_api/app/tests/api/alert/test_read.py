@@ -630,6 +630,23 @@ def test_get_multiple_filters(client, db):
     assert get.json()["items"][0]["disposition"]["value"] == "FALSE_POSITIVE"
 
 
+def test_get_sort_by_alert_type(client, db):
+    alert1 = factory.alert.create(db=db, alert_type="type1")
+    alert2 = factory.alert.create(db=db, alert_type="type2")
+
+    # If you sort descending, alert2 should appear first
+    get = client.get("/api/alert/?sort=alert_type|desc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
+
+    # If you sort ascending, alert1 should appear first
+    get = client.get("/api/alert/?sort=alert_type|asc")
+    assert get.json()["total"] == 2
+    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
+    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
+
+
 def test_get_sort_by_disposition(client, db):
     alert1 = factory.alert.create(db=db, disposition="DELIVERY")
     alert2 = factory.alert.create(db=db, disposition="FALSE_POSITIVE")
@@ -773,23 +790,6 @@ def test_get_sort_by_queue(client, db):
 
     # If you sort ascending, alert1 should appear first
     get = client.get("/api/alert/?sort=queue|asc")
-    assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert2.uuid)
-
-
-def test_get_sort_by_type(client, db):
-    alert1 = factory.alert.create(db=db, alert_type="type1")
-    alert2 = factory.alert.create(db=db, alert_type="type2")
-
-    # If you sort descending, alert2 should appear first
-    get = client.get("/api/alert/?sort=type|desc")
-    assert get.json()["total"] == 2
-    assert get.json()["items"][0]["uuid"] == str(alert2.uuid)
-    assert get.json()["items"][1]["uuid"] == str(alert1.uuid)
-
-    # If you sort ascending, alert1 should appear first
-    get = client.get("/api/alert/?sort=type|asc")
     assert get.json()["total"] == 2
     assert get.json()["items"][0]["uuid"] == str(alert1.uuid)
     assert get.json()["items"][1]["uuid"] == str(alert2.uuid)

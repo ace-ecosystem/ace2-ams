@@ -1728,6 +1728,26 @@ def test_get_sort_by_created_time(client, db):
     assert get.json()["items"][1]["name"] == "event2"
 
 
+def test_get_sort_by_event_type(client, db):
+    factory.event.create_or_read(name="event1", db=db)
+    factory.event.create_or_read(name="event2", db=db, event_type="value1")
+    factory.event.create_or_read(name="event3", db=db, event_type="value2")
+
+    # If you sort descending: event1, event3, event2
+    get = client.get("/api/event/?sort=event_type|desc")
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["name"] == "event1"
+    assert get.json()["items"][1]["name"] == "event3"
+    assert get.json()["items"][2]["name"] == "event2"
+
+    # If you sort ascending: event2, event3, event1
+    get = client.get("/api/event/?sort=event_type|asc")
+    assert get.json()["total"] == 3
+    assert get.json()["items"][0]["name"] == "event2"
+    assert get.json()["items"][1]["name"] == "event3"
+    assert get.json()["items"][2]["name"] == "event1"
+
+
 def test_get_sort_by_name(client, db):
     factory.event.create_or_read(name="event1", db=db)
     factory.event.create_or_read(name="event2", db=db)
@@ -1797,23 +1817,3 @@ def test_get_sort_by_status(client, db):
     assert get.json()["total"] == 2
     assert get.json()["items"][0]["name"] == "event1"
     assert get.json()["items"][1]["name"] == "event2"
-
-
-def test_get_sort_by_type(client, db):
-    factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db, event_type="value1")
-    factory.event.create_or_read(name="event3", db=db, event_type="value2")
-
-    # If you sort descending: event1, event3, event2
-    get = client.get("/api/event/?sort=type|desc")
-    assert get.json()["total"] == 3
-    assert get.json()["items"][0]["name"] == "event1"
-    assert get.json()["items"][1]["name"] == "event3"
-    assert get.json()["items"][2]["name"] == "event2"
-
-    # If you sort ascending: event2, event3, event1
-    get = client.get("/api/event/?sort=type|asc")
-    assert get.json()["total"] == 3
-    assert get.json()["items"][0]["name"] == "event2"
-    assert get.json()["items"][1]["name"] == "event3"
-    assert get.json()["items"][2]["name"] == "event1"
