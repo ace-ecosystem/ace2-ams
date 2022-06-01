@@ -1,5 +1,4 @@
 from ace2 import *
-import datetime
 
 class TestCallback:
     def do_something(self, foo, bar=None):
@@ -7,13 +6,13 @@ class TestCallback:
         self.bar = bar
         return 'beep'
 
-    def test_callback(self, mock_datetime):
+    def test_callback(self):
         # create a callback
         callback = Callback(self.do_something)
 
         # verify attributes
         assert callback.method == 'do_something'
-        assert callback.timestamp == mock_datetime.utcnow()
+        assert callback.seconds == 0
 
         # run the callback
         result = callback.execute(self, 'hello', bar='world')
@@ -27,7 +26,6 @@ class TestCallback:
         # verify state
         assert state == {
             'method': 'do_something',
-            'timestamp': mock_datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
 
         # load callback from state
@@ -35,18 +33,11 @@ class TestCallback:
 
         # verify attributes
         assert callback.method == 'do_something'
-        assert callback.timestamp == mock_datetime.utcnow().replace(microsecond=0)
+        assert callback.seconds == 0
 
-        # create a callback with kwargs
-        kwargs = {
-            'weeks': 1,
-            'days': 1,
-            'hours': 1,
-            'minutes': 1,
-            'seconds': 1,
-        }
-        callback = Callback(self.do_something, **kwargs)
+        # create a callback with seconds
+        callback = Callback(self.do_something, seconds=1)
 
         # verify attributes
         assert callback.method == 'do_something'
-        assert callback.timestamp == mock_datetime.utcnow() + datetime.timedelta(**kwargs)
+        assert callback.seconds == 1
