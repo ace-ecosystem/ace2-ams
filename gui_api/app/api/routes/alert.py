@@ -44,6 +44,7 @@ helpers.api_route_create(router, create_alert)
 def get_all_alerts(
     limit: Optional[int] = Query(50, le=100),
     offset: Optional[int] = Query(0),
+    alert_type: Optional[str] = None,
     disposition: Optional[str] = None,
     disposition_user: Optional[str] = None,
     dispositioned_after: Optional[datetime] = None,
@@ -63,6 +64,7 @@ def get_all_alerts(
         None,
         regex=""
         "^("
+        "(alert_type)|"
         "(disposition)|"
         "(disposition_time)|"
         "(disposition_user)|"
@@ -70,8 +72,7 @@ def get_all_alerts(
         "(insert_time)|"
         "(name)|"
         "(owner)|"
-        "(queue)|"
-        "(type)"
+        "(queue)"
         ")\|"
         "("
         "(asc)|"
@@ -83,9 +84,11 @@ def get_all_alerts(
     threats: Optional[str] = None,
     tool: Optional[str] = None,
     tool_instance: Optional[str] = None,
-    type: Optional[str] = None,
 ):
     query_params = f"?limit={limit}&offset={offset}"
+
+    if alert_type:
+        query_params += f"&alert_type={alert_type}"
 
     if disposition:
         query_params += f"&disposition={disposition}"
@@ -146,9 +149,6 @@ def get_all_alerts(
 
     if tool_instance:
         query_params += f"&tool_instance={tool_instance}"
-
-    if type:
-        query_params += f"&type={type}"
 
     if sort:
         query_params += f"&sort={sort}"

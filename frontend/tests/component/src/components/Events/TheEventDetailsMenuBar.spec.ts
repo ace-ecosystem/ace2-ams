@@ -140,6 +140,7 @@ describe("TheEventDetailsMenuBar", () => {
       {
         uuid: "uuid",
         owner: "analyst",
+        historyUsername: "analyst",
       },
     ]);
   });

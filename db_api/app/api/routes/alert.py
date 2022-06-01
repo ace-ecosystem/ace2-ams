@@ -75,6 +75,7 @@ def get_all_alerts(
         None,
         regex=""
         "^("
+        "(alert_type)|"
         "(disposition)|"
         "(disposition_time)|"
         "(disposition_user)|"
@@ -82,8 +83,7 @@ def get_all_alerts(
         "(insert_time)|"
         "(name)|"
         "(owner)|"
-        "(queue)|"
-        "(type)"
+        "(queue)"
         ")\|"
         "("
         "(asc)|"

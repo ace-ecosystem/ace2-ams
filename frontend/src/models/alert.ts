@@ -107,6 +107,7 @@ export interface alertUpdate extends nodeUpdate, historyUsername {
 }
 
 export interface alertFilterParams extends pageOptionParams {
+  alertType?: alertTypeRead;
   disposition?: alertDispositionRead;
   dispositionUser?: userRead;
   dispositionedAfter?: Date;
@@ -128,7 +129,6 @@ export interface alertFilterParams extends pageOptionParams {
   threats?: nodeThreatRead[];
   tool?: alertToolRead;
   toolInstance?: alertToolInstanceRead;
-  type?: alertTypeRead;
   [key: string]: any;
 }
 

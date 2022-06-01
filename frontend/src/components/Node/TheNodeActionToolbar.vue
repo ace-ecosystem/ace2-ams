@@ -145,6 +145,7 @@
       const updateData = selectedStore.selected.map((uuid) => ({
         uuid: uuid,
         owner: authStore.user.username,
+        historyUsername: authStore.user.username,
       }));
 
       await nodeStore.update(updateData);

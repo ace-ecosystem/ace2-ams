@@ -121,6 +121,7 @@ export interface eventFilterParams extends pageOptionParams {
   createdAfter?: Date;
   createdBefore?: Date;
   disposition?: alertDispositionRead;
+  eventType?: eventTypeRead;
   name?: string;
   observable?: { category: observableTypeRead; value: string };
   observableTypes?: observableTypeRead[];
@@ -133,7 +134,6 @@ export interface eventFilterParams extends pageOptionParams {
   tags?: string[];
   threatActor?: nodeThreatActorRead;
   threats?: nodeThreatRead[];
-  type?: eventTypeRead;
   vector?: eventVectorRead;
   [key: string]: any;
 }

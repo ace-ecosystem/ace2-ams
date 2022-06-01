@@ -55,6 +55,7 @@ def build_read_all_query(
     disposition: Optional[str] = None,
     disposition_time_after: Optional[datetime] = None,
     disposition_time_before: Optional[datetime] = None,
+    event_type: Optional[str] = None,
     name: Optional[str] = None,
     observable: Optional[str] = None,  # type|value
     observable_types: Optional[str] = None,
@@ -72,7 +73,6 @@ def build_read_all_query(
     tags: Optional[str] = None,
     threat_actors: Optional[str] = None,
     threats: Optional[str] = None,
-    type: Optional[str] = None,
     vectors: Optional[str] = None,
 ):
     def _join_as_subquery(query: Select, subquery: Select):
@@ -153,6 +153,10 @@ def build_read_all_query(
             )
         )
         query = _join_as_subquery(query, disposition_time_before_query)
+
+    if event_type:
+        type_query = select(Event).join(EventType).where(EventType.value == event_type)
+        query = _join_as_subquery(query, type_query)
 
     if name:
         name_query = select(Event).where(Event.name.ilike(f"%{name}%"))
@@ -293,10 +297,6 @@ def build_read_all_query(
         threats_query = select(Event).where(and_(*threat_filters))
 
         query = _join_as_subquery(query, threats_query)
-
-    if type:
-        type_query = select(Event).join(EventType).where(EventType.value == type)
-        query = _join_as_subquery(query, type_query)
 
     if vectors:
         vector_filters = []

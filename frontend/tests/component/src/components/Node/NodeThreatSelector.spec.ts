@@ -136,7 +136,7 @@ describe("NodeThreatSelector", () => {
     cy.get('[data-cy="threat-types"]').click();
     cy.contains("threat type A").click();
     cy.get('[data-cy="save-threat-button"]').click();
-    cy.get("@stub-1").should("have.been.calledWith", {
+    cy.get("@stub-2").should("have.been.calledWith", {
       value: "Test threat",
       queues: ["external"],
       types: ["threat type A"],
@@ -199,7 +199,7 @@ describe("NodeThreatSelector", () => {
     cy.get('[data-cy="threat-types"]').click();
     cy.contains("threat type B").click();
     cy.get('[data-cy="save-threat-button"]').click();
-    cy.get("@stub-3").should("have.been.calledWith", "testObject1", {
+    cy.get("@stub-4").should("have.been.calledWith", "testObject1", {
       types: ["threat type A", "threat type B"],
     });
   });
@@ -219,7 +219,7 @@ describe("NodeThreatSelector", () => {
     cy.get('[data-cy="threat-types"]').click();
     cy.contains("threat type B").click();
     cy.get('[data-cy="close-edit-threat-panel-button"]').click();
-    cy.get("@stub-3").should("not.have.been.called");
+    cy.get("@stub-4").should("not.have.been.called");
   });
   it("will correctly display an error message if attempt to edit a threat's threat types fails", () => {
     cy.stub(NodeThreat, "readAll").resolves([threatA, threatB]);

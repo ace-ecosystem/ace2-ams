@@ -72,6 +72,7 @@ def get_all_events(
     disposition: Optional[str] = None,
     disposition_time_after: Optional[datetime] = None,
     disposition_time_before: Optional[datetime] = None,
+    event_type: Optional[str] = None,
     name: Optional[str] = None,
     observable: Optional[str] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
     observable_types: Optional[str] = None,
@@ -88,11 +89,11 @@ def get_all_events(
         regex=""
         "^("
         "(created_time)|"
+        "(event_type)|"
         "(name)|"
         "(owner)|"
         "(risk_level)|"
-        "(status)|"
-        "(type)|"
+        "(status)"
         ")\|"
         "("
         "(asc)|"
@@ -104,7 +105,6 @@ def get_all_events(
     tags: Optional[str] = None,
     threat_actors: Optional[str] = None,
     threats: Optional[str] = None,
-    type: Optional[str] = None,
     vectors: Optional[str] = None,
 ):
     return paginate(
@@ -119,6 +119,7 @@ def get_all_events(
             disposition=disposition,
             disposition_time_after=disposition_time_after,
             disposition_time_before=disposition_time_before,
+            event_type=event_type,
             name=name,
             observable=observable,
             observable_types=observable_types,
@@ -136,7 +137,6 @@ def get_all_events(
             tags=tags,
             threat_actors=threat_actors,
             threats=threats,
-            type=type,
             vectors=vectors,
         ),
     )

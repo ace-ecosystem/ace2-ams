@@ -61,6 +61,7 @@ def get_all_events(
     disposition: Optional[str] = None,
     disposition_time_after: Optional[datetime] = None,
     disposition_time_before: Optional[datetime] = None,
+    event_type: Optional[str] = None,
     name: Optional[str] = None,
     observable: Optional[str] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
     observable_types: Optional[str] = None,
@@ -77,11 +78,11 @@ def get_all_events(
         regex=""
         "^("
         "(created_time)|"
+        "(event_type)|"
         "(name)|"
         "(owner)|"
         "(risk_level)|"
         "(status)|"
-        "(type)|"
         ")\|"
         "("
         "(asc)|"
@@ -93,7 +94,6 @@ def get_all_events(
     tags: Optional[str] = None,
     threat_actors: Optional[str] = None,
     threats: Optional[str] = None,
-    type: Optional[str] = None,
     vectors: Optional[str] = None,
 ):
     query_params = f"?limit={limit}&offset={offset}"
@@ -124,6 +124,9 @@ def get_all_events(
 
     if disposition_time_before:
         query_params += f"&disposition_time_before={disposition_time_before}"
+
+    if event_type:
+        query_params += f"&event_type={event_type}"
 
     if name:
         query_params += f"&name={name}"
@@ -175,9 +178,6 @@ def get_all_events(
 
     if threats:
         query_params += f"&threats={threats}"
-
-    if type:
-        query_params += f"&type={type}"
 
     if vectors:
         query_params += f"&vectors={vectors}"

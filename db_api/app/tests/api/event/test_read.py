@@ -1205,6 +1205,20 @@ def test_get_filter_disposition_time_before(client, db):
     assert get.json()["items"][0]["name"] == "event1"
 
 
+def test_get_filter_event_type(client, db):
+    factory.event.create_or_read(name="event1", db=db, event_type="test_type")
+    factory.event.create_or_read(name="event2", db=db, event_type="test_type2")
+
+    # There should be 2 total events
+    get = client.get("/api/event/")
+    assert get.json()["total"] == 2
+
+    # There should only be 1 event when we filter by test_type
+    get = client.get("/api/event/?event_type=test_type")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["type"]["value"] == "test_type"
+
+
 def test_get_filter_name(client, db):
     factory.event.create_or_read(db=db, name="Test Event")
     factory.event.create_or_read(db=db, name="Some Other Event")
@@ -1648,20 +1662,6 @@ def test_get_filter_threats(client, db):
     # All the alerts should be returned if you don't specify anything for the filter
     get = client.get("/api/event/?threats=")
     assert get.json()["total"] == 3
-
-
-def test_get_filter_type(client, db):
-    factory.event.create_or_read(name="event1", db=db, event_type="test_type")
-    factory.event.create_or_read(name="event2", db=db, event_type="test_type2")
-
-    # There should be 2 total events
-    get = client.get("/api/event/")
-    assert get.json()["total"] == 2
-
-    # There should only be 1 event when we filter by test_type
-    get = client.get("/api/event/?type=test_type")
-    assert get.json()["total"] == 1
-    assert get.json()["items"][0]["type"]["value"] == "test_type"
 
 
 def test_get_filter_vectors(client, db):

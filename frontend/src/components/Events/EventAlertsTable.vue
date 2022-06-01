@@ -87,6 +87,7 @@
 
   import { Alert } from "@/services/api/alert";
   import { alertSummary } from "@/models/alert";
+  import { useAuthStore } from "@/stores/auth";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
   import { parseAlertSummary } from "@/etc/helpers";
 
@@ -104,6 +105,7 @@
     eventUuid: { type: String, required: true },
   });
 
+  const authStore = useAuthStore();
   const selectedAlertStore = useSelectedAlertStore();
 
   const alerts = ref<alertSummary[]>([]);
@@ -177,8 +179,8 @@
       const updateData = selectedAlertStore.selected.map((uuid) => ({
         uuid: uuid,
         eventUuid: null,
+        historyUsername: authStore.user.username,
       }));
-
       await Alert.update(updateData);
 
       // Reinitialize the table

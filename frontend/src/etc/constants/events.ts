@@ -31,6 +31,7 @@ export const eventPropertyTypes: Record<string, string> = {
   CREATED_BEFORE_PROPERTY: "createdBefore",
   CONTAIN_TIME_PROPERTY: "containTime",
   EVENT_TIME_PROPERTY: "eventTime",
+  EVENT_TYPE_PROPERTY: "eventType",
   ALERT_TIME_PROPERTY: "alertTime",
   OWNERSHIP_TIME_PROPERTY: "ownershipTime",
   DISPOSITION_TIME_PROPERTY: "dispositionTime",
@@ -41,7 +42,6 @@ export const eventPropertyTypes: Record<string, string> = {
   RISK_LEVEL_PROPERTY: "riskLevel",
   SOURCE_PROPERTY: "source",
   STATUS_PROPERTY: "status",
-  TYPE_PROPERTY: "type",
   VECTORS_PROPERTY: "vectors",
 };
 export const eventEventTimeProperty: propertyOption = {
@@ -190,7 +190,7 @@ export const eventStatusProperty: propertyOption = {
   valueProperty: "value",
 };
 export const eventTypeProperty: propertyOption = {
-  name: eventPropertyTypes.TYPE_PROPERTY,
+  name: eventPropertyTypes.EVENT_TYPE_PROPERTY,
   label: "Type",
   type: inputTypes.SELECT,
   store: useEventTypeStore,

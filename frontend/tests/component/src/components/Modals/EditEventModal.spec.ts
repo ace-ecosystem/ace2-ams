@@ -33,7 +33,10 @@ import { User } from "@/services/api/user";
 
 function factory(args = { stubActions: true }) {
   const initialState = {
-    modalStore: { openModals: ["EditEventModal"] },
+    modalStore: {
+      openModals: ["EditEventModal"],
+    },
+    authStore: { user: userReadFactory() },
   };
   const wrapper = mount(EditEventModal, {
     global: {
@@ -140,6 +143,7 @@ describe("EditEventModal", () => {
           preventionTools: ["Test Prevention Tool"],
           remediations: ["Test Remediation"],
           eventTime: new Date("2022-04-12T16:00:00.000Z"),
+          historyUsername: "analyst",
         },
       ])
       .as("updateEvent")
@@ -243,6 +247,7 @@ describe("EditEventModal", () => {
           preventionTools: ["Test Prevention Tool"],
           remediations: ["Test Remediation"],
           eventTime: new Date("2022-04-12T16:00:00.000Z"),
+          historyUsername: "analyst",
         },
       ])
       .as("updateEvent")

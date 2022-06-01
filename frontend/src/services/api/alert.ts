@@ -46,5 +46,8 @@ export const Alert = {
   readObservables: async (uuids: Array<UUID>): Promise<observableRead[]> =>
     await api.baseRequest(`${endpoint}observables`, "POST", { data: uuids }),
 
-  update: (data: alertUpdate[]): Promise<void> => api.update(endpoint, data),
+  update: (data: alertUpdate[]): Promise<void> => {
+    console.log("hihi?");
+    return api.update(endpoint, data);
+  },
 };

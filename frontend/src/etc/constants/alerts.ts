@@ -24,6 +24,7 @@ import { inputTypes } from "./base";
 // ** Alerts ** //
 
 export const alertPropertyTypes: Record<string, string> = {
+  ALERT_TYPE_PROPERTY: "alertType",
   DISPOSITION_PROPERTY: "disposition",
   DISPOSITION_USER_PROPERTY: "dispositionUser",
   DISPOSITIONED_AFTER_PROPERTY: "dispositionedAfter",
@@ -36,7 +37,6 @@ export const alertPropertyTypes: Record<string, string> = {
   QUEUE_PROPERTY: "queue",
   TOOL_PROPERTY: "tool",
   TOOL_INSTANCE_PROPERTY: "toolInstance",
-  TYPE_PROPERTY: "type",
 };
 
 export const alertDispositionProperty: propertyOption = {
@@ -221,7 +221,7 @@ export const alertToolInstanceProperty: propertyOption = {
 };
 
 export const alertTypeProperty: propertyOption = {
-  name: alertPropertyTypes.TYPE_PROPERTY,
+  name: alertPropertyTypes.ALERT_TYPE_PROPERTY,
   label: "Type",
   type: inputTypes.SELECT,
   store: useAlertTypeStore,

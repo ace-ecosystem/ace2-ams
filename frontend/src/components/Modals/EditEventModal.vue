@@ -129,7 +129,10 @@
       return [];
     }
     // All updateData will have the event uuid
-    const data: eventUpdate = { uuid: props.eventUuid };
+    const data: eventUpdate = {
+      uuid: props.eventUuid,
+      historyUsername: authStore.user.username,
+    };
     // Add the formatted valueds for all fields in the form
     for (const field in formFields.value) {
       if (formFields.value[field].propertyValue !== event.value[field]) {

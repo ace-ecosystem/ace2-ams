@@ -42,7 +42,7 @@ export interface queueableObjectRead {
 }
 
 export interface queueableObjectUpdate {
-  queues: string[];
+  queues?: string[];
 }
 
 export interface page {

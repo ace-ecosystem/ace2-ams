@@ -17,6 +17,7 @@ function factory(
         createCustomCypressPinia({
           stubActions: false,
           initialState: {
+            authStore: { user: userReadFactory() },
             userStore: {
               items: args.users,
             },
@@ -77,7 +78,9 @@ describe("AssignModal", () => {
   });
   it("correctly makes request to assign owner upon user selection and submit", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", owner: "analyst" }])
+      .withArgs([
+        { uuid: "uuid", owner: "analyst", historyUsername: "analyst" },
+      ])
       .as("updateAlert")
       .resolves();
     factory({ users: users, selected: ["uuid"] });
@@ -89,7 +92,9 @@ describe("AssignModal", () => {
   });
   it("correctly shows error if request to assign owner fails", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", owner: "analyst" }])
+      .withArgs([
+        { uuid: "uuid", owner: "analyst", historyUsername: "analyst" },
+      ])
       .as("updateAlert")
       .rejects(new Error("404 request failed"));
     factory({ users: users, selected: ["uuid"] });

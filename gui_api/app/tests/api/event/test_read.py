@@ -17,6 +17,7 @@ from uuid import uuid4
         ("disposition", "FALSE_POSITIVE"),
         ("disposition_time_after", datetime.now()),
         ("disposition_time_before", datetime.now()),
+        ("event_type", "test_type"),
         ("name", "test"),
         ("observable", "fqdn|test.com"),
         ("observable_types", "fqdn,ipv4"),
@@ -34,7 +35,6 @@ from uuid import uuid4
         ("tags", "tag1,tag2"),
         ("threat_actors", "actor1,actor2"),
         ("threats", "threat1,threat2"),
-        ("type", "test_type"),
         ("vectors", "vector1,vector2"),
     ],
 )

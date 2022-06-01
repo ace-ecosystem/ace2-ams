@@ -60,6 +60,10 @@ def build_read_all_query(
 
     query = select(Alert)
 
+    if alert_type:
+        type_query = select(Alert).join(AlertType).where(AlertType.value == alert_type)
+        query = _join_as_subquery(query, type_query)
+
     if disposition:
         disposition_query = select(Alert)
         if disposition.lower() == "none":
@@ -216,10 +220,6 @@ def build_read_all_query(
     if tool_instance:
         tool_instance_query = select(Alert).join(AlertToolInstance).where(AlertToolInstance.value == tool_instance)
         query = _join_as_subquery(query, tool_instance_query)
-
-    if alert_type:
-        type_query = select(Alert).join(AlertType).where(AlertType.value == alert_type)
-        query = _join_as_subquery(query, type_query)
 
     if sort:
         sort_split = sort.split("|")

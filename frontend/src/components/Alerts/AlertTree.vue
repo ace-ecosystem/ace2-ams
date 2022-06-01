@@ -3,8 +3,8 @@
     <ul class="p-tree-container">
       <li
         v-for="(i, index) of items"
-        :id="`ID-${i.treeUuid}`"
-        :key="i.treeUuid"
+        :id="`ID-${i.uuid}-${i}`"
+        :key="`${i.uuid}-${i}`"
         :class="containerClass(i)"
         :data-cy="treeItemName(i)"
       >

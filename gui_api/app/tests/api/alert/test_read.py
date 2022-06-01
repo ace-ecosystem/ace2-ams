@@ -8,6 +8,7 @@ from uuid import uuid4
 @pytest.mark.parametrize(
     "param,value",
     [
+        ("alert_type", "test_type"),
         ("disposition", "FALSE_POSITIVE"),
         ("disposition_user", "analyst"),
         ("dispositioned_after", datetime.now()),
@@ -29,7 +30,6 @@ from uuid import uuid4
         ("threats", "threat1,threat2"),
         ("tool", "test_tool"),
         ("tool_instance", "test_tool_instance"),
-        ("type", "test_type"),
     ],
 )
 def test_get_all_alerts(client_valid_access_token, requests_mock, param, value):
