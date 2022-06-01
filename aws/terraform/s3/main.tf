@@ -1,5 +1,5 @@
 ##############################################################
-### Configure Backend Remote State
+### Configure Backend Remote State and Providers
 ##############################################################
 
 terraform {
@@ -10,6 +10,11 @@ terraform {
       prefix = "idr-aws-ice2-s3-dev"
     }
   }
+}
+
+#Declare AWS provider
+provider "aws" {
+  region = "us-east-2"
 }
 
 #Get info about current session

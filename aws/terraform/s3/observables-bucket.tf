@@ -1,18 +1,22 @@
 resource "aws_s3_bucket" "file_storage_bucket" {
   bucket = "ice2-file-storage"
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_versioning" "file_storage_versioning" {
+  bucket = aws_s3_bucket.file_storage_bucket.id
+  versioning_configuration {
+    status = "Enabled"
   }
+}
 
-  aws_s3_bucket_server_side_encryption_configuration {
+resource "aws_s3_bucket_server_side_encryption_configuration" "file_storage_encryption" {
+  bucket = aws_s3_bucket.file_storage_bucket.bucket
     rule {
       apply_server_side_encryption_by_default {
         kms_master_key_id = aws_kms_key.ice2_s3.arn
         sse_algorithm     = "aws:kms"
       }
     }
-  }
 }
 
 resource "aws_s3_bucket_policy" "allow_access_from_own_account" {

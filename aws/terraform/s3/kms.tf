@@ -9,15 +9,11 @@ resource "aws_kms_alias" "ice2_s3_alias" {
   target_key_id = aws_kms_key.ice2_s3.key_id
 }
 
-data "aws_iam_role" "s3" {
-  name = "AWSServiceRoleForS3"
-}
-
 data "aws_iam_policy_document" "kms" {
   statement {
     principals {
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
       type        = "AWS"
-      identifiers = [data.aws_iam_role.s3.arn]
     }
     actions = [
       "kms:Encrypt",
@@ -30,8 +26,8 @@ data "aws_iam_policy_document" "kms" {
   }
   statement {
     principals {
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"]
       type        = "AWS"
-      identifiers = [data.aws_iam_role.s3.arn]
     }
     actions   = ["kms:CreateGrant"]
     resources = ["*"]
