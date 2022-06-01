@@ -14,9 +14,6 @@ class FileType(Analysis):
         file_type: Optional[str] = Field(default=None, description='human readable file type of the target')
         mime_type: Optional[str] = Field(default=None, description='mime type of the target')
 
-    class Requirements(Analysis.Requirements):
-        observables = File
-
     def execute(self, target):
         # get the human readable type
         process = subprocess.run(['file', '-b', '-L', target.path], capture_output=True, text=True)

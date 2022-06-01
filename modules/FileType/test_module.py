@@ -1,5 +1,5 @@
 from ace2.test import *
-import module
+from module import FileType
 
 def test_analysis():
     # create analysis to run
@@ -18,13 +18,11 @@ def test_analysis():
         },
     }
 
-    # TODO: check module run_condition
-
-    # run the analysis
-    analysis = module.run(analysis, None)
+    analysis = FileType(**analysis)
+    assert analysis.execute(analysis.target) == None
 
     # verify analysis
-    assert analysis == {
+    assert analysis.dict() == {
         'id': 1,
         'type': 'FileType',
         'target': {
@@ -37,7 +35,7 @@ def test_analysis():
                 },
             ],
         },
-        'callback': None,
+        'callback': {'method': 'execute'},
         'state': {},
         'summary': 'File Type Analysis: (ASCII text) (text/plain)',
         'details': {
