@@ -3,7 +3,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -32,61 +32,7 @@ def test_create_invalid_fields(client, key, value):
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_create_duplicate_node_uuid_value(client, db):
-    alert_tree = helpers.create_alert(db=db)
-
-    # Create a comment
-    create_json = {
-        "node_uuid": str(alert_tree.node_uuid),
-        "uuid": str(uuid.uuid4()),
-        "value": "test",
-        "username": "analyst",
-    }
-    create = client.post("/api/node/comment/", json=[create_json])
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # Make sure you cannot add the same comment value to a node
-    create_json = {
-        "node_uuid": str(alert_tree.node_uuid),
-        "uuid": str(uuid.uuid4()),
-        "value": "test",
-        "username": "analyst",
-    }
-    create = client.post("/api/node/comment/", json=[create_json])
-    assert create.status_code == status.HTTP_409_CONFLICT
-
-
-@pytest.mark.parametrize(
-    "key",
-    [
-        ("uuid"),
-    ],
-)
-def test_create_duplicate_unique_fields(client, db, key):
-    alert_tree = helpers.create_alert(db=db)
-
-    # Create a comment
-    create1_json = {
-        "node_uuid": str(alert_tree.node_uuid),
-        "uuid": str(uuid.uuid4()),
-        "value": "test",
-        "username": "analyst",
-    }
-    client.post("/api/node/comment/", json=[create1_json])
-
-    # Ensure you cannot create another comment with the same unique field value
-    create2_json = {
-        "node_uuid": str(alert_tree.node_uuid),
-        "uuid": str(uuid.uuid4()),
-        "value": "test2",
-        "username": "analyst",
-    }
-    create2_json[key] = create1_json[key]
-    create2 = client.post("/api/node/comment/", json=[create2_json])
-    assert create2.status_code == status.HTTP_409_CONFLICT
-
-
-def test_create_nonexistent_node_uuid(client, db):
+def test_create_nonexistent_node_uuid(client):
     # Create a comment
     create_json = {
         "node_uuid": str(uuid.uuid4()),
@@ -104,21 +50,21 @@ def test_create_nonexistent_node_uuid(client, db):
 
 
 def test_create_verify_history_alerts(client, db):
-    alert_tree = helpers.create_alert(db=db, history_username="analyst")
+    alert = factory.alert.create(db=db, history_username="analyst")
 
     # Add a comment to the node
     create_json = [
-        {"node_uuid": str(alert_tree.node_uuid), "value": "test", "username": "analyst"},
+        {"node_uuid": str(alert.uuid), "value": "test", "username": "analyst"},
     ]
     create = client.post("/api/node/comment/?history_username=analyst", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
-    history = client.get(f"/api/alert/{alert_tree.node_uuid}/history")
+    history = client.get(f"/api/alert/{alert.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"
-    assert history.json()["items"][1]["record_uuid"] == str(alert_tree.node_uuid)
+    assert history.json()["items"][1]["record_uuid"] == str(alert.uuid)
     assert history.json()["items"][1]["field"] == "comments"
     assert history.json()["items"][1]["diff"]["old_value"] is None
     assert history.json()["items"][1]["diff"]["new_value"] is None
@@ -128,7 +74,7 @@ def test_create_verify_history_alerts(client, db):
 
 
 def test_create_verify_history_events(client, db):
-    event = helpers.create_event(name="Test Event", db=db, history_username="analyst")
+    event = factory.event.create_or_read(name="Test Event", db=db, history_username="analyst")
 
     # Add a comment to the node
     create_json = [
@@ -152,24 +98,24 @@ def test_create_verify_history_events(client, db):
 
 
 def test_create_verify_history_observables(client, db):
-    alert_tree = helpers.create_alert(db=db)
-    observable_tree = helpers.create_observable(
-        type="test_type", value="test_value", parent_tree=alert_tree, db=db, history_username="analyst"
+    alert = factory.alert.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )
 
     # Add a comment to the node
     create_json = [
-        {"node_uuid": str(observable_tree.node_uuid), "value": "test", "username": "analyst"},
+        {"node_uuid": str(observable.uuid), "value": "test", "username": "analyst"},
     ]
     create = client.post("/api/node/comment/?history_username=analyst", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Verify the history record
-    history = client.get(f"/api/observable/{observable_tree.node_uuid}/history")
+    history = client.get(f"/api/observable/{observable.uuid}/history")
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"
-    assert history.json()["items"][1]["record_uuid"] == str(observable_tree.node_uuid)
+    assert history.json()["items"][1]["record_uuid"] == str(observable.uuid)
     assert history.json()["items"][1]["field"] == "comments"
     assert history.json()["items"][1]["diff"]["old_value"] is None
     assert history.json()["items"][1]["diff"]["new_value"] is None
@@ -179,58 +125,58 @@ def test_create_verify_history_observables(client, db):
 
 
 def test_create_multiple(client, db):
-    alert_tree1 = helpers.create_alert(db=db)
-    initial_alert1_version = alert_tree1.node.version
+    alert1 = factory.alert.create(db=db)
+    initial_alert1_version = alert1.version
 
-    alert_tree2 = helpers.create_alert(db=db)
-    initial_alert2_version = alert_tree2.node.version
+    alert2 = factory.alert.create(db=db)
+    initial_alert2_version = alert2.version
 
-    alert_tree3 = helpers.create_alert(db=db)
-    initial_alert3_version = alert_tree3.node.version
+    alert3 = factory.alert.create(db=db)
+    initial_alert3_version = alert3.version
 
-    assert alert_tree1.node.comments == []
-    assert alert_tree2.node.comments == []
-    assert alert_tree3.node.comments == []
+    assert alert1.comments == []
+    assert alert2.comments == []
+    assert alert3.comments == []
 
     # Add a comment to each node at once
     create_json = [
-        {"node_uuid": str(alert_tree1.node_uuid), "value": "test1", "username": "analyst"},
-        {"node_uuid": str(alert_tree2.node_uuid), "value": "test2", "username": "analyst"},
-        {"node_uuid": str(alert_tree3.node_uuid), "value": "test3", "username": "analyst"},
+        {"node_uuid": str(alert1.uuid), "value": "test1", "username": "analyst"},
+        {"node_uuid": str(alert2.uuid), "value": "test2", "username": "analyst"},
+        {"node_uuid": str(alert3.uuid), "value": "test3", "username": "analyst"},
     ]
     create = client.post("/api/node/comment/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
-    assert len(alert_tree1.node.comments) == 1
-    assert alert_tree1.node.comments[0].value == "test1"
-    assert alert_tree1.node.comments[0].user.username == "analyst"
-    assert alert_tree1.node.version != initial_alert1_version
+    assert len(alert1.comments) == 1
+    assert alert1.comments[0].value == "test1"
+    assert alert1.comments[0].user.username == "analyst"
+    assert alert1.version != initial_alert1_version
 
-    assert len(alert_tree2.node.comments) == 1
-    assert alert_tree2.node.comments[0].value == "test2"
-    assert alert_tree2.node.comments[0].user.username == "analyst"
-    assert alert_tree2.node.version != initial_alert2_version
+    assert len(alert2.comments) == 1
+    assert alert2.comments[0].value == "test2"
+    assert alert2.comments[0].user.username == "analyst"
+    assert alert2.version != initial_alert2_version
 
-    assert len(alert_tree3.node.comments) == 1
-    assert alert_tree3.node.comments[0].value == "test3"
-    assert alert_tree3.node.comments[0].user.username == "analyst"
-    assert alert_tree3.node.version != initial_alert3_version
+    assert len(alert3.comments) == 1
+    assert alert3.comments[0].value == "test3"
+    assert alert3.comments[0].user.username == "analyst"
+    assert alert3.version != initial_alert3_version
 
 
 def test_create_valid_required_fields(client, db):
-    alert_tree = helpers.create_alert(db=db)
-    initial_node_version = alert_tree.node.version
+    alert = factory.alert.create(db=db)
+    initial_node_version = alert.version
 
     # Create a comment
     create_json = {
-        "node_uuid": str(alert_tree.node_uuid),
+        "node_uuid": str(alert.uuid),
         "uuid": str(uuid.uuid4()),
         "value": "test",
         "username": "analyst",
     }
     create = client.post("/api/node/comment/", json=[create_json])
     assert create.status_code == status.HTTP_201_CREATED
-    assert len(alert_tree.node.comments) == 1
-    assert alert_tree.node.comments[0].value == "test"
-    assert alert_tree.node.comments[0].user.username == "analyst"
-    assert alert_tree.node.version != initial_node_version
+    assert len(alert.comments) == 1
+    assert alert.comments[0].value == "test"
+    assert alert.comments[0].user.username == "analyst"
+    assert alert.version != initial_node_version

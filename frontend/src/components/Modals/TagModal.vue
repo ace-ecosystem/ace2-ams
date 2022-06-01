@@ -37,14 +37,7 @@
 </template>
 
 <script setup lang="ts">
-  import {
-    computed,
-    defineEmits,
-    defineProps,
-    ref,
-    inject,
-    PropType,
-  } from "vue";
+  import { computed, defineEmits, defineProps, ref, PropType } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -59,6 +52,7 @@
     nodeSelectedStores,
     nodeTableStores,
   } from "@/stores/index";
+  import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
   import { useNodeTagStore } from "@/stores/nodeTag";
   import { nodeTagRead } from "@/models/nodeTag";
@@ -88,6 +82,7 @@
     tableStore = nodeTableStores[props.nodeType]();
   }
 
+  const authStore = useAuthStore();
   const modalStore = useModalStore();
   const nodeTagStore = useNodeTagStore();
 
@@ -156,6 +151,7 @@
           ...props.observable.tags.map((tag) => tag.value),
           ...formTagValues.value,
         ]),
+        historyUsername: authStore.user.username,
       });
     }
   };

@@ -8,6 +8,7 @@ from uuid import uuid4
 @pytest.mark.parametrize(
     "param,value",
     [
+        ("alert_type", "test_type"),
         ("disposition", "FALSE_POSITIVE"),
         ("disposition_user", "analyst"),
         ("dispositioned_after", datetime.now()),
@@ -29,7 +30,6 @@ from uuid import uuid4
         ("threats", "threat1,threat2"),
         ("tool", "test_tool"),
         ("tool_instance", "test_tool_instance"),
-        ("type", "test_type"),
     ],
 )
 def test_get_all_alerts(client_valid_access_token, requests_mock, param, value):
@@ -68,3 +68,29 @@ def test_get_alert_history(client_valid_access_token, requests_mock):
     assert (len(requests_mock.request_history)) == 2
     assert requests_mock.request_history[1].method == "GET"
     assert requests_mock.request_history[1].url == f"http://db-api/api/alert/{alert_uuid}/history?{params}"
+
+
+def test_get_alerts_observables(client_valid_access_token, requests_mock):
+    alert_uuid = str(uuid4())
+    requests_mock.post(
+        "http://db-api/api/alert/observables",
+        json=[
+            {
+                "type": {"uuid": str(uuid4()), "value": "test_type"},
+                "value": "value",
+                "node_type": "observable",
+                "uuid": str(uuid4()),
+                "directives": [],
+                "observable_relationships": [],
+                "tags": [],
+                "threat_actors": [],
+                "threats": [],
+            }
+        ],
+    )
+
+    client_valid_access_token.post("/api/alert/observables", json=[alert_uuid])
+
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "POST"
+    assert requests_mock.request_history[1].url == "http://db-api/api/alert/observables"

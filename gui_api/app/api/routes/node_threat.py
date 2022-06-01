@@ -25,7 +25,7 @@ def create_node_threat(
     request: Request,
     response: Response,
 ):
-    result = db_api.post(path=f"/node/threat/", payload=json.loads(node_threat.json()))
+    result = db_api.post(path="/node/threat/", payload=json.loads(node_threat.json()))
 
     response.headers["Content-Location"] = request.url_for("get_node_threat", uuid=result["uuid"])
 

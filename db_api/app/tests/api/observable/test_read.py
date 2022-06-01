@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -26,22 +26,37 @@ def test_get_nonexistent_uuid(client):
 
 
 def test_get(client, db):
-    alert_tree = helpers.create_alert(db=db)
-    observable_tree = helpers.create_observable(type="test_type", value="test_value", parent_tree=alert_tree, db=db)
+    alert = factory.alert.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db
+    )
 
-    get = client.get(f"/api/observable/{observable_tree.node.uuid}")
+    get = client.get(f"/api/observable/{observable.uuid}")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["node_type"] == "observable"
 
 
 def test_get_all(client, db):
-    alert_tree = helpers.create_alert(db=db)
-    observable_tree = helpers.create_observable(type="test_type", value="test", parent_tree=alert_tree, db=db)
-    helpers.create_observable(type="test_type", value="test2", parent_tree=alert_tree, db=db)
+    # alert
+    #  o1
+    #  o2
+    #    a
+    #      o2
 
+    alert = factory.alert.create(db=db)
+    factory.observable.create_or_read(type="test_type", value="test", parent_analysis=alert.root_analysis, db=db)
+    obs2 = factory.observable.create_or_read(
+        type="test_type", value="test2", parent_analysis=alert.root_analysis, db=db
+    )
+    analysis = factory.analysis.create_or_read(
+        analysis_module_type=factory.analysis_module_type.create_or_read(value="test_type", db=db),
+        submission=alert,
+        target=obs2,
+        db=db,
+    )
     # Adding a third observable somewhere in the alert tree with the same type+value combination is allowed,
     # but it will not result in a third entry in the observable table.
-    helpers.create_observable(type="test_type", value="test2", parent_tree=observable_tree, db=db)
+    factory.observable.create_or_read(type="test_type", value="test2", parent_analysis=analysis, db=db)
 
     # Read them back
     get = client.get("/api/observable/")
@@ -56,39 +71,30 @@ def test_get_all_empty(client):
 
 
 def test_observable_relationships(client, db):
-    # Create some nodes with relationships
-    #
     # alert
-    #   o
-    #     analysis
-    #       o1
-    #       o2
-    #       o3 - IS_HASH_OF o1, IS_EQUAL_TO o2, BLAH analysis
-    alert_tree = helpers.create_alert(db=db)
-    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
-    analysis_tree = helpers.create_analysis(db=db, parent_tree=observable_tree, parent_observable=observable_tree.node)
-    observable_tree1 = helpers.create_observable(type="test_type", value="test_value", parent_tree=analysis_tree, db=db)
-    observable_tree2 = helpers.create_observable(
-        type="test_type", value="test_value2", parent_tree=analysis_tree, db=db
-    )
-    observable_tree3 = helpers.create_observable(
-        type="test_type", value="test_value3", parent_tree=analysis_tree, db=db
-    )
-    helpers.create_node_relationship(
-        node=observable_tree3.node, related_node=observable_tree1.node, type="IS_HASH_OF", db=db
-    )
-    helpers.create_node_relationship(
-        node=observable_tree3.node, related_node=observable_tree2.node, type="IS_EQUAL_TO", db=db
-    )
-    helpers.create_node_relationship(node=observable_tree3.node, related_node=analysis_tree.node, type="BLAH", db=db)
+    #   o1
+    #   o2
+    #   o3 - IS_HASH_OF o1, IS_EQUAL_TO o2, BLAH analysis
 
-    # The o2 observable has three relationships but only two observable relationship. The observable relationships
-    # should be sorted by the related observable's type then value.
-    get = client.get(f"/api/observable/{observable_tree3.node_uuid}")
+    alert = factory.alert.create(db=db)
+    obs1 = factory.observable.create_or_read(
+        type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db
+    )
+    obs2 = factory.observable.create_or_read(
+        type="test_type", value="test_value2", parent_analysis=alert.root_analysis, db=db
+    )
+    obs3 = factory.observable.create_or_read(
+        type="test_type", value="test_value3", parent_analysis=alert.root_analysis, db=db
+    )
+    factory.node_relationship.create_or_read(node=obs3, related_node=obs1, type="IS_HASH_OF", db=db)
+    factory.node_relationship.create_or_read(node=obs3, related_node=obs2, type="IS_EQUAL_TO", db=db)
+
+    # The observable relationships should be sorted by the related observable's type then value.
+    get = client.get(f"/api/observable/{obs3.uuid}")
     assert get.status_code == status.HTTP_200_OK
-    assert len(observable_tree3.node.relationships) == 3
+    assert len(obs3.relationships) == 2
     assert len(get.json()["observable_relationships"]) == 2
     assert get.json()["observable_relationships"][0]["type"]["value"] == "IS_HASH_OF"
-    assert get.json()["observable_relationships"][0]["related_node"]["uuid"] == str(observable_tree1.node_uuid)
+    assert get.json()["observable_relationships"][0]["related_node"]["uuid"] == str(obs1.uuid)
     assert get.json()["observable_relationships"][1]["type"]["value"] == "IS_EQUAL_TO"
-    assert get.json()["observable_relationships"][1]["related_node"]["uuid"] == str(observable_tree2.node_uuid)
+    assert get.json()["observable_relationships"][1]["related_node"]["uuid"] == str(obs2.uuid)

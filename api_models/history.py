@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, Json, UUID4
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from api_models import type_str
 from api_models.alert import AlertRead
@@ -16,11 +16,11 @@ class Diff(BaseModel):
 
     new_value: Optional[Union[type_str, bool]] = Field(description="The string value of the field after to the action")
 
-    added_to_list: List[type_str] = Field(
+    added_to_list: list[type_str] = Field(
         description="A list of strings that were added to the field", default_factory=list
     )
 
-    removed_from_list: List[type_str] = Field(
+    removed_from_list: list[type_str] = Field(
         description="A list of strings that were removed from the field", default_factory=list
     )
 

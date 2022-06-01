@@ -6,6 +6,7 @@ import {
   observableTreeRead,
 } from "@/models/observable";
 import { ObservableInstance } from "@/services/api/observable";
+import { useAuthStore } from "@/stores/auth";
 import RemoveTagModalVue from "@/components/Modals/RemoveTagModal.vue";
 
 export const enableDetection: observableActionCommand = {
@@ -15,7 +16,11 @@ export const enableDetection: observableActionCommand = {
   type: "command",
   reloadPage: true,
   command: async (obs: observableTreeRead) => {
-    return await ObservableInstance.update(obs.uuid, { forDetection: true });
+    const authStore = useAuthStore();
+    return await ObservableInstance.update(obs.uuid, {
+      forDetection: true,
+      historyUsername: authStore.user.username,
+    });
   },
   requirements: (obs: observableTreeRead) => !obs.forDetection,
 };
@@ -27,7 +32,11 @@ export const disableDetection: observableActionCommand = {
   type: "command",
   reloadPage: true,
   command: async (obs: observableTreeRead) => {
-    return await ObservableInstance.update(obs.uuid, { forDetection: false });
+    const authStore = useAuthStore();
+    return await ObservableInstance.update(obs.uuid, {
+      forDetection: false,
+      historyUsername: authStore.user.username,
+    });
   },
   requirements: (obs: observableTreeRead) => obs.forDetection,
 };

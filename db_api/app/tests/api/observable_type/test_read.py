@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -27,8 +27,8 @@ def test_get_nonexistent_uuid(client):
 
 def test_get_all(client, db):
     # Create some objects
-    helpers.create_observable_type(value="test_type", db=db)
-    helpers.create_observable_type(value="test_type2", db=db)
+    factory.observable_type.create_or_read(value="test", db=db)
+    factory.observable_type.create_or_read(value="test2", db=db)
 
     # Read them back
     get = client.get("/api/observable/type/")

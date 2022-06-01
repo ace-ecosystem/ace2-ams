@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import select
 from uuid import UUID
 
 from api.routes import helpers
@@ -13,6 +12,7 @@ from api_models.alert_disposition import (
 from db import crud
 from db.database import get_db
 from db.schemas.alert_disposition import AlertDisposition
+from exceptions.db import UuidNotFoundInDatabase
 
 
 router = APIRouter(
@@ -32,7 +32,8 @@ def create_disposition(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    obj: AlertDisposition = crud.create(obj=create, db_table=AlertDisposition, db=db)
+    obj = crud.alert_disposition.create_or_read(model=create, db=db)
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_disposition", uuid=obj.uuid)
 
@@ -46,11 +47,14 @@ helpers.api_route_create(router, create_disposition)
 
 
 def get_all_dispositions(db: Session = Depends(get_db)):
-    return paginate(db, select(AlertDisposition).order_by(AlertDisposition.rank))
+    return paginate(conn=db, query=crud.helpers.build_read_all_query(AlertDisposition).order_by(AlertDisposition.rank))
 
 
 def get_disposition(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read(uuid=uuid, db_table=AlertDisposition, db=db)
+    try:
+        return crud.alert_disposition.read_by_uuid(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 helpers.api_route_read_all(router, get_all_dispositions, AlertDispositionRead)
@@ -69,7 +73,15 @@ def update_disposition(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    crud.update(uuid=uuid, obj=disposition, db_table=AlertDisposition, db=db)
+    try:
+        if not crud.helpers.update(uuid=uuid, update_model=disposition, db_table=AlertDisposition, db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update alert disposition {uuid}"
+            )
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_disposition", uuid=uuid)
 
@@ -83,7 +95,15 @@ helpers.api_route_update(router, update_disposition)
 
 
 def delete_disposition(uuid: UUID, db: Session = Depends(get_db)):
-    crud.delete(uuid=uuid, db_table=AlertDisposition, db=db)
+    try:
+        if not crud.helpers.delete(uuid=uuid, db_table=AlertDisposition, db=db):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete alert disposition {uuid}"
+            )
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+    db.commit()
 
 
 helpers.api_route_delete(router, delete_disposition)

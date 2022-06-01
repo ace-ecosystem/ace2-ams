@@ -48,6 +48,7 @@
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
 
+  import { useAuthStore } from "@/stores/auth";
   import { nodeSelectedStores, nodeStores } from "@/stores/index";
   import { useModalStore } from "@/stores/modal";
   import { useUserStore } from "@/stores/user";
@@ -60,6 +61,7 @@
 
   const nodeType = inject("nodeType") as "events" | "alerts";
 
+  const authStore = useAuthStore();
   const selectedStore = nodeSelectedStores[nodeType]();
   const nodeStore = nodeStores[nodeType]();
   const modalStore = useModalStore();
@@ -76,6 +78,7 @@
       const updateData = selectedStore.selected.map((uuid) => ({
         uuid: uuid,
         owner: selectedUser.value.username,
+        historyUsername: authStore.user.username,
       }));
 
       await nodeStore.update(updateData);

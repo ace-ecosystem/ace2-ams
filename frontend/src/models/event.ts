@@ -1,4 +1,4 @@
-import { pageOptionParams, UUID } from "./base";
+import { historyUsername, pageOptionParams, UUID } from "./base";
 import { alertDispositionRead } from "./alertDisposition";
 import { eventPreventionToolRead } from "./eventPreventionTool";
 import { eventRemediationRead } from "./eventRemediation";
@@ -37,7 +37,7 @@ export interface eventSummary {
   [key: string]: unknown;
 }
 
-export interface eventCreate extends nodeCreate {
+export interface eventCreate extends nodeCreate, historyUsername {
   alertTime?: Date;
   containTime?: Date;
   dispositionTime?: Date;
@@ -94,7 +94,7 @@ export interface eventReadPage extends nodeReadPage {
   items: eventRead[];
 }
 
-export interface eventUpdate extends nodeUpdate {
+export interface eventUpdate extends nodeUpdate, historyUsername {
   alertTime?: Date | null;
   containTime?: Date | null;
   dispositionTime?: Date | null;
@@ -121,6 +121,7 @@ export interface eventFilterParams extends pageOptionParams {
   createdAfter?: Date;
   createdBefore?: Date;
   disposition?: alertDispositionRead;
+  eventType?: eventTypeRead;
   name?: string;
   observable?: { category: observableTypeRead; value: string };
   observableTypes?: observableTypeRead[];
@@ -133,7 +134,6 @@ export interface eventFilterParams extends pageOptionParams {
   tags?: string[];
   threatActor?: nodeThreatActorRead;
   threats?: nodeThreatRead[];
-  type?: eventTypeRead;
   vector?: eventVectorRead;
   [key: string]: any;
 }

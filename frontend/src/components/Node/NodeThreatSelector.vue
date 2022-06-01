@@ -101,11 +101,13 @@
   import Toast from "primevue/toast";
   import { useToast } from "primevue/usetoast";
 
+  import { useAuthStore } from "@/stores/auth";
   import { useNodeThreatStore } from "@/stores/nodeThreat";
   import { useNodeThreatTypeStore } from "@/stores/nodeThreatType";
   import { nodeThreatTypeRead } from "@/models/nodeThreatType";
   import { nodeThreatRead } from "@/models/nodeThreat";
 
+  const authStore = useAuthStore();
   const nodeThreatStore = useNodeThreatStore();
   const nodeThreatTypeStore = useNodeThreatTypeStore();
   const toast = useToast();

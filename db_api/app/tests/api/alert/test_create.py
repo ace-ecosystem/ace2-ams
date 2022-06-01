@@ -4,11 +4,8 @@ import uuid
 from fastapi import status
 
 from db import crud
-from db.schemas.node_tree import NodeTree
-from db.schemas.observable import Observable
-
+from tests import factory
 from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
-from tests import helpers
 
 
 #
@@ -60,8 +57,9 @@ def test_create_invalid_fields(client, key, value):
         "queue": "test_queue",
         "observables": [{"type": "o_type", "value": "o_value"}],
         "type": "test_type",
+        key: value,
     }
-    create_json[key] = value
+
     create = client.post("/api/alert/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert key in create.text
@@ -80,53 +78,20 @@ def test_create_invalid_node_fields(client, key, values):
         create = client.post(
             "/api/alert/",
             json={
-                key: value,
                 "name": "test alert",
                 "queue": "test_queue",
                 "observables": [{"type": "o_type", "value": "o_value"}],
                 "type": "test_type",
+                key: value,
             },
         )
         assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         assert key in create.json()["detail"][0]["loc"]
 
 
-@pytest.mark.parametrize(
-    "key",
-    [
-        ("uuid"),
-    ],
-)
-def test_create_duplicate_unique_fields(client, db, key):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_alert_type(value="test_type", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
-
-    # Create an object
-    create1_json = {
-        "uuid": str(uuid.uuid4()),
-        "name": "test alert",
-        "queue": "test_queue",
-        "observables": [{"type": "o_type", "value": "o_value"}],
-        "type": "test_type",
-    }
-    client.post("/api/alert/", json=create1_json)
-
-    # Ensure you cannot create another object with the same unique field value
-    create2_json = {
-        "name": "test alert",
-        "queue": "test_queue",
-        "observables": [{"type": "o_type", "value": "o_value"}],
-        "type": "test_type",
-    }
-    create2_json[key] = create1_json[key]
-    create2 = client.post("/api/alert/", json=create2_json)
-    assert create2.status_code == status.HTTP_409_CONFLICT
-
-
 def test_create_nonexistent_observable_type(client, db):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_alert_type(value="test_type", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.alert_type.create_or_read(value="test_type", db=db)
 
     # Create an object
     create = client.post(
@@ -143,9 +108,9 @@ def test_create_nonexistent_observable_type(client, db):
 
 
 def test_create_nonexistent_owner(client, db):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_alert_type(value="test_type", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.alert_type.create_or_read(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="o_type", db=db)
 
     # Create an object
     create = client.post(
@@ -163,8 +128,8 @@ def test_create_nonexistent_owner(client, db):
 
 
 def test_create_nonexistent_queue(client, db):
-    helpers.create_alert_type(value="test_type", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
+    factory.alert_type.create_or_read(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="o_type", db=db)
 
     # Create an object
     create = client.post(
@@ -181,9 +146,9 @@ def test_create_nonexistent_queue(client, db):
 
 
 def test_create_nonexistent_tool(client, db):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_alert_type(value="test_type", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.alert_type.create_or_read(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="o_type", db=db)
 
     # Create an object
     create = client.post(
@@ -201,9 +166,9 @@ def test_create_nonexistent_tool(client, db):
 
 
 def test_create_nonexistent_tool_instance(client, db):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_alert_type(value="test_type", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.alert_type.create_or_read(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="o_type", db=db)
 
     # Create an object
     create = client.post(
@@ -221,8 +186,8 @@ def test_create_nonexistent_tool_instance(client, db):
 
 
 def test_create_nonexistent_type(client, db):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.observable_type.create_or_read(value="o_type", db=db)
 
     # Create an object
     create = client.post(
@@ -243,9 +208,9 @@ def test_create_nonexistent_type(client, db):
     [("tags"), ("threat_actors"), ("threats")],
 )
 def test_create_nonexistent_node_fields(client, db, key):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_alert_type(value="test_type", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.alert_type.create_or_read(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="o_type", db=db)
 
     create = client.post(
         "/api/alert/",
@@ -267,19 +232,20 @@ def test_create_nonexistent_node_fields(client, db, key):
 
 
 def test_create_verify_history(client, db):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_alert_type(value="test_type", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.alert_type.create_or_read(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="o_type", db=db)
 
     alert_uuid = str(uuid.uuid4())
     create = client.post(
-        "/api/alert/?history_username=analyst",
+        "/api/alert/",
         json={
             "uuid": alert_uuid,
             "name": "test alert",
             "queue": "test_queue",
-            "observables": [{"type": "o_type", "value": "o_value"}],
+            "observables": [{"type": "o_type", "value": "o_value", "history_username": "analyst"}],
             "type": "test_type",
+            "history_username": "analyst",
         },
     )
     assert create.status_code == status.HTTP_201_CREATED
@@ -294,7 +260,7 @@ def test_create_verify_history(client, db):
     assert history.json()["items"][0]["diff"] is None
     assert history.json()["items"][0]["snapshot"]["name"] == "test alert"
 
-    db_observable = crud.read_observable(type="o_type", value="o_value", db=db)
+    db_observable = crud.observable.read_by_type_value(type="o_type", value="o_value", db=db)
     history = client.get(f"/api/observable/{db_observable.uuid}/history")
     assert history.json()["total"] == 1
     assert history.json()["items"][0]["action"] == "CREATE"
@@ -321,9 +287,9 @@ def test_create_verify_history(client, db):
     ],
 )
 def test_create_valid_optional_fields(client, db, key, value):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_alert_type(value="test_type", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.alert_type.create_or_read(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="o_type", db=db)
 
     # Create the alert
     create = client.post(
@@ -349,12 +315,12 @@ def test_create_valid_optional_fields(client, db, key, value):
 
 
 def test_create_valid_owner(client, db):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_alert_type(value="test_type", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.alert_type.create_or_read(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="o_type", db=db)
 
     # Create a user
-    helpers.create_user(username="johndoe", db=db)
+    factory.user.create_or_read(username="johndoe", db=db)
 
     # Use the user to create a new alert
     create = client.post(
@@ -375,12 +341,12 @@ def test_create_valid_owner(client, db):
 
 
 def test_create_valid_tool(client, db):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_alert_type(value="test_type", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.alert_type.create_or_read(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="o_type", db=db)
 
     # Create an alert tool
-    helpers.create_alert_tool(value="test_tool", db=db)
+    factory.alert_tool.create_or_read(value="test_tool", db=db)
 
     # Use the tool to create a new alert
     create = client.post(
@@ -401,12 +367,12 @@ def test_create_valid_tool(client, db):
 
 
 def test_create_valid_tool_instance(client, db):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_alert_type(value="test_type", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.alert_type.create_or_read(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="o_type", db=db)
 
     # Create an alert tool instance
-    helpers.create_alert_tool_instance(value="test_tool_instance", db=db)
+    factory.alert_tool_instance.create_or_read(value="test_tool_instance", db=db)
 
     # Use the tool instance to create a new alert
     create = client.post(
@@ -427,9 +393,9 @@ def test_create_valid_tool_instance(client, db):
 
 
 def test_create_valid_required_fields(client, db):
-    helpers.create_queue(value="test_queue", db=db)
-    helpers.create_alert_type(value="test_type", db=db)
-    helpers.create_observable_type(value="o_type", db=db)
+    factory.queue.create_or_read(value="test_queue", db=db)
+    factory.alert_type.create_or_read(value="test_type", db=db)
+    factory.observable_type.create_or_read(value="o_type", db=db)
 
     # Create the alert
     create = client.post(
@@ -450,22 +416,22 @@ def test_create_valid_required_fields(client, db):
     assert get.json()["type"]["value"] == "test_type"
 
     # There should also be 1 observable plus the alert in the tree
-    node_tree = db.query(NodeTree).all()
-    assert len(node_tree) == 2
-    node_tree_observable = next(n for n in node_tree if str(n.node_uuid) != get.json()["uuid"])
-    assert str(node_tree_observable.root_node_uuid) == get.json()["uuid"]
+    # node_tree = db.query(NodeTree).all()
+    # assert len(node_tree) == 2
+    # node_tree_observable = next(n for n in node_tree if str(n.node_uuid) != get.json()["uuid"])
+    # assert str(node_tree_observable.root_node_uuid) == get.json()["uuid"]
 
-    observable = db.query(Observable).where(Observable.uuid == node_tree_observable.node_uuid).one()
-    assert observable.type.value == "o_type"
-    assert observable.value == "o_value"
+    # observable = db.query(Observable).where(Observable.uuid == node_tree_observable.node_uuid).one()
+    # assert observable.type.value == "o_type"
+    # assert observable.value == "o_value"
 
 
 @pytest.mark.parametrize(
     "key,value_lists,helper_create_func",
     [
-        ("tags", VALID_LIST_STRING_VALUES, helpers.create_node_tag),
-        ("threat_actors", VALID_LIST_STRING_VALUES, helpers.create_node_threat_actor),
-        ("threats", VALID_LIST_STRING_VALUES, helpers.create_node_threat),
+        ("tags", VALID_LIST_STRING_VALUES, factory.node_tag.create_or_read),
+        ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
+        ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
     ],
 )
 def test_create_valid_node_fields(client, db, key, value_lists, helper_create_func):
@@ -473,9 +439,9 @@ def test_create_valid_node_fields(client, db, key, value_lists, helper_create_fu
         for value in value_list:
             helper_create_func(value=value, db=db)
 
-        helpers.create_queue(value="test_queue", db=db)
-        helpers.create_alert_type(value="test_type", db=db)
-        helpers.create_observable_type(value="o_type", db=db)
+        factory.queue.create_or_read(value="test_queue", db=db)
+        factory.alert_type.create_or_read(value="test_type", db=db)
+        factory.observable_type.create_or_read(value="o_type", db=db)
 
         create = client.post(
             "/api/alert/",

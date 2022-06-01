@@ -14,7 +14,7 @@ import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
 import { createTestingPinia } from "@pinia/testing";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import { genericObjectRead } from "@/models/base";
+import { genericQueueableObjectRead } from "@/models/base";
 
 createTestingPinia({ createSpy: vi.fn });
 
@@ -248,8 +248,8 @@ describe("formatNodeFiltersForAPI", () => {
     ],
     tags: ["tagA", "tagB"],
     threats: [
-      { value: "threatA", description: null, types: [], uuid: "1" },
-      { value: "threatB", description: null, types: [], uuid: "2" },
+      { value: "threatA", description: null, types: [], uuid: "1", queues: [] },
+      { value: "threatB", description: null, types: [], uuid: "2", queues: [] },
     ],
     observable: {
       category: { value: "test", description: null, uuid: "1" },
@@ -306,15 +306,14 @@ describe("formatNodeFiltersForAPI", () => {
 });
 
 describe("groupItemsByQueue", () => {
-  it("correctly returns an object of items grouped by their 'queues' property, skipping any without it", () => {
+  it("correctly returns an object of items grouped by their 'queues' property", () => {
     const queueA = genericObjectReadFactory({ value: "A" });
     const queueB = genericObjectReadFactory({ value: "B" });
     const queueC = genericObjectReadFactory({ value: "C" });
-    const testData: genericObjectRead[] = [
+    const testData: genericQueueableObjectRead[] = [
       { value: "1", queues: [queueA, queueB], uuid: "1", description: null },
       { value: "2", queues: [queueB], uuid: "1", description: null },
       { value: "3", queues: [queueA, queueC], uuid: "1", description: null },
-      { value: "4", uuid: "1", description: null },
       { value: "5", queues: [queueA], uuid: "1", description: null },
       { value: "6", queues: [queueB], uuid: "1", description: null },
       { value: "7", queues: [queueB, queueC], uuid: "1", description: null },

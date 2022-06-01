@@ -2,7 +2,7 @@ import pytest
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -24,7 +24,7 @@ def test_auth_invalid(client, username, password):
 
 
 def test_disabled_user(client, db):
-    user = helpers.create_user(username="johndoe", password="abcd1234", db=db)
+    user = factory.user.create_or_read(username="johndoe", password="abcd1234", db=db)
 
     # Attempt to authenticate
     auth = client.post("/api/auth", json={"username": "johndoe", "password": "abcd1234", "new_refresh_token": "asdf"})

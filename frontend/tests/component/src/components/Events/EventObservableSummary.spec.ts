@@ -1,5 +1,4 @@
 import { mount } from "@cypress/vue";
-import { createPinia } from "pinia";
 
 import PrimeVue from "primevue/config";
 
@@ -10,7 +9,9 @@ import { Event } from "@/services/api/event";
 import { observableSummary } from "@/models/eventSummaries";
 import { observableReadFactory } from "@mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { userReadFactory } from "@mocks/user";
 import { ObservableInstance } from "@/services/api/observable";
+import { createCustomCypressPinia } from "@tests/cypressHelpers";
 
 const props = {
   eventUuid: "uuid",
@@ -19,7 +20,17 @@ const props = {
 function factory() {
   return mount(EventObservableSummary, {
     global: {
-      plugins: [PrimeVue, createPinia(), router],
+      plugins: [
+        PrimeVue,
+        createCustomCypressPinia({
+          initialState: {
+            authStore: {
+              user: userReadFactory(),
+            },
+          },
+        }),
+        router,
+      ],
       provide: { config: testConfiguration },
     },
     propsData: props,
@@ -294,6 +305,7 @@ describe("EventObservableSummary", () => {
     updateStub
       .withArgs("ObservableA", {
         forDetection: true,
+        historyUsername: "analyst",
       })
       .as("updateObservableA")
       .resolves();
@@ -301,6 +313,7 @@ describe("EventObservableSummary", () => {
     updateStub
       .withArgs("ObservableB", {
         forDetection: false,
+        historyUsername: "analyst",
       })
       .as("updateObservableB")
       .resolves();
@@ -308,6 +321,7 @@ describe("EventObservableSummary", () => {
     updateStub
       .withArgs("ObservableC", {
         forDetection: true,
+        historyUsername: "analyst",
       })
       .as("updateObservableC")
       .resolves();

@@ -3,14 +3,23 @@ import {
   genericObjectRead,
   genericObjectReadPage,
   genericObjectUpdate,
+  queueableObjectCreate,
+  queueableObjectRead,
+  queueableObjectUpdate,
 } from "./base";
 
-export type nodeThreatActorCreate = genericObjectCreate;
+export interface nodeThreatActorCreate
+  extends genericObjectCreate,
+    queueableObjectCreate {}
 
-export type nodeThreatActorRead = genericObjectRead;
+export interface nodeThreatActorRead
+  extends genericObjectRead,
+    queueableObjectRead {}
 
 export interface nodeThreatActorReadPage extends genericObjectReadPage {
   items: nodeThreatActorRead[];
 }
 
-export type nodeThreatActorUpdate = genericObjectUpdate;
+export interface nodeThreatActorUpdate
+  extends genericObjectUpdate,
+    queueableObjectUpdate {}

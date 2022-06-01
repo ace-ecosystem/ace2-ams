@@ -90,12 +90,12 @@ class Event(Node, HasHistory):
 
     __mapper_args__ = {"polymorphic_identity": "event", "polymorphic_load": "inline"}
 
-    def serialize_for_node_tree(self) -> EventRead:
+    def convert_to_pydantic(self) -> EventRead:
         return EventRead(**self.__dict__)
 
     @property
     def history_snapshot(self):
-        return json.loads(EventRead(**self.__dict__).json())
+        return json.loads(self.convert_to_pydantic().json())
 
     @property
     def auto_alert_time(self) -> Optional[datetime]:

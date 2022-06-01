@@ -238,7 +238,7 @@ describe("TheAlertsTable.vue", () => {
   });
 
   it("correctly fetches and displays observables when alert row is expanded and hides when collapsed", () => {
-    cy.intercept("POST", "/api/node/tree/observable").as("getAlertObservables");
+    cy.intercept("POST", "/api/alert/observables").as("getAlertObservables");
 
     // Find the toggle button to expand and click on the first alert
     cy.get(".p-row-toggler").eq(0).click();
@@ -262,7 +262,7 @@ describe("TheAlertsTable.vue", () => {
     cy.get("td ul").should("not.exist");
   });
   it("correctly filters by observable when an observable in the dropdown is clicked", () => {
-    cy.intercept("POST", "/api/node/tree/observable").as("getAlertObservables");
+    cy.intercept("POST", "/api/alert/observables").as("getAlertObservables");
     cy.intercept({
       method: "GET",
       path: "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&observable=o_type0%7Co_value0",
@@ -282,7 +282,7 @@ describe("TheAlertsTable.vue", () => {
     cy.get(".p-checkbox-box").should("have.length", 7);
   });
   it("correctly filters by tag when an observable tag in the dropdown is clicked", () => {
-    cy.intercept("POST", "/api/node/tree/observable").as("getAlertObservables");
+    cy.intercept("POST", "/api/alert/observables").as("getAlertObservables");
     cy.intercept({
       method: "GET",
       path: "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=tag0",

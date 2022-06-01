@@ -1,26 +1,27 @@
 import { UUID } from "./base";
-import { nodeMetadata, nodeRead } from "./node";
 import {
   analysisModuleTypeNodeTreeRead,
   analysisModuleTypeRead,
 } from "./analysisModuleType";
 import { observableRead, observableTreeRead } from "./observable";
 
-export interface analysisRead extends nodeRead {
+export interface analysisRead {
   analysisModuleType: analysisModuleTypeRead;
   cachedUntil: Date;
   childObservables: observableRead[];
   details: Record<string, unknown> | null;
   errorMessage: string | null;
+  nodeType: string;
+  runTime: Date;
   stackTrace: string | null;
   summary: string | null;
+  uuid: UUID;
 }
 
-export interface analysisTreeRead extends nodeRead {
+export interface analysisTreeRead {
   analysisModuleType: analysisModuleTypeNodeTreeRead;
   children: observableTreeRead[];
   firstAppearance?: boolean;
-  nodeMetadata?: nodeMetadata;
-  parentTreeUuid: UUID | null;
-  treeUuid: UUID;
+  nodeType: string;
+  uuid: UUID;
 }

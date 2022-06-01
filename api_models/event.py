@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import Field, UUID4
-from typing import List, Optional
+from typing import Optional
 from uuid import uuid4
 
 from api_models import type_str, validators
@@ -44,7 +44,7 @@ class EventBase(NodeBase):
         description="The earliest time an analyst took ownership over an alert in the event"
     )
 
-    prevention_tools: List[type_str] = Field(
+    prevention_tools: list[type_str] = Field(
         default_factory=list, description="A list of prevention tools involved in the event"
     )
 
@@ -54,7 +54,7 @@ class EventBase(NodeBase):
         description="The earliest time that any remediation was performed on the attack represented by the event"
     )
 
-    remediations: List[type_str] = Field(
+    remediations: list[type_str] = Field(
         default_factory=list,
         description="A list of remediations performed to clean up the attack represented by the event",
     )
@@ -67,25 +67,31 @@ class EventBase(NodeBase):
 
     type: Optional[type_str] = Field(description="The type assigned to the event")
 
-    vectors: List[type_str] = Field(default_factory=list, description="A list of vectors assigned to the event")
+    vectors: list[type_str] = Field(default_factory=list, description="A list of vectors assigned to the event")
 
 
 class EventCreate(NodeCreate, EventBase):
-    tags: List[type_str] = Field(default_factory=list, description="A list of tags to add to the event")
+    creation_time: datetime = Field(default_factory=datetime.utcnow, description="The time the event was created")
 
-    threat_actors: List[type_str] = Field(
+    history_username: Optional[type_str] = Field(
+        description="If given, an event history record will be created and associated with the user"
+    )
+
+    tags: list[type_str] = Field(default_factory=list, description="A list of tags to add to the event")
+
+    threat_actors: list[type_str] = Field(
         default_factory=list, description="A list of threat actors to add to the event"
     )
 
-    threats: List[type_str] = Field(default_factory=list, description="A list of threats to add to the event")
+    threats: list[type_str] = Field(default_factory=list, description="A list of threats to add to the event")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the event")
 
 
 class EventRead(NodeRead, EventBase):
-    alert_uuids: List[UUID4] = Field(default_factory=list, description="A list of alert UUIDs contained in the event")
+    alert_uuids: list[UUID4] = Field(default_factory=list, description="A list of alert UUIDs contained in the event")
 
-    analysis_types: List[str] = Field(
+    analysis_types: list[str] = Field(
         description="A deduplicated list of analysis module types that exist within the event", default_factory=list
     )
 
@@ -105,7 +111,7 @@ class EventRead(NodeRead, EventBase):
         description="The automatically calculated earliest time an analyst took ownership of one of the alerts"
     )
 
-    comments: List[NodeCommentRead] = Field(description="A list of comments added to the event", default_factory=list)
+    comments: list[NodeCommentRead] = Field(description="A list of comments added to the event", default_factory=list)
 
     creation_time: datetime = Field(description="The time the event was created")
 
@@ -115,13 +121,13 @@ class EventRead(NodeRead, EventBase):
 
     owner: Optional[UserRead] = Field(description="The user who has taken ownership of this event")
 
-    prevention_tools: List[EventPreventionToolRead] = Field(
+    prevention_tools: list[EventPreventionToolRead] = Field(
         description="A list of prevention tools involved in the event"
     )
 
     queue: QueueRead = Field(description="The queue containing this event")
 
-    remediations: List[EventRemediationRead] = Field(
+    remediations: list[EventRemediationRead] = Field(
         description="A list of remediations performed to clean up the attack represented by the event"
     )
 
@@ -131,17 +137,17 @@ class EventRead(NodeRead, EventBase):
 
     status: EventStatusRead = Field(description="The status assigned to the event")
 
-    tags: List[NodeTagRead] = Field(description="A list of tags added to the event")
+    tags: list[NodeTagRead] = Field(description="A list of tags added to the event")
 
-    threat_actors: List[NodeThreatActorRead] = Field(description="A list of threat actors added to the event")
+    threat_actors: list[NodeThreatActorRead] = Field(description="A list of threat actors added to the event")
 
-    threats: List[NodeThreatRead] = Field(description="A list of threats added to the event")
+    threats: list[NodeThreatRead] = Field(description="A list of threats added to the event")
 
     type: Optional[EventTypeRead] = Field(description="The type assigned to the event")
 
     uuid: UUID4 = Field(description="The UUID of the event")
 
-    vectors: List[EventVectorRead] = Field(description="A list of vectors assigned to the event")
+    vectors: list[EventVectorRead] = Field(description="A list of vectors assigned to the event")
 
     _convert_association_list: classmethod = validators.convert_association_list("alert_uuids")
 
@@ -150,17 +156,21 @@ class EventRead(NodeRead, EventBase):
 
 
 class EventUpdate(NodeUpdate, EventBase):
+    history_username: Optional[type_str] = Field(
+        description="If given, an event history record will be created and associated with the user"
+    )
+
     name: Optional[type_str] = Field(description="The name of the event")
 
     queue: Optional[type_str] = Field(description="The event queue containing this event")
 
     status: Optional[type_str] = Field(description="The status assigned to the event")
 
-    tags: Optional[List[type_str]] = Field(description="A list of tags to add to the event")
+    tags: Optional[list[type_str]] = Field(description="A list of tags to add to the event")
 
-    threat_actors: Optional[List[type_str]] = Field(description="A list of threat actors to add to the event")
+    threat_actors: Optional[list[type_str]] = Field(description="A list of threat actors to add to the event")
 
-    threats: Optional[List[type_str]] = Field(description="A list of threats to add to the event")
+    threats: Optional[list[type_str]] = Field(description="A list of threats to add to the event")
 
     _prevent_none: classmethod = validators.prevent_none("name", "queue", "status", "tags", "threat_actors", "threats")
 

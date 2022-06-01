@@ -1,4 +1,5 @@
 from db.schemas.alert import Alert
+from db.schemas.alert_analysis_mapping import alert_analysis_mapping
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.alert_tool import AlertTool
 from db.schemas.alert_tool_instance import AlertToolInstance
@@ -44,7 +45,6 @@ from db.schemas.node_threat_node_threat_type_mapping import node_threat_node_thr
 from db.schemas.node_threat_queue_mapping import node_threat_queue_mapping
 from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.node_threat_type_queue_mapping import node_threat_type_queue_mapping
-from db.schemas.node_tree import NodeTree
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue

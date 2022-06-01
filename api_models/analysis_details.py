@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, IPvAnyAddress
-from typing import List, Optional
+from typing import Optional
 
 from api_models import type_str
 
@@ -14,9 +14,9 @@ class EmailAnalysisDetailsHeaderBody(BaseModel):
 
 
 class EmailAnalysisDetailsBase(BaseModel):
-    attachments: List[type_str] = Field(description="A list of the email attachment names")
+    attachments: list[type_str] = Field(description="A list of the email attachment names")
 
-    cc_addresses: List[type_str] = Field(description="A list of CC recipient email addresses")
+    cc_addresses: list[type_str] = Field(description="A list of CC recipient email addresses")
 
     from_address: type_str = Field(description="The email sender's address")
 
@@ -56,7 +56,7 @@ class SandboxContactedHost(BaseModel):
 
     location: Optional[type_str] = Field(description="Where the host is located")
 
-    associated_domains: List[type_str] = Field(description="A list of domains associated with the contacted host")
+    associated_domains: list[type_str] = Field(description="A list of domains associated with the contacted host")
 
 
 class SandboxDnsRequest(BaseModel):
@@ -116,31 +116,31 @@ class SandboxProcess(BaseModel):
 
     parent_pid: int = Field(description="The parent process' ID")
 
-    children: List["SandboxProcess"] = Field(description="A list of child processes", default_factory=list)
+    children: "list[SandboxProcess]" = Field(description="A list of child processes", default_factory=list)
 
 
 class SandboxAnalysisDetails(BaseModel):
     """Represents the minimum fields in the Sandbox Analysis details that the frontend expects for event pages."""
 
-    contacted_hosts: List[SandboxContactedHost] = Field(
+    contacted_hosts: list[SandboxContactedHost] = Field(
         description="A list of contacted hosts during the sandbox execution", default_factory=list
     )
 
-    created_services: List[type_str] = Field(
+    created_services: list[type_str] = Field(
         description="A list of services that were created during the sandbox execution", default_factory=list
     )
 
-    dns_requests: List[SandboxDnsRequest] = Field(
+    dns_requests: list[SandboxDnsRequest] = Field(
         description="A list of DNS requests made during the sandbox execution", default_factory=list
     )
 
-    dropped_files: List[SandboxDroppedFile] = Field(
+    dropped_files: list[SandboxDroppedFile] = Field(
         description="A list of dropped files from the sandbox execution", default_factory=list
     )
 
     filename: type_str = Field(description="The name of the sandboxed file")
 
-    http_requests: List[SandboxHttpRequest] = Field(
+    http_requests: list[SandboxHttpRequest] = Field(
         description="A list of HTTP requests made during the sandbox execution", default_factory=list
     )
 
@@ -148,23 +148,23 @@ class SandboxAnalysisDetails(BaseModel):
 
     md5: type_str = Field(description="The MD5 hash of the sandboxed file", default="")
 
-    memory_strings: List[type_str] = Field(description="A list of strings found in memory", default_factory=list)
+    memory_strings: list[type_str] = Field(description="A list of strings found in memory", default_factory=list)
 
-    memory_urls: List[type_str] = Field(description="A list of URLs found in memory", default_factory=list)
+    memory_urls: list[type_str] = Field(description="A list of URLs found in memory", default_factory=list)
 
-    mutexes: List[type_str] = Field(
+    mutexes: list[type_str] = Field(
         description="A list of mutexes created during the sandbox execution", default_factory=list
     )
 
-    processes: List[SandboxProcess] = Field(
+    processes: list[SandboxProcess] = Field(
         description="A list of the executed processes during the sandbox execution", default_factory=list
     )
 
-    registry_keys: List[type_str] = Field(
+    registry_keys: list[type_str] = Field(
         description="A list of registry keys accessed or modified during the sandbox execution", default_factory=list
     )
 
-    resolved_apis: List[type_str] = Field(
+    resolved_apis: list[type_str] = Field(
         description="A list of APIs used during the sandbox execution", default_factory=list
     )
 
@@ -178,15 +178,15 @@ class SandboxAnalysisDetails(BaseModel):
 
     ssdeep: str = Field(description="The SSDEEP hash of the sandboxed file", default="")
 
-    started_services: List[type_str] = Field(
+    started_services: list[type_str] = Field(
         description="A list of services that were started during the sandbox execution", default_factory=list
     )
 
-    strings_urls: List[type_str] = Field(
+    strings_urls: list[type_str] = Field(
         description="A list of URLs found in the strings of the sandboxed file", default_factory=list
     )
 
-    suricata_alerts: List[type_str] = Field(
+    suricata_alerts: list[type_str] = Field(
         description="A list of Suricata alerts identified during the sandbox execution", default_factory=list
     )
 

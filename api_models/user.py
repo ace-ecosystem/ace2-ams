@@ -1,5 +1,5 @@
 from pydantic import BaseModel, constr, EmailStr, Field, StrictBool, UUID4
-from typing import List, Optional
+from typing import Optional
 from uuid import uuid4
 
 from api_models import type_list_str, type_str, validators
@@ -40,6 +40,10 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
+    history_username: Optional[type_str] = Field(
+        description="If given, a user history record will be created and associated with the user"
+    )
+
     password: constr(strict=True, min_length=8) = Field(description="The password to use for the user")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the user")
@@ -54,7 +58,7 @@ class UserRead(UserBase):
         description="The default queue the user will see on the event management page"
     )
 
-    roles: List[UserRoleRead] = Field(description="A list of roles assigned to the user")
+    roles: list[UserRoleRead] = Field(description="A list of roles assigned to the user")
 
     uuid: UUID4 = Field(description="The UUID of the user")
 
@@ -77,6 +81,10 @@ class UserUpdate(UserBase):
 
     enabled: Optional[StrictBool] = Field(
         description="Whether or not the user account is enabled and can access the application"
+    )
+
+    history_username: Optional[type_str] = Field(
+        description="If given, a user history record will be created and associated with the user"
     )
 
     password: Optional[constr(strict=True, min_length=8)] = Field(description="The password to use for the user")

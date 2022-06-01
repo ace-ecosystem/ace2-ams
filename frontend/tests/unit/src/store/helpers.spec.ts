@@ -5,7 +5,10 @@ import { useAuthStore } from "@/stores/auth";
 import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
 import { useEventTableStore } from "@/stores/eventTable";
 import { useFilterStore } from "@/stores/filter";
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import {
+  genericObjectReadFactory,
+  queueableObjectReadFactory,
+} from "@mocks/genericObject";
 import { userReadFactory } from "@mocks/user";
 import { createTestingPinia } from "@pinia/testing";
 import { useEventStatusStore } from "@/stores/eventStatus";
@@ -20,8 +23,8 @@ describe("setUserDefaults", () => {
 
   const alertQueue = genericObjectReadFactory({ value: "alertQueue" });
   const eventQueue = genericObjectReadFactory({ value: "eventQueue" });
-  const openStatus = genericObjectReadFactory({ value: "OPEN" });
-  const closedStatus = genericObjectReadFactory({ value: "CLOSED" });
+  const openStatus = queueableObjectReadFactory({ value: "OPEN" });
+  const closedStatus = queueableObjectReadFactory({ value: "CLOSED" });
 
   beforeEach(() => {
     authStore.$reset();

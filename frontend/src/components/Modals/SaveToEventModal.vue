@@ -202,6 +202,7 @@
       try {
         const newEvent = (await Event.create(
           {
+            historyUsername: authStore.user.username,
             name: newEventName.value!,
             queue: authStore.user.defaultEventQueue.value,
             owner: authStore.user.username,
@@ -260,6 +261,7 @@
     const updateData = selectedAlertStore.selected.map((uuid) => ({
       uuid: uuid,
       eventUuid: eventUuid,
+      historyUsername: authStore.user.username,
     }));
     try {
       await alertStore.update(updateData);

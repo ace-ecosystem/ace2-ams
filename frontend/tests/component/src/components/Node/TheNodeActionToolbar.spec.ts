@@ -69,6 +69,7 @@ describe("TheNodeActionToolbar", () => {
       {
         uuid: "uuid",
         owner: "analyst",
+        historyUsername: "analyst",
       },
     ]);
   });

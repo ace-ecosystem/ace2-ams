@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -21,7 +21,7 @@ def test_get_nonexistent_uuid(client):
 
 
 def test_validate_refresh_token_disabled_user(client, db):
-    helpers.create_user(username="johndoe", email="johndoe@test.com", enabled=False, db=db)
+    factory.user.create_or_read(username="johndoe", email="johndoe@test.com", enabled=False, db=db)
 
     # Try to validate the refresh token
     auth = client.post(
@@ -32,12 +32,21 @@ def test_validate_refresh_token_disabled_user(client, db):
 
 
 def test_validate_refresh_token_invalid_token(client, db):
-    helpers.create_user(username="johndoe", email="johndoe@test.com", refresh_token="asdf", db=db)
+    factory.user.create_or_read(username="johndoe", email="johndoe@test.com", refresh_token="asdf", db=db)
 
     # Try to validate the refresh token
     auth = client.post(
         "/api/user/validate_refresh_token",
         json={"username": "johndoe", "refresh_token": "wxyz", "new_refresh_token": "1234"},
+    )
+    assert auth.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+def test_validate_refresh_token_nonexistent_user(client, db):
+    # Try to validate the refresh token
+    auth = client.post(
+        "/api/user/validate_refresh_token",
+        json={"username": "johndoe", "refresh_token": "asdf", "new_refresh_token": "1234"},
     )
     assert auth.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -49,8 +58,8 @@ def test_validate_refresh_token_invalid_token(client, db):
 
 def test_get_all(client, db):
     # Create some users
-    helpers.create_user(username="johndoe", email="johndoe@test.com", enabled=False, db=db)
-    helpers.create_user(username="janedoe", email="janedoe@test.com", db=db)
+    factory.user.create_or_read(username="johndoe", email="johndoe@test.com", enabled=False, db=db)
+    factory.user.create_or_read(username="janedoe", email="janedoe@test.com", db=db)
 
     # Read them back
     get = client.get("/api/user/")
@@ -69,7 +78,7 @@ def test_get_all(client, db):
 
 
 def test_validate_refresh_token(client, db):
-    helpers.create_user(username="johndoe", email="johndoe@test.com", refresh_token="asdf", db=db)
+    factory.user.create_or_read(username="johndoe", email="johndoe@test.com", refresh_token="asdf", db=db)
 
     # Try to validate the refresh token
     auth = client.post(

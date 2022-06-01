@@ -6,7 +6,7 @@ import PrimeVue from "primevue/config";
 import { testConfiguration } from "@/etc/configuration/test/index";
 import EventURLSummary from "@/components/Events/EventURLSummary.vue";
 import router from "@/router/index";
-import { NodeTree } from "@/services/api/nodeTree";
+import { Alert } from "@/services/api/alert";
 import { observableReadFactory } from "@mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 
@@ -26,8 +26,8 @@ function factory() {
 
 describe("EventURLSummary", () => {
   it("renders correctly when request to fetch URLs successfully returns results", () => {
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(props.eventAlertUuids, "observable")
+    cy.stub(Alert, "readObservables")
+      .withArgs(props.eventAlertUuids)
       .returns([
         observableReadFactory(),
         observableReadFactory({
@@ -43,8 +43,8 @@ describe("EventURLSummary", () => {
       .should("have.text", "www.google.com");
   });
   it("renders correctly when request to fetch URLs successfully returns empty", () => {
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(props.eventAlertUuids, "observable")
+    cy.stub(Alert, "readObservables")
+      .withArgs(props.eventAlertUuids)
       .returns([]);
     factory();
     cy.findByRole("listbox").should(
@@ -53,8 +53,8 @@ describe("EventURLSummary", () => {
     );
   });
   it("renders correctly when request to fetch URLs fails", () => {
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(props.eventAlertUuids, "observable")
+    cy.stub(Alert, "readObservables")
+      .withArgs(props.eventAlertUuids)
       .rejects(new Error("404 request failed"));
     factory();
     cy.get("[data-cy=error-banner]").should(

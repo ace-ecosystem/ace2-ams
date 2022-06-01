@@ -1,15 +1,15 @@
 import json
 
 from datetime import datetime
-from fastapi import APIRouter, Depends, Query, Request, Response
-from typing import List, Optional
+from fastapi import APIRouter, Query, Request, Response, status
+from typing import Optional
 from uuid import UUID
 
 from api import db_api
 from api.routes import helpers
-from api_models.alert import AlertCreate, AlertRead, AlertUpdateMultiple
+from api_models.alert import AlertCreate, AlertRead, AlertUpdate
 from api_models.history import AlertHistoryRead
-from core.auth import validate_access_token
+from api_models.observable import ObservableRead
 
 
 router = APIRouter(
@@ -27,9 +27,8 @@ def create_alert(
     alert: AlertCreate,
     request: Request,
     response: Response,
-    claims: dict = Depends(validate_access_token),
 ):
-    result = db_api.post(path=f"/alert/?history_username={claims['sub']}", payload=json.loads(alert.json()))
+    result = db_api.post(path="/alert/", payload=json.loads(alert.json()))
 
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=result["uuid"])
 
@@ -45,6 +44,7 @@ helpers.api_route_create(router, create_alert)
 def get_all_alerts(
     limit: Optional[int] = Query(50, le=100),
     offset: Optional[int] = Query(0),
+    alert_type: Optional[str] = None,
     disposition: Optional[str] = None,
     disposition_user: Optional[str] = None,
     dispositioned_after: Optional[datetime] = None,
@@ -64,6 +64,7 @@ def get_all_alerts(
         None,
         regex=""
         "^("
+        "(alert_type)|"
         "(disposition)|"
         "(disposition_time)|"
         "(disposition_user)|"
@@ -71,8 +72,7 @@ def get_all_alerts(
         "(insert_time)|"
         "(name)|"
         "(owner)|"
-        "(queue)|"
-        "(type)"
+        "(queue)"
         ")\|"
         "("
         "(asc)|"
@@ -84,9 +84,11 @@ def get_all_alerts(
     threats: Optional[str] = None,
     tool: Optional[str] = None,
     tool_instance: Optional[str] = None,
-    type: Optional[str] = None,
 ):
     query_params = f"?limit={limit}&offset={offset}"
+
+    if alert_type:
+        query_params += f"&alert_type={alert_type}"
 
     if disposition:
         query_params += f"&disposition={disposition}"
@@ -148,9 +150,6 @@ def get_all_alerts(
     if tool_instance:
         query_params += f"&tool_instance={tool_instance}"
 
-    if type:
-        query_params += f"&type={type}"
-
     if sort:
         query_params += f"&sort={sort}"
 
@@ -166,9 +165,14 @@ def get_alert_history(uuid: UUID, limit: Optional[int] = Query(50, le=100), offs
     return db_api.get(f"/alert/{uuid}/history{query_params}")
 
 
+def get_alerts_observables(uuids: list[UUID]):
+    return db_api.post(path="/alert/observables", payload=[str(u) for u in uuids], expected_status=status.HTTP_200_OK)
+
+
 helpers.api_route_read_all(router, get_all_alerts, AlertRead)
 helpers.api_route_read(router, get_alert, dict)
 helpers.api_route_read_all(router, get_alert_history, AlertHistoryRead, path="/{uuid}/history")
+helpers.api_route_read(router, get_alerts_observables, list[ObservableRead], methods=["POST"], path="/observables")
 
 
 #
@@ -177,15 +181,11 @@ helpers.api_route_read_all(router, get_alert_history, AlertHistoryRead, path="/{
 
 
 def update_alerts(
-    alerts: List[AlertUpdateMultiple],
+    alerts: list[AlertUpdate],
     request: Request,
     response: Response,
-    claims: dict = Depends(validate_access_token),
 ):
-    db_api.patch(
-        path=f"/alert/?history_username={claims['sub']}",
-        payload=[json.loads(a.json(exclude_unset=True)) for a in alerts],
-    )
+    db_api.patch(path="/alert/", payload=[json.loads(a.json(exclude_unset=True)) for a in alerts])
 
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=alerts[-1].uuid)
 

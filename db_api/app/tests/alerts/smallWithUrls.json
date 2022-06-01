@@ -191,9 +191,9 @@
               ],
               "observable_relationships": [
                 {
-                  "type": "IS_HASH_OF",
-                  "o_type": "file",
-                  "o_value": "email.rfc822"
+                  "relationship_type": "IS_HASH_OF",
+                  "type": "file",
+                  "value": "email.rfc822"
                 }
               ]
             }

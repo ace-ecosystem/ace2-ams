@@ -27,31 +27,10 @@ from fastapi import status
     ],
 )
 def test_create_invalid_fields(client, key, value):
-    create_json = {"rank": 1, "value": "test"}
-    create_json[key] = value
+    create_json = {"rank": 1, "value": "test", key: value}
     create = client.post("/api/alert/disposition/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert key in create.text
-
-
-@pytest.mark.parametrize(
-    "key",
-    [
-        ("rank"),
-        ("uuid"),
-        ("value"),
-    ],
-)
-def test_create_duplicate_unique_fields(client, key):
-    # Create an object
-    create1_json = {"rank": 1, "uuid": str(uuid.uuid4()), "value": "test"}
-    client.post("/api/alert/disposition/", json=create1_json)
-
-    # Ensure you cannot create another object with the same unique field value
-    create2_json = {"rank": 2, "value": "test2"}
-    create2_json[key] = create1_json[key]
-    create2 = client.post("/api/alert/disposition/", json=create2_json)
-    assert create2.status_code == status.HTTP_409_CONFLICT
 
 
 @pytest.mark.parametrize(
