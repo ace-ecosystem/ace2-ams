@@ -40,4 +40,19 @@ data "aws_iam_policy_document" "allow_access_from_own_account" {
       "${aws_s3_bucket.file_storage_bucket.arn}/*",
     ]
   }
+  statement {
+    principals {
+      type        = "AWS"
+      identifiers = ["arn:aws:iam::728226656595:role/service-role/test-file-type-role-uddpyb6f"]
+    }
+
+    actions = [
+      "s3:*"
+    ]
+
+    resources = [
+      aws_s3_bucket.file_storage_bucket.arn,
+      "${aws_s3_bucket.file_storage_bucket.arn}/*",
+    ]
+  }
 }
