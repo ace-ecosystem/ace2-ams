@@ -1,4 +1,5 @@
 import ace2
+import json
 import pytest
 
 queues = {}
@@ -23,9 +24,9 @@ def mock_queue(monkeypatch):
 
         # add message to queue
         queues[queue][receipt_handle] = {
-            'ReceiptHandle': receipt_handle,
-            'Body': message,
-            'DelaySeconds': delay,
+            'receiptHandle': receipt_handle,
+            'body': json.dumps(message),
+            'delaySeconds': delay,
         }
 
         # increment receipt handle
@@ -38,7 +39,11 @@ def mock_queue(monkeypatch):
     def get(queue):
         global queues
         receipt_handle = sorted(queues[queue])[0]
-        return queues[queue][receipt_handle]
+        return {
+            'Records': [
+                queues[queue][receipt_handle],
+            ],
+        }
 
     monkeypatch.setattr('ace2.queue.add', add)
     monkeypatch.setattr('ace2.queue.remove', remove)
