@@ -10,7 +10,7 @@ resource "aws_kms_alias" "ice2_s3_alias" {
 }
 
 data "aws_iam_role" "s3" {
-  name = "AWSServiceRoleForS3"
+  name = "S3FUserRole"
 }
 
 data "aws_iam_policy_document" "kms" {
