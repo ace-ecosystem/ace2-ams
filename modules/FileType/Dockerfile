@@ -5,8 +5,6 @@ FROM test-module-base-image AS module-filetype
 # add the module script to the image
 ADD module.py module.py
 
+# add dependencies
 RUN pip3 install cryptography
-
-# Run
-CMD [ "module.run" ]
-
+RUN yum install file -y
