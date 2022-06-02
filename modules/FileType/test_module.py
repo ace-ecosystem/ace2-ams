@@ -1,7 +1,7 @@
 from ace2.test import *
 from module import FileType
 
-def test_analysis():
+def test_file_type_analysis():
     # create analysis to run
     analysis = {
         'id': 1,
