@@ -55,6 +55,7 @@ helpers.api_route_create(router, create_submission, response_model=Create)
 
 def get_all_submissions(
     db: Session = Depends(get_db),
+    alert: Optional[bool] = None,
     disposition: Optional[str] = None,
     disposition_user: Optional[str] = None,
     dispositioned_after: Optional[datetime] = None,
@@ -99,6 +100,7 @@ def get_all_submissions(
     return paginate(
         conn=db,
         query=crud.submission.build_read_all_query(
+            alert=alert,
             disposition=disposition,
             disposition_user=disposition_user,
             dispositioned_after=dispositioned_after,

@@ -33,7 +33,7 @@ from uuid import uuid4
     ],
 )
 def test_get_all_alerts(client_valid_access_token, requests_mock, param, value):
-    params = urlencode({"limit": 50, "offset": 0, param: value})
+    params = urlencode({"limit": 50, "offset": 0, "alert": True, param: value})
 
     requests_mock.get(
         f"http://db-api/api/submission/?{params}", json={"items": [], "total": 0, "limit": 50, "offset": 0}

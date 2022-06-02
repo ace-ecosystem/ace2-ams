@@ -7,6 +7,7 @@ import { alertTypeRead } from "./alertType";
 import { analysisTreeRead } from "./analysis";
 import { userRead } from "./user";
 import { nodeCommentRead } from "./nodeComment";
+import { nodeDetectionPointRead } from "./nodeDetectionPoint";
 import { nodeTagRead } from "./nodeTag";
 import { observableCreate, observableTreeRead } from "./observable";
 import { observableTypeRead } from "./observableType";
@@ -15,6 +16,7 @@ import { nodeThreatRead } from "./nodeThreat";
 import { queueRead } from "./queue";
 
 export interface alertCreate extends nodeCreate, historyUsername {
+  alert: boolean;
   description?: string;
   eventTime?: Date;
   insertTime?: Date;
@@ -33,6 +35,8 @@ export interface alertCreate extends nodeCreate, historyUsername {
 }
 
 export interface alertRead extends nodeRead {
+  alert: boolean;
+  childDetectionPoints: nodeDetectionPointRead[];
   childTags: nodeTagRead[];
   childThreatActors: nodeThreatActorRead[];
   childThreats: nodeThreatRead[];

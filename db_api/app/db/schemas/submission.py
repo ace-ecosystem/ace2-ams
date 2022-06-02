@@ -1,7 +1,7 @@
 import json
 
 from datetime import datetime
-from sqlalchemy import Column, DateTime, ForeignKey, Index, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from typing import Optional
@@ -26,10 +26,12 @@ class Submission(Node, HasHistory):
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
 
+    alert = Column(Boolean, default=False, nullable=False, index=True)
+
     # Analyses are lazy loaded and are not included by default when fetching a submission from the API.
     analyses: list[Analysis] = relationship("Analysis", secondary=submission_analysis_mapping)
 
-    # The child_tags field uses a composite join relationship to get a list of the tags that
+    # The child_* fields use a composite join relationship to get a list of the objects that
     # are applied to any observables that exist in this submission's tree structure. For example, this is
     # used on the Manage Alerts page so that we can display ALL of the tags for a submission and
     # its children.
@@ -42,15 +44,27 @@ class Submission(Node, HasHistory):
     # The overall goal is that you use the "secondary" parameter in the relationship to construct
     # the intermediate table that you need. You then use the "primaryjoin" and, if needed, the
     # "secondaryjoin" parameters to tell SQLAlchemy how to join the child object against the
-    # parent object (where in this case Submission is the parent, and NodeTag is the child).
+    # parent object (where in this case Submission is the parent, and the child object is the child).
     #
     # Finally, "viewonly" is used on the relationship to prevent attempts to add tags to this list.
+    child_detection_points = relationship(
+        "NodeDetectionPoint",
+        secondary="join(NodeDetectionPoint, Observable, NodeDetectionPoint.node_uuid == Observable.uuid)."
+        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == Observable.uuid)."
+        "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
+        primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
+        order_by="asc(NodeDetectionPoint.value)",
+        viewonly=True,
+        lazy="selectin",
+    )
+
     child_tags = relationship(
         "NodeTag",
         secondary="join(NodeTag, node_tag_mapping, NodeTag.uuid == node_tag_mapping.c.tag_uuid)."
         "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == node_tag_mapping.c.node_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
+        order_by="asc(NodeTag.value)",
         viewonly=True,
         lazy="selectin",
     )
@@ -61,6 +75,7 @@ class Submission(Node, HasHistory):
         "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == node_threat_actor_mapping.c.node_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
+        order_by="asc(NodeThreatActor.value)",
         viewonly=True,
         lazy="selectin",
     )
@@ -71,6 +86,7 @@ class Submission(Node, HasHistory):
         "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == node_threat_mapping.c.node_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
+        order_by="asc(NodeThreat.value)",
         viewonly=True,
         lazy="selectin",
     )

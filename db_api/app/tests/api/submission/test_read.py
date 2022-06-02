@@ -66,18 +66,23 @@ def test_get_all_empty(client):
     assert get.json() == {"items": [], "limit": 50, "offset": 0, "total": 0}
 
 
-def test_get_filter_submission_type(client, db):
-    factory.submission.create(db=db, submission_type="test_type")
-    factory.submission.create(db=db, submission_type="test_type2")
+def test_get_filter_alert(client, db):
+    # Create some submissions where only one of them is marked as being an alert
+    #
+    # submission1 - alert
+    #
+    # submission2
+    submission1 = factory.submission.create(alert=True, db=db)
+    factory.submission.create(db=db)
 
     # There should be 2 total submissions
     get = client.get("/api/submission/")
     assert get.json()["total"] == 2
 
-    # There should only be 1 submission when we filter by the submission type
-    get = client.get("/api/submission/?submission_type=test_type")
+    # There should only be 1 submission when we filter by alert=true
+    get = client.get("/api/submission/?alert=true")
     assert get.json()["total"] == 1
-    assert get.json()["items"][0]["type"]["value"] == "test_type"
+    assert get.json()["items"][0]["uuid"] == str(submission1.uuid)
 
 
 def test_get_filter_disposition(client, db):
@@ -490,6 +495,20 @@ def test_get_filter_queue(client, db):
     assert get.json()["items"][0]["queue"]["value"] == "test_queue1"
 
 
+def test_get_filter_submission_type(client, db):
+    factory.submission.create(db=db, submission_type="test_type")
+    factory.submission.create(db=db, submission_type="test_type2")
+
+    # There should be 2 total submissions
+    get = client.get("/api/submission/")
+    assert get.json()["total"] == 2
+
+    # There should only be 1 submission when we filter by the submission type
+    get = client.get("/api/submission/?submission_type=test_type")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["type"]["value"] == "test_type"
+
+
 def test_get_filter_tags(client, db):
     submission1 = factory.submission.create(db=db, tags=["submission_tag"])
     factory.observable.create_or_read(
@@ -809,6 +828,9 @@ def test_get_submission_tree(client, db):
     assert str(get.json()["children"]).count("'observable'") == 14
     assert str(get.json()["children"]).count("'analysis'") == 16
     assert len(get.json()["children"]) == 2
+
+    # One of the root-level observables has a detection point
+    assert len(get.json()["child_detection_points"]) == 1
 
 
 def test_get_submissions_observables(client, db):

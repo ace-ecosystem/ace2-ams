@@ -31,6 +31,7 @@ from db.schemas.user import User
 
 
 def build_read_all_query(
+    alert: Optional[bool] = None,
     disposition: Optional[str] = None,
     disposition_user: Optional[str] = None,
     dispositioned_after: Optional[datetime] = None,
@@ -59,6 +60,11 @@ def build_read_all_query(
         return query.join(s, Submission.uuid == s.c.uuid).group_by(Submission.uuid, Node.uuid)
 
     query = select(Submission)
+
+    if alert:
+        alert_query = select(Submission).where(Submission.alert == True)
+
+        query = _join_as_subquery(query, alert_query)
 
     if disposition:
         disposition_query = select(Submission)
@@ -321,6 +327,7 @@ def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
     )
 
     # Set the various submission properties
+    obj.alert = model.alert
     obj.description = model.description
     obj.event_time = model.event_time
     obj.insert_time = model.insert_time

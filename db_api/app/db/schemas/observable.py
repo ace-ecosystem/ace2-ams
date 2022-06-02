@@ -37,7 +37,7 @@ class Observable(Node, HasHistory):
     # information will be assumed to be UTC, whereas datetimes with timezone data will be converted to UTC.
     expires_on = Column(DateTime(timezone=True))
 
-    for_detection = Column(Boolean, default=False, nullable=False)
+    for_detection = Column(Boolean, default=False, nullable=False, index=True)
 
     # History is lazy loaded and is not included by default when fetching an observable from the API.
     history = relationship(

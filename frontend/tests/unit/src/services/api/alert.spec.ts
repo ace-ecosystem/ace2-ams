@@ -4,6 +4,7 @@ import { Alert } from "@/services/api/alert";
 import myNock from "@unit/services/api/nock";
 
 const MOCK_ALERT_CREATE: alertCreate = {
+  alert: true,
   name: "Test",
   queue: "Default",
   type: "test",

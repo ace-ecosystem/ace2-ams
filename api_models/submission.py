@@ -7,6 +7,7 @@ from api_models import type_str, validators
 from api_models.alert_disposition import AlertDispositionRead
 from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
+from api_models.node_detection_point import NodeDetectionPointRead
 from api_models.node_tag import NodeTagRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
@@ -20,6 +21,8 @@ from api_models.user import UserRead
 
 class SubmissionBase(NodeBase):
     """Represents a submission, which is an analysis request from the ACE Core or one manually created by an analyst."""
+
+    alert: bool = Field(description="Whether or not this submission is an alert", default=False)
 
     description: Optional[type_str] = Field(description="A short description of the submission")
 
@@ -68,6 +71,10 @@ class SubmissionCreate(NodeCreate, SubmissionBase):
 
 
 class SubmissionRead(NodeRead, SubmissionBase):
+    child_detection_points: list[NodeDetectionPointRead] = Field(
+        description="A list of detection points added to child Nodes in the submission's tree", default_factory=list
+    )
+
     child_tags: list[NodeTagRead] = Field(
         description="A list of tags added to child Nodes in the submission's tree", default_factory=list
     )

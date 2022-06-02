@@ -17,6 +17,7 @@ from tests import factory
 
 def create(
     db: Session,
+    alert: bool = False,
     alert_queue: str = "external",
     submission_type: str = "test_type",
     submission_uuid: Optional[Union[str, UUID]] = None,
@@ -76,6 +77,7 @@ def create(
     # Create the actual submission
     submission = crud.submission.create_or_read(
         model=SubmissionCreate(
+            alert=alert,
             event_time=event_time,
             insert_time=insert_time,
             history_username=history_username,
@@ -157,6 +159,7 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
 
         # Build the ObservableCreate model
         observable_model = ObservableCreate(
+            detection_points=o.get("detection_points", []),
             for_detection=o.get("for_detection", False),
             observable_relationships=o.get("observable_relationships", []),
             tags=o.get("tags", []),
@@ -214,6 +217,7 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
     # Create the submission object
     submission = create(
         db=db,
+        alert=True,
         submission_uuid=data.get("submission_uuid", uuid4()),
         name=data.get("name", "Test Alert"),
         owner=data.get("owner", None),
@@ -228,6 +232,8 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
     # Create all of the observables using the submission's root analysis as the parent analysis
     for model in observable_create_models:
         crud.observable.create_or_read(model=model, parent_analysis=submission.root_analysis, db=db)
+
+    db.commit()
 
     return submission
 

@@ -85,7 +85,9 @@ def get_all_alerts(
     tool: Optional[str] = None,
     tool_instance: Optional[str] = None,
 ):
-    query_params = f"?limit={limit}&offset={offset}"
+    # alert=True is hardcoded in the query to the database API so that the GUI only receives
+    # submissions that are considered to be alerts.
+    query_params = f"?limit={limit}&offset={offset}&alert=True"
 
     if alert_type:
         query_params += f"&alert_type={alert_type}"

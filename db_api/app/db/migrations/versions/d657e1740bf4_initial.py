@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: b1f38610b630
+Revision ID: d657e1740bf4
 Revises: 
-Create Date: 2022-06-02 11:53:23.797227
+Create Date: 2022-06-02 18:08:25.369568
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'b1f38610b630'
+revision = 'd657e1740bf4'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -386,6 +386,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid'),
     sa.UniqueConstraint('type_uuid', 'value', name='type_value_uc')
     )
+    op.create_index(op.f('ix_observable_for_detection'), 'observable', ['for_detection'], unique=False)
     op.create_index('observable_value_trgm', 'observable', ['value'], unique=False, postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.create_index('type_value', 'observable', ['type_uuid', 'value'], unique=False)
     op.create_table('user',
@@ -561,6 +562,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_event_vector_mapping_vector_uuid'), 'event_vector_mapping', ['vector_uuid'], unique=False)
     op.create_table('submission',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('alert', sa.Boolean(), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
     sa.Column('disposition_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('disposition_time', sa.DateTime(timezone=True), nullable=True),
@@ -589,6 +591,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
     sa.PrimaryKeyConstraint('uuid')
     )
+    op.create_index(op.f('ix_submission_alert'), 'submission', ['alert'], unique=False)
     op.create_index(op.f('ix_submission_disposition_time'), 'submission', ['disposition_time'], unique=False)
     op.create_index(op.f('ix_submission_disposition_user_uuid'), 'submission', ['disposition_user_uuid'], unique=False)
     op.create_index(op.f('ix_submission_disposition_uuid'), 'submission', ['disposition_uuid'], unique=False)
@@ -651,6 +654,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_submission_disposition_uuid'), table_name='submission')
     op.drop_index(op.f('ix_submission_disposition_user_uuid'), table_name='submission')
     op.drop_index(op.f('ix_submission_disposition_time'), table_name='submission')
+    op.drop_index(op.f('ix_submission_alert'), table_name='submission')
     op.drop_table('submission')
     op.drop_index(op.f('ix_event_vector_mapping_vector_uuid'), table_name='event_vector_mapping')
     op.drop_index(op.f('ix_event_vector_mapping_event_uuid'), table_name='event_vector_mapping')
@@ -694,6 +698,7 @@ def downgrade() -> None:
     op.drop_table('user')
     op.drop_index('type_value', table_name='observable')
     op.drop_index('observable_value_trgm', table_name='observable', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
+    op.drop_index(op.f('ix_observable_for_detection'), table_name='observable')
     op.drop_table('observable')
     op.drop_index(op.f('ix_node_threat_type_queue_mapping_queue_uuid'), table_name='node_threat_type_queue_mapping')
     op.drop_index(op.f('ix_node_threat_type_queue_mapping_node_threat_type_uuid'), table_name='node_threat_type_queue_mapping')
