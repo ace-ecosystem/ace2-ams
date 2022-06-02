@@ -829,9 +829,6 @@ def test_get_submission_tree(client, db):
     assert str(get.json()["children"]).count("'analysis'") == 16
     assert len(get.json()["children"]) == 2
 
-    # One of the root-level observables has a detection point
-    assert len(get.json()["child_detection_points"]) == 1
-
 
 def test_get_submissions_observables(client, db):
     # Create an submission tree where the same observable type+value appears twice
