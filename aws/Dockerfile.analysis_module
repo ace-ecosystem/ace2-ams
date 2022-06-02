@@ -1,0 +1,25 @@
+FROM public.ecr.aws/lambda/python:3.9
+
+# get path to module directory from build args
+ARG module
+
+# copy all files over
+ADD . ace2
+
+# install ace2 library
+RUN pip3 install ace2/lib/ace2
+
+# run module setup script if one exists
+RUN if test -f "ace2/$module/setup.sh"; then bash ace2/$module/setup.sh; fi
+
+# run module tests
+RUN pytest ace2/$module
+
+# copy module to working dir
+RUN cp ace2/$module/module.py module.py
+
+# remove ace2 files to reduce image size
+RUN rm -rf ace2
+
+# set entrypoint to the module run function
+CMD [ "module.run" ]

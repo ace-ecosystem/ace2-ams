@@ -8,6 +8,8 @@ setup(
     install_requires = [
         'boto3',
         'pydantic',
+        'pytest',
+        'pytest-datadir',
         'pyyaml',
     ],
 )
