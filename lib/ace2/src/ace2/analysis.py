@@ -61,18 +61,19 @@ class Analysis(TypedModel):
         return self.private.config
 
     @classmethod
-    def run(cls, message:dict, context:dict):
-        ''' AWS lambda function handler that runs analysis passed in the event message
+    def run(cls, event:dict, context:dict):
+        ''' AWS lambda function handler that runs analysis on the event
 
         Args:
-            message: the analysis queue message
+            event: the aws event message
             context: aws runtime context (we do not use this)
         '''
 
-        # create an analysis object
-        message = message['Records'][0]
-        analysis = json.loads(message['body'])
-        self = cls(**analysis)
+        # get the message from the event
+        message = event['Records'][0]
+
+        # create an analysis object from the message
+        self = cls(**json.loads(message['body']))
 
         # call the current callback function which then tells us what to execute after that
         self.callback = self.callback.execute(self, self.target)

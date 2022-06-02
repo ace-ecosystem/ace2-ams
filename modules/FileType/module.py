@@ -31,36 +31,36 @@ class FileType(Analysis):
         # determine if file is ole
         with open(target.path, 'rb') as f:
             if f.read(8) == b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1':
-                target.add_tag('ole')
+                target.add(Tag, 'ole')
 
         # determine if file is rtf
         with open(target.path, 'rb') as f:
             data = f.read(4)
             if data[:3] == b'\\rt' or data == b'{\\rt':
-                target.add_tag('rtf')
+                target.add(Tag, 'rtf')
 
         # determine if file is pdf
         with open(target.path, 'rb') as f:
             if b'%PDF-' in f.read(1024):
-                target.add_tag('pdf')
+                target.add(Tag, 'pdf')
 
         # determine if file is an executable
         with open(target.path, 'rb') as f:
             if f.read(2) == b'MZ':
-                target.add_tag('executable')
+                target.add(Tag, 'executable')
 
         # determine if file is a jar or zip file by attempting to read the namelist
         try:
             with ZipFile(target.path, 'r') as f:
                 if f.namelist():
-                    target.add_tag('zip')
+                    target.add(Tag, 'zip')
         except:
             pass
 
         # determine if file is a lnk
         with open(target.path, 'rb') as f:
             if f.read(8) == b'\x4C\x00\x00\x00\x01\x14\x02\x00':
-                target.add_tag('lnk')
+                target.add(Tag, 'lnk')
 
         # determine if file is x509
         with open(target.path, 'rb') as f:
@@ -75,7 +75,7 @@ class FileType(Analysis):
                 except:
                     is_x509 = False
             if is_x509:
-                target.add_tag('x509')
+                target.add(Tag, 'x509')
                 if analysis.details.file_type == 'data':
                     analysis.details.file_type = 'DER certificate'
 
@@ -83,7 +83,7 @@ class FileType(Analysis):
         try:
             with ZipFile(target.path, 'r') as f:
                 if 'META-INF/MANIFEST.MF' in f.namelist():
-                    target.add_tag('jar')
+                    target.add(Tag, 'jar')
         except:
             pass
 
@@ -159,4 +159,4 @@ class FileType(Analysis):
         is_office_document |= 'ole' in target.tags
         is_office_document |= 'rtf' in target.tags
         if is_office_document:
-            target.add_tag('microsoft_office')
+            target.add(Tag, 'microsoft_office')

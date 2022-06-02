@@ -1,4 +1,5 @@
 from ace2 import *
+import json
 from pydantic import Field
 from typing import Optional
 
@@ -23,7 +24,7 @@ def test_analysis(monkeypatch, mock_datetime):
             self.state['submission_id'] = '123'
 
             # check back later
-            return Callback(self.get_results)
+            return Callback(self.get_results, seconds=5)
 
         def get_results(self, observable):
             # verify observable is passed correctly
@@ -79,7 +80,8 @@ def test_analysis(monkeypatch, mock_datetime):
     message = queue.get('MyAnalysis')
 
     # verify result
-    assert message['Body'] == {
+    assert message['Records'][0]['delaySeconds'] == 5
+    assert json.loads(message['Records'][0]['body']) == {
         'id': 1,
         'type': 'MyAnalysis',
         'target': {
@@ -107,7 +109,7 @@ def test_analysis(monkeypatch, mock_datetime):
     message = queue.get('Submission')
 
     # verify result
-    assert message['Body'] == {
+    assert json.loads(message['Records'][0]['body']) == {
         'id': 1,
         'type': 'MyAnalysis',
         'target': {
