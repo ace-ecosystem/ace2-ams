@@ -18,6 +18,7 @@ class FileType(Analysis):
         logging.debug('we should not see this')
         logging.info('we should see this')
         logging.warning('we should already have seen this')
+        print('[FAKE INFO] yada yada')
 
         # get the human readable type
         process = subprocess.run(['file', '-b', '-L', target.path], capture_output=True, text=True)
