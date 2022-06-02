@@ -1,13 +1,7 @@
-FROM public.ecr.aws/lambda/python:3.9
+FROM ace2-base
 
 # get path to module directory from build args
 ARG module
-
-# copy all files over
-ADD . ace2
-
-# install ace2 library
-RUN pip3 install ace2/lib/ace2
 
 # run module setup script if one exists
 RUN if test -f "ace2/$module/setup.sh"; then bash ace2/$module/setup.sh; fi
@@ -20,6 +14,9 @@ RUN cp ace2/$module/module.py module.py
 
 # remove ace2 files to reduce image size
 RUN rm -rf ace2
+
+# remove test packages to reduce image size
+RUN pip3 uninstall -y pytest-datadir pytest
 
 # set entrypoint to the module run function
 CMD [ "module.run" ]
