@@ -72,9 +72,9 @@ def test_update_invalid_uuid(client):
 
 
 def test_update_invalid_version(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     observable = factory.observable.create_or_read(
-        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db
+        type="test_type", value="test", parent_analysis=submission.root_analysis, db=db
     )
 
     # Make sure you cannot update it using an invalid version. The version is
@@ -84,12 +84,12 @@ def test_update_invalid_version(client, db):
 
 
 def test_update_duplicate_type_value(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     observable1 = factory.observable.create_or_read(
-        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db
+        type="test_type", value="test", parent_analysis=submission.root_analysis, db=db
     )
     observable2 = factory.observable.create_or_read(
-        type="test_type", value="test2", parent_analysis=alert.root_analysis, db=db
+        type="test_type", value="test2", parent_analysis=submission.root_analysis, db=db
     )
 
     # Ensure you cannot update an observable to have a duplicate type+value combination
@@ -98,9 +98,9 @@ def test_update_duplicate_type_value(client, db):
 
 
 def test_update_nonexistent_redirection_uuid(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     observable_tree = factory.observable.create_or_read(
-        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db
+        type="test_type", value="test", parent_analysis=submission.root_analysis, db=db
     )
 
     # Make sure you cannot update it to use a nonexistent redirection UUID
@@ -116,9 +116,9 @@ def test_update_nonexistent_redirection_uuid(client, db):
     [("directives"), ("tags"), ("threat_actors"), ("threats")],
 )
 def test_update_nonexistent_node_fields(client, db, key):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     observable = factory.observable.create_or_read(
-        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db
+        type="test_type", value="test", parent_analysis=submission.root_analysis, db=db
     )
 
     # Make sure you cannot update it to use a nonexistent node field value
@@ -138,9 +138,9 @@ def test_update_nonexistent_uuid(client):
 
 
 def test_update_type(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     observable = factory.observable.create_or_read(
-        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
+        type="test_type", value="test", parent_analysis=submission.root_analysis, db=db, history_username="analyst"
     )
     assert observable.type.value == "test_type"
 
@@ -166,16 +166,16 @@ def test_update_type(client, db):
 
 
 def test_update_redirection_uuid(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     obs1 = factory.observable.create_or_read(
-        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
+        type="test_type", value="test", parent_analysis=submission.root_analysis, db=db, history_username="analyst"
     )
     initial_observable_version = obs1.version
     assert obs1.redirection is None
 
     # Create a second observable to use for redirection
     obs2 = factory.observable.create_or_read(
-        type="test_type", value="test2", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
+        type="test_type", value="test2", parent_analysis=submission.root_analysis, db=db, history_username="analyst"
     )
 
     # Update the redirection UUID
@@ -225,7 +225,7 @@ def test_update_redirection_uuid(client, db):
     ],
 )
 def test_update_valid_node_fields(client, db, key, value_lists, helper_create_func):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
 
     for i in range(len(value_lists)):
         value_list = value_lists[i]
@@ -237,7 +237,7 @@ def test_update_valid_node_fields(client, db, key, value_lists, helper_create_fu
             tags=["remove_me"],
             threat_actors=["remove_me"],
             threats=["remove_me"],
-            parent_analysis=alert.root_analysis,
+            parent_analysis=submission.root_analysis,
             db=db,
             history_username="analyst",
         )
@@ -293,9 +293,9 @@ def test_update_valid_node_fields(client, db, key, value_lists, helper_create_fu
     ],
 )
 def test_update(client, db, key, initial_value, updated_value):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     observable = factory.observable.create_or_read(
-        type="test_type", value="test", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
+        type="test_type", value="test", parent_analysis=submission.root_analysis, db=db, history_username="analyst"
     )
 
     # Set the initial value

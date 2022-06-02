@@ -27,8 +27,8 @@ def add_test_alerts(alert: AddTestAlert, db: Session = Depends(get_db)):
     # Only proceed if the API is running in TESTING mode
     if is_in_testing_mode():
         for i in range(alert.count):
-            factory.alert.create_from_json_file(
-                db=db, json_path=f"/app/tests/alerts/{alert.template}", alert_name=f"Manual Alert {i}"
+            factory.submission.create_from_json_file(
+                db=db, json_path=f"/app/tests/alerts/{alert.template}", submission_name=f"Manual Alert {i}"
             )
 
         db.commit()
@@ -64,8 +64,8 @@ def add_test_events(event: AddTestEvent, db: Session = Depends(get_db)):
         db_event = factory.event.create_or_read(name=event.name, event_queue=event.queue, status=event.status, db=db)
 
         for i in range(event.alert_count):
-            alert = factory.alert.create_from_json_file(
-                db=db, json_path=f"/app/tests/alerts/{event.alert_template}", alert_name=f"Manual Alert {i}"
+            alert = factory.submission.create_from_json_file(
+                db=db, json_path=f"/app/tests/alerts/{event.alert_template}", submission_name=f"Manual Alert {i}"
             )
             alert.event_uuid = db_event.uuid
             db.commit()

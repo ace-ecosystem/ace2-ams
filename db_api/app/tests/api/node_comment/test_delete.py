@@ -27,7 +27,7 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete_alerts(client, db):
     # Create a comment
-    alert = factory.alert.create(db=db, history_username="analyst")
+    alert = factory.submission.create(db=db, history_username="analyst")
     comment = factory.node_comment.create_or_read(node=alert, username="analyst", value="test", db=db)
     assert alert.comments[0].value == "test"
 
@@ -43,7 +43,7 @@ def test_delete_alerts(client, db):
     assert len(alert.comments) == 0
 
     # Verify the history record
-    history = client.get(f"/api/alert/{alert.uuid}/history")
+    history = client.get(f"/api/submission/{alert.uuid}/history")
     assert history.json()["total"] == 3
     assert history.json()["items"][2]["action"] == "UPDATE"
     assert history.json()["items"][2]["action_by"]["username"] == "analyst"
@@ -89,7 +89,7 @@ def test_delete_events(client, db):
 
 def test_delete_observables(client, db):
     # Create a comment
-    alert = factory.alert.create(db=db, history_username="analyst")
+    alert = factory.submission.create(db=db, history_username="analyst")
     observable = factory.observable.create_or_read(
         type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )

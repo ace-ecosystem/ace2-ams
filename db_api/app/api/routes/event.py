@@ -179,7 +179,7 @@ def update_events(
         except VersionMismatch as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
-        response.headers["Content-Location"] = request.url_for("get_alert", uuid=event.uuid)
+        response.headers["Content-Location"] = request.url_for("get_event", uuid=event.uuid)
 
     db.commit()
 

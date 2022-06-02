@@ -85,7 +85,7 @@ if args.vectors:
     event.vectors = [factory.event_vector.create_or_read(value=v, db=db) for v in args.vectors.split(",")]
 
 for i in range(args.num_alerts):
-    alert = factory.alert.create_from_json_file(db=db, json_path=alert_json_path, alert_name=f"Manual Alert {i}")
+    alert = factory.submission.create_from_json_file(db=db, json_path=alert_json_path, submission_name=f"Manual Alert {i}")
     alert.event_uuid = event.uuid
 
 db.commit()

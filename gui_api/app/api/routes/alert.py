@@ -7,9 +7,9 @@ from uuid import UUID
 
 from api import db_api
 from api.routes import helpers
-from api_models.alert import AlertCreate, AlertRead, AlertUpdate
-from api_models.history import AlertHistoryRead
+from api_models.history import SubmissionHistoryRead
 from api_models.observable import ObservableRead
+from api_models.submission import SubmissionCreate, SubmissionRead, SubmissionUpdate
 
 
 router = APIRouter(
@@ -24,11 +24,11 @@ router = APIRouter(
 
 
 def create_alert(
-    alert: AlertCreate,
+    alert: SubmissionCreate,
     request: Request,
     response: Response,
 ):
-    result = db_api.post(path="/alert/", payload=json.loads(alert.json()))
+    result = db_api.post(path="/submission/", payload=json.loads(alert.json()))
 
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=result["uuid"])
 
@@ -153,25 +153,27 @@ def get_all_alerts(
     if sort:
         query_params += f"&sort={sort}"
 
-    return db_api.get(path=f"/alert/{query_params}")
+    return db_api.get(path=f"/submission/{query_params}")
 
 
 def get_alert(uuid: UUID):
-    return db_api.get(path=f"/alert/{uuid}")
+    return db_api.get(path=f"/submission/{uuid}")
 
 
 def get_alert_history(uuid: UUID, limit: Optional[int] = Query(50, le=100), offset: Optional[int] = Query(0)):
     query_params = f"?limit={limit}&offset={offset}"
-    return db_api.get(f"/alert/{uuid}/history{query_params}")
+    return db_api.get(f"/submission/{uuid}/history{query_params}")
 
 
 def get_alerts_observables(uuids: list[UUID]):
-    return db_api.post(path="/alert/observables", payload=[str(u) for u in uuids], expected_status=status.HTTP_200_OK)
+    return db_api.post(
+        path="/submission/observables", payload=[str(u) for u in uuids], expected_status=status.HTTP_200_OK
+    )
 
 
-helpers.api_route_read_all(router, get_all_alerts, AlertRead)
+helpers.api_route_read_all(router, get_all_alerts, SubmissionRead)
 helpers.api_route_read(router, get_alert, dict)
-helpers.api_route_read_all(router, get_alert_history, AlertHistoryRead, path="/{uuid}/history")
+helpers.api_route_read_all(router, get_alert_history, SubmissionHistoryRead, path="/{uuid}/history")
 helpers.api_route_read(router, get_alerts_observables, list[ObservableRead], methods=["POST"], path="/observables")
 
 
@@ -181,11 +183,11 @@ helpers.api_route_read(router, get_alerts_observables, list[ObservableRead], met
 
 
 def update_alerts(
-    alerts: list[AlertUpdate],
+    alerts: list[SubmissionUpdate],
     request: Request,
     response: Response,
 ):
-    db_api.patch(path="/alert/", payload=[json.loads(a.json(exclude_unset=True)) for a in alerts])
+    db_api.patch(path="/submission/", payload=[json.loads(a.json(exclude_unset=True)) for a in alerts])
 
     response.headers["Content-Location"] = request.url_for("get_alert", uuid=alerts[-1].uuid)
 

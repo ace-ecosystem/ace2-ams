@@ -25,7 +25,7 @@ def test_delete_used(client, db):
     obj = factory.queue.create_or_read(value="test", db=db)
 
     # Assign it to another object
-    factory.alert.create(alert_queue="test", db=db)
+    factory.submission.create(alert_queue="test", db=db)
 
     # Ensure you cannot delete it now that it is in use
     delete = client.delete(f"/api/queue/{obj.uuid}")

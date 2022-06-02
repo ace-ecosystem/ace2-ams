@@ -48,8 +48,7 @@ alert_disposition:
   - COMMAND_AND_CONTROL
   - EXFIL
   - DAMAGE
-alert_type:
-  - manual
+
 event_prevention_tool:
   external:
     - antivirus
@@ -170,6 +169,8 @@ observable_type:
   - file
   - ipv4
   - url
+submission_type:
+  - manual
 user_role:
   - admin
   - analyst

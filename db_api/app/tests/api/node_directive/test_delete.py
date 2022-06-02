@@ -25,9 +25,9 @@ def test_delete_used(client, db):
     obj = factory.node_directive.create_or_read(value="test", db=db)
 
     # Assign it to another object
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     factory.observable.create_or_read(
-        type="test", value="test", parent_analysis=alert.root_analysis, directives=["test"], db=db
+        type="test", value="test", parent_analysis=submission.root_analysis, directives=["test"], db=db
     )
 
     # Ensure you cannot delete it now that it is in use

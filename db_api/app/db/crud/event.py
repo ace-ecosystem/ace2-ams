@@ -20,8 +20,6 @@ from api_models.event_summaries import (
     UserSummary,
 )
 from db import crud
-from db.schemas.alert import Alert, AlertHistory
-from db.schemas.alert_analysis_mapping import alert_analysis_mapping
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
@@ -42,6 +40,8 @@ from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
+from db.schemas.submission import Submission, SubmissionHistory
+from db.schemas.submission_analysis_mapping import submission_analysis_mapping
 from db.schemas.user import User
 
 
@@ -84,16 +84,16 @@ def build_read_all_query(
     if alert_time_after:
         alert_time_after_query = (
             select(Event)
-            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-            .where(or_(Event.alert_time > alert_time_after, Alert.insert_time > alert_time_after))
+            .join(Submission, onclause=Submission.event_uuid == Event.uuid)
+            .where(or_(Event.alert_time > alert_time_after, Submission.insert_time > alert_time_after))
         )
         query = _join_as_subquery(query, alert_time_after_query)
 
     if alert_time_before:
         alert_time_before_query = (
             select(Event)
-            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-            .where(or_(Event.alert_time < alert_time_before, Alert.insert_time < alert_time_before))
+            .join(Submission, onclause=Submission.event_uuid == Event.uuid)
+            .where(or_(Event.alert_time < alert_time_before, Submission.insert_time < alert_time_before))
         )
         query = _join_as_subquery(query, alert_time_before_query)
 
@@ -114,10 +114,10 @@ def build_read_all_query(
         query = _join_as_subquery(query, created_time_before_query)
 
     if disposition:
-        disposition_query = select(Event).join(Alert, onclause=Alert.event_uuid == Event.uuid)
+        disposition_query = select(Event).join(Submission, onclause=Submission.event_uuid == Event.uuid)
         if disposition.lower() == "none":
             disposition_query = disposition_query.where(
-                Alert.disposition_uuid == None  # pylint: disable=singleton-comparison
+                Submission.disposition_uuid == None  # pylint: disable=singleton-comparison
             )
         else:
             disposition_query = disposition_query.join(AlertDisposition).where(AlertDisposition.value == disposition)
@@ -127,12 +127,15 @@ def build_read_all_query(
     if disposition_time_after:
         disposition_time_after_query = (
             select(Event)
-            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
+            .join(Submission, onclause=Submission.event_uuid == Event.uuid)
             .where(
                 or_(
                     Event.disposition_time > disposition_time_after,
-                    Alert.history.any(
-                        and_(AlertHistory.field == "disposition", AlertHistory.action_time > disposition_time_after)
+                    Submission.history.any(
+                        and_(
+                            SubmissionHistory.field == "disposition",
+                            SubmissionHistory.action_time > disposition_time_after,
+                        )
                     ),
                 )
             )
@@ -142,12 +145,15 @@ def build_read_all_query(
     if disposition_time_before:
         disposition_time_before_query = (
             select(Event)
-            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
+            .join(Submission, onclause=Submission.event_uuid == Event.uuid)
             .where(
                 or_(
                     Event.disposition_time < disposition_time_before,
-                    Alert.history.any(
-                        and_(AlertHistory.field == "disposition", AlertHistory.action_time < disposition_time_before)
+                    Submission.history.any(
+                        and_(
+                            SubmissionHistory.field == "disposition",
+                            SubmissionHistory.action_time < disposition_time_before,
+                        )
                     ),
                 )
             )
@@ -166,11 +172,14 @@ def build_read_all_query(
         observable_split = observable.split("|", maxsplit=1)
         observable_types_query = (
             select(Event)
-            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-            .join(alert_analysis_mapping, onclause=alert_analysis_mapping.c.alert_uuid == Alert.uuid)
+            .join(Submission, onclause=Submission.event_uuid == Event.uuid)
+            .join(
+                submission_analysis_mapping, onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid
+            )
             .join(
                 analysis_child_observable_mapping,
-                onclause=analysis_child_observable_mapping.c.analysis_uuid == alert_analysis_mapping.c.analysis_uuid,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
             )
             .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
             .join(ObservableType)
@@ -183,11 +192,14 @@ def build_read_all_query(
         type_filters = [func.count(1).filter(ObservableType.value == t) > 0 for t in observable_types.split(",")]
         observable_types_query = (
             select(Event)
-            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-            .join(alert_analysis_mapping, onclause=alert_analysis_mapping.c.alert_uuid == Alert.uuid)
+            .join(Submission, onclause=Submission.event_uuid == Event.uuid)
+            .join(
+                submission_analysis_mapping, onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid
+            )
             .join(
                 analysis_child_observable_mapping,
-                onclause=analysis_child_observable_mapping.c.analysis_uuid == alert_analysis_mapping.c.analysis_uuid,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
             )
             .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
             .join(ObservableType)
@@ -200,11 +212,14 @@ def build_read_all_query(
     if observable_value:
         observable_value_query = (
             select(Event)
-            .join(Alert, onclause=Alert.event_uuid == Event.uuid)
-            .join(alert_analysis_mapping, onclause=alert_analysis_mapping.c.alert_uuid == Alert.uuid)
+            .join(Submission, onclause=Submission.event_uuid == Event.uuid)
+            .join(
+                submission_analysis_mapping, onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid
+            )
             .join(
                 analysis_child_observable_mapping,
-                onclause=analysis_child_observable_mapping.c.analysis_uuid == alert_analysis_mapping.c.analysis_uuid,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
             )
             .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
             .where(Observable.value == observable_value)
@@ -262,8 +277,8 @@ def build_read_all_query(
             tag_filters.append(
                 or_(
                     Event.tags.any(NodeTag.value == tag),
-                    Event.alerts.any(Alert.tags.any(NodeTag.value == tag)),
-                    Event.alerts.any(Alert.child_tags.any(NodeTag.value == tag)),
+                    Event.alerts.any(Submission.tags.any(NodeTag.value == tag)),
+                    Event.alerts.any(Submission.child_tags.any(NodeTag.value == tag)),
                 )
             )
         tags_query = select(Event).where(and_(*tag_filters))
@@ -276,8 +291,8 @@ def build_read_all_query(
             threat_actor_filters.append(
                 or_(
                     Event.threat_actors.any(NodeThreatActor.value == threat),
-                    Event.alerts.any(Alert.threat_actors.any(NodeThreatActor.value == threat)),
-                    Event.alerts.any(Alert.child_threat_actors.any(NodeThreatActor.value == threat)),
+                    Event.alerts.any(Submission.threat_actors.any(NodeThreatActor.value == threat)),
+                    Event.alerts.any(Submission.child_threat_actors.any(NodeThreatActor.value == threat)),
                 )
             )
         threat_actors_query = select(Event).where(and_(*threat_actor_filters))
@@ -290,8 +305,8 @@ def build_read_all_query(
             threat_filters.append(
                 or_(
                     Event.threats.any(NodeThreat.value == threat),
-                    Event.alerts.any(Alert.threats.any(NodeThreat.value == threat)),
-                    Event.alerts.any(Alert.child_threats.any(NodeThreat.value == threat)),
+                    Event.alerts.any(Submission.threats.any(NodeThreat.value == threat)),
+                    Event.alerts.any(Submission.child_threats.any(NodeThreat.value == threat)),
                 )
             )
         threats_query = select(Event).where(and_(*threat_filters))
@@ -416,10 +431,10 @@ def read_analysis_type_from_event(
 
     # Get all the email analyses (and their parent alert UUIDs) performed in the event.
     query = (
-        select([Alert.uuid, Analysis])
+        select([Submission.uuid, Analysis])
         .join(
-            alert_analysis_mapping,
-            onclause=alert_analysis_mapping.c.analysis_uuid == Analysis.uuid,
+            submission_analysis_mapping,
+            onclause=submission_analysis_mapping.c.analysis_uuid == Analysis.uuid,
         )
         .join(
             AnalysisModuleType,
@@ -428,7 +443,12 @@ def read_analysis_type_from_event(
                 clause,
             ),
         )
-        .join(Alert, onclause=and_(Alert.uuid == alert_analysis_mapping.c.alert_uuid, Alert.event_uuid == uuid))
+        .join(
+            Submission,
+            onclause=and_(
+                Submission.uuid == submission_analysis_mapping.c.submission_uuid, Submission.event_uuid == uuid
+            ),
+        )
         .options(Load(Analysis).undefer("details"))
     )
 
@@ -442,9 +462,9 @@ def read_by_uuid(uuid: UUID, db: Session, inject_analysis_types: bool = False) -
         query = (
             select(AnalysisModuleType)
             .join(Analysis, onclause=Analysis.analysis_module_type_uuid == AnalysisModuleType.uuid)
-            .join(alert_analysis_mapping, onclause=alert_analysis_mapping.c.analysis_uuid == Analysis.uuid)
-            .join(Alert, onclause=Alert.uuid == alert_analysis_mapping.c.alert_uuid)
-            .where(Alert.event_uuid == uuid)
+            .join(submission_analysis_mapping, onclause=submission_analysis_mapping.c.analysis_uuid == Analysis.uuid)
+            .join(Submission, onclause=Submission.uuid == submission_analysis_mapping.c.submission_uuid)
+            .where(Submission.event_uuid == uuid)
             .order_by(AnalysisModuleType.value)
             .distinct()
         )
@@ -463,10 +483,15 @@ def read_observable_type_from_event(observable_type: str, uuid: UUID, db: Sessio
             onclause=analysis_child_observable_mapping.c.observable_uuid == Observable.uuid,
         )
         .join(
-            alert_analysis_mapping,
-            onclause=alert_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid,
+            submission_analysis_mapping,
+            onclause=submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid,
         )
-        .join(Alert, onclause=and_(Alert.uuid == alert_analysis_mapping.c.alert_uuid, Alert.event_uuid == uuid))
+        .join(
+            Submission,
+            onclause=and_(
+                Submission.uuid == submission_analysis_mapping.c.submission_uuid, Submission.event_uuid == uuid
+            ),
+        )
         .where(Observable.type.has(ObservableType.value == observable_type))
     )
 
@@ -480,17 +505,22 @@ def read_summary_detection_point(uuid: UUID, db: Session) -> list[DetectionSumma
     # Get all the detection points (and their parent alert UUIDs) performed in the event.
     # The query results are turned into a dictionary with the parent alert UUID as the key.
     query = (
-        select([Alert.uuid, NodeDetectionPoint])
+        select([Submission.uuid, NodeDetectionPoint])
         .join(Observable, onclause=Observable.uuid == NodeDetectionPoint.node_uuid)
         .join(
             analysis_child_observable_mapping,
             onclause=analysis_child_observable_mapping.c.observable_uuid == Observable.uuid,
         )
         .join(
-            alert_analysis_mapping,
-            onclause=alert_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid,
+            submission_analysis_mapping,
+            onclause=submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid,
         )
-        .join(Alert, onclause=and_(Alert.uuid == alert_analysis_mapping.c.alert_uuid, Alert.event_uuid == uuid))
+        .join(
+            Submission,
+            onclause=and_(
+                Submission.uuid == submission_analysis_mapping.c.submission_uuid, Submission.event_uuid == uuid
+            ),
+        )
     )
 
     alert_uuid_and_detection: list[Tuple[UUID, NodeDetectionPoint]] = db.execute(query).unique().all()

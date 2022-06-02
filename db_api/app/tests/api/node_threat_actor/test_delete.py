@@ -25,7 +25,7 @@ def test_delete_used(client, db):
     obj = factory.node_threat_actor.create_or_read(value="test", db=db)
 
     # Assign it to another object
-    factory.alert.create(threat_actors=["test"], db=db)
+    factory.submission.create(threat_actors=["test"], db=db)
 
     # Ensure you cannot delete it now that it is in use
     delete = client.delete(f"/api/node/threat_actor/{obj.uuid}")

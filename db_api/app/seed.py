@@ -10,7 +10,6 @@ from core.config import is_in_testing_mode
 from db import crud
 from db.database import get_db
 from db.schemas.alert_disposition import AlertDisposition
-from db.schemas.alert_type import AlertType
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_risk_level import EventRiskLevel
@@ -24,6 +23,7 @@ from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.seed import Seed
+from db.schemas.submission_type import SubmissionType
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
 
@@ -81,17 +81,12 @@ def seed(db: Session):
             db.add(queues[value])
             print(f"Adding queue: {value}")
 
-    # Add the rest of the objects from the config into the database
     if "alert_disposition" in data:
         for rank, value in enumerate(data["alert_disposition"]):
             db.add(AlertDisposition(rank=rank, value=value))
             print(f"Adding alert disposition: {rank}:{value}")
 
-    if "alert_type" in data:
-        for value in data["alert_type"]:
-            db.add(AlertType(value=value))
-            print(f"Adding alert type: {value}")
-
+    # Add the rest of the objects from the config into the database
     if "event_prevention_tool" in data:
         add_queueable_values(
             db=db,
@@ -166,6 +161,11 @@ def seed(db: Session):
         for value in data["observable_type"]:
             db.add(ObservableType(value=value))
             print(f"Adding observable type: {value}")
+
+    if "submission_type" in data:
+        for value in data["submission_type"]:
+            db.add(SubmissionType(value=value))
+            print(f"Adding submission type: {value}")
 
     user_roles = {}
     if "user_role" in data:

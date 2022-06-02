@@ -71,7 +71,7 @@ def create_or_read(
     parent_analysis.child_observables.append(obj)
 
     # Update the alert versions that contain the parent analysis
-    crud.alert.update_alert_versions(analysis_uuid=parent_analysis.uuid, db=db)
+    crud.submission.update_submission_versions(analysis_uuid=parent_analysis.uuid, db=db)
 
     db.flush()
     return obj
