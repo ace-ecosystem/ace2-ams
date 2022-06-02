@@ -8,4 +8,4 @@ name=${path##*/}
 name=$(echo $name | awk '{print tolower($0)}')
 
 # build module image
-docker build --build-arg module=$path -t analysis-module-$name -f aws/Dockerfile.analysis_module .
+docker build --build-arg module=$path -t module-$name -f aws/Dockerfile.module .
