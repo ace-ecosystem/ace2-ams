@@ -1,2 +1,2 @@
 pip3 install cryptography
-yum install file -y
+dnf debuginfo-install -y --setopt=install_weak_deps=False file

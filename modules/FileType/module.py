@@ -1,6 +1,5 @@
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
-import logging
 from pydantic import Field
 import subprocess
 from typing import Optional
@@ -16,7 +15,6 @@ class FileType(Analysis):
         mime_type: Optional[str] = Field(default=None, description='mime type of the target')
 
     def execute(self, target):
-        logging.warning('doing the thing')
         # get the human readable type
         process = subprocess.run(['file', '-b', '-L', target.path], capture_output=True, text=True)
         # TODO: handle stderr
@@ -162,9 +160,3 @@ class FileType(Analysis):
         is_office_document |= 'rtf' in target.tags
         if is_office_document:
             target.add(Tag, 'microsoft_office')
-
-        return Callback(self.next_thing, seconds=180)
-
-    def next_thing(self, target):
-        logging.warning('doing the next thing')
-        self.summary = 'it worked!'
