@@ -1,8 +1,11 @@
 FROM public.ecr.aws/lambda/python:3.9
 
 # copy entire repo over (this gets deleted by the final image to save space)
-ADD . ace2
+ADD lib/ace2 ace2
 
 # install and test the ace2 library
-RUN pip3 install ace2/lib/ace2
-RUN pytest ace2/lib/ace2
+RUN pip3 install ./ace2
+RUN pytest ace2
+
+# remove the ace2 lib to reduce image size
+RUN rm -rf ace2
