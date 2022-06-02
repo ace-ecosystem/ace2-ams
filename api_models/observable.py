@@ -45,6 +45,10 @@ class ObservableCreate(NodeCreate, ObservableBase):
         default_factory=list, description="A list of analysis results to add as children to the observable"
     )
 
+    detection_points: list[type_str] = Field(
+        default_factory=list, description="A list of detection points to add to the observable"
+    )
+
     directives: list[type_str] = Field(
         default_factory=list, description="A list of directives to add to the observable"
     )

@@ -31,7 +31,7 @@ def test_update_invalid_uuid(client):
 
 
 def test_update_duplicate_node_uuid_value(client, db):
-    alert = factory.alert.create(db=db, history_username="analyst")
+    alert = factory.submission.create(db=db, history_username="analyst")
     observable = factory.observable.create_or_read(
         type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )
@@ -57,7 +57,7 @@ def test_update_nonexistent_uuid(client):
 
 def test_update_observables(client, db):
     # Create a detection point
-    alert = factory.alert.create(db=db, history_username="analyst")
+    alert = factory.submission.create(db=db, history_username="analyst")
     observable = factory.observable.create_or_read(
         type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )

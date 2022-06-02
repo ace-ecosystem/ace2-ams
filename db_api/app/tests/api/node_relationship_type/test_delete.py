@@ -25,8 +25,8 @@ def test_delete_used(client, db):
     obj = factory.node_relationship_type.create_or_read(value="test", db=db)
 
     # Assign it to another object
-    alert1 = factory.alert.create(db=db)
-    alert2 = factory.alert.create(db=db)
+    alert1 = factory.submission.create(db=db)
+    alert2 = factory.submission.create(db=db)
     factory.node_relationship.create_or_read(node=alert1, related_node=alert2, type="test", db=db)
 
     # Ensure you cannot delete it now that it is in use

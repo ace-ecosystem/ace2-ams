@@ -29,4 +29,4 @@ num_alerts = int(sys.argv[2]) if len(sys.argv) == 3 else 1
 db: Session = next(get_db())
 
 for i in range(num_alerts):
-    factory.alert.create_from_json_file(db=db, json_path=json_path, alert_name=f"Manual Alert {i}")
+    factory.submission.create_from_json_file(db=db, json_path=json_path, submission_name=f"Manual Alert {i}")

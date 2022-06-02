@@ -27,7 +27,7 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete(client, db):
     # Create a detection point
-    alert = factory.alert.create(db=db, history_username="analyst")
+    alert = factory.submission.create(db=db, history_username="analyst")
     observable = factory.observable.create_or_read(
         type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )

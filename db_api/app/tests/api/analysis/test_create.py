@@ -75,9 +75,9 @@ def test_create_invalid_fields(client, key, value):
 
 
 def test_create_nonexistent_analysis_module_type(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     observable = factory.observable.create_or_read(
-        type="fqdn", value="localhost", parent_analysis=alert.root_analysis, db=db
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
     )
 
     create = client.post(
@@ -85,7 +85,7 @@ def test_create_nonexistent_analysis_module_type(client, db):
         json={
             "analysis_module_type_uuid": str(uuid.uuid4()),
             "run_time": str(crud.helpers.utcnow()),
-            "submission_uuid": str(alert.uuid),
+            "submission_uuid": str(submission.uuid),
             "target_uuid": str(observable.uuid),
         },
     )
@@ -93,10 +93,10 @@ def test_create_nonexistent_analysis_module_type(client, db):
 
 
 def test_create_nonexistent_submission(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
     observable = factory.observable.create_or_read(
-        type="fqdn", value="localhost", parent_analysis=alert.root_analysis, db=db
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
     )
 
     create = client.post(
@@ -115,10 +115,10 @@ def test_create_nonexistent_submission(client, db):
 
 
 def test_create_invalid_email_analysis(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="Email Analysis", version="1.0.0", db=db)
     observable = factory.observable.create_or_read(
-        type="fqdn", value="localhost", parent_analysis=alert.root_analysis, db=db
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
     )
 
     # Create the analysis - it is missing the required "from_address" key
@@ -139,7 +139,7 @@ def test_create_invalid_email_analysis(client, db):
                 }
             ),
             "run_time": str(crud.helpers.utcnow()),
-            "submission_uuid": str(alert.uuid),
+            "submission_uuid": str(submission.uuid),
             "target_uuid": str(observable.uuid),
         },
     )
@@ -148,12 +148,12 @@ def test_create_invalid_email_analysis(client, db):
 
 
 def test_create_invalid_faqueue_analysis(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(
         value="FA Queue Analysis", version="1.0.0", db=db
     )
     observable = factory.observable.create_or_read(
-        type="fqdn", value="localhost", parent_analysis=alert.root_analysis, db=db
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
     )
 
     # Create the analysis - it is missing the required "hits" key
@@ -163,7 +163,7 @@ def test_create_invalid_faqueue_analysis(client, db):
             "analysis_module_type_uuid": str(analysis_module_type.uuid),
             "details": json.dumps({"faqueue_hits": 100, "link": "https://example.com"}),
             "run_time": str(crud.helpers.utcnow()),
-            "submission_uuid": str(alert.uuid),
+            "submission_uuid": str(submission.uuid),
             "target_uuid": str(observable.uuid),
         },
     )
@@ -172,10 +172,10 @@ def test_create_invalid_faqueue_analysis(client, db):
 
 
 def test_create_invalid_sandbox_analysis(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="Sandbox Analysis", version="1.0.0", db=db)
     observable = factory.observable.create_or_read(
-        type="fqdn", value="localhost", parent_analysis=alert.root_analysis, db=db
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
     )
 
     # Create the analysis - it is missing the required "filename" key
@@ -185,7 +185,7 @@ def test_create_invalid_sandbox_analysis(client, db):
             "analysis_module_type_uuid": str(analysis_module_type.uuid),
             "details": json.dumps({"sandbox_url": "http://url.to.sandbox.report"}),
             "run_time": str(crud.helpers.utcnow()),
-            "submission_uuid": str(alert.uuid),
+            "submission_uuid": str(submission.uuid),
             "target_uuid": str(observable.uuid),
         },
     )
@@ -194,10 +194,10 @@ def test_create_invalid_sandbox_analysis(client, db):
 
 
 def test_create_invalid_user_analysis(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="User Analysis", version="1.0.0", db=db)
     observable = factory.observable.create_or_read(
-        type="fqdn", value="localhost", parent_analysis=alert.root_analysis, db=db
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
     )
 
     # Create the analysis - it is missing the required "user_id" key
@@ -207,7 +207,7 @@ def test_create_invalid_user_analysis(client, db):
             "analysis_module_type_uuid": str(analysis_module_type.uuid),
             "details": json.dumps({"username": "goodguy", "email": "goodguy@company.com"}),
             "run_time": str(crud.helpers.utcnow()),
-            "submission_uuid": str(alert.uuid),
+            "submission_uuid": str(submission.uuid),
             "target_uuid": str(observable.uuid),
         },
     )
@@ -242,10 +242,10 @@ def test_create_invalid_user_analysis(client, db):
     ],
 )
 def test_create_valid_optional_fields(client, db, key, value):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
     observable = factory.observable.create_or_read(
-        type="fqdn", value="localhost", parent_analysis=alert.root_analysis, db=db
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
     )
     factory.observable_type.create_or_read(value="ipv4", db=db)
 
@@ -255,7 +255,7 @@ def test_create_valid_optional_fields(client, db, key, value):
         json={
             "analysis_module_type_uuid": str(analysis_module_type.uuid),
             "run_time": str(crud.helpers.utcnow()),
-            "submission_uuid": str(alert.uuid),
+            "submission_uuid": str(submission.uuid),
             "target_uuid": str(observable.uuid),
             key: value,
         },
@@ -276,10 +276,10 @@ def test_create_valid_optional_fields(client, db, key, value):
 
 
 def test_create_valid_required_fields(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
     observable = factory.observable.create_or_read(
-        type="fqdn", value="localhost", parent_analysis=alert.root_analysis, db=db
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
     )
 
     # Create the object
@@ -288,7 +288,7 @@ def test_create_valid_required_fields(client, db):
         json={
             "analysis_module_type_uuid": str(analysis_module_type.uuid),
             "run_time": str(crud.helpers.utcnow()),
-            "submission_uuid": str(alert.uuid),
+            "submission_uuid": str(submission.uuid),
             "target_uuid": str(observable.uuid),
         },
     )
@@ -300,11 +300,11 @@ def test_create_valid_required_fields(client, db):
 
 
 def test_cached_analysis(client, db):
-    # Create the first alert and add the analysis to it.
-    alert = factory.alert.create(db=db)
+    # Create the first submission and add the analysis to it.
+    submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
     observable = factory.observable.create_or_read(
-        type="fqdn", value="localhost", parent_analysis=alert.root_analysis, db=db
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
     )
 
     # Create the analysis
@@ -313,14 +313,14 @@ def test_cached_analysis(client, db):
         json={
             "analysis_module_type_uuid": str(analysis_module_type.uuid),
             "run_time": str(crud.helpers.utcnow()),
-            "submission_uuid": str(alert.uuid),
+            "submission_uuid": str(submission.uuid),
             "target_uuid": str(observable.uuid),
         },
     )
     assert create1.status_code == status.HTTP_201_CREATED
 
-    # Create a second alert with the same observable and analysis type. This should be cached.
-    alert2 = factory.alert.create(db=db)
+    # Create a second submission with the same observable and analysis type. This should be cached.
+    submission2 = factory.submission.create(db=db)
 
     # Create the analysis
     create2 = client.post(
@@ -328,7 +328,7 @@ def test_cached_analysis(client, db):
         json={
             "analysis_module_type_uuid": str(analysis_module_type.uuid),
             "run_time": str(crud.helpers.utcnow()),
-            "submission_uuid": str(alert2.uuid),
+            "submission_uuid": str(submission2.uuid),
             "target_uuid": str(observable.uuid),
         },
     )
@@ -340,13 +340,13 @@ def test_cached_analysis(client, db):
 
 
 def test_expired_cached_analysis(client, db):
-    # Create the first alert and add the analysis to it.
-    alert = factory.alert.create(db=db)
+    # Create the first submission and add the analysis to it.
+    submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(
         value="test_type", version="1.0.0", cache_seconds=0, db=db
     )
     observable = factory.observable.create_or_read(
-        type="fqdn", value="localhost", parent_analysis=alert.root_analysis, db=db
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
     )
 
     # Create the analysis
@@ -355,15 +355,15 @@ def test_expired_cached_analysis(client, db):
         json={
             "analysis_module_type_uuid": str(analysis_module_type.uuid),
             "run_time": str(crud.helpers.utcnow()),
-            "submission_uuid": str(alert.uuid),
+            "submission_uuid": str(submission.uuid),
             "target_uuid": str(observable.uuid),
         },
     )
     assert create1.status_code == status.HTTP_201_CREATED
 
-    # Create a second alert with the same observable and analysis type. The cache is expired since the analysis
+    # Create a second submission with the same observable and analysis type. The cache is expired since the analysis
     # module type's cache_seconds was set to 0.
-    alert2 = factory.alert.create(db=db)
+    submission2 = factory.submission.create(db=db)
 
     # Create the analysis
     create2 = client.post(
@@ -371,7 +371,7 @@ def test_expired_cached_analysis(client, db):
         json={
             "analysis_module_type_uuid": str(analysis_module_type.uuid),
             "run_time": str(crud.helpers.utcnow()),
-            "submission_uuid": str(alert2.uuid),
+            "submission_uuid": str(submission2.uuid),
             "target_uuid": str(observable.uuid),
         },
     )

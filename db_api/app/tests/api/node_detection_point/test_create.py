@@ -48,7 +48,7 @@ def test_create_nonexistent_node_uuid(client, db):
 
 
 def test_create_verify_history_observables(client, db):
-    alert = factory.alert.create(db=db, history_username="analyst")
+    alert = factory.submission.create(db=db, history_username="analyst")
     observable = factory.observable.create_or_read(
         type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )
@@ -75,21 +75,21 @@ def test_create_verify_history_observables(client, db):
 
 
 def test_create_multiple(client, db):
-    alert1 = factory.alert.create(db=db)
+    alert1 = factory.submission.create(db=db)
     obs1 = factory.observable.create_or_read(
         type="test_type", value="test_value1", parent_analysis=alert1.root_analysis, db=db
     )
     initial_alert1_version = alert1.version
     initial_obs1_version = obs1.version
 
-    alert2 = factory.alert.create(db=db)
+    alert2 = factory.submission.create(db=db)
     obs2 = factory.observable.create_or_read(
         type="test_type", value="test_value2", parent_analysis=alert2.root_analysis, db=db
     )
     initial_alert2_version = alert2.version
     initial_obs2_version = obs2.version
 
-    alert3 = factory.alert.create(db=db)
+    alert3 = factory.submission.create(db=db)
     obs3 = factory.observable.create_or_read(
         type="test_type", value="test_value3", parent_analysis=alert3.root_analysis, db=db
     )
@@ -128,7 +128,7 @@ def test_create_multiple(client, db):
 
 
 def test_create_valid_required_fields(client, db):
-    alert = factory.alert.create(db=db)
+    alert = factory.submission.create(db=db)
     initial_node_version = alert.version
 
     # Create a detection point

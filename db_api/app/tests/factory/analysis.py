@@ -7,14 +7,14 @@ from typing import Optional
 from api_models.analysis import AnalysisCreate
 from api_models.observable import ObservableCreate
 from db import crud
-from db.schemas.alert import Alert
 from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.observable import Observable
+from db.schemas.submission import Submission
 
 
 def create_or_read(
     analysis_module_type: AnalysisModuleType,
-    submission: Alert,
+    submission: Submission,
     target: Observable,
     db: Session,
     child_observables: list[ObservableCreate] = None,

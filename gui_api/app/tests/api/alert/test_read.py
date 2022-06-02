@@ -33,33 +33,35 @@ from uuid import uuid4
     ],
 )
 def test_get_all_alerts(client_valid_access_token, requests_mock, param, value):
-    params = urlencode({"limit": 50, "offset": 0, param: value})
+    params = urlencode({"limit": 50, "offset": 0, "alert": True, param: value})
 
-    requests_mock.get(f"http://db-api/api/alert/?{params}", json={"items": [], "total": 0, "limit": 50, "offset": 0})
+    requests_mock.get(
+        f"http://db-api/api/submission/?{params}", json={"items": [], "total": 0, "limit": 50, "offset": 0}
+    )
 
     client_valid_access_token.get(f"/api/alert/?{params}")
 
     assert (len(requests_mock.request_history)) == 2
     assert requests_mock.request_history[1].method == "GET"
-    assert unquote_plus(requests_mock.request_history[1].url) == unquote_plus(f"http://db-api/api/alert/?{params}")
+    assert unquote_plus(requests_mock.request_history[1].url) == unquote_plus(f"http://db-api/api/submission/?{params}")
 
 
 def test_get_alert(client_valid_access_token, requests_mock):
     alert_uuid = uuid4()
-    requests_mock.get(f"http://db-api/api/alert/{alert_uuid}", json={})
+    requests_mock.get(f"http://db-api/api/submission/{alert_uuid}", json={})
 
     client_valid_access_token.get(f"/api/alert/{alert_uuid}")
 
     assert (len(requests_mock.request_history)) == 2
     assert requests_mock.request_history[1].method == "GET"
-    assert requests_mock.request_history[1].url == f"http://db-api/api/alert/{alert_uuid}"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/submission/{alert_uuid}"
 
 
 def test_get_alert_history(client_valid_access_token, requests_mock):
     alert_uuid = uuid4()
     params = urlencode({"limit": 50, "offset": 0})
     requests_mock.get(
-        f"http://db-api/api/alert/{alert_uuid}/history?{params}",
+        f"http://db-api/api/submission/{alert_uuid}/history?{params}",
         json={"items": [], "total": 0, "limit": 50, "offset": 0},
     )
 
@@ -67,13 +69,13 @@ def test_get_alert_history(client_valid_access_token, requests_mock):
 
     assert (len(requests_mock.request_history)) == 2
     assert requests_mock.request_history[1].method == "GET"
-    assert requests_mock.request_history[1].url == f"http://db-api/api/alert/{alert_uuid}/history?{params}"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/submission/{alert_uuid}/history?{params}"
 
 
 def test_get_alerts_observables(client_valid_access_token, requests_mock):
     alert_uuid = str(uuid4())
     requests_mock.post(
-        "http://db-api/api/alert/observables",
+        "http://db-api/api/submission/observables",
         json=[
             {
                 "type": {"uuid": str(uuid4()), "value": "test_type"},
@@ -93,4 +95,4 @@ def test_get_alerts_observables(client_valid_access_token, requests_mock):
 
     assert (len(requests_mock.request_history)) == 2
     assert requests_mock.request_history[1].method == "POST"
-    assert requests_mock.request_history[1].url == "http://db-api/api/alert/observables"
+    assert requests_mock.request_history[1].url == "http://db-api/api/submission/observables"

@@ -3,8 +3,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from typing import Optional
 from uuid import UUID
-from api_models.node_relationship import NodeRelationshipCreate
 
+from api_models.node_detection_point import NodeDetectionPointCreate
+from api_models.node_relationship import NodeRelationshipCreate
 from api_models.observable import ObservableCreate, ObservableUpdate
 from db import crud
 from db.schemas.analysis import Analysis
@@ -22,7 +23,14 @@ def create_or_read(
         model=model,
         db_node_type=Observable,
         db=db,
-        exclude={"analyses", "history_username", "observable_relationships", "parent_analysis_uuid", "redirection"},
+        exclude={
+            "analyses",
+            "detection_points",
+            "history_username",
+            "observable_relationships",
+            "parent_analysis_uuid",
+            "redirection",
+        },
     )
 
     # Set the various observable properties
@@ -45,6 +53,15 @@ def create_or_read(
             )
     else:
         obj = read_by_type_value(type=model.type, value=model.value, db=db)
+
+    # Create any detection points that were given
+    for detection_point in model.detection_points:
+        crud.node_detection_point.create_or_read(
+            model=NodeDetectionPointCreate(
+                node_uuid=obj.uuid, value=detection_point, history_username=model.history_username
+            ),
+            db=db,
+        )
 
     # Create any relationships that were given
     for relationship in model.observable_relationships:
@@ -71,7 +88,7 @@ def create_or_read(
     parent_analysis.child_observables.append(obj)
 
     # Update the alert versions that contain the parent analysis
-    crud.alert.update_alert_versions(analysis_uuid=parent_analysis.uuid, db=db)
+    crud.submission.update_submission_versions(analysis_uuid=parent_analysis.uuid, db=db)
 
     db.flush()
     return obj

@@ -70,7 +70,7 @@ def test_summary_detection_point(client, db):
     #
     # alert2
     #   o1 - detection point 2, detection point 3
-    alert1 = factory.alert.create(db=db, event=event)
+    alert1 = factory.submission.create(db=db, event=event)
     alert1_o1 = factory.observable.create_or_read(
         type="test_type",
         value="test_value",
@@ -80,7 +80,7 @@ def test_summary_detection_point(client, db):
     factory.node_detection_point.create_or_read(node=alert1_o1, value="detection point 1", db=db)
     factory.node_detection_point.create_or_read(node=alert1_o1, value="detection point 2", db=db)
 
-    alert2 = factory.alert.create(db=db, event=event)
+    alert2 = factory.submission.create(db=db, event=event)
     alert2_o1 = factory.observable.create_or_read(
         type="test_type",
         value="test_value2",
@@ -126,7 +126,7 @@ def test_summary_email(client, db):
     # alert3
     #  o1
     #    a1 - email analysis 2
-    alert1 = factory.alert.create(db=db, event=event)
+    alert1 = factory.submission.create(db=db, event=event)
     alert1_o1 = factory.observable.create_or_read(
         type="file",
         value="6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -150,7 +150,7 @@ def test_summary_email(client, db):
         },
     )
 
-    alert2 = factory.alert.create(db=db, event=event)
+    alert2 = factory.submission.create(db=db, event=event)
     alert2_o1 = factory.observable.create_or_read(
         type="file",
         value="d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
@@ -176,7 +176,7 @@ def test_summary_email(client, db):
     )
 
     # Add a third alert that has the exact same analysis as one of the others
-    alert3 = factory.alert.create(db=db, event=event)
+    alert3 = factory.submission.create(db=db, event=event)
     alert3_o1 = factory.observable.create_or_read(
         type="file",
         value="d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
@@ -201,7 +201,7 @@ def test_summary_email(client, db):
     )
 
     # Add a fourth alert that is not part of the event
-    alert4 = factory.alert.create(db=db)
+    alert4 = factory.submission.create(db=db)
     alert4_o1 = factory.observable.create_or_read(
         type="file",
         value="4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
@@ -251,7 +251,7 @@ def test_summary_email_headers_body(client, db):
     # alert2
     #  o1
     #    a1 - email analysis 2
-    alert1 = factory.alert.create(db=db, event=event)
+    alert1 = factory.submission.create(db=db, event=event)
     alert1_o1 = factory.observable.create_or_read(
         type="file",
         value="6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
@@ -278,7 +278,7 @@ def test_summary_email_headers_body(client, db):
     )
 
     # The second alert's email has an earlier time
-    alert2 = factory.alert.create(db=db, event=event)
+    alert2 = factory.submission.create(db=db, event=event)
     alert2_o1 = factory.observable.create_or_read(
         type="file",
         value="d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35",
@@ -305,7 +305,7 @@ def test_summary_email_headers_body(client, db):
     )
 
     # Add an alert that is not part of the event
-    alert3 = factory.alert.create(db=db)
+    alert3 = factory.submission.create(db=db)
     alert3_o1 = factory.observable.create_or_read(
         type="file",
         value="4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce",
@@ -360,7 +360,7 @@ def test_summary_observable(client, db):
     #    a1 - FA Q
     #  o2 - 192.168.1.1
     #    a2 - FA Q
-    alert1 = factory.alert.create(db=db, event=event)
+    alert1 = factory.submission.create(db=db, event=event)
     alert1_o1 = factory.observable.create_or_read(
         type="fqdn", value="localhost.localdomain", parent_analysis=alert1.root_analysis, db=db
     )
@@ -389,7 +389,7 @@ def test_summary_observable(client, db):
         details={"link": "https://url.to.search/query=asdf", "hits": 10},
     )
 
-    alert2 = factory.alert.create(db=db, event=event)
+    alert2 = factory.submission.create(db=db, event=event)
     alert2_o1 = factory.observable.create_or_read(
         type="ipv4", value="127.0.0.1", parent_analysis=alert2.root_analysis, db=db
     )
@@ -413,7 +413,7 @@ def test_summary_observable(client, db):
     )
 
     # Add a third alert that is not part of the event
-    alert3 = factory.alert.create(db=db)
+    alert3 = factory.submission.create(db=db)
     alert3_o1 = factory.observable.create_or_read(
         type="ipv4", value="172.16.1.1", parent_analysis=alert3.root_analysis, db=db
     )
@@ -552,7 +552,7 @@ def test_summary_sandbox(client, db):
     #     a1 - Sandbox Analysis (malware.exe)
     #   o2
     #     a2 - Sandbox Analysis (othermalware.exe)
-    alert1 = factory.alert.create(db=db, event=event)
+    alert1 = factory.submission.create(db=db, event=event)
     alert1_o1 = factory.observable.create_or_read(
         type="file", value="malware.exe", parent_analysis=alert1.root_analysis, db=db
     )
@@ -564,7 +564,7 @@ def test_summary_sandbox(client, db):
         details=json.loads(sample1_details.json()),
     )
 
-    alert2 = factory.alert.create(db=db, event=event)
+    alert2 = factory.submission.create(db=db, event=event)
     alert2_o1 = factory.observable.create_or_read(
         type="file", value="malware.exe", parent_analysis=alert2.root_analysis, db=db
     )
@@ -587,7 +587,7 @@ def test_summary_sandbox(client, db):
     )
 
     # Add a third alert that is not part of the event
-    alert3 = factory.alert.create(db=db)
+    alert3 = factory.submission.create(db=db)
     alert3_o1 = factory.observable.create_or_read(
         type="file", value="good.exe", parent_analysis=alert3.root_analysis, db=db
     )
@@ -629,7 +629,7 @@ def test_summary_url_domains(client, db):
     # alert2
     #  o1 - https://example.com/index.html
     #  o2 - https://example3.com
-    alert1 = factory.alert.create(db=db, event=event)
+    alert1 = factory.submission.create(db=db, event=event)
     alert1_o1 = factory.observable.create_or_read(
         type="url", value="https://example.com", parent_analysis=alert1.root_analysis, db=db
     )
@@ -642,7 +642,7 @@ def test_summary_url_domains(client, db):
     factory.observable.create_or_read(type="url", value="https://example2.com", parent_analysis=alert1_a1, db=db)
     factory.observable.create_or_read(type="url", value="https://example.com", parent_analysis=alert1_a1, db=db)
 
-    alert2 = factory.alert.create(db=db, event=event)
+    alert2 = factory.submission.create(db=db, event=event)
     factory.observable.create_or_read(
         type="url", value="https://example.com/index.html", parent_analysis=alert2.root_analysis, db=db
     )
@@ -651,7 +651,7 @@ def test_summary_url_domains(client, db):
     )
 
     # Add a third alert that is not part of the event
-    alert3 = factory.alert.create(db=db)
+    alert3 = factory.submission.create(db=db)
     factory.observable.create_or_read(
         type="url", value="https://example4.com", parent_analysis=alert3.root_analysis, db=db
     )
@@ -694,7 +694,7 @@ def test_summary_user(client, db):
     #  o1
     #    a1 - user1 analysis
 
-    alert1 = factory.alert.create(db=db, event=event)
+    alert1 = factory.submission.create(db=db, event=event)
     alert1_o1 = factory.observable.create_or_read(
         type="email_address", value="goodguy@company.com", parent_analysis=alert1.root_analysis, db=db
     )
@@ -714,7 +714,7 @@ def test_summary_user(client, db):
         },
     )
 
-    alert2 = factory.alert.create(db=db, event=event)
+    alert2 = factory.submission.create(db=db, event=event)
     alert2_o1 = factory.observable.create_or_read(
         type="email_address", value="otherguy@company.com", parent_analysis=alert2.root_analysis, db=db
     )
@@ -734,7 +734,7 @@ def test_summary_user(client, db):
         },
     )
 
-    alert3 = factory.alert.create(db=db, event=event)
+    alert3 = factory.submission.create(db=db, event=event)
     alert3_o1 = factory.observable.create_or_read(
         type="email_address", value="goodguy@company.com", parent_analysis=alert3.root_analysis, db=db
     )
@@ -755,7 +755,7 @@ def test_summary_user(client, db):
     )
 
     # Add a fourth alert that is not part of the event
-    alert4 = factory.alert.create(db=db)
+    alert4 = factory.submission.create(db=db)
     alert4_o1 = factory.observable.create_or_read(
         type="email_address", value="dude@company.com", parent_analysis=alert4.root_analysis, db=db
     )
@@ -794,7 +794,7 @@ def test_analysis_module_types(client, db):
     assert get.json()["analysis_types"] == []
 
     # Add some alerts with analyses to the event
-    alert1 = factory.alert.create(db=db, event=event)
+    alert1 = factory.submission.create(db=db, event=event)
     alert1_o1 = factory.observable.create_or_read(
         type="url", value="https://127.0.0.1", parent_analysis=alert1.root_analysis, db=db
     )
@@ -812,7 +812,7 @@ def test_analysis_module_types(client, db):
         target=alert1_o2,
     )
 
-    alert2 = factory.alert.create(db=db, event=event)
+    alert2 = factory.submission.create(db=db, event=event)
     alert2_o1 = factory.observable.create_or_read(
         type="url", value="https://127.0.0.1/malware.exe", parent_analysis=alert2.root_analysis, db=db
     )
@@ -847,7 +847,7 @@ def test_auto_alert_time(client, db):
 
     # Add an alert to the event
     now = datetime.utcnow()
-    alert1 = factory.alert.create(db=db, event=event, insert_time=now)
+    alert1 = factory.submission.create(db=db, event=event, insert_time=now)
 
     # Verify the auto_alert_time
     get = client.get(f"/api/event/{event.uuid}")
@@ -855,7 +855,7 @@ def test_auto_alert_time(client, db):
 
     # Add a second alert to the event with an earlier insert time
     earlier = now - timedelta(seconds=5)
-    alert2 = factory.alert.create(db=db, event=event, insert_time=earlier)
+    alert2 = factory.submission.create(db=db, event=event, insert_time=earlier)
 
     # Verify the new auto_alert_time
     get = client.get(f"/api/event/{event.uuid}")
@@ -872,7 +872,7 @@ def test_auto_disposition_time(client, db):
 
     # Add an alert to the event
     now = datetime.utcnow()
-    alert1 = factory.alert.create(
+    alert1 = factory.submission.create(
         db=db, event=event, disposition="DELIVERY", update_time=now, history_username="analyst"
     )
 
@@ -882,7 +882,7 @@ def test_auto_disposition_time(client, db):
 
     # Add a second alert to the event with an earlier disposition time
     earlier = now - timedelta(seconds=5)
-    alert2 = factory.alert.create(
+    alert2 = factory.submission.create(
         db=db, event=event, disposition="DELIVERY", update_time=earlier, history_username="analyst"
     )
 
@@ -901,7 +901,7 @@ def test_auto_event_time(client, db):
 
     # Add an alert to the event
     now = datetime.utcnow()
-    alert1 = factory.alert.create(db=db, event=event, event_time=now)
+    alert1 = factory.submission.create(db=db, event=event, event_time=now)
 
     # Verify the auto_event_time
     get = client.get(f"/api/event/{event.uuid}")
@@ -909,7 +909,7 @@ def test_auto_event_time(client, db):
 
     # Add a second alert to the event with an earlier insert time
     earlier = now - timedelta(seconds=5)
-    alert2 = factory.alert.create(db=db, event=event, event_time=earlier)
+    alert2 = factory.submission.create(db=db, event=event, event_time=earlier)
 
     # Verify the new auto_event_time
     get = client.get(f"/api/event/{event.uuid}")
@@ -926,7 +926,7 @@ def test_auto_ownership_time(client, db):
 
     # Add an alert to the event
     now = datetime.utcnow()
-    alert1 = factory.alert.create(db=db, event=event, owner="alice", update_time=now, history_username="analyst")
+    alert1 = factory.submission.create(db=db, event=event, owner="alice", update_time=now, history_username="analyst")
 
     # Verify the auto_ownership_time
     get = client.get(f"/api/event/{event.uuid}")
@@ -934,7 +934,9 @@ def test_auto_ownership_time(client, db):
 
     # Add a second alert to the event with an earlier ownership time
     earlier = now - timedelta(seconds=5)
-    alert2 = factory.alert.create(db=db, event=event, owner="alice", update_time=earlier, history_username="analyst")
+    alert2 = factory.submission.create(
+        db=db, event=event, owner="alice", update_time=earlier, history_username="analyst"
+    )
 
     # Verify the new auto_ownership_time
     get = client.get(f"/api/event/{event.uuid}")
@@ -954,14 +956,14 @@ def test_disposition(client, db):
     assert get.json()["disposition"] is None
 
     # Add an alert to the event
-    factory.alert.create(db=db, event=event, disposition="FALSE_POSITIVE")
+    factory.submission.create(db=db, event=event, disposition="FALSE_POSITIVE")
 
     # Verify the disposition
     get = client.get(f"/api/event/{event.uuid}")
     assert get.json()["disposition"]["value"] == "FALSE_POSITIVE"
 
     # Add a second alert to the event with a higher disposition
-    factory.alert.create(db=db, event=event, disposition="DELIVERY")
+    factory.submission.create(db=db, event=event, disposition="DELIVERY")
 
     # Verify the new disposition
     get = client.get(f"/api/event/{event.uuid}")
@@ -1008,13 +1010,13 @@ def test_get_all_empty(client):
 
 def test_get_filter_alert_time_after(client, db):
     event1 = factory.event.create_or_read(name="event1", db=db)
-    factory.alert.create(event=event1, insert_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    factory.submission.create(event=event1, insert_time=datetime.utcnow() - timedelta(seconds=5), db=db)
 
     event2 = factory.event.create_or_read(name="event2", db=db)
-    alert2 = factory.alert.create(event=event2, insert_time=datetime.utcnow(), db=db)
+    alert2 = factory.submission.create(event=event2, insert_time=datetime.utcnow(), db=db)
 
     event3 = factory.event.create_or_read(name="event3", db=db)
-    alert3 = factory.alert.create(event=event3, insert_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    alert3 = factory.submission.create(event=event3, insert_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1032,13 +1034,13 @@ def test_get_filter_alert_time_after(client, db):
 
 def test_get_filter_alert_time_before(client, db):
     event1 = factory.event.create_or_read(name="event1", db=db)
-    alert1 = factory.alert.create(event=event1, insert_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    alert1 = factory.submission.create(event=event1, insert_time=datetime.utcnow() - timedelta(seconds=5), db=db)
 
     event2 = factory.event.create_or_read(name="event2", db=db)
-    alert2 = factory.alert.create(event=event2, insert_time=datetime.utcnow(), db=db)
+    alert2 = factory.submission.create(event=event2, insert_time=datetime.utcnow(), db=db)
 
     event3 = factory.event.create_or_read(name="event3", db=db)
-    factory.alert.create(event=event3, insert_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    factory.submission.create(event=event3, insert_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1128,10 +1130,10 @@ def test_get_filter_created_time_before(client, db):
 
 def test_get_filter_disposition(client, db):
     event1 = factory.event.create_or_read(name="event1", contain_time=datetime.utcnow() - timedelta(seconds=5), db=db)
-    factory.alert.create(event=event1, db=db)
+    factory.submission.create(event=event1, db=db)
 
     event2 = factory.event.create_or_read(name="event2", contain_time=datetime.utcnow(), db=db)
-    factory.alert.create(event=event2, db=db, disposition="FALSE_POSITIVE")
+    factory.submission.create(event=event2, db=db, disposition="FALSE_POSITIVE")
 
     # There should be 2 total events
     get = client.get("/api/event/")
@@ -1151,15 +1153,15 @@ def test_get_filter_disposition_time_after(client, db):
     now = datetime.utcnow()
 
     event1 = factory.event.create_or_read(name="event1", db=db)
-    factory.alert.create(
+    factory.submission.create(
         event=event1, disposition="DELIVERY", update_time=now - timedelta(seconds=5), db=db, history_username="analyst"
     )
 
     event2 = factory.event.create_or_read(name="event2", db=db)
-    factory.alert.create(event=event2, disposition="DELIVERY", update_time=now, db=db, history_username="analyst")
+    factory.submission.create(event=event2, disposition="DELIVERY", update_time=now, db=db, history_username="analyst")
 
     event3 = factory.event.create_or_read(name="event3", db=db)
-    factory.alert.create(
+    factory.submission.create(
         event=event3, disposition="DELIVERY", update_time=now + timedelta(seconds=5), db=db, history_username="analyst"
     )
 
@@ -1180,15 +1182,15 @@ def test_get_filter_disposition_time_before(client, db):
     now = datetime.utcnow()
 
     event1 = factory.event.create_or_read(name="event1", db=db)
-    factory.alert.create(
+    factory.submission.create(
         event=event1, disposition="DELIVERY", update_time=now - timedelta(seconds=5), db=db, history_username="analyst"
     )
 
     event2 = factory.event.create_or_read(name="event2", db=db)
-    factory.alert.create(event=event2, disposition="DELIVERY", update_time=now, db=db, history_username="analyst")
+    factory.submission.create(event=event2, disposition="DELIVERY", update_time=now, db=db, history_username="analyst")
 
     event3 = factory.event.create_or_read(name="event3", db=db)
-    factory.alert.create(
+    factory.submission.create(
         event=event3, disposition="DELIVERY", update_time=now + timedelta(seconds=5), db=db, history_username="analyst"
     )
 
@@ -1236,24 +1238,24 @@ def test_get_filter_name(client, db):
 def test_get_filter_observable(client, db):
     # Create an empty event
     event1 = factory.event.create_or_read(name="event1", db=db)
-    factory.alert.create(db=db, event=event1)
+    factory.submission.create(db=db, event=event1)
 
     # Create some events with one observable
     event2 = factory.event.create_or_read(name="event2", db=db)
-    alert2 = factory.alert.create(db=db, event=event2)
+    alert2 = factory.submission.create(db=db, event=event2)
     factory.observable.create_or_read(
         parent_analysis=alert2.root_analysis, type="test_type1", value="test_value1", db=db
     )
 
     event3 = factory.event.create_or_read(name="event3", db=db)
-    alert3 = factory.alert.create(db=db, event=event3)
+    alert3 = factory.submission.create(db=db, event=event3)
     factory.observable.create_or_read(
         parent_analysis=alert3.root_analysis, type="test_type2", value="test_value2", db=db
     )
 
     # Create an event with multiple observables
     event4 = factory.event.create_or_read(name="event4", db=db)
-    alert4 = factory.alert.create(db=db, event=event4)
+    alert4 = factory.submission.create(db=db, event=event4)
     factory.observable.create_or_read(
         parent_analysis=alert4.root_analysis, type="test_type1", value="test_value_asdf", db=db
     )
@@ -1283,18 +1285,18 @@ def test_get_filter_observable(client, db):
 def test_get_filter_observable_types(client, db):
     # Create an empty event
     event1 = factory.event.create_or_read(name="event1", db=db)
-    factory.alert.create(db=db, event=event1)
+    factory.submission.create(db=db, event=event1)
 
     # Create an event with one observable
     event2 = factory.event.create_or_read(name="event2", db=db)
-    alert2 = factory.alert.create(db=db, event=event2)
+    alert2 = factory.submission.create(db=db, event=event2)
     factory.observable.create_or_read(
         parent_analysis=alert2.root_analysis, type="test_type1", value="test_value1", db=db
     )
 
     # Create an alert with multiple observables
     event3 = factory.event.create_or_read(name="event3", db=db)
-    alert3 = factory.alert.create(db=db, event=event3)
+    alert3 = factory.submission.create(db=db, event=event3)
     factory.observable.create_or_read(
         parent_analysis=alert3.root_analysis, type="test_type1", value="test_value_asdf", db=db
     )
@@ -1324,24 +1326,24 @@ def test_get_filter_observable_types(client, db):
 def test_get_filter_observable_value(client, db):
     # Create an empty event
     event1 = factory.event.create_or_read(name="event1", db=db)
-    factory.alert.create(db=db, event=event1)
+    factory.submission.create(db=db, event=event1)
 
     # Create some alerts with one observable
     event2 = factory.event.create_or_read(name="event2", db=db)
-    alert2 = factory.alert.create(db=db, event=event2)
+    alert2 = factory.submission.create(db=db, event=event2)
     factory.observable.create_or_read(
         parent_analysis=alert2.root_analysis, type="test_type1", value="test_value1", db=db
     )
 
     event3 = factory.event.create_or_read(name="event3", db=db)
-    alert3 = factory.alert.create(db=db, event=event3)
+    alert3 = factory.submission.create(db=db, event=event3)
     factory.observable.create_or_read(
         parent_analysis=alert3.root_analysis, type="test_type2", value="test_value2", db=db
     )
 
     # Create an event with multiple observables
     event4 = factory.event.create_or_read(name="event4", db=db)
-    alert4 = factory.alert.create(db=db, event=event4)
+    alert4 = factory.submission.create(db=db, event=event4)
     factory.observable.create_or_read(
         parent_analysis=alert4.root_analysis, type="test_type1", value="test_value_asdf", db=db
     )
@@ -1544,22 +1546,22 @@ def test_get_filter_status(client, db):
 def test_get_filter_tags(client, db):
     # Create an event with a tagged observable
     event1 = factory.event.create_or_read(name="event1", db=db)
-    alert1 = factory.alert.create(event=event1, db=db)
+    alert1 = factory.submission.create(event=event1, db=db)
     factory.observable.create_or_read(
         type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, tags=["obs1"]
     )
 
     # Create an event with an alert with one tag
     event2 = factory.event.create_or_read(name="event2", db=db)
-    factory.alert.create(event=event2, db=db, tags=["tag1"])
+    factory.submission.create(event=event2, db=db, tags=["tag1"])
 
     # Create an event with an alert with two tags
     event3 = factory.event.create_or_read(name="event3", db=db)
-    factory.alert.create(event=event3, db=db, tags=["tag2", "tag3"])
+    factory.submission.create(event=event3, db=db, tags=["tag2", "tag3"])
 
     # Create a tagged event
     event4 = factory.event.create_or_read(name="event4", db=db, tags=["tag4"])
-    factory.alert.create(event=event4, db=db)
+    factory.submission.create(event=event4, db=db)
 
     # There should be 4 total events
     get = client.get("/api/event/")
@@ -1592,16 +1594,16 @@ def test_get_filter_tags(client, db):
 
 def test_get_filter_threat_actors(client, db):
     event1 = factory.event.create_or_read(name="event1", db=db)
-    alert1 = factory.alert.create(event=event1, db=db)
+    alert1 = factory.submission.create(event=event1, db=db)
     factory.observable.create_or_read(
         type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, threat_actors=["bad_guys"]
     )
 
     event2 = factory.event.create_or_read(name="event2", db=db)
-    factory.alert.create(event=event2, db=db, threat_actors=["test_actor"])
+    factory.submission.create(event=event2, db=db, threat_actors=["test_actor"])
 
     event3 = factory.event.create_or_read(name="event3", db=db, threat_actors=["test_actor2"])
-    factory.alert.create(event=event3, db=db)
+    factory.submission.create(event=event3, db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1629,16 +1631,16 @@ def test_get_filter_threat_actors(client, db):
 
 def test_get_filter_threats(client, db):
     event1 = factory.event.create_or_read(name="event1", db=db)
-    alert1 = factory.alert.create(event=event1, db=db)
+    alert1 = factory.submission.create(event=event1, db=db)
     factory.observable.create_or_read(
         type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, threats=["malz"]
     )
 
     event2 = factory.event.create_or_read(name="event2", db=db)
-    factory.alert.create(event=event2, db=db, threats=["threat1"])
+    factory.submission.create(event=event2, db=db, threats=["threat1"])
 
     event3 = factory.event.create_or_read(name="event3", db=db, threats=["threat2", "threat3"])
-    factory.alert.create(event=event3, db=db)
+    factory.submission.create(event=event3, db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1693,13 +1695,13 @@ def test_get_filter_vectors(client, db):
 
 def test_get_multiple_filters(client, db):
     event1 = factory.event.create_or_read(name="event1", db=db, event_type="test_type1")
-    factory.alert.create(db=db, event=event1)
+    factory.submission.create(db=db, event=event1)
 
     event2 = factory.event.create_or_read(name="event2", db=db, event_type="test_type1", prevention_tools=["tool1"])
-    factory.alert.create(db=db, event=event2)
+    factory.submission.create(db=db, event=event2)
 
     event2 = factory.event.create_or_read(name="event2", db=db, event_type="test_type2")
-    factory.alert.create(db=db, event=event2)
+    factory.submission.create(db=db, event=event2)
 
     # There should be 3 total events
     get = client.get("/api/event/")

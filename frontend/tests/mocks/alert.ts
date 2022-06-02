@@ -14,6 +14,7 @@ export const alertCreateFactory = ({
   type = "",
   historyUsername = "analyst",
 }: Partial<alertCreate> = {}): alertCreate => ({
+  alert: true,
   name: name,
   observables: observables,
   queue: queue,
@@ -23,6 +24,7 @@ export const alertCreateFactory = ({
 
 export const alertTreeReadFactory = ({
   children = [],
+  childDetectionPoints = [],
   childTags = [],
   childThreatActors = [],
   childThreats = [],
@@ -49,7 +51,9 @@ export const alertTreeReadFactory = ({
   uuid = "testAlertUuid",
   version = "testAlertVersion",
 }: Partial<alertTreeRead> = {}): alertTreeRead => ({
+  alert: true,
   children: children,
+  childDetectionPoints: childDetectionPoints,
   childTags: childTags,
   childThreatActors: childThreatActors,
   childThreats: childThreats,
@@ -78,6 +82,7 @@ export const alertTreeReadFactory = ({
 });
 
 export const alertReadFactory = ({
+  childDetectionPoints = [],
   childTags = [],
   childThreatActors = [],
   childThreats = [],
@@ -104,6 +109,8 @@ export const alertReadFactory = ({
   uuid = "testAlertUuid",
   version = "testAlertVersion",
 }: Partial<alertRead> = {}): alertRead => ({
+  alert: true,
+  childDetectionPoints: childDetectionPoints,
   childTags: childTags,
   childThreatActors: childThreatActors,
   childThreats: childThreats,

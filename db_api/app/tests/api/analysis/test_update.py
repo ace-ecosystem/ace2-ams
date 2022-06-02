@@ -67,13 +67,13 @@ def test_update_nonexistent_uuid(client):
     ],
 )
 def test_update(client, db, key, initial_value, updated_value):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
     observable = factory.observable.create_or_read(
-        type="fqdn", value="localhost", parent_analysis=alert.root_analysis, db=db
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
     )
     analysis = factory.analysis.create_or_read(
-        analysis_module_type=analysis_module_type, submission=alert, target=observable, db=db
+        analysis_module_type=analysis_module_type, submission=submission, target=observable, db=db
     )
 
     # Set the initial value
@@ -81,7 +81,6 @@ def test_update(client, db, key, initial_value, updated_value):
 
     # Update it
     update = client.patch(f"/api/analysis/{analysis.uuid}", json={key: updated_value})
-    print(update.text)
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     if key == "details" and updated_value:

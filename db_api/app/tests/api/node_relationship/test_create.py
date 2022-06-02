@@ -48,8 +48,8 @@ def test_create_invalid_fields(client, key, value):
 )
 def test_create_missing_required_fields(client, db, key):
     # Create two nodes
-    alert1 = factory.alert.create(db=db)
-    alert2 = factory.alert.create(db=db)
+    alert1 = factory.submission.create(db=db)
+    alert2 = factory.submission.create(db=db)
 
     # Create some node relationship types
     factory.node_relationship_type.create_or_read(value="test_rel", db=db)
@@ -78,8 +78,8 @@ def test_create_missing_required_fields(client, db, key):
 )
 def test_create_valid_optional_fields(client, db, key, value):
     # Create two nodes
-    alert1 = factory.alert.create(db=db)
-    alert2 = factory.alert.create(db=db)
+    alert1 = factory.submission.create(db=db)
+    alert2 = factory.submission.create(db=db)
 
     # Create a node relationship type
     factory.node_relationship_type.create_or_read(value="test_rel", db=db)
@@ -98,8 +98,8 @@ def test_create_valid_optional_fields(client, db, key, value):
 
 def test_create_valid_required_fields(client, db):
     # Create two nodes
-    alert1 = factory.alert.create(db=db)
-    alert2 = factory.alert.create(db=db)
+    alert1 = factory.submission.create(db=db)
+    alert2 = factory.submission.create(db=db)
 
     # Create a node relationship type
     factory.node_relationship_type.create_or_read(value="test_rel", db=db)
@@ -127,7 +127,7 @@ def test_create_verify_observable(client, db):
     # alert
     #   o1
     #   o2 - IS_HASH_OF o1
-    alert = factory.alert.create(db=db, history_username="analyst")
+    alert = factory.submission.create(db=db, history_username="analyst")
     obs1 = factory.observable.create_or_read(
         type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )
@@ -163,7 +163,6 @@ def test_create_verify_observable(client, db):
     assert history.json()["items"][1]["diff"]["new_value"] is None
     assert history.json()["items"][1]["diff"]["added_to_list"] == [str(obs1.uuid)]
     assert history.json()["items"][1]["diff"]["removed_from_list"] == []
-    print(history.json()["items"][1])
     assert history.json()["items"][1]["snapshot"]["observable_relationships"][0]["related_node"]["uuid"] == str(
         obs1.uuid
     )

@@ -27,8 +27,8 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete(client, db):
     # Create some nodes
-    alert1 = factory.alert.create(db=db)
-    alert2 = factory.alert.create(db=db)
+    alert1 = factory.submission.create(db=db)
+    alert2 = factory.submission.create(db=db)
 
     # Create the object
     obj = factory.node_relationship.create_or_read(node=alert1, related_node=alert2, type="test_rel", db=db)
@@ -52,7 +52,7 @@ def test_delete_verify_observable(client, db):
     # alert
     #   o1
     #   o2 - IS_HASH_OF o1
-    alert = factory.alert.create(db=db, history_username="analyst")
+    alert = factory.submission.create(db=db, history_username="analyst")
     obs1 = factory.observable.create_or_read(
         type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )

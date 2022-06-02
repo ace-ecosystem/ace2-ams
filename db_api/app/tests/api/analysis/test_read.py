@@ -26,13 +26,13 @@ def test_get_nonexistent_uuid(client):
 
 
 def test_get(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
     observable = factory.observable.create_or_read(
-        type="fqdn", value="localhost", parent_analysis=alert.root_analysis, db=db
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
     )
     analysis = factory.analysis.create_or_read(
-        analysis_module_type=analysis_module_type, submission=alert, target=observable, db=db
+        analysis_module_type=analysis_module_type, submission=submission, target=observable, db=db
     )
 
     get = client.get(f"/api/analysis/{analysis.uuid}")

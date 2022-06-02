@@ -26,8 +26,8 @@ def test_get_version_nonexistent_uuid(client):
 
 
 def test_get_version(client, db):
-    alert = factory.alert.create(db=db)
+    submission = factory.submission.create(db=db)
 
-    get = client.get(f"/api/node/{alert.uuid}/version")
+    get = client.get(f"/api/node/{submission.uuid}/version")
     assert get.status_code == status.HTTP_200_OK
-    assert get.json() == {"version": str(alert.version)}
+    assert get.json() == {"version": str(submission.version)}

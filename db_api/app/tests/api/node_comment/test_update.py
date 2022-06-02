@@ -31,7 +31,7 @@ def test_update_invalid_uuid(client):
 
 
 def test_update_duplicate_node_uuid_value(client, db):
-    alert = factory.alert.create(db=db)
+    alert = factory.submission.create(db=db)
 
     # Create some comments
     comment1 = factory.node_comment.create_or_read(node=alert, username="johndoe", value="test", db=db)
@@ -54,7 +54,7 @@ def test_update_nonexistent_uuid(client):
 
 def test_update_alerts(client, db):
     # Create a comment
-    alert = factory.alert.create(db=db, history_username="analyst")
+    alert = factory.submission.create(db=db, history_username="analyst")
     comment = factory.node_comment.create_or_read(node=alert, username="johndoe", value="test", db=db)
     original_time = comment.insert_time
     assert alert.comments[0].value == "test"
@@ -68,7 +68,7 @@ def test_update_alerts(client, db):
     assert alert.comments[0].insert_time != original_time
 
     # Verify the history record
-    history = client.get(f"/api/alert/{alert.uuid}/history")
+    history = client.get(f"/api/submission/{alert.uuid}/history")
 
     assert history.json()["total"] == 3
     assert history.json()["items"][1]["action"] == "UPDATE"
@@ -134,7 +134,7 @@ def test_update_events(client, db):
 
 def test_update_observables(client, db):
     # Create a comment
-    alert = factory.alert.create(db=db)
+    alert = factory.submission.create(db=db)
     observable = factory.observable.create_or_read(
         type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )

@@ -54,7 +54,7 @@ def create_or_read(model: AnalysisCreate, db: Session) -> Analysis:
     ]
 
     # Associate the analysis with its submission
-    crud.alert_analysis_mapping.create(analysis_uuid=obj.uuid, submission_uuid=model.submission_uuid, db=db)
+    crud.submission_analysis_mapping.create(analysis_uuid=obj.uuid, submission_uuid=model.submission_uuid, db=db)
 
     return obj
 
