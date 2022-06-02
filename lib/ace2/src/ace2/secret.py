@@ -18,10 +18,6 @@ class Secret(str):
             the secret value string
         '''
 
-        # get the secret value from the secret id
         session = Session()
         client = session.client(service_name='secretsmanager', region_name=session.region_name)
-        secret = client.get_secret_value(SecretId=value)
-
-        # use the secret value as the value for this field
-        return secret['SecretString']
+        return client.get_secret_value(SecretId=value)['SecretString']
