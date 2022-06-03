@@ -3,5 +3,5 @@ FROM public.ecr.aws/lambda/python:3.9
 # install and test the ace2 library
 ADD lib/ace2 ace2
 RUN pip3 install ./ace2
-RUN pytest ace2
+RUN pytest -vv ace2
 RUN rm -rf ace2
