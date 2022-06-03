@@ -7,5 +7,8 @@ path=$(echo $1 | sed 's:/*$::')
 name=${path##*/}
 name=$(echo $name | awk '{print tolower($0)}')
 
+# build the base image
+./setup/aws/build_ace2_base.sh
+
 # build module image
 docker build --build-arg module=$path -t ace2-module-$name -f setup/aws/Dockerfile-ace2-module .

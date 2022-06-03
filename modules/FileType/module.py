@@ -17,16 +17,15 @@ class FileType(Analysis):
     def execute(self, target):
         # get the human readable type
         process = subprocess.run(['file', '-b', '-L', target.path], capture_output=True, text=True)
-        # TODO: handle stderr
+        if process.stderr:
+            logging.warning(f'failed to get file_type of {target.value}: {process.stderr}')
         self.details.file_type = process.stdout.strip()
 
         # get the mime type
         process = subprocess.run(['file', '-b', '--mime-type', '-L', target.path], capture_output=True, text=True)
-        # TODO: handle stderr
+        if process.stderr:
+            logging.warning(f'failed to get mime_type of {target.value}: {process.stderr}')
         self.details.mime_type = process.stdout.strip()
-
-        # set the summary
-        self.summary = f'File Type Analysis: ({self.details.file_type}) ({self.details.mime_type})'
 
         # determine if file is ole
         with open(target.path, 'rb') as f:
@@ -76,8 +75,8 @@ class FileType(Analysis):
                     is_x509 = False
             if is_x509:
                 target.add(Tag, 'x509')
-                if analysis.details.file_type == 'data':
-                    analysis.details.file_type = 'DER certificate'
+                if self.details.file_type == 'data':
+                    self.details.file_type = 'DER certificate'
 
         # determine if file is jar
         try:
@@ -160,3 +159,6 @@ class FileType(Analysis):
         is_office_document |= 'rtf' in target.tags
         if is_office_document:
             target.add(Tag, 'microsoft_office')
+
+        # set the summary
+        self.summary = f'FileType: ({self.details.file_type}) ({self.details.mime_type})'
