@@ -21,6 +21,9 @@ def create_or_read(model: AnalysisCreate, db: Session) -> Analysis:
     analysis_module_type = crud.analysis_module_type.read_by_uuid(uuid=model.analysis_module_type_uuid, db=db)
     validate_analysis_details(analysis_module_type=analysis_module_type, details=model.details)
 
+    # Ensure the target observable exists
+    target = crud.observable.read_by_uuid(uuid=model.target_uuid, db=db)
+
     obj = Analysis(
         analysis_module_type=analysis_module_type,
         # The [) range operator is described here:
@@ -36,7 +39,7 @@ def create_or_read(model: AnalysisCreate, db: Session) -> Analysis:
         run_time=model.run_time,
         stack_trace=model.stack_trace,
         summary=model.summary,
-        target_uuid=model.target_uuid,
+        target_uuid=target.uuid,
         uuid=model.uuid,
     )
 
@@ -44,7 +47,7 @@ def create_or_read(model: AnalysisCreate, db: Session) -> Analysis:
     if not crud.helpers.create(obj=obj, db=db):
         obj = read_cached(
             analysis_module_type_uuid=model.analysis_module_type_uuid,
-            observable_uuid=model.target_uuid,
+            observable_uuid=target.uuid,
             db=db,
         )
 
