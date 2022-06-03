@@ -4,7 +4,7 @@ import uuid
 from fastapi import status
 
 from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
-from tests import helpers
+from tests import factory
 
 
 #
@@ -75,8 +75,7 @@ from tests import helpers
     ],
 )
 def test_create_invalid_fields(client, key, value):
-    create_json = {"name": "test", "status": "OPEN"}
-    create_json[key] = value
+    create_json = {"name": "test", "status": "OPEN", key: value}
     create = client.post("/api/event/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert key in create.text
@@ -97,30 +96,8 @@ def test_create_invalid_node_fields(client, key, values):
         assert key in create.json()["detail"][0]["loc"]
 
 
-@pytest.mark.parametrize(
-    "key",
-    [
-        ("uuid"),
-    ],
-)
-def test_create_duplicate_unique_fields(client, db, key):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
-
-    # Create an object
-    create1_json = {"uuid": str(uuid.uuid4()), "name": "test", "queue": "external", "status": "OPEN"}
-    client.post("/api/event/", json=create1_json)
-
-    # Ensure you cannot create another object with the same unique field value
-    create2_json = {"name": "test2", "queue": "external", "status": "OPEN"}
-    create2_json[key] = create1_json[key]
-    create2 = client.post("/api/event/", json=create2_json)
-    assert create2.status_code == status.HTTP_409_CONFLICT
-
-
 def test_create_nonexistent_owner(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Create an object
     create = client.post(
@@ -131,8 +108,7 @@ def test_create_nonexistent_owner(client, db):
 
 
 def test_create_nonexistent_prevention_tools(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Create an object
     create = client.post(
@@ -143,7 +119,7 @@ def test_create_nonexistent_prevention_tools(client, db):
 
 
 def test_create_nonexistent_queue(client, db):
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Create an object
     create = client.post("/api/event/", json={"name": "test", "queue": "nonexistent_queue", "status": "OPEN"})
@@ -152,8 +128,7 @@ def test_create_nonexistent_queue(client, db):
 
 
 def test_create_nonexistent_remediations(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Create an object
     create = client.post(
@@ -164,8 +139,7 @@ def test_create_nonexistent_remediations(client, db):
 
 
 def test_create_nonexistent_risk_level(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Create an object
     create = client.post(
@@ -176,8 +150,7 @@ def test_create_nonexistent_risk_level(client, db):
 
 
 def test_create_nonexistent_source(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Create an object
     create = client.post("/api/event/", json={"source": "test", "name": "test", "queue": "external", "status": "OPEN"})
@@ -186,7 +159,7 @@ def test_create_nonexistent_source(client, db):
 
 
 def test_create_nonexistent_status(client, db):
-    helpers.create_queue(value="external", db=db)
+    factory.queue.create_or_read(value="external", db=db)
 
     # Create an object
     create = client.post("/api/event/", json={"name": "test", "queue": "external", "status": "OPEN"})
@@ -195,8 +168,7 @@ def test_create_nonexistent_status(client, db):
 
 
 def test_create_nonexistent_type(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Create an object
     create = client.post("/api/event/", json={"type": "test", "name": "test", "queue": "external", "status": "OPEN"})
@@ -205,8 +177,7 @@ def test_create_nonexistent_type(client, db):
 
 
 def test_create_nonexistent_vectors(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Create an object
     create = client.post(
@@ -221,8 +192,7 @@ def test_create_nonexistent_vectors(client, db):
     [("tags"), ("threat_actors"), ("threats")],
 )
 def test_create_nonexistent_node_fields(client, db, key):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     create = client.post("/api/event/", json={key: ["abc"], "name": "test", "queue": "external", "status": "OPEN"})
     assert create.status_code == status.HTTP_404_NOT_FOUND
@@ -235,13 +205,12 @@ def test_create_nonexistent_node_fields(client, db, key):
 
 
 def test_create_verify_history(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     event_uuid = str(uuid.uuid4())
     create = client.post(
-        "/api/event/?history_username=analyst",
-        json={"uuid": event_uuid, "name": "test", "queue": "external", "status": "OPEN"},
+        "/api/event/",
+        json={"uuid": event_uuid, "name": "test", "queue": "external", "status": "OPEN", "history_username": "analyst"},
     )
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -299,8 +268,7 @@ def test_create_verify_history(client, db):
     ],
 )
 def test_create_valid_optional_fields(client, db, key, value):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Create the object
     create = client.post("/api/event/", json={key: value, "name": "test", "queue": "external", "status": "OPEN"})
@@ -317,8 +285,8 @@ def test_create_valid_optional_fields(client, db, key, value):
 
 
 def test_create_valid_owner(client, db):
-    helpers.create_user(username="johndoe", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.user.create_or_read(username="johndoe", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Use the user to create a new event
     create = client.post(
@@ -332,9 +300,8 @@ def test_create_valid_owner(client, db):
 
 
 def test_create_valid_prevention_tools(client, db):
-    helpers.create_event_prevention_tool(value="test", db=db)
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_prevention_tool.create_or_read(value="test", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Use the prevention tool to create a new event
     create = client.post(
@@ -348,9 +315,8 @@ def test_create_valid_prevention_tools(client, db):
 
 
 def test_create_valid_remediations(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_remediation(value="test", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_remediation.create_or_read(value="test", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Use the remediation to create a new event
     create = client.post(
@@ -364,9 +330,8 @@ def test_create_valid_remediations(client, db):
 
 
 def test_create_valid_risk_level(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_risk_level(value="test", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_risk_level.create_or_read(value="test", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Use the risk level to create a new event
     create = client.post(
@@ -380,9 +345,8 @@ def test_create_valid_risk_level(client, db):
 
 
 def test_create_valid_source(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_source(value="test", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
+    factory.event_source.create_or_read(value="test", db=db)
 
     # Use the source to create a new event
     create = client.post("/api/event/", json={"source": "test", "name": "test", "queue": "external", "status": "OPEN"})
@@ -394,9 +358,8 @@ def test_create_valid_source(client, db):
 
 
 def test_create_valid_type(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
-    helpers.create_event_type(value="test", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
+    factory.event_type.create_or_read(value="test", db=db)
 
     # Use the type to create a new event
     create = client.post("/api/event/", json={"type": "test", "name": "test", "queue": "external", "status": "OPEN"})
@@ -408,9 +371,8 @@ def test_create_valid_type(client, db):
 
 
 def test_create_valid_vectors(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
-    helpers.create_event_vector(value="test", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
+    factory.event_vector.create_or_read(value="test", db=db)
 
     # Use the vector to create a new event
     create = client.post(
@@ -424,8 +386,7 @@ def test_create_valid_vectors(client, db):
 
 
 def test_create_valid_required_fields(client, db):
-    helpers.create_queue(value="external", db=db)
-    helpers.create_event_status(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Create the object
     create = client.post("/api/event/", json={"name": "test", "queue": "external", "status": "OPEN"})
@@ -441,9 +402,9 @@ def test_create_valid_required_fields(client, db):
 @pytest.mark.parametrize(
     "key,value_lists,helper_create_func",
     [
-        ("tags", VALID_LIST_STRING_VALUES, helpers.create_node_tag),
-        ("threat_actors", VALID_LIST_STRING_VALUES, helpers.create_node_threat_actor),
-        ("threats", VALID_LIST_STRING_VALUES, helpers.create_node_threat),
+        ("tags", VALID_LIST_STRING_VALUES, factory.node_tag.create_or_read),
+        ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
+        ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
     ],
 )
 def test_create_valid_node_fields(client, db, key, value_lists, helper_create_func):
@@ -451,8 +412,7 @@ def test_create_valid_node_fields(client, db, key, value_lists, helper_create_fu
         for value in value_list:
             helper_create_func(value=value, db=db)
 
-        helpers.create_queue(value="external", db=db)
-        helpers.create_event_status(value="OPEN", db=db)
+        factory.event_status.create_or_read(value="OPEN", db=db)
 
         create = client.post(
             "/api/event/", json={key: value_list, "name": "test", "queue": "external", "status": "OPEN"}

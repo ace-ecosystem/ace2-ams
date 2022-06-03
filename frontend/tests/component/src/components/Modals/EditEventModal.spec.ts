@@ -9,7 +9,10 @@ import { Event } from "@/services/api/event";
 import { eventReadFactory, mockEventUUID } from "@mocks/events";
 import { testConfiguration } from "@/etc/configuration/test/index";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import {
+  genericObjectReadFactory,
+  queueableObjectReadFactory,
+} from "@mocks/genericObject";
 import ToastService from "primevue/toastservice";
 
 import Tooltip from "primevue/tooltip";
@@ -30,7 +33,10 @@ import { User } from "@/services/api/user";
 
 function factory(args = { stubActions: true }) {
   const initialState = {
-    modalStore: { openModals: ["EditEventModal"] },
+    modalStore: {
+      openModals: ["EditEventModal"],
+    },
+    authStore: { user: userReadFactory() },
   };
   const wrapper = mount(EditEventModal, {
     global: {
@@ -59,14 +65,14 @@ function factory(args = { stubActions: true }) {
 describe("EditEventModal", () => {
   beforeEach(() => {
     cy.stub(EventPreventionTool, "readAll").returns([
-      genericObjectReadFactory({
+      queueableObjectReadFactory({
         value: "Test Prevention Tool",
         queues: [genericObjectReadFactory({ value: "external" })],
       }),
     ]);
     cy.stub(EventRiskLevel, "readAll").returns([]);
     cy.stub(EventRemediation, "readAll").returns([
-      genericObjectReadFactory({
+      queueableObjectReadFactory({
         value: "Test Remediation",
         queues: [genericObjectReadFactory({ value: "external" })],
       }),
@@ -137,6 +143,7 @@ describe("EditEventModal", () => {
           preventionTools: ["Test Prevention Tool"],
           remediations: ["Test Remediation"],
           eventTime: new Date("2022-04-12T16:00:00.000Z"),
+          historyUsername: "analyst",
         },
       ])
       .as("updateEvent")
@@ -240,6 +247,7 @@ describe("EditEventModal", () => {
           preventionTools: ["Test Prevention Tool"],
           remediations: ["Test Remediation"],
           eventTime: new Date("2022-04-12T16:00:00.000Z"),
+          historyUsername: "analyst",
         },
       ])
       .as("updateEvent")

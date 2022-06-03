@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import select
 from typing import Optional
 from uuid import UUID
 
@@ -13,12 +12,10 @@ from api_models.user import (
     UserRead,
     UserUpdate,
 )
-from core.auth import hash_password
 from db import crud
 from db.database import get_db
-from db.schemas.queue import Queue
-from db.schemas.user import User, UserHistory
-from db.schemas.user_role import UserRole
+from db.schemas.user import UserHistory
+from exceptions.db import ReusedToken, UserIsDisabled, UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 
 router = APIRouter(
@@ -36,37 +33,16 @@ def create_user(
     user: UserCreate,
     request: Request,
     response: Response,
-    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
-    # Create the new user using the data from the request
-    new_user = User(**user.dict())
+    try:
+        obj = crud.user.create_or_read(model=user, db=db)
+    except ValueNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
-    # Get the queues from the database to associate with the new user
-    new_user.default_alert_queue = crud.read_by_value(user.default_alert_queue, db_table=Queue, db=db)
-    new_user.default_event_queue = crud.read_by_value(user.default_event_queue, db_table=Queue, db=db)
+    db.commit()
 
-    # Get the user roles from the database to associate with the new user
-    new_user.roles = crud.read_by_values(user.roles, db_table=UserRole, db=db)
-
-    # Securely hash and salt the password. Bcrypt_256 is used to get around the Bcrypt limitations
-    # of silently truncating passwords longer than 72 characters as well as not handling NULL bytes.
-    new_user.password = hash_password(new_user.password)
-
-    # Save the new user to the database
-    db.add(new_user)
-    crud.commit(db)
-
-    # Add an entry to the history table
-    if history_username:
-        crud.record_create_history(
-            history_table=UserHistory,
-            action_by=crud.read_user_by_username(username=history_username, db=db),
-            record=new_user,
-            db=db,
-        )
-
-    response.headers["Content-Location"] = request.url_for("get_user", uuid=new_user.uuid)
+    response.headers["Content-Location"] = request.url_for("get_user", uuid=obj.uuid)
 
 
 helpers.api_route_create(router, create_user)
@@ -77,31 +53,22 @@ helpers.api_route_create(router, create_user)
 #
 
 
-def _join_as_subquery(query: select, subquery: select):
-    s = subquery.subquery()
-    return query.join(s, User.uuid == s.c.uuid).group_by(User.uuid)
-
-
 def get_all_users(db: Session = Depends(get_db), enabled: Optional[bool] = None, username: Optional[str] = None):
-    query = select(User).order_by(User.username)
-
-    if enabled is not None:
-        enabled_query = select(User).where(User.enabled == enabled)
-        query = _join_as_subquery(query, enabled_query)
-
-    if username:
-        username_query = select(User).where(User.username == username)
-        query = _join_as_subquery(query, username_query)
-
-    return paginate(db, query)
+    return paginate(
+        conn=db,
+        query=crud.user.build_read_all_query(enabled=enabled, username=username),
+    )
 
 
 def get_user(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read(uuid=uuid, db_table=User, db=db)
+    try:
+        return crud.user.read_by_uuid(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"User {uuid} does not exist") from e
 
 
 def get_user_history(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read_history_records(history_table=UserHistory, record_uuid=uuid, db=db)
+    return paginate(conn=db, query=crud.history.build_read_history_query(history_table=UserHistory, record_uuid=uuid))
 
 
 helpers.api_route_read_all(router, get_all_users, UserRead)
@@ -119,100 +86,20 @@ def update_user(
     user: UserUpdate,
     request: Request,
     response: Response,
-    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
-    # Read the current user from the database
-    db_user: User = crud.read(uuid=uuid, db_table=User, db=db)
+    try:
+        if not crud.user.update(uuid=uuid, model=user, db=db):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update user {uuid}")
+    except (UuidNotFoundInDatabase, ValueNotFoundInDatabase) as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
-    # Get the data that was given in the request and use it to update the database object
-    update_data = user.dict(exclude_unset=True)
-
-    # Keep track of all the diffs that were made
-    diffs: list[crud.Diff] = []
-
-    if "default_alert_queue" in update_data:
-        diffs.append(
-            crud.create_diff(
-                field="default_alert_queue",
-                old=db_user.default_alert_queue.value,
-                new=update_data["default_alert_queue"],
-            )
-        )
-
-        db_user.default_alert_queue = crud.read_by_value(
-            value=update_data["default_alert_queue"], db_table=Queue, db=db
-        )
-
-    if "default_event_queue" in update_data:
-        diffs.append(
-            crud.create_diff(
-                field="default_event_queue",
-                old=db_user.default_event_queue.value,
-                new=update_data["default_event_queue"],
-            )
-        )
-
-        db_user.default_event_queue = crud.read_by_value(
-            value=update_data["default_event_queue"], db_table=Queue, db=db
-        )
-
-    if "display_name" in update_data:
-        diffs.append(crud.create_diff(field="display_name", old=db_user.display_name, new=update_data["display_name"]))
-        db_user.display_name = update_data["display_name"]
-
-    if "email" in update_data:
-        diffs.append(crud.create_diff(field="email", old=db_user.email, new=update_data["email"]))
-        db_user.email = update_data["email"]
-
-    if "enabled" in update_data:
-        diffs.append(crud.create_diff(field="enabled", old=db_user.enabled, new=update_data["enabled"]))
-        db_user.enabled = update_data["enabled"]
-
-    if "password" in update_data:
-        diffs.append(crud.create_diff(field="password", old=None, new=None))
-        db_user.password = hash_password(update_data["password"])
-
-    if "roles" in update_data:
-        diffs.append(crud.create_diff(field="roles", old=[x.value for x in db_user.roles], new=update_data["roles"]))
-        db_user.roles = crud.read_by_values(values=update_data["roles"], db_table=UserRole, db=db)
-
-    if "timezone" in update_data:
-        diffs.append(crud.create_diff(field="timezone", old=db_user.timezone, new=update_data["timezone"]))
-        db_user.timezone = update_data["timezone"]
-
-    if "training" in update_data:
-        diffs.append(crud.create_diff(field="training", old=db_user.training, new=update_data["training"]))
-        db_user.training = update_data["training"]
-
-    if "username" in update_data:
-        diffs.append(crud.create_diff(field="username", old=db_user.username, new=update_data["username"]))
-        db_user.username = update_data["username"]
-
-    crud.commit(db)
-
-    # Add the entries to the history table
-    if history_username:
-        crud.record_update_history(
-            history_table=UserHistory,
-            action_by=crud.read_user_by_username(username=history_username, db=db),
-            record=db_user,
-            diffs=diffs,
-            db=db,
-        )
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_user", uuid=uuid)
 
 
 helpers.api_route_update(router, update_user)
-
-
-#
-# DELETE
-#
-
-
-# Deleting users is not currently supported (mark them as disabled instead)
 
 
 #
@@ -224,34 +111,26 @@ def validate_refresh_token(
     data: ValidateRefreshToken,
     db: Session = Depends(get_db),
 ):
-    user: User = (
-        db.execute(select(User).where(User.username == data.username, User.enabled == True)).scalars().one_or_none()
-    )
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    # Check the refresh token against the database to ensure it is valid. If the token does not match, it may mean
-    # that someone is trying to use an old refresh token. In this case, remove the current refresh token from the
-    # database to require the user to fully log in again.
-    if data.refresh_token != user.refresh_token:
-        user.refresh_token = None
-        db.commit()
-
+    try:
+        return crud.user.validate_refresh_token(data=data, db=db)
+    except ReusedToken as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Reused token",
             headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    # Rotate the refresh token and save it to the database
-    user.refresh_token = data.new_refresh_token
-    db.commit()
-
-    return user
+        ) from e
+    except UserIsDisabled as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from e
+    except ValueNotFoundInDatabase as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from e
 
 
 helpers.api_route_auth(

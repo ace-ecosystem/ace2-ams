@@ -32,6 +32,9 @@
           cols="30"
           placeholder="Add a comment..."
         />
+        <NodeCommentAutocomplete
+          @comment-clicked="recentCommentClicked($event)"
+        ></NodeCommentAutocomplete>
       </div>
     </div>
 
@@ -68,12 +71,15 @@
   import AlertDispositionTag from "@/components/Alerts/AlertDispositionTag.vue";
 
   import { NodeComment } from "@/services/api/nodeComment";
+  import NodeCommentAutocomplete from "@/components/Node/NodeCommentAutocomplete.vue";
 
   import { useAlertDispositionStore } from "@/stores/alertDisposition";
   import { useAlertStore } from "@/stores/alert";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
+  import { useRecentCommentsStore } from "@/stores/recentComments";
+
   import { alertDispositionRead } from "@/models/alertDisposition";
   import { nodeCommentCreate } from "@/models/nodeComment";
 
@@ -82,6 +88,7 @@
   const authStore = useAuthStore();
   const modalStore = useModalStore();
   const selectedAlertStore = useSelectedAlertStore();
+  const recentCommentsStore = useRecentCommentsStore();
 
   const emit = defineEmits(["requestReload"]);
 
@@ -101,6 +108,7 @@
       const updateData = selectedAlertStore.selected.map((uuid) => ({
         uuid: uuid,
         disposition: newDisposition.value?.value,
+        historyUsername: authStore.user.username,
       }));
       await alertStore.update(updateData);
 
@@ -134,6 +142,9 @@
     isLoading.value = false;
 
     if (!error.value) {
+      if (dispositionComment.value) {
+        recentCommentsStore.addComment(dispositionComment.value);
+      }
       close();
       emit("requestReload");
     }
@@ -146,6 +157,10 @@
     }
     return false;
   });
+
+  const recentCommentClicked = (comment: string) => {
+    dispositionComment.value = comment;
+  };
 
   const handleError = () => {
     error.value = undefined;

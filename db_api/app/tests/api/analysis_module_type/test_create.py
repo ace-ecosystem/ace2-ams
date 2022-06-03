@@ -4,7 +4,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -62,8 +62,7 @@ from tests import helpers
     ],
 )
 def test_create_invalid_fields(client, key, value):
-    create_json = {"cache_seconds": 90, "value": "test"}
-    create_json[key] = value
+    create_json = {"cache_seconds": 90, "value": "test", key: value}
     create = client.post("/api/analysis/module_type/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -71,59 +70,14 @@ def test_create_invalid_fields(client, key, value):
 @pytest.mark.parametrize(
     "key",
     [
-        ("uuid"),
-    ],
-)
-def test_create_duplicate_unique_fields(client, key):
-    # Create an object
-    create1_json = {"uuid": str(uuid.uuid4()), "cache_seconds": 90, "value": "test", "version": "1.0.0"}
-    client.post("/api/analysis/module_type/", json=create1_json)
-
-    # Ensure you cannot create another object with the same unique field value
-    create2_json = {"cache_seconds": 90, "value": "test2", "version": "1.0.0"}
-    create2_json[key] = create1_json[key]
-    create2 = client.post("/api/analysis/module_type/", json=create2_json)
-    assert create2.status_code == status.HTTP_409_CONFLICT
-
-
-def test_create_duplicate_version_value(client):
-    # Create an object
-    client.post("/api/analysis/module_type/", json={"cache_seconds": 90, "value": "test", "version": "1.0.0"})
-
-    # Ensure you cannot create another object with the same unique value+version combination
-    create = client.post("/api/analysis/module_type/", json={"cache_seconds": 90, "value": "test", "version": "1.0.0"})
-    assert create.status_code == status.HTTP_409_CONFLICT
-
-
-@pytest.mark.parametrize(
-    "key",
-    [
-        ("cache_seconds"),
         ("value"),
-        ("version"),
     ],
 )
 def test_create_missing_required_fields(client, key):
-    create_json = {"cache_seconds": 90, "value": "test", "version": "1.0.0"}
+    create_json = {"value": "test"}
     del create_json[key]
     create = client.post("/api/analysis/module_type/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-
-
-@pytest.mark.parametrize(
-    "key",
-    [
-        ("observable_types"),
-        ("required_directives"),
-        ("required_tags"),
-    ],
-)
-def test_create_nonexistent_list_values(client, key):
-    create = client.post(
-        "/api/analysis/module_type/",
-        json={"cache_seconds": 90, "value": "test", "version": "1.0.0", key: ["test_value"]},
-    )
-    assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
 #
@@ -179,17 +133,6 @@ def test_create_valid_optional_fields(client, key, value):
     ],
 )
 def test_create_valid_list_fields(client, db, key, values):
-    # Create the objects
-    if key == "observable_types":
-        create_func = helpers.create_observable_type
-    elif key == "required_directives":
-        create_func = helpers.create_node_directive
-    else:
-        create_func = helpers.create_node_tag
-
-    for value in values:
-        create_func(value=value, db=db)
-
     # Create the analysis module type
     create = client.post(
         "/api/analysis/module_type/",

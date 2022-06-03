@@ -53,7 +53,9 @@ describe("alert Actions", () => {
 
   it("will make a request to update an alert given the UUID and update data upon the updateAlert action", async () => {
     const mockRequest = myNock.patch("/alert/").reply(200);
-    await store.update([{ uuid: "uuid1", disposition: "test" }]);
+    await store.update([
+      { uuid: "uuid1", disposition: "test", historyUsername: "analyst" },
+    ]);
 
     expect(mockRequest.isDone()).toEqual(true);
     // None of these should be changed
@@ -89,7 +91,9 @@ describe("alert Actions", () => {
     }
 
     try {
-      await store.update([{ uuid: "uuid1", disposition: "test" }]);
+      await store.update([
+        { uuid: "uuid1", disposition: "test", historyUsername: "analyst" },
+      ]);
     } catch (e) {
       const error = e as Error;
       expect(error.message).toStrictEqual(

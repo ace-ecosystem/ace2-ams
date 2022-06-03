@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, UUID4
-from typing import List, Optional
+from typing import Optional
 from uuid import uuid4
 
 from api_models import type_list_str, type_str, validators
@@ -25,9 +25,9 @@ class NodeThreatCreate(NodeThreatBase):
 
 
 class NodeThreatRead(NodeThreatBase):
-    queues: List[QueueRead] = Field(description="The queues where this node threat is valid")
+    queues: list[QueueRead] = Field(description="The queues where this node threat is valid")
 
-    types: List[NodeThreatTypeRead] = Field(description="A list of types the threat represents")
+    types: list[NodeThreatTypeRead] = Field(description="A list of types the threat represents")
 
     uuid: UUID4 = Field(description="The UUID of the threat")
 

@@ -4,7 +4,7 @@ import uuid
 from fastapi import status
 
 from core.auth import verify_password
-from tests import helpers
+from tests import factory
 
 
 #
@@ -74,12 +74,12 @@ def test_update_invalid_uuid(client):
 )
 def test_update_duplicate_unique_fields(client, db, key):
     # Create some users
-    obj1 = helpers.create_user(username="johndoe", email="johndoe@test.com", db=db)
-    obj2 = helpers.create_user(username="janedoe", email="janedoe@test.com", db=db)
+    obj1 = factory.user.create_or_read(username="johndoe", email="johndoe@test.com", db=db)
+    obj2 = factory.user.create_or_read(username="janedoe", email="janedoe@test.com", db=db)
 
     # Ensure you cannot update a unique field to a value that already exists
     update = client.patch(f"/api/user/{obj2.uuid}", json={key: getattr(obj1, key)})
-    assert update.status_code == status.HTTP_409_CONFLICT
+    assert update.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_update_nonexistent_uuid(client):
@@ -94,14 +94,16 @@ def test_update_nonexistent_uuid(client):
 
 def test_update_valid_alert_queue(client, db):
     # Create a user
-    obj = helpers.create_user(username="johndoe", alert_queue="test_queue", db=db, history_username="analyst")
+    obj = factory.user.create_or_read(username="johndoe", alert_queue="test_queue", db=db, history_username="analyst")
     assert obj.default_alert_queue.value == "test_queue"
 
     # Create the new alert queue
-    helpers.create_queue(value="test_queue2", db=db)
+    factory.queue.create_or_read(value="test_queue2", db=db)
 
     # Update it
-    update = client.patch(f"/api/user/{obj.uuid}?history_username=analyst", json={"default_alert_queue": "test_queue2"})
+    update = client.patch(
+        f"/api/user/{obj.uuid}", json={"default_alert_queue": "test_queue2", "history_username": "analyst"}
+    )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.default_alert_queue.value == "test_queue2"
 
@@ -118,14 +120,16 @@ def test_update_valid_alert_queue(client, db):
 
 def test_update_valid_event_queue(client, db):
     # Create a user
-    obj = helpers.create_user(username="johndoe", event_queue="test_queue", db=db, history_username="analyst")
+    obj = factory.user.create_or_read(username="johndoe", event_queue="test_queue", db=db, history_username="analyst")
     assert obj.default_event_queue.value == "test_queue"
 
     # Create the new event queue
-    helpers.create_queue(value="test_queue2", db=db)
+    factory.queue.create_or_read(value="test_queue2", db=db)
 
     # Update it
-    update = client.patch(f"/api/user/{obj.uuid}?history_username=analyst", json={"default_event_queue": "test_queue2"})
+    update = client.patch(
+        f"/api/user/{obj.uuid}", json={"default_event_queue": "test_queue2", "history_username": "analyst"}
+    )
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.default_event_queue.value == "test_queue2"
 
@@ -150,15 +154,15 @@ def test_update_valid_event_queue(client, db):
 def test_update_valid_roles(client, db, values):
     # Create a user
     initial_roles = ["test_role1", "test_role2", "test_role3"]
-    obj = helpers.create_user(username="johndoe", roles=initial_roles, db=db, history_username="analyst")
+    obj = factory.user.create_or_read(username="johndoe", roles=initial_roles, db=db, history_username="analyst")
     assert len(obj.roles) == len(initial_roles)
 
     # Create the new user roles
     for value in values:
-        helpers.create_user_role(value=value, db=db)
+        factory.user_role.create_or_read(value=value, db=db)
 
     # Update it
-    update = client.patch(f"/api/user/{obj.uuid}?history_username=analyst", json={"roles": values})
+    update = client.patch(f"/api/user/{obj.uuid}", json={"roles": values, "history_username": "analyst"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(obj.roles) == len(values)
 
@@ -194,13 +198,13 @@ def test_update_valid_roles(client, db, values):
 )
 def test_update(client, db, key, initial_value, updated_value):
     # Create a user
-    obj = helpers.create_user(username="johndoe", db=db, history_username="analyst")
+    obj = factory.user.create_or_read(username="johndoe", db=db, history_username="analyst")
 
     # Set the initial value
     setattr(obj, key, initial_value)
 
     # Update it
-    update = client.patch(f"/api/user/{obj.uuid}?history_username=analyst", json={key: updated_value})
+    update = client.patch(f"/api/user/{obj.uuid}", json={key: updated_value, "history_username": "analyst"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert getattr(obj, key) == updated_value
 
@@ -224,14 +228,14 @@ def test_update(client, db, key, initial_value, updated_value):
 )
 def test_update_password(client, db, initial_value, updated_value):
     # Create a user
-    obj = helpers.create_user(username="johndoe", password=initial_value, db=db, history_username="analyst")
+    obj = factory.user.create_or_read(username="johndoe", password=initial_value, db=db, history_username="analyst")
     initial_password_hash = obj.password
 
     # Make sure the initial password validates against its hash
     assert verify_password(initial_value, initial_password_hash) is True
 
     # Update it
-    update = client.patch(f"/api/user/{obj.uuid}?history_username=analyst", json={"password": updated_value})
+    update = client.patch(f"/api/user/{obj.uuid}", json={"password": updated_value, "history_username": "analyst"})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.password != initial_password_hash
     assert verify_password(updated_value, obj.password) is True

@@ -35,16 +35,12 @@
                     ></AlertTableCell>
                   </td>
                 </tr>
-                <tr v-if="!alertDetectionPoints.length && !isLoading">
+                <tr v-if="!alertStore.open.childDetectionPoints.length">
                   <td class="header-cell">No detections found</td>
                   <td></td>
                 </tr>
-                <tr v-if="isLoading">
-                  <td class="header-cell">Loading detections...</td>
-                  <td></td>
-                </tr>
                 <tr
-                  v-for="detection in alertDetectionPoints"
+                  v-for="detection in alertStore.open.childDetectionPoints"
                   :key="detection.uuid"
                 >
                   <td class="header-cell">Detection</td>
@@ -91,10 +87,7 @@
   import { getAllAlertTags } from "@/etc/helpers";
   import AlertTableCell from "./AlertTableCell.vue";
   import { alertSummary } from "@/models/alert";
-  import { observableRead } from "@/models/observable";
-  import { NodeTree } from "@/services/api/nodeTree";
-  import { onMounted, ref } from "@pinia/testing/node_modules/vue-demi";
-  import { nodeDetectionPointRead } from "@/models/nodeDetectionPoint";
+  import { ref } from "@pinia/testing/node_modules/vue-demi";
 
   const alertStore = useAlertStore();
 
@@ -111,46 +104,13 @@
     { value: "comments", label: "Comments" },
   ];
 
-  const alertDetectionPoints = ref<nodeDetectionPointRead[]>([]);
-  const isLoading = ref(false);
   const error = ref<string>();
-
-  onMounted(async () => {
-    if (alertStore.openAlertSummary) {
-      isLoading.value = true;
-      await getAllDetectionPoints(alertStore.openAlertSummary.uuid);
-      isLoading.value = false;
-    }
-  });
 
   const scrollToDetection = (detectionUuid: string) => {
     const detection = document.getElementById(detectionUuid);
 
     if (detection) {
       detection.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  };
-
-  const getAllDetectionPoints = async (uuid: string) => {
-    try {
-      const unsortedObservables = (await NodeTree.readNodesOfNodeTree(
-        [uuid],
-        "observable",
-      )) as unknown as observableRead[];
-
-      unsortedObservables.forEach((observable) => {
-        alertDetectionPoints.value = [
-          ...alertDetectionPoints.value,
-          ...observable.detectionPoints,
-        ];
-      });
-    } catch (e: unknown) {
-      if (typeof e === "string") {
-        error.value = e;
-      } else if (e instanceof Error) {
-        error.value = e.message;
-      }
-      return;
     }
   };
 

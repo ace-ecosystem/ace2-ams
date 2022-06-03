@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
-from typing import Optional
 from uuid import UUID
 
 from api.routes import helpers
@@ -10,6 +9,7 @@ from db.database import get_db
 from db.schemas.node import Node
 from db.schemas.node_relationship import NodeRelationship
 from db.schemas.node_relationship_type import NodeRelationshipType
+from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 
 router = APIRouter(
@@ -27,32 +27,10 @@ def create_node_relationship(
     create: NodeRelationshipCreate,
     request: Request,
     response: Response,
-    history_username: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
-    # Make sure the nodes actually exist
-    node: Node = crud.read(uuid=create.node_uuid, db_table=Node, db=db)
-    related_node: Node = crud.read(uuid=create.related_node_uuid, db_table=Node, db=db)
-
-    # Make sure the relationship type exists
-    type: NodeRelationshipType = crud.read_by_value(value=create.type, db_table=NodeRelationshipType, db=db)
-
-    # Create the relationship
-    obj = NodeRelationship(uuid=create.uuid, node_uuid=node.uuid, related_node=related_node, type=type)
-    db.add(obj)
-    crud.commit(db)
-
-    # Adding the relationship counts as modifying the node, so update its version
-    crud.update_node_version(node=node, db=db)
-
-    # Add the node history record
-    if history_username:
-        crud.record_node_update_history(
-            record_node=node,
-            action_by=crud.read_user_by_username(username=history_username, db=db),
-            diffs=[crud.Diff(field="relationships", added_to_list=[str(related_node.uuid)], removed_from_list=[])],
-            db=db,
-        )
+    obj = crud.node_relationship.create_or_read(model=create, db=db)
+    db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_node_relationship", uuid=obj.uuid)
 
@@ -66,7 +44,10 @@ helpers.api_route_create(router, create_node_relationship)
 
 
 def get_node_relationship(uuid: UUID, db: Session = Depends(get_db)):
-    return crud.read(uuid=uuid, db_table=NodeRelationship, db=db)
+    try:
+        return crud.node_relationship.read_by_uuid(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
 helpers.api_route_read(router, get_node_relationship, NodeRelationshipRead)
@@ -77,30 +58,13 @@ helpers.api_route_read(router, get_node_relationship, NodeRelationshipRead)
 #
 
 
-def delete_node_relationship(
-    uuid: UUID,
-    history_username: Optional[str] = None,
-    db: Session = Depends(get_db),
-):
-    # Read the relationship to get the impacted node
-    relationship: NodeRelationship = crud.read(uuid=uuid, db_table=NodeRelationship, db=db)
-    node = relationship.node
-    related_node_uuid = relationship.related_node_uuid
+def delete_node_relationship(uuid: UUID, history_username: str, db: Session = Depends(get_db)):
+    try:
+        crud.node_relationship.delete(uuid=uuid, history_username=history_username, db=db)
+    except (UuidNotFoundInDatabase, ValueNotFoundInDatabase) as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
-    # Removing the relationship counts as modifying the node, so update its version
-    crud.update_node_version(node=node, db=db)
-
-    # Delete the relationship
-    crud.delete(uuid=uuid, db_table=NodeRelationship, db=db)
-
-    # Add the node history record
-    if history_username:
-        crud.record_node_update_history(
-            record_node=node,
-            action_by=crud.read_user_by_username(username=history_username, db=db),
-            diffs=[crud.Diff(field="relationships", added_to_list=[], removed_from_list=[str(related_node_uuid)])],
-            db=db,
-        )
+    db.commit()
 
 
 helpers.api_route_delete(router, delete_node_relationship)

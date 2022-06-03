@@ -11,7 +11,6 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from typing import List
 
 from api_models.observable import ObservableNodeTreeRead, ObservableRead, ObservableRelationshipRead
 from db.database import Base
@@ -38,7 +37,7 @@ class Observable(Node, HasHistory):
     # information will be assumed to be UTC, whereas datetimes with timezone data will be converted to UTC.
     expires_on = Column(DateTime(timezone=True))
 
-    for_detection = Column(Boolean, default=False, nullable=False)
+    for_detection = Column(Boolean, default=False, nullable=False, index=True)
 
     # History is lazy loaded and is not included by default when fetching an observable from the API.
     history = relationship(
@@ -72,23 +71,22 @@ class Observable(Node, HasHistory):
         UniqueConstraint("type_uuid", "value", name="type_value_uc"),
     )
 
-    def serialize_for_node_tree(self) -> ObservableNodeTreeRead:
+    def convert_to_pydantic(self) -> ObservableNodeTreeRead:
         return ObservableNodeTreeRead(**self.to_dict())
 
     def to_dict(self):
-        values_dict = self.__dict__
-        values_dict["observable_relationships"] = self.observable_relationships
-        return values_dict
+        ignore_keys = ["convert_to_pydantic", "history", "history_snapshot", "to_dict"]
+        return {key: getattr(self, key) for key in self.__class__.__dict__ if key not in ignore_keys}
 
     @property
     def history_snapshot(self):
         return json.loads(ObservableRead(**self.to_dict()).json())
 
     @property
-    def observable_relationships(self) -> List[ObservableRelationshipRead]:
+    def observable_relationships(self) -> list[ObservableRelationshipRead]:
         """Returns the list of observable relationships for this observable sorted by the
         related observable's type then value"""
 
-        results: List[NodeRelationship] = [r for r in self.relationships if isinstance(r.related_node, Observable)]
+        results: list[NodeRelationship] = [r for r in self.relationships if isinstance(r.related_node, Observable)]
 
         return sorted(results, key=lambda x: (x.related_node.type.value, x.related_node.value))

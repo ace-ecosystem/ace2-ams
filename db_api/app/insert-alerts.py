@@ -3,7 +3,7 @@ import sys
 from sqlalchemy.orm import Session
 
 from db.database import get_db
-from tests import helpers
+from tests import factory
 
 # Command line arguments:
 #
@@ -25,11 +25,8 @@ if len(sys.argv) < 2:
 # Example: db_api/app/tests/alerts/blah.json -> /app/tests/alerts/blah.json
 json_path = sys.argv[1].replace("db_api", "")
 
-num_alerts = 1
-if len(sys.argv) == 3:
-    num_alerts = int(sys.argv[2])
-
+num_alerts = int(sys.argv[2]) if len(sys.argv) == 3 else 1
 db: Session = next(get_db())
 
 for i in range(num_alerts):
-    helpers.create_alert_from_json_file(db=db, json_path=json_path, alert_name=f"Manual Alert {i}")
+    factory.submission.create_from_json_file(db=db, json_path=json_path, submission_name=f"Manual Alert {i}")

@@ -3,7 +3,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -39,12 +39,12 @@ def test_update_invalid_uuid(client):
 )
 def test_update_duplicate_unique_fields(client, db, key):
     # Create some objects
-    obj1 = helpers.create_user_role(value="test_role", db=db)
-    obj2 = helpers.create_user_role(value="test_role2", db=db)
+    obj1 = factory.user_role.create_or_read(value="test_role", db=db)
+    obj2 = factory.user_role.create_or_read(value="test_role2", db=db)
 
     # Ensure you cannot update a unique field to a value that already exists
     update = client.patch(f"/api/user/role/{obj2.uuid}", json={key: getattr(obj1, key)})
-    assert update.status_code == status.HTTP_409_CONFLICT
+    assert update.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_update_nonexistent_uuid(client):
@@ -68,7 +68,7 @@ def test_update_nonexistent_uuid(client):
 )
 def test_update(client, db, key, initial_value, updated_value):
     # Create the object
-    obj = helpers.create_user_role(value="test_role", db=db)
+    obj = factory.user_role.create_or_read(value="test", db=db)
 
     # Set the initial value
     setattr(obj, key, initial_value)

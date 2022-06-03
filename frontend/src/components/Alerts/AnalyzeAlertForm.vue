@@ -431,6 +431,7 @@
   // Submit alert create object to API to create an alert
   const submitAlert = async (observables) => {
     const alert = {
+      alert: true,
       alertDescription: alertDescriptionFormatted.value,
       eventTime: alertDate.value,
       name: alertDescriptionFormatted.value,

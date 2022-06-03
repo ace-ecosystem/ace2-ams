@@ -486,7 +486,7 @@ describe("URL Summary Details", () => {
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
-    cy.intercept("POST", "/api/node/tree/observable").as("getObservables");
+    cy.intercept("POST", "/api/alert/observables").as("getObservables");
 
     // Add the test event to the database
     cy.request({
@@ -1528,17 +1528,24 @@ describe("Detection Summary Details", () => {
     // First actual row should have empty message
     cy.get("td").should("have.text", "No detection points found.");
 
-    // Add a detection point to alert in event
+    // Start by getting all of the observables inside of the test alert.
+    // Then use the UUID of the first returned observable to create the detection point.
     cy.request({
       method: "POST",
-      url: "/api/node/detection_point/",
-      body: [
-        {
-          node_uuid: "02f8299b-2a24-400f-9751-7dd9164daf6a",
-          uuid: "2845378f-3fba-4ced-ab03-f23638acc018",
-          value: "Test Detection Point",
-        },
-      ],
+      url: "/api/alert/observables",
+      body: ["02f8299b-2a24-400f-9751-7dd9164daf6a"],
+    }).then((response) => {
+      const firstObservableUuid = response.body[0].uuid;
+      cy.request({
+        method: "POST",
+        url: "/api/node/detection_point/",
+        body: [
+          {
+            node_uuid: firstObservableUuid,
+            value: "Test Detection Point",
+          },
+        ],
+      });
     });
 
     // Refresh and navigate back to detection summary

@@ -4,7 +4,7 @@ import myNock from "@unit/services/api/nock";
 import { eventFilterParams } from "@/models/event";
 import { parseEventSummary, useEventTableStore } from "@/stores/eventTable";
 import { eventReadFactory, eventSummaryFactory } from "@mocks/events";
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import { queueableObjectReadFactory } from "@mocks/genericObject";
 import { nodeThreatReadFactory } from "@mocks/nodeThreat";
 import { userReadFactory } from "@mocks/user";
 import { createCustomPinia } from "@tests/unitHelpers";
@@ -24,15 +24,15 @@ const mockEventReadBSummary = eventSummaryFactory({
 });
 
 const mockOwner = userReadFactory();
-const mockPreventionTool = genericObjectReadFactory({
+const mockPreventionTool = queueableObjectReadFactory({
   value: "preventionTool",
 });
-const mockRiskLevel = genericObjectReadFactory({ value: "riskLevel" });
-const mockStatus = genericObjectReadFactory({ value: "status" });
+const mockRiskLevel = queueableObjectReadFactory({ value: "riskLevel" });
+const mockStatus = queueableObjectReadFactory({ value: "status" });
 const mockThreat = nodeThreatReadFactory();
-const mockThreatActor = genericObjectReadFactory({ value: "threatActor" });
-const mockType = genericObjectReadFactory({ value: "type" });
-const mockVector = genericObjectReadFactory({ value: "vector" });
+const mockThreatActor = queueableObjectReadFactory({ value: "threatActor" });
+const mockType = queueableObjectReadFactory({ value: "type" });
+const mockVector = queueableObjectReadFactory({ value: "vector" });
 const mockEventReadC = eventReadFactory({
   uuid: "uuid3",
   owner: mockOwner,

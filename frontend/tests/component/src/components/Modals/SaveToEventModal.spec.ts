@@ -3,7 +3,7 @@ import PrimeVue from "primevue/config";
 
 import SaveToEventModal from "@/components/Modals/SaveToEventModal.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import { queueableObjectReadFactory } from "@mocks/genericObject";
 import { Event } from "@/services/api/event";
 import { eventReadFactory } from "@mocks/events";
 import { eventRead } from "@/models/event";
@@ -11,8 +11,8 @@ import { Alert } from "@/services/api/alert";
 import { NodeComment } from "@/services/api/nodeComment";
 import { userReadFactory } from "@mocks/user";
 
-const openStatus = genericObjectReadFactory({ value: "OPEN" });
-const closedStatus = genericObjectReadFactory({ value: "CLOSED" });
+const openStatus = queueableObjectReadFactory({ value: "OPEN" });
+const closedStatus = queueableObjectReadFactory({ value: "CLOSED" });
 
 const defaultReadAllPagesOpen = {
   status: openStatus,
@@ -58,6 +58,9 @@ function factory(
             },
             eventStatusStore: {
               items: [openStatus, closedStatus],
+            },
+            recentCommentsStore: {
+              recentComments: ["test"],
             },
           },
         }),
@@ -215,6 +218,7 @@ describe("SaveToEventModal", () => {
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
@@ -241,6 +245,7 @@ describe("SaveToEventModal", () => {
           queue: "testObject",
           owner: "analyst",
           status: "OPEN",
+          historyUsername: "analyst",
         },
         true,
       )
@@ -251,6 +256,7 @@ describe("SaveToEventModal", () => {
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
@@ -279,6 +285,7 @@ describe("SaveToEventModal", () => {
           queue: "testObject",
           owner: "analyst",
           status: "OPEN",
+          historyUsername: "analyst",
         },
         true,
       )
@@ -300,6 +307,7 @@ describe("SaveToEventModal", () => {
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
@@ -322,12 +330,68 @@ describe("SaveToEventModal", () => {
     cy.get("@updateAlert").should("have.been.calledOnce");
     cy.get("[data-cy='save-to-event-modal']").should("not.exist");
   });
+  it("attempts to create and save to new event when new event, and disposition comment when is selected, comment is given using NodeCommentAutocomplete, and the 'Save' button is clicked", () => {
+    cy.stub(Event, "create")
+      .withArgs(
+        {
+          name: "Test Name",
+          queue: "testObject",
+          owner: "analyst",
+          status: "OPEN",
+          historyUsername: "analyst",
+        },
+        true,
+      )
+      .as("createEvent")
+      .returns(eventReadFactory());
+    cy.stub(NodeComment, "create")
+      .withArgs([
+        {
+          username: "analyst",
+          nodeUuid: "testEvent1",
+          user: "analyst",
+          value: "test extra content",
+        },
+      ])
+      .as("createComment")
+      .resolves();
+    cy.stub(Alert, "update")
+      .withArgs([
+        {
+          uuid: "uuid",
+          eventUuid: "testEvent1",
+          historyUsername: "analyst",
+        },
+      ])
+      .as("updateAlert")
+      .resolves();
+    factory({
+      selected: ["uuid"],
+      openEvents: [
+        eventReadFactory({ name: "Test Open Event", status: openStatus }),
+      ],
+      closedEvents: [
+        eventReadFactory({ name: "Test Closed Event", status: closedStatus }),
+      ],
+    });
+    cy.contains("NEW").click();
+    cy.findByLabelText("Event Name").click().type("Test Name");
+    cy.get(".p-autocomplete > .p-button").click();
+    cy.contains("test").click();
+    cy.findByDisplayValue("test").click().type(" extra content");
+    cy.findByText("Save").click();
+    cy.get("@createEvent").should("have.been.calledOnce");
+    cy.get("@createComment").should("have.been.calledOnce");
+    cy.get("@updateAlert").should("have.been.calledOnce");
+    cy.get("[data-cy='save-to-event-modal']").should("not.exist");
+  });
   it("shows error when attempt to save to existing event fails", () => {
     cy.stub(Alert, "update")
       .withArgs([
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
@@ -354,6 +418,7 @@ describe("SaveToEventModal", () => {
           queue: "testObject",
           owner: "analyst",
           status: "OPEN",
+          historyUsername: "analyst",
         },
         true,
       )
@@ -384,6 +449,7 @@ describe("SaveToEventModal", () => {
           queue: "testObject",
           owner: "analyst",
           status: "OPEN",
+          historyUsername: "analyst",
         },
         true,
       )
@@ -405,6 +471,7 @@ describe("SaveToEventModal", () => {
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
@@ -434,6 +501,7 @@ describe("SaveToEventModal", () => {
           queue: "testObject",
           owner: "analyst",
           status: "OPEN",
+          historyUsername: "analyst",
         },
         true,
       )
@@ -455,6 +523,7 @@ describe("SaveToEventModal", () => {
         {
           uuid: "uuid",
           eventUuid: "testEvent1",
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")

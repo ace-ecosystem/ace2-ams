@@ -1,4 +1,3 @@
-import BaseModalVue from "@/components/Modals/BaseModal.vue";
 import TagModalVue from "@/components/Modals/TagModal.vue";
 import {
   observableActionCommand,

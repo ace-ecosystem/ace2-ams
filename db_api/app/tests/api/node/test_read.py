@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -26,10 +26,8 @@ def test_get_version_nonexistent_uuid(client):
 
 
 def test_get_version(client, db):
-    alert_tree = helpers.create_alert(db=db)
-    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
-    analysis_tree = helpers.create_analysis(parent_tree=observable_tree, parent_observable=observable_tree.node, db=db)
+    submission = factory.submission.create(db=db)
 
-    get = client.get(f"/api/node/{analysis_tree.node_uuid}/version")
+    get = client.get(f"/api/node/{submission.uuid}/version")
     assert get.status_code == status.HTTP_200_OK
-    assert get.json() == {"version": str(analysis_tree.node.version)}
+    assert get.json() == {"version": str(submission.version)}

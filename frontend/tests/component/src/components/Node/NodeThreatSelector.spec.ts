@@ -4,7 +4,7 @@ import PrimeVue from "primevue/config";
 import NodeThreatSelector from "@/components/Node/NodeThreatSelector.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { nodeThreatRead } from "@/models/nodeThreat";
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import { queueableObjectReadFactory } from "@mocks/genericObject";
 import Tooltip from "primevue/tooltip";
 import ToastService from "primevue/toastservice";
 import { NodeThreat } from "@/services/api/nodeThreat";
@@ -41,22 +41,22 @@ function factory(
   });
 }
 
-const threatTypeA = genericObjectReadFactory({
+const threatTypeA = queueableObjectReadFactory({
   value: "threat type A",
 });
-const threatTypeB = genericObjectReadFactory({
+const threatTypeB = queueableObjectReadFactory({
   value: "threat type B",
 });
 
 const threatA: nodeThreatRead = {
   types: [threatTypeA],
-  ...genericObjectReadFactory({
+  ...queueableObjectReadFactory({
     value: "threat A",
   }),
 };
 const threatB: nodeThreatRead = {
   types: [threatTypeB],
-  ...genericObjectReadFactory({
+  ...queueableObjectReadFactory({
     value: "threat B",
   }),
 };
@@ -136,7 +136,7 @@ describe("NodeThreatSelector", () => {
     cy.get('[data-cy="threat-types"]').click();
     cy.contains("threat type A").click();
     cy.get('[data-cy="save-threat-button"]').click();
-    cy.get("@stub-1").should("have.been.calledWith", {
+    cy.get("@stub-2").should("have.been.calledWith", {
       value: "Test threat",
       queues: ["external"],
       types: ["threat type A"],
@@ -199,7 +199,7 @@ describe("NodeThreatSelector", () => {
     cy.get('[data-cy="threat-types"]').click();
     cy.contains("threat type B").click();
     cy.get('[data-cy="save-threat-button"]').click();
-    cy.get("@stub-3").should("have.been.calledWith", "testObject1", {
+    cy.get("@stub-4").should("have.been.calledWith", "testObject1", {
       types: ["threat type A", "threat type B"],
     });
   });
@@ -219,7 +219,7 @@ describe("NodeThreatSelector", () => {
     cy.get('[data-cy="threat-types"]').click();
     cy.contains("threat type B").click();
     cy.get('[data-cy="close-edit-threat-panel-button"]').click();
-    cy.get("@stub-3").should("not.have.been.called");
+    cy.get("@stub-4").should("not.have.been.called");
   });
   it("will correctly display an error message if attempt to edit a threat's threat types fails", () => {
     cy.stub(NodeThreat, "readAll").resolves([threatA, threatB]);

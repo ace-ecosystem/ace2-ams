@@ -213,6 +213,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     stub
       .withArgs({
         ...expectedCreateAlert,
+        alert: true,
         alertDescription: "Manual Alert",
         name: "Manual Alert",
         observables: [
@@ -250,6 +251,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     stub
       .withArgs({
         ...expectedCreateAlert,
+        alert: true,
         alertDescription: "Manual Alert",
         name: "Manual Alert",
         observables: [
@@ -286,6 +288,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     stub
       .withArgs({
         ...expectedCreateAlert,
+        alert: true,
         alertDescription: "Manual Alert",
         name: "Manual Alert",
         observables: [
@@ -321,6 +324,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     stub
       .withArgs({
         ...expectedCreateAlert,
+        alert: true,
         alertDescription: "Manual Alert 1.2.3.4",
         name: "Manual Alert 1.2.3.4",
         observables: [{ type: "ipv4", value: testObservableValueA }],
@@ -330,6 +334,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     stub
       .withArgs({
         ...expectedCreateAlert,
+        alert: true,
         alertDescription: "Manual Alert 5.6.7.8",
         name: "Manual Alert 5.6.7.8",
         observables: [{ type: "ipv4", value: testObservableValueB }],
@@ -367,6 +372,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     stub
       .withArgs({
         ...expectedCreateAlert,
+        alert: true,
         alertDescription: "Manual Alert 1.2.3.4",
         name: "Manual Alert 1.2.3.4",
         observables: [{ type: "ipv4", value: testObservableValueA }],
@@ -376,6 +382,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     stub
       .withArgs({
         ...expectedCreateAlert,
+        alert: true,
         alertDescription: "Manual Alert 4.3.2.1",
         name: "Manual Alert 4.3.2.1",
         observables: [{ type: "ipv4", value: "4.3.2.1" }],
@@ -385,6 +392,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     stub
       .withArgs({
         ...expectedCreateAlert,
+        alert: true,
         alertDescription: "Manual Alert 8.7.6.5",
         name: "Manual Alert 8.7.6.5",
         observables: [{ type: "ipv4", value: "8.7.6.5" }],

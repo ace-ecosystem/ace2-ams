@@ -1,11 +1,11 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, Json, UUID4
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from api_models import type_str
-from api_models.alert import AlertRead
 from api_models.event import EventRead
 from api_models.observable import ObservableRead
+from api_models.submission import SubmissionRead
 from api_models.user import UserRead
 
 
@@ -16,11 +16,11 @@ class Diff(BaseModel):
 
     new_value: Optional[Union[type_str, bool]] = Field(description="The string value of the field after to the action")
 
-    added_to_list: List[type_str] = Field(
+    added_to_list: list[type_str] = Field(
         description="A list of strings that were added to the field", default_factory=list
     )
 
-    removed_from_list: List[type_str] = Field(
+    removed_from_list: list[type_str] = Field(
         description="A list of strings that were removed from the field", default_factory=list
     )
 
@@ -48,12 +48,6 @@ class HistoryBase(BaseModel):
         orm_mode = True
 
 
-class AlertHistoryRead(HistoryBase):
-    """Represents an alert history entry."""
-
-    snapshot: AlertRead = Field(description="A JSON representation of the alert after the action was performed")
-
-
 class EventHistoryRead(HistoryBase):
     """Represents an event history entry."""
 
@@ -65,6 +59,14 @@ class ObservableHistoryRead(HistoryBase):
 
     snapshot: ObservableRead = Field(
         description="A JSON representation of the observable after the action was performed"
+    )
+
+
+class SubmissionHistoryRead(HistoryBase):
+    """Represents a submission history entry."""
+
+    snapshot: SubmissionRead = Field(
+        description="A JSON representation of the submission after the action was performed"
     )
 
 

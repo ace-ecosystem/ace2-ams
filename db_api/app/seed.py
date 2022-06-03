@@ -4,14 +4,12 @@ import yaml
 
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
-from typing import Dict, List
 
 from core.auth import hash_password
 from core.config import is_in_testing_mode
 from db import crud
 from db.database import get_db
 from db.schemas.alert_disposition import AlertDisposition
-from db.schemas.alert_type import AlertType
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_risk_level import EventRiskLevel
@@ -25,6 +23,7 @@ from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.seed import Seed
+from db.schemas.submission_type import SubmissionType
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
 
@@ -36,7 +35,7 @@ from db.schemas.user_role import UserRole
 def add_queueable_values(db: Session, db_table: DeclarativeMeta, queues: dict, data: dict, key: str, print_value: str):
     # Transform the data into a dictionary where the keys are the individual values from the config
     # and the values are lists of which queue they belong to.
-    transformed_data: Dict[str, List[str]] = dict()
+    transformed_data: dict[str, list[str]] = {}
 
     for queue in data[key]:
         for value in data[key][queue]:
@@ -55,7 +54,7 @@ def add_queueable_values(db: Session, db_table: DeclarativeMeta, queues: dict, d
 
 def seed(db: Session):
     # Quit early if the database was already seeded
-    if crud.read_all(db_table=Seed, db=db):
+    if crud.helpers.read_all(db_table=Seed, db=db):
         print("The database was already seeded!")
         sys.exit()
 
@@ -75,24 +74,19 @@ def seed(db: Session):
         sys.exit()
 
     # Add the queues to the database
-    queues = dict()
+    queues = {}
     if "queue" in data:
         for value in data["queue"]:
             queues[value] = Queue(value=value)
             db.add(queues[value])
             print(f"Adding queue: {value}")
 
-    # Add the rest of the objects from the config into the database
     if "alert_disposition" in data:
         for rank, value in enumerate(data["alert_disposition"]):
             db.add(AlertDisposition(rank=rank, value=value))
             print(f"Adding alert disposition: {rank}:{value}")
 
-    if "alert_type" in data:
-        for value in data["alert_type"]:
-            db.add(AlertType(value=value))
-            print(f"Adding alert type: {value}")
-
+    # Add the rest of the objects from the config into the database
     if "event_prevention_tool" in data:
         add_queueable_values(
             db=db,
@@ -160,7 +154,7 @@ def seed(db: Session):
 
     if "node_directive" in data:
         for directive in data["node_directive"]:
-            db.add(NodeDirective(value=directive["value"],description=directive["description"] ))
+            db.add(NodeDirective(value=directive["value"], description=directive["description"]))
             print(f"Adding node directive type: {value}")
 
     if "observable_type" in data:
@@ -168,7 +162,12 @@ def seed(db: Session):
             db.add(ObservableType(value=value))
             print(f"Adding observable type: {value}")
 
-    user_roles = dict()
+    if "submission_type" in data:
+        for value in data["submission_type"]:
+            db.add(SubmissionType(value=value))
+            print(f"Adding submission type: {value}")
+
+    user_roles = {}
     if "user_role" in data:
         for value in data["user_role"]:
             user_roles[value] = UserRole(value=value)
@@ -195,11 +194,9 @@ def seed(db: Session):
     db.add(Seed())
 
     # Commit all of the changes
-    crud.commit(db)
+    db.commit()
 
 
-if __name__ == "__main__":
-    # Don't seed the database automatically if running in TESTING mode
-    if not is_in_testing_mode():
-        db: Session = next(get_db())
-        seed(db)
+if __name__ == "__main__" and not is_in_testing_mode():
+    db: Session = next(get_db())
+    seed(db)

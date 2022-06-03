@@ -7,6 +7,7 @@ import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { nodeTagRead } from "@/models/nodeTag";
 import { alertReadFactory } from "@mocks/alert";
+import { userReadFactory } from "@mocks/user";
 import { NodeTag } from "@/services/api/nodeTag";
 import { Alert } from "@/services/api/alert";
 import { observableTreeRead } from "@/models/observable";
@@ -64,6 +65,7 @@ function factory(
               stateFiltersLoaded: false,
               routeFiltersLoaded: false,
             },
+            authStore: { user: userReadFactory() },
             selectedAlertStore: {
               selected: args.selected,
             },
@@ -250,6 +252,7 @@ describe("RemoveTagModal", () => {
         {
           uuid: "uuid",
           tags: ["otherTag"],
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")
@@ -279,14 +282,17 @@ describe("RemoveTagModal", () => {
         {
           uuid: "uuidA",
           tags: ["otherTag"],
+          historyUsername: "analyst",
         },
         {
           uuid: "uuidB",
           tags: ["existingTag"],
+          historyUsername: "analyst",
         },
         {
           uuid: "uuidC",
           tags: [],
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlerts")
@@ -329,6 +335,7 @@ describe("RemoveTagModal", () => {
     cy.stub(ObservableInstance, "update")
       .withArgs("observableUuid1", {
         tags: ["testTag"],
+        historyUsername: "analyst",
       })
       .as("updateObservable")
       .rejects(new Error("404 request failed !"));
@@ -356,6 +363,7 @@ describe("RemoveTagModal", () => {
         {
           uuid: "uuid",
           tags: ["otherTag"],
+          historyUsername: "analyst",
         },
       ])
       .as("updateAlert")

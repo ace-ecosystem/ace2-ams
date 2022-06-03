@@ -40,10 +40,10 @@ describe("ViewAlert", () => {
   it("renders correctly when alert can be fetched", () => {
     cy.stub(Alert, "read").resolves(alertTreeReadFactory());
     factory(false).then((wrapper) => {
-      cy.get("@spy-8").should("have.been.calledOnce"); // unselectAll
-      cy.get("@spy-5").should("have.been.calledOnce"); // select alert
-      cy.get("@spy-4").should("have.been.calledOnce"); // 'patch' aka reset alertStore
-      cy.get("@spy-2").should("have.been.calledOnce"); // read alert
+      cy.get("@spy-9").should("have.been.calledOnce"); // unselectAll
+      cy.get("@spy-6").should("have.been.calledOnce"); // select alert
+      cy.get("@spy-5").should("have.been.calledOnce"); // 'patch' aka reset alertStore
+      cy.get("@spy-3").should("have.been.calledOnce"); // read alert
       expect(wrapper.findComponent(TheAlertActionToolbarVue)).to.exist;
       expect(wrapper.findComponent(TheAlertDetailsVue)).to.exist;
       expect(wrapper.findComponent(AlertTreeVue)).to.exist;
@@ -56,6 +56,7 @@ describe("ViewAlert", () => {
         {
           uuid: undefined,
           disposition: "FALSE_POSITIVE",
+          historyUsername: "analyst",
         },
       ])
       .as("dispositionFP")
@@ -67,7 +68,7 @@ describe("ViewAlert", () => {
         .vm.$emit("falsePositiveClicked");
     });
     cy.get("@dispositionFP").should("have.been.calledOnce");
-    cy.get("@spy-2").should("have.been.calledTwice"); // read alert should be called again
+    cy.get("@spy-3").should("have.been.calledTwice"); // read alert should be called again
   });
   it("attempts to disposition alert as 'ignore' on ignoreClicked event", () => {
     cy.stub(Alert, "read").resolves(alertTreeReadFactory());
@@ -76,6 +77,7 @@ describe("ViewAlert", () => {
         {
           uuid: undefined,
           disposition: "IGNORE",
+          historyUsername: "analyst",
         },
       ])
       .as("dispositionIgnore")
@@ -87,7 +89,7 @@ describe("ViewAlert", () => {
         .vm.$emit("ignoreClicked");
     });
     cy.get("@dispositionIgnore").should("have.been.calledOnce");
-    cy.get("@spy-2").should("have.been.calledTwice"); // read alert should be called again
+    cy.get("@spy-3").should("have.been.calledTwice"); // read alert should be called again
   });
   it("will display error message if attempt to use FP disposition shortcut fails", () => {
     cy.stub(Alert, "read").resolves(alertTreeReadFactory());
@@ -96,6 +98,7 @@ describe("ViewAlert", () => {
         {
           uuid: undefined,
           disposition: "FALSE_POSITIVE",
+          historyUsername: "analyst",
         },
       ])
       .as("dispositionFP")
@@ -107,7 +110,7 @@ describe("ViewAlert", () => {
         .vm.$emit("falsePositiveClicked");
     });
     cy.get("@dispositionFP").should("have.been.calledOnce");
-    cy.get("@spy-2").should("have.been.calledOnce"); // read alert should not be called again
+    cy.get("@spy-3").should("have.been.calledOnce"); // read alert should not be called again
     cy.get("[data-cy=error-message]")
       .should("be.visible")
       .should("contain.text", "404 request failed");
@@ -119,6 +122,7 @@ describe("ViewAlert", () => {
         {
           uuid: undefined,
           disposition: "IGNORE",
+          historyUsername: "analyst",
         },
       ])
       .as("dispositionIgnore")
@@ -130,7 +134,7 @@ describe("ViewAlert", () => {
         .vm.$emit("ignoreClicked");
     });
     cy.get("@dispositionIgnore").should("have.been.calledOnce");
-    cy.get("@spy-2").should("have.been.calledOnce"); // read alert should not be called again
+    cy.get("@spy-3").should("have.been.calledOnce"); // read alert should not be called again
     cy.get("[data-cy=error-message]")
       .should("be.visible")
       .should("contain.text", "404 request failed");

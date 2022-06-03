@@ -16,7 +16,6 @@ const props = {
 };
 
 function factory(event: eventRead = eventReadFactory()) {
-  const spy = cy.spy();
   return mount(TheEventDetailsMenuBar, {
     global: {
       provide: {
@@ -141,6 +140,7 @@ describe("TheEventDetailsMenuBar", () => {
       {
         uuid: "uuid",
         owner: "analyst",
+        historyUsername: "analyst",
       },
     ]);
   });

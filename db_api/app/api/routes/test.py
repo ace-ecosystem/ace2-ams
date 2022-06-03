@@ -9,7 +9,7 @@ from api_models.test import AddTestAlert, AddTestEvent
 from core.config import is_in_testing_mode
 from db.database import get_db
 from seed import seed
-from tests import helpers as test_helpers
+from tests import factory
 
 
 router = APIRouter(
@@ -27,9 +27,11 @@ def add_test_alerts(alert: AddTestAlert, db: Session = Depends(get_db)):
     # Only proceed if the API is running in TESTING mode
     if is_in_testing_mode():
         for i in range(alert.count):
-            test_helpers.create_alert_from_json_file(
-                db=db, json_path=f"/app/tests/alerts/{alert.template}", alert_name=f"Manual Alert {i}"
+            factory.submission.create_from_json_file(
+                db=db, json_path=f"/app/tests/alerts/{alert.template}", submission_name=f"Manual Alert {i}"
             )
+
+        db.commit()
 
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     else:
@@ -59,13 +61,13 @@ helpers.api_route_create(
 def add_test_events(event: AddTestEvent, db: Session = Depends(get_db)):
     # Only proceed if the API is running in TESTING mode
     if is_in_testing_mode():
-        db_event = test_helpers.create_event(name=event.name, queue=event.queue, status=event.status, db=db)
+        db_event = factory.event.create_or_read(name=event.name, event_queue=event.queue, status=event.status, db=db)
 
         for i in range(event.alert_count):
-            alert_tree = test_helpers.create_alert_from_json_file(
-                db=db, json_path=f"/app/tests/alerts/{event.alert_template}", alert_name=f"Manual Alert {i}"
+            alert = factory.submission.create_from_json_file(
+                db=db, json_path=f"/app/tests/alerts/{event.alert_template}", submission_name=f"Manual Alert {i}"
             )
-            alert_tree.node.event_uuid = db_event.uuid
+            alert.event_uuid = db_event.uuid
             db.commit()
 
         return Response(status_code=status.HTTP_204_NO_CONTENT)

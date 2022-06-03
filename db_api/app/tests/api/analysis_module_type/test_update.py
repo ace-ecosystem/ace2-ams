@@ -4,7 +4,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -69,12 +69,12 @@ def test_update_invalid_uuid(client):
 
 def test_update_duplicate_value_version(client, db):
     # Create some objects
-    helpers.create_analysis_module_type(value="test", version="1.0.0", db=db)
-    amt2 = helpers.create_analysis_module_type(value="test", version="1.0.1", db=db)
+    factory.analysis_module_type.create_or_read(value="test", version="1.0.0", db=db)
+    amt2 = factory.analysis_module_type.create_or_read(value="test", version="1.0.1", db=db)
 
     # Ensure you cannot update an analysis module type to have a duplicate version+value combination
     update = client.patch(f"/api/analysis/module_type/{amt2.uuid}", json={"version": "1.0.0"})
-    assert update.status_code == status.HTTP_409_CONFLICT
+    assert update.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_update_nonexistent_uuid(client):
@@ -106,15 +106,15 @@ def test_update_nonexistent_uuid(client):
 )
 def test_update_valid_list_fields(client, db, key, values):
     # Create an analysis module type
-    analysis_module_type = helpers.create_analysis_module_type(value="test_type", db=db)
+    analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", db=db)
 
     # Create the objects
     if key == "observable_types":
-        create_func = helpers.create_observable_type
+        create_func = factory.observable_type.create_or_read
     elif key == "required_directives":
-        create_func = helpers.create_node_directive
+        create_func = factory.node_directive.create_or_read
     else:
-        create_func = helpers.create_node_tag
+        create_func = factory.node_tag.create_or_read
 
     for value in values:
         create_func(value=value, db=db)
@@ -144,7 +144,7 @@ def test_update_valid_list_fields(client, db, key, values):
 )
 def test_update(client, db, key, initial_value, updated_value):
     # Create an analysis module type
-    analysis_module_type = helpers.create_analysis_module_type(value="test", db=db)
+    analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", db=db)
 
     # Set the initial value
     setattr(analysis_module_type, key, initial_value)

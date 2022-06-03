@@ -9,7 +9,8 @@ from core.config import get_settings
 def _request(method: str, path: str, expected_status: int, payload: Optional[dict] = None, return_json: bool = False):
     result = requests.request(method=method, url=f"{get_settings().database_api_url}{path}", json=payload)
 
-    if result.status_code != expected_status and result.status_code not in [
+    if result.status_code not in [
+        expected_status,
         status.HTTP_200_OK,
         status.HTTP_201_CREATED,
         status.HTTP_204_NO_CONTENT,

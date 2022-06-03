@@ -2,13 +2,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
-
-
-"""
-NOTE: There are no tests for the foreign key constraints. The DELETE endpoint will need to be updated once the endpoints
-are in place in order to account for this.
-"""
+from tests import factory
 
 
 #
@@ -26,6 +20,18 @@ def test_delete_nonexistent_uuid(client):
     assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_delete_used(client, db):
+    # Create an object
+    obj = factory.alert_disposition.create_or_read(value="test", rank=1, db=db)
+
+    # Assign it to another object
+    factory.submission.create(disposition="test", db=db)
+
+    # Ensure you cannot delete it now that it is in use
+    delete = client.delete(f"/api/alert/disposition/{obj.uuid}")
+    assert delete.status_code == status.HTTP_400_BAD_REQUEST
+
+
 #
 # VALID TESTS
 #
@@ -33,12 +39,8 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete(client, db):
     # Create the object
-    obj = helpers.create_alert_disposition(value="test", rank=1, db=db)
+    obj = factory.alert_disposition.create_or_read(value="test", rank=1, db=db)
 
     # Delete it
     delete = client.delete(f"/api/alert/disposition/{obj.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
-
-    # Make sure it is gone
-    get = client.get(f"/api/alert/disposition/{obj.uuid}")
-    assert get.status_code == status.HTTP_404_NOT_FOUND

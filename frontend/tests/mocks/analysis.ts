@@ -29,22 +29,22 @@ export const analysisModuleTypeReadFactory = ({
 });
 
 export const analysisReadFactory = ({
-  version = "f0590bba-c854-4a2c-b414-71c2bc580c4b",
   analysisModuleType = analysisModuleTypeReadFactory(),
   cachedUntil = new Date(),
   details = { test: "test description" },
   errorMessage = null,
+  runTime = new Date(),
   stackTrace = null,
   summary = null,
   nodeType = "analysis",
   uuid = "uuid2",
 }: Partial<analysisRead> = {}): analysisRead => ({
-  version: version,
   analysisModuleType: analysisModuleType,
   cachedUntil: cachedUntil,
   childObservables: [],
   details: details,
   errorMessage: errorMessage,
+  runTime: runTime,
   stackTrace: stackTrace,
   summary: summary,
   nodeType: nodeType,
@@ -62,18 +62,12 @@ export const analysisModuleTypeNodeTreeReadFactory = ({
 export const analysisTreeReadFactory = ({
   analysisModuleType = analysisModuleTypeNodeTreeReadFactory(),
   children = [],
-  parentTreeUuid = "",
-  treeUuid = "",
   firstAppearance = undefined,
   uuid = "testUuid",
-  version = "",
 }: Partial<analysisTreeRead> = {}): analysisTreeRead => ({
   analysisModuleType: analysisModuleType,
   children: children,
-  parentTreeUuid: parentTreeUuid,
-  treeUuid: treeUuid,
   firstAppearance: firstAppearance,
   nodeType: "analysis",
   uuid: uuid,
-  version: version,
 });

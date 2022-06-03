@@ -9,7 +9,6 @@ import { eventSummary } from "@/models/event";
 import { commentReadFactory } from "@mocks/comment";
 import { eventSummaryFactory } from "@mocks/events";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import EditEventModalVue from "@/components/Modals/EditEventModal.vue";
 
 interface EventTableCellProps {
   data: eventSummary;

@@ -4,7 +4,7 @@ import {
   alertSummary,
   alertTreeRead,
 } from "@/models/alert";
-import { genericObjectRead, propertyOption } from "@/models/base";
+import { genericQueueableObjectRead, propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
 import { nodeTagRead } from "@/models/nodeTag";
 import { isValidDate, isObject } from "@/etc/validators";
@@ -258,7 +258,7 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
   };
 }
 
-export function groupItemsByQueue<T extends genericObjectRead>(
+export function groupItemsByQueue<T extends genericQueueableObjectRead>(
   arr: T[],
 ): Record<string, T[]> {
   const itemsByQueue: Record<string, T[]> = {};

@@ -13,8 +13,11 @@ export interface genericObjectRead {
   description: string | null;
   uuid: UUID;
   value: string;
-  queues?: genericObjectRead[];
 }
+
+export interface genericQueueableObjectRead
+  extends genericObjectRead,
+    queueableObjectRead {}
 
 export interface genericObjectReadPage extends page {
   items: genericObjectRead[];
@@ -24,6 +27,22 @@ export interface genericObjectUpdate {
   description?: string;
   value?: string;
   [key: string]: unknown;
+}
+
+export interface historyUsername {
+  historyUsername: string;
+}
+
+export interface queueableObjectCreate {
+  queues: string[];
+}
+
+export interface queueableObjectRead {
+  queues: genericObjectRead[];
+}
+
+export interface queueableObjectUpdate {
+  queues?: string[];
 }
 
 export interface page {

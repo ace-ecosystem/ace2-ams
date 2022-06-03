@@ -4,7 +4,7 @@ import uuid
 
 from fastapi import status
 
-from tests import helpers
+from tests import factory
 
 
 #
@@ -39,17 +39,6 @@ def test_update_invalid_uuid(client):
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-def test_update_invalid_version(client, db):
-    alert_tree = helpers.create_alert(db=db)
-    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
-    analysis_tree = helpers.create_analysis(parent_tree=observable_tree, parent_observable=observable_tree.node, db=db)
-
-    # Make sure you cannot update it using an invalid version. The version is
-    # optional, but if given, it must match.
-    update = client.patch(f"/api/analysis/{analysis_tree.node.uuid}", json={"version": str(uuid.uuid4())})
-    assert update.status_code == status.HTTP_409_CONFLICT
-
-
 def test_update_nonexistent_uuid(client):
     update = client.patch(f"/api/analysis/{uuid.uuid4()}", json={})
     assert update.status_code == status.HTTP_404_NOT_FOUND
@@ -78,21 +67,23 @@ def test_update_nonexistent_uuid(client):
     ],
 )
 def test_update(client, db, key, initial_value, updated_value):
-    alert_tree = helpers.create_alert(db=db)
-    observable_tree = helpers.create_observable(type="ipv4", value="127.0.0.1", parent_tree=alert_tree, db=db)
-    analysis_tree = helpers.create_analysis(parent_tree=observable_tree, parent_observable=observable_tree.node, db=db)
-    initial_analysis_version = analysis_tree.node.version
+    submission = factory.submission.create(db=db)
+    analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
+    observable = factory.observable.create_or_read(
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
+    )
+    analysis = factory.analysis.create_or_read(
+        analysis_module_type=analysis_module_type, submission=submission, target=observable, db=db
+    )
 
     # Set the initial value
-    setattr(analysis_tree.node, key, initial_value)
+    setattr(analysis, key, initial_value)
 
     # Update it
-    update = client.patch(f"/api/analysis/{analysis_tree.node.uuid}", json={key: updated_value})
+    update = client.patch(f"/api/analysis/{analysis.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     if key == "details" and updated_value:
-        assert analysis_tree.node.details == json.loads(updated_value)
+        assert analysis.details == json.loads(updated_value)
     else:
-        assert getattr(analysis_tree.node, key) == updated_value
-
-    assert analysis_tree.node.version != initial_analysis_version
+        assert getattr(analysis, key) == updated_value

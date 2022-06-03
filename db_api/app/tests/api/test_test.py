@@ -51,18 +51,18 @@ def test_not_testing_mode_reset_database(client):
 
 
 def test_add_alerts(client):
-    get = client.get("/api/alert/")
+    get = client.get("/api/submission/")
     assert get.json()["total"] == 0
 
     result = client.post("/api/test/add_alerts", json={"template": "small.json", "count": 1})
     assert result.status_code == status.HTTP_204_NO_CONTENT
 
-    get = client.get("/api/alert/")
+    get = client.get("/api/submission/")
     assert get.json()["total"] == 1
 
 
 def test_add_event(client):
-    get = client.get("/api/alert/")
+    get = client.get("/api/submission/")
     assert get.json()["total"] == 0
     get = client.get("/api/event/")
     assert get.json()["total"] == 0
@@ -72,7 +72,7 @@ def test_add_event(client):
     )
     assert result.status_code == status.HTTP_204_NO_CONTENT
 
-    get = client.get("/api/alert/")
+    get = client.get("/api/submission/")
     assert get.json()["total"] == 1
     get = client.get("/api/event/")
     assert get.json()["total"] == 1

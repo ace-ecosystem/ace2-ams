@@ -172,17 +172,19 @@
   const displayValue = computed(() => {
     let type = observableType.value;
     let value = props.observable.value;
-    const metadata = props.observable.nodeMetadata;
 
-    if (metadata && metadata.display) {
-      if (metadata.display.type) {
-        type = `${metadata.display.type} (${observableType.value})`;
-      }
+    // TODO: This needs to change once analysis metadata is added
+    // const metadata = props.observable.nodeMetadata;
 
-      if (metadata.display.value) {
-        value = metadata.display.value;
-      }
-    }
+    // if (metadata && metadata.display) {
+    //   if (metadata.display.type) {
+    //     type = `${metadata.display.type} (${observableType.value})`;
+    //   }
+
+    //   if (metadata.display.value) {
+    //     value = metadata.display.value;
+    //   }
+    // }
 
     const displayValue = `${type}: ${value}`;
 

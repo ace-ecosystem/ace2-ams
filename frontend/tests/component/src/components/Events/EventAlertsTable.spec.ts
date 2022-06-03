@@ -1,24 +1,38 @@
 // Example Cypress Vue component test that we might use one day
 
 import { mount } from "@cypress/vue";
-import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 
 import router from "@/router";
 
+import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import EventAlertsTable from "@/components/Events/EventAlertsTable.vue";
 import { Alert } from "@/services/api/alert";
 import { alertReadFactory } from "@mocks/alert";
+import { userReadFactory } from "@mocks/user";
 import { testConfiguration } from "@/etc/configuration/test";
 
 const mockAlertA = alertReadFactory({ uuid: "uuid1", name: "Test Alert A" });
 const mockAlertB = alertReadFactory({ uuid: "uuid2", name: "Test Alert B" });
 const mockAlertC = alertReadFactory({ uuid: "uuid3", name: "Test Alert C" });
 
-function factory() {
+function factory(args: { selected: string[] } = { selected: [] }) {
   return mount(EventAlertsTable, {
     global: {
-      plugins: [router, PrimeVue, createPinia()],
+      plugins: [
+        router,
+        PrimeVue,
+        createCustomCypressPinia({
+          initialState: {
+            authStore: {
+              user: userReadFactory(),
+            },
+            selectedAlertStore: {
+              selected: args.selected,
+            },
+          },
+        }),
+      ],
       provide: { nodeType: "events", config: testConfiguration },
     },
     propsData: {
@@ -84,11 +98,13 @@ describe("EventAlertsTable", () => {
 
     cy.stub(Alert, "readAllPages").as("readAllStub").callsFake(mockReadAll);
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid1", eventUuid: null }])
+      .withArgs([
+        { uuid: "uuid1", eventUuid: null, historyUsername: "analyst" },
+      ])
       .as("updateStub")
       .returns("Success");
 
-    factory();
+    factory({ selected: ["uuid1"] });
 
     // Click to remove the first alert
     cy.get("tr").eq(1).children().eq(0).findByRole("checkbox").click();
@@ -111,11 +127,13 @@ describe("EventAlertsTable", () => {
 
     cy.stub(Alert, "readAllPages").as("readAllStub").callsFake(mockReadAll);
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid1", eventUuid: null }])
+      .withArgs([
+        { uuid: "uuid1", eventUuid: null, historyUsername: "analyst" },
+      ])
       .as("updateStub")
       .rejects(new Error("404 Request failed"));
 
-    factory();
+    factory({ selected: ["uuid1"] });
 
     // Click to remove the first alert
     cy.get("tr").eq(1).children().eq(0).findByRole("checkbox").click();

@@ -9,6 +9,8 @@ def hash_password(password: str) -> str:
         password: the plaintext password to hash
     """
 
+    # Securely hash and salt the password. Bcrypt_256 is used to get around the Bcrypt limitations
+    # of silently truncating passwords longer than 72 characters as well as not handling NULL bytes.
     return bcrypt_sha256.hash(password)
 
 

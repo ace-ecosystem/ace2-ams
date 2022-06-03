@@ -8,8 +8,6 @@ import router from "@/router/index";
 import { alertReadFactory } from "@mocks/alert";
 import { alertRead } from "@/models/alert";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import { NodeTree } from "@/services/api/nodeTree";
-import { observableReadFactory } from "@mocks/observable";
 import { userReadFactory } from "@mocks/user";
 
 function factory(initialAlertStoreState: {
@@ -31,27 +29,19 @@ function factory(initialAlertStoreState: {
 
 describe("TheAlertDetails", () => {
   it("renders correctly when there is not an open alert", () => {
-    cy.stub(NodeTree, "readNodesOfNodeTree").as("getObservables").resolves([]);
     factory({
       open: null,
       requestReload: false,
     });
-    cy.get("@getObservables").should("not.have.been.called");
     cy.contains("Test Alert").should("not.exist");
   });
   it("renders correctly when there is an open alert that has no observables with detection points or instructions", () => {
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(["testAlertUuid"], "observable")
-      .as("getObservables")
-      .resolves([]);
     factory({
       open: alertReadFactory({
         tags: [genericObjectReadFactory({ value: "TestTag" })],
       }),
       requestReload: false,
     });
-
-    cy.get("@getObservables").should("have.been.calledOnce");
 
     cy.contains("Test Alert").should("be.visible");
     cy.get("button .pi-link").should("be.visible");
@@ -76,10 +66,6 @@ describe("TheAlertDetails", () => {
   });
   it("renders correctly when there is an open alert has an owner and disposition set (uses the correct alertSummary fields)", () => {
     const date = new Date(2020, 5, 4, 12, 0, 0, 0);
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(["testAlertUuid"], "observable")
-      .as("getObservables")
-      .resolves([]);
     factory({
       open: alertReadFactory({
         tags: [genericObjectReadFactory({ value: "TestTag" })],
@@ -95,8 +81,6 @@ describe("TheAlertDetails", () => {
       requestReload: false,
     });
 
-    cy.get("@getObservables").should("have.been.calledOnce");
-
     // Should still have all the same rows
     cy.get("tr").should("have.length", 11);
     // Check these specific fields
@@ -111,10 +95,6 @@ describe("TheAlertDetails", () => {
       .should("have.text", "Test Analyst @ 2020-06-04T16:00:00.000Z");
   });
   it("renders correctly when there is an open alert that has instructions available", () => {
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(["testAlertUuid"], "observable")
-      .as("getObservables")
-      .resolves([]);
     factory({
       open: alertReadFactory({
         instructions: "alert instructions example",
@@ -122,8 +102,6 @@ describe("TheAlertDetails", () => {
       }),
       requestReload: false,
     });
-
-    cy.get("@getObservables").should("have.been.calledOnce");
 
     cy.get("tr").should("have.length", 12);
     cy.contains("Instructions")
@@ -150,31 +128,24 @@ describe("TheAlertDetails", () => {
       value: "detectionC",
     };
 
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(["testAlertUuid"], "observable")
-      .as("getObservables")
-      .resolves([
-        observableReadFactory({
-          detectionPoints: [detectionPointC],
-        }),
-        observableReadFactory({
-          detectionPoints: [detectionPointB, detectionPointA],
-        }),
-      ]);
     factory({
       open: alertReadFactory({
+        // The detection points are returned from the API sorted by their values
+        childDetectionPoints: [
+          detectionPointA,
+          detectionPointB,
+          detectionPointC,
+        ],
         tags: [genericObjectReadFactory({ value: "TestTag" })],
       }),
       requestReload: false,
     });
 
-    cy.get("@getObservables").should("have.been.calledOnce");
-
     cy.findAllByText("Detection").should("have.length", 3);
     cy.findAllByText("Detection")
       .eq(0)
       .siblings()
-      .should("contain.text", "detectionC");
+      .should("contain.text", "detectionA");
     cy.findAllByText("Detection");
     cy.findAllByText("Detection")
       .eq(1)
@@ -183,25 +154,6 @@ describe("TheAlertDetails", () => {
     cy.findAllByText("Detection")
       .eq(2)
       .siblings()
-      .should("contain.text", "detectionA");
-  });
-  it("displays error if request to fetch observables fails", () => {
-    cy.stub(NodeTree, "readNodesOfNodeTree")
-      .withArgs(["testAlertUuid"], "observable")
-      .as("getObservables")
-      .rejects(new Error("404 request failed"));
-    factory({
-      open: alertReadFactory({
-        tags: [genericObjectReadFactory({ value: "TestTag" })],
-      }),
-      requestReload: false,
-    });
-
-    cy.get("@getObservables").should("have.been.calledOnce");
-
-    cy.get("[data-cy=error-message]")
-      .should("be.visible")
-      .should("have.text", "404 request failed");
-    cy.contains("No detections found").should("be.visible");
+      .should("contain.text", "detectionC");
   });
 });

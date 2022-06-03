@@ -6,7 +6,10 @@ import { testConfiguration } from "@/etc/configuration/test/index";
 
 import TheEventsTable from "@/components/Events/TheEventsTable.vue";
 import router from "@/router/index";
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import {
+  genericObjectReadFactory,
+  queueableObjectReadFactory,
+} from "@mocks/genericObject";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { eventRead } from "@/models/event";
 import { eventReadFactory } from "@mocks/events";
@@ -116,8 +119,8 @@ describe("TheEventsTable", () => {
     ];
 
     const threats: nodeThreatRead[] = [
-      { ...genericObjectReadFactory({ value: "ThreatA" }), types: [] },
-      { ...genericObjectReadFactory({ value: "ThreatB" }), types: [] },
+      { ...queueableObjectReadFactory({ value: "ThreatA" }), types: [] },
+      { ...queueableObjectReadFactory({ value: "ThreatB" }), types: [] },
     ];
 
     factory({
@@ -125,7 +128,7 @@ describe("TheEventsTable", () => {
       visibleQueriedItems: [
         eventReadFactory({
           threats: threats,
-          riskLevel: genericObjectReadFactory({ value: "low" }),
+          riskLevel: queueableObjectReadFactory({ value: "low" }),
         }),
         eventReadFactory({ value: "Test Event 2", uuid: "uuid2" }),
       ],

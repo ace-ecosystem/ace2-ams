@@ -30,6 +30,9 @@ function factory(
             selectedAlertStore: {
               selected: args.selected,
             },
+            recentCommentsStore: {
+              recentComments: ["test"],
+            },
           },
         }),
       ],
@@ -110,7 +113,9 @@ describe("DispositionModal", () => {
   });
   it("attempts to set disposition when save button clicked and no comment is given", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .withArgs([
+        { uuid: "uuid", disposition: "Bad", historyUsername: "analyst" },
+      ])
       .as("setDisposition")
       .resolves();
     cy.stub(NodeComment, "create").as("createComment");
@@ -126,7 +131,9 @@ describe("DispositionModal", () => {
   });
   it("attempts to set disposition and create comment when save button clicked and comment is given", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .withArgs([
+        { uuid: "uuid", disposition: "Bad", historyUsername: "analyst" },
+      ])
       .as("setDisposition")
       .resolves();
     cy.stub(NodeComment, "create")
@@ -152,9 +159,41 @@ describe("DispositionModal", () => {
     cy.get("@createComment").should("have.been.calledOnce");
     cy.get("[data-cy=DispositionModal]").should("not.exist");
   });
+  it("attempts to set disposition and create comment when save button clicked and comment is given using NodeCommentAutocomplete", () => {
+    cy.stub(Alert, "update")
+      .withArgs([
+        { uuid: "uuid", disposition: "Bad", historyUsername: "analyst" },
+      ])
+      .as("setDisposition")
+      .resolves();
+    cy.stub(NodeComment, "create")
+      .withArgs([
+        {
+          username: "analyst",
+          nodeUuid: "uuid",
+          value: "test extra content",
+        },
+      ])
+      .as("createComment")
+      .resolves();
+    factory({
+      dipsositions: [falsePositive, badDisposition],
+      selected: ["uuid"],
+    });
+    cy.contains("Bad").click();
+    cy.get(".p-autocomplete > .p-button").click();
+    cy.contains("test").click();
+    cy.findByDisplayValue("test").click().type(" extra content");
+    cy.contains("Save").click();
+    cy.get("@setDisposition").should("have.been.calledOnce");
+    cy.get("@createComment").should("have.been.calledOnce");
+    cy.get("[data-cy=DispositionModal]").should("not.exist");
+  });
   it("displays error if attempt to set disposition fails", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .withArgs([
+        { uuid: "uuid", disposition: "Bad", historyUsername: "analyst" },
+      ])
       .as("setDisposition")
       .rejects(new Error("404 request failed"));
     cy.stub(NodeComment, "create").as("createComment");
@@ -174,7 +213,9 @@ describe("DispositionModal", () => {
   });
   it("displays error if attempt to create comment fails with non-409 error code", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .withArgs([
+        { uuid: "uuid", disposition: "Bad", historyUsername: "analyst" },
+      ])
       .as("setDisposition")
       .resolves();
     cy.stub(NodeComment, "create")
@@ -202,7 +243,9 @@ describe("DispositionModal", () => {
   });
   it("does not display error if attempt to create comment fails with 409 error code", () => {
     cy.stub(Alert, "update")
-      .withArgs([{ uuid: "uuid", disposition: "Bad" }])
+      .withArgs([
+        { uuid: "uuid", disposition: "Bad", historyUsername: "analyst" },
+      ])
       .as("setDisposition")
       .resolves();
     cy.stub(NodeComment, "create")

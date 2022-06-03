@@ -3,7 +3,7 @@ import argparse
 from sqlalchemy.orm import Session
 
 from db.database import get_db
-from tests import helpers
+from tests import factory
 
 parser = argparse.ArgumentParser()
 
@@ -40,48 +40,52 @@ alert_json_path = args.alert_json_path.replace("db_api", "")
 
 db: Session = next(get_db())
 
-event = helpers.create_event(name=args.event_name, db=db)
+event = factory.event.create_or_read(name=args.event_name, db=db)
 
 if args.owner:
-    event.owner = helpers.create_user(username=args.owner, db=db, display_name=args.owner)
+    event.owner = factory.user.create_or_read(username=args.owner, db=db, display_name=args.owner)
 
 if args.prevention_tools:
     event.prevention_tools = [
-        helpers.create_event_prevention_tool(value=p, db=db) for p in args.prevention_tools.split(",")
+        factory.event_prevention_tool.create_or_read(value=p, db=db) for p in args.prevention_tools.split(",")
     ]
 
 if args.queue:
-    event.queue = helpers.create_queue(value=args.queue, db=db)
+    event.queue = factory.queue.create_or_read(value=args.queue, db=db)
 
 if args.remediations:
-    event.remediations = [helpers.create_event_remediation(value=r, db=db) for r in args.remediations.split(",")]
+    event.remediations = [
+        factory.event_remediation.create_or_read(value=r, db=db) for r in args.remediations.split(",")
+    ]
 
 if args.risk_level:
-    event.risk_level = helpers.create_event_risk_level(value=args.risk_level, db=db)
+    event.risk_level = factory.event_risk_level.create_or_read(value=args.risk_level, db=db)
 
 if args.source:
-    event.source = helpers.create_event_source(value=args.source, db=db)
+    event.source = factory.event_source.create_or_read(value=args.source, db=db)
 
 if args.status:
-    event.status = helpers.create_event_status(value=args.status, db=db)
+    event.status = factory.event_status.create_or_read(value=args.status, db=db)
 
 if args.tags:
-    event.tags = [helpers.create_node_tag(value=t, db=db) for t in args.tags.split(",")]
+    event.tags = [factory.node_tag.create_or_read(value=t, db=db) for t in args.tags.split(",")]
 
 if args.threat_actors:
-    event.threat_actors = [helpers.create_node_threat_actor(value=t, db=db) for t in args.threat_actors.split(",")]
+    event.threat_actors = [
+        factory.node_threat_actor.create_or_read(value=t, db=db) for t in args.threat_actors.split(",")
+    ]
 
 if args.threats:
-    event.threats = [helpers.create_node_threat(value=t, db=db) for t in args.threats.split(",")]
+    event.threats = [factory.node_threat.create_or_read(value=t, db=db) for t in args.threats.split(",")]
 
 if args.type:
-    event.type = helpers.create_event_type(value=args.type, db=db)
+    event.type = factory.event_type.create_or_read(value=args.type, db=db)
 
 if args.vectors:
-    event.vectors = [helpers.create_event_vector(value=v, db=db) for v in args.vectors.split(",")]
+    event.vectors = [factory.event_vector.create_or_read(value=v, db=db) for v in args.vectors.split(",")]
 
 for i in range(args.num_alerts):
-    alert_tree = helpers.create_alert_from_json_file(db=db, json_path=alert_json_path, alert_name=f"Manual Alert {i}")
-    alert_tree.node.event_uuid = event.uuid
+    alert = factory.submission.create_from_json_file(db=db, json_path=alert_json_path, submission_name=f"Manual Alert {i}")
+    alert.event_uuid = event.uuid
 
 db.commit()

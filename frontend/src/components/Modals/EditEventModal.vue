@@ -81,10 +81,12 @@
   import { propertyOption } from "@/models/base";
   import { nodeCommentRead } from "@/models/nodeComment";
   import { populateEventStores } from "@/stores/helpers";
+  import { useRecentCommentsStore } from "@/stores/recentComments";
 
   const authStore = useAuthStore();
   const modalStore = useModalStore();
   const eventStore = useEventStore();
+  const recentCommentsStore = useRecentCommentsStore();
 
   const props = defineProps({
     name: { type: String, required: true },
@@ -127,7 +129,10 @@
       return [];
     }
     // All updateData will have the event uuid
-    const data: eventUpdate = { uuid: props.eventUuid };
+    const data: eventUpdate = {
+      uuid: props.eventUuid,
+      historyUsername: authStore.user.username,
+    };
     // Add the formatted valueds for all fields in the form
     for (const field in formFields.value) {
       if (formFields.value[field].propertyValue !== event.value[field]) {
@@ -230,6 +235,7 @@
           username: authStore.user.username,
           value: comment.value,
         });
+        recentCommentsStore.addComment(comment.value!);
       }
     }
   };

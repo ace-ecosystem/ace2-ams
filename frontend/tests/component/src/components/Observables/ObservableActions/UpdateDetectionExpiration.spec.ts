@@ -4,13 +4,24 @@ import PrimeVue from "primevue/config";
 import UpdateDetectionExpiration from "@/components/Observables/ObservableActions/UpdateDetectionExpiration.vue";
 import { observableTreeRead } from "@/models/observable";
 import { observableTreeReadFactory } from "@mocks/observable";
-import { createPinia } from "pinia";
+import { userReadFactory } from "@mocks/user";
 import { ObservableInstance } from "@/services/api/observable";
+import { createCustomCypressPinia } from "@tests/cypressHelpers";
 
 function factory(args: { observable: observableTreeRead }) {
   return mount(UpdateDetectionExpiration, {
     global: {
-      plugins: [PrimeVue, createPinia()],
+      plugins: [
+        PrimeVue,
+        createCustomCypressPinia({
+          stubActions: false,
+          initialState: {
+            authStore: {
+              user: userReadFactory(),
+            },
+          },
+        }),
+      ],
       provide: {
         nodeType: "alerts",
       },
@@ -69,7 +80,10 @@ describe("UpdateDetectionExpiration", () => {
   });
   it("correctly attempts to set observable expiration to null on submit", () => {
     cy.stub(ObservableInstance, "update")
-      .withArgs("observableUuid1", { expiresOn: null })
+      .withArgs("observableUuid1", {
+        expiresOn: null,
+        historyUsername: "analyst",
+      })
       .as("updateObservable")
       .resolves();
     factory({ observable: doesExpire });
@@ -82,6 +96,7 @@ describe("UpdateDetectionExpiration", () => {
     cy.stub(ObservableInstance, "update")
       .withArgs("observableUuid1", {
         expiresOn: new Date("04/22/2022 12:00:00"),
+        historyUsername: "analyst",
       })
       .as("updateObservable")
       .resolves();
@@ -95,7 +110,10 @@ describe("UpdateDetectionExpiration", () => {
   });
   it("correctly shows error if request to update expiration fails", () => {
     cy.stub(ObservableInstance, "update")
-      .withArgs("observableUuid1", { expiresOn: null })
+      .withArgs("observableUuid1", {
+        expiresOn: null,
+        historyUsername: "analyst",
+      })
       .as("updateObservable")
       .rejects(new Error("404 request failed"));
     factory({ observable: doesExpire });

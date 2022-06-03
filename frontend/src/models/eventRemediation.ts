@@ -3,14 +3,23 @@ import {
   genericObjectRead,
   genericObjectReadPage,
   genericObjectUpdate,
+  queueableObjectCreate,
+  queueableObjectRead,
+  queueableObjectUpdate,
 } from "./base";
 
-export type eventRemediationCreate = genericObjectCreate;
+export interface eventRemediationCreate
+  extends genericObjectCreate,
+    queueableObjectCreate {}
 
-export type eventRemediationRead = genericObjectRead;
+export interface eventRemediationRead
+  extends genericObjectRead,
+    queueableObjectRead {}
 
 export interface eventRemediationReadPage extends genericObjectReadPage {
   items: eventRemediationRead[];
 }
 
-export type eventRemediationUpdate = genericObjectUpdate;
+export interface eventRemediationUpdate
+  extends genericObjectUpdate,
+    queueableObjectUpdate {}
