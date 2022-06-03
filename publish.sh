@@ -11,7 +11,7 @@ git fetch --all
 git checkout -B publish/master -t origin/master
 
 # remove private files
-find . -name '*.private*' -exec git rm -r --ignore-unmatch {} +
+find . -name '*private*' -exec git rm -r --ignore-unmatch {} +
 git commit -m 'removed private files'
 
 # squash merge publish/master into branch of upstream/main and push it out
