@@ -6,6 +6,16 @@ from api_models.alert_disposition import AlertDispositionCreate
 from db import crud
 
 
+def test_create(db):
+    obj = crud.alert_disposition.create_or_read(
+        model=AlertDispositionCreate(description="test description", rank=1, value="test value"), db=db
+    )
+
+    assert obj.description == "test description"
+    assert obj.rank == 1
+    assert obj.value == "test value"
+
+
 @pytest.mark.parametrize(
     "key",
     [
