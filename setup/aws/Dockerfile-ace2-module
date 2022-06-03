@@ -11,7 +11,7 @@ RUN rm -rf setup.sh lib
 
 # run tests and install module
 ADD $module module
-RUN pytest -vv module
+RUN pytest -vv module/test.py
 RUN cp module/module.py module.py
 RUN rm -rf module
 
