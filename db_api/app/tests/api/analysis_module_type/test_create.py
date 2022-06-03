@@ -130,7 +130,7 @@ def test_create_valid_optional_fields(client, key, value):
         ("required_tags", ["test", "test"]),
     ],
 )
-def test_create_valid_list_fields(client, db, key, values):
+def test_create_valid_list_fields(client, key, values):
     # Create the analysis module type
     create = client.post(
         "/api/analysis/module_type/",
