@@ -96,7 +96,7 @@ helpers.api_route_update(router, update_disposition)
 
 def delete_disposition(uuid: UUID, db: Session = Depends(get_db)):
     try:
-        if not crud.helpers.delete(uuid=uuid, db_table=AlertDisposition, db=db):
+        if not crud.alert_disposition.delete(uuid=uuid, db=db):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete alert disposition {uuid}"
             )

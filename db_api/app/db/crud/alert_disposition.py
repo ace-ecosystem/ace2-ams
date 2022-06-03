@@ -28,6 +28,10 @@ def create_or_read(model: AlertDispositionCreate, db: Session) -> AlertDispositi
     )
 
 
+def delete(uuid: UUID, db: Session) -> bool:
+    return crud.helpers.delete(uuid=uuid, db_table=AlertDisposition, db=db)
+
+
 def read_all(db: Session) -> list[AlertDisposition]:
     return crud.helpers.read_all(db_table=AlertDisposition, order_by=AlertDisposition.value, db=db)
 
