@@ -13,8 +13,6 @@ import pytest
     ('x509.der', ['x509'], 'DER certificate', 'application/octet-stream'),
     ('x509.pem', ['x509'], 'PEM certificate', 'text/plain'),
     ('zip', ['zip'], 'Zip archive data, at least v2.0 to extract', 'application/zip'),
-    ('zip', ['zip'], 'Zip archive data, at least v2.0 to extract', 'application/zip'),
-    ('zip', ['zip'], 'Zip archive data, at least v2.0 to extract', 'application/zip'),
 ])
 def test_file_type_analysis(path, tags, file_type, mime_type):
     # create analysis to run
