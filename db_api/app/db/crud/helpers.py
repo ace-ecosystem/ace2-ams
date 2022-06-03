@@ -2,12 +2,12 @@ import contextlib
 
 from datetime import datetime, timezone
 from pydantic import BaseModel
-from sqlalchemy import delete as sql_delete, select, update as sql_update
+from sqlalchemy import Column, delete as sql_delete, select, update as sql_update
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session, undefer
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.sql.selectable import Select
-from typing import Any
+from typing import Any, Optional
 from uuid import UUID
 
 from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
@@ -17,7 +17,7 @@ def build_read_all_query(db_table: DeclarativeMeta, joins: list[DeclarativeMeta]
     if joins is None:
         joins = []
 
-    query = select(db_table)
+    query: Select = select(db_table)
     for j in joins:
         query = query.join(j)
 
@@ -62,16 +62,20 @@ def ensure_record_exists(uuid: UUID, db_table: DeclarativeMeta, db: Session):
         raise UuidNotFoundInDatabase(f"UUID {uuid} was not found in the {db_table.__tablename__} table.") from e
 
 
-def read_all(db_table: DeclarativeMeta, db: Session) -> list[Any]:
+def read_all(db_table: DeclarativeMeta, db: Session, order_by: Optional[Column] = None) -> list[Any]:
     """Returns all of the objects from the given database table."""
 
-    return db.execute(select(db_table)).all()
+    query: Select = select(db_table)
+    if order_by:
+        query = query.order_by(order_by)
+
+    return db.execute(query).scalars().all()
 
 
 def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session, undefer_column: str = None) -> Any:
     """Returns the object with the specific UUID from the given database table."""
 
-    query = select(db_table).where(db_table.uuid == uuid)
+    query: Select = select(db_table).where(db_table.uuid == uuid)
     if undefer_column is not None:
         query = query.options(undefer(undefer_column))
 
