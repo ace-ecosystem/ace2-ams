@@ -1,11 +1,9 @@
 import json
 import pytest
-import time
 import uuid
 
 from datetime import datetime
-from fastapi import HTTPException, status
-from api_models.analysis import AnalysisCreate
+from fastapi import status
 
 from db import crud
 from tests import factory
