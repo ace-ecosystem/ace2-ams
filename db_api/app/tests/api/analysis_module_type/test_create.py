@@ -4,8 +4,6 @@ import uuid
 
 from fastapi import status
 
-from tests import factory
-
 
 #
 # INVALID TESTS
