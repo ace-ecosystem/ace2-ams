@@ -110,6 +110,7 @@ def create(
 
     if event:
         submission.event = event
+        diffs.append(crud.history.create_diff(field="event_uuid", old=None, new=event.uuid))
 
     if tags:
         submission.tags = [factory.node_tag.create_or_read(value=t, db=db) for t in tags]
