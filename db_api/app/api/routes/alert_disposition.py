@@ -74,7 +74,7 @@ def update_disposition(
     db: Session = Depends(get_db),
 ):
     try:
-        if not crud.helpers.update(uuid=uuid, update_model=disposition, db_table=AlertDisposition, db=db):
+        if not crud.alert_disposition.update(uuid=uuid, model=disposition, db=db):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update alert disposition {uuid}"
             )
