@@ -76,7 +76,7 @@ def test_create(db):
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test", cache_seconds=90, db=db)
     factory.observable_type.create_or_read(value="ipv4", db=db)
 
-    # Create the first analysis
+    # Create the analysis
     now = crud.helpers.utcnow()
     analysis = crud.analysis.create_or_read(
         model=AnalysisCreate(
