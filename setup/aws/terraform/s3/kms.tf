@@ -64,7 +64,7 @@ data "aws_iam_policy_document" "kms" {
   statement {
     principals {
       type        = "AWS"
-      identifiers = "arn:aws:iam::728226656595:role/FileType_analysis_lambda_role"
+      identifiers = ["arn:aws:iam::728226656595:role/FileType_analysis_lambda_role"]
     }
     actions = [
       "kms:GenerateDataKey",
@@ -76,7 +76,7 @@ data "aws_iam_policy_document" "kms" {
     condition {
       test = "StringLike"
       variable = "kms:EncryptionContext:aws:s3:arn"
-      values = "arn:aws:s3:::ice2-file-storage/*" 
+      values = ["arn:aws:s3:::ice2-file-storage/*"]
     }
   }
 }
