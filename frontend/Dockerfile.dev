@@ -1,4 +1,4 @@
-FROM cypress/included:9.5.4
+FROM cypress/included:10.0.2
 
 RUN apt-get install -y curl
 
@@ -10,7 +10,7 @@ RUN npm install
 
 COPY . .
 
-# Fixes the strange permission issues GitHub Actions was having. 
+# Fixes the strange permission issues GitHub Actions was having.
 RUN chmod -R 777 /app
 
 # Override the entrypoint of the cypress/included image

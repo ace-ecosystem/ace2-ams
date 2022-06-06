@@ -1436,7 +1436,7 @@ describe("Email Analysis Details", () => {
   });
   it("renders Email Details section correctly", () => {
     // Check title
-    cy.get("h5").eq(1).should("contain.text", "Email Details");
+    cy.contains("Email Details").should("be.visible");
 
     // Check Headers Panel
     cy.get("#email-headers-panel").should("be.visible");
