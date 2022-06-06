@@ -19,7 +19,7 @@ provider "aws" {
 
 module "filetype-idr-analysis-module" {
   source  = "app.terraform.io/FifthThird/idr-analysis-module/aws"
-  version = "1.0.3"
+  version = "1.0.4"
   #Vars
   environment              = var.environment
   analysis_module_name     = var.analysis_module_name
