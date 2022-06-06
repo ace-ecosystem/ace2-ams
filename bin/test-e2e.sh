@@ -17,6 +17,6 @@ docker-compose -f docker-compose.yml up -d
 docker exec ace2-ams-gui bin/wait-for-gui.sh
 
 # Run Cypress
-docker exec ace2-ams-gui xvfb-run node_modules/cypress/bin/cypress run --e2e --headed --browser chrome --config-file "cypress.config.ts" --config video=false,screenshotOnRunFailure=false
+docker exec ace2-ams-gui xvfb-run cypress run --e2e --headed --browser chrome --config-file "cypress.config.ts" --config video=false,screenshotOnRunFailure=false
 
 bin/disable-test-mode.sh
