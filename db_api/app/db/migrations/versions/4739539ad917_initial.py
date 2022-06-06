@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: d657e1740bf4
+Revision ID: 4739539ad917
 Revises: 
-Create Date: 2022-06-02 18:08:25.369568
+Create Date: 2022-06-06 12:39:41.009541
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'd657e1740bf4'
+revision = '4739539ad917'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -428,7 +428,7 @@ def upgrade() -> None:
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('alert_time', sa.DateTime(timezone=True), nullable=True),
     sa.Column('contain_time', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('creation_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
+    sa.Column('created_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
     sa.Column('disposition_time', sa.DateTime(timezone=True), nullable=True),
     sa.Column('event_time', sa.DateTime(timezone=True), nullable=True),
     sa.Column('name', sa.String(), nullable=False),
@@ -451,7 +451,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_event_alert_time'), 'event', ['alert_time'], unique=False)
     op.create_index(op.f('ix_event_contain_time'), 'event', ['contain_time'], unique=False)
-    op.create_index(op.f('ix_event_creation_time'), 'event', ['creation_time'], unique=False)
+    op.create_index(op.f('ix_event_created_time'), 'event', ['created_time'], unique=False)
     op.create_index(op.f('ix_event_disposition_time'), 'event', ['disposition_time'], unique=False)
     op.create_index(op.f('ix_event_event_time'), 'event', ['event_time'], unique=False)
     op.create_index(op.f('ix_event_ownership_time'), 'event', ['ownership_time'], unique=False)
@@ -688,7 +688,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_event_ownership_time'), table_name='event')
     op.drop_index(op.f('ix_event_event_time'), table_name='event')
     op.drop_index(op.f('ix_event_disposition_time'), table_name='event')
-    op.drop_index(op.f('ix_event_creation_time'), table_name='event')
+    op.drop_index(op.f('ix_event_created_time'), table_name='event')
     op.drop_index(op.f('ix_event_contain_time'), table_name='event')
     op.drop_index(op.f('ix_event_alert_time'), table_name='event')
     op.drop_table('event')

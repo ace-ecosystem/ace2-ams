@@ -34,6 +34,7 @@ def create_or_read(
     # Set default values
     if created_time is None:
         created_time = crud.helpers.utcnow()
+
     if prevention_tools is None:
         prevention_tools = []
 
@@ -90,7 +91,7 @@ def create_or_read(
     for v in vectors:
         factory.event_vector.create_or_read(value=v, queues=[event_queue], db=db)
 
-    return crud.event.create_or_read(
+    obj = crud.event.create_or_read(
         model=EventCreate(
             alert_time=alert_time,
             contain_time=contain_time,
@@ -115,3 +116,7 @@ def create_or_read(
         ),
         db=db,
     )
+
+    db.commit()
+
+    return obj

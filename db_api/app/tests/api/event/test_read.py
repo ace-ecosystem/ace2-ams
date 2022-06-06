@@ -1104,7 +1104,7 @@ def test_get_filter_created_time_after(client, db):
     # There should only be 1 event when we filter by created_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"created_time_after": event2.creation_time}
+    params = {"created_time_after": event2.created_time}
     get = client.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
@@ -1122,7 +1122,7 @@ def test_get_filter_created_time_before(client, db):
     # There should only be 1 event when we filter by created_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"created_time_before": event2.creation_time}
+    params = {"created_time_before": event2.created_time}
     get = client.get(f"/api/event/?{urlencode(params)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"

@@ -25,7 +25,7 @@ def test_create(db):
         model=EventCreate(
             alert_time=now,
             contain_time=now,
-            creation_time=now,
+            created_time=now,
             disposition_time=now,
             event_time=now,
             history_username="analyst",
@@ -56,7 +56,7 @@ def test_create(db):
     assert event.auto_event_time is None
     assert event.auto_ownership_time is None
     assert event.contain_time == now
-    assert event.creation_time == now
+    assert event.created_time == now
     assert event.disposition is None
     assert event.disposition_time == now
     assert event.event_time == now

@@ -17,6 +17,7 @@ def create_or_read(
     parent_analysis: Analysis,
     db: Session,
     context: Optional[str] = None,
+    detection_points: Optional[str] = None,
     directives: Optional[list[str]] = None,
     expires_on: Optional[datetime] = None,
     for_detection: bool = False,
@@ -32,6 +33,7 @@ def create_or_read(
     obj = crud.observable.create_or_read(
         model=ObservableCreate(
             context=context,
+            detection_points=detection_points or [],
             expires_on=expires_on,
             for_detection=for_detection,
             history_username=history_username,
