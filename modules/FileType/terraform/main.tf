@@ -17,8 +17,9 @@ provider "aws" {
   region = "us-east-2"
 }
 
-module "filetype_analysis_module" {
-  source = "git@github.info53.com:Fifth-Third/terraform-aws-idr-analysis-module.git"
+module "filetype-idr-analysis-module" {
+  source  = "app.terraform.io/FifthThird/idr-analysis-module/aws"
+  version = "1.0.0"
   #Vars
   environment              = var.environment
   analysis_module_name     = var.analysis_module_name
