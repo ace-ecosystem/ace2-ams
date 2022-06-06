@@ -70,9 +70,6 @@ def test_update_conflicting_value_version(db):
         db=db,
     )
 
-    # Ensure you cannot update an analysis module type to have the same value+version
-    # as an existing analysis module type.
     result = crud.analysis_module_type.update(uuid=obj2.uuid, model=AnalysisModuleTypeUpdate(value="module"), db=db)
-
     assert result is False
     assert obj2.value == "module2"

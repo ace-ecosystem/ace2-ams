@@ -22,6 +22,14 @@ def create_or_read(model: NodeThreatCreate, db: Session) -> NodeThreat:
     return read_by_value(value=model.value, db=db)
 
 
+def delete(uuid: UUID, db: Session) -> bool:
+    return crud.helpers.delete(uuid=uuid, db_table=NodeThreat, db=db)
+
+
+def read_all(db: Session) -> list[NodeThreat]:
+    return crud.helpers.read_all(db_table=NodeThreat, order_by=NodeThreat.value, db=db)
+
+
 def read_by_uuid(uuid: UUID, db: Session) -> NodeThreat:
     return crud.helpers.read_by_uuid(db_table=NodeThreat, uuid=uuid, db=db)
 

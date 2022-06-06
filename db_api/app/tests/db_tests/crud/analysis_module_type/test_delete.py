@@ -8,7 +8,6 @@ def test_delete(db):
 
 
 def test_unable_to_delete(db):
-    # Create an analysis module type and assign it to an analysis object
     submission = factory.submission.create(db=db)
     observable = factory.observable.create_or_read(
         type="test", value="test", parent_analysis=submission.root_analysis, db=db
@@ -18,5 +17,5 @@ def test_unable_to_delete(db):
         analysis_module_type=analysis_module_type, submission=submission, target=observable, db=db
     )
 
-    # You should not be able to delete the analysis module type now that it is in use
+    # You should not be able to delete it now that it is in use
     assert crud.analysis_module_type.delete(uuid=analysis_module_type.uuid, db=db) is False
