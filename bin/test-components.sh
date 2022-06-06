@@ -15,6 +15,6 @@ docker-compose up -d
 
 # Run Cypress
 
-docker exec -e TZ=America/New_York ace2-ams-gui xvfb-run cypress run --component --headed --browser chrome --config-file "cypress.config.ts" --config video=false,screenshotOnRunFailure=false
+docker exec -e TZ=America/New_York ace2-ams-gui xvfb-run cypress run --component --headless --browser chrome --config-file "cypress.config.ts" --config video=false,screenshotOnRunFailure=false
 
 bin/disable-test-mode.sh
