@@ -8,12 +8,12 @@ export default defineConfig({
   viewportHeight: 720,
   e2e: {
     specPattern: "tests/e2e/specs/**/*.spec.js",
-    supportFile: "cypress/support/index-e2e.js",
+    supportFile: "tests/e2e/support/index-e2e.js",
     baseUrl: "http://ace2-ams:8080",
   },
   component: {
     specPattern: "tests/component/src/**/*.spec.ts",
-    supportFile: "cypress/support/index-ct.js",
+    supportFile: "tests/e2e/support/index-ct.js",
     devServer: {
       framework: "vue",
       bundler: "vite",
