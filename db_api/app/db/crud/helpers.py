@@ -2,12 +2,12 @@ import contextlib
 
 from datetime import datetime, timezone
 from pydantic import BaseModel
-from sqlalchemy import Column, delete as sql_delete, select, update as sql_update
+from sqlalchemy import delete as sql_delete, select, update as sql_update
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session, undefer
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.sql.selectable import Select
-from typing import Any, Optional
+from typing import Any
 from uuid import UUID
 
 from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
@@ -30,7 +30,8 @@ def delete(uuid: UUID, db_table: DeclarativeMeta, db: Session) -> bool:
     """Uses a nested transaction to attempt to delete the given object from the database. If it fails due
     to an IntegrityError, only the nested transaction is rolled back."""
 
-    ensure_record_exists(uuid=uuid, db_table=db_table, db=db)
+    # Ensure the record exists in the database
+    read_by_uuid(uuid=uuid, db_table=db_table, db=db)
 
     with db.begin_nested():
         try:
@@ -40,15 +41,6 @@ def delete(uuid: UUID, db_table: DeclarativeMeta, db: Session) -> bool:
             db.rollback()
 
     return False
-
-
-def ensure_record_exists(uuid: UUID, db_table: DeclarativeMeta, db: Session):
-    """Raises an exception if the given UUID does not exist in the given table."""
-
-    try:
-        read_by_uuid(db_table=db_table, uuid=uuid, db=db)
-    except NoResultFound as e:
-        raise UuidNotFoundInDatabase(f"UUID {uuid} was not found in the {db_table.__tablename__} table.") from e
 
 
 def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session, undefer_column: str = None) -> Any:
@@ -102,7 +94,8 @@ def update(uuid: UUID, update_model: BaseModel, db_table: DeclarativeMeta, db: S
     """Uses a nested transaction to attempt to update the given object in the database. If it fails due
     to an IntegrityError, only the nested transaction is rolled back."""
 
-    ensure_record_exists(uuid=uuid, db_table=db_table, db=db)
+    # Ensure the record exists in the database
+    read_by_uuid(uuid=uuid, db_table=db_table, db=db)
 
     with db.begin_nested():
         try:
