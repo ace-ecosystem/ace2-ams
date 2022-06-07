@@ -51,16 +51,6 @@ def ensure_record_exists(uuid: UUID, db_table: DeclarativeMeta, db: Session):
         raise UuidNotFoundInDatabase(f"UUID {uuid} was not found in the {db_table.__tablename__} table.") from e
 
 
-def read_all(db_table: DeclarativeMeta, db: Session, order_by: Optional[Column] = None) -> list[Any]:
-    """Returns all of the objects from the given database table."""
-
-    query: Select = select(db_table)
-    if order_by:
-        query = query.order_by(order_by)
-
-    return db.execute(query).scalars().all()
-
-
 def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session, undefer_column: str = None) -> Any:
     """Returns the object with the specific UUID from the given database table."""
 
@@ -72,24 +62,6 @@ def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session, undefer_col
         return db.execute(query).scalars().one()
     except NoResultFound as e:
         raise UuidNotFoundInDatabase(f"UUID {uuid} was not found in the {db_table.__tablename__} table.") from e
-
-
-def read_by_uuids(
-    uuids: list[UUID], db_table: DeclarativeMeta, db: Session, error_on_not_found: bool = True
-) -> list[Any]:
-    """Returns a list of objects with the given UUIDs. Raises an exception if the number of objects
-    returned from the database does not match the number of unique given UUIDs."""
-
-    if not uuids:
-        return uuids
-
-    unique_uuids = list(set(uuids))
-    result = db.execute(select(db_table).where(db_table.uuid.in_(unique_uuids))).scalars().all()
-
-    if error_on_not_found and len(unique_uuids) != len(result):
-        raise ValueError("One or more UUIDs was not found in the database.")
-
-    return result
 
 
 def read_by_value(db_table: DeclarativeMeta, value: str, db: Session) -> Any:
