@@ -106,4 +106,5 @@ class AnalysisUpdate(AnalysisBase):
 from api_models.observable import ObservableCreate, ObservableRead
 
 AnalysisCreate.update_forward_refs()
+AnalysisCreateInObservable.update_forward_refs()
 AnalysisRead.update_forward_refs()

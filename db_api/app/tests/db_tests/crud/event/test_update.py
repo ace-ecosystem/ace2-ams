@@ -1,7 +1,6 @@
 import pytest
 
 from datetime import timedelta
-from dateutil.parser import parse
 
 from api_models.event import EventUpdate
 from db import crud

@@ -1,3 +1,5 @@
+import json
+
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
@@ -82,7 +84,7 @@ def create_or_read(
     for analysis in model.analyses:
         crud.analysis.create_or_read(
             model=AnalysisCreate(
-                details=analysis.details,
+                details=json.dumps(analysis.details) if analysis.details else None,
                 error_message=analysis.error_message,
                 stack_trace=analysis.stack_trace,
                 summary=analysis.summary,

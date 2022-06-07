@@ -11,7 +11,7 @@ from api_models.node_detection_point import NodeDetectionPointRead
 from api_models.node_tag import NodeTagRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
-from api_models.observable import ObservableCreate
+from api_models.observable import ObservableCreateInSubmission
 from api_models.queue import QueueRead
 from api_models.submission_tool import SubmissionToolRead
 from api_models.submission_tool_instance import SubmissionToolInstanceRead
@@ -49,7 +49,7 @@ class SubmissionCreate(NodeCreate, SubmissionBase):
 
     name: type_str = Field(description="The name of the submission")
 
-    observables: list[ObservableCreate] = Field(
+    observables: list[ObservableCreateInSubmission] = Field(
         default_factory=list, description="A list of observables that should be added to the submission"
     )
 

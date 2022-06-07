@@ -303,10 +303,6 @@ def test_update_valid_node_fields(client, db, key, value_lists, helper_create_fu
         for value in value_list:
             helper_create_func(value=value, db=db)
 
-        # helpers.create_queue(value="test_queue", db=db)
-        # factory.submission.create_type(value="test_type", db=db)
-        # helpers.create_observable_type(value="o_type", db=db)
-
         # Update the submission
         update = client.patch(
             "/api/submission/", json=[{key: value_list, "uuid": str(submission.uuid), "history_username": "analyst"}]
