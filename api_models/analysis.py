@@ -19,7 +19,7 @@ class AnalysisBase(BaseModel):
     summary: Optional[type_str] = Field(description="A short summary/description of what this analysis did or found")
 
 
-class AnalysisCreate(AnalysisBase):
+class AnalysisCreateBase(AnalysisBase):
     analysis_module_type_uuid: UUID4 = Field(
         description="""The UUID of the analysis module type that was used to perform this analysis"""
     )
@@ -34,9 +34,15 @@ class AnalysisCreate(AnalysisBase):
 
     submission_uuid: UUID4 = Field(description="The UUID of the submission that will contain this analysis")
 
+    uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
+
+
+class AnalysisCreate(AnalysisCreateBase):
     target_uuid: UUID4 = Field(description="The UUID of the target observable for this analysis")
 
-    uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
+
+class AnalysisCreateInObservable(AnalysisCreateBase):
+    pass
 
 
 class AnalysisNodeTreeRead(BaseModel):

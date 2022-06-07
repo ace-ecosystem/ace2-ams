@@ -1,8 +1,9 @@
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 from typing import Optional
 from uuid import UUID
+from api_models.analysis import AnalysisCreate
 
 from api_models.node_detection_point import NodeDetectionPointCreate
 from api_models.node_relationship import NodeRelationshipCreate
@@ -11,6 +12,7 @@ from db import crud
 from db.schemas.analysis import Analysis
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
+from exceptions.db import ValueNotFoundInDatabase
 
 
 def create_or_read(
@@ -78,8 +80,20 @@ def create_or_read(
 
     # Create any analyses that were given
     for analysis in model.analyses:
-        analysis.target_uuid = obj.uuid
-        crud.analysis.create_or_read(model=analysis, db=db)
+        crud.analysis.create_or_read(
+            model=AnalysisCreate(
+                details=analysis.details,
+                error_message=analysis.error_message,
+                stack_trace=analysis.stack_trace,
+                summary=analysis.summary,
+                analysis_module_type_uuid=analysis.analysis_module_type_uuid,
+                child_observables=analysis.child_observables,
+                run_time=analysis.run_time,
+                submission_uuid=analysis.submission_uuid,
+                target_uuid=obj.uuid,
+            ),
+            db=db,
+        )
 
     # If a parent analysis UUID was given, look up the analysis from the database.
     # Then add the observable to the parent analysis' list of child observables.
@@ -97,13 +111,18 @@ def create_or_read(
 def read_by_type_value(type: str, value: str, db: Session) -> Observable:
     """Returns the Observable with the given type and value if it exists."""
 
-    return (
-        db.execute(
-            select(Observable).join(ObservableType).where(ObservableType.value == type, Observable.value == value)
+    try:
+        return (
+            db.execute(
+                select(Observable).join(ObservableType).where(ObservableType.value == type, Observable.value == value)
+            )
+            .scalars()
+            .one()
         )
-        .scalars()
-        .one()
-    )
+    except NoResultFound as e:
+        raise ValueNotFoundInDatabase(
+            f'Observable with type "{type}" and value "{value}" was not found in the database.'
+        ) from e
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> Observable:

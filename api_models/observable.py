@@ -41,7 +41,7 @@ class ObservableBase(NodeBase):
 
 
 class ObservableCreate(NodeCreate, ObservableBase):
-    analyses: "list[AnalysisCreate]" = Field(
+    analyses: "list[AnalysisCreateInObservable]" = Field(
         default_factory=list, description="A list of analysis results to add as children to the observable"
     )
 
@@ -160,7 +160,7 @@ class ObservableRelationshipRead(NodeRelationshipRead):
 
 # This is needed for the circular relationship between ObservableRead and ObservableRelationshipRead
 # and ObservableCreate <-> AnalysisCreate.
-from api_models.analysis import AnalysisCreate
+from api_models.analysis import AnalysisCreate, AnalysisCreateInObservable
 
 ObservableCreate.update_forward_refs()
 ObservableRead.update_forward_refs()
