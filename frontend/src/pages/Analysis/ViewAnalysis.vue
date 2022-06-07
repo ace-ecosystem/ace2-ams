@@ -6,13 +6,19 @@
       <Breadcrumb :home="home" :model="items"></Breadcrumb>
     </template>
     <template #content>
-      {{ analysisDetails }}
+      <component
+        :is="currentComponent"
+        :analysis-uuid="route.params.analysisID"
+        :analysis="analysis"
+      ></component>
     </template>
   </Card>
 </template>
 
 <script setup>
-  import { computed, onMounted, ref } from "vue";
+  import AnalysisDetailsBase from "@/components/Analysis/AnalysisDetailsBase.vue";
+
+  import { computed, onMounted, ref, inject, watch, shallowRef } from "vue";
   import { useRoute } from "vue-router";
   import Breadcrumb from "primevue/breadcrumb";
 
@@ -24,16 +30,42 @@
 
   let analysis = ref();
 
+  const config = inject("config");
+  const componentMapping = {
+    ...config.analysis.analysisModuleComponents,
+  };
+
+  const currentComponent = shallowRef(AnalysisDetailsBase);
+
+  const route = useRoute();
+
   onMounted(async () => {
-    await initPage(useRoute().params.analysisID, useRoute().params.alertID);
+    await initPage(route.params.analysisID, route.params.alertID);
   });
 
   async function initPage(analysisID, alertID) {
-    analysis.value = await Analysis.read(analysisID);
+    try {
+      analysis.value = await Analysis.read(analysisID);
+    } catch {
+      console.warn("Could not fetch analysis");
+    }
     if (!alertStore.open) {
-      await alertStore.read(alertID);
+      try {
+        await alertStore.read(alertID);
+      } catch {
+        console.warn("Could not fetch alert");
+      }
     }
   }
+
+  watch(analysis, () => {
+    if (analysis.value?.analysisModuleType?.value in componentMapping) {
+      currentComponent.value =
+        componentMapping[analysis.value.analysisModuleType.value];
+    } else {
+      currentComponent.value = AnalysisDetailsBase;
+    }
+  });
 
   const alertName = computed(() => {
     if (alertStore.open) {
@@ -52,10 +84,4 @@
     { label: alertName, to: `/alert/${useRoute().params.alertID}` },
     { label: analysisName },
   ];
-  const analysisDetails = computed(() => {
-    if (analysis.value) {
-      return analysis.value.details;
-    }
-    return "No details";
-  });
 </script>
