@@ -1,9 +1,15 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
 from api_models.user_role import UserRoleCreate, UserRoleUpdate
 from db import crud
 from db.schemas.user_role import UserRole
+
+
+def build_read_all_query() -> Select:
+    return select(UserRole).order_by(UserRole.value)
 
 
 def create_or_read(model: UserRoleCreate, db: Session) -> UserRole:
@@ -20,7 +26,7 @@ def delete(uuid: UUID, db: Session) -> bool:
 
 
 def read_all(db: Session) -> list[UserRole]:
-    return crud.helpers.read_all(db_table=UserRole, order_by=UserRole.value, db=db)
+    return db.execute(build_read_all_query()).scalars().all()
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> UserRole:

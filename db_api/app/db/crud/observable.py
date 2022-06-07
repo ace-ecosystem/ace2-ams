@@ -3,6 +3,7 @@ import json
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 from typing import Optional
 from uuid import UUID
 from api_models.analysis import AnalysisCreate
@@ -15,6 +16,10 @@ from db.schemas.analysis import Analysis
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from exceptions.db import ValueNotFoundInDatabase
+
+
+def build_read_all_query() -> Select:
+    return select(Observable).join(ObservableType).order_by(ObservableType.value, Observable.value)
 
 
 def create_or_read(
@@ -108,6 +113,10 @@ def create_or_read(
 
     db.flush()
     return obj
+
+
+def read_all(db: Session) -> list[Observable]:
+    return db.execute(build_read_all_query()).scalars().all()
 
 
 def read_by_type_value(type: str, value: str, db: Session) -> Observable:

@@ -1,10 +1,15 @@
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
 from api_models.alert_disposition import AlertDispositionCreate, AlertDispositionUpdate
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
+
+
+def build_read_all_query() -> Select:
+    return select(AlertDisposition).order_by(AlertDisposition.value)
 
 
 def create_or_read(model: AlertDispositionCreate, db: Session) -> AlertDisposition:
@@ -33,7 +38,7 @@ def delete(uuid: UUID, db: Session) -> bool:
 
 
 def read_all(db: Session) -> list[AlertDisposition]:
-    return crud.helpers.read_all(db_table=AlertDisposition, order_by=AlertDisposition.value, db=db)
+    return db.execute(build_read_all_query()).scalars().all()
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> AlertDisposition:

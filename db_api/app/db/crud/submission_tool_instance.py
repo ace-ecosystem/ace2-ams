@@ -1,9 +1,15 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
 from api_models.submission_tool_instance import SubmissionToolInstanceCreate, SubmissionToolInstanceUpdate
 from db import crud
 from db.schemas.submission_tool_instance import SubmissionToolInstance
+
+
+def build_read_all_query() -> Select:
+    return select(SubmissionToolInstance).order_by(SubmissionToolInstance.value)
 
 
 def create_or_read(model: SubmissionToolInstanceCreate, db: Session) -> SubmissionToolInstance:
@@ -20,7 +26,7 @@ def delete(uuid: UUID, db: Session) -> bool:
 
 
 def read_all(db: Session) -> list[SubmissionToolInstance]:
-    return crud.helpers.read_all(db_table=SubmissionToolInstance, order_by=SubmissionToolInstance.value, db=db)
+    return db.execute(build_read_all_query()).scalars().all()
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> SubmissionToolInstance:

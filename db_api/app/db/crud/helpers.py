@@ -13,17 +13,6 @@ from uuid import UUID
 from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 
-def build_read_all_query(db_table: DeclarativeMeta, joins: list[DeclarativeMeta] = None) -> Select:
-    if joins is None:
-        joins = []
-
-    query: Select = select(db_table)
-    for j in joins:
-        query = query.join(j)
-
-    return query
-
-
 def create(obj: Any, db: Session) -> bool:
     """Uses a nested transaction to attempt to add the given object to the database. If it fails due
     to an IntegrityError, only the nested transaction is rolled back."""

@@ -51,7 +51,7 @@ helpers.api_route_create(router, create_event_type)
 
 
 def get_all_event_types(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(EventType).order_by(EventType.value))
+    return paginate(conn=db, query=crud.event_type.build_read_all_query())
 
 
 def get_event_type(uuid: UUID, db: Session = Depends(get_db)):

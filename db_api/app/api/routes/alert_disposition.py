@@ -47,7 +47,7 @@ helpers.api_route_create(router, create_disposition)
 
 
 def get_all_dispositions(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(AlertDisposition).order_by(AlertDisposition.rank))
+    return paginate(conn=db, query=crud.alert_disposition.build_read_all_query())
 
 
 def get_disposition(uuid: UUID, db: Session = Depends(get_db)):

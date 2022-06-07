@@ -1,10 +1,16 @@
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
 from api_models.event_vector import EventVectorCreate, EventVectorUpdate
 from db import crud
 from db.schemas.event_vector import EventVector
+
+
+def build_read_all_query() -> Select:
+    return select(EventVector).order_by(EventVector.value)
 
 
 def create_or_read(model: EventVectorCreate, db: Session) -> EventVector:
@@ -26,7 +32,7 @@ def delete(uuid: UUID, db: Session) -> bool:
 
 
 def read_all(db: Session) -> list[EventVector]:
-    return crud.helpers.read_all(db_table=EventVector, order_by=EventVector.value, db=db)
+    return db.execute(build_read_all_query()).scalars().all()
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> EventVector:

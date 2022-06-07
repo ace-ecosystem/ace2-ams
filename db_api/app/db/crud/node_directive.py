@@ -1,9 +1,15 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
 from api_models.node_directive import NodeDirectiveCreate, NodeDirectiveUpdate
 from db import crud
 from db.schemas.node_directive import NodeDirective
+
+
+def build_read_all_query() -> Select:
+    return select(NodeDirective).order_by(NodeDirective.value)
 
 
 def create_or_read(model: NodeDirectiveCreate, db: Session) -> NodeDirective:
@@ -20,7 +26,7 @@ def delete(uuid: UUID, db: Session) -> bool:
 
 
 def read_all(db: Session) -> list[NodeDirective]:
-    return crud.helpers.read_all(db_table=NodeDirective, order_by=NodeDirective.value, db=db)
+    return db.execute(build_read_all_query()).scalars().all()
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> NodeDirective:

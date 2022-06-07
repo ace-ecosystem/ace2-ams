@@ -50,8 +50,8 @@ helpers.api_route_create(router, create_event_status)
 #
 
 
-def get_all_event_statuss(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(EventStatus).order_by(EventStatus.value))
+def get_all_event_statuses(db: Session = Depends(get_db)):
+    return paginate(conn=db, query=crud.event_status.build_read_all_query())
 
 
 def get_event_status(uuid: UUID, db: Session = Depends(get_db)):
@@ -61,7 +61,7 @@ def get_event_status(uuid: UUID, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
-helpers.api_route_read_all(router, get_all_event_statuss, EventStatusRead)
+helpers.api_route_read_all(router, get_all_event_statuses, EventStatusRead)
 helpers.api_route_read(router, get_event_status, EventStatusRead)
 
 

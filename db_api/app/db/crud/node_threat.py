@@ -1,10 +1,16 @@
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
 from api_models.node_threat import NodeThreatCreate, NodeThreatUpdate
 from db import crud
 from db.schemas.node_threat import NodeThreat
+
+
+def build_read_all_query() -> Select:
+    return select(NodeThreat).order_by(NodeThreat.value)
 
 
 def create_or_read(model: NodeThreatCreate, db: Session) -> NodeThreat:
@@ -27,7 +33,7 @@ def delete(uuid: UUID, db: Session) -> bool:
 
 
 def read_all(db: Session) -> list[NodeThreat]:
-    return crud.helpers.read_all(db_table=NodeThreat, order_by=NodeThreat.value, db=db)
+    return db.execute(build_read_all_query()).scalars().all()
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> NodeThreat:

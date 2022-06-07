@@ -1,9 +1,15 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
 from api_models.node_relationship_type import NodeRelationshipTypeCreate, NodeRelationshipTypeUpdate
 from db import crud
 from db.schemas.node_relationship_type import NodeRelationshipType
+
+
+def build_read_all_query() -> Select:
+    return select(NodeRelationshipType).order_by(NodeRelationshipType.value)
 
 
 def create_or_read(model: NodeRelationshipTypeCreate, db: Session) -> NodeRelationshipType:
@@ -20,7 +26,7 @@ def delete(uuid: UUID, db: Session) -> bool:
 
 
 def read_all(db: Session) -> list[NodeRelationshipType]:
-    return crud.helpers.read_all(db_table=NodeRelationshipType, order_by=NodeRelationshipType.value, db=db)
+    return db.execute(build_read_all_query()).scalars().all()
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> NodeRelationshipType:

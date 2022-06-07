@@ -1,10 +1,16 @@
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
 from api_models.event_risk_level import EventRiskLevelCreate, EventRiskLevelUpdate
 from db import crud
 from db.schemas.event_risk_level import EventRiskLevel
+
+
+def build_read_all_query() -> Select:
+    return select(EventRiskLevel).order_by(EventRiskLevel.value)
 
 
 def create_or_read(model: EventRiskLevelCreate, db: Session) -> EventRiskLevel:
@@ -26,7 +32,7 @@ def delete(uuid: UUID, db: Session) -> bool:
 
 
 def read_all(db: Session) -> list[EventRiskLevel]:
-    return crud.helpers.read_all(db_table=EventRiskLevel, order_by=EventRiskLevel.value, db=db)
+    return db.execute(build_read_all_query()).scalars().all()
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> EventRiskLevel:

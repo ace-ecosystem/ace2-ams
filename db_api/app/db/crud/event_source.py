@@ -1,10 +1,16 @@
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
 from api_models.event_source import EventSourceCreate, EventSourceUpdate
 from db import crud
 from db.schemas.event_source import EventSource
+
+
+def build_read_all_query() -> Select:
+    return select(EventSource).order_by(EventSource.value)
 
 
 def create_or_read(model: EventSourceCreate, db: Session) -> EventSource:
@@ -26,7 +32,7 @@ def delete(uuid: UUID, db: Session) -> bool:
 
 
 def read_all(db: Session) -> list[EventSource]:
-    return crud.helpers.read_all(db_table=EventSource, order_by=EventSource.value, db=db)
+    return db.execute(build_read_all_query()).scalars().all()
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> EventSource:
