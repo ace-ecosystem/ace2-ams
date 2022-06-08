@@ -1,9 +1,8 @@
+# entend module base of the same name
 ARG name
 FROM ace2-module-$name-base
 
-# install ace2 lib
-COPY --from=ace2-lib-ace2 / /
-
+#get module path from args
 ARG module
 
 # add module condition
