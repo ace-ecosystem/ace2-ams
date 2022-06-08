@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from db.database import Base
 
 
-node_tag_mapping = Table(
+tag_mapping = Table(
     "node_tag_mapping",
     Base.metadata,
     Column(
@@ -14,5 +14,5 @@ node_tag_mapping = Table(
         index=True,
         primary_key=True,
     ),
-    Column("tag_uuid", UUID(as_uuid=True), ForeignKey("node_tag.uuid"), index=True, primary_key=True),
+    Column("tag_uuid", UUID(as_uuid=True), ForeignKey("tag.uuid"), index=True, primary_key=True),
 )

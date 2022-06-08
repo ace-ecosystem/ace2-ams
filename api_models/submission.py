@@ -8,7 +8,6 @@ from api_models.alert_disposition import AlertDispositionRead
 from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
 from api_models.node_detection_point import NodeDetectionPointRead
-from api_models.node_tag import NodeTagRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
 from api_models.observable import ObservableCreateInSubmission
@@ -16,6 +15,7 @@ from api_models.queue import QueueRead
 from api_models.submission_tool import SubmissionToolRead
 from api_models.submission_tool_instance import SubmissionToolInstanceRead
 from api_models.submission_type import SubmissionTypeRead
+from api_models.tag import TagRead
 from api_models.user import UserRead
 
 
@@ -75,7 +75,7 @@ class SubmissionRead(NodeRead, SubmissionBase):
         description="A list of detection points added to child Nodes in the submission's tree", default_factory=list
     )
 
-    child_tags: list[NodeTagRead] = Field(
+    child_tags: list[TagRead] = Field(
         description="A list of tags added to child Nodes in the submission's tree", default_factory=list
     )
 
@@ -109,7 +109,7 @@ class SubmissionRead(NodeRead, SubmissionBase):
 
     queue: QueueRead = Field(description="The queue containing this submission")
 
-    tags: list[NodeTagRead] = Field(description="A list of tags added to the submission", default_factory=list)
+    tags: list[TagRead] = Field(description="A list of tags added to the submission", default_factory=list)
 
     threat_actors: list[NodeThreatActorRead] = Field(
         description="A list of threat actors added to the submission", default_factory=list

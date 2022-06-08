@@ -68,7 +68,7 @@ if args.status:
     event.status = factory.event_status.create_or_read(value=args.status, db=db)
 
 if args.tags:
-    event.tags = [factory.node_tag.create_or_read(value=t, db=db) for t in args.tags.split(",")]
+    event.tags = [factory.tag.create_or_read(value=t, db=db) for t in args.tags.split(",")]
 
 if args.threat_actors:
     event.threat_actors = [

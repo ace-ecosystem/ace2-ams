@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
 from typing import Optional
 from uuid import UUID
-from api_models.analysis import AnalysisCreate
 
+from api_models.analysis import AnalysisCreate
 from api_models.node_detection_point import NodeDetectionPointCreate
 from api_models.node_relationship import NodeRelationshipCreate
 from api_models.observable import ObservableCreate, ObservableUpdate
@@ -107,6 +107,10 @@ def create_or_read(
     if parent_analysis is None:
         parent_analysis = crud.analysis.read_by_uuid(uuid=model.parent_analysis_uuid, db=db)
     parent_analysis.child_observables.append(obj)
+
+    # If there was any metadata given, it is assumed that it was added by the observable's parent analysis.
+    for metadata in model.metadata:
+        crud.analysis_metadata.create_or_read(model=metadata, analysis=parent_analysis, observable=obj, db=db)
 
     # Update the alert versions that contain the parent analysis
     crud.submission.update_submission_versions(analysis_uuid=parent_analysis.uuid, db=db)

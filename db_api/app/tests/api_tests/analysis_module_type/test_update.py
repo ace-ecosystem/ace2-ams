@@ -114,7 +114,7 @@ def test_update_valid_list_fields(client, db, key, values):
     elif key == "required_directives":
         create_func = factory.node_directive.create_or_read
     else:
-        create_func = factory.node_tag.create_or_read
+        create_func = factory.tag.create_or_read
 
     for value in values:
         create_func(value=value, db=db)

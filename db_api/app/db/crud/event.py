@@ -34,7 +34,6 @@ from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
 from db.schemas.node import Node
 from db.schemas.node_detection_point import NodeDetectionPoint
-from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.observable import Observable
@@ -42,6 +41,7 @@ from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.submission import Submission, SubmissionHistory
 from db.schemas.submission_analysis_mapping import submission_analysis_mapping
+from db.schemas.tag import Tag
 from db.schemas.user import User
 
 
@@ -278,9 +278,9 @@ def build_read_all_query(
         for tag in tags.split(","):
             tag_filters.append(
                 or_(
-                    Event.tags.any(NodeTag.value == tag),
-                    Event.alerts.any(Submission.tags.any(NodeTag.value == tag)),
-                    Event.alerts.any(Submission.child_tags.any(NodeTag.value == tag)),
+                    Event.tags.any(Tag.value == tag),
+                    Event.alerts.any(Submission.tags.any(Tag.value == tag)),
+                    Event.alerts.any(Submission.child_tags.any(Tag.value == tag)),
                 )
             )
         tags_query = select(Event).where(and_(*tag_filters))

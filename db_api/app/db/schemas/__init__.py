@@ -1,6 +1,7 @@
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
+from db.schemas.analysis_metadata import AnalysisMetadata
 from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.analysis_module_type_directive_mapping import analysis_module_type_directive_mapping
 from db.schemas.analysis_module_type_observable_type_mapping import analysis_module_type_observable_type_mapping
@@ -23,6 +24,7 @@ from db.schemas.event_type_queue_mapping import event_type_queue_mapping
 from db.schemas.event_vector import EventVector
 from db.schemas.event_vector_queue_mapping import event_vector_queue_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
+from db.schemas.metadata import Metadata
 from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment
 from db.schemas.node_detection_point import NodeDetectionPoint
@@ -30,8 +32,7 @@ from db.schemas.node_directive import NodeDirective
 from db.schemas.node_directive_mapping import node_directive_mapping
 from db.schemas.node_relationship import NodeRelationship
 from db.schemas.node_relationship_type import NodeRelationshipType
-from db.schemas.node_tag import NodeTag
-from db.schemas.node_tag_mapping import node_tag_mapping
+from db.schemas.node_tag_mapping import tag_mapping
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.node_threat_actor_queue_mapping import node_threat_actor_queue_mapping
@@ -49,6 +50,7 @@ from db.schemas.submission_analysis_mapping import submission_analysis_mapping
 from db.schemas.submission_tool import SubmissionTool
 from db.schemas.submission_tool_instance import SubmissionToolInstance
 from db.schemas.submission_type import SubmissionType
+from db.schemas.tag import Tag
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
 from db.schemas.user_role_mapping import user_role_mapping

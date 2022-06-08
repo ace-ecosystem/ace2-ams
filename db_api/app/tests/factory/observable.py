@@ -34,7 +34,7 @@ def create_or_read(
 
     if tags is not None:
         for tag in tags:
-            factory.node_tag.create_or_read(value=tag, db=db)
+            factory.tag.create_or_read(value=tag, db=db)
 
     if threat_actors:
         for threat_actor in threat_actors:

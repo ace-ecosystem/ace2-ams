@@ -14,10 +14,10 @@ from api_models.event_type import EventTypeRead
 from api_models.event_vector import EventVectorRead
 from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
-from api_models.node_tag import NodeTagRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
 from api_models.queue import QueueRead
+from api_models.tag import TagRead
 from api_models.user import UserRead
 
 
@@ -137,7 +137,7 @@ class EventRead(NodeRead, EventBase):
 
     status: EventStatusRead = Field(description="The status assigned to the event")
 
-    tags: list[NodeTagRead] = Field(description="A list of tags added to the event")
+    tags: list[TagRead] = Field(description="A list of tags added to the event")
 
     threat_actors: list[NodeThreatActorRead] = Field(description="A list of threat actors added to the event")
 

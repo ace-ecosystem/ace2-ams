@@ -15,7 +15,7 @@ def test_create(db):
     factory.event_status.create_or_read(value="OPEN", db=db)
     factory.event_type.create_or_read(value="phish", db=db)
     factory.event_vector.create_or_read(value="email", db=db)
-    factory.node_tag.create_or_read(value="tag", db=db)
+    factory.tag.create_or_read(value="tag", db=db)
     factory.node_threat.create_or_read(value="threat", db=db)
     factory.node_threat_actor.create_or_read(value="actor", db=db)
 

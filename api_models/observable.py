@@ -4,15 +4,16 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from api_models import type_str, validators
+from api_models.analysis_metadata import AnalysisMetadataCreate
 from api_models.node import NodeBase, NodeCreate, NodeRead, NodeTreeItemRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
 from api_models.node_detection_point import NodeDetectionPointRead
 from api_models.node_directive import NodeDirectiveRead
 from api_models.node_relationship import NodeRelationshipRead
-from api_models.node_tag import NodeTagRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
 from api_models.observable_type import ObservableTypeRead
+from api_models.tag import TagRead
 
 
 class ObservableBase(NodeBase):
@@ -55,6 +56,10 @@ class ObservableCreateBase(NodeCreate, ObservableBase):
 
     history_username: Optional[type_str] = Field(
         description="If given, an observable history record will be created and associated with the user"
+    )
+
+    metadata: list[AnalysisMetadataCreate] = Field(
+        default_factory=list, description="A list of metadata objects to add to the observable by its parent analysis"
     )
 
     observable_relationships: "list[ObservableRelationshipCreate]" = Field(
@@ -101,7 +106,7 @@ class ObservableRead(NodeRead, ObservableBase):
 
     redirection: "Optional[ObservableRead]" = Field(description="Another observable to which this one points")
 
-    tags: list[NodeTagRead] = Field(description="A list of tags added to the observable")
+    tags: list[TagRead] = Field(description="A list of tags added to the observable")
 
     threat_actors: list[NodeThreatActorRead] = Field(description="A list of threat actors added to the observable")
 
@@ -117,6 +122,10 @@ class ObservableRead(NodeRead, ObservableBase):
 
 class ObservableNodeTreeRead(ObservableRead, NodeTreeItemRead):
     """Model used to control which information for an Observable is displayed when getting an alert tree"""
+
+    metadata: list[dict] = Field(
+        default_factory=list, description="A list of metadata added to the observable by analysis in the tree"
+    )
 
     class Config:
         orm_mode = True

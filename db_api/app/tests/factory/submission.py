@@ -135,7 +135,7 @@ def create(
         diffs.append(crud.history.create_diff(field="event_uuid", old=None, new=event.uuid))
 
     if tags:
-        submission.tags = [factory.node_tag.create_or_read(value=t, db=db) for t in tags]
+        submission.tags = [factory.tag.create_or_read(value=t, db=db) for t in tags]
 
     if threat_actors:
         submission.threat_actors = [factory.node_threat_actor.create_or_read(value=t, db=db) for t in threat_actors]
@@ -178,12 +178,13 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
         # Make sure that any tags the observable has exist
         if "tags" in o:
             for tag in o["tags"]:
-                factory.node_tag.create_or_read(value=tag, db=db)
+                factory.tag.create_or_read(value=tag, db=db)
 
         # Build the ObservableCreate model
         observable_model = ObservableCreate(
             detection_points=o.get("detection_points", []),
             for_detection=o.get("for_detection", False),
+            metadata=o.get("metadata", []),
             observable_relationships=o.get("observable_relationships", []),
             tags=o.get("tags", []),
             type=o["type"],
@@ -197,9 +198,9 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
                 # Create the analysis module type object
                 analysis_module_type = factory.analysis_module_type.create_or_read(
                     value=a["type"],
-                    observable_types=a["observable_types"] if "observable_types" in a else None,
-                    required_directives=a["required_directives"] if "required_directives" in a else None,
-                    required_tags=a["required_tags"] if "required_tags" in a else None,
+                    observable_types=a.get("observable_types", None),
+                    required_directives=a.get("required_directives", None),
+                    required_tags=a.get("required_tags", None),
                     db=db,
                 )
 

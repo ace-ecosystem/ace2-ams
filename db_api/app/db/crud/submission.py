@@ -10,13 +10,12 @@ from uuid import UUID
 
 from api_models.analysis import AnalysisNodeTreeRead
 from api_models.observable import ObservableNodeTreeRead
-from api_models.submission import SubmissionCreate, SubmissionTreeRead, SubmissionUpdate
+from api_models.submission import SubmissionCreate, SubmissionUpdate
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
 from db.schemas.event import Event
 from db.schemas.node import Node
-from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.observable import Observable
@@ -27,6 +26,7 @@ from db.schemas.submission_analysis_mapping import submission_analysis_mapping
 from db.schemas.submission_tool import SubmissionTool
 from db.schemas.submission_tool_instance import SubmissionToolInstance
 from db.schemas.submission_type import SubmissionType
+from db.schemas.tag import Tag
 from db.schemas.user import User
 
 
@@ -204,9 +204,7 @@ def build_read_all_query(
     if tags:
         tag_filters = []
         for tag in tags.split(","):
-            tag_filters.append(
-                or_(Submission.tags.any(NodeTag.value == tag), Submission.child_tags.any(NodeTag.value == tag))
-            )
+            tag_filters.append(or_(Submission.tags.any(Tag.value == tag), Submission.child_tags.any(Tag.value == tag)))
 
         tags_query = select(Submission).where(and_(*tag_filters))
         query = _join_as_subquery(query, tags_query)
@@ -493,12 +491,23 @@ def read_tree(uuid: UUID, db: Session) -> dict:
             if db_child_observable.uuid not in child_observables:
                 child_observables[db_child_observable.uuid] = db_child_observable.convert_to_pydantic()
 
+            # Add any metadata added by the analysis to the observable model.
+            child_observables[db_child_observable.uuid].metadata += [
+                m.metadata_object.convert_to_pydantic()
+                for m in db_analysis.analysis_metadata
+                if m.observable_uuid == db_child_observable.uuid
+            ]
+
             # Add the observable as a child to the analysis model.
             analyses_by_uuid[db_analysis.uuid].children.append(child_observables[db_child_observable.uuid])
 
-    # Loop over each overvable and add its analysis as a child
+    # Loop over each overvable in the submission
     for observable_uuid, observable in child_observables.items():
 
+        # Dedup its metadata and sort it by the metadata type then its value
+        observable.metadata = sorted(set(observable.metadata), key=lambda m: (m.metadata_type, m.value))
+
+        # Add its analysis as a child to the observable model.
         if observable_uuid in analyses_by_target:
             observable.children = analyses_by_target[observable_uuid]
 

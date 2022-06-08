@@ -14,7 +14,6 @@ from tests.factory import node_detection_point
 from tests.factory import node_directive
 from tests.factory import node_relationship
 from tests.factory import node_relationship_type
-from tests.factory import node_tag
 from tests.factory import node_threat
 from tests.factory import node_threat_actor
 from tests.factory import node_threat_type
@@ -25,5 +24,6 @@ from tests.factory import submission
 from tests.factory import submission_tool
 from tests.factory import submission_tool_instance
 from tests.factory import submission_type
+from tests.factory import tag
 from tests.factory import user
 from tests.factory import user_role

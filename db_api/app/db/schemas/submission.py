@@ -58,16 +58,18 @@ class Submission(Node, HasHistory):
         lazy="selectin",
     )
 
-    child_tags = relationship(
-        "NodeTag",
-        secondary="join(NodeTag, node_tag_mapping, NodeTag.uuid == node_tag_mapping.c.tag_uuid)."
-        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == node_tag_mapping.c.node_uuid)."
-        "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
-        primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
-        order_by="asc(NodeTag.value)",
-        viewonly=True,
-        lazy="selectin",
-    )
+    child_tags = []
+
+    # child_tags = relationship(
+    #     "Tag",
+    #     secondary="join(Tag, node_tag_mapping, Tag.uuid == node_tag_mapping.c.tag_uuid)."
+    #     "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == node_tag_mapping.c.node_uuid)."
+    #     "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
+    #     primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
+    #     order_by="asc(Tag.value)",
+    #     viewonly=True,
+    #     lazy="selectin",
+    # )
 
     child_threat_actors = relationship(
         "NodeThreatActor",

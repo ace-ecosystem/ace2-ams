@@ -105,7 +105,7 @@ def test_update(db, key, initial_value, updated_value):
     "key,value_lists,helper_create_func",
     [
         ("directives", VALID_LIST_STRING_VALUES, factory.node_directive.create_or_read),
-        ("tags", VALID_LIST_STRING_VALUES, factory.node_tag.create_or_read),
+        ("tags", VALID_LIST_STRING_VALUES, factory.tag.create_or_read),
         ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
         ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
     ],
