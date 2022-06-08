@@ -8,7 +8,6 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 from core.auth import hash_password
 from core.config import is_in_testing_mode
-from db import crud
 from db.database import get_db
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.event_prevention_tool import EventPreventionTool
