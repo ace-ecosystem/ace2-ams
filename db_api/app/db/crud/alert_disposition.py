@@ -9,7 +9,7 @@ from db.schemas.alert_disposition import AlertDisposition
 
 
 def build_read_all_query() -> Select:
-    return select(AlertDisposition).order_by(AlertDisposition.value)
+    return select(AlertDisposition).order_by(AlertDisposition.rank)
 
 
 def create_or_read(model: AlertDispositionCreate, db: Session) -> AlertDisposition:
