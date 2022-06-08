@@ -34,6 +34,30 @@ class Analysis(TypedModel):
         ''' Base analysis details class '''
         pass
 
+    class Condition():
+        ''' Class for loading and checking the run condition of an analysis module '''
+        def __init__(self, analysis_type:str):
+            ''' loads the run condition from file
+
+            Args:
+                type: the analysis type to get the condition of
+            '''
+
+            with open(os.path.join('/opt/ace2/modules', analysis_type, 'condition')) as f:
+                self.condition = f.read()
+
+        def passes(self, target:Observable) -> bool:
+            ''' checks if the analysis condition passes for provided target
+
+            Args:
+                target: the target observable to check if analysis condition passes
+
+            Returns:
+                True if target passes the condition
+            '''
+
+            return eval(self.condition)
+
     def __init_subclass__(cls):
         ''' Modify all subclasses of Analysis '''
         

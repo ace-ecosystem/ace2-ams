@@ -1,4 +1,4 @@
-from ace2 import Observable
+from ace2 import *
 from ace2.test import *
 from module import FileType
 import os
@@ -8,17 +8,14 @@ import yaml
     
 
 def test_file_type_run_condition():
-    # load config
-    with open('/opt/ace2/modules/FileType/condition') as f:
-        condition = f.read()
+    # load condition for FileType module
+    condition = Analysis.Condition('FileType')
 
     # test run condition True
-    target = Observable(type='File', value='empty')
-    assert eval(condition)
+    assert condition.passes(Observable(type='File', value='empty'))
 
     # test run condition False
-    target = Observable(type='NotFile', value='empty')
-    assert not eval(condition)
+    assert not condition.passes(Observable(type='NotFile', value='empty'))
 
 
 @pytest.mark.parametrize('path,extension,tags,file_type,mime_type', [
