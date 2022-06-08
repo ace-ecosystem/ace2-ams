@@ -4,7 +4,7 @@ import uuid
 from dateutil.parser import parse
 from fastapi import status
 
-from tests.api.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
+from tests.api_tests.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import factory
 
 
