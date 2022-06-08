@@ -1,2 +1,0 @@
-cache_seconds: null
-run_condition: target.type == 'File'

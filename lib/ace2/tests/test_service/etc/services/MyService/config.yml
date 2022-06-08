@@ -1,0 +1,4 @@
+default: {}
+
+secondary:
+    address: "127.0.0.2"
