@@ -47,7 +47,7 @@ helpers.api_route_create(router, create_disposition)
 
 
 def get_all_dispositions(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(AlertDisposition).order_by(AlertDisposition.rank))
+    return paginate(conn=db, query=crud.alert_disposition.build_read_all_query())
 
 
 def get_disposition(uuid: UUID, db: Session = Depends(get_db)):
@@ -74,7 +74,7 @@ def update_disposition(
     db: Session = Depends(get_db),
 ):
     try:
-        if not crud.helpers.update(uuid=uuid, update_model=disposition, db_table=AlertDisposition, db=db):
+        if not crud.alert_disposition.update(uuid=uuid, model=disposition, db=db):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update alert disposition {uuid}"
             )
@@ -96,7 +96,7 @@ helpers.api_route_update(router, update_disposition)
 
 def delete_disposition(uuid: UUID, db: Session = Depends(get_db)):
     try:
-        if not crud.helpers.delete(uuid=uuid, db_table=AlertDisposition, db=db):
+        if not crud.alert_disposition.delete(uuid=uuid, db=db):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete alert disposition {uuid}"
             )

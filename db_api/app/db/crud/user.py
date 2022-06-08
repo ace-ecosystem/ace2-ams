@@ -21,7 +21,7 @@ def auth(auth: Auth, db: Session) -> User:
 
     # Save the new refresh token to the database
     user.refresh_token = auth.new_refresh_token
-    db.flush()
+    db.commit()
 
     return user
 
@@ -76,6 +76,10 @@ def create_or_read(model: UserCreate, db: Session) -> User:
         )
 
     return obj
+
+
+def read_all(db: Session, enabled: Optional[bool] = None, username: Optional[str] = None) -> list[User]:
+    return db.execute(build_read_all_query(enabled=enabled, username=username)).scalars().all()
 
 
 def read_by_username(username: Optional[str], db: Session) -> User:

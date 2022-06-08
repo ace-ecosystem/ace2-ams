@@ -44,6 +44,14 @@ def create_or_read(model: AnalysisModuleTypeCreate, db: Session) -> AnalysisModu
     return read_by_value_version(value=model.value, version=model.version, db=db)
 
 
+def delete(uuid: UUID, db: Session) -> bool:
+    return crud.helpers.delete(uuid=uuid, db_table=AnalysisModuleType, db=db)
+
+
+def read_all(db: Session) -> list[AnalysisModuleType]:
+    return db.execute(build_read_all_query()).scalars().all()
+
+
 def read_by_uuid(uuid: UUID, db: Session) -> AnalysisModuleType:
     return crud.helpers.read_by_uuid(db_table=AnalysisModuleType, uuid=uuid, db=db)
 

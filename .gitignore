@@ -30,6 +30,6 @@ pnpm-debug.log*
 *.sw?
 
 # E2E test screenshots and videos
-frontend/cypress/screenshots
-frontend/cypress/videos
-frontend/cypress/downloads
+frontend/tests/*/screenshots
+frontend/tests/*/videos
+frontend/tests/*/downloads

@@ -50,12 +50,7 @@ helpers.api_route_create(router, create_observables)
 
 
 def get_all_observables(db: Session = Depends(get_db)):
-    return paginate(
-        conn=db,
-        query=crud.helpers.build_read_all_query(db_table=Observable, joins=[ObservableType]).order_by(
-            ObservableType.value, Observable.value
-        ),
-    )
+    return paginate(conn=db, query=crud.observable.build_read_all_query())
 
 
 def get_observable(uuid: UUID, db: Session = Depends(get_db)):

@@ -1,9 +1,16 @@
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
-from api_models.node_threat_type import NodeThreatTypeCreate
+from api_models.node_threat_type import NodeThreatTypeCreate, NodeThreatTypeUpdate
 from db import crud
 from db.schemas.node_threat_type import NodeThreatType
+
+
+def build_read_all_query() -> Select:
+    return select(NodeThreatType).order_by(NodeThreatType.value)
 
 
 def create_or_read(model: NodeThreatTypeCreate, db: Session) -> NodeThreatType:
@@ -20,6 +27,14 @@ def create_or_read(model: NodeThreatTypeCreate, db: Session) -> NodeThreatType:
     return read_by_value(value=model.value, db=db)
 
 
+def delete(uuid: UUID, db: Session) -> bool:
+    return crud.helpers.delete(uuid=uuid, db_table=NodeThreatType, db=db)
+
+
+def read_all(db: Session) -> list[NodeThreatType]:
+    return db.execute(build_read_all_query()).scalars().all()
+
+
 def read_by_uuid(uuid: UUID, db: Session) -> NodeThreatType:
     return crud.helpers.read_by_uuid(db_table=NodeThreatType, uuid=uuid, db=db)
 
@@ -30,3 +45,28 @@ def read_by_value(value: str, db: Session) -> NodeThreatType:
 
 def read_by_values(values: list[str], db: Session) -> list[NodeThreatType]:
     return crud.helpers.read_by_values(db_table=NodeThreatType, values=values, db=db)
+
+
+def update(uuid: UUID, model: NodeThreatTypeUpdate, db: Session) -> bool:
+    obj = read_by_uuid(uuid=uuid, db=db)
+
+    # Get the data that was given in the request and use it to update the database object
+    update_data = model.dict(exclude_unset=True)
+
+    with db.begin_nested():
+        try:
+            if "description" in update_data:
+                obj.description = update_data["description"]
+
+            if "queues" in update_data:
+                obj.queues = crud.queue.read_by_values(values=update_data["queues"], db=db)
+
+            if "value" in update_data:
+                obj.value = update_data["value"]
+
+            db.flush()
+            return True
+        except IntegrityError:
+            db.rollback()
+
+    return False

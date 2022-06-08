@@ -38,14 +38,14 @@ class Event(Node, HasHistory):
     # There isn't currently a way to automatically calculate this time
     contain_time = Column(DateTime(timezone=True), index=True)
 
-    creation_time = Column(DateTime(timezone=True), server_default=utcnow(), index=True)
+    created_time = Column(DateTime(timezone=True), server_default=utcnow(), index=True)
 
     disposition_time = Column(DateTime(timezone=True), index=True)
 
     event_time = Column(DateTime(timezone=True), index=True)
 
     # History is lazy loaded and is not included by default when fetching an event from the API.
-    history = relationship(
+    history: list[EventHistory] = relationship(
         "EventHistory",
         primaryjoin="EventHistory.record_uuid == Event.uuid",
         order_by="EventHistory.action_time",
@@ -132,6 +132,6 @@ class Event(Node, HasHistory):
     @property
     def disposition(self) -> Optional[AlertDispositionRead]:
         """Returns the highest disposition used on the alerts in the event"""
-        if self.alerts:
-            return sorted(self.alerts, key=lambda x: x.disposition.rank)[-1].disposition
+        if alerts_with_disposition := [a for a in self.alerts if a.disposition]:
+            return sorted(alerts_with_disposition, key=lambda x: x.disposition.rank)[-1].disposition
         return None

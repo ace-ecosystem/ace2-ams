@@ -69,7 +69,7 @@ export interface eventRead extends nodeRead {
   autoOwnershipTime: Date | null;
   comments: nodeCommentRead[];
   containTime: Date | null;
-  creationTime: Date;
+  createdTime: Date;
   dispositionTime: Date | null;
   eventTime: Date | null;
   name: string;

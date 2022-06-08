@@ -11,7 +11,6 @@ from api_models.analysis_module_type import (
 )
 from db import crud
 from db.database import get_db
-from db.schemas.analysis_module_type import AnalysisModuleType
 from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 
@@ -99,7 +98,7 @@ helpers.api_route_update(router, update_analysis_module_type)
 
 def delete_analysis_module_type(uuid: UUID, db: Session = Depends(get_db)):
     try:
-        if not crud.helpers.delete(uuid=uuid, db_table=AnalysisModuleType, db=db):
+        if not crud.analysis_module_type.delete(uuid=uuid, db=db):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete analysis module type {uuid}"
             )

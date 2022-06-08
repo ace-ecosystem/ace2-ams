@@ -51,7 +51,7 @@ helpers.api_route_create(router, create_event_risk_level)
 
 
 def get_all_event_risk_levels(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(EventRiskLevel).order_by(EventRiskLevel.value))
+    return paginate(conn=db, query=crud.event_risk_level.build_read_all_query())
 
 
 def get_event_risk_level(uuid: UUID, db: Session = Depends(get_db)):
