@@ -12,7 +12,7 @@
         placeholder="Select a property"
         @change="
           clearPropertyValue();
-          updatePropertyType;
+          updatePropertyType($event as any);
         "
       />
     </div>

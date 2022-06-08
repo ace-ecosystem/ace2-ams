@@ -214,4 +214,58 @@ describe("NodePropertyInput", () => {
     cy.contains("ipv4").should("be.visible");
     cy.findByDisplayValue("1.2.3.4").should("be.visible");
   });
+  it("emits expected event when property type is changed", () => {
+    factory({
+      props: {
+        modelValue: { propertyType: null, propertyValue: null },
+        queue: "external",
+        formType: "filter",
+      },
+      initialState: { userStore: { items: [userReadFactory()] } },
+    }).then((wrapper) => {
+      cy.contains("Disposition").click();
+      cy.get('[aria-label="Owner"]').click();
+      cy.contains("Owner").should("be.visible");
+      cy.contains("Test Analyst").should("be.visible");
+      cy.wrap(wrapper.emitted())
+        .its("update:modelValue")
+        .its(2) // Check the most recently emitted value
+        .should("deep.equal", [
+          {
+            propertyType: "owner",
+            propertyValue: userReadFactory(),
+          },
+        ]);
+    });
+  });
+  it("emits expected event when property value is changed", () => {
+    factory({
+      props: {
+        modelValue: { propertyType: null, propertyValue: null },
+        queue: "external",
+        formType: "filter",
+      },
+      initialState: {
+        alertDispositionStore: {
+          items: [
+            genericObjectReadFactory({ value: "FP" }),
+            genericObjectReadFactory({ value: "Bad" }),
+          ],
+        },
+      },
+    }).then((wrapper) => {
+      cy.contains("FP").click();
+      cy.get('[aria-label="Bad"]').click();
+      cy.contains("Bad").should("be.visible");
+      cy.wrap(wrapper.emitted())
+        .its("update:modelValue")
+        .its(2)
+        .should("deep.equal", [
+          {
+            propertyType: "disposition",
+            propertyValue: genericObjectReadFactory({ value: "Bad" }),
+          },
+        ]);
+    });
+  });
 });

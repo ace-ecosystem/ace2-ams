@@ -135,7 +135,7 @@ However, this will need to be performed on your local system ouside of the conta
 **Step 1:** Install Cypress on your host system (this only needs to be done one time):
 
 ```
-npm install -g cypress@9.3.1
+npm install -g cypress@10.0.2
 ```
 
 **Step 2:** Prep the application to run the tests in interactive mode:
