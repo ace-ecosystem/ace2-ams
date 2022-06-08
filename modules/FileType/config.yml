@@ -1,1 +1,0 @@
-run_condition: target.type == 'File'

@@ -1,7 +1,0 @@
-MyService:
-    address: "127.0.0.1"
-
-    secondary:
-        address: "127.0.0.2"
-
-    tertiary: {}

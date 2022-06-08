@@ -1,31 +1,14 @@
-from ace2 import config
+from ace2.config import Config
 
-def test_config():
-    assert config.load() == {
-        'somedict': {
-            'key': {
-                'foo': 'bar',
-            },
-        },
-        'somelist': [
-            1,
-            2,
-            3,
-        ],
-    }
+def test_config(datadir):
+    # create a new config class
+    class MyConfig(Config):
+        foo: str
 
-    # add something to the raw_config and load again to make sure that we use the cached version
-    config.raw_config['tricky'] = 'hello'
-    assert config.load() == {
-        'somedict': {
-            'key': {
-                'foo': 'bar',
-            },
-        },
-        'somelist': [
-            1,
-            2,
-            3,
-        ],
-        'tricky': 'hello',
-    }
+    # load the config
+    config = MyConfig.load('MyConfig')
+    assert config.foo == 'bar'
+
+    # test section option
+    config = MyConfig.load('MyConfig', section='hello')
+    assert config.foo == 'world'

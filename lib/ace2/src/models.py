@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 import re
 import sys
 from typing import Any
+from yaml import safe_load
 
 def find(name:str, base:type) -> dict:
     ''' finds all subclasses of base in module (not recursive)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import os
 from pydantic import Field
 from pydantic.fields import ModelField
 from typing import List, Optional, Type
@@ -7,6 +8,7 @@ import sys
 
 from . import config, queue
 from .callback import Callback
+from .config import Config
 from .observables import Observable
 from .models import TypedModel, PrivateModel
 
@@ -23,12 +25,13 @@ class Analysis(TypedModel):
         description='callback to execute when running analysis. If None then analysis is complete'
     )
 
-    class Config(PrivateModel):
-        ''' Subclasses can override the config class to add new config fields '''
-        pass
+    class Config(Config):
+        ''' Base analysis config class '''
+        
+        cache_seconds: Optional[int] = Field(default=None, description='number of seconds until analysis expires')
 
     class Details(PrivateModel):
-        ''' Subclasses can override the details class to add new details fields '''
+        ''' Base analysis details class '''
         pass
 
     def __init_subclass__(cls):
@@ -55,7 +58,7 @@ class Analysis(TypedModel):
 
         # load config into cache if we need to
         if self.private.config == None:
-            self.private.config = type(self).Config(**config.load()['analysis'][type(self).__name__])
+            self.private.config = self.Config.load(os.path.join('modules', type(self).__name__))
 
         # returned loaded config
         return self.private.config
