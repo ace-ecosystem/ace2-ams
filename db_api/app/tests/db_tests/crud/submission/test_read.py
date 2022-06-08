@@ -305,6 +305,13 @@ def test_filter_by_type(db):
     assert result == [submission1]
 
 
+def test_read_all_history(db):
+    submission = factory.submission.create(history_username="analyst", db=db)
+    result = crud.submission.read_all_history(uuid=submission.uuid, db=db)
+    assert len(result) == 1
+    assert result[0].action == "CREATE"
+
+
 def test_read_observables(db):
     # Create a submission tree where the same observable type+value appears twice
     #

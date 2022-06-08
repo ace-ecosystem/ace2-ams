@@ -132,6 +132,6 @@ class Event(Node, HasHistory):
     @property
     def disposition(self) -> Optional[AlertDispositionRead]:
         """Returns the highest disposition used on the alerts in the event"""
-        if self.alerts:
-            return sorted(self.alerts, key=lambda x: x.disposition.rank)[-1].disposition
+        if alerts_with_disposition := [a for a in self.alerts if a.disposition]:
+            return sorted(alerts_with_disposition, key=lambda x: x.disposition.rank)[-1].disposition
         return None

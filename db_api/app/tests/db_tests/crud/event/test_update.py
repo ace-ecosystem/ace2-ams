@@ -1,11 +1,32 @@
 import pytest
 
 from datetime import timedelta
+from uuid import uuid4
 
 from api_models.event import EventUpdate
 from db import crud
+from exceptions.db import VersionMismatch
 from tests.api.node import VALID_LIST_STRING_VALUES
 from tests import factory
+
+
+#
+# INVALID TESTS
+#
+
+
+def test_update_version_mismatch(db):
+    # Create an event
+    event = factory.event.create_or_read(name="test", db=db, history_username="analyst")
+
+    # Update the event
+    with pytest.raises(VersionMismatch):
+        crud.event.update(uuid=event.uuid, model=EventUpdate(name="test2", version=uuid4()), db=db)
+
+
+#
+# VALID TESTS
+#
 
 
 def test_update_owner(db):

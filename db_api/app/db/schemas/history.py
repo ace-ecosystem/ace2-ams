@@ -37,6 +37,6 @@ class HistoryMixin:
 
 class HasHistory:
     @property
-    def history_snapshot(self):
+    def history_snapshot(self):  # pragma: no cover
         """Returns the JSON view of the database object that will be saved as the snapshot in the history table"""
         raise NotImplementedError()

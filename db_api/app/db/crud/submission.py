@@ -428,6 +428,14 @@ def read_all(
     )
 
 
+def read_all_history(uuid: UUID, db: Session) -> list[SubmissionHistory]:
+    return (
+        db.execute(crud.history.build_read_history_query(history_table=SubmissionHistory, record_uuid=uuid))
+        .scalars()
+        .all()
+    )
+
+
 def read_by_uuid(uuid: UUID, db: Session) -> Submission:
     return crud.helpers.read_by_uuid(db_table=Submission, uuid=uuid, db=db)
 
@@ -494,8 +502,9 @@ def read_tree(uuid: UUID, db: Session) -> dict:
         if observable_uuid in analyses_by_target:
             observable.children = analyses_by_target[observable_uuid]
 
-    # Create the SubmissionTree object and set its children to be the root analysis children.
-    tree = SubmissionTreeRead(**db_submission.__dict__)
+    # Create the Submission object to SubmissionTree and set its children to be the root analysis children.
+    # The actual root analysis is not included in the tree structure.
+    tree = db_submission.convert_to_pydantic()
     tree.children = analyses_by_uuid[db_submission.root_analysis_uuid].children
 
     # Now that the tree structure is built, we need to walk it to mark which of the leaves have

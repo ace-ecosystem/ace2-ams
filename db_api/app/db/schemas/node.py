@@ -40,5 +40,5 @@ class Node(Base):
 
     __mapper_args__ = {"polymorphic_identity": "node", "polymorphic_on": node_type, "with_polymorphic": "*"}
 
-    def convert_to_pydantic(self):
+    def convert_to_pydantic(self):  # pragma: no cover
         raise NotImplementedError("A Node subclass must implement convert_to_pydantic")

@@ -15,6 +15,113 @@ from db import crud
 from tests import factory
 
 
+def test_auto_alert_time(db):
+    event = factory.event.create_or_read(name="event", db=db)
+
+    # The auto_alert_time should be None if there are no alerts in the event
+    assert event.auto_alert_time is None
+
+    # Add an alert to the event
+    now = crud.helpers.utcnow()
+    factory.submission.create(event=event, insert_time=now, db=db)
+
+    # The auto_alert_time should be the time the alert was dispositioned
+    assert event.auto_alert_time == now
+
+    # Add another alert to the event with an earlier disposition
+    earlier = now - timedelta(seconds=5)
+    factory.submission.create(event=event, insert_time=earlier, db=db)
+    assert event.auto_alert_time == earlier
+
+
+def test_auto_disposition_time(db):
+    event = factory.event.create_or_read(name="event", db=db)
+
+    # The auto_disposition_time should be None if there are no alerts in the event
+    assert event.auto_disposition_time is None
+
+    # The auto_disposition_time should be None if the alerts have not been dispositioned
+    factory.submission.create(event=event, db=db)
+    assert event.auto_disposition_time is None
+
+    # Add an alert to the event with a disposition
+    now = crud.helpers.utcnow()
+    factory.submission.create(event=event, disposition="DELIVERY", update_time=now, history_username="analyst", db=db)
+
+    # The auto_disposition_time should be the time the alert was dispositioned
+    assert event.auto_disposition_time == now
+
+    # Add another alert to the event with an earlier disposition
+    earlier = now - timedelta(seconds=5)
+    factory.submission.create(
+        event=event, disposition="DELIVERY", update_time=earlier, history_username="analyst", db=db
+    )
+    assert event.auto_disposition_time == earlier
+
+
+def test_auto_event_time(db):
+    event = factory.event.create_or_read(name="event", db=db)
+
+    # The auto_event_time should be None if there are no alerts in the event
+    assert event.auto_event_time is None
+
+    # Add an alert to the event
+    now = crud.helpers.utcnow()
+    factory.submission.create(event=event, event_time=now, db=db)
+
+    # The auto_event_time should be the time the alert was dispositioned
+    assert event.auto_event_time == now
+
+    # Add another alert to the event with an earlier disposition
+    earlier = now - timedelta(seconds=5)
+    factory.submission.create(event=event, event_time=earlier, db=db)
+    assert event.auto_event_time == earlier
+
+
+def test_auto_ownership_time(db):
+    event = factory.event.create_or_read(name="event", db=db)
+
+    # The auto_ownership_time should be None if there are no alerts in the event
+    assert event.auto_ownership_time is None
+
+    # The auto_ownership_time should be None if the alerts have not been dispositioned
+    factory.submission.create(event=event, db=db)
+    assert event.auto_ownership_time is None
+
+    # Add an alert to the event with a disposition
+    now = crud.helpers.utcnow()
+    factory.submission.create(event=event, owner="analyst", update_time=now, history_username="analyst", db=db)
+
+    # The auto_ownership_time should be the time the alert was dispositioned
+    assert event.auto_ownership_time == now
+
+    # Add another alert to the event with an earlier disposition
+    earlier = now - timedelta(seconds=5)
+    factory.submission.create(event=event, owner="analyst", update_time=earlier, history_username="analyst", db=db)
+    assert event.auto_ownership_time == earlier
+
+
+def test_disposition(db):
+    event = factory.event.create_or_read(name="event", db=db)
+
+    # The disposition should be None if there are no alerts in the event
+    assert event.disposition is None
+
+    # The disposition should be None if the alerts have not been dispositioned
+    factory.submission.create(event=event, db=db)
+    assert event.disposition is None
+
+    # Add an alert to the event with a disposition with rank 1
+    factory.alert_disposition.create_or_read(value="DELIVERY", rank=1, db=db)
+    factory.submission.create(event=event, disposition="DELIVERY", db=db)
+    assert event.disposition.value == "DELIVERY"
+
+    # Add another alert to the event with a higher ranked disposition
+    factory.alert_disposition.create_or_read(value="EXPLOITATION", rank=2, db=db)
+    factory.submission.create(event=event, disposition="EXPLOITATION", db=db)
+    assert event.disposition.value == "EXPLOITATION"
+
+
 def test_filter_by_alert_time_after_alert_insert_time(db):
     now = crud.helpers.utcnow()
 
@@ -559,6 +666,13 @@ def test_sort_by_status(db):
 
     result = crud.event.read_all(sort="status|desc", db=db)
     assert result == [event3, event2, event1]
+
+
+def test_read_all_history(db):
+    event = factory.event.create_or_read(name="event", history_username="analyst", db=db)
+    result = crud.event.read_all_history(uuid=event.uuid, db=db)
+    assert len(result) == 1
+    assert result[0].action == "CREATE"
 
 
 def test_read_analysis_type_from_event(db):

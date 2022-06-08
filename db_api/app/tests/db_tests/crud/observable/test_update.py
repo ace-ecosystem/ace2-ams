@@ -1,9 +1,11 @@
 import pytest
 
 from datetime import timedelta
+from uuid import uuid4
 
 from api_models.observable import ObservableUpdate
 from db import crud
+from exceptions.db import VersionMismatch
 from tests import factory
 from tests.api.node import VALID_LIST_STRING_VALUES
 
@@ -28,6 +30,16 @@ def test_update_duplicate_type_value(db):
         uuid=obs2.uuid, model=ObservableUpdate(type=obs1.type.value, history_username="analyst"), db=db
     )
     assert result is False
+
+
+def test_update_version_mismatch(db):
+    submission = factory.submission.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="type", value="value", parent_analysis=submission.root_analysis, history_username="analyst", db=db
+    )
+
+    with pytest.raises(VersionMismatch):
+        crud.observable.update(uuid=observable.uuid, model=ObservableUpdate(for_detection=True, version=uuid4()), db=db)
 
 
 #

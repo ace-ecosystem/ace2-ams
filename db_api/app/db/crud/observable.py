@@ -13,7 +13,7 @@ from api_models.node_relationship import NodeRelationshipCreate
 from api_models.observable import ObservableCreate, ObservableUpdate
 from db import crud
 from db.schemas.analysis import Analysis
-from db.schemas.observable import Observable
+from db.schemas.observable import Observable, ObservableHistory
 from db.schemas.observable_type import ObservableType
 from exceptions.db import ValueNotFoundInDatabase
 
@@ -117,6 +117,14 @@ def create_or_read(
 
 def read_all(db: Session) -> list[Observable]:
     return db.execute(build_read_all_query()).scalars().all()
+
+
+def read_all_history(uuid: UUID, db: Session) -> list[ObservableHistory]:
+    return (
+        db.execute(crud.history.build_read_history_query(history_table=ObservableHistory, record_uuid=uuid))
+        .scalars()
+        .all()
+    )
 
 
 def read_by_type_value(type: str, value: str, db: Session) -> Observable:

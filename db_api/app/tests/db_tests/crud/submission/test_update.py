@@ -1,11 +1,30 @@
 import pytest
 
 from datetime import timedelta
+from uuid import uuid4
 
 from api_models.submission import SubmissionUpdate
 from db import crud
+from exceptions.db import VersionMismatch
 from tests.api.node import VALID_LIST_STRING_VALUES
 from tests import factory
+
+
+#
+# INVALID TESTS
+#
+
+
+def test_update_version_mismatch(db):
+    submission = factory.submission.create(db=db)
+
+    with pytest.raises(VersionMismatch):
+        crud.submission.update(model=SubmissionUpdate(uuid=submission.uuid, tags=["tag"], version=uuid4()), db=db)
+
+
+#
+# VALID TESTS
+#
 
 
 def test_update_disposition(db):

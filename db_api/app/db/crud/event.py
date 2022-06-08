@@ -24,7 +24,7 @@ from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
 from db.schemas.analysis_module_type import AnalysisModuleType
-from db.schemas.event import Event
+from db.schemas.event import Event, EventHistory
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_risk_level import EventRiskLevel
@@ -485,6 +485,12 @@ def read_all(
         )
         .scalars()
         .all()
+    )
+
+
+def read_all_history(uuid: UUID, db: Session) -> list[EventHistory]:
+    return (
+        db.execute(crud.history.build_read_history_query(history_table=EventHistory, record_uuid=uuid)).scalars().all()
     )
 
 
