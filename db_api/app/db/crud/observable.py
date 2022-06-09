@@ -38,6 +38,7 @@ def create_or_read(
             "history_username",
             "observable_relationships",
             "parent_analysis_uuid",
+            "permanent_tags",
             "redirection",
         },
     )
@@ -46,6 +47,7 @@ def create_or_read(
     obj.context = model.context
     obj.expires_on = model.expires_on
     obj.for_detection = model.for_detection
+    obj.permanent_tags = crud.tag.read_by_values(values=model.permanent_tags, db=db)
     obj.redirection = create_or_read(model=model.redirection, db=db) if model.redirection else None
     obj.time = model.time
     obj.type = crud.observable_type.read_by_value(value=model.type, db=db)

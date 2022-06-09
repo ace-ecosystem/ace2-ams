@@ -18,6 +18,7 @@ from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.node import Node
 from db.schemas.node_relationship import NodeRelationship
+from db.schemas.observable_permanent_tag_mapping import observable_permanent_tag_mapping
 
 
 class ObservableHistory(Base, HistoryMixin):
@@ -45,6 +46,8 @@ class Observable(Node, HasHistory):
         primaryjoin="ObservableHistory.record_uuid == Observable.uuid",
         order_by="ObservableHistory.action_time",
     )
+
+    permanent_tags = relationship("Tag", secondary=observable_permanent_tag_mapping, lazy="selectin")
 
     redirection_uuid = Column(UUID(as_uuid=True), ForeignKey("observable.uuid"))
 

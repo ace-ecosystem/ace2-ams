@@ -204,7 +204,13 @@ def build_read_all_query(
     if tags:
         tag_filters = []
         for tag in tags.split(","):
-            tag_filters.append(or_(Submission.tags.any(Tag.value == tag), Submission.child_tags.any(Tag.value == tag)))
+            tag_filters.append(
+                or_(
+                    Submission.tags.any(Tag.value == tag),
+                    Submission.child_analysis_tags.any(Tag.value == tag),
+                    Submission.child_permanent_tags.any(Tag.value == tag),
+                )
+            )
 
         tags_query = select(Submission).where(and_(*tag_filters))
         query = _join_as_subquery(query, tags_query)
@@ -336,6 +342,7 @@ def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
         obj.ownership_time = crud.helpers.utcnow()
     obj.queue = crud.queue.read_by_value(value=model.queue, db=db)
     obj.root_analysis = crud.analysis.create_root(db=db)
+    obj.tags = crud.tag.read_by_values(values=model.tags, db=db)
     if model.tool:
         obj.tool = crud.submission_tool.read_by_value(value=model.tool, db=db)
     if model.tool_instance:
@@ -364,6 +371,7 @@ def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
             db=db,
         )
 
+    db.flush()
     return obj
 
 

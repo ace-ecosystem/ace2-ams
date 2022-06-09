@@ -107,8 +107,8 @@ def create(
                     history_username=observable.history_username,
                     observable_relationships=observable.observable_relationships,
                     parent_analysis_uuid=submission.root_analysis_uuid,
+                    permanent_tags=observable.permanent_tags,
                     redirection=observable.redirection,
-                    tags=observable.tags,
                     threat_actors=observable.threat_actors,
                     threats=observable.threats,
                     time=observable.time,
@@ -136,6 +136,7 @@ def create(
 
     if tags:
         submission.tags = [factory.tag.create_or_read(value=t, db=db) for t in tags]
+        diffs.append(crud.history.create_diff(field="tags", old=[], new=tags))
 
     if threat_actors:
         submission.threat_actors = [factory.node_threat_actor.create_or_read(value=t, db=db) for t in threat_actors]
@@ -175,9 +176,9 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
             for relationship in o["observable_relationships"]:
                 factory.node_relationship_type.create_or_read(value=relationship["type"], db=db)
 
-        # Make sure that any tags the observable has exist
-        if "tags" in o:
-            for tag in o["tags"]:
+        # Make sure that any permanent tags the observable has exist
+        if "permanent_tags" in o:
+            for tag in o["permanent_tags"]:
                 factory.tag.create_or_read(value=tag, db=db)
 
         # Build the ObservableCreate model
@@ -186,7 +187,7 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
             for_detection=o.get("for_detection", False),
             metadata=o.get("metadata", []),
             observable_relationships=o.get("observable_relationships", []),
-            tags=o.get("tags", []),
+            permanent_tags=o.get("permanent_tags", []),
             type=o["type"],
             value=o["value"],
         )

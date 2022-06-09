@@ -2,6 +2,7 @@ from uuid import uuid4
 from api_models.analysis import AnalysisCreateInObservable
 from api_models.observable import ObservableCreate
 
+from api_models.analysis_metadata import AnalysisMetadataCreate
 from api_models.submission import SubmissionCreate
 from db import crud
 from tests import factory
@@ -44,7 +45,8 @@ def test_create(db):
                         )
                     ],
                     detection_points=["detection_point"],
-                    tags=["o_tag"],
+                    metadata=[AnalysisMetadataCreate(key="tag", value="o_analysis_tag")],
+                    permanent_tags=["o_permanent_tag"],
                     threat_actors=["o_threat_actor"],
                     threats=["o_threat"],
                 )
@@ -67,8 +69,9 @@ def test_create(db):
     assert submission.analyses[1].analysis_module_type_uuid == analysis_module_type.uuid
     assert len(submission.child_detection_points) == 1
     assert submission.child_detection_points[0].value == "detection_point"
-    assert len(submission.child_tags) == 1
-    assert submission.child_tags[0].value == "o_tag"
+    assert len(submission.child_tags) == 2
+    assert submission.child_tags[0].value == "o_analysis_tag"
+    assert submission.child_tags[1].value == "o_permanent_tag"
     assert len(submission.child_threat_actors) == 1
     assert submission.child_threat_actors[0].value == "o_threat_actor"
     assert len(submission.child_threats) == 1

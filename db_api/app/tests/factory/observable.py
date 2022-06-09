@@ -22,6 +22,7 @@ def create_or_read(
     expires_on: Optional[datetime] = None,
     for_detection: bool = False,
     history_username: Optional[str] = None,
+    permanent_tags: Optional[list[str]] = None,
     redirection: Optional[Observable] = None,
     threat_actors: Optional[list[str]] = None,
     threats: Optional[list[str]] = None,
@@ -38,6 +39,10 @@ def create_or_read(
     if directives is not None:
         for directive in directives:
             factory.node_directive.create_or_read(value=directive, db=db)
+
+    if permanent_tags is not None:
+        for tag in permanent_tags:
+            factory.tag.create_or_read(value=tag, db=db)
 
     if threat_actors:
         for threat_actor in threat_actors:
@@ -56,6 +61,7 @@ def create_or_read(
             for_detection=for_detection,
             history_username=history_username,
             metadata=metadata,
+            permanent_tags=permanent_tags or [],
             threat_actors=threat_actors or [],
             threats=threats or [],
             time=time or crud.helpers.utcnow(),
@@ -71,5 +77,7 @@ def create_or_read(
 
     # Add the observable to its parent analysis
     parent_analysis.child_observables.append(obj)
+
+    db.commit()
 
     return obj

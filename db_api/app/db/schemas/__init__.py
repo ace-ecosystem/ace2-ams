@@ -32,7 +32,6 @@ from db.schemas.node_directive import NodeDirective
 from db.schemas.node_directive_mapping import node_directive_mapping
 from db.schemas.node_relationship import NodeRelationship
 from db.schemas.node_relationship_type import NodeRelationshipType
-from db.schemas.node_tag_mapping import tag_mapping
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.node_threat_actor_queue_mapping import node_threat_actor_queue_mapping
@@ -42,11 +41,13 @@ from db.schemas.node_threat_queue_mapping import node_threat_queue_mapping
 from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.node_threat_type_queue_mapping import node_threat_type_queue_mapping
 from db.schemas.observable import Observable
+from db.schemas.observable_permanent_tag_mapping import observable_permanent_tag_mapping
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.seed import Seed
 from db.schemas.submission import Submission
 from db.schemas.submission_analysis_mapping import submission_analysis_mapping
+from db.schemas.submission_tag_mapping import submission_tag_mapping
 from db.schemas.submission_tool import SubmissionTool
 from db.schemas.submission_tool_instance import SubmissionToolInstance
 from db.schemas.submission_type import SubmissionType

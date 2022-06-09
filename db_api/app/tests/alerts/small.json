@@ -187,10 +187,8 @@
     {
       "type": "ipv4",
       "value": "127.0.0.1",
-      "metadata": [
-        { "type": "tag", "value": "c2" },
-        { "type": "tag", "value": "contacted_host" }
-      ],
+      "metadata": [{ "type": "tag", "value": "contacted_host" }],
+      "permanent_tags": ["c2"],
       "node_metadata": {
         "display": {
           "type": "private ip address",

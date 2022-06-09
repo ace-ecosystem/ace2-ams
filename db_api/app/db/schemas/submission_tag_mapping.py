@@ -4,13 +4,13 @@ from sqlalchemy.dialects.postgresql import UUID
 from db.database import Base
 
 
-tag_mapping = Table(
-    "node_tag_mapping",
+submission_tag_mapping = Table(
+    "submission_tag_mapping",
     Base.metadata,
     Column(
-        "node_uuid",
+        "submission_uuid",
         UUID(as_uuid=True),
-        ForeignKey("node.uuid"),
+        ForeignKey("submission.uuid"),
         index=True,
         primary_key=True,
     ),

@@ -65,7 +65,7 @@ def test_create_nonexistent_tag(db):
     with pytest.raises(ValueNotFoundInDatabase):
         crud.observable.create_or_read(
             model=ObservableCreate(
-                type="test", value="test", parent_analysis_uuid=submission.root_analysis_uuid, tags=["asdf"]
+                type="test", value="test", parent_analysis_uuid=submission.root_analysis_uuid, permanent_tags=["asdf"]
             ),
             db=db,
         )
@@ -192,7 +192,7 @@ def test_create(db):
             redirection=ObservableCreate(
                 type="type3", value="value3", parent_analysis_uuid=submission.root_analysis_uuid
             ),
-            tags=["tag"],
+            permanent_tags=["tag"],
             threat_actors=["threat_actor"],
             threats=["threat"],
             time=now,

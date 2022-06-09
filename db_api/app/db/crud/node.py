@@ -19,9 +19,6 @@ def create(
     if hasattr(model, "directives") and model.directives:
         obj.directives = crud.node_directive.read_by_values(values=model.directives, db=db)
 
-    if hasattr(model, "tags") and model.tags:
-        obj.tags = crud.tag.read_by_values(values=model.tags, db=db)
-
     if hasattr(model, "threat_actors") and model.threat_actors:
         obj.threat_actors = crud.node_threat_actor.read_by_values(values=model.threat_actors, db=db)
 

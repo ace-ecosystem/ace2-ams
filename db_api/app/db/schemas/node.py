@@ -4,7 +4,6 @@ from sqlalchemy.orm import relationship
 
 from db.database import Base
 from db.schemas.node_directive_mapping import node_directive_mapping
-from db.schemas.node_tag_mapping import tag_mapping
 from db.schemas.node_threat_actor_mapping import node_threat_actor_mapping
 from db.schemas.node_threat_mapping import node_threat_mapping
 
@@ -29,8 +28,6 @@ class Node(Base):
         viewonly=True,
         lazy="selectin",
     )
-
-    tags = relationship("Tag", secondary=tag_mapping, lazy="selectin")
 
     threat_actors = relationship("NodeThreatActor", secondary=node_threat_actor_mapping, lazy="selectin")
 
