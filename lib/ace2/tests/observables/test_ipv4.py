@@ -5,7 +5,7 @@ def test_ipv4():
     observable = IPv4('127.0.0.1')
 
     # verify attributes
-    assert observable.type == 'IPv4'
+    assert observable.type == 'ipv4'
     assert observable.value == '127.0.0.1'
 
     # save then load
@@ -14,5 +14,5 @@ def test_ipv4():
 
     # verify class instatnce
     assert isinstance(observable, IPv4)
-    assert observable.type == 'IPv4'
+    assert observable.type == 'ipv4'
     assert observable.value == '127.0.0.1'

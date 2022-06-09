@@ -5,7 +5,7 @@ def test_file(datadir):
     observable = File(str(datadir / 'hello.txt'))
 
     # verify attributes
-    assert observable.type == 'File'
+    assert observable.type == 'file'
     assert observable.value == 'a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447'
     assert observable.display_value == 'hello.txt'
     assert observable.path == str(datadir / 'hello.txt')
@@ -14,11 +14,11 @@ def test_file(datadir):
     # save then load
     state = observable.dict()
     assert state == {
-        'type': 'File',
+        'type': 'file',
         'value': 'a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447',
         'metadata': [
             {
-                'type': 'DisplayValue',
+                'type': 'display_value',
                 'value': 'hello.txt'
             },
         ],
@@ -27,7 +27,7 @@ def test_file(datadir):
 
     # verify attributes
     assert isinstance(observable, File)
-    assert observable.type == 'File'
+    assert observable.type == 'file'
     assert observable.value == 'a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447'
     assert observable.display_value == 'hello.txt'
     assert observable.extension == 'txt'
@@ -36,11 +36,11 @@ def test_file(datadir):
 
     # test uppercase extension
     state = {
-        'type': 'File',
+        'type': 'file',
         'value': 'a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447',
         'metadata': [
             {
-                'type': 'DisplayValue',
+                'type': 'display_value',
                 'value': 'hello.TXT'
             },
         ],
@@ -49,11 +49,11 @@ def test_file(datadir):
 
     # test empty extension
     state = {
-        'type': 'File',
+        'type': 'file',
         'value': 'a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447',
         'metadata': [
             {
-                'type': 'DisplayValue',
+                'type': 'display_value',
                 'value': 'hello.'
             },
         ],
@@ -62,11 +62,11 @@ def test_file(datadir):
 
     # test missing extension
     state = {
-        'type': 'File',
+        'type': 'file',
         'value': 'a948904f2f0f479b8f8197694b30184b0d2ed1c1cd2a1ec0fb85d299a192a447',
         'metadata': [
             {
-                'type': 'DisplayValue',
+                'type': 'display_value',
                 'value': 'hello'
             },
         ],

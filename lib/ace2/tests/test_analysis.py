@@ -14,7 +14,7 @@ def test_analysis(monkeypatch, mock_datetime):
         def execute(self, observable):
             # verify observable is passed correctly
             assert isinstance(observable, IPv4)
-            assert observable.type == 'IPv4'
+            assert observable.type == 'ipv4'
             assert observable.value == '127.0.0.1'
 
             # verify config property works
@@ -29,7 +29,7 @@ def test_analysis(monkeypatch, mock_datetime):
         def get_results(self, observable):
             # verify observable is passed correctly
             assert isinstance(observable, IPv4)
-            assert observable.type == 'IPv4'
+            assert observable.type == 'ipv4'
             assert observable.value == '127.0.0.1'
 
             # make sure the state was kept
@@ -53,7 +53,7 @@ def test_analysis(monkeypatch, mock_datetime):
             observable = self.add(IPv4, '127.0.0.1')
             assert len(self.observables) == 2
             assert isinstance(observable, IPv4)
-            assert observable.type == 'IPv4'
+            assert observable.type == 'ipv4'
             assert observable.value == '127.0.0.1'
 
             # set the summary
@@ -62,30 +62,30 @@ def test_analysis(monkeypatch, mock_datetime):
     # add analysis to the queue
     analysis = {
         'id': 1,
-        'type': 'MyAnalysis',
+        'type': 'my_analysis',
         'target': {
-            'type': 'IPv4',
+            'type': 'ipv4',
             'value': '127.0.0.1',
         },
     }
-    queue.add('MyAnalysis', analysis)
+    queue.add('my_analysis', analysis)
 
     # get a message from the queue
-    message = queue.get('MyAnalysis')
+    message = queue.get('my_analysis')
 
     # run the analysis with the lambda handler function
     run(message, None)
 
     # make sure message was requeued
-    message = queue.get('MyAnalysis')
+    message = queue.get('my_analysis')
 
     # verify result
     assert message['Records'][0]['delaySeconds'] == 5
     assert json.loads(message['Records'][0]['body']) == {
         'id': 1,
-        'type': 'MyAnalysis',
+        'type': 'my_analysis',
         'target': {
-            'type': 'IPv4',
+            'type': 'ipv4',
             'value': '127.0.0.1',
             'metadata': [],
         },
@@ -111,9 +111,9 @@ def test_analysis(monkeypatch, mock_datetime):
     # verify result
     assert json.loads(message['Records'][0]['body']) == {
         'id': 1,
-        'type': 'MyAnalysis',
+        'type': 'my_analysis',
         'target': {
-            'type': 'IPv4',
+            'type': 'ipv4',
             'value': '127.0.0.1',
             'metadata': [],
         },
@@ -128,7 +128,7 @@ def test_analysis(monkeypatch, mock_datetime):
                 'metadata': [],
             },
             {
-                'type': 'IPv4',
+                'type': 'ipv4',
                 'value': '127.0.0.1',
                 'metadata': [],
             },

@@ -9,7 +9,7 @@ def test_typed_model():
 
     # load Foo from state
     state = {
-        'type': 'Bar'
+        'type': 'bar'
     }
     foo = Foo(**state)
 
@@ -20,7 +20,7 @@ def test_typed_model():
     assert isinstance(foo, Bar)
 
     # ensure that Bar class has a set type
-    assert Bar.type == 'Bar'
+    assert Bar.type == 'bar'
 
 def test_private_model():
     # init a private model

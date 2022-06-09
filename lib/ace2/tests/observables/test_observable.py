@@ -26,7 +26,7 @@ def test_observable():
         'value': 'bar',
         'metadata': [
             {
-                'type': 'Tag',
+                'type': 'tag',
                 'value': 'beep',
             },
         ],
@@ -53,9 +53,9 @@ def test_observable():
     class Hello(Observable):
         def __init__(self, value, **kwargs):
             super().__init__(self.type, value, **kwargs)
-    observable = Observable('Hello', 'world')
+    observable = Observable('hello', 'world')
     assert isinstance(observable, Hello)
-    assert observable.type == 'Hello'
+    assert observable.type == 'hello'
     assert observable.value == 'world'
 
     # add directive
