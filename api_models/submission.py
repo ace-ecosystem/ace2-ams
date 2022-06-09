@@ -154,6 +154,8 @@ class SubmissionUpdate(NodeUpdate, SubmissionBase):
 
 
 class SubmissionTreeRead(SubmissionRead):
+    root_analysis_uuid: UUID4 = Field(description="The UUID the submission's root analysis")
+    
     children: list[dict] = Field(default_factory=list, description="A list of this submission's child objects")
 
     class Config:

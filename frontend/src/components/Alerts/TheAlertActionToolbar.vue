@@ -35,6 +35,18 @@
           name="DispositionModal"
           @request-reload="requestReload"
         />
+        <!-- ADD OBSERVABLES MODAL -->
+        <Button
+          data-cy="add-observable-button"
+          class="p-m-1 p-button-normal p-button-secondary"
+          icon="pi pi-plus-circle"
+          label="Add Observable"
+          @click="open('AddObservableModal')"
+        />
+        <AddObservableModal
+          name="AddObservableModal"
+          @request-reload="requestReload"
+        />
       </template>
       <template #start-right>
         <!-- REMEDIATE MODAL -->
@@ -60,6 +72,7 @@
   import TheNodeActionToolbarVue from "@/components/Node/TheNodeActionToolbar.vue";
   import RemediationModal from "@/components/Modals/RemediateModal.vue";
   import DispositionModal from "@/components/Modals/DispositionModal.vue";
+  import AddObservableModal from "@/components/Modals/AddObservableModal.vue";
 
   import { useModalStore } from "@/stores/modal";
 

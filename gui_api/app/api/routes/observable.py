@@ -5,13 +5,28 @@ from uuid import UUID
 
 from api import db_api
 from api.routes import helpers
-from api_models.observable import ObservableRead, ObservableUpdate
+from api_models.observable import ObservableCreate, ObservableRead, ObservableUpdate
 
 
 router = APIRouter(
     prefix="/observable",
     tags=["Observable"],
 )
+
+
+#
+# CREATE
+#
+
+
+def create_observable(observable: ObservableCreate, request: Request, response: Response):
+    result =  db_api.post(path=f"/observable/", payload=json.loads(observable.json()))
+
+    response.headers["Content-Location"] = request.url_for("get_observable", uuid=result["uuid"])
+
+
+
+helpers.api_route_create(router, create_observable)
 
 
 #
