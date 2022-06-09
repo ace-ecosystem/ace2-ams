@@ -11,8 +11,8 @@ COPY modules/$name/condition ${ACE2}/modules/$name/condition
 COPY modules/$name/module.py ${ACE2}/modules/$name/module.py
 
 # install config if one exists
-ARG ENV
-COPY modules/$name/config-$env.ym[l] ${ACE2}/modules/$name/
+ARG env
+COPY modules/$name/config-$env.ym[l] ${ACE2}/modules/$name/config.yml
 
 # make module importable
 RUN touch ${ACE2}/modules/$name/__init__.py
