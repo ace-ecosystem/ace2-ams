@@ -35,20 +35,23 @@
           name="DispositionModal"
           @request-reload="requestReload"
         />
-        <!-- ADD OBSERVABLES MODAL -->
-        <Button
-          data-cy="add-observable-button"
-          class="p-m-1 p-button-normal p-button-secondary"
-          icon="pi pi-plus-circle"
-          label="Add Observable"
-          @click="open('AddObservableModal')"
-        />
-        <AddObservableModal
-          name="AddObservableModal"
-          @request-reload="requestReload"
-        />
       </template>
       <template #start-right>
+        <!-- ADD OBSERVABLES MODAL -->
+        <span v-if="props.reloadObject == 'node'">
+          <Button
+            data-cy="add-observable-button"
+            class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
+            style="width: 160px"
+            icon="pi pi-plus-circle"
+            label="Add Observable"
+            @click="open('AddObservableModal')"
+          />
+          <AddObservableModal
+            name="AddObservableModal"
+            @request-reload="requestReload"
+          />
+        </span>
         <!-- REMEDIATE MODAL -->
         <Button
           data-cy="remediate-button"
