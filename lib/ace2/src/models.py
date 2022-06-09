@@ -8,6 +8,7 @@ import re
 import sys
 from typing import Any
 from yaml import safe_load
+from .util import camel_to_snake
 
 def find(name:str, base:type) -> dict:
     ''' finds all subclasses of base in module (not recursive)
@@ -106,7 +107,7 @@ class TypedModel(PrivateModel):
             return
 
         # use the class name as the type
-        cls.type = cls.__name__
+        cls.type = camel_to_snake(cls.__name__)
 
         # add a mapping dictionary for this base type if it does not already exist
         if base.__name__ not in model_types:

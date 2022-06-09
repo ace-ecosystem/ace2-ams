@@ -1,6 +1,7 @@
 import os
 from typing import Optional
 from .config import Config
+from .util import camel_to_snake
 
 class Service():
     ''' Base class for making configurable services '''
@@ -17,4 +18,4 @@ class Service():
         '''
 
         # load the config
-        self.config = self.Config.load(os.path.join('services', type(self).__name__), section=instance)
+        self.config = self.Config.load(os.path.join('lib', camel_to_snake(type(self).__name__)), section=instance)

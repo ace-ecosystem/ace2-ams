@@ -1,16 +1,15 @@
-# extend lib base of the same name
+# extend image base
 ARG name
 FROM ace2-lib-$name-base
 
-# get lib name
-ARG lib
-
-# install config
-COPY $lib/config.yml /opt/ace2/etc/$lib/config.yml
-
 # install source
-COPY $lib/src /opt/ace2/$lib
+ARG name
+COPY lib/$name/src ${ACE2}/lib/$name
+
+# install config if one exists
+ARG env
+COPY lib/$name/config-$env.ym[l] ${ACE2}/lib/$name/config.yml
 
 # test
-COPY $lib/tests $lib/tests
-RUN pytest -vv $lib && rm -rf lib
+COPY lib/$name/tests lib/$name/tests
+RUN pytest -vv lib/$name && rm -rf lib

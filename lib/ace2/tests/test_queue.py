@@ -26,7 +26,7 @@ def test_queue(monkeypatch):
     monkeypatch.setattr('ace2.queue.client', mock_client)
 
     # patch env var for sqs base url
-    monkeypatch.setattr('os.environ', { 'QUEUE_BASE_URL': 'https://whatever' })
+    monkeypatch.setattr('ace2.queue.environ', { 'QUEUE_BASE_URL': 'https://whatever' })
 
     # test
     add('SomeQueue', {'hello':'world'}, delay=5)

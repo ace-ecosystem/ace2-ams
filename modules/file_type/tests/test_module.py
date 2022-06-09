@@ -1,6 +1,6 @@
 from ace2 import *
 from ace2.test import *
-from module import FileType
+from file_type.module import FileType
 import os
 import pathlib
 import pytest
@@ -8,14 +8,27 @@ import yaml
     
 
 def test_file_type_run_condition():
-    # load condition for FileType module
-    condition = Analysis.Condition('FileType')
-
     # test run condition True
-    assert condition.passes(Observable(type='File', value='empty'))
+    analysis = {
+        'id': 1,
+        'type': 'file_type',
+        'target': {
+            'type': 'file',
+            'value': 'blah',
+        },
+    }
+    assert Analysis(**analysis).should_run
 
     # test run condition False
-    assert not condition.passes(Observable(type='NotFile', value='empty'))
+    analysis = {
+        'id': 1,
+        'type': 'file_type',
+        'target': {
+            'type': 'foo',
+            'value': 'blah',
+        },
+    }
+    assert not Analysis(**analysis).should_run
 
 
 @pytest.mark.parametrize('path,extension,tags,file_type,mime_type', [
@@ -96,12 +109,12 @@ def test_file_type(path, extension, tags, file_type, mime_type):
     # create analysis to run
     analysis = {
         'id': 1,
-        'type': 'FileType',
+        'type': 'file_type',
         'target': {
-            'type': 'File',
+            'type': 'file',
             'value': path,
             'metadata': [
-                {'type': 'DisplayValue', 'value': f'{path}{extension}' },
+                {'type': 'display_value', 'value': f'{path}{extension}' },
             ],
         },
     }

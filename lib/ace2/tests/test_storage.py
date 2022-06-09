@@ -19,7 +19,7 @@ def test_storage(monkeypatch, datadir, tmp_path):
     monkeypatch.setattr('ace2.storage.client', mock_client)
 
     # patch env var for bucket
-    monkeypatch.setattr('os.environ', { 'FILE_STORAGE_BUCKET': 'bucket' })
+    monkeypatch.setattr('ace2.storage.environ', { 'FILE_STORAGE_BUCKET': 'bucket' })
 
     # test upload
     storage_id = upload(str(datadir / 'hello.txt'))
