@@ -5,8 +5,8 @@ FROM ace2-lib-$name-base
 # get lib name
 ARG lib
 
-# install config
-COPY $lib/config.yml /opt/ace2/etc/$lib/config.yml
+# install config if one exists
+COPY $lib/config.ym[l] /opt/ace2/etc/$lib/
 
 # install source
 COPY $lib/src /opt/ace2/$lib

@@ -8,8 +8,8 @@ ARG module
 # add module condition
 COPY $module/condition /opt/ace2/$module/condition
 
-# add module config
-COPY $module/config.py /opt/ace2/etc/$module/config.py
+# add module config if there is one
+COPY $module/config.p[y] /opt/ace2/etc/$module/
 
 # add module script
 COPY $module/module.py /opt/ace2/$module/module.py
