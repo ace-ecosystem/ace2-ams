@@ -9,15 +9,15 @@ COPY --from=ace2-lib-ace2 / /
 ARG module
 
 # add module source
-COPY $module/module.py /opt/ace2/$module/module.py
-COPY $module/condition /opt/ace2/$module/condition
+COPY $module/module.py ${ACE2}/$module/module.py
+COPY $module/condition ${ACE2}/$module/condition
 
 # add optional config file
-COPY $module/config.p[y] /opt/ace2/$module/
+COPY $module/config.p[y] ${ACE2}/$module/
 
 # make module importable
-RUN touch /opt/ace2/$module/__init__.py
-ENV PYTHONPATH "${PYTHONPATH}:/opt/ace2/modules"
+RUN touch ${ACE2}/$module/__init__.py
+ENV PYTHONPATH "${PYTHONPATH}:${ACE2}/modules"
 
 # test
 COPY $module/tests $module/tests

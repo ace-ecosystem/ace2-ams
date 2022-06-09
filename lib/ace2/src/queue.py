@@ -1,7 +1,7 @@
 from boto3 import client
 import json
+from os import environ
 from typing import Optional
-import os
 
 def add(queue:str, message:dict, delay:Optional[int]=0):
     ''' adds message to specified queue with optional delay
@@ -14,7 +14,7 @@ def add(queue:str, message:dict, delay:Optional[int]=0):
 
     # add the message to the queue
     client('sqs').send_message(
-        QueueUrl = f'{os.environ["QUEUE_BASE_URL"]}/{queue}',
+        QueueUrl = f'{environ["QUEUE_BASE_URL"]}/{queue}',
         MessageBody = json.dumps(message),
         DelaySeconds = delay,
     )
@@ -29,7 +29,7 @@ def remove(queue:str, receipt_handle:str):
 
     # add the message to the queue
     client('sqs').delete_message(
-        QueueUrl = f'{os.environ["QUEUE_BASE_URL"]}/{queue}',
+        QueueUrl = f'{environ["QUEUE_BASE_URL"]}/{queue}',
         ReceiptHandle = receipt_handle,
     )
 
@@ -42,7 +42,7 @@ def get(queue:str):
 
     # add the message to the queue
     messages = client('sqs').receive_message(
-        QueueUrl = f'{os.environ["QUEUE_BASE_URL"]}/{queue}',
+        QueueUrl = f'{environ["QUEUE_BASE_URL"]}/{queue}',
         VisibilityTimeout = 15 * 60, # 15 minutes
     )
     return messages[0] if messages else None

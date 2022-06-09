@@ -43,7 +43,7 @@ class Analysis(TypedModel):
                 type: the analysis type to get the condition of
             '''
 
-            with open(os.path.join('/opt/ace2/modules', analysis_type, 'condition')) as f:
+            with open(os.path.join(os.environ['ACE2'], 'modules', analysis_type, 'condition')) as f:
                 self.condition = f.read()
 
         def passes(self, target:Observable) -> bool:

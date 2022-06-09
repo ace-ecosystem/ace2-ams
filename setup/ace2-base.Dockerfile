@@ -1,4 +1,7 @@
 FROM public.ecr.aws/lambda/python:3.9
 
-# update python path to include /opt/ace2/lib
-ENV PYTHONPATH "${PYTHONPATH}:/opt/ace2/lib"
+# set install path
+ENV ACE2 "/opt/ace2"
+
+# update python path to include lib
+ENV PYTHONPATH "${PYTHONPATH}:${ACE2}/lib"

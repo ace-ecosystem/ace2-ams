@@ -1,6 +1,7 @@
 from boto3 import client
 from hashlib import sha256
 import os
+from os import environ
 
 def get_storage_id(path:str) -> str:
     """ returns a storage id for a file used to upload/download files
@@ -36,7 +37,7 @@ def upload(path:str) -> str:
     storage_id = get_storage_id(path)
 
     # copy the file to s3
-    client('s3').upload_file(path, os.environ['FILE_STORAGE_BUCKET'], storage_id)
+    client('s3').upload_file(path, environ['FILE_STORAGE_BUCKET'], storage_id)
 
     # return the storage id
     return storage_id
@@ -55,7 +56,7 @@ def download(storage_id:str) -> str:
     path = os.path.join('/tmp', storage_id)
 
     # copy the file from s3
-    client('s3').download_file(os.environ['FILE_STORAGE_BUCKET'], storage_id, path)
+    client('s3').download_file(environ['FILE_STORAGE_BUCKET'], storage_id, path)
 
     # return the path to the file which is just the storage id
     return path

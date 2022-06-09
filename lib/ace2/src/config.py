@@ -1,10 +1,9 @@
 from __future__ import annotations
 import os
+from os import environ
 from typing import Optional
 from yaml import safe_load
 from .models import PrivateModel
-
-DIR = '/opt/ace'
 
 class Config(PrivateModel):
     ''' base class for building config models '''
@@ -22,7 +21,7 @@ class Config(PrivateModel):
         '''
 
         # load config yaml into config object
-        with open(os.path.join(DIR, path, 'config.yml')) as f:
+        with open(os.path.join(environ['ACE2'], path, 'config.yml')) as f:
             config_dict = safe_load(f.read()) or {}
         config = config_dict[section] if section else config_dict
         return cls(**config)
