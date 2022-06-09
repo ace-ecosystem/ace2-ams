@@ -2,21 +2,26 @@
 ARG name
 FROM ace2-module-$name-base
 
-#get module path from args
+# install ace2 lib
+COPY --from=ace2-lib-ace2 / /
+
+# get module path
 ARG module
 
-# add module condition
+# add module source
+COPY $module/module.py /opt/ace2/$module/module.py
 COPY $module/condition /opt/ace2/$module/condition
 
-# add module config if there is one
-COPY $module/config.p[y] /opt/ace2/etc/$module/
+# add optional config file
+COPY $module/config.p[y] /opt/ace2/$module/
 
-# add module script
-COPY $module/module.py /opt/ace2/$module/module.py
+# make module importable
+RUN touch /opt/ace2/$module/__init__.py
+ENV PYTHONPATH "${PYTHONPATH}:/opt/ace2/modules"
 
 # test
 COPY $module/tests $module/tests
-RUN ln -s /opt/ace2/$module/module.py $module/tests/module.py && pytest -vv $module && rm -rf module
+RUN pytest -vv $module && rm -rf modules
 
 # uninstall testing tools
 RUN pip3 uninstall -y pytest-datadir pytest

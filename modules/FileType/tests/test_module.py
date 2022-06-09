@@ -1,6 +1,6 @@
 from ace2 import *
 from ace2.test import *
-from module import FileType
+from FileType.module import FileType
 import os
 import pathlib
 import pytest

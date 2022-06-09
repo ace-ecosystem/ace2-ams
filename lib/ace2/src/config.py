@@ -4,7 +4,7 @@ from typing import Optional
 from yaml import safe_load
 from .models import PrivateModel
 
-DIR = 'etc'
+DIR = '/opt/ace'
 
 class Config(PrivateModel):
     ''' base class for building config models '''

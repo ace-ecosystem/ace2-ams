@@ -17,4 +17,4 @@ class Service():
         '''
 
         # load the config
-        self.config = self.Config.load(os.path.join('services', type(self).__name__), section=instance)
+        self.config = self.Config.load(os.path.join('lib', type(self).__name__), section=instance)
