@@ -25,7 +25,11 @@ name=${path##*/}
 name=$(echo $name | awk '{print tolower($0)}')
 
 # build image base
-docker build -t ace2-$type-$name-base -f $path/Dockerfile .
+if [ -f "$path/Dockerfile" ]; then
+    docker build -t ace2-$type-$name-base -f $path/Dockerfile .
+else
+    docker build -t ace2-$type-$name-base -f setup/ace2-base.Dockerfile .
+fi
 
 # build image
 docker build \
