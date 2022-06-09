@@ -12,7 +12,7 @@ def test_unable_to_delete(db):
 
     submission = factory.submission.create(db=db)
     factory.observable.create_or_read(
-        type="type", value="value", parent_analysis=submission.root_analysis, tags=["test"], db=db
+        type="type", value="value", parent_analysis=submission.root_analysis, analysis_tags=["test"], db=db
     )
 
     # You should not be able to delete it now that it is in use

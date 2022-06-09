@@ -229,7 +229,11 @@ def test_filter_by_tags(db):
 
     submission3 = factory.submission.create(db=db)
     factory.observable.create_or_read(
-        type="type3", value="value3", parent_analysis=submission3.root_analysis, tags=["observable3_tag"], db=db
+        type="type3",
+        value="value3",
+        parent_analysis=submission3.root_analysis,
+        analysis_tags=["observable3_tag"],
+        db=db,
     )
 
     result = crud.submission.read_all(tags="submission2_tag", db=db)
@@ -365,6 +369,13 @@ def test_read_submission_tree(db):
     assert str(result["children"]).count("'observable'") == 14
     assert str(result["children"]).count("'analysis'") == 16
     assert len(result["children"]) == 2
+
+    # The small.json has four different analysis tags applied to observables, and they should be in alphabetical order.
+    assert len(submission.child_analysis_tags) == 4
+    assert submission.child_analysis_tags[0].value == "c2"
+    assert submission.child_analysis_tags[1].value == "contacted_host"
+    assert submission.child_analysis_tags[2].value == "from_address"
+    assert submission.child_analysis_tags[3].value == "recipient"
 
 
 def test_sort_by_disposition(db):

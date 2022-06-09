@@ -512,7 +512,7 @@ def test_get_filter_submission_type(client, db):
 def test_get_filter_tags(client, db):
     submission1 = factory.submission.create(db=db, tags=["submission_tag"])
     factory.observable.create_or_read(
-        type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, tags=["obs1"]
+        type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, analysis_tags=["obs1"]
     )
     factory.submission.create(db=db, tags=["tag1"])
     factory.submission.create(db=db, tags=["tag2", "tag3", "tag4"])

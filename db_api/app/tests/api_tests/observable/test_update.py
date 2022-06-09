@@ -234,7 +234,7 @@ def test_update_valid_node_fields(client, db, key, value_lists, helper_create_fu
             type="test_type",
             value=f"test{i}",
             directives=["remove_me"],
-            tags=["remove_me"],
+            analysis_tags=["remove_me"],
             threat_actors=["remove_me"],
             threats=["remove_me"],
             parent_analysis=submission.root_analysis,

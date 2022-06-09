@@ -522,7 +522,7 @@ def test_filter_by_tags(db):
     event3 = factory.event.create_or_read(name="event3", db=db)
     alert3 = factory.submission.create(event=event3, db=db)
     factory.observable.create_or_read(
-        type="type3", value="value3", parent_analysis=alert3.root_analysis, tags=["observable3_tag"], db=db
+        type="type3", value="value3", parent_analysis=alert3.root_analysis, analysis_tags=["observable3_tag"], db=db
     )
 
     result = crud.event.read_all(tags="event1_tag", db=db)

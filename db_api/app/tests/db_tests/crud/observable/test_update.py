@@ -120,7 +120,7 @@ def test_update_node_fields(db, key, value_lists, helper_create_func):
             type="test_type",
             value=f"test{i}",
             directives=["remove_me"],
-            tags=["remove_me"],
+            analysis_tags=["remove_me"],
             threat_actors=["remove_me"],
             threats=["remove_me"],
             parent_analysis=submission.root_analysis,
