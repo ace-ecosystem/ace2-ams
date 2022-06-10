@@ -48,6 +48,8 @@
     unknown
   >;
 
+  const closedEventStatus = inject("closedEventStatus") as string;
+
   const props = defineProps({
     eventUuid: { type: String, required: true },
   });
@@ -69,6 +71,27 @@
       const updateData = selectedStore.selected.map((uuid) => ({
         uuid: uuid,
         owner: authStore.user.username,
+        historyUsername: authStore.user.username,
+      }));
+
+      await eventStore.update(updateData);
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
+    }
+    if (!error.value) {
+      requestReload();
+    }
+  }
+
+  async function closeEvent() {
+    try {
+      const updateData = selectedStore.selected.map((uuid) => ({
+        uuid: uuid,
+        status: closedEventStatus,
         historyUsername: authStore.user.username,
       }));
 
@@ -180,7 +203,12 @@
           {
             label: "Management",
             items: [
-              { label: "Close Event" },
+              {
+                label: "Close Event",
+                command: () => {
+                  closeEvent();
+                },
+              },
               { label: "TIP Actions", disabled: true },
             ],
           },
