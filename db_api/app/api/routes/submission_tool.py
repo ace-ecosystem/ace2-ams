@@ -43,7 +43,7 @@ helpers.api_route_create(router, create_submission_tool)
 
 
 def get_all_submission_tools(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(SubmissionTool).order_by(SubmissionTool.value))
+    return paginate(conn=db, query=crud.submission_tool.build_read_all_query())
 
 
 def get_submission_tool(uuid: UUID, db: Session = Depends(get_db)):

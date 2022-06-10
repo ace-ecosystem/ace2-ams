@@ -71,7 +71,7 @@ class EventBase(NodeBase):
 
 
 class EventCreate(NodeCreate, EventBase):
-    creation_time: datetime = Field(default_factory=datetime.utcnow, description="The time the event was created")
+    created_time: datetime = Field(default_factory=datetime.utcnow, description="The time the event was created")
 
     history_username: Optional[type_str] = Field(
         description="If given, an event history record will be created and associated with the user"
@@ -113,7 +113,7 @@ class EventRead(NodeRead, EventBase):
 
     comments: list[NodeCommentRead] = Field(description="A list of comments added to the event", default_factory=list)
 
-    creation_time: datetime = Field(description="The time the event was created")
+    created_time: datetime = Field(description="The time the event was created")
 
     disposition: Optional[AlertDispositionRead] = Field(
         description="The highest disposition used on the alerts in the event"

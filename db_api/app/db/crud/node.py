@@ -39,12 +39,8 @@ def read_by_uuid(uuid: UUID, db: Session) -> Node:
 def update(
     model: NodeUpdate, uuid: UUID, db_table: DeclarativeMeta, db: Session
 ) -> tuple[Node, list[crud.history.Diff]]:
-    try:
-        node: Node = crud.helpers.read_by_uuid(db_table=db_table, uuid=uuid, db=db)
-    except NoResultFound as e:
-        raise UuidNotFoundInDatabase(
-            f"The {uuid} UUID does not exist in the {db_table.__tablename__} database table"
-        ) from e
+    # Read the node from the database.
+    node: Node = crud.helpers.read_by_uuid(db_table=db_table, uuid=uuid, db=db)
 
     # Capture all of the diffs that were made (for adding to the history tables)
     diffs: list[crud.history.Diff] = []

@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from typing import Optional, Union
 from uuid import UUID, uuid4
 
-from api_models.analysis import AnalysisCreate
-from api_models.observable import ObservableCreate
+from api_models.analysis import AnalysisCreateInObservable
+from api_models.observable import ObservableCreate, ObservableCreateInSubmission
 from api_models.submission import SubmissionCreate
 from api_models.alert_disposition import AlertDispositionCreate
 from db import crud
@@ -27,7 +27,7 @@ def create(
     history_username: Optional[str] = None,
     insert_time: datetime = None,
     name: str = "Test Alert",
-    observables: Optional[list[ObservableCreate]] = None,
+    observables: Optional[list[ObservableCreateInSubmission]] = None,
     owner: Optional[str] = None,
     tags: Optional[list[str]] = None,
     threat_actors: Optional[list[str]] = None,
@@ -95,7 +95,29 @@ def create(
     # Add the observables to the submission
     for observable in observables:
         factory.observable_type.create_or_read(value=observable.type, db=db)
-        submission.root_analysis.child_observables.append(crud.observable.create_or_read(model=observable, db=db))
+        submission.root_analysis.child_observables.append(
+            crud.observable.create_or_read(
+                model=ObservableCreate(
+                    analyses=observable.analyses,
+                    context=observable.context,
+                    detection_points=observable.detection_points,
+                    directives=observable.directives,
+                    expires_on=observable.expires_on,
+                    for_detction=observable.for_detection,
+                    history_username=observable.history_username,
+                    observable_relationships=observable.observable_relationships,
+                    parent_analysis_uuid=submission.root_analysis_uuid,
+                    redirection=observable.redirection,
+                    tags=observable.tags,
+                    threat_actors=observable.threat_actors,
+                    threats=observable.threats,
+                    time=observable.time,
+                    type=observable.type,
+                    value=observable.value,
+                ),
+                db=db,
+            )
+        )
 
     if disposition:
         existing_dispositions = crud.alert_disposition.read_all(db=db)
@@ -110,6 +132,7 @@ def create(
 
     if event:
         submission.event = event
+        diffs.append(crud.history.create_diff(field="event_uuid", old=None, new=event.uuid))
 
     if tags:
         submission.tags = [factory.node_tag.create_or_read(value=t, db=db) for t in tags]
@@ -182,7 +205,7 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
 
                 # Build the AnalysisCreate model and add it to the ObservableCreate model's list of analyses
                 observable_model.analyses.append(
-                    AnalysisCreate(
+                    AnalysisCreateInObservable(
                         analysis_module_type_uuid=analysis_module_type.uuid,
                         child_observables=[
                             _build_observable_model(o=co, submission_uuid=submission_uuid) for co in a["observables"]
@@ -191,7 +214,6 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
                         else [],
                         details=json.dumps(a["details"]) if "details" in a else None,
                         submission_uuid=submission_uuid,
-                        target_uuid=observable_model.uuid,
                     )
                 )
 

@@ -51,7 +51,7 @@ helpers.api_route_create(router, create_node_threat_actor)
 
 
 def get_all_node_threat_actors(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(NodeThreatActor).order_by(NodeThreatActor.value))
+    return paginate(conn=db, query=crud.node_threat_actor.build_read_all_query())
 
 
 def get_node_threat_actor(uuid: UUID, db: Session = Depends(get_db)):

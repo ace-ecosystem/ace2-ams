@@ -47,9 +47,7 @@ helpers.api_route_create(router, create_node_relationship_type)
 
 
 def get_all_node_relationship_types(db: Session = Depends(get_db)):
-    return paginate(
-        conn=db, query=crud.helpers.build_read_all_query(NodeRelationshipType).order_by(NodeRelationshipType.value)
-    )
+    return paginate(conn=db, query=crud.node_relationship_type.build_read_all_query())
 
 
 def get_node_relationship_type(uuid: UUID, db: Session = Depends(get_db)):

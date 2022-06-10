@@ -14,9 +14,9 @@ class EmailAnalysisDetailsHeaderBody(BaseModel):
 
 
 class EmailAnalysisDetailsBase(BaseModel):
-    attachments: list[type_str] = Field(description="A list of the email attachment names")
+    attachments: list[type_str] = Field(description="A list of the email attachment names", default_factory=list)
 
-    cc_addresses: list[type_str] = Field(description="A list of CC recipient email addresses")
+    cc_addresses: list[type_str] = Field(description="A list of CC recipient email addresses", default_factory=list)
 
     from_address: type_str = Field(description="The email sender's address")
 

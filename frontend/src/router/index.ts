@@ -2,7 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import AnalyzeAlert from "@/pages/Alerts/AnalyzeAlert.vue";
 import ViewAlert from "@/pages/Alerts/ViewAlert.vue";
 import ViewEvent from "@/pages/Events/ViewEvent.vue";
-import ViewAnalysis from "@/pages/Alerts/ViewAnalysis.vue";
+import ViewAnalysis from "@/pages/Analysis/ViewAnalysis.vue";
 import ManageAlerts from "@/pages/Alerts/ManageAlerts.vue";
 import ManageEvents from "@/pages/Events/ManageEvents.vue";
 import TheLogin from "@/pages/User/TheLogin.vue";

@@ -129,7 +129,7 @@ def build_read_all_query(
 
     if name:
         name_query = select(Submission).where(Submission.name.ilike(f"%{name}%"))
-        query = _join_as_subquery(query, name_query)
+        query = _join_as_subquery(query, name_query).order_by(Submission.name.asc())
 
     if observable:
         observable_split = observable.split("|", maxsplit=1)
@@ -369,6 +369,73 @@ def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
     return obj
 
 
+def read_all(
+    db: Session,
+    alert: Optional[bool] = None,
+    disposition: Optional[str] = None,
+    disposition_user: Optional[str] = None,
+    dispositioned_after: Optional[datetime] = None,
+    dispositioned_before: Optional[datetime] = None,
+    event_uuid: Optional[UUID] = None,
+    event_time_after: Optional[datetime] = None,
+    event_time_before: Optional[datetime] = None,
+    insert_time_after: Optional[datetime] = None,
+    insert_time_before: Optional[datetime] = None,
+    name: Optional[str] = None,
+    observable: Optional[str] = None,  # Example: type|value
+    observable_types: Optional[str] = None,
+    observable_value: Optional[str] = None,
+    owner: Optional[str] = None,
+    queue: Optional[str] = None,
+    sort: Optional[str] = None,  # Example: event_time|desc
+    submission_type: Optional[str] = None,
+    tags: Optional[str] = None,
+    threat_actors: Optional[str] = None,
+    threats: Optional[str] = None,
+    tool: Optional[str] = None,
+    tool_instance: Optional[str] = None,
+):
+    return (
+        db.execute(
+            build_read_all_query(
+                alert=alert,
+                disposition=disposition,
+                disposition_user=disposition_user,
+                dispositioned_after=dispositioned_after,
+                dispositioned_before=dispositioned_before,
+                event_uuid=event_uuid,
+                event_time_after=event_time_after,
+                event_time_before=event_time_before,
+                insert_time_after=insert_time_after,
+                insert_time_before=insert_time_before,
+                name=name,
+                observable=observable,  # Example: type|value
+                observable_types=observable_types,
+                observable_value=observable_value,
+                owner=owner,
+                queue=queue,
+                sort=sort,  # Example: event_time|desc
+                submission_type=submission_type,
+                tags=tags,
+                threat_actors=threat_actors,
+                threats=threats,
+                tool=tool,
+                tool_instance=tool_instance,
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+
+def read_all_history(uuid: UUID, db: Session) -> list[SubmissionHistory]:
+    return (
+        db.execute(crud.history.build_read_history_query(history_table=SubmissionHistory, record_uuid=uuid))
+        .scalars()
+        .all()
+    )
+
+
 def read_by_uuid(uuid: UUID, db: Session) -> Submission:
     return crud.helpers.read_by_uuid(db_table=Submission, uuid=uuid, db=db)
 
@@ -435,8 +502,9 @@ def read_tree(uuid: UUID, db: Session) -> dict:
         if observable_uuid in analyses_by_target:
             observable.children = analyses_by_target[observable_uuid]
 
-    # Create the SubmissionTree object and set its children to be the root analysis children.
-    tree = SubmissionTreeRead(**db_submission.__dict__)
+    # Create the Submission object to SubmissionTree and set its children to be the root analysis children.
+    # The actual root analysis is not included in the tree structure.
+    tree = db_submission.convert_to_pydantic()
     tree.children = analyses_by_uuid[db_submission.root_analysis_uuid].children
 
     # Now that the tree structure is built, we need to walk it to mark which of the leaves have
