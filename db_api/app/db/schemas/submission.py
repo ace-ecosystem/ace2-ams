@@ -49,11 +49,13 @@ class Submission(Node, HasHistory):
     # parent object (where in this case Submission is the parent, and the child object is the child).
     #
     # Finally, "viewonly" is used on the relationship to prevent attempts to add tags to this list.
+
     child_analysis_tags: list[Tag] = relationship(
         "Tag",
-        secondary="join(Tag, AnalysisMetadata, Tag.uuid == AnalysisMetadata.metadata_uuid)."
+        secondary="join(AnalysisMetadata, Tag, Tag.uuid == AnalysisMetadata.metadata_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == AnalysisMetadata.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
+        secondaryjoin="Metadata.uuid == AnalysisMetadata.metadata_uuid",
         order_by="asc(Tag.value)",
         viewonly=True,
         lazy="selectin",
@@ -184,6 +186,11 @@ class Submission(Node, HasHistory):
 
     @property
     def child_tags(self) -> list[Tag]:
+        for t in self.child_analysis_tags:
+            print(f"analysis tag = {t.value}")
+        print()
+        for t in self.child_permanent_tags:
+            print(f"permanent tag = {t.value}")
         return sorted(set(self.child_analysis_tags + self.child_permanent_tags), key=lambda x: x.value)
 
     @property
