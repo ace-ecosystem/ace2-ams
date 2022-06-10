@@ -1,3 +1,5 @@
+version: 0.2
+
 env:
   variables:
     BLACKDUCK_URL: "https://fifththird.blackducksoftware.com/"
@@ -11,4 +13,3 @@ phases:
       - curl "https://detect.synopsys.com/detect.sh" --output ./detect.sh
       - ./detect.sh --blackduck.url=$BLACKDUCK_URL --blackduck.api.token=$BLACKDUCK_TOKEN --blackduck.trust.cert=true --detect.project.name=$BLACKDUCK_PROJECT_NAME  --detect.project.version.name=$CODEBUILD_BUILD_ID
 
-      
