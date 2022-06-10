@@ -87,6 +87,7 @@ export interface alertSummary {
 }
 
 export interface alertTreeRead extends alertRead {
+  rootAnalysisUuid: UUID;
   children: (analysisTreeRead | observableTreeRead)[];
 }
 
