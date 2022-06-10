@@ -1,5 +1,6 @@
 <!-- AddObservableModal.vue -->
 <!-- 'AddObservable' modal, meant specifically for adding observables to an alert -->
+<!-- As of right now, this will only work when adding an observable to a single, currently open alert. -->
 
 <template>
   <BaseModal :name="name" header="Add Observable(s)">
@@ -35,16 +36,14 @@
   import Message from "primevue/message";
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
+  import NewObservableForm from "@/components/Observables/NewObservableForm.vue";
 
   import { ObservableInstance } from "@/services/api/observable";
   import { useModalStore } from "@/stores/modal";
   import { observableCreate } from "@/models/observable";
 
   import { useAuthStore } from "@/stores/auth";
-
-  import NewObservableForm from "@/components/Observables/NewObservableForm.vue";
-
-  const authStore = useAuthStore();
+  import { useAlertStore } from "@/stores/alert";
 
   const props = defineProps({
     name: { type: String, required: true },
@@ -59,7 +58,10 @@
   }
   const emit = defineEmits(["requestReload"]);
 
+  const authStore = useAuthStore();
+  const alertStore = useAlertStore();
   const modalStore = useModalStore();
+
   const observables = ref<formObservable[]>([]);
   const isLoading = ref(false);
 
@@ -73,9 +75,9 @@
     );
 
     try {
-      for (const obs of _observables) {
-        await ObservableInstance.create(obs);
-      }
+      // for (const obs of _observables) {
+        await ObservableInstance.create(_observables);
+      // }
     } catch (e: unknown) {
       if (typeof e === "string") {
         error.value = e;
@@ -112,7 +114,7 @@
     const submissionObservable: observableCreate = {
       type: observable.type,
       value: observable.value,
-      parentAnalysisUuid: "todo",
+      parentAnalysisUuid: alertStore.open.rootAnalysisUuid,
       historyUsername: authStore.user.username,
     };
     if (observable.time) {
