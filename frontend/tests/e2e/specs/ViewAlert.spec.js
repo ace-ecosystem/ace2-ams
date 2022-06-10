@@ -332,5 +332,35 @@ describe("ViewAlert.vue", () => {
       cy.wait("@updateAlert").its("state").should("eq", "Complete");
       cy.wait("@getAlert").its("state").should("eq", "Complete");
     });
+
+    // Add observable
+    it("should make a request to add observable to the alert and get updated alert via AddObservablesModal", () => {
+      cy.intercept("POST", "/api/observable/").as("createObservables");
+      cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
+        "getAlert",
+      );
+      cy.contains("Add Observable(s)").click();
+
+      // Add first observable
+      cy.get("[name=observable-type]").click();
+      cy.get('[aria-label="ipv4"]').click();
+      cy.get("[name=observable-value] input").type("1.2.3.4");
+
+      // Add second observable
+      cy.get("#add-observable").click();
+      cy.get("[name=observable-type]").eq(1).click();
+      cy.get('[aria-label="ipv4"]').click();
+      cy.get("[name=observable-value] input").eq(1).type("5.6.7.8");
+
+      // Submit
+      cy.contains("Add!").click();
+
+      cy.wait("@createObservables").its("state").should("eq", "Complete");
+      cy.wait("@getAlert").its("state").should("eq", "Complete");
+
+      // Check that the observables were added
+      cy.contains("1.2.3.4").should("exist");
+      cy.contains("5.6.7.8").should("exist");
+    });
   });
 });
