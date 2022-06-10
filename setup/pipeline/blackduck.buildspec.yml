@@ -1,0 +1,12 @@
+env:
+  variables:
+    BLACKDUCK_URL: "https://fifththird.blackducksoftware.com/"
+    BLACKDUCK_PROJECT_NAME: "ICE2"
+  secrets-manager:
+    BLACKDUCK_TOKEN: arn:aws:secretsmanager:us-east-2:728226656595:secret:blackduck_token-Ncs8NY
+
+phases:
+  build:
+    commands:
+      - curl "https://detect.synopsys.com/detect.sh" --output ./detect.sh
+      - ./detect.sh --blackduck.url=$BLACKDUCK_URL --blackduck.api.token=$BLACKDUCK_TOKEN --blackduck.trust.cert=true --detect.project.name=$BLACKDUCK_PROJECT_NAME  --detect.project.version.name=$CODEBUILD_BUILD_ID
