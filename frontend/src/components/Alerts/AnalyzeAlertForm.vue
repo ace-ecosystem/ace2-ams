@@ -79,130 +79,7 @@
       <Card>
         <template #title>Observables </template>
         <template #content>
-          <div id="observables-list">
-            <div class="formgrid grid">
-              <div class="field col-2 px-1">
-                <label for="observable-time">Time (UTC)</label>
-              </div>
-              <div class="field col-2 px-1">
-                <label for="observable-type">Type</label>
-              </div>
-              <div class="field col-3 px-1">
-                <label for="observable-value">Value</label>
-              </div>
-              <div class="field col-3 px-1">
-                <label for="observable-directives">Directives</label>
-              </div>
-              <div class="field col-1">
-                <Button
-                  v-if="observablesListEmpty"
-                  id="add-observable-empty"
-                  icon="pi pi-plus"
-                  class="p-button-rounded inputfield"
-                  @click="addFormObservable"
-                />
-              </div>
-            </div>
-            <div
-              v-for="(observable, index) in observables"
-              :key="observable.index"
-              name="observable-input"
-              class="p-col-12"
-            >
-              <div class="formgrid grid">
-                <div class="field col-2 px-1">
-                  <DatePicker
-                    v-model="observables[index].time"
-                    mode="dateTime"
-                    class="inputfield w-16rem"
-                    is24hr
-                    timezone="UTC"
-                  >
-                    <template #default="{ inputValue, inputEvents }">
-                      <div class="p-inputgroup">
-                        <InputText
-                          name="observable-time"
-                          class="inputfield w-16rem"
-                          type="text"
-                          :value="inputValue"
-                          placeholder="No time selected"
-                          v-on="inputEvents"
-                        />
-                      </div>
-                    </template>
-                  </DatePicker>
-                </div>
-                <div class="field col-2 px-1">
-                  <Dropdown
-                    v-model="observables[index].type"
-                    name="observable-type"
-                    class="inputfield w-full"
-                    option-label="value"
-                    option-value="value"
-                    :options="observableTypeStore.items"
-                  />
-                </div>
-                <div class="field px-1" name="observable-value">
-                  <span class="inputfield">
-                    <span style="display: inline">
-                      <ObservableInput
-                        v-model:observableValue="observables[index].value"
-                        v-model:invalid="observables[index].invalid"
-                        :multi-add="observables[index].multiAdd"
-                        :type="observables[index].type"
-                      ></ObservableInput>
-                    </span>
-                    <span>
-                      <Button
-                        icon="pi pi-list"
-                        @click="toggleMultiObservable(index)"
-                      />
-                    </span>
-                  </span>
-                </div>
-                <div class="field col-3 px-1">
-                  <MultiSelect
-                    v-model="observables[index].directives"
-                    name="observable-directives"
-                    placeholder="No directives selected"
-                    class="inputfield w-full"
-                    display="chip"
-                    option-label="value"
-                    option-value="value"
-                    :options="nodeDirectiveStore.items"
-                  >
-                    <template #option="slotProps">
-                      <div class="country-item">
-                        <div>
-                          <span v-tooltip="slotProps.option.description">
-                            {{ slotProps.option.value }}</span
-                          >
-                        </div>
-                      </div>
-                    </template>
-                  </MultiSelect>
-                </div>
-                <div class="field col-1">
-                  <Button
-                    name="delete-observable"
-                    icon="pi pi-times"
-                    class="inputfield"
-                    @click="deleteFormObservable(index)"
-                  />
-                </div>
-                <div class="field col-1">
-                  <Button
-                    v-if="isLastObservable(index)"
-                    id="add-observable"
-                    label="Add"
-                    icon="pi pi-plus"
-                    class="p-button-rounded inputfield"
-                    @click="addFormObservable"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          <NewObservableForm v-model="observables"></NewObservableForm>
         </template>
       </Card>
 
@@ -257,28 +134,23 @@
   import Fieldset from "primevue/fieldset";
   import InputText from "primevue/inputtext";
   import Message from "primevue/message";
-  import MultiSelect from "primevue/multiselect";
   import SplitButton from "primevue/splitbutton";
   import TabPanel from "primevue/tabpanel";
   import TabView from "primevue/tabview";
   import { DatePicker } from "v-calendar";
 
-  import ObservableInput from "@/components/Observables/ObservableInput.vue";
+  import NewObservableForm from "@/components/Observables/NewObservableForm.vue";
 
   import { useAlertStore } from "@/stores/alert";
   import { useQueueStore } from "@/stores/queue";
   import { useAlertTypeStore } from "@/stores/alertType";
   import { useAuthStore } from "@/stores/auth";
-  import { useNodeDirectiveStore } from "@/stores/nodeDirective";
-  import { useObservableTypeStore } from "@/stores/observableType";
 
   const router = useRouter();
 
   const alertStore = useAlertStore();
   const alertTypeStore = useAlertTypeStore();
   const authStore = useAuthStore();
-  const nodeDirectiveStore = useNodeDirectiveStore();
-  const observableTypeStore = useObservableTypeStore();
   const queueStore = useQueueStore();
 
   const addingObservables = ref(false);
@@ -303,14 +175,6 @@
 
   const alertDescriptionFormatted = computed(() => {
     return `${alertDescription.value}${alertDescriptionAppendString.value}`;
-  });
-
-  const observablesListEmpty = computed(() => {
-    return !observables.value.length;
-  });
-
-  const lastObservableIndex = computed(() => {
-    return observables.value.length - 1;
   });
 
   const anyObservablesInvalid = computed(() => {
@@ -341,10 +205,6 @@
       directives: [],
       invalid: false,
     });
-  };
-
-  const deleteFormObservable = (index) => {
-    observables.value.splice(index, 1);
   };
 
   // Generate a list of all observables (single observables plus expanded multi-observables)
@@ -395,10 +255,6 @@
     errors.value = [];
     observables.value = [];
     addFormObservable();
-  };
-
-  const isLastObservable = (index) => {
-    return index == lastObservableIndex.value;
   };
 
   const routeToNewAlert = () => {
@@ -488,9 +344,5 @@
     alertCreateLoading.value = false;
     // Routes you to latest alert
     routeToNewAlert();
-  };
-
-  const toggleMultiObservable = (index) => {
-    observables.value[index].multiAdd = !observables.value[index].multiAdd;
   };
 </script>
