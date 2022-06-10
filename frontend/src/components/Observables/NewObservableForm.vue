@@ -62,29 +62,20 @@
             :options="observableTypeStore.items"
           />
         </div>
-        <div class="field col-3 px-1" name="observable-value">
-          <div
-            v-if="observablesCopy[index].type == 'file'"
-            name="observable-file-upload"
-          >
-            <FileUpload mode="basic" class="inputfield w-full"></FileUpload>
-          </div>
-          <div v-else class="p-inputgroup">
-            <InputText
-              v-if="!observablesCopy[index].multiAdd"
-              v-model="observablesCopy[index].value"
-              placeholder="Enter a value"
-              class="inputfield w-full"
-              type="text"
-            ></InputText>
-            <Textarea
-              v-else
-              v-model="observablesCopy[index].value"
-              placeholder="Enter a comma or newline-delimited list of values"
-              class="inputfield w-full"
-            ></Textarea>
-            <Button icon="pi pi-list" @click="toggleMultiObservable(index)" />
-          </div>
+        <div class="field px-1" name="observable-value">
+          <span class="inputfield">
+            <span style="display: inline">
+              <ObservableInput
+                v-model:observableValue="observablesCopy[index].value"
+                v-model:invalid="observablesCopy[index].invalid"
+                :multi-add="observablesCopy[index].multiAdd"
+                :type="observablesCopy[index].type"
+              ></ObservableInput>
+            </span>
+            <span>
+              <Button icon="pi pi-list" @click="toggleMultiObservable(index)" />
+            </span>
+          </span>
         </div>
         <div class="field col-3 px-1">
           <MultiSelect
@@ -132,10 +123,10 @@
 
   import Button from "primevue/button";
   import Dropdown from "primevue/dropdown";
-  import FileUpload from "primevue/fileupload";
   import InputText from "primevue/inputtext";
   import MultiSelect from "primevue/multiselect";
-  import Textarea from "primevue/textarea";
+
+  import ObservableInput from "@/components/Observables/ObservableInput.vue";
   import { DatePicker } from "v-calendar";
 
   import { useObservableTypeStore } from "@/stores/observableType";
@@ -146,7 +137,8 @@
   interface formObservable {
     time?: Date;
     type: string;
-    multiAdd?: boolean;
+    multiAdd: boolean;
+    invalid: boolean;
     value: any;
     directives?: string[];
   }
@@ -189,6 +181,7 @@
       time: undefined,
       type: "file",
       multiAdd: false,
+      invalid: false,
       value: undefined,
       directives: [],
     });
@@ -200,6 +193,7 @@
   };
 
   watch(observablesCopy, () => {
+    console.log(observablesCopy.value);
     emit("update:modelValue", observablesCopy);
   });
 </script>
