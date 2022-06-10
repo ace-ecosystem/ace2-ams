@@ -196,17 +196,6 @@
     });
   };
 
-  const addFormObservable = () => {
-    observables.value.push({
-      time: null,
-      type: "file",
-      multiAdd: false,
-      value: "",
-      directives: [],
-      invalid: false,
-    });
-  };
-
   // Generate a list of all observables (single observables plus expanded multi-observables)
   const expandObservablesList = () => {
     let _observables = [];
@@ -253,8 +242,6 @@
       ? authStore.user.defaultAlertQueue.value
       : "default";
     errors.value = [];
-    observables.value = [];
-    addFormObservable();
   };
 
   const routeToNewAlert = () => {
@@ -278,6 +265,8 @@
         type: multiObservable.type,
         value: splitValues[index],
         time: multiObservable.time,
+        multiAdd: multiObservable.multiAdd,
+        invalid: multiObservable.invalid,
       };
       splitObservables.push(subObservable);
     }
