@@ -4,7 +4,6 @@ import PrimeVue from "primevue/config";
 import { testConfiguration } from "@/etc/configuration/test/index";
 
 import AddObservablesModal from "@/components/Modals/AddObservablesModal.vue";
-import NewObservableForm from "@/components/Observables/NewObservableForm.vue";
 
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { userReadFactory } from "@mocks/user";
@@ -43,9 +42,9 @@ function factory() {
           },
         }),
       ],
-    },
-    provide: {
-      config: testConfiguration,
+      provide: {
+        config: testConfiguration,
+      },
     },
     propsData: {
       name: "AddObservablesModal",
