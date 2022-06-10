@@ -11,5 +11,6 @@ phases:
   build:
     commands:
       - curl "https://detect.synopsys.com/detect.sh" --output ./detect.sh
+      - chmod 755 ./detect.sh
       - ./detect.sh --blackduck.url=$BLACKDUCK_URL --blackduck.api.token=$BLACKDUCK_TOKEN --blackduck.trust.cert=true --detect.project.name=$BLACKDUCK_PROJECT_NAME  --detect.project.version.name=$CODEBUILD_BUILD_ID
 
