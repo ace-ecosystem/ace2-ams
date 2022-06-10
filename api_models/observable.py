@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 
 from api_models import type_str, validators
 from api_models.analysis_metadata import AnalysisMetadataCreate
-from api_models.node import NodeBase, NodeCreate, NodeRead, NodeTreeItemRead, NodeUpdate
+from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
 from api_models.node_detection_point import NodeDetectionPointRead
 from api_models.node_directive import NodeDirectiveRead
