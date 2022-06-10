@@ -10,7 +10,7 @@ from api_models.node_comment import NodeCommentRead
 from api_models.node_detection_point import NodeDetectionPointRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
-from api_models.observable import ObservableCreateInSubmission
+from api_models.observable import ObservableCreateInSubmission, ObservableSubmissionTreeRead
 from api_models.queue import QueueRead
 from api_models.submission_tool import SubmissionToolRead
 from api_models.submission_tool_instance import SubmissionToolInstanceRead
@@ -131,6 +131,15 @@ class SubmissionRead(NodeRead, SubmissionBase):
         orm_mode = True
 
 
+class SubmissionTreeRead(SubmissionRead):
+    children: list[ObservableSubmissionTreeRead] = Field(
+        default_factory=list, description="A list of this submission's child observables"
+    )
+
+    class Config:
+        orm_mode = True
+
+
 class SubmissionUpdate(NodeUpdate, SubmissionBase):
     disposition: Optional[type_str] = Field(description="The disposition assigned to this submission")
 
@@ -151,10 +160,3 @@ class SubmissionUpdate(NodeUpdate, SubmissionBase):
     uuid: UUID4 = Field(description="The UUID of the submission to update")
 
     _prevent_none: classmethod = validators.prevent_none("queue", "tags", "threat_actors", "threats")
-
-
-class SubmissionTreeRead(SubmissionRead):
-    children: list[dict] = Field(default_factory=list, description="A list of this submission's child objects")
-
-    class Config:
-        orm_mode = True

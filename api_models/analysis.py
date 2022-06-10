@@ -45,28 +45,6 @@ class AnalysisCreateInObservable(AnalysisCreateBase):
     pass
 
 
-class AnalysisNodeTreeRead(BaseModel):
-    """Model used to control which information for an Analysis is displayed when getting an alert tree"""
-
-    analysis_module_type: Optional[AnalysisModuleTypeNodeTreeRead] = Field(
-        description="The analysis module type that was used to perform this analysis"
-    )
-
-    children: list[dict] = Field(default_factory=list, description="A list of this analysis' child objects")
-
-    first_appearance: bool = Field(
-        default=True, description="Whether or not this is the first time the object appears in the tree"
-    )
-
-    # This is needed since Analysis no longer inherits from the Node table
-    node_type: str = "analysis"
-
-    uuid: UUID4 = Field(description="The UUID of the analysis")
-
-    class Config:
-        orm_mode = True
-
-
 class AnalysisRead(AnalysisBase):
     analysis_module_type: Optional[AnalysisModuleTypeRead] = Field(
         description="The analysis module type that was used to perform this analysis"
@@ -94,6 +72,30 @@ class AnalysisRead(AnalysisBase):
         orm_mode = True
 
 
+class AnalysisSubmissionTreeRead(BaseModel):
+    """Model used to control which information for an Analysis is displayed when getting a submission tree"""
+
+    analysis_module_type: Optional[AnalysisModuleTypeNodeTreeRead] = Field(
+        description="The analysis module type that was used to perform this analysis"
+    )
+
+    children: "list[ObservableSubmissionTreeRead]" = Field(
+        default_factory=list, description="A list of this analysis' child observables"
+    )
+
+    first_appearance: bool = Field(
+        default=True, description="Whether or not this is the first time the object appears in the tree"
+    )
+
+    # This is needed since Analysis no longer inherits from the Node table
+    node_type: str = "analysis"
+
+    uuid: UUID4 = Field(description="The UUID of the analysis")
+
+    class Config:
+        orm_mode = True
+
+
 class AnalysisUpdate(AnalysisBase):
     details: Optional[Json] = Field(description="A JSON representation of the details produced by the analysis")
 
@@ -103,8 +105,9 @@ class AnalysisUpdate(AnalysisBase):
 
 
 # Needed for the circular relationship between analysis <-> observable
-from api_models.observable import ObservableCreate, ObservableRead
+from api_models.observable import ObservableCreate, ObservableSubmissionTreeRead, ObservableRead
 
 AnalysisCreate.update_forward_refs()
 AnalysisCreateInObservable.update_forward_refs()
+AnalysisSubmissionTreeRead.update_forward_refs()
 AnalysisRead.update_forward_refs()

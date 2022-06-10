@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import ExcludeConstraint, JSONB, TSTZRANGE, 
 from sqlalchemy.orm import deferred, relationship
 from typing import Optional
 
-from api_models.analysis import AnalysisNodeTreeRead
+from api_models.analysis import AnalysisSubmissionTreeRead
 from db.database import Base
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
 from db.schemas.analysis_metadata import AnalysisMetadata
@@ -74,5 +74,5 @@ class Analysis(Base):
     def cached_until(self) -> Optional[datetime]:
         return self.cached_during.upper if self.cached_during else None
 
-    def convert_to_pydantic(self) -> AnalysisNodeTreeRead:
-        return AnalysisNodeTreeRead(**self.__dict__)
+    def convert_to_pydantic(self) -> AnalysisSubmissionTreeRead:
+        return AnalysisSubmissionTreeRead(**self.__dict__)

@@ -12,13 +12,14 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from api_models.observable import ObservableNodeTreeRead, ObservableRead, ObservableRelationshipRead
+from api_models.observable import ObservableSubmissionTreeRead, ObservableRead, ObservableRelationshipRead
 from db.database import Base
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.node import Node
 from db.schemas.node_relationship import NodeRelationship
 from db.schemas.observable_permanent_tag_mapping import observable_permanent_tag_mapping
+from db.schemas.tag import Tag
 
 
 class ObservableHistory(Base, HistoryMixin):
@@ -47,7 +48,7 @@ class Observable(Node, HasHistory):
         order_by="ObservableHistory.action_time",
     )
 
-    permanent_tags = relationship("Tag", secondary=observable_permanent_tag_mapping, lazy="selectin")
+    permanent_tags: list[Tag] = relationship("Tag", secondary=observable_permanent_tag_mapping, lazy="selectin")
 
     redirection_uuid = Column(UUID(as_uuid=True), ForeignKey("observable.uuid"))
 
@@ -74,8 +75,8 @@ class Observable(Node, HasHistory):
         UniqueConstraint("type_uuid", "value", name="type_value_uc"),
     )
 
-    def convert_to_pydantic(self) -> ObservableNodeTreeRead:
-        return ObservableNodeTreeRead(**self.to_dict())
+    def convert_to_pydantic(self) -> ObservableSubmissionTreeRead:
+        return ObservableSubmissionTreeRead(**self.to_dict())
 
     def to_dict(self):
         ignore_keys = ["convert_to_pydantic", "history", "history_snapshot", "to_dict"]

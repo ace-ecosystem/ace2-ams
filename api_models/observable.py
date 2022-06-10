@@ -122,8 +122,16 @@ class ObservableRead(NodeRead, ObservableBase):
         orm_mode = True
 
 
-class ObservableNodeTreeRead(ObservableRead, NodeTreeItemRead):
-    """Model used to control which information for an Observable is displayed when getting an alert tree"""
+class ObservableSubmissionTreeRead(ObservableRead):
+    """Model used to control which information for an Observable is displayed when getting a submission tree"""
+
+    children: "list[AnalysisSubmissionTreeRead]" = Field(
+        default_factory=list, description="A list of this observable's child analysis"
+    )
+
+    first_appearance: bool = Field(
+        default=True, description="Whether or not this is the first time the object appears in the tree"
+    )
 
     metadata: list[dict] = Field(
         default_factory=list, description="A list of metadata added to the observable by analysis in the tree"
@@ -177,9 +185,9 @@ class ObservableRelationshipRead(NodeRelationshipRead):
 
 # This is needed for the circular relationship between ObservableRead and ObservableRelationshipRead
 # and ObservableCreate <-> AnalysisCreateInObservable.
-from api_models.analysis import AnalysisCreateInObservable
+from api_models.analysis import AnalysisCreateInObservable, AnalysisSubmissionTreeRead
 
 ObservableCreate.update_forward_refs()
 ObservableCreateInSubmission.update_forward_refs()
+ObservableSubmissionTreeRead.update_forward_refs()
 ObservableRead.update_forward_refs()
-ObservableNodeTreeRead.update_forward_refs()

@@ -8,8 +8,8 @@ from sqlalchemy.sql.selectable import Select
 from typing import Optional
 from uuid import UUID
 
-from api_models.analysis import AnalysisNodeTreeRead
-from api_models.observable import ObservableNodeTreeRead
+from api_models.analysis import AnalysisSubmissionTreeRead
+from api_models.observable import ObservableSubmissionTreeRead
 from api_models.submission import SubmissionCreate, SubmissionUpdate
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
@@ -481,9 +481,9 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     # Dictionary of analysis objects where their UUID is the key
     # Dictionary of analysis objects where their target observable UUID is the key
     # Dictionary of observables where their UUID is the key
-    analyses_by_target: dict[UUID, list[AnalysisNodeTreeRead]] = {}
-    analyses_by_uuid: dict[UUID, AnalysisNodeTreeRead] = {}
-    child_observables: dict[UUID, ObservableNodeTreeRead] = {}
+    analyses_by_target: dict[UUID, list[AnalysisSubmissionTreeRead]] = {}
+    analyses_by_uuid: dict[UUID, AnalysisSubmissionTreeRead] = {}
+    child_observables: dict[UUID, ObservableSubmissionTreeRead] = {}
     for db_analysis in db_submission.analyses:
         # Create an empty list if this target observable UUID has not been seen yet.
         if db_analysis.target_uuid not in analyses_by_target:
