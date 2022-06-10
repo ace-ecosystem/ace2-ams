@@ -52,7 +52,8 @@
   interface formObservable {
     time?: Date;
     type: string;
-    multiAdd?: boolean;
+    multiAdd: boolean;
+    invalid: boolean;
     value: string;
     directives?: string[];
   }
@@ -140,6 +141,8 @@
         type: multiObservable.type,
         value: splitValues[index],
         time: multiObservable.time,
+        multiAdd: multiObservable.multiAdd,
+        invalid: multiObservable.invalid,
       };
       splitObservables.push(subObservable);
     }
