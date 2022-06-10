@@ -193,7 +193,6 @@
   };
 
   watch(observablesCopy, () => {
-    console.log(observablesCopy.value);
     emit("update:modelValue", observablesCopy);
   });
 </script>
