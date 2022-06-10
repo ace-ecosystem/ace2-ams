@@ -245,9 +245,22 @@ def test_filter_by_tags(db):
         db=db,
     )
 
+    submission5 = factory.submission.create(tags=["submission5_tag"], db=db)
+    factory.observable.create_or_read(
+        type="type5",
+        value="value5",
+        parent_analysis=submission5.root_analysis,
+        analysis_tags=["observable5_analysis_tag"],
+        permanent_tags=["observable5_permanent_tag"],
+        db=db,
+    )
+
     assert crud.submission.read_all(tags="submission2_tag", db=db) == [submission2]
     assert crud.submission.read_all(tags="observable3_analysis_tag", db=db) == [submission3]
     assert crud.submission.read_all(tags="observable4_permanent_tag", db=db) == [submission4]
+    assert crud.submission.read_all(
+        tags="submission5_tag,observable5_analysis_tag,observable5_permanent_tag", db=db
+    ) == [submission5]
 
 
 def test_filter_by_threat_actors(db):
