@@ -42,13 +42,13 @@
           <Button
             data-cy="add-observable-button"
             class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
-            style="width: 160px"
+            style="width: 180px"
             icon="pi pi-plus-circle"
-            label="Add Observable"
-            @click="open('AddObservableModal')"
+            label="Add Observable(s)"
+            @click="open('AddObservablesModal')"
           />
-          <AddObservableModal
-            name="AddObservableModal"
+          <AddObservablesModal
+            name="AddObservablesModal"
             @request-reload="requestReload"
           />
         </span>
@@ -75,7 +75,7 @@
   import TheNodeActionToolbarVue from "@/components/Node/TheNodeActionToolbar.vue";
   import RemediationModal from "@/components/Modals/RemediateModal.vue";
   import DispositionModal from "@/components/Modals/DispositionModal.vue";
-  import AddObservableModal from "@/components/Modals/AddObservableModal.vue";
+  import AddObservablesModal from "@/components/Modals/AddObservablesModal.vue";
 
   import { useModalStore } from "@/stores/modal";
 
