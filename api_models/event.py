@@ -137,7 +137,7 @@ class EventRead(NodeRead, EventBase):
 
     status: EventStatusRead = Field(description="The status assigned to the event")
 
-    tags: list[TagRead] = Field(description="A list of tags added to the event")
+    tags: list[TagRead] = Field(default_factory=list, description="A list of tags added to the event")
 
     threat_actors: list[NodeThreatActorRead] = Field(description="A list of threat actors added to the event")
 

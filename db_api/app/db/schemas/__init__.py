@@ -19,6 +19,7 @@ from db.schemas.event_source import EventSource
 from db.schemas.event_source_queue_mapping import event_source_queue_mapping
 from db.schemas.event_status import EventStatus
 from db.schemas.event_status_queue_mapping import event_status_queue_mapping
+from db.schemas.event_tag_mapping import event_tag_mapping
 from db.schemas.event_type import EventType
 from db.schemas.event_type_queue_mapping import event_type_queue_mapping
 from db.schemas.event_vector import EventVector

@@ -280,7 +280,8 @@ def build_read_all_query(
                 or_(
                     Event.tags.any(Tag.value == tag),
                     Event.alerts.any(Submission.tags.any(Tag.value == tag)),
-                    Event.alerts.any(Submission.child_tags.any(Tag.value == tag)),
+                    Event.alerts.any(Submission.child_analysis_tags.any(Tag.value == tag)),
+                    Event.alerts.any(Submission.child_permanent_tags.any(Tag.value == tag)),
                 )
             )
         tags_query = select(Event).where(and_(*tag_filters))
@@ -400,6 +401,7 @@ def create_or_read(model: EventCreate, db: Session) -> Event:
     obj.status = crud.event_status.read_by_value(value=model.status, db=db)
     if model.type:
         obj.type = crud.event_type.read_by_value(value=model.type, db=db)
+    obj.tags = crud.tag.read_by_values(values=model.tags, db=db)
     obj.uuid = model.uuid
     obj.vectors = crud.event_vector.read_by_values(values=model.vectors, db=db)
 
@@ -880,6 +882,20 @@ def update(uuid: UUID, model: EventUpdate, db: Session):
         diffs.append(crud.history.create_diff(field="status", old=event.status.value, new=update_data["status"]))
 
         event.status = crud.event_status.read_by_value(value=update_data["status"], db=db)
+
+    if "tags" in update_data:
+        diffs.append(
+            crud.history.create_diff(
+                field="tags",
+                old=[x.value for x in event.tags],
+                new=update_data["tags"],
+            )
+        )
+
+        if update_data["tags"]:
+            event.tags = crud.tag.read_by_values(values=update_data["tags"], db=db)
+        else:
+            event.tags = []
 
     if "type" in update_data:
         old = event.type.value if event.type else None
