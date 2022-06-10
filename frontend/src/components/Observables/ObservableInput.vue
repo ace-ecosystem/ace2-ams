@@ -26,15 +26,7 @@
   </span>
 </template>
 <script setup lang="ts">
-  import {
-    defineEmits,
-    defineProps,
-    computed,
-    ref,
-    watch,
-    inject,
-    PropType,
-  } from "vue";
+  import { defineEmits, defineProps, computed, ref, watch, inject } from "vue";
 
   import FileUpload from "primevue/fileupload";
   import InputText from "primevue/inputtext";
@@ -46,8 +38,9 @@
 
   const props = defineProps({
     observableValue: {
-      type: String as PropType<string | undefined>,
-      required: true,
+      type: String,
+      required: false,
+      default: undefined,
     },
     invalid: {
       type: Boolean,

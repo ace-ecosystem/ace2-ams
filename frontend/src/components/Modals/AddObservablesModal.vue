@@ -77,7 +77,7 @@
 
     try {
       // for (const obs of _observables) {
-        await ObservableInstance.create(_observables);
+      await ObservableInstance.create(_observables);
       // }
     } catch (e: unknown) {
       if (typeof e === "string") {
