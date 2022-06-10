@@ -50,6 +50,7 @@ export const alertTreeReadFactory = ({
   nodeType = "alert",
   uuid = "testAlertUuid",
   version = "testAlertVersion",
+  rootAnalysisUuid = "testRootAnalysisUuid",
 }: Partial<alertTreeRead> = {}): alertTreeRead => ({
   alert: true,
   children: children,
@@ -79,6 +80,7 @@ export const alertTreeReadFactory = ({
   nodeType: nodeType,
   uuid: uuid,
   version: version,
+  rootAnalysisUuid: rootAnalysisUuid,
 });
 
 export const alertReadFactory = ({
