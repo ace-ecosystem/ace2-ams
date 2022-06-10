@@ -611,6 +611,20 @@ def update(model: SubmissionUpdate, db: Session):
         diffs.append(crud.history.create_diff(field="queue", old=submission.queue.value, new=update_data["queue"]))
         submission.queue = crud.queue.read_by_value(value=update_data["queue"], db=db)
 
+    if "tags" in update_data:
+        diffs.append(
+            crud.history.create_diff(
+                field="tags",
+                old=[x.value for x in submission.tags],
+                new=update_data["tags"],
+            )
+        )
+
+        if update_data["tags"]:
+            submission.tags = crud.tag.read_by_values(values=update_data["tags"], db=db)
+        else:
+            submission.tags = []
+
     db.flush()
 
     # Add a submission history entry if the history username was given. This would typically only be
