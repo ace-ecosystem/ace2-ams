@@ -59,10 +59,6 @@ def update(
 
         node.directives = crud.node_directive.read_by_values(values=update_data["directives"], db=db)
 
-    if "tags" in update_data:
-        diffs.append(crud.history.create_diff(field="tags", old=[x.value for x in node.tags], new=update_data["tags"]))
-        node.tags = crud.tag.read_by_values(values=update_data["tags"], db=db)
-
     if "threat_actors" in update_data:
         diffs.append(
             crud.history.create_diff(
