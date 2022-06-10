@@ -50,10 +50,6 @@ class Observable(Node, HasHistory):
 
     permanent_tags: list[Tag] = relationship("Tag", secondary=observable_permanent_tag_mapping, lazy="selectin")
 
-    redirection_uuid = Column(UUID(as_uuid=True), ForeignKey("observable.uuid"))
-
-    redirection = relationship("Observable", foreign_keys=[redirection_uuid], uselist=False)
-
     time = Column(DateTime(timezone=True), server_default=utcnow(), nullable=False)
 
     type = relationship("ObservableType", lazy="selectin")

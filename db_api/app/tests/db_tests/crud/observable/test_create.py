@@ -189,9 +189,6 @@ def test_create(db):
             observable_relationships=[
                 ObservableRelationshipCreate(relationship_type="relationship_type", type="type2", value="value2")
             ],
-            redirection=ObservableCreate(
-                type="type3", value="value3", parent_analysis_uuid=submission.root_analysis_uuid
-            ),
             permanent_tags=["tag"],
             threat_actors=["threat_actor"],
             threats=["threat"],
@@ -216,10 +213,8 @@ def test_create(db):
     assert len(observable.observable_relationships) == 1
     assert observable.observable_relationships[0].related_node.type.value == "type2"
     assert observable.observable_relationships[0].related_node.value == "value2"
-    assert observable.redirection.type.value == "type3"
-    assert observable.redirection.value == "value3"
-    assert len(observable.tags) == 1
-    assert observable.tags[0].value == "tag"
+    assert len(observable.permanent_tags) == 1
+    assert observable.permanent_tags[0].value == "tag"
     assert len(observable.threat_actors) == 1
     assert observable.threat_actors[0].value == "threat_actor"
     assert len(observable.threats) == 1

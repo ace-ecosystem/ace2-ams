@@ -70,8 +70,6 @@ class ObservableCreateBase(NodeCreate, ObservableBase):
         default_factory=list, description="A list of tags to permanently add to the observable"
     )
 
-    redirection: "Optional[ObservableCreate]" = Field(description="Another observable to which this one should point")
-
     threat_actors: list[type_str] = Field(
         default_factory=list, description="A list of threat actors to add to the observable"
     )
@@ -107,8 +105,6 @@ class ObservableRead(NodeRead, ObservableBase):
     )
 
     permanent_tags: list[TagRead] = Field(description="A list of tags permanently added to the observable")
-
-    redirection: "Optional[ObservableRead]" = Field(description="Another observable to which this one points")
 
     threat_actors: list[NodeThreatActorRead] = Field(description="A list of threat actors added to the observable")
 
@@ -153,8 +149,6 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
     )
 
     permanent_tags: Optional[list[type_str]] = Field(description="A list of tags to permanently add to the observable")
-
-    redirection_uuid: Optional[UUID] = Field(description="The observable UUID to which the observable should redirect")
 
     threat_actors: Optional[list[type_str]] = Field(description="A list of threat actors to add to the observable")
 

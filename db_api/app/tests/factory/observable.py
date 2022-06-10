@@ -23,7 +23,6 @@ def create_or_read(
     for_detection: bool = False,
     history_username: Optional[str] = None,
     permanent_tags: Optional[list[str]] = None,
-    redirection: Optional[Observable] = None,
     threat_actors: Optional[list[str]] = None,
     threats: Optional[list[str]] = None,
     time: Optional[datetime] = None,
@@ -71,9 +70,6 @@ def create_or_read(
         parent_analysis=parent_analysis,
         db=db,
     )
-
-    if redirection is not None:
-        obj.redirection = redirection
 
     # Add the observable to its parent analysis
     parent_analysis.child_observables.append(obj)
