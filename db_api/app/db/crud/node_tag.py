@@ -1,9 +1,15 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
-from api_models.node_tag import NodeTagCreate
+from api_models.node_tag import NodeTagCreate, NodeTagUpdate
 from db import crud
 from db.schemas.node_tag import NodeTag
+
+
+def build_read_all_query() -> Select:
+    return select(NodeTag).order_by(NodeTag.value)
 
 
 def create_or_read(model: NodeTagCreate, db: Session) -> NodeTag:
@@ -13,6 +19,14 @@ def create_or_read(model: NodeTagCreate, db: Session) -> NodeTag:
         return obj
 
     return read_by_value(value=model.value, db=db)
+
+
+def delete(uuid: UUID, db: Session) -> bool:
+    return crud.helpers.delete(uuid=uuid, db_table=NodeTag, db=db)
+
+
+def read_all(db: Session) -> list[NodeTag]:
+    return db.execute(build_read_all_query()).scalars().all()
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> NodeTag:
@@ -25,3 +39,7 @@ def read_by_value(value: str, db: Session) -> NodeTag:
 
 def read_by_values(values: list[str], db: Session) -> list[NodeTag]:
     return crud.helpers.read_by_values(db_table=NodeTag, values=values, db=db)
+
+
+def update(uuid: UUID, model: NodeTagUpdate, db: Session) -> bool:
+    return crud.helpers.update(uuid=uuid, update_model=model, db_table=NodeTag, db=db)

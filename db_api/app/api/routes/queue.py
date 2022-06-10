@@ -43,7 +43,7 @@ helpers.api_route_create(router, create_queue)
 
 
 def get_all_queues(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(Queue).order_by(Queue.value))
+    return paginate(conn=db, query=crud.queue.build_read_all_query())
 
 
 def get_queue(uuid: UUID, db: Session = Depends(get_db)):

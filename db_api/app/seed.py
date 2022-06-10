@@ -2,12 +2,12 @@ import os
 import sys
 import yaml
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 from core.auth import hash_password
 from core.config import is_in_testing_mode
-from db import crud
 from db.database import get_db
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.event_prevention_tool import EventPreventionTool
@@ -54,7 +54,7 @@ def add_queueable_values(db: Session, db_table: DeclarativeMeta, queues: dict, d
 
 def seed(db: Session):
     # Quit early if the database was already seeded
-    if crud.helpers.read_all(db_table=Seed, db=db):
+    if db.execute(select(Seed)).one_or_none():
         print("The database was already seeded!")
         sys.exit()
 

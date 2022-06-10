@@ -40,8 +40,8 @@ class ObservableBase(NodeBase):
     value: type_str = Field(description="The value of the observable")
 
 
-class ObservableCreate(NodeCreate, ObservableBase):
-    analyses: "list[AnalysisCreate]" = Field(
+class ObservableCreateBase(NodeCreate, ObservableBase):
+    analyses: "list[AnalysisCreateInObservable]" = Field(
         default_factory=list, description="A list of analysis results to add as children to the observable"
     )
 
@@ -61,10 +61,6 @@ class ObservableCreate(NodeCreate, ObservableBase):
         default_factory=list, description="A list of observable relationships to add to this observable"
     )
 
-    parent_analysis_uuid: Optional[UUID] = Field(
-        description="The UUID of the analysis that will contain this observable. This can be NULL if you pass in an Analysis object when creating an observable."
-    )
-
     redirection: "Optional[ObservableCreate]" = Field(description="Another observable to which this one should point")
 
     tags: list[type_str] = Field(default_factory=list, description="A list of tags to add to the observable")
@@ -76,6 +72,16 @@ class ObservableCreate(NodeCreate, ObservableBase):
     threats: list[type_str] = Field(default_factory=list, description="A list of threats to add to the observable")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the observable")
+
+
+class ObservableCreate(ObservableCreateBase):
+    parent_analysis_uuid: Optional[UUID] = Field(
+        description="The UUID of the analysis that will contain this observable. This can be NULL if you pass in an Analysis object when creating an observable."
+    )
+
+
+class ObservableCreateInSubmission(ObservableCreateBase):
+    pass
 
 
 class ObservableRead(NodeRead, ObservableBase):
@@ -159,9 +165,10 @@ class ObservableRelationshipRead(NodeRelationshipRead):
 
 
 # This is needed for the circular relationship between ObservableRead and ObservableRelationshipRead
-# and ObservableCreate <-> AnalysisCreate.
-from api_models.analysis import AnalysisCreate
+# and ObservableCreate <-> AnalysisCreateInObservable.
+from api_models.analysis import AnalysisCreateInObservable
 
 ObservableCreate.update_forward_refs()
+ObservableCreateInSubmission.update_forward_refs()
 ObservableRead.update_forward_refs()
 ObservableNodeTreeRead.update_forward_refs()

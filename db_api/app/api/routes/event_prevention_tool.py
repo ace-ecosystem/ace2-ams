@@ -51,9 +51,7 @@ helpers.api_route_create(router, create_event_prevention_tool)
 
 
 def get_all_event_prevention_tools(db: Session = Depends(get_db)):
-    return paginate(
-        conn=db, query=crud.helpers.build_read_all_query(EventPreventionTool).order_by(EventPreventionTool.value)
-    )
+    return paginate(conn=db, query=crud.event_prevention_tool.build_read_all_query())
 
 
 def get_event_prevention_tool(uuid: UUID, db: Session = Depends(get_db)):

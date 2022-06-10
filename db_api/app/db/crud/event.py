@@ -3,7 +3,7 @@ from deepdiff import DeepHash
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Load, Session
 from sqlalchemy.sql.selectable import Select
-from typing import Optional, Tuple
+from typing import Optional
 from urllib.parse import urlparse
 from uuid import UUID
 from api_models.analysis_details import FAQueueAnalysisDetails, SandboxProcess
@@ -24,7 +24,7 @@ from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
 from db.schemas.analysis_module_type import AnalysisModuleType
-from db.schemas.event import Event
+from db.schemas.event import Event, EventHistory
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_risk_level import EventRiskLevel
@@ -82,36 +82,38 @@ def build_read_all_query(
     query = select(Event)
 
     if alert_time_after:
+        # Outer join is used in case the event does not have any alerts (for some reason).
         alert_time_after_query = (
             select(Event)
-            .join(Submission, onclause=Submission.event_uuid == Event.uuid)
+            .outerjoin(Submission, onclause=Submission.event_uuid == Event.uuid)
             .where(or_(Event.alert_time > alert_time_after, Submission.insert_time > alert_time_after))
         )
         query = _join_as_subquery(query, alert_time_after_query)
 
     if alert_time_before:
+        # Outer join is used in case the event does not have any alerts (for some reason).
         alert_time_before_query = (
             select(Event)
-            .join(Submission, onclause=Submission.event_uuid == Event.uuid)
+            .outerjoin(Submission, onclause=Submission.event_uuid == Event.uuid)
             .where(or_(Event.alert_time < alert_time_before, Submission.insert_time < alert_time_before))
         )
         query = _join_as_subquery(query, alert_time_before_query)
 
     if contain_time_after:
         contain_time_after_query = select(Event).where(Event.contain_time > contain_time_after)
-        query = _join_as_subquery(query, contain_time_after_query)
+        query = _join_as_subquery(query, contain_time_after_query).order_by(Event.contain_time.asc())
 
     if contain_time_before:
         contain_time_before_query = select(Event).where(Event.contain_time < contain_time_before)
-        query = _join_as_subquery(query, contain_time_before_query)
+        query = _join_as_subquery(query, contain_time_before_query).order_by(Event.contain_time.asc())
 
     if created_time_after:
-        created_time_after_query = select(Event).where(Event.creation_time > created_time_after)
-        query = _join_as_subquery(query, created_time_after_query)
+        created_time_after_query = select(Event).where(Event.created_time > created_time_after)
+        query = _join_as_subquery(query, created_time_after_query).order_by(Event.created_time.asc())
 
     if created_time_before:
-        created_time_before_query = select(Event).where(Event.creation_time < created_time_before)
-        query = _join_as_subquery(query, created_time_before_query)
+        created_time_before_query = select(Event).where(Event.created_time < created_time_before)
+        query = _join_as_subquery(query, created_time_before_query).order_by(Event.created_time.asc())
 
     if disposition:
         disposition_query = select(Event).join(Submission, onclause=Submission.event_uuid == Event.uuid)
@@ -166,7 +168,7 @@ def build_read_all_query(
 
     if name:
         name_query = select(Event).where(Event.name.ilike(f"%{name}%"))
-        query = _join_as_subquery(query, name_query)
+        query = _join_as_subquery(query, name_query).order_by(Event.name.asc())
 
     if observable:
         observable_split = observable.split("|", maxsplit=1)
@@ -328,9 +330,9 @@ def build_read_all_query(
 
         if sort_by.lower() == "created_time":
             if order == "asc":
-                query = query.order_by(Event.creation_time.asc())
-            else:
-                query = query.order_by(Event.creation_time.desc())
+                query = query.order_by(Event.created_time.asc())
+            elif order == "desc":
+                query = query.order_by(Event.created_time.desc())
 
         # Only sort by event_type if we are not also filtering by event_type
         elif sort_by.lower() == "event_type" and not event_type:
@@ -339,13 +341,13 @@ def build_read_all_query(
             )
             if order == "asc":
                 query = query.order_by(EventType.value.asc())
-            else:
+            elif order == "desc":
                 query = query.order_by(EventType.value.desc())
 
         elif sort_by.lower() == "name":
             if order == "asc":
                 query = query.order_by(Event.name.asc())
-            else:
+            elif order == "desc":
                 query = query.order_by(Event.name.desc())
 
         # Only sort by owner if we are not also filtering by owner
@@ -355,7 +357,7 @@ def build_read_all_query(
             )
             if order == "asc":
                 query = query.order_by(User.username.asc())
-            else:
+            elif order == "desc":
                 query = query.order_by(User.username.desc())
 
         # Only sort by risk_level if we are not also filtering by risk_level
@@ -365,7 +367,7 @@ def build_read_all_query(
             )
             if order == "asc":
                 query = query.order_by(EventRiskLevel.value.asc())
-            else:
+            elif order == "desc":
                 query = query.order_by(EventRiskLevel.value.desc())
 
         # Only sort by status if we are not also filtering by status
@@ -375,7 +377,7 @@ def build_read_all_query(
             )
             if order == "asc":
                 query = query.order_by(EventStatus.value.asc())
-            else:
+            elif order == "desc":
                 query = query.order_by(EventStatus.value.desc())
 
     return query
@@ -417,9 +419,84 @@ def create_or_read(model: EventCreate, db: Session) -> Event:
     return obj
 
 
+def read_all(
+    db: Session,
+    alert_time_after: Optional[datetime] = None,
+    alert_time_before: Optional[datetime] = None,
+    contain_time_after: Optional[datetime] = None,
+    contain_time_before: Optional[datetime] = None,
+    created_time_after: Optional[datetime] = None,
+    created_time_before: Optional[datetime] = None,
+    disposition: Optional[str] = None,
+    disposition_time_after: Optional[datetime] = None,
+    disposition_time_before: Optional[datetime] = None,
+    event_type: Optional[str] = None,
+    name: Optional[str] = None,
+    observable: Optional[str] = None,  # type|value
+    observable_types: Optional[str] = None,
+    observable_value: Optional[str] = None,
+    owner: Optional[str] = None,
+    prevention_tools: Optional[str] = None,
+    queue: Optional[str] = None,
+    remediation_time_after: Optional[datetime] = None,
+    remediation_time_before: Optional[datetime] = None,
+    remediations: Optional[str] = None,
+    risk_level: Optional[str] = None,
+    sort: Optional[str] = None,  # Example: created_time|desc,
+    source: Optional[str] = None,
+    status: Optional[str] = None,
+    tags: Optional[str] = None,
+    threat_actors: Optional[str] = None,
+    threats: Optional[str] = None,
+    vectors: Optional[str] = None,
+) -> list[Event]:
+    return (
+        db.execute(
+            build_read_all_query(
+                alert_time_after=alert_time_after,
+                alert_time_before=alert_time_before,
+                contain_time_after=contain_time_after,
+                contain_time_before=contain_time_before,
+                created_time_after=created_time_after,
+                created_time_before=created_time_before,
+                disposition=disposition,
+                disposition_time_after=disposition_time_after,
+                disposition_time_before=disposition_time_before,
+                event_type=event_type,
+                name=name,
+                observable=observable,
+                observable_types=observable_types,
+                observable_value=observable_value,
+                owner=owner,
+                prevention_tools=prevention_tools,
+                queue=queue,
+                remediation_time_after=remediation_time_after,
+                remediation_time_before=remediation_time_before,
+                remediations=remediations,
+                risk_level=risk_level,
+                sort=sort,
+                source=source,
+                status=status,
+                tags=tags,
+                threat_actors=threat_actors,
+                threats=threats,
+                vectors=vectors,
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+
+def read_all_history(uuid: UUID, db: Session) -> list[EventHistory]:
+    return (
+        db.execute(crud.history.build_read_history_query(history_table=EventHistory, record_uuid=uuid)).scalars().all()
+    )
+
+
 def read_analysis_type_from_event(
     analysis_module_type: str, uuid: UUID, db: Session, starts_with: bool = False
-) -> list[Tuple[UUID, Analysis]]:
+) -> list[tuple[UUID, Analysis]]:
     """
     Returns a list of tuples containing the alert UUID and the analysis object where the list contains every
     analysis of the given type that was performed in the given event UUID.
@@ -450,6 +527,7 @@ def read_analysis_type_from_event(
             ),
         )
         .options(Load(Analysis).undefer("details"))
+        .order_by(Analysis.run_time.asc())
     )
 
     return db.execute(query).unique().all()
@@ -523,7 +601,7 @@ def read_summary_detection_point(uuid: UUID, db: Session) -> list[DetectionSumma
         )
     )
 
-    alert_uuid_and_detection: list[Tuple[UUID, NodeDetectionPoint]] = db.execute(query).unique().all()
+    alert_uuid_and_detection: list[tuple[UUID, NodeDetectionPoint]] = db.execute(query).unique().all()
 
     # Loop through the database results to count the number of times each detection point value occurred
     results: dict[UUID, DetectionSummary] = {}
@@ -651,7 +729,7 @@ def read_summary_url_domain(uuid: UUID, db: Session) -> URLDomainSummary:
     # a URLDomainSummary object.
     # NOTE: This assumes the URL values are validated as they are added to the database.
     urls = read_observable_type_from_event(observable_type="url", uuid=uuid, db=db)
-    domain_count: dict[str, URLDomainSummaryIndividual] = dict()
+    domain_count: dict[str, URLDomainSummaryIndividual] = {}
     for url in urls:
         parsed_url = urlparse(url.value)
         if parsed_url.hostname not in domain_count:

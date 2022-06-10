@@ -9,5 +9,5 @@ class utcnow(expression.FunctionElement):
 
 
 @compiles(utcnow, "postgresql")
-def pg_utcnow(element, compiler, **kw):
+def pg_utcnow(element, compiler, **kw):  # pragma: no cover
     return "TIMEZONE('utc', CURRENT_TIMESTAMP)"

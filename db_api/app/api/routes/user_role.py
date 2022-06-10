@@ -43,7 +43,7 @@ helpers.api_route_create(router, create_user_role)
 
 
 def get_all_user_roles(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(UserRole).order_by(UserRole.value))
+    return paginate(conn=db, query=crud.user_role.build_read_all_query())
 
 
 def get_user_role(uuid: UUID, db: Session = Depends(get_db)):

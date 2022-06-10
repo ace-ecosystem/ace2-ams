@@ -47,7 +47,7 @@ helpers.api_route_create(router, create_type)
 
 
 def get_all_types(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(ObservableType).order_by(ObservableType.value))
+    return paginate(conn=db, query=crud.observable_type.build_read_all_query())
 
 
 def get_type(uuid: UUID, db: Session = Depends(get_db)):

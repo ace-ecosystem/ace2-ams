@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlalchemy.orm import Session
 from typing import Optional
+from uuid import UUID, uuid4
 
 from api_models.event import EventCreate
 from db import crud
@@ -27,11 +28,13 @@ def create_or_read(
     tags: Optional[list[str]] = None,
     threat_actors: Optional[list[str]] = None,
     threats: Optional[list[str]] = None,
+    uuid: Optional[UUID] = None,
     vectors: Optional[list[str]] = None,
 ):
     # Set default values
     if created_time is None:
         created_time = crud.helpers.utcnow()
+
     if prevention_tools is None:
         prevention_tools = []
 
@@ -46,6 +49,9 @@ def create_or_read(
 
     if threats is None:
         threats = []
+
+    if uuid is None:
+        uuid = uuid4()
 
     if vectors is None:
         vectors = []
@@ -85,7 +91,7 @@ def create_or_read(
     for v in vectors:
         factory.event_vector.create_or_read(value=v, queues=[event_queue], db=db)
 
-    return crud.event.create_or_read(
+    obj = crud.event.create_or_read(
         model=EventCreate(
             alert_time=alert_time,
             contain_time=contain_time,
@@ -105,7 +111,12 @@ def create_or_read(
             threat_actors=threat_actors,
             threats=threats,
             type=event_type,
+            uuid=uuid,
             vectors=vectors,
         ),
         db=db,
     )
+
+    db.commit()
+
+    return obj

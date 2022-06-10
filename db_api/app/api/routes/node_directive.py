@@ -47,7 +47,7 @@ helpers.api_route_create(router, create_node_directive)
 
 
 def get_all_node_directives(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(NodeDirective).order_by(NodeDirective.value))
+    return paginate(conn=db, query=crud.node_directive.build_read_all_query())
 
 
 def get_node_directive(uuid: UUID, db: Session = Depends(get_db)):

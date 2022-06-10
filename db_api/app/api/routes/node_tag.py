@@ -46,7 +46,7 @@ helpers.api_route_create(router, create_node_tag, response_model=Create)
 
 
 def get_all_node_tags(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(NodeTag).order_by(NodeTag.value))
+    return paginate(conn=db, query=crud.node_tag.build_read_all_query())
 
 
 def get_node_tag(uuid: UUID, db: Session = Depends(get_db)):

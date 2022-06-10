@@ -43,7 +43,7 @@ helpers.api_route_create(router, create_submission_type)
 
 
 def get_all_submission_types(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.helpers.build_read_all_query(SubmissionType).order_by(SubmissionType.value))
+    return paginate(conn=db, query=crud.submission_type.build_read_all_query())
 
 
 def get_submission_type(uuid: UUID, db: Session = Depends(get_db)):
