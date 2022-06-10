@@ -1,6 +1,6 @@
 import json
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request, Response, status
 from uuid import UUID
 
 from api import db_api
@@ -19,14 +19,15 @@ router = APIRouter(
 #
 
 
-def create_observable(observable: ObservableCreate, request: Request, response: Response):
-    result =  db_api.post(path=f"/observable/", payload=json.loads(observable.json()))
+def create_observables(
+    observables: list[ObservableCreate], 
+    request: Request, 
+    response: Response
+):
+    result =  db_api.post(path="/observable/",  payload=[json.loads(o.json(exclude_unset=True)) for o in observables], expected_status=status.HTTP_201_CREATED)
 
-    response.headers["Content-Location"] = request.url_for("get_observable", uuid=result["uuid"])
 
-
-
-helpers.api_route_create(router, create_observable)
+helpers.api_route_create(router, create_observables)
 
 
 #
