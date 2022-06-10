@@ -152,5 +152,6 @@
 
   const close = () => {
     modalStore.close(props.name);
+    observables.value = [];
   };
 </script>
