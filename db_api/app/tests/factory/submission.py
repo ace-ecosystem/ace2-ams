@@ -52,9 +52,6 @@ def create(
     if observables is None:
         observables = []
 
-    if update_time is None:
-        update_time = crud.helpers.utcnow()
-
     # Create the alert queue
     factory.queue.create_or_read(value=alert_queue, db=db)
 
@@ -72,7 +69,6 @@ def create(
     # Create the owner user if one was given
     if owner is not None:
         factory.user.create_or_read(username=owner, alert_queue=alert_queue, db=db)
-        diffs.append(crud.history.create_diff(field="owner", old=None, new=owner))
 
     # Create the actual submission
     submission = crud.submission.create_or_read(
@@ -92,6 +88,12 @@ def create(
         db=db,
     )
 
+    if update_time is None:
+        update_time = crud.helpers.utcnow()
+
+    if owner is not None:
+        diffs.append(crud.history.create_diff(field="owner", old=None, new=owner))
+
     # Add the observables to the submission
     for observable in observables:
         factory.observable_type.create_or_read(value=observable.type, db=db)
@@ -108,7 +110,6 @@ def create(
                     observable_relationships=observable.observable_relationships,
                     parent_analysis_uuid=submission.root_analysis_uuid,
                     permanent_tags=observable.permanent_tags,
-                    redirection=observable.redirection,
                     threat_actors=observable.threat_actors,
                     threats=observable.threats,
                     time=observable.time,
@@ -136,7 +137,6 @@ def create(
 
     if tags:
         submission.tags = [factory.tag.create_or_read(value=t, db=db) for t in tags]
-        diffs.append(crud.history.create_diff(field="tags", old=[], new=tags))
 
     if threat_actors:
         submission.threat_actors = [factory.node_threat_actor.create_or_read(value=t, db=db) for t in threat_actors]
