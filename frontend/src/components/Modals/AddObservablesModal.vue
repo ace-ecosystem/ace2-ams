@@ -10,7 +10,10 @@
       </div>
     </div>
     <div>
-      <NewObservableForm v-model="observables"></NewObservableForm>
+      <NewObservableForm
+        v-model="observables"
+        data-cy="new-observable-form"
+      ></NewObservableForm>
     </div>
     <template #footer>
       <Button
@@ -121,6 +124,9 @@
     if (observable.time) {
       submissionObservable["time"] = observable.time;
     }
+    if (observable.directives) {
+      submissionObservable["directives"] = observable.directives;
+    }
     return submissionObservable;
   };
 
@@ -143,6 +149,7 @@
         time: multiObservable.time,
         multiAdd: multiObservable.multiAdd,
         invalid: multiObservable.invalid,
+        directives: multiObservable.directives,
       };
       splitObservables.push(subObservable);
     }
