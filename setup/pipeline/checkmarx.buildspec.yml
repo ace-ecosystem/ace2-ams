@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    CHECKMARX_BASE_URL: "https://checkmarx.info53.com/CxWebClient"
+    CHECKMARX_BASE_URL: "https://checkmarx.info53.com/"
     CX_FLOW_BUG_TRACKER: "None"
     CX_FLOW_BUG_TRACKER_IMPL: ${CX_FLOW_BUG_TRACKER}
     CX_FLOW_EXE: "java -jar /app/cx-flow.jar"
