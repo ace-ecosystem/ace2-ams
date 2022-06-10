@@ -293,3 +293,5 @@ export const defaultEventDetailsSections = {
   "URL Domain Summary": EventURLDomainSummaryVue,
   "Observable Summary": EventObservableSummaryVue,
 };
+
+export const closedEventStatus = "CLOSED";
