@@ -78,4 +78,16 @@ describe("TheAlertActionToolbar", () => {
         );
       });
   });
+  it("should show Add Observables button when reload object is 'node'", () => {
+    factory({
+      reloadObject: "node",
+    });
+    cy.contains("Add Observable(s)").should("be.visible");
+  });
+  it("should not show Add Observables button when reload object is not 'node'", () => {
+    factory({
+      reloadObject: "table",
+    });
+    cy.contains("Add Observable(s)").should("not.be.exist");
+  });
 });
