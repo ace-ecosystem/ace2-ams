@@ -8,13 +8,14 @@ import re
 import sys
 from typing import Any
 from yaml import safe_load
-from .util import camel_to_snake
+
+from .utility import camel_to_snake
 
 def find(name:str, base:type) -> dict:
-    ''' finds all subclasses of base in module (not recursive)
+    ''' recursively finds all subclasses in module
 
     Args:
-        name: the name of the module we are importing from
+        name: the name of the module to search
         base: the base class to search for subclasses of
 
     Returns:
@@ -25,7 +26,12 @@ def find(name:str, base:type) -> dict:
     module = sys.modules[name]
     package_dir = Path(module.__file__).resolve().parent
     for (_, module_name, _) in iter_modules([package_dir]):
-        sub_module = import_module(f"{module.__name__}.{module_name}")
+        sub_module_name = f'{module.__name__}.{module_name}'
+        try:
+            sub_module = import_module(sub_module_name)
+        except:
+            continue
+        subclasses.update(find(sub_module_name, base))
         for attribute_name in dir(sub_module):
             attribute = getattr(sub_module, attribute_name)
             if isclass(attribute) and attribute != base and issubclass(attribute, base):

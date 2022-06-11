@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 from .config import Config
-from .util import camel_to_snake
+from .utility import camel_to_snake
 
 class Service():
     ''' Base class for making configurable services '''

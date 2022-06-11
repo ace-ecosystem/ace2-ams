@@ -2,6 +2,9 @@
 ARG name
 FROM ace2-lib-$name-base
 
+# install ace2 core
+COPY --from=ace2-core / /
+
 # install source
 ARG name
 COPY lib/$name/src ${ACE2}/lib/$name
