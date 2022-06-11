@@ -55,6 +55,10 @@ class Submission(Node, HasHistory):
         secondary="join(AnalysisMetadata, Tag, Tag.uuid == AnalysisMetadata.metadata_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == AnalysisMetadata.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
+        # NOTE: The secondaryjoin parameter is required specifically when using the
+        # crud.submission.read_all() function to filter submissions by their tags.
+        # Without it, the query that SQLAlchemy creates results in the returned submissions
+        # having every tag from every submission in their child_analysis_tags list.
         secondaryjoin="Metadata.uuid == AnalysisMetadata.metadata_uuid",
         order_by="asc(Tag.value)",
         viewonly=True,
@@ -78,6 +82,11 @@ class Submission(Node, HasHistory):
         "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == observable_permanent_tag_mapping.c.observable_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
+        # NOTE: The secondaryjoin parameter is required specifically when using the
+        # crud.submission.read_all() function to filter submissions by their tags.
+        # Without it, the query that SQLAlchemy creates results in the returned submissions
+        # having every tag from every submission in their child_permanent_tags list.
+        secondaryjoin="Tag.uuid == observable_permanent_tag_mapping.c.tag_uuid",
         foreign_keys="[Submission.uuid, Tag.uuid]",
         order_by="asc(Tag.value)",
         viewonly=True,
@@ -186,11 +195,6 @@ class Submission(Node, HasHistory):
 
     @property
     def child_tags(self) -> list[Tag]:
-        for t in self.child_analysis_tags:
-            print(f"analysis tag = {t.value}")
-        print()
-        for t in self.child_permanent_tags:
-            print(f"permanent tag = {t.value}")
         return sorted(set(self.child_analysis_tags + self.child_permanent_tags), key=lambda x: x.value)
 
     @property

@@ -400,7 +400,7 @@ def read_all(
     threats: Optional[str] = None,
     tool: Optional[str] = None,
     tool_instance: Optional[str] = None,
-):
+) -> list[Submission]:
     return (
         db.execute(
             build_read_all_query(
