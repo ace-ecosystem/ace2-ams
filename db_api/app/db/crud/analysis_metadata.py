@@ -35,6 +35,8 @@ def create_or_read(
         )
 
         if crud.helpers.create(obj=obj, db=db):
+            # Refreshing the analysis object ensures that its analysis_metadata relationship is updated
+            db.refresh(analysis)
             return obj
 
         return read_existing(
