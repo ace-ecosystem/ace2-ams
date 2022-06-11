@@ -20,25 +20,20 @@ docker build --target ace2-base -t ace2-base -f Dockerfile .
 # build ace2
 docker build --build-arg env=$env -t ace2 -f Dockerfile .
 
-#function build_image() {
-#}
-
-## build all libs
-#for lib in lib/*/ ; do
-#    setup/build_image.sh -e $env $lib
-#done
-
-# build all modules
-for path in modules/*/ ; do
+function build_image() {
     # get path without trailing slashes
-    path=$(echo $path | sed 's:/*$::')
+    path=$(echo $1 | sed 's:/*$::')
 
     # get image type from path
     type=${path%/*}
 
     # get image name from path
     name=${path##*/}
-    name=$(echo $name | awk '{print tolower($0)}')
+
+    # skip empty directory
+    if [ "$name" = "*" ] ; then
+        return
+    fi
 
     # build image base
     if [ -f "$path/Dockerfile" ]; then
@@ -49,4 +44,14 @@ for path in modules/*/ ; do
 
     # build image
     docker build --build-arg name=$name --build-arg env=$env -t ace2-$type-$name -f $type/Dockerfile .
+}
+
+# build all libs
+for path in lib/*/ ; do
+    build_image $path
+done
+
+# build all modules
+for path in modules/*/ ; do
+    build_image $path
 done
