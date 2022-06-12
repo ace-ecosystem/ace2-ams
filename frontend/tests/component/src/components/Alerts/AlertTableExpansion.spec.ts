@@ -4,7 +4,7 @@ import PrimeVue from "primevue/config";
 import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
 
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import { metadataObjectReadFactory } from "@mocks/metadata";
 import { observableRead } from "@/models/observable";
 import { observableReadFactory } from "@mocks/observable";
 import router from "@/router/index";
@@ -49,7 +49,7 @@ describe("AlertTableExpansion", () => {
           observableReadFactory(),
           observableReadFactory({
             value: "TestObservable2",
-            tags: [genericObjectReadFactory({ value: "testTag" })],
+            permanentTags: [metadataObjectReadFactory({ value: "testTag" })],
           }),
         ],
       },

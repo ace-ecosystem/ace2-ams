@@ -4,13 +4,13 @@ import { useAlertDispositionStore } from "@/stores/alertDisposition";
 import { useAlertToolStore } from "@/stores/alertTool";
 import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";
-import { useTagStore } from "@/stores/nodeTag";
+import { useTagStore } from "@/stores/tag";
 import { useNodeThreatStore } from "@/stores/nodeThreat";
 import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
 import { useUserStore } from "@/stores/user";
 import {
   nameProperty,
-  nodeTagsProperty,
+  tagsProperty,
   nodeThreatActorProperty,
   nodeThreatsProperty,
   observableProperty,
@@ -250,7 +250,7 @@ export const validAlertFilters: propertyOption[] = [
   observableValueProperty,
   ownerProperty,
   queueProperty,
-  nodeTagsProperty,
+  tagsProperty,
   nodeThreatActorProperty,
   nodeThreatsProperty,
   alertToolProperty,

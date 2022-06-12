@@ -64,12 +64,12 @@
         @request-reload="reload"
       ></component>
     </span>
-    <span v-if="showTags && observable.tags.length" class="leaf-element">
-      <NodeTagVue
-        v-for="tag in observable.tags"
+    <span v-if="showTags && allTags.length" class="leaf-element">
+      <MetadataTag
+        v-for="tag in allTags"
         :key="tag.uuid"
         :tag="tag"
-      ></NodeTagVue
+      ></MetadataTag
     ></span>
   </span>
 </template>
@@ -94,7 +94,7 @@
 
   import type CSS from "csstype";
 
-  import NodeTagVue from "@/components/Node/NodeTag.vue";
+  import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
   import {
     observableActionCommand,
@@ -157,6 +157,11 @@
         style.value = observableMetadata[observableType.value].style;
       }
     }
+  });
+
+  const allTags = computed(() => {
+    // TODO: Loop through props.observable.metadata array to get all the analysis tags
+    return props.observable.permanentTags;
   });
 
   const itemsFiltered = computed(() => {

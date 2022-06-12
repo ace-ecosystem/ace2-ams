@@ -207,7 +207,9 @@ export function formatNodeFiltersForAPI(
 export function getAllAlertTags(
   alert: alertRead | alertSummary | alertTreeRead,
 ): Array<tagRead> {
-  const allTags = alert.tags.concat(alert.childTags);
+  const allTags = alert.tags
+    .concat(alert.childAnalysisTags)
+    .concat(alert.childPermanentTags);
 
   // Return a sorted and deduplicated list of the tags based on the tag UUID.
   return [...new Map(allTags.map((v) => [v.uuid, v])).values()].sort((a, b) =>
@@ -221,7 +223,8 @@ export function getAlertLink(alert: alertRead | alertSummary): string {
 
 export function parseAlertSummary(alert: alertRead): alertSummary {
   return {
-    childTags: alert.childTags,
+    childAnalysisTags: alert.childAnalysisTags,
+    childPermanentTags: alert.childPermanentTags,
     comments: alert.comments,
     description: alert.description ? alert.description : "",
     disposition: alert.disposition ? alert.disposition.value : "OPEN",

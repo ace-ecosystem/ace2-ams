@@ -4,7 +4,7 @@ import {
   observableProperty,
   observableTypesProperty,
   ownerProperty,
-  nodeTagsProperty,
+  tagsProperty,
   nodeThreatsProperty,
   nodeCommentProperty,
   queueProperty,
@@ -35,7 +35,7 @@ export const eventFilters: Record<string, readonly propertyOption[]> = {
     observableTypesProperty,
     ownerProperty,
     queueProperty, // Required, do not delete
-    nodeTagsProperty,
+    tagsProperty,
     eventStatusProperty, // Required, do not delete
   ],
   internal: [

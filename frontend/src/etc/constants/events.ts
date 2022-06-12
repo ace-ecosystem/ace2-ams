@@ -13,7 +13,7 @@ import { useEventVectorStore } from "@/stores/eventVector";
 
 import {
   nameProperty,
-  nodeTagsProperty,
+  tagsProperty,
   nodeThreatActorProperty,
   nodeThreatsProperty,
   observableProperty,
@@ -281,7 +281,7 @@ export const validEventFilters: propertyOption[] = [
   eventRiskLevelProperty,
   eventSourceProperty,
   eventStatusProperty,
-  nodeTagsProperty,
+  tagsProperty,
   nodeThreatActorProperty,
   nodeThreatsProperty,
   eventTypeProperty,

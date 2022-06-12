@@ -1,11 +1,11 @@
-import { tagCreate, tagRead, tagReadPage, tagUpdate } from "@/models/nodeTag";
+import { tagCreate, tagRead, tagReadPage, tagUpdate } from "@/models/tag";
 import { pageOptionParams, UUID } from "@/models/base";
 import { BaseApi } from "./base";
 
 const api = new BaseApi();
-const endpoint = "/node/tag/";
+const endpoint = "/tag/";
 
-export const NodeTag = {
+export const Tag = {
   create: (data: tagCreate, getAfterCreate = false): Promise<void> =>
     api.create(endpoint, data, getAfterCreate),
 

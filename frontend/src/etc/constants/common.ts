@@ -3,7 +3,7 @@
 import { propertyOption } from "@/models/base";
 import { nodeThreatRead } from "@/models/nodeThreat";
 import { observableTypeRead } from "@/models/observableType";
-import { useTagStore } from "@/stores/nodeTag";
+import { useTagStore } from "@/stores/tag";
 import { useNodeThreatStore } from "@/stores/nodeThreat";
 import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
 import { useObservableTypeStore } from "@/stores/observableType";
@@ -110,7 +110,7 @@ export const nodeThreatsProperty: propertyOption = {
     return valueString.split(",");
   },
 };
-export const nodeTagsProperty: propertyOption = {
+export const tagsProperty: propertyOption = {
   name: commonPropertyTypes.TAGS_PROPERTY,
   label: "Tags",
   type: inputTypes.CHIPS,

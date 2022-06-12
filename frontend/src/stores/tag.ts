@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { tagRead } from "@/models/tag";
-import { NodeTag } from "@/services/api/nodeTag";
+import { Tag } from "@/services/api/tag";
 
 export const useTagStore = defineStore({
   id: "tagStore",
@@ -17,7 +17,7 @@ export const useTagStore = defineStore({
 
   actions: {
     async readAll() {
-      this.items = await NodeTag.readAll();
+      this.items = await Tag.readAll();
     },
   },
 });

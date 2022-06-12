@@ -46,7 +46,7 @@
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
 
-  import { NodeTag } from "@/services/api/nodeTag";
+  import { Tag } from "@/services/api/tag";
   import {
     nodeStores,
     nodeSelectedStores,
@@ -54,7 +54,7 @@
   } from "@/stores/index";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
-  import { useTagStore } from "@/stores/nodeTag";
+  import { useTagStore } from "@/stores/tag";
   import { tagRead } from "@/models/tag";
   import { observableTreeRead } from "@/models/observable";
   import { useObservableStore } from "@/stores/observable";
@@ -148,7 +148,7 @@
     if (props.observable) {
       await observableStore.update(props.observable.uuid, {
         tags: deduped([
-          ...props.observable.tags.map((tag) => tag.value),
+          ...props.observable.permanentTags.map((tag) => tag.value),
           ...formTagValues.value,
         ]),
         historyUsername: authStore.user.username,
@@ -158,7 +158,7 @@
 
   const createNewTags = async () => {
     for (const tag of uniqueNewTags.value) {
-      await NodeTag.create({ value: tag });
+      await Tag.create({ value: tag });
     }
     await loadAllExistingTags();
   };

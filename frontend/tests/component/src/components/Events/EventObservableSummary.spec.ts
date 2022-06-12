@@ -9,6 +9,7 @@ import { Event } from "@/services/api/event";
 import { observableSummary } from "@/models/eventSummaries";
 import { observableReadFactory } from "@mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { metadataObjectReadFactory } from "@mocks/metadata";
 import { userReadFactory } from "@mocks/user";
 import { ObservableInstance } from "@/services/api/observable";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
@@ -50,7 +51,7 @@ describe("EventObservableSummary", () => {
       uuid: "ObservableB",
       forDetection: true,
       value: "MediumHits",
-      tags: [genericObjectReadFactory({ value: "TestTag" })],
+      permanentTags: [metadataObjectReadFactory({ value: "TestTag" })],
     }),
   };
   const resultC: observableSummary = {

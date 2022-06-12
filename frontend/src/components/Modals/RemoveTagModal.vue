@@ -54,7 +54,7 @@
   } from "@/stores/index";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
-  import { useTagStore } from "@/stores/nodeTag";
+  import { useTagStore } from "@/stores/tag";
   import { tagRead } from "@/models/tag";
   import { observableTreeRead } from "@/models/observable";
   import { useObservableStore } from "@/stores/observable";
@@ -95,7 +95,7 @@
 
   const initTagOptions = async () => {
     if (props.nodeType === "observable" && props.observable) {
-      tagOptions.value = props.observable.tags;
+      tagOptions.value = props.observable.permanentTags;
     } else if (props.reloadObject == "node") {
       tagOptions.value = nodeStore.open.tags;
     } else {
@@ -118,7 +118,7 @@
       if (props.nodeType == "observable") {
         await removeObservableTags();
       } else {
-        await removeNodeTags();
+        await removeTagsFromObservable();
       }
     } catch (e: unknown) {
       if (typeof e === "string") {
@@ -135,11 +135,11 @@
     }
   }
 
-  const removeNodeTags = async () => {
+  const removeTagsFromObservable = async () => {
     const updateData = selectedStore.selected.map((uuid: any) => ({
       uuid: uuid,
       tags: deduped([
-        ...existingNodeTagValues(uuid),
+        ...existingTagValues(uuid),
         ...formTagValues.value,
       ]).filter((tag) => !formTagValues.value.includes(tag)),
       historyUsername: authStore.user.username,
@@ -148,7 +148,7 @@
     await nodeStore.update(updateData);
   };
 
-  const existingNodeTagValues = (uuid: string) => {
+  const existingTagValues = (uuid: string) => {
     let nodeTags: tagRead[] = [];
     if (props.reloadObject == "table") {
       const node = tableStore.visibleQueriedItemById(uuid);
@@ -165,7 +165,7 @@
     if (props.observable) {
       await observableStore.update(props.observable.uuid, {
         tags: deduped([
-          ...props.observable.tags.map((tag) => tag.value),
+          ...props.observable.permanentTags.map((tag) => tag.value),
           ...formTagValues.value,
         ]).filter((tag) => !formTagValues.value.includes(tag)),
         historyUsername: authStore.user.username,

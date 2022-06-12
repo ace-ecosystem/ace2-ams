@@ -19,11 +19,11 @@
             class="p-button-secondary p-button-outlined p-button-sm"
             @click="copyLink"
           />
-          <NodeTagVue
+          <MetadataTag
             v-for="tag in eventStore.open.tags"
             :key="tag.uuid"
             :tag="tag"
-          ></NodeTagVue>
+          ></MetadataTag>
         </div>
       </template>
       <template #content>
@@ -57,7 +57,7 @@
   import AnalysisDetailsBase from "@/components/Analysis/AnalysisDetailsBase.vue";
   import EventDetailsMenuBar from "@/components/Events/TheEventDetailsMenuBar.vue";
   import EventSummary from "@/components/Events/EventSummary.vue";
-  import NodeTagVue from "@/components/Node/NodeTag.vue";
+  import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
   import { useEventStore } from "@/stores/event";
   import { useSelectedEventStore } from "@/stores/selectedEvent";

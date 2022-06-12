@@ -14,34 +14,39 @@ import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
 import { createTestingPinia } from "@pinia/testing";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { metadataObjectReadFactory } from "@mocks/metadata";
 import { genericQueueableObjectRead } from "@/models/base";
 
 createTestingPinia({ createSpy: vi.fn });
 
 const mockAlertTreeRead = alertTreeReadFactory({
   tags: [
-    genericObjectReadFactory({
+    metadataObjectReadFactory({
       value: "from_address",
       uuid: "uuid3",
       description: null,
     }),
-    genericObjectReadFactory({
+    metadataObjectReadFactory({
       value: "contacted_host",
       uuid: "uuid2",
       description: null,
     }),
-    genericObjectReadFactory({
+    metadataObjectReadFactory({
       value: "contacted_host",
       uuid: "uuid2",
       description: null,
     }),
-    genericObjectReadFactory({
+    metadataObjectReadFactory({
       value: "contacted_host",
       uuid: "uuid2",
       description: null,
     }),
-    genericObjectReadFactory({ value: "c2", uuid: "uuid1", description: null }),
-    genericObjectReadFactory({
+    metadataObjectReadFactory({
+      value: "c2",
+      uuid: "uuid1",
+      description: null,
+    }),
+    metadataObjectReadFactory({
       value: "recipient",
       uuid: "uuid4",
       description: null,

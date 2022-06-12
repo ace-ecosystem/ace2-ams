@@ -13,11 +13,11 @@
         class="p-button-secondary p-button-outlined p-button-sm"
         @click="copyLink"
       />
-      <NodeTagVue
+      <MetadataTag
         v-for="tag in getAllAlertTags(alertStore.open)"
         :key="tag.uuid"
         :tag="tag"
-      ></NodeTagVue>
+      ></MetadataTag>
     </template>
 
     <template #content>
@@ -80,7 +80,7 @@
   import Card from "primevue/card";
   import Message from "primevue/message";
 
-  import NodeTagVue from "@/components/Node/NodeTag.vue";
+  import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
   import { copyToClipboard } from "@/etc/helpers";
   import { useAlertStore } from "@/stores/alert";
