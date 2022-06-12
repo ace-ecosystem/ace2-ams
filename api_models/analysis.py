@@ -10,8 +10,6 @@ from api_models.analysis_module_type import AnalysisModuleTypeRead, AnalysisModu
 class AnalysisBase(BaseModel):
     """Represents an individual analysis that was performed."""
 
-    details: Optional[Json] = Field(description="A JSON representation of the details produced by the analysis")
-
     error_message: Optional[type_str] = Field(description="An optional error message that occurred during analysis")
 
     stack_trace: Optional[type_str] = Field(description="An optional stack trace that occurred during analysis")
@@ -27,6 +25,8 @@ class AnalysisCreateBase(AnalysisBase):
     child_observables: "list[ObservableCreate]" = Field(
         default_factory=list, description="A list of child observables discovered during the analysis"
     )
+
+    details: Optional[Json] = Field(description="A JSON representation of the details produced by the analysis")
 
     run_time: datetime = Field(
         default_factory=datetime.utcnow, description="The time at which the analysis was performed"
