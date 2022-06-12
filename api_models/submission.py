@@ -71,12 +71,16 @@ class SubmissionCreate(NodeCreate, SubmissionBase):
 
 
 class SubmissionRead(NodeRead, SubmissionBase):
+    child_analysis_tags: list[TagRead] = Field(
+        description="A list of tags added to observables by analysis modules", default_factory=list
+    )
+
     child_detection_points: list[NodeDetectionPointRead] = Field(
         description="A list of detection points added to child Nodes in the submission's tree", default_factory=list
     )
 
-    child_tags: list[TagRead] = Field(
-        description="A list of tags added to child Nodes in the submission's tree", default_factory=list
+    child_permanent_tags: list[TagRead] = Field(
+        description="A list of tags permanently added to observables", default_factory=list
     )
 
     child_threat_actors: list[NodeThreatActorRead] = Field(

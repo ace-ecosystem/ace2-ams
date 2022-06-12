@@ -194,10 +194,6 @@ class Submission(Node, HasHistory):
         return SubmissionTreeRead(**self.__dict__)
 
     @property
-    def child_tags(self) -> list[Tag]:
-        return sorted(set(self.child_analysis_tags + self.child_permanent_tags), key=lambda x: x.value)
-
-    @property
     def history_snapshot(self):
         return json.loads(SubmissionRead(**self.__dict__).json())
 

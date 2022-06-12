@@ -274,7 +274,6 @@ def test_filter_by_tags(db):
     assert result_submission1 == [submission1]
     assert result_submission1[0].child_analysis_tags == []
     assert result_submission1[0].child_permanent_tags == []
-    assert result_submission1[0].child_tags == []
     assert [t.value for t in result_submission1[0].tags] == ["submission1_tag"]
 
     # Verify that submission2 is returned when filtering by the "observable2_analysis_tag" tag.
@@ -283,7 +282,6 @@ def test_filter_by_tags(db):
     assert result_submission2 == [submission2]
     assert [t.value for t in result_submission2[0].child_analysis_tags] == ["observable2_analysis_tag"]
     assert result_submission2[0].child_permanent_tags == []
-    assert [t.value for t in result_submission2[0].child_tags] == ["observable2_analysis_tag"]
     assert result_submission2[0].tags == []
 
     # Verify that submission3 is returned when filtering by the "observable3_permanent_tag" tag.
@@ -292,7 +290,6 @@ def test_filter_by_tags(db):
     assert result_submission3 == [submission3]
     assert result_submission3[0].child_analysis_tags == []
     assert [t.value for t in result_submission3[0].child_permanent_tags] == ["observable3_permanent_tag"]
-    assert [t.value for t in result_submission3[0].child_tags] == ["observable3_permanent_tag"]
     assert result_submission3[0].tags == []
 
     # Verify that submission4 is returned when filtering by the multiple tags in submission4.
@@ -303,10 +300,6 @@ def test_filter_by_tags(db):
     assert result_submission4 == [submission4]
     assert [t.value for t in result_submission4[0].child_analysis_tags] == ["observable4_analysis_tag"]
     assert [t.value for t in result_submission4[0].child_permanent_tags] == ["observable4_permanent_tag"]
-    assert [t.value for t in result_submission4[0].child_tags] == [
-        "observable4_analysis_tag",
-        "observable4_permanent_tag",
-    ]
     assert [t.value for t in result_submission4[0].tags] == ["submission4_tag"]
 
 
@@ -446,13 +439,6 @@ def test_read_submission_tree(db):
     # The small.json has one permanent tag applied to an observable.
     assert len(submission.child_permanent_tags) == 1
     assert submission.child_permanent_tags[0].value == "c2"
-
-    # The child_tags list should be the alphabetical order of the analysis tags and permanent tags.
-    assert len(submission.child_tags) == 4
-    assert submission.child_tags[0].value == "c2"
-    assert submission.child_tags[1].value == "contacted_host"
-    assert submission.child_tags[2].value == "from_address"
-    assert submission.child_tags[3].value == "recipient"
 
 
 def test_sort_by_disposition(db):
@@ -621,11 +607,9 @@ def test_tag_functionality(db):
     # Verify the tag relationships on the submissions
     assert [t.value for t in submission1.child_analysis_tags] == ["analysis2_tag", "z_analysis1_tag"]
     assert [t.value for t in submission1.child_permanent_tags] == ["permanent_tag1"]
-    assert [t.value for t in submission1.child_tags] == ["analysis2_tag", "permanent_tag1", "z_analysis1_tag"]
 
     assert submission2.child_analysis_tags == []
     assert [t.value for t in submission2.child_permanent_tags] == ["permanent_tag1"]
-    assert [t.value for t in submission2.child_tags] == ["permanent_tag1"]
 
     # The two instances of O1 across both submissions should be the same observable
     assert sub1_o1.uuid == sub2_o1.uuid
@@ -686,58 +670,3 @@ def test_tag_functionality(db):
     # contain any analysis that added tags to it.
     assert len(submission2_tree["children"][1]["metadata"]) == 0
     assert len(submission2_tree["children"][1]["permanent_tags"]) == 0
-
-
-def test_tag_blah(db):
-    # NOTE: This did not impact the test
-    # submission1 = factory.submission.create(db=db, tags=["submission_tag"])
-    # factory.observable.create_or_read(
-    #     type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, analysis_tags=["obs1"]
-    # )
-
-    submission1 = factory.submission.create(db=db, tags=["submission_tag"])
-    factory.observable.create_or_read(
-        type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, analysis_tags=["obs1"]
-    )
-    # NOTE: This did not impact the test.
-    # factory.observable.create_or_read(
-    #     type="fqdn", value="bad2.com", parent_analysis=submission1.root_analysis, db=db, analysis_tags=["obs2"]
-    # )
-
-    # NOTE: This did not impact the test.
-    # submission2 = factory.submission.create(db=db, tags=["tag1"])
-    # factory.observable.create_or_read(
-    #     type="fqdn", value="bad2.com", parent_analysis=submission2.root_analysis, db=db, analysis_tags=["obs2"]
-    # )
-
-    factory.submission.create(db=db, tags=["tag1"])
-
-    factory.submission.create(db=db, tags=["tag2", "tag3", "tag4"])
-
-    # There should be 3 total submissions
-    result = crud.submission.read_all(db=db)
-    assert len(result) == 3
-
-    # There should only be 1 submission when we filter by tag1
-    result = crud.submission.read_all(tags="tag1", db=db)
-    assert len(result) == 1
-    assert len(result[0].tags) == 1
-    assert result[0].tags[0].value == "tag1"
-
-    # There should only be 1 submission when we filter by tag2 AND tag3
-    result = crud.submission.read_all(tags="tag2,tag3", db=db)
-    assert len(result) == 1
-    assert len(result[0].tags) == 3
-    assert any(t.value == "tag2" for t in result[0].tags)
-    assert any(t.value == "tag3" for t in result[0].tags)
-
-    # There should only be 1 submission when we filter by the child observable tag obs1
-    result = crud.submission.read_all(tags="obs1", db=db)
-    assert len(result) == 1
-    assert result[0].uuid == submission1.uuid
-    assert len(result[0].child_tags) == 1
-    assert result[0].child_tags[0].value == "obs1"
-
-    # All the submissions should be returned if you don't specify any tags for the filter
-    result = crud.submission.read_all(tags="", db=db)
-    assert len(result) == 3

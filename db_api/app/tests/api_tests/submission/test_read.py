@@ -538,8 +538,8 @@ def test_get_filter_tags(client, db):
     get = client.get("/api/submission/?tags=obs1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["uuid"] == str(submission1.uuid)
-    assert len(get.json()["items"][0]["child_tags"]) == 1
-    assert get.json()["items"][0]["child_tags"][0]["value"] == "obs1"
+    assert len(get.json()["items"][0]["child_analysis_tags"]) == 1
+    assert get.json()["items"][0]["child_analysis_tags"][0]["value"] == "obs1"
 
     # All the submissions should be returned if you don't specify any tags for the filter
     get = client.get("/api/submission/?tags=")

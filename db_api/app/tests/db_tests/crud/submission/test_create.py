@@ -70,9 +70,10 @@ def test_create(db):
     assert submission.analyses[1].analysis_module_type_uuid == analysis_module_type.uuid
     assert len(submission.child_detection_points) == 1
     assert submission.child_detection_points[0].value == "detection_point"
-    assert len(submission.child_tags) == 2
-    assert submission.child_tags[0].value == "o_analysis_tag"
-    assert submission.child_tags[1].value == "o_permanent_tag"
+    assert len(submission.child_analysis_tags) == 1
+    assert submission.child_analysis_tags[0].value == "o_analysis_tag"
+    assert len(submission.child_permanent_tags) == 1
+    assert submission.child_permanent_tags[0].value == "o_permanent_tag"
     assert len(submission.child_threat_actors) == 1
     assert submission.child_threat_actors[0].value == "o_threat_actor"
     assert len(submission.child_threats) == 1
