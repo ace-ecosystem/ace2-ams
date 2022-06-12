@@ -4,7 +4,7 @@ import PrimeVue from "primevue/config";
 import TagModal from "@/components/Modals/TagModal.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import { nodeTagRead } from "@/models/nodeTag";
+import { tagRead } from "@/models/tag";
 import { alertReadFactory } from "@mocks/alert";
 import { userReadFactory } from "@mocks/user";
 import { NodeTag } from "@/services/api/nodeTag";
@@ -19,7 +19,7 @@ const testTag = genericObjectReadFactory({ value: "testTag" });
 function factory(
   args: {
     selected: string[];
-    existingTags: nodeTagRead[];
+    existingTags: tagRead[];
     nodeType: "alerts" | "events" | "observable";
     reloadObject: "node" | "table";
     observable: undefined | observableTreeRead;

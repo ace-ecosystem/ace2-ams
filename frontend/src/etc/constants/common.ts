@@ -3,7 +3,7 @@
 import { propertyOption } from "@/models/base";
 import { nodeThreatRead } from "@/models/nodeThreat";
 import { observableTypeRead } from "@/models/observableType";
-import { useNodeTagStore } from "@/stores/nodeTag";
+import { useTagStore } from "@/stores/nodeTag";
 import { useNodeThreatStore } from "@/stores/nodeThreat";
 import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
 import { useObservableTypeStore } from "@/stores/observableType";
@@ -114,7 +114,7 @@ export const nodeTagsProperty: propertyOption = {
   name: commonPropertyTypes.TAGS_PROPERTY,
   label: "Tags",
   type: inputTypes.CHIPS,
-  store: useNodeTagStore,
+  store: useTagStore,
   stringRepr: (value: string[]) => {
     return value
       .map(function (elem) {

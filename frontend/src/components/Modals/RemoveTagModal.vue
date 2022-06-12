@@ -54,8 +54,8 @@
   } from "@/stores/index";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
-  import { useNodeTagStore } from "@/stores/nodeTag";
-  import { nodeTagRead } from "@/models/nodeTag";
+  import { useTagStore } from "@/stores/nodeTag";
+  import { tagRead } from "@/models/tag";
   import { observableTreeRead } from "@/models/observable";
   import { useObservableStore } from "@/stores/observable";
 
@@ -84,12 +84,12 @@
 
   const authStore = useAuthStore();
   const modalStore = useModalStore();
-  const nodeTagStore = useNodeTagStore();
+  const nodeTagStore = useTagStore();
 
   const emit = defineEmits(["requestReload"]);
 
   const formTagValues = ref<string[]>([]);
-  const tagOptions = ref<nodeTagRead[]>([]);
+  const tagOptions = ref<tagRead[]>([]);
   const error = ref<string>();
   const isLoading = ref(false);
 
@@ -149,7 +149,7 @@
   };
 
   const existingNodeTagValues = (uuid: string) => {
-    let nodeTags: nodeTagRead[] = [];
+    let nodeTags: tagRead[] = [];
     if (props.reloadObject == "table") {
       const node = tableStore.visibleQueriedItemById(uuid);
       nodeTags = node ? node.tags : [];
@@ -174,7 +174,7 @@
   };
 
   interface tagEvent {
-    value: nodeTagRead;
+    value: tagRead;
   }
   function addExistingTagToForm(tagEvent: tagEvent) {
     // Add an existing tag to the list of tags to be added

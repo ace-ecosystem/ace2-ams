@@ -1,16 +1,16 @@
 import { defineStore } from "pinia";
-import { nodeTagRead } from "@/models/nodeTag";
+import { tagRead } from "@/models/tag";
 import { NodeTag } from "@/services/api/nodeTag";
 
-export const useNodeTagStore = defineStore({
-  id: "nodeTagStore",
+export const useTagStore = defineStore({
+  id: "tagStore",
 
   state: () => ({
-    items: [] as nodeTagRead[],
+    items: [] as tagRead[],
   }),
 
   getters: {
-    allItems(): nodeTagRead[] {
+    allItems(): tagRead[] {
       return this.items;
     },
   },

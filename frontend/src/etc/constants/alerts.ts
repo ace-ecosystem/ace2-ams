@@ -4,7 +4,7 @@ import { useAlertDispositionStore } from "@/stores/alertDisposition";
 import { useAlertToolStore } from "@/stores/alertTool";
 import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";
-import { useNodeTagStore } from "@/stores/nodeTag";
+import { useTagStore } from "@/stores/nodeTag";
 import { useNodeThreatStore } from "@/stores/nodeThreat";
 import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
 import { useUserStore } from "@/stores/user";
@@ -170,7 +170,7 @@ export const alertTagsProperty: propertyOption = {
   name: alertPropertyTypes.TAGS_PROPERTY,
   label: "Tags",
   type: inputTypes.CHIPS,
-  store: useNodeTagStore,
+  store: useTagStore,
   stringRepr: (filter: string[]) => {
     return filter
       .map(function (elem) {

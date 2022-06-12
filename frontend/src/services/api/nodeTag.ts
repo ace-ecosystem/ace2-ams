@@ -1,9 +1,4 @@
-import {
-  nodeTagCreate,
-  nodeTagRead,
-  nodeTagReadPage,
-  nodeTagUpdate,
-} from "@/models/nodeTag";
+import { tagCreate, tagRead, tagReadPage, tagUpdate } from "@/models/nodeTag";
 import { pageOptionParams, UUID } from "@/models/base";
 import { BaseApi } from "./base";
 
@@ -11,16 +6,16 @@ const api = new BaseApi();
 const endpoint = "/node/tag/";
 
 export const NodeTag = {
-  create: (data: nodeTagCreate, getAfterCreate = false): Promise<void> =>
+  create: (data: tagCreate, getAfterCreate = false): Promise<void> =>
     api.create(endpoint, data, getAfterCreate),
 
-  read: (uuid: UUID): Promise<nodeTagRead> => api.read(`${endpoint}${uuid}`),
+  read: (uuid: UUID): Promise<tagRead> => api.read(`${endpoint}${uuid}`),
 
-  readAll: (): Promise<nodeTagRead[]> => api.readAll(endpoint),
+  readAll: (): Promise<tagRead[]> => api.readAll(endpoint),
 
-  readPage: (params?: pageOptionParams): Promise<nodeTagReadPage> =>
+  readPage: (params?: pageOptionParams): Promise<tagReadPage> =>
     api.read(`${endpoint}`, params),
 
-  update: (uuid: UUID, data: nodeTagUpdate): Promise<void> =>
+  update: (uuid: UUID, data: tagUpdate): Promise<void> =>
     api.update(`${endpoint}${uuid}`, data),
 };

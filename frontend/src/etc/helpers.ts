@@ -6,7 +6,7 @@ import {
 } from "@/models/alert";
 import { genericQueueableObjectRead, propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
-import { nodeTagRead } from "@/models/nodeTag";
+import { tagRead } from "@/models/tag";
 import { isValidDate, isObject } from "@/etc/validators";
 import { inputTypes } from "@/etc/constants/base";
 
@@ -206,7 +206,7 @@ export function formatNodeFiltersForAPI(
 
 export function getAllAlertTags(
   alert: alertRead | alertSummary | alertTreeRead,
-): Array<nodeTagRead> {
+): Array<tagRead> {
   const allTags = alert.tags.concat(alert.childTags);
 
   // Return a sorted and deduplicated list of the tags based on the tag UUID.

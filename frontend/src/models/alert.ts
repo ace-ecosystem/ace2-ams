@@ -4,16 +4,15 @@ import { alertDispositionRead } from "./alertDisposition";
 import { alertToolRead } from "./alertTool";
 import { alertToolInstanceRead } from "./alertToolInstance";
 import { alertTypeRead } from "./alertType";
-import { analysisTreeRead } from "./analysis";
 import { userRead } from "./user";
 import { nodeCommentRead } from "./nodeComment";
 import { nodeDetectionPointRead } from "./nodeDetectionPoint";
-import { nodeTagRead } from "./nodeTag";
 import { observableCreate, observableTreeRead } from "./observable";
 import { observableTypeRead } from "./observableType";
 import { nodeThreatActorRead } from "./nodeThreatActor";
 import { nodeThreatRead } from "./nodeThreat";
 import { queueRead } from "./queue";
+import { tagRead } from "./tag";
 
 export interface alertCreate extends nodeCreate, historyUsername {
   alert: boolean;
@@ -36,8 +35,9 @@ export interface alertCreate extends nodeCreate, historyUsername {
 
 export interface alertRead extends nodeRead {
   alert: boolean;
+  childAnalysisTags: tagRead[];
   childDetectionPoints: nodeDetectionPointRead[];
-  childTags: nodeTagRead[];
+  childPermanentTags: tagRead[];
   childThreatActors: nodeThreatActorRead[];
   childThreats: nodeThreatRead[];
   comments: nodeCommentRead[];
@@ -53,7 +53,7 @@ export interface alertRead extends nodeRead {
   owner: userRead | null;
   ownershipTime: Date | null;
   queue: queueRead;
-  tags: nodeTagRead[];
+  tags: tagRead[];
   threatActors: nodeThreatActorRead[];
   threats: nodeThreatRead[];
   tool: alertToolRead | null;
@@ -64,7 +64,8 @@ export interface alertRead extends nodeRead {
 
 // High-level alert data that will be displayed in Manage Alerts or in an event
 export interface alertSummary {
-  childTags: nodeTagRead[];
+  childAnalysisTags: tagRead[];
+  childPermanentTags: tagRead[];
   comments: nodeCommentRead[];
   description: string;
   disposition: string;
@@ -79,7 +80,7 @@ export interface alertSummary {
   ownershipTime: Date | null;
   ownerWithTime: string;
   queue: string;
-  tags: nodeTagRead[];
+  tags: tagRead[];
   tool: string;
   toolInstance: string;
   type: string;
@@ -87,7 +88,7 @@ export interface alertSummary {
 }
 
 export interface alertTreeRead extends alertRead {
-  children: (analysisTreeRead | observableTreeRead)[];
+  children: observableTreeRead[];
 }
 
 export interface alertReadPage extends nodeReadPage {
@@ -142,7 +143,7 @@ export type alertFilterValues =
       | string
       | observableTypeRead[]
       | nodeThreatRead[]
-      | nodeTagRead[]
+      | tagRead[]
       | Date
       | {
           category: observableTypeRead;

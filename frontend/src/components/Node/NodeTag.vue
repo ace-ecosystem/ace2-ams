@@ -14,7 +14,7 @@
   import { defineProps, inject, PropType } from "vue";
   import { useRouter } from "vue-router";
   import { useFilterStore } from "@/stores/filter";
-  import { nodeTagRead } from "@/models/nodeTag";
+  import { tagRead } from "@/models/tag";
 
   const router = useRouter();
   const nodeType = inject("nodeType") as "alerts" | "events";
@@ -26,7 +26,7 @@
   const filterStore = useFilterStore();
 
   const props = defineProps({
-    tag: { type: Object as PropType<nodeTagRead>, required: true },
+    tag: { type: Object as PropType<tagRead>, required: true },
     overrideNodeType: {
       type: String as PropType<"alerts" | "events">,
       required: false,
