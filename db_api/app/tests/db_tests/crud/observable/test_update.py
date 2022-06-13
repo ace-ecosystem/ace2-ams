@@ -176,3 +176,16 @@ def test_update_type(db):
     assert observable.history[1].diff["old_value"] == "test_type"
     assert observable.history[1].diff["new_value"] == "test_type2"
     assert observable.history[1].snapshot["type"]["value"] == "test_type2"
+
+
+def test_associate_permanent_tags_with_observable_duplicate(db):
+    tag = factory.tag.create_or_read(value="tag", db=db)
+    submission = factory.submission.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test", value="test", parent_analysis=submission.root_analysis, permanent_tags=["tag"], db=db
+    )
+    assert [t.value for t in observable.permanent_tags] == ["tag"]
+
+    # Try to add the same tag to the observable. Any duplicate tag associations are silently skipped.
+    crud.observable.associate_permanent_tags_with_observable(observable=observable, tags=[tag], db=db)
+    assert [t.value for t in observable.permanent_tags] == ["tag"]
