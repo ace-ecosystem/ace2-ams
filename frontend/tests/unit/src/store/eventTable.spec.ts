@@ -27,7 +27,7 @@ const mockOwner = userReadFactory();
 const mockPreventionTool = queueableObjectReadFactory({
   value: "preventionTool",
 });
-const mockRiskLevel = queueableObjectReadFactory({ value: "riskLevel" });
+const mockSeverity = queueableObjectReadFactory({ value: "severity" });
 const mockStatus = queueableObjectReadFactory({ value: "status" });
 const mockThreat = nodeThreatReadFactory();
 const mockThreatActor = queueableObjectReadFactory({ value: "threatActor" });
@@ -37,7 +37,7 @@ const mockEventReadC = eventReadFactory({
   uuid: "uuid3",
   owner: mockOwner,
   preventionTools: [mockPreventionTool],
-  riskLevel: mockRiskLevel,
+  severity: mockSeverity,
   status: mockStatus,
   threatActors: [mockThreatActor],
   threats: [mockThreat],
@@ -48,7 +48,7 @@ const mockEventReadCSummary = eventSummaryFactory({
   uuid: "uuid3",
   owner: "Test Analyst",
   preventionTools: ["preventionTool"],
-  riskLevel: "riskLevel",
+  severity: "severity",
   status: "status",
   threatActors: ["threatActor"],
   threats: ["nodeThreat"],

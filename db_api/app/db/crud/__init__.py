@@ -4,7 +4,7 @@ from db.crud import analysis_module_type
 from db.crud import event
 from db.crud import event_prevention_tool
 from db.crud import event_remediation
-from db.crud import event_risk_level
+from db.crud import event_severity
 from db.crud import event_source
 from db.crud import event_status
 from db.crud import event_type

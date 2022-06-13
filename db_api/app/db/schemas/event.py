@@ -70,9 +70,9 @@ class Event(Node, HasHistory):
 
     remediations = relationship("EventRemediation", secondary=event_remediation_mapping, lazy="selectin")
 
-    risk_level = relationship("EventRiskLevel", lazy="selectin")
+    severity = relationship("EventSeverity", lazy="selectin")
 
-    risk_level_uuid = Column(UUID(as_uuid=True), ForeignKey("event_risk_level.uuid"))
+    severity_uuid = Column(UUID(as_uuid=True), ForeignKey("event_severity.uuid"))
 
     source = relationship("EventSource", lazy="selectin")
 

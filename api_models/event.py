@@ -7,7 +7,7 @@ from api_models import type_str, validators
 from api_models.alert_disposition import AlertDispositionRead
 from api_models.event_prevention_tool import EventPreventionToolRead
 from api_models.event_remediation import EventRemediationRead
-from api_models.event_risk_level import EventRiskLevelRead
+from api_models.event_severity import EventSeverityRead
 from api_models.event_source import EventSourceRead
 from api_models.event_status import EventStatusRead
 from api_models.event_type import EventTypeRead
@@ -59,7 +59,7 @@ class EventBase(NodeBase):
         description="A list of remediations performed to clean up the attack represented by the event",
     )
 
-    risk_level: Optional[type_str] = Field(description="The risk level assigned to the event")
+    severity: Optional[type_str] = Field(description="The severity assigned to the event")
 
     source: Optional[type_str] = Field(description="The source of the event")
 
@@ -131,7 +131,7 @@ class EventRead(NodeRead, EventBase):
         description="A list of remediations performed to clean up the attack represented by the event"
     )
 
-    risk_level: Optional[EventRiskLevelRead] = Field(description="The risk level assigned to the event")
+    severity: Optional[EventSeverityRead] = Field(description="The severity assigned to the event")
 
     source: Optional[EventSourceRead] = Field(description="The source of the event")
 

@@ -5,7 +5,7 @@ import { eventVectorRead } from "@/models/eventVector";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
 import { useEventPreventionToolStore } from "@/stores/eventPreventionTool";
 import { useEventRemediationStore } from "@/stores/eventRemediation";
-import { useEventRiskLevelStore } from "@/stores/eventRiskLevel";
+import { useEventSeverityStore } from "@/stores/eventSeverity";
 import { useEventSourceStore } from "@/stores/eventSource";
 import { useEventStatusStore } from "@/stores/eventStatus";
 import { useEventTypeStore } from "@/stores/eventType";
@@ -45,7 +45,7 @@ export const eventPropertyTypes: Record<string, string> = {
   DISPOSITION_PROPERTY: "disposition",
   PREVENTION_TOOLS_PROPERTY: "preventionTools",
   REMEDIATIONS_PROPERTY: "remediations",
-  RISK_LEVEL_PROPERTY: "riskLevel",
+  SEVERITY_PROPERTY: "severity",
   SOURCE_PROPERTY: "source",
   STATUS_PROPERTY: "status",
   VECTORS_PROPERTY: "vectors",
@@ -175,11 +175,11 @@ export const eventPreventionToolsProperty: propertyOption = {
     return valueString.split(",");
   },
 };
-export const eventRiskLevelProperty: propertyOption = {
-  name: eventPropertyTypes.RISK_LEVEL_PROPERTY,
-  label: "Risk Level",
+export const eventSeverityProperty: propertyOption = {
+  name: eventPropertyTypes.SEVERITY_PROPERTY,
+  label: "Severity",
   type: inputTypes.SELECT,
-  store: useEventRiskLevelStore,
+  store: useEventSeverityStore,
   queueDependent: true,
 
   optionProperty: "value",
@@ -278,7 +278,7 @@ export const validEventFilters: propertyOption[] = [
   ownerProperty,
   eventPreventionToolsProperty,
   queueProperty,
-  eventRiskLevelProperty,
+  eventSeverityProperty,
   eventSourceProperty,
   eventStatusProperty,
   nodeTagsProperty,
