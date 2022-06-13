@@ -118,8 +118,23 @@ class ObservableRead(NodeRead, ObservableBase):
         orm_mode = True
 
 
+class ObservableSubmissionRead(ObservableRead):
+    """Model used to control which information for an Observable is displayed when getting Observables contained in a list of Submissions."""
+
+    analysis_tags: list[TagRead] = Field(
+        default_factory=list, description="A list of tags added to the observable by analysis"
+    )
+
+    class Config:
+        orm_mode = True
+
+
 class ObservableSubmissionTreeRead(ObservableRead):
     """Model used to control which information for an Observable is displayed when getting a submission tree"""
+
+    analysis_tags: list[TagRead] = Field(
+        default_factory=list, description="A list of tags added to the observable by analysis"
+    )
 
     children: "list[AnalysisSubmissionTreeRead]" = Field(
         default_factory=list, description="A list of this observable's child analysis"
@@ -127,10 +142,6 @@ class ObservableSubmissionTreeRead(ObservableRead):
 
     first_appearance: bool = Field(
         default=True, description="Whether or not this is the first time the object appears in the tree"
-    )
-
-    metadata: list[dict] = Field(
-        default_factory=list, description="A list of metadata added to the observable by analysis in the tree"
     )
 
     class Config:

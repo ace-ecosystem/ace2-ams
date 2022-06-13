@@ -33,6 +33,9 @@ class Observable(Node, HasHistory):
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
 
+    # This is an empty list that gets populated by certain submission-related queries.
+    analysis_tags: list[Tag] = []
+
     context = Column(String)
 
     # Using timezone=True causes PostgreSQL to store the datetime as UTC. Datetimes without timezone

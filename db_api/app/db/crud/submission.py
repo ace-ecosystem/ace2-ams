@@ -14,6 +14,7 @@ from api_models.submission import SubmissionCreate, SubmissionUpdate
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
+from db.schemas.analysis_metadata import AnalysisMetadata
 from db.schemas.event import Event
 from db.schemas.node import Node
 from db.schemas.node_threat import NodeThreat
@@ -449,6 +450,7 @@ def read_by_uuid(uuid: UUID, db: Session) -> Submission:
 def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
     """Returns a list of the unique observables contained within the given submission UUIDs."""
 
+    # Get a list of all the observables contained within the given submission UUIDs
     query = (
         select(Observable)
         .join(
@@ -464,10 +466,41 @@ def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
             Submission,
             onclause=and_(Submission.uuid == submission_analysis_mapping.c.submission_uuid, Submission.uuid.in_(uuids)),
         )
-        .order_by(ObservableType.value, Observable.value)
     )
 
-    return db.execute(query).unique().scalars().all()
+    # Organize the observables into a dictionary with their UUIDs as the key
+    observables_by_uuid: dict[UUID, Observable] = {o.uuid: o for o in db.execute(query).unique().scalars().all()}
+
+    # Get a list of the analysis metadata tags added to the observables inside of the given submission UUIDs
+    query = (
+        select(AnalysisMetadata)
+        .join(
+            submission_analysis_mapping,
+            onclause=and_(
+                submission_analysis_mapping.c.analysis_uuid == AnalysisMetadata.analysis_uuid,
+                submission_analysis_mapping.c.submission_uuid.in_(uuids),
+            ),
+        )
+        .join(Tag, onclause=Tag.uuid == AnalysisMetadata.metadata_uuid)
+    )
+    analysis_metadata_tags: list[AnalysisMetadata] = db.execute(query).scalars().all()
+
+    # Build a dictionary of the analysis tags with their observable UUIDs as the keys
+    analysis_tags_by_observable_uuid: dict[UUID, list[Tag]] = {}
+    for analysis_metadata in analysis_metadata_tags:
+        if analysis_metadata.observable_uuid not in analysis_tags_by_observable_uuid:
+            analysis_tags_by_observable_uuid[analysis_metadata.observable_uuid] = []
+
+        analysis_tags_by_observable_uuid[analysis_metadata.observable_uuid].append(analysis_metadata.metadata_object)
+
+    # Inject the analysis tags into the observables
+    for observable_uuid in analysis_tags_by_observable_uuid:
+        observables_by_uuid[observable_uuid].analysis_tags = sorted(
+            set(analysis_tags_by_observable_uuid[observable_uuid]), key=lambda t: t.value
+        )
+
+    # Return the list of observables sorted by their type then value
+    return sorted(observables_by_uuid.values(), key=lambda o: (o.type.value, o.value))
 
 
 def read_tree(uuid: UUID, db: Session) -> dict:
@@ -499,11 +532,18 @@ def read_tree(uuid: UUID, db: Session) -> dict:
             if db_child_observable.uuid not in child_observables:
                 child_observables[db_child_observable.uuid] = db_child_observable.convert_to_pydantic()
 
-            # Add any metadata added by the analysis to the observable model.
-            child_observables[db_child_observable.uuid].metadata += [
+            #
+            # METADATA
+            #
+            # Inject metadata objects added by analysis into the observable model. We could simply add a list
+            # of metadata objects to the observable model, but this would require the GUI to perform extra
+            # work to display certain kinds of metadata (such as tags).
+
+            # Add any tags added by the analysis to the observable model.
+            child_observables[db_child_observable.uuid].analysis_tags += [
                 m.metadata_object.convert_to_pydantic()
                 for m in db_analysis.analysis_metadata
-                if m.observable_uuid == db_child_observable.uuid
+                if m.metadata_object.metadata_type == "tag" and m.observable_uuid == db_child_observable.uuid
             ]
 
             # Add the observable as a child to the analysis model.
@@ -512,8 +552,12 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     # Loop over each overvable in the submission
     for observable_uuid, observable in child_observables.items():
 
-        # Dedup its metadata and sort it by the metadata type then its value
-        observable.metadata = sorted(set(observable.metadata), key=lambda m: (m.metadata_type, m.value))
+        #
+        # METADATA
+        #
+        # Dedup the various types of metadata that were injected into the observable model.
+
+        observable.analysis_tags = sorted(set(observable.analysis_tags), key=lambda m: m.value)
 
         # Add its analysis as a child to the observable model.
         if observable_uuid in analyses_by_target:
