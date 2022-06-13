@@ -194,5 +194,6 @@ from api_models.analysis import AnalysisCreateInObservable, AnalysisSubmissionTr
 
 ObservableCreate.update_forward_refs()
 ObservableCreateInSubmission.update_forward_refs()
+ObservableSubmissionRead.update_forward_refs()
 ObservableSubmissionTreeRead.update_forward_refs()
 ObservableRead.update_forward_refs()
