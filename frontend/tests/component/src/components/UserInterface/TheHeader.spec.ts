@@ -1,22 +1,42 @@
 import { mount } from "@cypress/vue";
-import { createPinia } from "pinia";
+import { createCustomCypressPinia } from "@tests/cypressHelpers";
+import { userReadFactory } from "@mocks/user";
+
 import PrimeVue from "primevue/config";
 import router from "@/router/index";
 import authApi from "@/services/api/auth";
 
 import TheHeader from "@/components/UserInterface/TheHeader.vue";
 
-function factory() {
+function factory(user: any) {
   mount(TheHeader, {
     global: {
-      plugins: [PrimeVue, createPinia(), router],
+      plugins: [
+        PrimeVue,
+        createCustomCypressPinia({
+          initialState: {
+            authStore: {
+              user: user,
+            },
+          },
+        }),
+        router,
+      ],
     },
   });
 }
 
 describe("TheHeader", () => {
-  it("renders with expected elements", () => {
-    factory();
+  it("renders with expected elements when not auth'd", () => {
+    factory(null);
+    cy.get("img").should("be.visible");
+    cy.contains("Analyze").should("not.exist");
+    cy.contains("Alerts").should("not.exist");
+    cy.contains("Events").should("not.exist");
+    cy.get(".pi").should("have.length", 1);
+  });
+  it("renders with expected elements when auth'd", () => {
+    factory(userReadFactory());
     cy.get("img").should("be.visible");
     cy.contains("Analyze").should("be.visible");
     cy.contains("Alerts").should("be.visible");
@@ -25,7 +45,7 @@ describe("TheHeader", () => {
   });
   it("should attempt to logout when logout button clicked", () => {
     cy.stub(authApi, "logout").as("logout").resolves();
-    factory();
+    factory(userReadFactory());
     cy.get(".pi").last().click();
     cy.get("@logout").should("have.been.calledOnce");
   });
