@@ -64,9 +64,20 @@
         @request-reload="reload"
       ></component>
     </span>
-    <span v-if="showTags && allTags.length" class="leaf-element">
+    <span
+      v-if="
+        showTags &&
+        (observable.permanentTags.length || observable.analysisTags.length)
+      "
+      class="leaf-element"
+    >
       <MetadataTag
-        v-for="tag in allTags"
+        v-for="tag in observable.permanentTags"
+        :key="tag.uuid"
+        :tag="tag"
+      ></MetadataTag>
+      <MetadataTag
+        v-for="tag in observable.analysisTags"
         :key="tag.uuid"
         :tag="tag"
       ></MetadataTag
@@ -157,11 +168,6 @@
         style.value = observableMetadata[observableType.value].style;
       }
     }
-  });
-
-  const allTags = computed(() => {
-    // TODO: Loop through props.observable.metadata array to get all the analysis tags
-    return props.observable.permanentTags;
   });
 
   const itemsFiltered = computed(() => {

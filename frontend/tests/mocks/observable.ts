@@ -1,4 +1,8 @@
-import { observableRead, observableTreeRead } from "@/models/observable";
+import {
+  observableInAlertRead,
+  observableRead,
+  observableTreeRead,
+} from "@/models/observable";
 import { genericObjectReadFactory } from "./genericObject";
 
 export const observableReadFactory = ({
@@ -36,7 +40,45 @@ export const observableReadFactory = ({
   observableRelationships: observableRelationships,
 });
 
+export const observableInAlertReadFactory = ({
+  time = new Date("2020-01-01"),
+  uuid = "observableUuid1",
+  value = "TestObservable",
+  analysisTags = [],
+  comments = [],
+  context = null,
+  directives = [],
+  detectionPoints = [],
+  forDetection = false,
+  expiresOn = null,
+  permanentTags = [],
+  threatActors = [],
+  threats = [],
+  type = genericObjectReadFactory({ value: "testObservableType" }),
+  version = "observableVersion1",
+  observableRelationships = [],
+}: Partial<observableInAlertRead> = {}): observableInAlertRead => ({
+  time: time,
+  uuid: uuid,
+  value: value,
+  analysisTags: analysisTags,
+  comments: comments,
+  context: context,
+  directives: directives,
+  detectionPoints: detectionPoints,
+  forDetection: forDetection,
+  expiresOn: expiresOn,
+  permanentTags: permanentTags,
+  threatActors: threatActors,
+  threats: threats,
+  type: type,
+  nodeType: "observable",
+  version: version,
+  observableRelationships: observableRelationships,
+});
+
 export const observableTreeReadFactory = ({
+  analysisTags = [],
   children = [],
   time = new Date("2020-01-01"),
   uuid = "observableUuid1",
@@ -48,7 +90,6 @@ export const observableTreeReadFactory = ({
   firstAppearance = undefined,
   forDetection = false,
   expiresOn = null,
-  metadata = [],
   permanentTags = [],
   threatActors = [],
   threats = [],
@@ -56,6 +97,7 @@ export const observableTreeReadFactory = ({
   version = "observableVersion1",
   observableRelationships = [],
 }: Partial<observableTreeRead> = {}): observableTreeRead => ({
+  analysisTags: analysisTags,
   children: children,
   uuid: uuid,
   version: version,
@@ -68,7 +110,6 @@ export const observableTreeReadFactory = ({
   firstAppearance: firstAppearance,
   forDetection: forDetection,
   expiresOn: expiresOn,
-  metadata: metadata,
   permanentTags: permanentTags,
   threatActors: threatActors,
   threats: threats,

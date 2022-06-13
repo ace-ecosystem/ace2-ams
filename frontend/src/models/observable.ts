@@ -1,7 +1,6 @@
 import { Component } from "vue";
 import { analysisTreeRead } from "./analysis";
 import { historyUsername, UUID } from "./base";
-import { metadataRead } from "./metadata";
 import { nodeCreate, nodeRead, nodeUpdate } from "./node";
 import { nodeCommentRead } from "./nodeComment";
 import { nodeDetectionPointRead } from "./nodeDetectionPoint";
@@ -45,6 +44,10 @@ export interface observableRead extends nodeRead {
   value: string;
 }
 
+export interface observableInAlertRead extends observableRead {
+  analysisTags: tagRead[];
+}
+
 export interface observableReadPage {
   items: observableRead[];
   limit: number;
@@ -53,9 +56,9 @@ export interface observableReadPage {
 }
 
 export interface observableTreeRead extends observableRead {
+  analysisTags: tagRead[];
   children: analysisTreeRead[];
   firstAppearance?: boolean;
-  metadata: metadataRead[];
 }
 
 export interface observableUpdate extends nodeUpdate, historyUsername {
