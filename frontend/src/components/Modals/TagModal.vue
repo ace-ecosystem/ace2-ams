@@ -11,7 +11,7 @@
     <span class="p-fluid">
       <Chips v-model="formTagValues" data-cy="chips-container" />
       <Dropdown
-        :options="nodeTagStore.allItems"
+        :options="tagStore.allItems"
         option-label="value"
         :filter="true"
         placeholder="Select from existing tags"
@@ -84,7 +84,7 @@
 
   const authStore = useAuthStore();
   const modalStore = useModalStore();
-  const nodeTagStore = useTagStore();
+  const tagStore = useTagStore();
 
   const emit = defineEmits(["requestReload"]);
 
@@ -93,7 +93,7 @@
   const isLoading = ref(false);
 
   async function loadAllExistingTags() {
-    await nodeTagStore.readAll();
+    await tagStore.readAll();
   }
 
   async function createAndAddTags() {
@@ -125,21 +125,21 @@
   const addNodeTags = async () => {
     const updateData = selectedStore.selected.map((uuid: any) => ({
       uuid: uuid,
-      tags: deduped([...existingNodeTagValues(uuid), ...formTagValues.value]),
+      tags: deduped([...getExistingTagValues(uuid), ...formTagValues.value]),
     }));
 
     await nodeStore.update(updateData);
   };
 
-  const existingNodeTagValues = (uuid: string) => {
-    let nodeTags: tagRead[] = [];
+  const getExistingTagValues = (uuid: string) => {
+    let tags: tagRead[] = [];
     if (props.reloadObject == "table") {
       const node = tableStore.visibleQueriedItemById(uuid);
-      nodeTags = node ? node.tags : [];
+      tags = node ? node.tags : [];
     } else if (props.reloadObject == "node") {
-      nodeTags = nodeStore.open.tags;
+      tags = nodeStore.open.tags;
     }
-    return nodeTags.map((tag) => tag.value);
+    return tags.map((tag) => tag.value);
   };
 
   const addObservableTags = async () => {
@@ -170,7 +170,7 @@
   });
 
   const existingTagValues = computed(() => {
-    return nodeTagStore.allItems.map((tag) => tag.value);
+    return tagStore.allItems.map((tag) => tag.value);
   });
 
   interface tagEvent {

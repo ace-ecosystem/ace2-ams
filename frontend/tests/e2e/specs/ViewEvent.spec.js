@@ -137,7 +137,7 @@ describe("ViewEvent.vue actions", () => {
   });
   it("Correctly adds tags via add tags modal and reloads page", () => {
     cy.intercept("PATCH", "/api/event/").as("updateEvent");
-    cy.intercept("POST", "/api/node/tag/").as("addTag");
+    cy.intercept("POST", "/api/tag/").as("addTag");
 
     // Click on the Actions dropdown
     cy.get('[aria-haspopup="true"]').eq(0).click();

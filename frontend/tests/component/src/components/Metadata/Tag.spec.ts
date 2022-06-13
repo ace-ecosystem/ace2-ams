@@ -1,18 +1,18 @@
 import { mount } from "@cypress/vue";
 import PrimeVue from "primevue/config";
 
-import NodeTag from "@/components/Node/NodeTag.vue";
+import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 import router from "@/router/index";
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import { metadataObjectReadFactory } from "@mocks/metadata";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 
-const testTag = genericObjectReadFactory({ value: "testTag" });
+const testTag = metadataObjectReadFactory({ value: "testTag" });
 
 function factory(
   nodeType: "alerts" | "events" = "alerts",
   overrideNodeType?: "alerts" | "events",
 ) {
-  return mount(NodeTag, {
+  return mount(MetadataTag, {
     global: {
       plugins: [PrimeVue, createCustomCypressPinia(), router],
       provide: { nodeType: nodeType },
@@ -24,7 +24,7 @@ function factory(
   });
 }
 
-describe("NodeTag", () => {
+describe("MetadataTag", () => {
   it("renders as expected", () => {
     factory();
     cy.contains("testTag").should("be.visible");

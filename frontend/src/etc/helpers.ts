@@ -211,7 +211,7 @@ export function getAllAlertTags(
     .concat(alert.childAnalysisTags)
     .concat(alert.childPermanentTags);
 
-  // Return a sorted and deduplicated list of the tags based on the tag UUID.
+  // Return a sorted and deduplicated list of the tags based on the tag value.
   return [...new Map(allTags.map((v) => [v.uuid, v])).values()].sort((a, b) =>
     a.value > b.value ? 1 : -1,
   );

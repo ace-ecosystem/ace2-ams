@@ -749,8 +749,8 @@ describe("Manage Alerts - Single Alert Tests", () => {
 
   describe("Tags", () => {
     it("will add given tags to an alert via the tag modal", () => {
-      cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTags");
-      cy.intercept("POST", "/api/node/tag").as("addTags");
+      cy.intercept("GET", "/api/tag/?offset=0").as("getNodeTags");
+      cy.intercept("POST", "/api/tag").as("addTags");
       cy.intercept("PATCH", "/api/alert/").as("updateAlert");
 
       // Get first visible alert checkbox

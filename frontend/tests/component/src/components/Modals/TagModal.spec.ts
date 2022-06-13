@@ -61,7 +61,7 @@ function factory(
             selectedAlertStore: {
               selected: args.selected,
             },
-            nodeTagStore: {
+            tagStore: {
               items: args.existingTags,
             },
           },
