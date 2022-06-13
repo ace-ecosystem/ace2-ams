@@ -74,7 +74,22 @@ describe("AnalyzeAlertForm Setup", () => {
     cy.get("div").contains("Alert Details");
     cy.get("div").contains("Advanced");
     cy.get("div").contains("Observables");
-    cy.get("button").contains("Analyze!");
+    cy.get("button").contains("Submit Alert");
+    cy.get("button").contains("Submit Multiple Alerts");
+  });
+  it("disables 'Submit Multiple Alerts' button unless >1 (or at least 1 multiAdd) observables are in form", () => {
+    factory();
+    // Initial state
+    cy.contains("Submit Multiple Alerts").should("be.disabled");
+    // Add one observable
+    cy.contains("Add").click();
+    cy.contains("Submit Multiple Alerts").should("not.be.disabled");
+    // Delete observable to return to initial state
+    cy.get('[name="delete-observable"]').last().click();
+    cy.contains("Submit Multiple Alerts").should("be.disabled");
+    // Switch to multiple observable input
+    cy.get('[name="toggle-multi-observable"]').click();
+    cy.contains("Submit Multiple Alerts").should("not.be.disabled");
   });
 });
 
@@ -151,7 +166,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     cy.get("[name=observable-value] input").eq(1).type(testObservableValueB);
 
     // Submit
-    cy.contains("Analyze!").eq(0).click();
+    cy.contains("Submit Alert").click();
     cy.get("@CreateAlertA").should("have.been.called");
 
     // Should route to last created alert
@@ -188,7 +203,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     cy.contains("testNodeDirective").click();
 
     // Submit
-    cy.contains("Analyze!").eq(0).click();
+    cy.contains("Submit Alert").eq(0).click();
     cy.get("@CreateAlertA").should("have.been.called");
 
     // Should route to last created alert
@@ -223,7 +238,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     cy.get("[name=observable-value] textarea").type(testObservableValueMultiA);
 
     // Submit
-    cy.contains("Analyze!").eq(0).click();
+    cy.contains("Submit Alert").click();
 
     cy.get("@CreateAlertA").should("have.been.called");
 
@@ -269,8 +284,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     cy.get("[name=observable-value] input").eq(1).type(testObservableValueB);
 
     // Submit using multi-add
-    cy.get(".p-splitbutton > .p-button-icon-only").click();
-    cy.contains("Create multiple alerts").click();
+    cy.contains("Submit Multiple Alerts").click();
 
     cy.get("@CreateAlertA").should("have.been.called");
     cy.get("@CreateAlertB").should("have.been.called");
@@ -329,8 +343,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     cy.get("[name=observable-value] textarea").type(testObservableValueMultiA);
 
     // Submit using multi-add
-    cy.get(".p-splitbutton > .p-button-icon-only").click();
-    cy.contains("Create multiple alerts").click();
+    cy.contains("Submit Multiple Alerts").click();
 
     cy.get("@CreateAlertA").should("have.been.called");
     cy.get("@CreateAlertB").should("have.been.called");
