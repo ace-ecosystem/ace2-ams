@@ -81,6 +81,7 @@
   provide("analysisModuleComponents", config.analysis.analysisModuleComponents);
   provide("availableFilters", config.events.eventFilters);
   provide("availableEditFields", config.events.eventEditableProperties);
+  provide("closedEventStatus", config.events.closedEventStatus);
 
   onBeforeMount(async () => {
     await initPage(route.params.eventID);

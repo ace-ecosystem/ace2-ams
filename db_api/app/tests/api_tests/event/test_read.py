@@ -1489,21 +1489,21 @@ def test_get_filter_remediations(client, db):
     assert get.json()["total"] == 3
 
 
-def test_get_filter_risk_level(client, db):
+def test_get_filter_severity(client, db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db, risk_level="value1")
+    factory.event.create_or_read(name="event2", db=db, severity="value1")
 
     # There should be 2 total events
     get = client.get("/api/event/")
     assert get.json()["total"] == 2
 
     # There should only be 1 event when we filter by value1
-    get = client.get("/api/event/?risk_level=value1")
+    get = client.get("/api/event/?severity=value1")
     assert get.json()["total"] == 1
-    assert get.json()["items"][0]["risk_level"]["value"] == "value1"
+    assert get.json()["items"][0]["severity"]["value"] == "value1"
 
     # All the events should be returned if you don't specify any value for the filter
-    get = client.get("/api/event/?risk_level=")
+    get = client.get("/api/event/?severity=")
     assert get.json()["total"] == 2
 
 
@@ -1784,20 +1784,20 @@ def test_get_sort_by_owner(client, db):
     assert get.json()["items"][1]["name"] == "event2"
 
 
-def test_get_sort_by_risk_level(client, db):
+def test_get_sort_by_severity(client, db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db, risk_level="value1")
-    factory.event.create_or_read(name="event3", db=db, risk_level="value2")
+    factory.event.create_or_read(name="event2", db=db, severity="value1")
+    factory.event.create_or_read(name="event3", db=db, severity="value2")
 
     # If you sort descending: event1, event3, event2
-    get = client.get("/api/event/?sort=risk_level|desc")
+    get = client.get("/api/event/?sort=severity|desc")
     assert get.json()["total"] == 3
     assert get.json()["items"][0]["name"] == "event1"
     assert get.json()["items"][1]["name"] == "event3"
     assert get.json()["items"][2]["name"] == "event2"
 
     # If you sort ascending: event2, event3, event1
-    get = client.get("/api/event/?sort=risk_level|asc")
+    get = client.get("/api/event/?sort=severity|asc")
     assert get.json()["total"] == 3
     assert get.json()["items"][0]["name"] == "event2"
     assert get.json()["items"][1]["name"] == "event3"

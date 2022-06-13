@@ -87,13 +87,13 @@ describe("ManageEvents.vue table functionality", () => {
     // Check default columns in column select
     cy.get('[data-cy="table-column-select"]').should(
       "have.text",
-      "Created, Name, Threats, Risk Level, Status, Owner",
+      "Created, Name, Threats, Severity, Status, Owner",
     );
     // Check columns in table
     cy.get(".p-column-title").eq(0).should("have.text", "Created");
     cy.get(".p-column-title").eq(1).should("have.text", "Name");
     cy.get(".p-column-title").eq(2).should("have.text", "Threats");
-    cy.get(".p-column-title").eq(3).should("have.text", "Risk Level");
+    cy.get(".p-column-title").eq(3).should("have.text", "Severity");
     cy.get(".p-column-title").eq(4).should("have.text", "Status");
     cy.get(".p-column-title").eq(5).should("have.text", "Owner");
 
@@ -118,14 +118,14 @@ describe("ManageEvents.vue table functionality", () => {
     // Check columns in table
     cy.get('[data-cy="table-column-select"]').should(
       "have.text",
-      "Created, Name, Threat Actors, Threats, Type, Risk Level, Prevention Tools, Remediation, Status, Owner, Vectors, Queue",
+      "Created, Name, Threat Actors, Threats, Type, Severity, Prevention Tools, Remediation, Status, Owner, Vectors, Queue",
     );
     cy.get(".p-column-title").eq(0).should("have.text", "Created");
     cy.get(".p-column-title").eq(1).should("have.text", "Name");
     cy.get(".p-column-title").eq(2).should("have.text", "Threat Actors");
     cy.get(".p-column-title").eq(3).should("have.text", "Threats");
     cy.get(".p-column-title").eq(4).should("have.text", "Type");
-    cy.get(".p-column-title").eq(5).should("have.text", "Risk Level");
+    cy.get(".p-column-title").eq(5).should("have.text", "Severity");
     cy.get(".p-column-title").eq(6).should("have.text", "Prevention Tools");
     cy.get(".p-column-title").eq(7).should("have.text", "Remediation");
     cy.get(".p-column-title").eq(8).should("have.text", "Status");
@@ -251,13 +251,13 @@ describe("ManageEvents.vue table functionality", () => {
     // Check default columns in column select
     cy.get('[data-cy="table-column-select"]').should(
       "have.text",
-      "Created, Name, Threats, Risk Level, Status, Owner",
+      "Created, Name, Threats, Severity, Status, Owner",
     );
     // Check columns in table
     cy.get(".p-column-title").eq(0).should("have.text", "Created");
     cy.get(".p-column-title").eq(1).should("have.text", "Name");
     cy.get(".p-column-title").eq(2).should("have.text", "Threats");
-    cy.get(".p-column-title").eq(3).should("have.text", "Risk Level");
+    cy.get(".p-column-title").eq(3).should("have.text", "Severity");
     cy.get(".p-column-title").eq(4).should("have.text", "Status");
     cy.get(".p-column-title").eq(5).should("have.text", "Owner");
 

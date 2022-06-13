@@ -483,12 +483,12 @@ def test_filter_by_remediations(db):
     assert result == [event3]
 
 
-def test_filter_by_risk_level(db):
+def test_filter_by_severity(db):
     factory.event.create_or_read(name="event1", db=db)
     factory.event.create_or_read(name="event2", db=db)
-    event3 = factory.event.create_or_read(name="event3", risk_level="level3", db=db)
+    event3 = factory.event.create_or_read(name="event3", severity="level3", db=db)
 
-    result = crud.event.read_all(risk_level="level3", db=db)
+    result = crud.event.read_all(severity="level3", db=db)
     assert result == [event3]
 
 
@@ -644,15 +644,15 @@ def test_sort_by_owner(db):
     assert result == [event3, event2, event1]
 
 
-def test_sort_by_risk_level(db):
-    event1 = factory.event.create_or_read(name="event1", risk_level="level1", db=db)
-    event2 = factory.event.create_or_read(name="event2", risk_level="level2", db=db)
-    event3 = factory.event.create_or_read(name="event3", risk_level="level3", db=db)
+def test_sort_by_severity(db):
+    event1 = factory.event.create_or_read(name="event1", severity="level1", db=db)
+    event2 = factory.event.create_or_read(name="event2", severity="level2", db=db)
+    event3 = factory.event.create_or_read(name="event3", severity="level3", db=db)
 
-    result = crud.event.read_all(sort="risk_level|asc", db=db)
+    result = crud.event.read_all(sort="severity|asc", db=db)
     assert result == [event1, event2, event3]
 
-    result = crud.event.read_all(sort="risk_level|desc", db=db)
+    result = crud.event.read_all(sort="severity|desc", db=db)
     assert result == [event3, event2, event1]
 
 

@@ -89,6 +89,7 @@ export interface alertSummary {
 
 export interface alertTreeRead extends alertRead {
   children: observableTreeRead[];
+  rootAnalysisUuid: UUID;
 }
 
 export interface alertReadPage extends nodeReadPage {

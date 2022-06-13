@@ -104,8 +104,8 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     { field: "threats", header: "Threats", sortable: false, default: true },
     { field: "type", header: "Type", sortable: true, default: false },
     {
-      field: "riskLevel",
-      header: "Risk Level",
+      field: "severity",
+      header: "Severity",
       sortable: false,
       default: true,
     },
@@ -145,8 +145,8 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     { field: "threats", header: "Threats", sortable: false, default: false },
     { field: "type", header: "Type", sortable: true, default: true },
     {
-      field: "riskLevel",
-      header: "Risk Level",
+      field: "severity",
+      header: "Severity",
       sortable: true,
       default: false,
     },
@@ -186,8 +186,8 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     { field: "threats", header: "Threats", sortable: false, default: true },
     { field: "type", header: "Type", sortable: true, default: false },
     {
-      field: "riskLevel",
-      header: "Risk Level",
+      field: "severity",
+      header: "Severity",
       sortable: false,
       default: true,
     },
@@ -224,3 +224,5 @@ export const defaultEventDetailsSections = {
   "URL Domain Summary": EventURLDomainSummaryVue,
   "Observable Summary": EventObservableSummaryVue,
 };
+
+export const closedEventStatus = "CLOSED";

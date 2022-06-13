@@ -23,6 +23,7 @@ function factory(event: eventRead = eventReadFactory()) {
         availableEditFields: testConfiguration.events.eventEditableProperties,
         analysisModuleComponents:
           testConfiguration.analysis.analysisModuleComponents,
+        closedEventStatus: testConfiguration.events.closedEventStatus,
       },
       plugins: [
         PrimeVue,
@@ -140,6 +141,18 @@ describe("TheEventDetailsMenuBar", () => {
       {
         uuid: "uuid",
         owner: "analyst",
+        historyUsername: "analyst",
+      },
+    ]);
+  });
+  it("makes a request to update event with configured closed status when 'Close Event' menu link clicked", () => {
+    factory();
+    cy.contains("Actions").click();
+    cy.contains("Close Event").click();
+    cy.get("@stub-3").should("have.been.calledWith", [
+      {
+        uuid: "uuid",
+        status: "CLOSED",
         historyUsername: "analyst",
       },
     ]);

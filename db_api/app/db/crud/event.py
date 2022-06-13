@@ -27,7 +27,7 @@ from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.event import Event, EventHistory
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_remediation import EventRemediation
-from db.schemas.event_risk_level import EventRiskLevel
+from db.schemas.event_severity import EventSeverity
 from db.schemas.event_source import EventSource
 from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
@@ -66,7 +66,7 @@ def build_read_all_query(
     remediation_time_after: Optional[datetime] = None,
     remediation_time_before: Optional[datetime] = None,
     remediations: Optional[str] = None,
-    risk_level: Optional[str] = None,
+    severity: Optional[str] = None,
     sort: Optional[str] = None,  # Example: created_time|desc,
     source: Optional[str] = None,
     status: Optional[str] = None,
@@ -261,9 +261,9 @@ def build_read_all_query(
         remediations_query = select(Event).where(and_(*remediation_filters))
         query = _join_as_subquery(query, remediations_query)
 
-    if risk_level:
-        risk_level_query = select(Event).join(EventRiskLevel).where(EventRiskLevel.value == risk_level)
-        query = _join_as_subquery(query, risk_level_query)
+    if severity:
+        severity_query = select(Event).join(EventSeverity).where(EventSeverity.value == severity)
+        query = _join_as_subquery(query, severity_query)
 
     if source:
         source_query = select(Event).join(EventSource).where(EventSource.value == source)
@@ -361,15 +361,15 @@ def build_read_all_query(
             elif order == "desc":
                 query = query.order_by(User.username.desc())
 
-        # Only sort by risk_level if we are not also filtering by risk_level
-        elif sort_by.lower() == "risk_level" and not risk_level:
-            query = query.outerjoin(EventRiskLevel, onclause=EventRiskLevel.uuid == Event.risk_level_uuid).group_by(
-                Event.uuid, Node.uuid, EventRiskLevel.value
+        # Only sort by severity if we are not also filtering by severity
+        elif sort_by.lower() == "severity" and not severity:
+            query = query.outerjoin(EventSeverity, onclause=EventSeverity.uuid == Event.severity_uuid).group_by(
+                Event.uuid, Node.uuid, EventSeverity.value
             )
             if order == "asc":
-                query = query.order_by(EventRiskLevel.value.asc())
+                query = query.order_by(EventSeverity.value.asc())
             elif order == "desc":
-                query = query.order_by(EventRiskLevel.value.desc())
+                query = query.order_by(EventSeverity.value.desc())
 
         # Only sort by status if we are not also filtering by status
         elif sort_by.lower() == "status" and not status:
@@ -394,8 +394,8 @@ def create_or_read(model: EventCreate, db: Session) -> Event:
         obj.owner = crud.user.read_by_username(username=model.owner, db=db)
     obj.queue = crud.queue.read_by_value(value=model.queue, db=db)
     obj.remediations = crud.event_remediation.read_by_values(values=model.remediations, db=db)
-    if model.risk_level:
-        obj.risk_level = crud.event_risk_level.read_by_value(value=model.risk_level, db=db)
+    if model.severity:
+        obj.severity = crud.event_severity.read_by_value(value=model.severity, db=db)
     if model.source:
         obj.source = crud.event_source.read_by_value(value=model.source, db=db)
     obj.status = crud.event_status.read_by_value(value=model.status, db=db)
@@ -443,7 +443,7 @@ def read_all(
     remediation_time_after: Optional[datetime] = None,
     remediation_time_before: Optional[datetime] = None,
     remediations: Optional[str] = None,
-    risk_level: Optional[str] = None,
+    severity: Optional[str] = None,
     sort: Optional[str] = None,  # Example: created_time|desc,
     source: Optional[str] = None,
     status: Optional[str] = None,
@@ -475,7 +475,7 @@ def read_all(
                 remediation_time_after=remediation_time_after,
                 remediation_time_before=remediation_time_before,
                 remediations=remediations,
-                risk_level=risk_level,
+                severity=severity,
                 sort=sort,
                 source=source,
                 status=status,
@@ -868,14 +868,14 @@ def update(uuid: UUID, model: EventUpdate, db: Session):
         else:
             event.remediations = []
 
-    if "risk_level" in update_data:
-        old = event.risk_level.value if event.risk_level else None
-        diffs.append(crud.history.create_diff(field="risk_level", old=old, new=update_data["risk_level"]))
+    if "severity" in update_data:
+        old = event.severity.value if event.severity else None
+        diffs.append(crud.history.create_diff(field="severity", old=old, new=update_data["severity"]))
 
-        if update_data["risk_level"]:
-            event.risk_level = crud.event_risk_level.read_by_value(value=update_data["risk_level"], db=db)
+        if update_data["severity"]:
+            event.severity = crud.event_severity.read_by_value(value=update_data["severity"], db=db)
         else:
-            event.risk_level = None
+            event.severity = None
 
     if "source" in update_data:
         old = event.source.value if event.source else None

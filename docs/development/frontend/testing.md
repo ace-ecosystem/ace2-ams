@@ -52,7 +52,7 @@ _Do:_
 
 _Do Not:_
 
-- Test the internals of a component, e.g., any functions within the <setup> tags
+- Test the internals of a component, e.g., any functions within the `<setup>` tags
 - Test child component functionality/presentation where it can be avoided
 - Test a component mounted with invalid props (this should not happen IRL)
 - Write deterministic tests

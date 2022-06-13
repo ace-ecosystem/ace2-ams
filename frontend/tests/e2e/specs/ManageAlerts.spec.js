@@ -305,7 +305,7 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.get(".flex ").children().should("have.length", 4);
 
       // Delete one
-      cy.get(":nth-child(2) > :nth-child(3) > .p-button").click();
+      cy.get("[data-cy='property-input-delete']").last().click();
       cy.get(".flex ").children().should("have.length", 3);
 
       // Clear all of them

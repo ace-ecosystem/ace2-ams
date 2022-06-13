@@ -7,7 +7,7 @@ from api.routes.auth import router as auth_router
 from api.routes.event import router as event_router
 from api.routes.event_prevention_tool import router as event_prevention_tool_router
 from api.routes.event_remediation import router as event_remediation_router
-from api.routes.event_risk_level import router as event_risk_level_router
+from api.routes.event_severity import router as event_severity_router
 from api.routes.event_source import router as event_source_router
 from api.routes.event_status import router as event_status_router
 from api.routes.event_type import router as event_type_router
@@ -44,7 +44,7 @@ router.include_router(auth_router)
 router.include_router(event_router)
 router.include_router(event_prevention_tool_router)
 router.include_router(event_remediation_router)
-router.include_router(event_risk_level_router)
+router.include_router(event_severity_router)
 router.include_router(event_source_router)
 router.include_router(event_status_router)
 router.include_router(event_type_router)

@@ -164,3 +164,12 @@ class SubmissionUpdate(NodeUpdate, SubmissionBase):
     uuid: UUID4 = Field(description="The UUID of the submission to update")
 
     _prevent_none: classmethod = validators.prevent_none("queue", "tags", "threat_actors", "threats")
+
+
+class SubmissionTreeRead(SubmissionRead):
+    root_analysis_uuid: UUID4 = Field(description="The UUID the submission's root analysis")
+
+    children: list[dict] = Field(default_factory=list, description="A list of this submission's child objects")
+
+    class Config:
+        orm_mode = True

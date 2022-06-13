@@ -74,7 +74,22 @@ describe("AnalyzeAlertForm Setup", () => {
     cy.get("div").contains("Alert Details");
     cy.get("div").contains("Advanced");
     cy.get("div").contains("Observables");
-    cy.get("button").contains("Analyze!");
+    cy.get("button").contains("Submit Alert");
+    cy.get("button").contains("Submit Multiple Alerts");
+  });
+  it("disables 'Submit Multiple Alerts' button unless >1 (or at least 1 multiAdd) observables are in form", () => {
+    factory();
+    // Initial state
+    cy.contains("Submit Multiple Alerts").should("be.disabled");
+    // Add one observable
+    cy.contains("Add").click();
+    cy.contains("Submit Multiple Alerts").should("not.be.disabled");
+    // Delete observable to return to initial state
+    cy.get('[name="delete-observable"]').last().click();
+    cy.contains("Submit Multiple Alerts").should("be.disabled");
+    // Switch to multiple observable input
+    cy.get('[name="toggle-multi-observable"]').click();
+    cy.contains("Submit Multiple Alerts").should("not.be.disabled");
   });
 });
 
@@ -104,93 +119,6 @@ describe("AnalyzeAlertForm - Advanced Panel", () => {
     cy.get("#timezone").should("not.be.empty");
     cy.get("#type").should("have.text", "testAlertTypeA");
     cy.get("#queue").should("have.text", "testQueueA");
-  });
-});
-
-describe("AnalyzeAlertForm - Observables", () => {
-  it("renders initial observable correctly", () => {
-    factory();
-    // Make sure all the observable labels are there
-    cy.findByText("Time (UTC)").should("be.visible");
-    cy.findByText("Type").should("be.visible");
-    cy.findByText("Value").should("be.visible");
-    cy.findByText("Directives").should("be.visible");
-    // Check all the initial inputs
-    cy.get("[name=observable-time]")
-      .invoke("attr", "placeholder")
-      .should("contain", "No time selected");
-    cy.get("[name=observable-type]").should("have.text", "file");
-    cy.get("[name=observable-file-upload]").should("be.visible");
-    cy.get("[name=observable-directives]").should(
-      "have.text",
-      "No directives selected",
-    );
-  });
-  it("successfully renders additional and removed observables", () => {
-    factory();
-    // Add an observable
-    cy.get("#add-observable").click();
-    // Check that there's two of everything now
-    cy.get("[name=observable-time]").should("have.length", 2);
-    cy.get("[name=observable-type]").should("have.length", 2);
-    cy.get("[name=observable-file-upload]").should("have.length", 2);
-
-    // Delete one
-    cy.get("[name=delete-observable]").eq(0).click();
-    // Check that there's one of each observable input again
-    cy.get("[name=observable-directives]").should("have.length", 1);
-    cy.get("[name=observable-time]").should("have.length", 1);
-    cy.get("[name=observable-type]").should("have.length", 1);
-    cy.get("[name=observable-file-upload]").should("have.length", 1);
-    cy.get("[name=observable-directives]").should("have.length", 1);
-  });
-  it("correctly renders observable input based on type", () => {
-    factory();
-    // When observable type is 'file', file input should be there
-    cy.get("[name=observable-type]").should("have.text", "file");
-    cy.get("[name=observable-value]").should("be.visible");
-    cy.get("[name=observable-file-upload]").should("be.visible");
-
-    // Switch to 'ipv4' input type
-    cy.get("[name=observable-type]").click();
-    cy.get(".p-dropdown-items").should("be.visible");
-    cy.get('[aria-label="ipv4"]').click();
-    cy.get(".p-dropdown-items").should("not.exist");
-    cy.get("body").click();
-
-    // Should be input box
-    cy.get("[name=observable-type]").should("have.text", "ipv4");
-    cy.get("[name=observable-value] input").should("be.visible");
-    cy.get("[name=observable-file-upload]").should("not.exist");
-
-    // Switch back to 'file,' should be the file input again
-    cy.get("[name=observable-type]").click();
-    cy.get(".p-dropdown-items").should("be.visible");
-    cy.get('[aria-label="file"]').click();
-    cy.get(".p-dropdown-items").should("not.exist");
-    cy.get("[name=observable-type]").should("have.text", "file");
-    cy.get("[name=observable-value]").should("be.visible");
-    cy.get("[name=observable-file-upload]").should("be.visible");
-  });
-  it("correctly toggles multi-add observable input", () => {
-    factory();
-    // Switch to 'ipv4' input type
-    cy.get("[name=observable-type]").click();
-    cy.get('[aria-label="ipv4"]').click();
-    cy.get("[name=observable-value] input").should("be.visible");
-
-    // Switch to 'multi' mode
-    cy.get("[name=observable-value] button").click();
-    cy.get("[name=observable-value] input").should("not.exist");
-    cy.get("[name=observable-value] textarea")
-      .should("be.visible")
-      .invoke("attr", "placeholder")
-      .should("contain", "Enter a comma or newline-delimited list of values");
-
-    // Switch back
-    cy.get("[name=observable-value] button").click();
-    cy.get("[name=observable-value] input").should("be.visible");
-    cy.get("[name=observable-value] textarea").should("not.exist");
   });
 });
 
@@ -238,7 +166,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     cy.get("[name=observable-value] input").eq(1).type(testObservableValueB);
 
     // Submit
-    cy.contains("Analyze!").eq(0).click();
+    cy.contains("Submit Alert").click();
     cy.get("@CreateAlertA").should("have.been.called");
 
     // Should route to last created alert
@@ -275,7 +203,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     cy.contains("testNodeDirective").click();
 
     // Submit
-    cy.contains("Analyze!").eq(0).click();
+    cy.contains("Submit Alert").eq(0).click();
     cy.get("@CreateAlertA").should("have.been.called");
 
     // Should route to last created alert
@@ -310,7 +238,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     cy.get("[name=observable-value] textarea").type(testObservableValueMultiA);
 
     // Submit
-    cy.contains("Analyze!").eq(0).click();
+    cy.contains("Submit Alert").click();
 
     cy.get("@CreateAlertA").should("have.been.called");
 
@@ -356,8 +284,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     cy.get("[name=observable-value] input").eq(1).type(testObservableValueB);
 
     // Submit using multi-add
-    cy.get(".p-splitbutton > .p-button-icon-only").click();
-    cy.contains("Create multiple alerts").click();
+    cy.contains("Submit Multiple Alerts").click();
 
     cy.get("@CreateAlertA").should("have.been.called");
     cy.get("@CreateAlertB").should("have.been.called");
@@ -416,8 +343,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     cy.get("[name=observable-value] textarea").type(testObservableValueMultiA);
 
     // Submit using multi-add
-    cy.get(".p-splitbutton > .p-button-icon-only").click();
-    cy.contains("Create multiple alerts").click();
+    cy.contains("Submit Multiple Alerts").click();
 
     cy.get("@CreateAlertA").should("have.been.called");
     cy.get("@CreateAlertB").should("have.been.called");

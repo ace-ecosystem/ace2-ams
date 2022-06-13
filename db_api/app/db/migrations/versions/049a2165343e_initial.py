@@ -55,13 +55,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_event_remediation_value'), 'event_remediation', ['value'], unique=True)
-    op.create_table('event_risk_level',
+    op.create_table('event_severity',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
     sa.Column('value', sa.String(), nullable=False),
     sa.PrimaryKeyConstraint('uuid')
     )
-    op.create_index(op.f('ix_event_risk_level_value'), 'event_risk_level', ['value'], unique=True)
+    op.create_index(op.f('ix_event_severity_value'), 'event_severity', ['value'], unique=True)
     op.create_table('event_source',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -220,15 +220,15 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_event_remediation_queue_mapping_event_remediation_uuid'), 'event_remediation_queue_mapping', ['event_remediation_uuid'], unique=False)
     op.create_index(op.f('ix_event_remediation_queue_mapping_queue_uuid'), 'event_remediation_queue_mapping', ['queue_uuid'], unique=False)
-    op.create_table('event_risk_level_queue_mapping',
-    sa.Column('event_risk_level_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    op.create_table('event_severity_queue_mapping',
+    sa.Column('event_severity_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.ForeignKeyConstraint(['event_risk_level_uuid'], ['event_risk_level.uuid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['event_severity_uuid'], ['event_severity.uuid'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['queue_uuid'], ['queue.uuid'], ),
-    sa.PrimaryKeyConstraint('event_risk_level_uuid', 'queue_uuid')
+    sa.PrimaryKeyConstraint('event_severity_uuid', 'queue_uuid')
     )
-    op.create_index(op.f('ix_event_risk_level_queue_mapping_event_risk_level_uuid'), 'event_risk_level_queue_mapping', ['event_risk_level_uuid'], unique=False)
-    op.create_index(op.f('ix_event_risk_level_queue_mapping_queue_uuid'), 'event_risk_level_queue_mapping', ['queue_uuid'], unique=False)
+    op.create_index(op.f('ix_event_severity_queue_mapping_event_severity_uuid'), 'event_severity_queue_mapping', ['event_severity_uuid'], unique=False)
+    op.create_index(op.f('ix_event_severity_queue_mapping_queue_uuid'), 'event_severity_queue_mapping', ['queue_uuid'], unique=False)
     op.create_table('event_source_queue_mapping',
     sa.Column('event_source_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -433,13 +433,13 @@ def upgrade() -> None:
     sa.Column('ownership_time', sa.DateTime(timezone=True), nullable=True),
     sa.Column('queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('remediation_time', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('risk_level_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('severity_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('source_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('status_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.ForeignKeyConstraint(['owner_uuid'], ['user.uuid'], ),
     sa.ForeignKeyConstraint(['queue_uuid'], ['queue.uuid'], ),
-    sa.ForeignKeyConstraint(['risk_level_uuid'], ['event_risk_level.uuid'], ),
+    sa.ForeignKeyConstraint(['severity_uuid'], ['event_severity.uuid'], ),
     sa.ForeignKeyConstraint(['source_uuid'], ['event_source.uuid'], ),
     sa.ForeignKeyConstraint(['status_uuid'], ['event_status.uuid'], ),
     sa.ForeignKeyConstraint(['type_uuid'], ['event_type.uuid'], ),
@@ -788,9 +788,9 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_event_source_queue_mapping_queue_uuid'), table_name='event_source_queue_mapping')
     op.drop_index(op.f('ix_event_source_queue_mapping_event_source_uuid'), table_name='event_source_queue_mapping')
     op.drop_table('event_source_queue_mapping')
-    op.drop_index(op.f('ix_event_risk_level_queue_mapping_queue_uuid'), table_name='event_risk_level_queue_mapping')
-    op.drop_index(op.f('ix_event_risk_level_queue_mapping_event_risk_level_uuid'), table_name='event_risk_level_queue_mapping')
-    op.drop_table('event_risk_level_queue_mapping')
+    op.drop_index(op.f('ix_event_severity_queue_mapping_queue_uuid'), table_name='event_severity_queue_mapping')
+    op.drop_index(op.f('ix_event_severity_queue_mapping_event_severity_uuid'), table_name='event_severity_queue_mapping')
+    op.drop_table('event_severity_queue_mapping')
     op.drop_index(op.f('ix_event_remediation_queue_mapping_queue_uuid'), table_name='event_remediation_queue_mapping')
     op.drop_index(op.f('ix_event_remediation_queue_mapping_event_remediation_uuid'), table_name='event_remediation_queue_mapping')
     op.drop_table('event_remediation_queue_mapping')
@@ -837,8 +837,8 @@ def downgrade() -> None:
     op.drop_table('event_status')
     op.drop_index(op.f('ix_event_source_value'), table_name='event_source')
     op.drop_table('event_source')
-    op.drop_index(op.f('ix_event_risk_level_value'), table_name='event_risk_level')
-    op.drop_table('event_risk_level')
+    op.drop_index(op.f('ix_event_severity_value'), table_name='event_severity')
+    op.drop_table('event_severity')
     op.drop_index(op.f('ix_event_remediation_value'), table_name='event_remediation')
     op.drop_table('event_remediation')
     op.drop_index(op.f('ix_event_prevention_tool_value'), table_name='event_prevention_tool')

@@ -65,7 +65,7 @@ describe("AnalyzeAlert.vue", () => {
     cy.intercept("POST", "/api/alert").as("createAlert");
     cy.intercept("GET", "/api/alert/*").as("getAlert");
     addMultipleObservables();
-    cy.get(".p-splitbutton-defaultbutton").click();
+    cy.contains("Submit Alert").click();
     cy.wait("@createAlert").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
     cy.wait("@getAlert").its("state").should("eq", "Complete");
@@ -78,7 +78,7 @@ describe("AnalyzeAlert.vue", () => {
       statusCode: 500,
       body: "Server error",
     }).as("createAlert");
-    cy.get(".p-splitbutton-defaultbutton").click();
+    cy.contains("Submit Alert").click();
     cy.wait("@createAlert").its("state").should("eq", "Complete");
     cy.get(".p-message-wrapper").should("exist");
     cy.url().should("include", "/analyze");
@@ -88,8 +88,7 @@ describe("AnalyzeAlert.vue", () => {
     cy.intercept("POST", "/api/alert").as("createAlert");
     cy.intercept("GET", "/api/alert/*").as("getAlert");
     addMultipleObservables();
-    cy.get(".p-splitbutton > .p-button-icon-only").click();
-    cy.get(".p-menuitem-link").click();
+    cy.contains("Submit Multiple Alerts").click();
 
     // 5 alerts and 5 respsective observables should be created
     cy.wait("@createAlert").its("state").should("eq", "Complete");
@@ -118,8 +117,7 @@ describe("AnalyzeAlert.vue", () => {
       statusCode: 500,
       body: "Server error",
     }).as("createAlert");
-    cy.get(".p-splitbutton > .p-button-icon-only").click();
-    cy.get(".p-menuitem-link").click();
+    cy.contains("Submit Alert").click();
     cy.wait("@createAlert").its("state").should("eq", "Complete");
     cy.get(".p-message-wrapper").should("exist");
     cy.url().should("include", "/analyze");

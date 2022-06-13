@@ -11,8 +11,8 @@ const api = new BaseApi();
 const endpoint = "/observable/";
 
 export const ObservableInstance = {
-  create: (data: observableCreate, getAfterCreate = false): Promise<void> =>
-    api.create(endpoint, data, getAfterCreate),
+  create: (data: observableCreate[]): Promise<void> =>
+    api.create(endpoint, data, false),
 
   read: (uuid: UUID): Promise<observableRead> => api.read(`${endpoint}${uuid}`),
 

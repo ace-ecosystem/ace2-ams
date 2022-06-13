@@ -8,18 +8,18 @@ import {
   queueableObjectUpdate,
 } from "./base";
 
-export interface eventRiskLevelCreate
+export interface eventSeverityCreate
   extends genericObjectCreate,
     queueableObjectCreate {}
 
-export interface eventRiskLevelRead
+export interface eventSeverityRead
   extends genericObjectRead,
     queueableObjectRead {}
 
-export interface eventRiskLevelReadPage extends genericObjectReadPage {
-  items: eventRiskLevelRead[];
+export interface eventSeverityReadPage extends genericObjectReadPage {
+  items: eventSeverityRead[];
 }
 
-export interface eventRiskLevelUpdate
+export interface eventSeverityUpdate
   extends genericObjectUpdate,
     queueableObjectUpdate {}

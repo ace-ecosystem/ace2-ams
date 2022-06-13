@@ -53,8 +53,8 @@ from tests import factory
         ("remediations", [None]),
         ("remediations", [""]),
         ("remediations", ["abc", 123]),
-        ("risk_level", 123),
-        ("risk_level", ""),
+        ("severity", 123),
+        ("severity", ""),
         ("source", 123),
         ("source", ""),
         ("status", 123),
@@ -138,15 +138,15 @@ def test_create_nonexistent_remediations(client, db):
     assert "event_remediation" in create.text
 
 
-def test_create_nonexistent_risk_level(client, db):
+def test_create_nonexistent_severity(client, db):
     factory.event_status.create_or_read(value="OPEN", db=db)
 
     # Create an object
     create = client.post(
-        "/api/event/", json={"risk_level": "test", "name": "test", "queue": "external", "status": "OPEN"}
+        "/api/event/", json={"severity": "test", "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
-    assert "event_risk_level" in create.text
+    assert "event_severity" in create.text
 
 
 def test_create_nonexistent_source(client, db):
@@ -329,19 +329,19 @@ def test_create_valid_remediations(client, db):
     assert get.json()["remediations"][0]["value"] == "test"
 
 
-def test_create_valid_risk_level(client, db):
-    factory.event_risk_level.create_or_read(value="test", db=db)
+def test_create_valid_severity(client, db):
+    factory.event_severity.create_or_read(value="test", db=db)
     factory.event_status.create_or_read(value="OPEN", db=db)
 
-    # Use the risk level to create a new event
+    # Use the severity to create a new event
     create = client.post(
-        "/api/event/", json={"risk_level": "test", "name": "test", "queue": "external", "status": "OPEN"}
+        "/api/event/", json={"severity": "test", "name": "test", "queue": "external", "status": "OPEN"}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
     get = client.get(create.headers["Content-Location"])
-    assert get.json()["risk_level"]["value"] == "test"
+    assert get.json()["severity"]["value"] == "test"
 
 
 def test_create_valid_source(client, db):

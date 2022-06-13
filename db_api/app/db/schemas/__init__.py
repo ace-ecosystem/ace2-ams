@@ -13,8 +13,8 @@ from db.schemas.event_prevention_tool_mapping import event_prevention_tool_mappi
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_remediation_queue_mapping import event_remediation_queue_mapping
 from db.schemas.event_remediation_mapping import event_remediation_mapping
-from db.schemas.event_risk_level import EventRiskLevel
-from db.schemas.event_risk_level_queue_mapping import event_risk_level_queue_mapping
+from db.schemas.event_severity import EventSeverity
+from db.schemas.event_severity_queue_mapping import event_severity_queue_mapping
 from db.schemas.event_source import EventSource
 from db.schemas.event_source_queue_mapping import event_source_queue_mapping
 from db.schemas.event_status import EventStatus
