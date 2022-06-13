@@ -73,7 +73,11 @@
               ></ObservableInput>
             </span>
             <span>
-              <Button icon="pi pi-list" @click="toggleMultiObservable(index)" />
+              <Button
+                name="toggle-multi-observable"
+                icon="pi pi-list"
+                @click="toggleMultiObservable(index)"
+              />
             </span>
           </span>
         </div>

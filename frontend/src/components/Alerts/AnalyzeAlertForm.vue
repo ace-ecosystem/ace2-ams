@@ -90,12 +90,21 @@
     >Please check observable input</small
   >
   <div class="pl-3">
-    <SplitButton
-      label="Analyze!"
+    <Button
+      v-tooltip="'Create a new alert for each observable'"
+      label="Submit Multiple Alerts"
+      :loading="alertCreateLoading"
+      :disabled="anyObservablesInvalid || !formContainsMultipleObservables"
+      class="p-button-lg p-button-outlined m-1"
+      icon="pi pi-question-circle"
+      icon-pos="right"
+      @click="submitMultipleAlerts"
+    />
+    <Button
+      label="Submit Alert"
       :loading="alertCreateLoading"
       :disabled="anyObservablesInvalid"
-      :model="splitButtonOptions"
-      class="p-button-lg"
+      class="p-button-lg m-1"
       @click="submitSingleAlert"
     />
   </div>
@@ -134,7 +143,6 @@
   import Fieldset from "primevue/fieldset";
   import InputText from "primevue/inputtext";
   import Message from "primevue/message";
-  import SplitButton from "primevue/splitbutton";
   import TabPanel from "primevue/tabpanel";
   import TabView from "primevue/tabview";
   import { DatePicker } from "v-calendar";
@@ -161,15 +169,6 @@
   const alertType = ref("manual");
   const queue = ref();
   const errors = ref([]);
-  const splitButtonOptions = ref([
-    {
-      label: "Create multiple alerts",
-      icon: "pi pi-copy",
-      command: async () => {
-        await submitMultipleAlerts();
-      },
-    },
-  ]);
   const observables = ref([]);
   const showContinueButton = ref(false);
 
@@ -180,6 +179,13 @@
   const anyObservablesInvalid = computed(() => {
     const invalid = observables.value.filter((obs) => obs.invalid);
     return invalid.length;
+  });
+
+  const formContainsMultipleObservables = computed(() => {
+    if (observables.value.length > 1) {
+      return true;
+    }
+    return observables.value.some((obs) => obs.multiAdd);
   });
 
   onMounted(() => {
@@ -237,7 +243,6 @@
     alertType.value = alertTypeStore.items.length
       ? alertTypeStore.items[0].value
       : "manual";
-    // TODO: This needs to be based on the current user's preferred queue
     queue.value = authStore.user
       ? authStore.user.defaultAlertQueue.value
       : "default";
