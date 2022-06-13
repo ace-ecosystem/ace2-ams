@@ -4,6 +4,7 @@
 import { mount } from "@cypress/vue";
 import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
+import Tooltip from "primevue/tooltip";
 
 import AnalyzeAlert from "@/pages/Alerts/AnalyzeAlert.vue";
 
@@ -11,6 +12,7 @@ describe("AnalyzeAlert", () => {
   it("renders", () => {
     mount(AnalyzeAlert, {
       global: {
+        directives: { tooltip: Tooltip },
         plugins: [PrimeVue, createPinia()],
       },
     });
