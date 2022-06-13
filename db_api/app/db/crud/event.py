@@ -656,8 +656,16 @@ def read_summary_email_headers_body(uuid: UUID, db: Session) -> Optional[EmailHe
 
 def read_summary_observable(uuid: UUID, db: Session) -> list[ObservableSummary]:
     # Verify the event exists
-    read_by_uuid(uuid=uuid, db=db)
+    event = read_by_uuid(uuid=uuid, db=db)
 
+    # Read all of the observables contained in the event. These observables will have their
+    # analysis tags injected into them. This list is then transformed into a dictionary with
+    # the observable UUID as the key.
+    observables_by_uuid: dict[UUID, Observable] = {
+        o.uuid: o for o in crud.submission.read_observables(uuids=event.alert_uuids, db=db)
+    }
+
+    # Read all of the FA Queue analyses contained in the event
     alert_uuid_and_analysis = read_analysis_type_from_event(
         analysis_module_type="FA Queue", starts_with=True, uuid=uuid, db=db
     )
@@ -667,9 +675,9 @@ def read_summary_observable(uuid: UUID, db: Session) -> list[ObservableSummary]:
     results = set()
     for _, faqueue_analysis in alert_uuid_and_analysis:
         analysis_details = FAQueueAnalysisDetails(**faqueue_analysis.details)
-        faqueue_analysis.target.faqueue_hits = analysis_details.hits
-        faqueue_analysis.target.faqueue_link = analysis_details.link
-        results.add(faqueue_analysis.target)
+        observables_by_uuid[faqueue_analysis.target.uuid].faqueue_hits = analysis_details.hits
+        observables_by_uuid[faqueue_analysis.target.uuid].faqueue_link = analysis_details.link
+        results.add(observables_by_uuid[faqueue_analysis.target.uuid])
 
     # Return the observables sorted by their type then value
     return sorted(results, key=lambda x: (x.type.value, x.value))

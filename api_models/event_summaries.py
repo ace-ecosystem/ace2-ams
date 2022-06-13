@@ -9,7 +9,7 @@ from api_models.analysis_details import (
     UserAnalysisDetails,
 )
 from api_models.node_detection_point import NodeDetectionPointRead
-from api_models.observable import ObservableRead
+from api_models.observable import ObservableSubmissionRead
 
 
 class DetectionSummary(NodeDetectionPointRead):
@@ -32,7 +32,7 @@ class EmailSummary(EmailAnalysisDetailsBase):
     alert_uuid: UUID4 = Field(description="The UUID of the alert to which this email belongs")
 
 
-class ObservableSummary(ObservableRead):
+class ObservableSummary(ObservableSubmissionRead):
     """Represents an observable summary as used on the event pages."""
 
     faqueue_hits: int = Field(description="The number of hits found by FA Queue Analysis for this observable")
