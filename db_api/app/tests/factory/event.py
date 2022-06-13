@@ -22,7 +22,7 @@ def create_or_read(
     prevention_tools: Optional[list[str]] = None,
     remediation_time: Optional[datetime] = None,
     remediations: Optional[list[str]] = None,
-    risk_level: Optional[str] = None,
+    severity: Optional[str] = None,
     source: Optional[str] = None,
     status: str = "OPEN",
     tags: Optional[list[str]] = None,
@@ -71,8 +71,8 @@ def create_or_read(
     for r in remediations:
         factory.event_remediation.create_or_read(value=r, queues=[event_queue], db=db)
 
-    if risk_level:
-        factory.event_risk_level.create_or_read(value=risk_level, queues=[event_queue], db=db)
+    if severity:
+        factory.event_severity.create_or_read(value=severity, queues=[event_queue], db=db)
 
     if source:
         factory.event_source.create_or_read(value=source, queues=[event_queue], db=db)
@@ -104,7 +104,7 @@ def create_or_read(
             queue=event_queue,
             remediation_time=remediation_time,
             remediations=remediations,
-            risk_level=risk_level,
+            severity=severity,
             source=source,
             status=status,
             tags=tags,

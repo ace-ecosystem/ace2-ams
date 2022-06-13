@@ -82,7 +82,7 @@ describe("TheEventsTable", () => {
       "Created",
       "Name",
       "Threats",
-      "Risk Level",
+      "Severity",
       "Status",
       "Owner",
     ];
@@ -102,7 +102,7 @@ describe("TheEventsTable", () => {
       "Created",
       "Name",
       "Threats",
-      "Risk Level",
+      "Severity",
       "Status",
       "Owner",
     ];
@@ -128,7 +128,7 @@ describe("TheEventsTable", () => {
       visibleQueriedItems: [
         eventReadFactory({
           threats: threats,
-          riskLevel: queueableObjectReadFactory({ value: "low" }),
+          severity: queueableObjectReadFactory({ value: "low" }),
         }),
         eventReadFactory({ value: "Test Event 2", uuid: "uuid2" }),
       ],

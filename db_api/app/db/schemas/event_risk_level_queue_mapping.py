@@ -4,13 +4,13 @@ from sqlalchemy.dialects.postgresql import UUID
 from db.database import Base
 
 
-event_risk_level_queue_mapping = Table(
-    "event_risk_level_queue_mapping",
+event_severity_queue_mapping = Table(
+    "event_severity_queue_mapping",
     Base.metadata,
     Column(
-        "event_risk_level_uuid",
+        "event_severity_uuid",
         UUID(as_uuid=True),
-        ForeignKey("event_risk_level.uuid", ondelete="CASCADE"),
+        ForeignKey("event_severity.uuid", ondelete="CASCADE"),
         index=True,
         primary_key=True,
     ),

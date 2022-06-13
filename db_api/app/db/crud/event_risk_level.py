@@ -4,17 +4,17 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
-from api_models.event_risk_level import EventRiskLevelCreate, EventRiskLevelUpdate
+from api_models.event_severity import EventSeverityCreate, EventSeverityUpdate
 from db import crud
-from db.schemas.event_risk_level import EventRiskLevel
+from db.schemas.event_severity import EventSeverity
 
 
 def build_read_all_query() -> Select:
-    return select(EventRiskLevel).order_by(EventRiskLevel.value)
+    return select(EventSeverity).order_by(EventSeverity.value)
 
 
-def create_or_read(model: EventRiskLevelCreate, db: Session) -> EventRiskLevel:
-    obj = EventRiskLevel(
+def create_or_read(model: EventSeverityCreate, db: Session) -> EventSeverity:
+    obj = EventSeverity(
         description=model.description,
         queues=crud.queue.read_by_values(values=model.queues, db=db),
         uuid=model.uuid,
@@ -28,22 +28,22 @@ def create_or_read(model: EventRiskLevelCreate, db: Session) -> EventRiskLevel:
 
 
 def delete(uuid: UUID, db: Session) -> bool:
-    return crud.helpers.delete(uuid=uuid, db_table=EventRiskLevel, db=db)
+    return crud.helpers.delete(uuid=uuid, db_table=EventSeverity, db=db)
 
 
-def read_all(db: Session) -> list[EventRiskLevel]:
+def read_all(db: Session) -> list[EventSeverity]:
     return db.execute(build_read_all_query()).scalars().all()
 
 
-def read_by_uuid(uuid: UUID, db: Session) -> EventRiskLevel:
-    return crud.helpers.read_by_uuid(db_table=EventRiskLevel, uuid=uuid, db=db)
+def read_by_uuid(uuid: UUID, db: Session) -> EventSeverity:
+    return crud.helpers.read_by_uuid(db_table=EventSeverity, uuid=uuid, db=db)
 
 
-def read_by_value(value: str, db: Session) -> EventRiskLevel:
-    return crud.helpers.read_by_value(db_table=EventRiskLevel, value=value, db=db)
+def read_by_value(value: str, db: Session) -> EventSeverity:
+    return crud.helpers.read_by_value(db_table=EventSeverity, value=value, db=db)
 
 
-def update(uuid: UUID, model: EventRiskLevelUpdate, db: Session) -> bool:
+def update(uuid: UUID, model: EventSeverityUpdate, db: Session) -> bool:
     obj = read_by_uuid(uuid=uuid, db=db)
 
     # Get the data that was given in the request and use it to update the database object

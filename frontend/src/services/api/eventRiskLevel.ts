@@ -1,36 +1,36 @@
 import {
-  eventRiskLevelCreate,
-  eventRiskLevelRead,
-  eventRiskLevelReadPage,
-  eventRiskLevelUpdate,
-} from "@/models/eventRiskLevel";
+  eventSeverityCreate,
+  eventSeverityRead,
+  eventSeverityReadPage,
+  eventSeverityUpdate,
+} from "@/models/eventSeverity";
 import { pageOptionParams, UUID } from "@/models/base";
 import { BaseApi } from "./base";
 
 const api = new BaseApi();
-const endpoint = "/event/risk_level/";
+const endpoint = "/event/severity/";
 
-export const EventRiskLevel = {
+export const EventSeverity = {
   create: (
-    data: eventRiskLevelCreate,
+    data: eventSeverityCreate,
     getAfterCreate = false,
   ): Promise<void> => {
     return api.create(endpoint, data, getAfterCreate);
   },
 
-  read: (uuid: UUID): Promise<eventRiskLevelRead> => {
+  read: (uuid: UUID): Promise<eventSeverityRead> => {
     return api.read(`${endpoint}${uuid}`);
   },
 
-  readAll: (): Promise<eventRiskLevelRead[]> => {
+  readAll: (): Promise<eventSeverityRead[]> => {
     return api.readAll(endpoint);
   },
 
-  readPage: (params?: pageOptionParams): Promise<eventRiskLevelReadPage> => {
+  readPage: (params?: pageOptionParams): Promise<eventSeverityReadPage> => {
     return api.read(`${endpoint}`, params);
   },
 
-  update: (uuid: UUID, data: eventRiskLevelUpdate): Promise<void> => {
+  update: (uuid: UUID, data: eventSeverityUpdate): Promise<void> => {
     return api.update(`${endpoint}${uuid}`, data);
   },
 };

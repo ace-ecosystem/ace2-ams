@@ -28,7 +28,7 @@ from uuid import uuid4
         ("remediation_time_after", datetime.now()),
         ("remediation_time_before", datetime.now()),
         ("remediations", "rem1,rem2"),
-        ("risk_level", "test_level"),
+        ("severity", "test_level"),
         ("sort", "name|desc"),
         ("source", "test_source"),
         ("status", "OPEN"),

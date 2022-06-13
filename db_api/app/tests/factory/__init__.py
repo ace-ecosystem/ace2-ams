@@ -4,7 +4,7 @@ from tests.factory import analysis_module_type
 from tests.factory import event
 from tests.factory import event_prevention_tool
 from tests.factory import event_remediation
-from tests.factory import event_risk_level
+from tests.factory import event_severity
 from tests.factory import event_source
 from tests.factory import event_status
 from tests.factory import event_type

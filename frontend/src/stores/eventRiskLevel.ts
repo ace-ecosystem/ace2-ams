@@ -1,18 +1,18 @@
 import { defineStore } from "pinia";
-import { eventRiskLevelRead } from "@/models/eventRiskLevel";
-import { EventRiskLevel } from "@/services/api/eventRiskLevel";
+import { eventSeverityRead } from "@/models/eventSeverity";
+import { EventSeverity } from "@/services/api/eventSeverity";
 import { groupItemsByQueue } from "@/etc/helpers";
 
-export const useEventRiskLevelStore = defineStore({
-  id: "eventRiskLevelStore",
+export const useEventSeverityStore = defineStore({
+  id: "eventSeverityStore",
 
   state: () => ({
-    items: [] as eventRiskLevelRead[],
-    itemsByQueue: {} as Record<string, eventRiskLevelRead[]>,
+    items: [] as eventSeverityRead[],
+    itemsByQueue: {} as Record<string, eventSeverityRead[]>,
   }),
 
   getters: {
-    allItems(): eventRiskLevelRead[] {
+    allItems(): eventSeverityRead[] {
       return this.items;
     },
     getItemsByQueue() {
@@ -27,7 +27,7 @@ export const useEventRiskLevelStore = defineStore({
 
   actions: {
     async readAll() {
-      this.items = await EventRiskLevel.readAll();
+      this.items = await EventSeverity.readAll();
       this.itemsByQueue = groupItemsByQueue(this.items);
     },
   },

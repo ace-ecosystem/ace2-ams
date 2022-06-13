@@ -1,4 +1,4 @@
-from api_models.event_risk_level import EventRiskLevelCreate
+from api_models.event_severity import EventSeverityCreate
 from db import crud
 from tests import factory
 
@@ -6,8 +6,8 @@ from tests import factory
 def test_create(db):
     queue = factory.queue.create_or_read(value="test_queue", db=db)
 
-    obj = crud.event_risk_level.create_or_read(
-        model=EventRiskLevelCreate(description="test description", value="test", queues=["test_queue"]),
+    obj = crud.event_severity.create_or_read(
+        model=EventSeverityCreate(description="test description", value="test", queues=["test_queue"]),
         db=db,
     )
 
@@ -17,7 +17,7 @@ def test_create(db):
 
 
 def test_create_duplicate(db):
-    obj = crud.event_risk_level.create_or_read(model=EventRiskLevelCreate(value="test", queues=["external"]), db=db)
-    obj2 = crud.event_risk_level.create_or_read(model=EventRiskLevelCreate(value="test", queues=["external"]), db=db)
+    obj = crud.event_severity.create_or_read(model=EventSeverityCreate(value="test", queues=["external"]), db=db)
+    obj2 = crud.event_severity.create_or_read(model=EventSeverityCreate(value="test", queues=["external"]), db=db)
 
     assert obj2.uuid == obj.uuid

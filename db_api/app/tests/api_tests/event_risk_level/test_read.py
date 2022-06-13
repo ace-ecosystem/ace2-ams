@@ -11,12 +11,12 @@ from tests import factory
 
 
 def test_get_invalid_uuid(client):
-    get = client.get("/api/event/risk_level/1")
+    get = client.get("/api/event/severity/1")
     assert get.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_get_nonexistent_uuid(client):
-    get = client.get(f"/api/event/risk_level/{uuid.uuid4()}")
+    get = client.get(f"/api/event/severity/{uuid.uuid4()}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -27,16 +27,16 @@ def test_get_nonexistent_uuid(client):
 
 def test_get_all(client, db):
     # Create some objects
-    factory.event_risk_level.create_or_read(value="test", db=db)
-    factory.event_risk_level.create_or_read(value="test2", db=db)
+    factory.event_severity.create_or_read(value="test", db=db)
+    factory.event_severity.create_or_read(value="test2", db=db)
 
     # Read them back
-    get = client.get("/api/event/risk_level/")
+    get = client.get("/api/event/severity/")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["total"] == 2
 
 
 def test_get_all_empty(client):
-    get = client.get("/api/event/risk_level/")
+    get = client.get("/api/event/severity/")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["total"] == 0

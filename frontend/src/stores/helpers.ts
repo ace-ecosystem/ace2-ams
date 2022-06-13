@@ -8,7 +8,7 @@ import { useAuthStore } from "./auth";
 import { useCurrentUserSettingsStore } from "./currentUserSettings";
 import { useEventPreventionToolStore } from "./eventPreventionTool";
 import { useEventRemediationStore } from "./eventRemediation";
-import { useEventRiskLevelStore } from "./eventRiskLevel";
+import { useEventSeverityStore } from "./eventSeverity";
 import { useEventStatusStore } from "./eventStatus";
 import { useEventTableStore } from "./eventTable";
 import { useEventTypeStore } from "./eventType";
@@ -28,7 +28,7 @@ export async function populateCommonStores(): Promise<void> {
   const alertToolStore = useAlertToolStore();
   const alertToolInstanceStore = useAlertToolInstanceStore();
   const eventPreventionToolStore = useEventPreventionToolStore();
-  const eventRiskLevelStore = useEventRiskLevelStore();
+  const eventSeverityStore = useEventSeverityStore();
   const eventStatusStore = useEventStatusStore();
   const eventTypeStore = useEventTypeStore();
   const eventVectorStore = useEventVectorStore();
@@ -43,7 +43,7 @@ export async function populateCommonStores(): Promise<void> {
     alertToolStore.readAll(),
     alertToolInstanceStore.readAll(),
     eventPreventionToolStore.readAll(),
-    eventRiskLevelStore.readAll(),
+    eventSeverityStore.readAll(),
     eventStatusStore.readAll(),
     eventTypeStore.readAll(),
     eventVectorStore.readAll(),
@@ -59,7 +59,7 @@ export async function populateCommonStores(): Promise<void> {
 export async function populateEventStores(): Promise<void> {
   const eventPreventionToolStore = useEventPreventionToolStore();
   const eventRemediationStore = useEventRemediationStore();
-  const eventRiskLevelStore = useEventRiskLevelStore();
+  const eventSeverityStore = useEventSeverityStore();
   const eventStatusStore = useEventStatusStore();
   const eventTypeStore = useEventTypeStore();
   const nodeThreatActorStore = useNodeThreatActorStore();
@@ -70,7 +70,7 @@ export async function populateEventStores(): Promise<void> {
 
   await Promise.all([
     eventPreventionToolStore.readAll(),
-    eventRiskLevelStore.readAll(),
+    eventSeverityStore.readAll(),
     eventRemediationStore.readAll(),
     eventStatusStore.readAll(),
     eventTypeStore.readAll(),
