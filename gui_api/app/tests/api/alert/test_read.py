@@ -105,7 +105,7 @@ def test_get_url_domain_summary(client_valid_access_token, requests_mock):
         json={"domains": [], "total": 0},
     )
 
-    client_valid_access_token.get(f"/api/submission/{alert_uuid}/summary/url_domain")
+    client_valid_access_token.get(f"/api/alert/{alert_uuid}/summary/url_domain")
 
     assert (len(requests_mock.request_history)) == 2
     assert requests_mock.request_history[1].method == "GET"
