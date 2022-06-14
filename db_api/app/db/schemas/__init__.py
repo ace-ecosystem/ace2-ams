@@ -26,6 +26,8 @@ from db.schemas.event_vector import EventVector
 from db.schemas.event_vector_queue_mapping import event_vector_queue_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
 from db.schemas.metadata import Metadata
+from db.schemas.metadata_display_type import MetadataDisplayType
+from db.schemas.metadata_display_value import MetadataDisplayValue
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment

@@ -4,6 +4,8 @@ from typing import Optional
 from uuid import UUID
 
 from api_models.analysis_metadata import AnalysisMetadataCreate
+from api_models.metadata_display_type import MetadataDisplayTypeCreate
+from api_models.metadata_display_value import MetadataDisplayValueCreate
 from api_models.metadata_tag import MetadataTagCreate
 from db import crud
 from db.schemas.analysis import Analysis
@@ -25,7 +27,18 @@ def create_or_read(
 
     # Create or read the metadata object based on its type
     metadata_object = None
-    if model.type == "tag":
+
+    if model.type == "display_type":
+        metadata_object = crud.metadata_display_type.create_or_read(
+            model=MetadataDisplayTypeCreate(value=model.value), db=db
+        )
+
+    elif model.type == "display_value":
+        metadata_object = crud.metadata_display_value.create_or_read(
+            model=MetadataDisplayValueCreate(value=model.value), db=db
+        )
+
+    elif model.type == "tag":
         metadata_object = crud.metadata_tag.create_or_read(model=MetadataTagCreate(value=model.value), db=db)
 
     # Create the analysis metadata object

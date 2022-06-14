@@ -19,6 +19,8 @@ def create_or_read(
     context: Optional[str] = None,
     detection_points: Optional[str] = None,
     directives: Optional[list[str]] = None,
+    display_type: Optional[str] = None,
+    display_value: Optional[str] = None,
     expires_on: Optional[datetime] = None,
     for_detection: bool = False,
     history_username: Optional[str] = None,
@@ -38,6 +40,14 @@ def create_or_read(
     if directives is not None:
         for directive in directives:
             factory.node_directive.create_or_read(value=directive, db=db)
+
+    if display_type is not None:
+        factory.metadata_display_type.create_or_read(value=display_type, db=db)
+        metadata.append(AnalysisMetadataCreate(type="display_type", value=display_type))
+
+    if display_value is not None:
+        factory.metadata_display_value.create_or_read(value=display_value, db=db)
+        metadata.append(AnalysisMetadataCreate(type="display_value", value=display_value))
 
     if permanent_tags is not None:
         for tag in permanent_tags:

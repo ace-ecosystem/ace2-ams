@@ -13,7 +13,6 @@ from api_models.node_relationship import NodeRelationshipCreate
 from api_models.observable import ObservableCreate, ObservableUpdate
 from db import crud
 from db.schemas.analysis import Analysis
-from db.schemas.metadata_tag import MetadataTag
 from db.schemas.observable import Observable, ObservableHistory
 from db.schemas.observable_type import ObservableType
 from exceptions.db import ValueNotFoundInDatabase

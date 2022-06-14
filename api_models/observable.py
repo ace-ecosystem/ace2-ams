@@ -125,6 +125,14 @@ class ObservableSubmissionRead(ObservableRead):
         default_factory=list, description="A list of tags added to the observable by analysis"
     )
 
+    display_type: Optional[type_str] = Field(
+        description="An overridden type for the observable when displaying in the GUI"
+    )
+
+    display_value: Optional[type_str] = Field(
+        description="An overridden value for the observable when displaying in the GUI"
+    )
+
     class Config:
         orm_mode = True
 
@@ -138,6 +146,14 @@ class ObservableSubmissionTreeRead(ObservableRead):
 
     children: "list[AnalysisSubmissionTreeRead]" = Field(
         default_factory=list, description="A list of this observable's child analysis"
+    )
+
+    display_type: Optional[type_str] = Field(
+        description="An overridden type for the observable when displaying in the GUI"
+    )
+
+    display_value: Optional[type_str] = Field(
+        description="An overridden value for the observable when displaying in the GUI"
     )
 
     first_appearance: bool = Field(
