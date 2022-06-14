@@ -17,7 +17,7 @@ parser.add_argument("--owner", type=str, help="The username of the user to use a
 parser.add_argument("--prevention_tools", type=str, help="Comma-separated list of prevention tools")
 parser.add_argument("--queue", type=str, help="The event queue")
 parser.add_argument("--remediations", type=str, help="Comma-separated list of remediations")
-parser.add_argument("--risk_level", type=str, help="The event risk level")
+parser.add_argument("--severity", type=str, help="The event severity")
 parser.add_argument("--source", type=str, help="The event source")
 parser.add_argument("--status", type=str, help="The event status")
 parser.add_argument("--tags", type=str, help="Comma-separated list of tags for the event")
@@ -58,8 +58,8 @@ if args.remediations:
         factory.event_remediation.create_or_read(value=r, db=db) for r in args.remediations.split(",")
     ]
 
-if args.risk_level:
-    event.risk_level = factory.event_risk_level.create_or_read(value=args.risk_level, db=db)
+if args.severity:
+    event.severity = factory.event_severity.create_or_read(value=args.severity, db=db)
 
 if args.source:
     event.source = factory.event_source.create_or_read(value=args.source, db=db)
@@ -68,7 +68,7 @@ if args.status:
     event.status = factory.event_status.create_or_read(value=args.status, db=db)
 
 if args.tags:
-    event.tags = [factory.node_tag.create_or_read(value=t, db=db) for t in args.tags.split(",")]
+    event.tags = [factory.tag.create_or_read(value=t, db=db) for t in args.tags.split(",")]
 
 if args.threat_actors:
     event.threat_actors = [

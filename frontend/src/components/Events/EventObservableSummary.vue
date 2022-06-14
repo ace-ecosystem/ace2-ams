@@ -144,8 +144,14 @@
     </Column>
     <Column field="tags" header="Tags">
       <template #body="slotProps">
-        <NodeTagVue
-          v-for="tag of slotProps.data.tags"
+        <MetadataTag
+          v-for="tag of slotProps.data.permanentTags"
+          :key="tag.value"
+          :tag="tag"
+          override-node-type="alerts"
+        />
+        <MetadataTag
+          v-for="tag of slotProps.data.analysisTags"
           :key="tag.value"
           :tag="tag"
           override-node-type="alerts"
@@ -165,7 +171,7 @@
   import Message from "primevue/message";
   import MultiSelect from "primevue/multiselect";
   import NodeRelationshipVue from "@/components/Node/NodeRelationship.vue";
-  import NodeTagVue from "@/components/Node/NodeTag.vue";
+  import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
   import { Event } from "@/services/api/event";
   import { ObservableInstance } from "@/services/api/observable";

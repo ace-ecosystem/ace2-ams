@@ -10,12 +10,12 @@ def test_create(db):
     # Create the various objects to link to the event
     factory.event_prevention_tool.create_or_read(value="tool", db=db)
     factory.event_remediation.create_or_read(value="remediation", db=db)
-    factory.event_risk_level.create_or_read(value="1", db=db)
+    factory.event_severity.create_or_read(value="1", db=db)
     factory.event_source.create_or_read(value="email", db=db)
     factory.event_status.create_or_read(value="OPEN", db=db)
     factory.event_type.create_or_read(value="phish", db=db)
     factory.event_vector.create_or_read(value="email", db=db)
-    factory.node_tag.create_or_read(value="tag", db=db)
+    factory.tag.create_or_read(value="tag", db=db)
     factory.node_threat.create_or_read(value="threat", db=db)
     factory.node_threat_actor.create_or_read(value="actor", db=db)
 
@@ -36,7 +36,7 @@ def test_create(db):
             queue="external",
             remediation_time=now,
             remediations=["remediation"],
-            risk_level="1",
+            severity="1",
             source="email",
             status="OPEN",
             tags=["tag"],
@@ -67,7 +67,7 @@ def test_create(db):
     assert event.queue.value == "external"
     assert event.remediation_time == now
     assert event.remediations[0].value == "remediation"
-    assert event.risk_level.value == "1"
+    assert event.severity.value == "1"
     assert event.source.value == "email"
     assert event.status.value == "OPEN"
     assert event.tags[0].value == "tag"

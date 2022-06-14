@@ -4,25 +4,25 @@ import PrimeVue from "primevue/config";
 import RemoveTagModal from "@/components/Modals/RemoveTagModal.vue";
 import Dialog from "primevue/dialog";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { genericObjectReadFactory } from "@mocks/genericObject";
-import { nodeTagRead } from "@/models/nodeTag";
+import { metadataObjectReadFactory } from "@mocks/metadata";
+import { tagRead } from "@/models/tag";
 import { alertReadFactory } from "@mocks/alert";
 import { userReadFactory } from "@mocks/user";
-import { NodeTag } from "@/services/api/nodeTag";
+import { Tag } from "@/services/api/tag";
 import { Alert } from "@/services/api/alert";
 import { observableTreeRead } from "@/models/observable";
 import { ObservableInstance } from "@/services/api/observable";
 import { observableTreeReadFactory } from "@mocks/observable";
 
-const existingTag = genericObjectReadFactory({ value: "existingTag" });
-const testTag = genericObjectReadFactory({ value: "testTag" });
-const otherTag = genericObjectReadFactory({ value: "otherTag" });
+const existingTag = metadataObjectReadFactory({ value: "existingTag" });
+const testTag = metadataObjectReadFactory({ value: "testTag" });
+const otherTag = metadataObjectReadFactory({ value: "otherTag" });
 
 function factory(
   args: {
     selected: string[];
-    openAlertTags: nodeTagRead[];
-    existingTags: nodeTagRead[];
+    openAlertTags: tagRead[];
+    existingTags: tagRead[];
     nodeType: "alerts" | "events" | "observable";
     reloadObject: "node" | "table";
     observable: undefined | observableTreeRead;
@@ -106,7 +106,7 @@ describe("RemoveTagModal", () => {
       nodeType: "observable",
       reloadObject: "node",
       observable: observableTreeReadFactory({
-        tags: [existingTag, testTag],
+        permanentTags: [existingTag, testTag],
       }),
     });
 
@@ -138,7 +138,7 @@ describe("RemoveTagModal", () => {
       nodeType: "observable",
       reloadObject: "node",
       observable: observableTreeReadFactory({
-        tags: [existingTag, testTag],
+        permanentTags: [existingTag, testTag],
       }),
     });
     cy.get('[data-cy="chips-container"]')
@@ -170,7 +170,7 @@ describe("RemoveTagModal", () => {
       nodeType: "observable",
       reloadObject: "node",
       observable: observableTreeReadFactory({
-        tags: [existingTag, testTag],
+        permanentTags: [existingTag, testTag],
       }),
     });
     cy.get("[data-cy='remove-button']").should("be.disabled");
@@ -202,7 +202,7 @@ describe("RemoveTagModal", () => {
     cy.get("[data-cy='remove-button']").should("be.disabled");
   });
   it("will fetch and use all available tags in nodeTagStore as as existing tag options if the given nodeType is not 'observable' and reloadObject is not 'node'", () => {
-    cy.stub(NodeTag, "readAll")
+    cy.stub(Tag, "readAll")
       .as("readAllTags")
       .resolves([existingTag, testTag, otherTag]);
 
@@ -237,7 +237,7 @@ describe("RemoveTagModal", () => {
       nodeType: "observable",
       reloadObject: "node",
       observable: observableTreeReadFactory({
-        tags: [existingTag, testTag],
+        permanentTags: [existingTag, testTag],
       }),
     });
 
@@ -273,7 +273,7 @@ describe("RemoveTagModal", () => {
     cy.get("@updateAlert").should("have.been.calledOnce");
   });
   it("will make the expected call to update multiple node's tags w/o tags in form when 'Remove' is clicked and the given nodeType is not 'observable' and reloadObject is not 'node'", () => {
-    cy.stub(NodeTag, "readAll")
+    cy.stub(Tag, "readAll")
       .as("readAllTags")
       .resolves([existingTag, testTag, otherTag]);
 
@@ -315,7 +315,7 @@ describe("RemoveTagModal", () => {
     cy.get("@updateAlerts").should("have.been.calledOnce");
   });
   it("will show an error if attempt to fetch all node tags fails", () => {
-    cy.stub(NodeTag, "readAll")
+    cy.stub(Tag, "readAll")
       .as("readAllTags")
       .rejects(new Error("404 request failed !"));
 
@@ -347,7 +347,7 @@ describe("RemoveTagModal", () => {
       nodeType: "observable",
       reloadObject: "node",
       observable: observableTreeReadFactory({
-        tags: [existingTag, testTag],
+        permanentTags: [existingTag, testTag],
       }),
     });
 

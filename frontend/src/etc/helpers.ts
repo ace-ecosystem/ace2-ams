@@ -6,7 +6,7 @@ import {
 } from "@/models/alert";
 import { genericQueueableObjectRead, propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
-import { nodeTagRead } from "@/models/nodeTag";
+import { tagRead } from "@/models/tag";
 import { isValidDate, isObject } from "@/etc/validators";
 import { inputTypes } from "@/etc/constants/base";
 
@@ -206,10 +206,12 @@ export function formatNodeFiltersForAPI(
 
 export function getAllAlertTags(
   alert: alertRead | alertSummary | alertTreeRead,
-): Array<nodeTagRead> {
-  const allTags = alert.tags.concat(alert.childTags);
+): Array<tagRead> {
+  const allTags = alert.tags
+    .concat(alert.childAnalysisTags)
+    .concat(alert.childPermanentTags);
 
-  // Return a sorted and deduplicated list of the tags based on the tag UUID.
+  // Return a sorted and deduplicated list of the tags based on the tag value.
   return [...new Map(allTags.map((v) => [v.uuid, v])).values()].sort((a, b) =>
     a.value > b.value ? 1 : -1,
   );
@@ -221,7 +223,8 @@ export function getAlertLink(alert: alertRead | alertSummary): string {
 
 export function parseAlertSummary(alert: alertRead): alertSummary {
   return {
-    childTags: alert.childTags,
+    childAnalysisTags: alert.childAnalysisTags,
+    childPermanentTags: alert.childPermanentTags,
     comments: alert.comments,
     description: alert.description ? alert.description : "",
     disposition: alert.disposition ? alert.disposition.value : "OPEN",

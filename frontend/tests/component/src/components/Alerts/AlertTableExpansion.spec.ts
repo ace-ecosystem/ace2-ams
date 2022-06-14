@@ -4,13 +4,13 @@ import PrimeVue from "primevue/config";
 import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
 
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { genericObjectReadFactory } from "@mocks/genericObject";
-import { observableRead } from "@/models/observable";
-import { observableReadFactory } from "@mocks/observable";
+import { metadataObjectReadFactory } from "@mocks/metadata";
+import { observableInAlertRead } from "@/models/observable";
+import { observableInAlertReadFactory } from "@mocks/observable";
 import router from "@/router/index";
 
 interface AlertTableExpansionProps {
-  observables: observableRead[] | null;
+  observables: observableInAlertRead[] | null;
 }
 
 const defaultProps: AlertTableExpansionProps = {
@@ -46,10 +46,13 @@ describe("AlertTableExpansion", () => {
     factory({
       props: {
         observables: [
-          observableReadFactory(),
-          observableReadFactory({
+          observableInAlertReadFactory(),
+          observableInAlertReadFactory({
             value: "TestObservable2",
-            tags: [genericObjectReadFactory({ value: "testTag" })],
+            analysisTags: [
+              metadataObjectReadFactory({ value: "analysisTag1" }),
+            ],
+            permanentTags: [metadataObjectReadFactory({ value: "testTag" })],
           }),
         ],
       },
@@ -58,9 +61,10 @@ describe("AlertTableExpansion", () => {
     cy.get("li").contains("testObservableType : TestObservable");
     cy.get("li").contains("testObservableType : TestObservable2");
     cy.get("li").eq(1).contains("testTag");
+    cy.get("li").eq(1).contains("analysisTag1");
   });
   it("renders with observables containing observables with tags", () => {
-    const observable = observableReadFactory();
+    const observable = observableInAlertReadFactory();
     factory({
       props: {
         observables: [observable],

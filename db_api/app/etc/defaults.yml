@@ -82,7 +82,7 @@ event_remediation:
     - reimaged
     - removed from mailbox
     - some internal value
-event_risk_level:
+event_severity:
   external:
     - 0
     - 1

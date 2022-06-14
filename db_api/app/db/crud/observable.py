@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
 from typing import Optional
 from uuid import UUID
-from api_models.analysis import AnalysisCreate
 
+from api_models.analysis import AnalysisCreate
 from api_models.node_detection_point import NodeDetectionPointCreate
 from api_models.node_relationship import NodeRelationshipCreate
 from api_models.observable import ObservableCreate, ObservableUpdate
@@ -15,6 +15,7 @@ from db import crud
 from db.schemas.analysis import Analysis
 from db.schemas.observable import Observable, ObservableHistory
 from db.schemas.observable_type import ObservableType
+from db.schemas.tag import Tag
 from exceptions.db import ValueNotFoundInDatabase
 
 
@@ -38,7 +39,7 @@ def create_or_read(
             "history_username",
             "observable_relationships",
             "parent_analysis_uuid",
-            "redirection",
+            "permanent_tags",
         },
     )
 
@@ -46,7 +47,7 @@ def create_or_read(
     obj.context = model.context
     obj.expires_on = model.expires_on
     obj.for_detection = model.for_detection
-    obj.redirection = create_or_read(model=model.redirection, db=db) if model.redirection else None
+    obj.permanent_tags = crud.tag.read_by_values(values=model.permanent_tags, db=db)
     obj.time = model.time
     obj.type = crud.observable_type.read_by_value(value=model.type, db=db)
     obj.value = model.value
@@ -107,6 +108,10 @@ def create_or_read(
     if parent_analysis is None:
         parent_analysis = crud.analysis.read_by_uuid(uuid=model.parent_analysis_uuid, db=db)
     parent_analysis.child_observables.append(obj)
+
+    # If there was any metadata given, it is assumed that it was added by the observable's parent analysis.
+    for metadata in model.metadata:
+        crud.analysis_metadata.create_or_read(model=metadata, analysis=parent_analysis, observable=obj, db=db)
 
     # Update the alert versions that contain the parent analysis
     crud.submission.update_submission_versions(analysis_uuid=parent_analysis.uuid, db=db)
@@ -174,24 +179,15 @@ def update(uuid: UUID, model: ObservableUpdate, db: Session) -> bool:
             )
             observable.for_detection = update_data["for_detection"]
 
-        if "redirection_uuid" in update_data:
+        if "permanent_tags" in update_data:
             diffs.append(
                 crud.history.create_diff(
-                    field="redirection_uuid", old=observable.redirection_uuid, new=update_data["redirection_uuid"]
+                    field="permanent_tags",
+                    old=[x.value for x in observable.permanent_tags],
+                    new=update_data["permanent_tags"],
                 )
             )
-
-            if update_data["redirection_uuid"]:
-                observable.redirection = read_by_uuid(uuid=update_data["redirection_uuid"], db=db)
-
-                # TODO: Figure out why setting the redirection field above does not set the redirection_uuid
-                # the same way it does in the create endpoint.
-                observable.redirection_uuid = update_data["redirection_uuid"]
-            elif observable.redirection:
-                # At this point we want to set the redirection back to None. If there actually is
-                # a redirection observable set, then set both observables' redirection_uuid to None.
-                observable.redirection.redirection_uuid = None
-                observable.redirection_uuid = None
+            observable.permanent_tags = crud.tag.read_by_values(values=update_data["permanent_tags"], db=db)
 
         if "time" in update_data:
             diffs.append(crud.history.create_diff(field="time", old=observable.time, new=update_data["time"]))

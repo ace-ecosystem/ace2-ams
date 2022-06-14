@@ -12,7 +12,7 @@ def test_get_observable(client_valid_access_token, requests_mock):
             "uuid": str(uuid4()),
             "directives": [],
             "observable_relationships": [],
-            "tags": [],
+            "permanent_tags": [],
             "threat_actors": [],
             "threats": [],
         },

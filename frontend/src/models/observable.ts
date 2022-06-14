@@ -6,10 +6,10 @@ import { nodeCommentRead } from "./nodeComment";
 import { nodeDetectionPointRead } from "./nodeDetectionPoint";
 import { nodeDirectiveRead } from "./nodeDirective";
 import { nodeRelationshipRead } from "./nodeRelationship";
-import { nodeTagRead } from "./nodeTag";
 import { nodeThreatRead } from "./nodeThreat";
 import { nodeThreatActorRead } from "./nodeThreatActor";
 import { observableTypeRead } from "./observableType";
+import { tagRead } from "./tag";
 
 export interface observableCreate extends nodeCreate, historyUsername {
   // The backend API actually allows you to specify a list of AnalysisCreate objects
@@ -19,7 +19,6 @@ export interface observableCreate extends nodeCreate, historyUsername {
   expiresOn?: Date;
   forDetection?: boolean;
   parentAnalysisUuid: UUID;
-  redirection?: observableCreate;
   tags?: string[];
   threatActors?: string[];
   threats?: string[];
@@ -37,13 +36,16 @@ export interface observableRead extends nodeRead {
   expiresOn: Date | null;
   forDetection: boolean;
   observableRelationships: observableRelationshipRead[];
-  redirection: observableRead | null;
-  tags: nodeTagRead[];
+  permanentTags: tagRead[];
   threatActors: nodeThreatActorRead[];
   threats: nodeThreatRead[];
   time: Date;
   type: observableTypeRead;
   value: string;
+}
+
+export interface observableInAlertRead extends observableRead {
+  analysisTags: tagRead[];
 }
 
 export interface observableReadPage {
@@ -54,6 +56,7 @@ export interface observableReadPage {
 }
 
 export interface observableTreeRead extends observableRead {
+  analysisTags: tagRead[];
   children: analysisTreeRead[];
   firstAppearance?: boolean;
 }
@@ -63,7 +66,6 @@ export interface observableUpdate extends nodeUpdate, historyUsername {
   directives?: string[];
   expiresOn?: Date | null;
   forDetection?: boolean;
-  redirectionUuid?: UUID;
   tags?: string[];
   threatActors?: string[];
   threats?: string[];

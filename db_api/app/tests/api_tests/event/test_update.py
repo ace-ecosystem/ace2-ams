@@ -54,8 +54,8 @@ from tests import factory
         ("remediations", [None]),
         ("remediations", [""]),
         ("remediations", ["abc", 123]),
-        ("risk_level", 123),
-        ("risk_level", ""),
+        ("severity", 123),
+        ("severity", ""),
         ("source", 123),
         ("source", ""),
         ("status", 123),
@@ -114,7 +114,7 @@ def test_update_invalid_version(client, db):
         ("prevention_tools", ["abc"]),
         ("queue", "abc"),
         ("remediations", ["abc"]),
-        ("risk_level", "abc"),
+        ("severity", "abc"),
         ("source", "abc"),
         ("status", "abc"),
         ("type", "abc"),
@@ -322,20 +322,20 @@ def test_update_remediations(client, db):
     assert history.json()["items"][2]["snapshot"]["remediations"] == []
 
 
-def test_update_risk_level(client, db):
+def test_update_severity(client, db):
     # Create an event
     event = factory.event.create_or_read(name="test", db=db, history_username="analyst")
     initial_event_version = event.version
 
-    # Create an event risk level
-    factory.event_risk_level.create_or_read(value="test", db=db)
+    # Create an event severity
+    factory.event_severity.create_or_read(value="test", db=db)
 
     # Update the event
     update = client.patch(
-        "/api/event/", json=[{"risk_level": "test", "uuid": str(event.uuid), "history_username": "analyst"}]
+        "/api/event/", json=[{"severity": "test", "uuid": str(event.uuid), "history_username": "analyst"}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert event.risk_level.value == "test"
+    assert event.severity.value == "test"
     assert event.version != initial_event_version
 
     # Verify the history
@@ -343,27 +343,27 @@ def test_update_risk_level(client, db):
     assert history.json()["total"] == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
     assert history.json()["items"][1]["action_by"]["username"] == "analyst"
-    assert history.json()["items"][1]["field"] == "risk_level"
+    assert history.json()["items"][1]["field"] == "severity"
     assert history.json()["items"][1]["diff"]["old_value"] is None
     assert history.json()["items"][1]["diff"]["new_value"] == "test"
-    assert history.json()["items"][1]["snapshot"]["risk_level"]["value"] == "test"
+    assert history.json()["items"][1]["snapshot"]["severity"]["value"] == "test"
 
     # Set it back to None
     update = client.patch(
-        "/api/event/", json=[{"risk_level": None, "uuid": str(event.uuid), "history_username": "analyst"}]
+        "/api/event/", json=[{"severity": None, "uuid": str(event.uuid), "history_username": "analyst"}]
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
-    assert event.risk_level is None
+    assert event.severity is None
 
     # Verify the history
     history = client.get(f"/api/event/{event.uuid}/history")
     assert history.json()["total"] == 3
     assert history.json()["items"][2]["action"] == "UPDATE"
     assert history.json()["items"][2]["action_by"]["username"] == "analyst"
-    assert history.json()["items"][2]["field"] == "risk_level"
+    assert history.json()["items"][2]["field"] == "severity"
     assert history.json()["items"][2]["diff"]["old_value"] == "test"
     assert history.json()["items"][2]["diff"]["new_value"] is None
-    assert history.json()["items"][2]["snapshot"]["risk_level"] is None
+    assert history.json()["items"][2]["snapshot"]["severity"] is None
 
 
 def test_update_source(client, db):
@@ -532,7 +532,7 @@ def test_update_vectors(client, db):
 @pytest.mark.parametrize(
     "key,value_lists,helper_create_func",
     [
-        ("tags", VALID_LIST_STRING_VALUES, factory.node_tag.create_or_read),
+        ("tags", VALID_LIST_STRING_VALUES, factory.tag.create_or_read),
         ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
         ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
     ],

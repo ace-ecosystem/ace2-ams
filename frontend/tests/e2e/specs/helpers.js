@@ -20,7 +20,7 @@ export function visitUrl(options) {
   cy.intercept("GET", "/api/event/prevention_tool/?offset=0").as(
     "eventPreventionTool",
   );
-  cy.intercept("GET", "/api/event/risk_level/?offset=0").as("eventRiskLevel");
+  cy.intercept("GET", "/api/event/severity/?offset=0").as("eventSeverity");
   cy.intercept("GET", "/api/event/status/?offset=0").as("eventStatus");
   cy.intercept("GET", "/api/event/type/?offset=0").as("eventType");
   cy.intercept("GET", "/api/event/vector/?offset=0").as("eventVector");
@@ -41,7 +41,7 @@ export function visitUrl(options) {
     "@alertToolInstance",
     "@alertType",
     "@eventPreventionTool",
-    "@eventRiskLevel",
+    "@eventSeverity",
     "@eventStatus",
     "@eventType",
     "@eventVector",
@@ -70,7 +70,7 @@ export function openEditEventModal(eventNum = 0) {
   cy.intercept("GET", "/api/event/remediation/?offset=0").as(
     "eventRemediation",
   );
-  cy.intercept("GET", "/api/event/risk_level/?offset=0").as("eventRiskLevel");
+  cy.intercept("GET", "/api/event/severity/?offset=0").as("eventSeverity");
   cy.intercept("GET", "/api/event/status/?offset=0").as("eventStatus");
   cy.intercept("GET", "/api/event/type/?offset=0").as("eventType");
   cy.intercept("GET", "/api/event/vector/?offset=0").as("eventVector");
@@ -87,7 +87,7 @@ export function openEditEventModal(eventNum = 0) {
   const intercepts = [
     "@eventPreventionTool",
     "@eventRemediation",
-    "@eventRiskLevel",
+    "@eventSeverity",
     "@eventStatus",
     "@eventType",
     "@eventVector",

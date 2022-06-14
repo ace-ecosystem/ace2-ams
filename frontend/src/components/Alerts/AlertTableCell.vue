@@ -18,11 +18,11 @@
     <br />
     <!-- Alert Tags -->
     <span data-cy="tags">
-      <NodeTagVue
+      <MetadataTag
         v-for="tag in getAllAlertTags(props.data)"
         :key="tag.uuid"
         :tag="tag"
-      ></NodeTagVue>
+      ></MetadataTag>
     </span>
     <!-- Alert comments -->
     <span v-if="props.data.comments">
@@ -66,7 +66,7 @@
   import { defineProps, PropType, inject, computed } from "vue";
 
   import AlertDispositionTag from "@/components/Alerts/AlertDispositionTag.vue";
-  import NodeTagVue from "@/components/Node/NodeTag.vue";
+  import MetadataTag from "@/components/Metadata/MetadataTag.vue";
   import NodeComment from "@/components/Node/NodeComment.vue";
 
   import { alertSummary } from "@/models/alert";

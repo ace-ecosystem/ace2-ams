@@ -3,23 +3,23 @@ import PrimeVue from "primevue/config";
 
 import TagModal from "@/components/Modals/TagModal.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { genericObjectReadFactory } from "@mocks/genericObject";
-import { nodeTagRead } from "@/models/nodeTag";
+import { metadataObjectReadFactory } from "@mocks/metadata";
+import { tagRead } from "@/models/tag";
 import { alertReadFactory } from "@mocks/alert";
 import { userReadFactory } from "@mocks/user";
-import { NodeTag } from "@/services/api/nodeTag";
+import { Tag } from "@/services/api/tag";
 import { Alert } from "@/services/api/alert";
 import { observableTreeRead } from "@/models/observable";
 import { ObservableInstance } from "@/services/api/observable";
 import { observableTreeReadFactory } from "@mocks/observable";
 
-const existingTag = genericObjectReadFactory({ value: "existingTag" });
-const testTag = genericObjectReadFactory({ value: "testTag" });
+const existingTag = metadataObjectReadFactory({ value: "existingTag" });
+const testTag = metadataObjectReadFactory({ value: "testTag" });
 
 function factory(
   args: {
     selected: string[];
-    existingTags: nodeTagRead[];
+    existingTags: tagRead[];
     nodeType: "alerts" | "events" | "observable";
     reloadObject: "node" | "table";
     observable: undefined | observableTreeRead;
@@ -61,7 +61,7 @@ function factory(
             selectedAlertStore: {
               selected: args.selected,
             },
-            nodeTagStore: {
+            tagStore: {
               items: args.existingTags,
             },
           },
@@ -142,16 +142,14 @@ describe("TagModal", () => {
     cy.findByText("Add").parent().should("be.disabled");
   });
   it("attempts to create new tags and update selected nodes with new and existing tags and 'Add' clicked", () => {
-    cy.stub(NodeTag, "create")
+    cy.stub(Tag, "create")
       .withArgs({
         value: "newTag",
       })
       .as("createTag")
       .resolves();
 
-    cy.stub(NodeTag, "readAll")
-      .as("readAllTags")
-      .resolves([testTag, existingTag]);
+    cy.stub(Tag, "readAll").as("readAllTags").resolves([testTag, existingTag]);
 
     cy.stub(Alert, "update")
       .withArgs([
@@ -224,16 +222,14 @@ describe("TagModal", () => {
     cy.get("[data-cy=TagModal]").should("not.exist");
   });
   it("attempts to create new tags and update a given observable with new and existing tags and 'Add' clicked", () => {
-    cy.stub(NodeTag, "create")
+    cy.stub(Tag, "create")
       .withArgs({
         value: "newTag",
       })
       .as("createTag")
       .resolves();
 
-    cy.stub(NodeTag, "readAll")
-      .as("readAllTags")
-      .resolves([testTag, existingTag]);
+    cy.stub(Tag, "readAll").as("readAllTags").resolves([testTag, existingTag]);
 
     cy.stub(ObservableInstance, "update")
       .withArgs("observableUuid1", {
@@ -249,7 +245,9 @@ describe("TagModal", () => {
       nodeType: "observable",
       reloadObject: "node",
 
-      observable: observableTreeReadFactory({ tags: [testTag, existingTag] }),
+      observable: observableTreeReadFactory({
+        permanentTags: [testTag, existingTag],
+      }),
     });
     cy.contains("Select from existing tags").click();
     cy.contains("testTag").click();
@@ -265,14 +263,14 @@ describe("TagModal", () => {
     cy.get("[data-cy=TagModal]").should("not.exist");
   });
   it("shows error if existing tags cannot be fetched", () => {
-    cy.stub(NodeTag, "create")
+    cy.stub(Tag, "create")
       .withArgs({
         value: "newTag",
       })
       .as("createTag")
       .resolves();
 
-    cy.stub(NodeTag, "readAll")
+    cy.stub(Tag, "readAll")
       .as("readAllTags")
       .rejects(new Error("404 request failed !"));
 
@@ -300,14 +298,14 @@ describe("TagModal", () => {
     cy.contains("404 request failed !").should("be.visible");
   });
   it("shows error if request to create a new tag fails", () => {
-    cy.stub(NodeTag, "create")
+    cy.stub(Tag, "create")
       .withArgs({
         value: "newTag",
       })
       .as("createTag")
       .rejects(new Error("404 request failed !"));
 
-    cy.stub(NodeTag, "readAll").as("readAllTags").resolves();
+    cy.stub(Tag, "readAll").as("readAllTags").resolves();
 
     cy.stub(Alert, "update").as("updateAlert").resolves();
 
@@ -333,16 +331,14 @@ describe("TagModal", () => {
     cy.contains("404 request failed !").should("be.visible");
   });
   it("shows error if request to update node tags fails", () => {
-    cy.stub(NodeTag, "create")
+    cy.stub(Tag, "create")
       .withArgs({
         value: "newTag",
       })
       .as("createTag")
       .resolves();
 
-    cy.stub(NodeTag, "readAll")
-      .as("readAllTags")
-      .resolves([testTag, existingTag]);
+    cy.stub(Tag, "readAll").as("readAllTags").resolves([testTag, existingTag]);
 
     cy.stub(Alert, "update")
       .withArgs([

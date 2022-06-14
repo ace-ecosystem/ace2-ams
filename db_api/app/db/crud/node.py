@@ -1,4 +1,3 @@
-from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from uuid import UUID, uuid4
@@ -6,7 +5,7 @@ from uuid import UUID, uuid4
 from api_models.node import NodeCreate, NodeUpdate
 from db import crud
 from db.schemas.node import Node
-from exceptions.db import UuidNotFoundInDatabase, VersionMismatch
+from exceptions.db import VersionMismatch
 
 
 def create(
@@ -19,9 +18,6 @@ def create(
 
     if hasattr(model, "directives") and model.directives:
         obj.directives = crud.node_directive.read_by_values(values=model.directives, db=db)
-
-    if hasattr(model, "tags") and model.tags:
-        obj.tags = crud.node_tag.read_by_values(values=model.tags, db=db)
 
     if hasattr(model, "threat_actors") and model.threat_actors:
         obj.threat_actors = crud.node_threat_actor.read_by_values(values=model.threat_actors, db=db)
@@ -62,10 +58,6 @@ def update(
         )
 
         node.directives = crud.node_directive.read_by_values(values=update_data["directives"], db=db)
-
-    if "tags" in update_data:
-        diffs.append(crud.history.create_diff(field="tags", old=[x.value for x in node.tags], new=update_data["tags"]))
-        node.tags = crud.node_tag.read_by_values(values=update_data["tags"], db=db)
 
     if "threat_actors" in update_data:
         diffs.append(

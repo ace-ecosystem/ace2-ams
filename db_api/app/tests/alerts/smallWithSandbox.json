@@ -153,12 +153,12 @@
             {
               "type": "email_address",
               "value": "badguy@evil.com",
+              "metadata": [{ "type": "tag", "value": "from_address" }],
               "node_metadata": {
                 "display": {
                   "type": "sender"
                 }
               },
-              "tags": ["from_address"],
               "analyses": [
                 {
                   "type": "Email Address Analysis",
@@ -182,7 +182,7 @@
             {
               "type": "email_address",
               "value": "goodguy@company.com",
-              "tags": ["recipient"],
+              "metadata": [{ "type": "tag", "value": "recipient" }],
               "analyses": [
                 {
                   "type": "Email Address Analysis",
@@ -205,7 +205,7 @@
             {
               "type": "email_address",
               "value": "otherguy@company.com",
-              "tags": ["recipient"],
+              "metadata": [{ "type": "tag", "value": "recipient" }],
               "analyses": [
                 {
                   "type": "Email Address Analysis",
@@ -294,7 +294,10 @@
     {
       "type": "ipv4",
       "value": "127.0.0.1",
-      "tags": ["c2", "contacted_host"],
+      "metadata": [
+        { "type": "tag", "value": "c2" },
+        { "type": "tag", "value": "contacted_host" }
+      ],
       "node_metadata": {
         "display": {
           "type": "private ip address",

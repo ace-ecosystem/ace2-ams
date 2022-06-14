@@ -105,7 +105,7 @@ def test_update(db, key, initial_value, updated_value):
     "key,value_lists,helper_create_func",
     [
         ("directives", VALID_LIST_STRING_VALUES, factory.node_directive.create_or_read),
-        ("tags", VALID_LIST_STRING_VALUES, factory.node_tag.create_or_read),
+        ("permanent_tags", VALID_LIST_STRING_VALUES, factory.tag.create_or_read),
         ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
         ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
     ],
@@ -120,7 +120,7 @@ def test_update_node_fields(db, key, value_lists, helper_create_func):
             type="test_type",
             value=f"test{i}",
             directives=["remove_me"],
-            tags=["remove_me"],
+            permanent_tags=["remove_me"],
             threat_actors=["remove_me"],
             threats=["remove_me"],
             parent_analysis=submission.root_analysis,
@@ -150,51 +150,6 @@ def test_update_node_fields(db, key, value_lists, helper_create_func):
             assert observable.history[1].diff["added_to_list"] == sorted(set(value_list))
             assert observable.history[1].diff["removed_from_list"] == ["remove_me"]
             assert len(observable.history[1].snapshot[key]) == len(set(value_list))
-
-
-def test_update_redirection_uuid(db):
-    submission = factory.submission.create(db=db)
-    obs1 = factory.observable.create_or_read(
-        type="test_type", value="test", parent_analysis=submission.root_analysis, db=db, history_username="analyst"
-    )
-    initial_observable_version = obs1.version
-    assert obs1.redirection is None
-
-    # Create a second observable to use for redirection
-    obs2 = factory.observable.create_or_read(
-        type="test_type", value="test2", parent_analysis=submission.root_analysis, db=db, history_username="analyst"
-    )
-
-    # Update the redirection UUID
-    crud.observable.update(
-        uuid=obs1.uuid, model=ObservableUpdate(redirection_uuid=obs2.uuid, history_username="analyst"), db=db
-    )
-    assert obs1.redirection_uuid == obs2.uuid
-    assert obs1.version != initial_observable_version
-
-    # Verify the history
-    assert len(obs1.history) == 2
-    assert obs1.history[1].action == "UPDATE"
-    assert obs1.history[1].action_by.username == "analyst"
-    assert obs1.history[1].field == "redirection_uuid"
-    assert obs1.history[1].diff["old_value"] is None
-    assert obs1.history[1].diff["new_value"] == str(obs2.uuid)
-    assert obs1.history[1].snapshot["redirection"]["uuid"] == str(obs2.uuid)
-
-    # Set it back to None
-    crud.observable.update(
-        uuid=obs1.uuid, model=ObservableUpdate(redirection_uuid=None, history_username="analyst"), db=db
-    )
-    assert obs1.redirection is None
-
-    # Verify the history
-    assert len(obs1.history) == 3
-    assert obs1.history[2].action == "UPDATE"
-    assert obs1.history[2].action_by.username == "analyst"
-    assert obs1.history[2].field == "redirection_uuid"
-    assert obs1.history[2].diff["old_value"] == str(obs2.uuid)
-    assert obs1.history[2].diff["new_value"] is None
-    assert obs1.history[2].snapshot["redirection"] is None
 
 
 def test_update_type(db):

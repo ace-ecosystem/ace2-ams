@@ -2,7 +2,7 @@ import contextlib
 
 from datetime import datetime, timezone
 from pydantic import BaseModel
-from sqlalchemy import delete as sql_delete, select, update as sql_update
+from sqlalchemy import select, update as sql_update
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session, undefer
 from sqlalchemy.orm.decl_api import DeclarativeMeta
@@ -35,12 +35,13 @@ def delete(uuid: UUID, db_table: DeclarativeMeta, db: Session) -> bool:
     to an IntegrityError, only the nested transaction is rolled back."""
 
     # Ensure the record exists in the database
-    read_by_uuid(uuid=uuid, db_table=db_table, db=db)
+    obj = read_by_uuid(uuid=uuid, db_table=db_table, db=db)
 
     with db.begin_nested():
         try:
-            result = db.execute(sql_delete(db_table).where(db_table.uuid == uuid))
-            return result.rowcount == 1
+            db.delete(obj)
+            db.flush()
+            return True
         except IntegrityError:
             db.rollback()
 

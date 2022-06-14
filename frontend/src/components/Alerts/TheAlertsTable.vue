@@ -32,7 +32,7 @@
   import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
   import TheNodeTable from "@/components/Node/TheNodeTable.vue";
 
-  import { observableRead } from "@/models/observable";
+  import { observableInAlertRead } from "@/models/observable";
 
   import { Alert } from "@/services/api/alert";
   import { alertSummary } from "@/models/alert";
@@ -84,7 +84,9 @@
     { field: "type", header: "Type", sortable: true, default: false },
   ];
 
-  const alertObservables = ref<Record<string, null | observableRead[]>>({});
+  const alertObservables = ref<Record<string, null | observableInAlertRead[]>>(
+    {},
+  );
 
   const onRowExpand = async (event: { data: alertSummary }) => {
     const alertUuid = event.data.uuid;

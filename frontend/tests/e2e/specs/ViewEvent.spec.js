@@ -137,7 +137,7 @@ describe("ViewEvent.vue actions", () => {
   });
   it("Correctly adds tags via add tags modal and reloads page", () => {
     cy.intercept("PATCH", "/api/event/").as("updateEvent");
-    cy.intercept("POST", "/api/node/tag/").as("addTag");
+    cy.intercept("POST", "/api/tag/").as("addTag");
 
     // Click on the Actions dropdown
     cy.get('[aria-haspopup="true"]').eq(0).click();
@@ -158,7 +158,7 @@ describe("ViewEvent.vue actions", () => {
     cy.intercept("GET", "/api/event/remediation/?offset=0").as(
       "eventRemediation",
     );
-    cy.intercept("GET", "/api/event/risk_level/?offset=0").as("eventRiskLevel");
+    cy.intercept("GET", "/api/event/severity/?offset=0").as("eventSeverity");
     cy.intercept("GET", "/api/event/status/?offset=0").as("eventStatus");
     cy.intercept("GET", "/api/event/type/?offset=0").as("eventType");
     cy.intercept("GET", "/api/event/vector/?offset=0").as("eventVector");
@@ -174,7 +174,7 @@ describe("ViewEvent.vue actions", () => {
     const intercepts = [
       "@eventPreventionTool",
       "@eventRemediation",
-      "@eventRiskLevel",
+      "@eventSeverity",
       "@eventStatus",
       "@eventType",
       "@eventVector",
@@ -292,7 +292,7 @@ describe("Event Summary Details", () => {
     cy.get('[data-cy="table-column-select"]').should("be.visible");
     cy.get(".p-multiselect-label").should(
       "contain.text",
-      "Created, Name, Threats, Risk Level, Status, Owner",
+      "Created, Name, Threats, Severity, Status, Owner",
     );
     cy.get('[data-cy="reset-table-button"]').should("be.visible");
     cy.get(".p-column-header-content > .p-column-title")
@@ -315,7 +315,7 @@ describe("Event Summary Details", () => {
       .should("contain.text", "None");
     cy.get(".p-column-header-content > .p-column-title")
       .eq(3)
-      .should("have.text", "Risk Level");
+      .should("have.text", "Severity");
     cy.get(".p-datatable-tbody > tr >  > :nth-child(2)")
       .eq(3)
       .should("have.text", "None");
@@ -340,7 +340,7 @@ describe("Event Summary Details", () => {
     cy.get(".p-menubar").click(); // Click away from column selector
     cy.get(".p-multiselect-label").should(
       "contain.text",
-      "Created, Name, Threat Actors, Threats, Risk Level, Status, Owner",
+      "Created, Name, Threat Actors, Threats, Severity, Status, Owner",
     );
     cy.get(".p-column-header-content > .p-column-title")
       .eq(0)
@@ -368,7 +368,7 @@ describe("Event Summary Details", () => {
       .should("contain.text", "None");
     cy.get(".p-column-header-content > .p-column-title")
       .eq(4)
-      .should("have.text", "Risk Level");
+      .should("have.text", "Severity");
     cy.get(".p-datatable-tbody > tr >  > :nth-child(2)")
       .eq(4)
       .should("have.text", "None");
@@ -407,7 +407,7 @@ describe("Event Summary Details", () => {
       .should("contain.text", "None");
     cy.get(".p-column-header-content > .p-column-title")
       .eq(3)
-      .should("have.text", "Risk Level");
+      .should("have.text", "Severity");
     cy.get(".p-datatable-tbody > tr >  > :nth-child(2)")
       .eq(3)
       .should("have.text", "None");

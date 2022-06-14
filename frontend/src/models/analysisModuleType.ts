@@ -1,7 +1,7 @@
 import { genericObjectRead, UUID } from "./base";
 
 import { nodeDirectiveRead } from "./nodeDirective";
-import { nodeTagRead } from "./nodeTag";
+import { tagRead } from "./tag";
 import { observableTypeRead } from "./observableType";
 
 export interface analysisModuleTypeRead extends genericObjectRead {
@@ -10,7 +10,7 @@ export interface analysisModuleTypeRead extends genericObjectRead {
   manual: boolean;
   observableTypes: observableTypeRead[];
   requiredDirectives: nodeDirectiveRead[];
-  requiredTags: nodeTagRead[];
+  requiredTags: tagRead[];
   version: string;
 }
 

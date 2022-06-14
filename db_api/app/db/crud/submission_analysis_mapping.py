@@ -13,6 +13,7 @@ def create(analysis_uuid: UUID, submission_uuid: UUID, db: Session):
             db.execute(
                 insert(submission_analysis_mapping).values(submission_uuid=submission_uuid, analysis_uuid=analysis_uuid)
             )
+            db.flush()
         except IntegrityError as e:
             db.rollback()
 

@@ -222,22 +222,86 @@ def test_filter_by_queue(db):
 
 
 def test_filter_by_tags(db):
-    submission1 = factory.submission.create(db=db)
-    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission1.root_analysis, db=db)
+    # Create various submissions to test filtering by tags. These are the submissions that will be returned.
+    submission1 = factory.submission.create(tags=["submission1_tag"], db=db)
+    factory.observable.create_or_read(type="type2", value="value2", parent_analysis=submission1.root_analysis, db=db)
 
-    submission2 = factory.submission.create(tags=["submission2_tag"], db=db)
-    factory.observable.create_or_read(type="type2", value="value2", parent_analysis=submission2.root_analysis, db=db)
+    submission2 = factory.submission.create(db=db)
+    factory.observable.create_or_read(
+        type="type2",
+        value="value2",
+        parent_analysis=submission2.root_analysis,
+        analysis_tags=["observable2_analysis_tag"],
+        db=db,
+    )
 
     submission3 = factory.submission.create(db=db)
     factory.observable.create_or_read(
-        type="type3", value="value3", parent_analysis=submission3.root_analysis, tags=["observable3_tag"], db=db
+        type="type3",
+        value="value3",
+        parent_analysis=submission3.root_analysis,
+        permanent_tags=["observable3_permanent_tag"],
+        db=db,
     )
 
-    result = crud.submission.read_all(tags="submission2_tag", db=db)
-    assert result == [submission2]
+    submission4 = factory.submission.create(tags=["submission4_tag"], db=db)
+    factory.observable.create_or_read(
+        type="type4",
+        value="value4",
+        parent_analysis=submission4.root_analysis,
+        analysis_tags=["observable4_analysis_tag"],
+        permanent_tags=["observable4_permanent_tag"],
+        db=db,
+    )
 
-    result = crud.submission.read_all(tags="observable3_tag", db=db)
-    assert result == [submission3]
+    # Create some submissions that should not be returned in the results. This is to help ensure that
+    # the submission tag relationships are configured properly and do not include tags they shouldn't.
+    submission5 = factory.submission.create(tags=["submission5_tag"], db=db)
+    factory.observable.create_or_read(
+        type="type5",
+        value="value5",
+        parent_analysis=submission5.root_analysis,
+        analysis_tags=["observable5_analysis_tag"],
+        permanent_tags=["observable5_permanent_tag"],
+        db=db,
+    )
+
+    submission6 = factory.submission.create(db=db)
+    factory.observable.create_or_read(type="type6", value="value6", parent_analysis=submission6.root_analysis, db=db)
+
+    # Verify that submission1 is returned when filtering by the "submission1_tag" tag.
+    # Additionally, verify that the submission's tag relationships contain the expected tags.
+    result_submission1 = crud.submission.read_all(tags="submission1_tag", db=db)
+    assert result_submission1 == [submission1]
+    assert result_submission1[0].child_analysis_tags == []
+    assert result_submission1[0].child_permanent_tags == []
+    assert [t.value for t in result_submission1[0].tags] == ["submission1_tag"]
+
+    # Verify that submission2 is returned when filtering by the "observable2_analysis_tag" tag.
+    # Additionally, verify that the submission's tag relationships contain the expected tags.
+    result_submission2 = crud.submission.read_all(tags="observable2_analysis_tag", db=db)
+    assert result_submission2 == [submission2]
+    assert [t.value for t in result_submission2[0].child_analysis_tags] == ["observable2_analysis_tag"]
+    assert result_submission2[0].child_permanent_tags == []
+    assert result_submission2[0].tags == []
+
+    # Verify that submission3 is returned when filtering by the "observable3_permanent_tag" tag.
+    # Additionally, verify that the submission's tag relationships contain the expected tags.
+    result_submission3 = crud.submission.read_all(tags="observable3_permanent_tag", db=db)
+    assert result_submission3 == [submission3]
+    assert result_submission3[0].child_analysis_tags == []
+    assert [t.value for t in result_submission3[0].child_permanent_tags] == ["observable3_permanent_tag"]
+    assert result_submission3[0].tags == []
+
+    # Verify that submission4 is returned when filtering by the multiple tags in submission4.
+    # Additionally, verify that the submission's tag relationships contain the expected tags.
+    result_submission4 = crud.submission.read_all(
+        tags="submission4_tag,observable4_analysis_tag,observable4_permanent_tag", db=db
+    )
+    assert result_submission4 == [submission4]
+    assert [t.value for t in result_submission4[0].child_analysis_tags] == ["observable4_analysis_tag"]
+    assert [t.value for t in result_submission4[0].child_permanent_tags] == ["observable4_permanent_tag"]
+    assert [t.value for t in result_submission4[0].tags] == ["submission4_tag"]
 
 
 def test_filter_by_threat_actors(db):
@@ -317,25 +381,34 @@ def test_read_observables(db):
     # Create a submission tree where the same observable type+value appears twice
     #
     # submission
-    #   o1
+    #   o1 - analysis_tag1
     #     a
-    #       o1
-    #   o2
+    #       o1 - analysis_tag2
+    #   o2 - analysis_tag3, permanent_tag1
     submission = factory.submission.create(db=db)
     observable1 = factory.observable.create_or_read(
-        type="fqdn", value="bad.com", parent_analysis=submission.root_analysis, db=db
+        type="fqdn", value="bad.com", parent_analysis=submission.root_analysis, analysis_tags=["analysis_tag1"], db=db
     )
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test", db=db)
     analysis = factory.analysis.create_or_read(
         analysis_module_type=analysis_module_type, submission=submission, target=observable1, db=db
     )
-    factory.observable.create_or_read(type="fqdn", value="bad.com", parent_analysis=analysis, db=db)
-    factory.observable.create_or_read(type="ipv4", value="127.0.0.1", parent_analysis=submission.root_analysis, db=db)
+    factory.observable.create_or_read(
+        type="fqdn", value="bad.com", parent_analysis=analysis, analysis_tags=["analysis_tag2"], db=db
+    )
+    factory.observable.create_or_read(
+        type="ipv4",
+        value="127.0.0.1",
+        parent_analysis=submission.root_analysis,
+        analysis_tags=["analysis_tag3"],
+        permanent_tags=["permanent_tag1"],
+        db=db,
+    )
 
     # Create a second submission tree with a duplicate observable from the first submission
     #
     # submission
-    #   o2
+    #   o2 - permanent_tag1
     #   o3
     submission2 = factory.submission.create(db=db)
     factory.observable.create_or_read(type="ipv4", value="127.0.0.1", parent_analysis=submission2.root_analysis, db=db)
@@ -343,17 +416,39 @@ def test_read_observables(db):
         type="email_address", value="badguy@bad.com", parent_analysis=submission2.root_analysis, db=db
     )
 
-    # Fetching the list of observables in the submissions should only show three observables since
-    # there were duplicates. Additionally, they should be sorted by the types then values:
+    # Create a third submission tree that should not be included in the results
     #
-    # email_address: badguy@bad.com
-    # fqdn: bad.com
-    # ipv4: 127.0.0.1
+    # submission
+    #   o4 - analysis_tag4
+    submission3 = factory.submission.create(db=db)
+    factory.observable.create_or_read(
+        type="ipv4",
+        value="192.168.1.1",
+        parent_analysis=submission3.root_analysis,
+        analysis_tags=["analysis_tag4"],
+        db=db,
+    )
+
+    # Fetching the list of observables in the submissions should only show three observables since
+    # there were duplicates. The analysis tags are injected, and the observalbes should be sorted
+    # by the types then values.
+    #
+    # email_address: badguy@bad.com (no permanent or analysis tags)
+    # fqdn: bad.com (analysis_tag1, analysis_tag2)
+    # ipv4: 127.0.0.1 (analysis_tag3, permanent_tag1)
     result = crud.submission.read_observables(uuids=[submission.uuid, submission2.uuid], db=db)
     assert len(result) == 3
     assert result[0].type.value == "email_address" and result[0].value == "badguy@bad.com"
+    assert result[0].analysis_tags == []
+    assert result[0].permanent_tags == []
+
     assert result[1].type.value == "fqdn" and result[1].value == "bad.com"
+    assert [t.value for t in result[1].analysis_tags] == ["analysis_tag1", "analysis_tag2"]
+    assert result[1].permanent_tags == []
+
     assert result[2].type.value == "ipv4" and result[2].value == "127.0.0.1"
+    assert [t.value for t in result[2].analysis_tags] == ["analysis_tag3"]
+    assert [t.value for t in result[2].permanent_tags] == ["permanent_tag1"]
 
 
 def test_read_submission_tree(db):
@@ -366,6 +461,16 @@ def test_read_submission_tree(db):
     assert str(result["children"]).count("'observable'") == 14
     assert str(result["children"]).count("'analysis'") == 16
     assert len(result["children"]) == 2
+
+    # The small.json has three different analysis tags applied to observables, and they should be in alphabetical order.
+    assert len(submission.child_analysis_tags) == 3
+    assert submission.child_analysis_tags[0].value == "contacted_host"
+    assert submission.child_analysis_tags[1].value == "from_address"
+    assert submission.child_analysis_tags[2].value == "recipient"
+
+    # The small.json has one permanent tag applied to an observable.
+    assert len(submission.child_permanent_tags) == 1
+    assert submission.child_permanent_tags[0].value == "c2"
 
 
 def test_sort_by_disposition(db):
@@ -525,3 +630,130 @@ def test_read_summary_url_domain(db):
     assert result.domains[1].count == 1
     assert result.domains[2].domain == "example3.com"
     assert result.domains[2].count == 1
+
+
+def test_tag_functionality(db):
+    """
+    Submission1
+        O1 - permanent_tag1
+            A1 - adds tag z_analysis1_tag to O2
+                O2 - analysis2_tag, z_analysis1_tag (should show all analysis tags in this alert for the observable)
+        O3
+            A2 - adds tag analysis2_tag to O2
+                O2 - analysis2_tag, z_analysis1_tag (should show all analysis tags in this alert for the observable)
+
+    Submission2
+        O1 - should have permanent_tag1 because it is a permanent tag
+        O2 - should not have any tags because the alert does not contain analysis A1 or A2
+    """
+
+    # Create the submission1 tree structure
+    submission1 = factory.submission.create(db=db)
+
+    sub1_o1 = factory.observable.create_or_read(
+        type="type1",
+        value="value1",
+        parent_analysis=submission1.root_analysis,
+        permanent_tags=["permanent_tag1"],
+        db=db,
+    )
+
+    amt1 = factory.analysis_module_type.create_or_read(value="amt1", db=db)
+    o1_a1 = factory.analysis.create_or_read(analysis_module_type=amt1, submission=submission1, target=sub1_o1, db=db)
+
+    a1_o2 = factory.observable.create_or_read(
+        type="type2", value="value2", parent_analysis=o1_a1, analysis_tags=["z_analysis1_tag"], db=db
+    )
+
+    sub1_o3 = factory.observable.create_or_read(
+        type="type3", value="value3", parent_analysis=submission1.root_analysis, db=db
+    )
+
+    amt2 = factory.analysis_module_type.create_or_read(value="amt2", db=db)
+    o3_a2 = factory.analysis.create_or_read(analysis_module_type=amt2, submission=submission1, target=sub1_o3, db=db)
+
+    a2_o2 = factory.observable.create_or_read(
+        type="type2", value="value2", parent_analysis=o3_a2, analysis_tags=["analysis2_tag"], db=db
+    )
+
+    # Create the submission2 tree structure
+    submission2 = factory.submission.create(db=db)
+
+    sub2_o1 = factory.observable.create_or_read(
+        type="type1", value="value1", parent_analysis=submission2.root_analysis, db=db
+    )
+
+    sub2_o2 = factory.observable.create_or_read(
+        type="type2", value="value2", parent_analysis=submission2.root_analysis, db=db
+    )
+
+    # Verify the tag relationships on the submissions
+    assert [t.value for t in submission1.child_analysis_tags] == ["analysis2_tag", "z_analysis1_tag"]
+    assert [t.value for t in submission1.child_permanent_tags] == ["permanent_tag1"]
+
+    assert submission2.child_analysis_tags == []
+    assert [t.value for t in submission2.child_permanent_tags] == ["permanent_tag1"]
+
+    # The two instances of O1 across both submissions should be the same observable
+    assert sub1_o1.uuid == sub2_o1.uuid
+
+    # The two instances of O1 should both have the permanent_tag1 tag
+    assert len(sub1_o1.permanent_tags) == 1
+    assert sub1_o1.permanent_tags[0].value == "permanent_tag1"
+    assert len(sub2_o1.permanent_tags) == 1
+    assert sub2_o1.permanent_tags[0].value == "permanent_tag1"
+
+    # The three instances of O2 across both submissions should be the same observable
+    assert a1_o2.uuid == a2_o2.uuid == sub2_o2.uuid
+
+    # The analysis tags are only associated with their observables when the submission tree is constructed
+    submission1_tree = crud.submission.read_tree(submission1.uuid, db=db)
+    submission2_tree = crud.submission.read_tree(submission2.uuid, db=db)
+
+    # The first submission should have two child observables, and they should be in the order
+    # in which they were added to the tree (they are not sorted).
+    assert len(submission1_tree["children"]) == 2
+    assert submission1_tree["children"][0]["uuid"] == str(sub1_o1.uuid)
+    assert submission1_tree["children"][1]["uuid"] == str(sub1_o3.uuid)
+
+    # Verify the tags for O1 in the first submission
+    assert len(submission1_tree["children"][0]["permanent_tags"]) == 1
+    assert submission1_tree["children"][0]["permanent_tags"][0]["value"] == "permanent_tag1"
+
+    # Verify the tags for O2 in the first submission under A1. It should have two tags, even though
+    # its parent analysis A1 only added one tag. The tags should be in alphabetical order, not the
+    # order in which they were added by the analyses.
+    assert len(o1_a1.analysis_metadata) == 1
+    assert o1_a1.analysis_metadata[0].metadata_object.value == "z_analysis1_tag"
+    assert len(submission1_tree["children"][0]["children"][0]["children"][0]["analysis_tags"]) == 2
+    assert submission1_tree["children"][0]["children"][0]["children"][0]["analysis_tags"][0]["value"] == "analysis2_tag"
+    assert (
+        submission1_tree["children"][0]["children"][0]["children"][0]["analysis_tags"][1]["value"] == "z_analysis1_tag"
+    )
+
+    # Verify the tags for O2 in the first submission under A2. It should have two tags, even though
+    # its parent analysis A2 only added one tag. The tags should be in alphabetical order, not the
+    # order in which they were added by the analyses.
+    assert len(o3_a2.analysis_metadata) == 1
+    assert o3_a2.analysis_metadata[0].metadata_object.value == "analysis2_tag"
+    assert len(submission1_tree["children"][1]["children"][0]["children"][0]["analysis_tags"]) == 2
+    assert submission1_tree["children"][1]["children"][0]["children"][0]["analysis_tags"][0]["value"] == "analysis2_tag"
+    assert (
+        submission1_tree["children"][1]["children"][0]["children"][0]["analysis_tags"][1]["value"] == "z_analysis1_tag"
+    )
+
+    # The second submission should have two child observables, and they should be in the order
+    # in which they were added to the tree (they are not sorted).
+    assert len(submission2_tree["children"]) == 2
+    assert submission2_tree["children"][0]["uuid"] == str(sub2_o1.uuid)
+    assert submission2_tree["children"][1]["uuid"] == str(sub2_o2.uuid)
+
+    # Verify the tags for O1 in the second submission
+    assert len(submission2_tree["children"][0]["permanent_tags"]) == 1
+    assert submission2_tree["children"][0]["permanent_tags"][0]["value"] == "permanent_tag1"
+
+    # Verify the tags for O2 in the second submission. Even though it is the exact same observable
+    # object as in the first submission, it shouldn't have any tags because the submission does not
+    # contain any analysis that added tags to it.
+    assert len(submission2_tree["children"][1]["analysis_tags"]) == 0
+    assert len(submission2_tree["children"][1]["permanent_tags"]) == 0

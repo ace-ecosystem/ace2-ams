@@ -12,7 +12,7 @@ from db.database import get_db
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_remediation import EventRemediation
-from db.schemas.event_risk_level import EventRiskLevel
+from db.schemas.event_severity import EventSeverity
 from db.schemas.event_source import EventSource
 from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
@@ -107,14 +107,14 @@ def seed(db: Session):
             print_value="event remediation",
         )
 
-    if "event_risk_level" in data:
+    if "event_severity" in data:
         add_queueable_values(
             db=db,
-            db_table=EventRiskLevel,
+            db_table=EventSeverity,
             queues=queues,
             data=data,
-            key="event_risk_level",
-            print_value="event risk level",
+            key="event_severity",
+            print_value="event severity",
         )
 
     if "event_source" in data:

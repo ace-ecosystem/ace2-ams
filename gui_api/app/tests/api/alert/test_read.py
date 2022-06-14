@@ -84,9 +84,10 @@ def test_get_alerts_observables(client_valid_access_token, requests_mock):
                 "value": "value",
                 "node_type": "observable",
                 "uuid": str(uuid4()),
+                "analysis_tags": [],
                 "directives": [],
                 "observable_relationships": [],
-                "tags": [],
+                "permanent_tags": [],
                 "threat_actors": [],
                 "threats": [],
             }

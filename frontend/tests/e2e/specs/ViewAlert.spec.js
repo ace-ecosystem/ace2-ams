@@ -293,7 +293,7 @@ describe("ViewAlert.vue", () => {
       cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
         "getAlert",
       );
-      cy.intercept("GET", "/api/node/tag/?offset=0").as("getNodeTags");
+      cy.intercept("GET", "/api/tag/?offset=0").as("getNodeTags");
 
       // Open tag modal
       cy.get("[data-cy=tag-button]").click();

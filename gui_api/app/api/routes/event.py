@@ -72,7 +72,7 @@ def get_all_events(
     remediation_time_after: Optional[datetime] = None,
     remediation_time_before: Optional[datetime] = None,
     remediations: Optional[str] = None,
-    risk_level: Optional[str] = None,
+    severity: Optional[str] = None,
     sort: Optional[str] = Query(
         None,
         regex=""
@@ -81,7 +81,7 @@ def get_all_events(
         "(event_type)|"
         "(name)|"
         "(owner)|"
-        "(risk_level)|"
+        "(severity)|"
         "(status)|"
         ")\|"
         "("
@@ -158,8 +158,8 @@ def get_all_events(
     if remediations:
         query_params += f"&remediations={remediations}"
 
-    if risk_level:
-        query_params += f"&risk_level={risk_level}"
+    if severity:
+        query_params += f"&severity={severity}"
 
     if sort:
         query_params += f"&sort={sort}"

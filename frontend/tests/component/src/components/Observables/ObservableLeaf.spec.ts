@@ -7,6 +7,7 @@ import router from "@/router/index";
 import { observableActionUrl, observableTreeRead } from "@/models/observable";
 import { observableTreeReadFactory } from "@mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { metadataObjectReadFactory } from "@mocks/metadata";
 import { userReadFactory } from "@mocks/user";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { testConfiguration } from "@/etc/configuration/test";
@@ -62,7 +63,7 @@ function factory(
 const observableWithTags = observableTreeReadFactory({
   value: "Observable w/ Tags",
   children: [],
-  tags: [genericObjectReadFactory({ value: "testTag" })],
+  permanentTags: [metadataObjectReadFactory({ value: "testTag" })],
 });
 
 const observableWithTime = observableTreeReadFactory({

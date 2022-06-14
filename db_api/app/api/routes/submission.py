@@ -9,7 +9,7 @@ from uuid import UUID
 from api.routes import helpers
 from api_models.create import Create
 from api_models.history import SubmissionHistoryRead
-from api_models.observable import ObservableRead
+from api_models.observable import ObservableSubmissionRead
 from api_models.submission import SubmissionCreate, SubmissionRead, SubmissionUpdate
 from db import crud
 from db.database import get_db
@@ -155,7 +155,9 @@ def get_url_domain_summary(uuid: UUID, db: Session = Depends(get_db)):
 helpers.api_route_read_all(router, get_all_submissions, SubmissionRead)
 helpers.api_route_read(router, get_submission, dict)
 helpers.api_route_read_all(router, get_submission_history, SubmissionHistoryRead, path="/{uuid}/history")
-helpers.api_route_read(router, get_submissions_observables, list[ObservableRead], methods=["POST"], path="/observables")
+helpers.api_route_read(
+    router, get_submissions_observables, list[ObservableSubmissionRead], methods=["POST"], path="/observables"
+)
 helpers.api_route_read(router, get_url_domain_summary, URLDomainSummary, path="/{uuid}/summary/url_domain")
 
 
