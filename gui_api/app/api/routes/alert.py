@@ -10,6 +10,7 @@ from api.routes import helpers
 from api_models.history import SubmissionHistoryRead
 from api_models.observable import ObservableRead
 from api_models.submission import SubmissionCreate, SubmissionRead, SubmissionUpdate
+from api_models.summaries import URLDomainSummary
 
 
 router = APIRouter(
@@ -195,3 +196,15 @@ def update_alerts(
 
 
 helpers.api_route_update(router, update_alerts, path="/")
+
+
+#
+# SUMMARIES
+#
+
+
+def get_url_domain_summary(uuid: UUID):
+    return db_api.get(path=f"/submission/{uuid}/summary/url_domain")
+
+
+helpers.api_route_read(router, get_url_domain_summary, URLDomainSummary, path="/{uuid}/summary/url_domain")
