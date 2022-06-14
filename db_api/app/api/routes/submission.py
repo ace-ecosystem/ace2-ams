@@ -1,4 +1,5 @@
 from datetime import datetime
+from api_models.summaries import URLDomainSummary
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from fastapi_pagination.ext.sqlalchemy_future import paginate
 from sqlalchemy.orm import Session
@@ -144,10 +145,18 @@ def get_submissions_observables(uuids: list[UUID], db: Session = Depends(get_db)
     return crud.submission.read_observables(uuids=uuids, db=db)
 
 
+def get_url_domain_summary(uuid: UUID, db: Session = Depends(get_db)):
+    try:
+        return crud.submission.read_summary_url_domain(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Submission {uuid} does not exist") from e
+
+
 helpers.api_route_read_all(router, get_all_submissions, SubmissionRead)
 helpers.api_route_read(router, get_submission, dict)
 helpers.api_route_read_all(router, get_submission_history, SubmissionHistoryRead, path="/{uuid}/history")
 helpers.api_route_read(router, get_submissions_observables, list[ObservableRead], methods=["POST"], path="/observables")
+helpers.api_route_read(router, get_url_domain_summary, URLDomainSummary, path="/{uuid}/summary/url_domain")
 
 
 #

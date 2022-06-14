@@ -13,9 +13,9 @@ from api_models.event_summaries import (
     EmailSummary,
     ObservableSummary,
     SandboxSummary,
-    URLDomainSummary,
     UserSummary,
 )
+from api_models.summaries import URLDomainSummary
 from api_models.history import EventHistoryRead
 from api.routes import helpers
 from db import crud

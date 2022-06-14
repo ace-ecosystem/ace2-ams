@@ -1,6 +1,7 @@
 import json
 
 from datetime import datetime
+from api_models.summaries import URLDomainSummary
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
@@ -532,6 +533,16 @@ def read_tree(uuid: UUID, db: Session) -> dict:
             unvisited.insert(0, current["children"][idx])
 
     return tree_json
+
+
+def read_summary_url_domain(uuid: UUID, db: Session) -> URLDomainSummary:
+    # Verify the submission exists
+    read_by_uuid(uuid=uuid, db=db)
+
+    observables = read_observables(uuids=[uuid], db=db)
+    urls = [observable for observable in observables if observable.type.value == "url"]
+
+    return crud.helpers.read_summary_url_domain(urls=urls)
 
 
 def update(model: SubmissionUpdate, db: Session):

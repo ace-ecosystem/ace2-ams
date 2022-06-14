@@ -10,7 +10,7 @@ from api_models.analysis_details import (
     SandboxHttpRequest,
     SandboxProcess,
 )
-from api_models.event_summaries import URLDomainSummary
+from api_models.summaries import URLDomainSummary
 from db import crud
 from tests import factory
 

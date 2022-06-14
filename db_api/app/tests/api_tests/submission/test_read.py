@@ -872,3 +872,60 @@ def test_get_submissions_observables(client, db):
     assert any(o["type"]["value"] == "email_address" and o["value"] == "badguy@bad.com" for o in get.json())
     assert any(o["type"]["value"] == "fqdn" and o["value"] == "bad.com" for o in get.json())
     assert any(o["type"]["value"] == "ipv4" and o["value"] == "127.0.0.1" for o in get.json())
+
+
+def test_read_summary_url_domain(client, db):
+    # Create a submission
+    submission1 = factory.submission.create(db=db)
+
+    # The URL domains summary should be empty
+    get = client.get(f"/api/submission/{submission1.uuid}/summary/url_domain")
+    assert get.json() == {"domains": [], "total": 0}
+
+    # Add some observables to the submission
+    #
+    #   o1 - url - https://example.com
+    #   o2 - url - https://example2.com
+    #   o3 - url - https://example.com
+    #   o4 - url - https://example.com/index.html
+    #   o5 - url - https://example3.com
+    #   o6 - ipv4 - 1.2.3.4
+    #   o7 - email_address - name@company.com
+
+    factory.observable.create_or_read(
+        type="url", value="https://example.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example2.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example.com/index.html", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example3.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example4.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(type="ipv4", value="1.2.3.4", parent_analysis=submission1.root_analysis, db=db)
+    factory.observable.create_or_read(
+        type="email_address", value="name@company.com", parent_analysis=submission1.root_analysis, db=db
+    )
+
+    # The URL domain summary should now have three entries in it. The https://example.com URL is repeated, so it
+    # only counts once for the purposes of the summary.
+    # Additionally, the results should be sorted by the number of times the domains appeared then by the domain.
+    #
+    # Results: example.com (2), example2.com (1), example3.com (1)
+    get = client.get(f"/api/submission/{submission1.uuid}/summary/url_domain")
+    assert get.json()["total"] == 4
+    assert len(get.json()["domains"]) == 3
+    assert get.json()["domains"][0]["domain"] == "example.com"
+    assert get.json()["domains"][0]["count"] == 2
+    assert get.json()["domains"][1]["domain"] == "example2.com"
+    assert get.json()["domains"][1]["count"] == 1
+    assert get.json()["domains"][2]["domain"] == "example3.com"
+    assert get.json()["domains"][2]["count"] == 1

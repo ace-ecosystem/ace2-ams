@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from api_models.observable import ObservableCreateInSubmission
 from api_models.submission import SubmissionUpdate
+from api_models.summaries import URLDomainSummary
 from db import crud
 from tests import factory
 
@@ -473,3 +474,61 @@ def test_sort_by_type(db):
 
     result = crud.submission.read_all(sort="submission_type|desc", db=db)
     assert result == [submission2, submission1]
+
+
+def test_read_summary_url_domain(db):
+    # Create a submission
+    submission1 = factory.submission.create(db=db)
+
+    # The URL domains summary should be empty
+    assert crud.submission.read_summary_url_domain(uuid=submission1.uuid, db=db) == URLDomainSummary(
+        domains=[], total=0
+    )
+
+    # Add some observables to the submission
+    #
+    #   o1 - url - https://example.com
+    #   o2 - url - https://example2.com
+    #   o3 - url - https://example.com
+    #   o4 - url - https://example.com/index.html
+    #   o5 - url - https://example3.com
+    #   o6 - ipv4 - 1.2.3.4
+    #   o7 - email_address - name@company.com
+
+    factory.observable.create_or_read(
+        type="url", value="https://example.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example2.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example.com/index.html", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example3.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example4.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(type="ipv4", value="1.2.3.4", parent_analysis=submission1.root_analysis, db=db)
+    factory.observable.create_or_read(
+        type="email_address", value="name@company.com", parent_analysis=submission1.root_analysis, db=db
+    )
+
+    # The URL domain summary should now have three entries in it. The https://example.com URL is repeated, so it
+    # only counts once for the purposes of the summary.
+    # Additionally, the results should be sorted by the number of times the domains appeared then by the domain.
+    #
+    # Results: example.com (2), example2.com (1), example3.com (1)
+    result = crud.submission.read_summary_url_domain(uuid=submission1.uuid, db=db)
+    assert result.total == 4
+    assert len(result.domains) == 3
+    assert result.domains[0].domain == "example.com"
+    assert result.domains[0].count == 2
+    assert result.domains[1].domain == "example2.com"
+    assert result.domains[1].count == 1
+    assert result.domains[2].domain == "example3.com"
+    assert result.domains[2].count == 1
