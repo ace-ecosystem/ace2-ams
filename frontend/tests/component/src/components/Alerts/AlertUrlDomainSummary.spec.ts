@@ -30,17 +30,15 @@ describe("AlertUrlDomainSummary", () => {
     factory();
     cy.get("[data-cy=error-banner]")
       .should("be.visible")
-      .should("contain.text", "404 Request failed");
-    cy.get("canvas").should("not.exist");
-    cy.contains("URL Domain Summary results empty.").should("be.visible");
+      .should("contain.text", "URL Domain Summary: 404 Request failed");
+    cy.get("[data-cy=alert-url-domain-summary]").should("not.exist");
   });
   it("renders correctly when request to fetch data successfully returns empty", () => {
     cy.stub(Alert, "readUrlDomainSummary")
       .withArgs("uuid")
       .returns({ domains: [] });
     factory();
-    cy.get("canvas").should("not.exist");
-    cy.contains("URL Domain Summary results empty.").should("be.visible");
+    cy.get("[data-cy=alert-url-domain-summary]").should("not.exist"); // Panel shouldn't exist if there's domains
   });
   it("renders correctly when request to fetch data successfully returns results", () => {
     cy.stub(Alert, "readUrlDomainSummary")
@@ -52,6 +50,7 @@ describe("AlertUrlDomainSummary", () => {
         ],
       });
     factory();
+    cy.get("#pv_id_1_header > .pi").click(); // Open panel, should be collapsed by default
     cy.get("canvas").should("be.visible");
     cy.findByRole("table").should("be.visible");
     cy.get("tr").should("have.length", 3);
