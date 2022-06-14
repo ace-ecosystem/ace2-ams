@@ -489,11 +489,10 @@ def test_read_summary_url_domain(db):
     #
     #   o1 - url - https://example.com
     #   o2 - url - https://example2.com
-    #   o3 - url - https://example.com
-    #   o4 - url - https://example.com/index.html
-    #   o5 - url - https://example3.com
-    #   o6 - ipv4 - 1.2.3.4
-    #   o7 - email_address - name@company.com
+    #   o3 - url - https://example.com/index.html
+    #   o4 - url - https://example3.com
+    #   o5 - ipv4 - 1.2.3.4
+    #   o6 - email_address - name@company.com
 
     factory.observable.create_or_read(
         type="url", value="https://example.com", parent_analysis=submission1.root_analysis, db=db
@@ -502,16 +501,10 @@ def test_read_summary_url_domain(db):
         type="url", value="https://example2.com", parent_analysis=submission1.root_analysis, db=db
     )
     factory.observable.create_or_read(
-        type="url", value="https://example.com", parent_analysis=submission1.root_analysis, db=db
-    )
-    factory.observable.create_or_read(
         type="url", value="https://example.com/index.html", parent_analysis=submission1.root_analysis, db=db
     )
     factory.observable.create_or_read(
         type="url", value="https://example3.com", parent_analysis=submission1.root_analysis, db=db
-    )
-    factory.observable.create_or_read(
-        type="url", value="https://example4.com", parent_analysis=submission1.root_analysis, db=db
     )
     factory.observable.create_or_read(type="ipv4", value="1.2.3.4", parent_analysis=submission1.root_analysis, db=db)
     factory.observable.create_or_read(
