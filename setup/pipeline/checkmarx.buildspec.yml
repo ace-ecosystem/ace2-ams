@@ -35,7 +35,7 @@ phases:
     commands: 
        - printf '$s\n' "$ROOT_CERT" > root.crt
        - chmod 644 root.crt
-       - sudo keytool -import -alias 53_root -keystore cacerts -file root.crt
+       - keytool -import -alias 53_root -keystore cacerts -file root.crt
        - export CX_REPO_NAME=$(basename "$CODEBUILD_SOURCE_REPO_URL" .git)
        - export CX_REPO_BRANCH=$(basename "$CODEBUILD_WEBHOOK_HEAD_REF") 
        - |
