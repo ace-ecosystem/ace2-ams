@@ -16,10 +16,9 @@ from api_models.event_summaries import (
     EmailSummary,
     ObservableSummary,
     SandboxSummary,
-    URLDomainSummary,
-    URLDomainSummaryIndividual,
     UserSummary,
 )
+from api_models.summaries import URLDomainSummary
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis import Analysis
