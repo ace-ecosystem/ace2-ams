@@ -16,7 +16,9 @@ def test_get_all_tags(client_valid_access_token, requests_mock):
 
 def test_get_tag(client_valid_access_token, requests_mock):
     tag_uuid = uuid4()
-    requests_mock.get(f"http://db-api/api/tag/{tag_uuid}", json={"value": "value", "uuid": str(uuid4())})
+    requests_mock.get(
+        f"http://db-api/api/tag/{tag_uuid}", json={"metadata_type": "tag", "value": "value", "uuid": str(uuid4())}
+    )
 
     client_valid_access_token.get(f"/api/tag/{tag_uuid}")
 
