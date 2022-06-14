@@ -10,12 +10,12 @@ import {
 import { UUID } from "@/models/base";
 import { alertHistoryReadPage } from "@/models/history";
 import { observableRead } from "@/models/observable";
+import { urlDomainSummary } from "@/models/summaries";
+import { validAlertFilters } from "@/etc/constants/alerts";
 import { BaseApi } from "./base";
 
 const api = new BaseApi();
 const endpoint = "/alert/";
-
-import { validAlertFilters } from "@/etc/constants/alerts";
 
 export const Alert = {
   createAndRead: async (data: alertCreate): Promise<alertTreeRead> =>
@@ -45,6 +45,9 @@ export const Alert = {
 
   readObservables: async (uuids: Array<UUID>): Promise<observableRead[]> =>
     await api.baseRequest(`${endpoint}observables`, "POST", { data: uuids }),
+
+  readUrlDomainSummary: async (uuid: UUID): Promise<urlDomainSummary> =>
+    await api.read(`${endpoint}${uuid}/summary/url_domain`),
 
   update: (data: alertUpdate[]): Promise<void> => {
     return api.update(endpoint, data);

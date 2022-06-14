@@ -32,7 +32,7 @@
 
   import { defineProps, ref, onMounted } from "vue";
   import { Event } from "@/services/api/event";
-  import { urlDomainSummaryIndividual } from "@/models/eventSummaries";
+  import { urlDomainSummaryIndividual } from "@/models/summaries";
 
   const props = defineProps({
     eventUuid: { type: String, required: true },

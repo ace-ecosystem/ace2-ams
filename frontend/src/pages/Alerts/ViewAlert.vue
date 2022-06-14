@@ -18,7 +18,9 @@
   <div v-if="alertStore.open">
     <TheAlertDetails />
     <br />
-    <AlertUrlDomainSummary />
+    <Panel header="URL Domain Summary" :toggleable="true" :collapsed="true">
+      <AlertUrlDomainSummary :alert-uuid="alertID" />
+    </Panel>
     <br />
     <Card style="overflow-x: scroll">
       <template #content>
@@ -40,6 +42,7 @@
   import { useRoute } from "vue-router";
 
   import Card from "primevue/card";
+  import Panel from "primevue/panel";
   import Message from "primevue/message";
   import ScrollTop from "primevue/scrolltop";
 
