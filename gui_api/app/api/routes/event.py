@@ -15,8 +15,8 @@ from api_models.event_summaries import (
     ObservableSummary,
     SandboxSummary,
     UserSummary,
-    URLDomainSummary,
 )
+from api_models.summaries import URLDomainSummary
 from api_models.history import EventHistoryRead
 
 

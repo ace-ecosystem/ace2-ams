@@ -8,7 +8,11 @@ from sqlalchemy.orm import Session, undefer
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.sql.selectable import Select
 from typing import Any
+from urllib.parse import urlparse
 from uuid import UUID
+from api_models.summaries import URLDomainSummary, URLDomainSummaryIndividual
+from db.schemas.observable import Observable
+
 
 from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
@@ -120,3 +124,21 @@ def utcnow() -> datetime:
     """Returns a timezone-aware version of datetime.utcnow()."""
 
     return datetime.now(timezone.utc)
+
+
+def read_summary_url_domain(url_observables: list[Observable], db: Session) -> URLDomainSummary:
+    domain_count: dict[str, URLDomainSummaryIndividual] = {}
+    for url in url_observables:
+        parsed_url = urlparse(url.value)
+        if parsed_url.hostname not in domain_count:
+            domain_count[parsed_url.hostname] = URLDomainSummaryIndividual(domain=parsed_url.hostname, count=1)
+        else:
+            domain_count[parsed_url.hostname].count += 1
+
+    # Return a list of the URLDomainSummary objects sorted by their count (highest first) then the domain.
+    # There isn't a built-in way to do this type of sort, so first sort by the secondary value (the domain).
+    # Then sort by the primary value (the count).
+    sorted_results = sorted(domain_count.values(), key=lambda x: x.domain)
+    sorted_results = sorted(sorted_results, key=lambda x: x.count, reverse=True)
+
+    return URLDomainSummary(domains=sorted_results, total=len(url_observables))
