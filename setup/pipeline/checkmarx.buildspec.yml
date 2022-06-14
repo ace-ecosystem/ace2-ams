@@ -34,7 +34,7 @@ phases:
   pre_build: 
     commands: 
        - printenv ROOT_CERT > root.crt
-       - ls -al
+       - ls -al /app
        - chmod 644 root.pem
        - cat root.pem
        - keytool -import -alias 53_root -file root.pem -keystore cacerts -storepass changeit -noprompt
