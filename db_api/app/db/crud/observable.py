@@ -1,6 +1,6 @@
 import json
 
-from sqlalchemy import delete, insert, select
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
@@ -14,50 +14,9 @@ from api_models.observable import ObservableCreate, ObservableUpdate
 from db import crud
 from db.schemas.analysis import Analysis
 from db.schemas.observable import Observable, ObservableHistory
-from db.schemas.observable_permanent_tag_mapping import observable_permanent_tag_mapping
 from db.schemas.observable_type import ObservableType
 from db.schemas.tag import Tag
 from exceptions.db import ValueNotFoundInDatabase
-
-
-def associate_permanent_tags_with_observable(observable: Observable, tags: list[Tag], db: Session):
-    """
-    This function adds rows to the observable_permanent_tag_mapping table. The observable table has a relationship
-    to the tag table for the permanent tags, and normally you can just add tags to that relationship and have
-    the mapping rows created automatically. However, I suspect that because the tag table using a polymorphic
-    relationship to the metadata table that this is not working as intended.
-    """
-
-    # Try to associate each tag with the observable. This can be done in a single insert call, but
-    # they are done individually so that if one fails (if it is already associated with the observable),
-    # it will be skipped and the rest should succeed.
-    for tag in tags:
-        with db.begin_nested():
-            try:
-                db.execute(
-                    insert(observable_permanent_tag_mapping).values(observable_uuid=observable.uuid, tag_uuid=tag.uuid)
-                )
-                db.flush()
-            except IntegrityError:
-                db.rollback()
-
-    db.refresh(observable)
-
-
-def remove_all_permanent_tag_associations(observable: Observable, db: Session):
-    """
-    This function removes all rows from the observable_permanent_tag_mapping table that are associated with the
-    given observable.
-    """
-
-    db.execute(
-        delete(observable_permanent_tag_mapping).where(
-            observable_permanent_tag_mapping.c.observable_uuid == observable.uuid
-        )
-    )
-
-    db.flush()
-    db.refresh(observable)
 
 
 def build_read_all_query() -> Select:
@@ -88,6 +47,7 @@ def create_or_read(
     obj.context = model.context
     obj.expires_on = model.expires_on
     obj.for_detection = model.for_detection
+    obj.permanent_tags = crud.tag.read_by_values(values=model.permanent_tags, db=db)
     obj.time = model.time
     obj.type = crud.observable_type.read_by_value(value=model.type, db=db)
     obj.value = model.value
@@ -103,11 +63,6 @@ def create_or_read(
             )
     else:
         obj = read_by_type_value(type=model.type, value=model.value, db=db)
-
-    # Associate any permanent tags that were given with the observable
-    associate_permanent_tags_with_observable(
-        observable=obj, tags=crud.tag.read_by_values(values=model.permanent_tags, db=db), db=db
-    )
 
     # Create any detection points that were given
     for detection_point in model.detection_points:
@@ -232,15 +187,7 @@ def update(uuid: UUID, model: ObservableUpdate, db: Session) -> bool:
                     new=update_data["permanent_tags"],
                 )
             )
-
-            remove_all_permanent_tag_associations(observable=observable, db=db)
-
-            if update_data["permanent_tags"]:
-                associate_permanent_tags_with_observable(
-                    observable=observable,
-                    tags=crud.tag.read_by_values(values=update_data["permanent_tags"], db=db),
-                    db=db,
-                )
+            observable.permanent_tags = crud.tag.read_by_values(values=update_data["permanent_tags"], db=db)
 
         if "time" in update_data:
             diffs.append(crud.history.create_diff(field="time", old=observable.time, new=update_data["time"]))
