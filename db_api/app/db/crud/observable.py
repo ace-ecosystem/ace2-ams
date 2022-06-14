@@ -13,9 +13,9 @@ from api_models.node_relationship import NodeRelationshipCreate
 from api_models.observable import ObservableCreate, ObservableUpdate
 from db import crud
 from db.schemas.analysis import Analysis
+from db.schemas.metadata_tag import MetadataTag
 from db.schemas.observable import Observable, ObservableHistory
 from db.schemas.observable_type import ObservableType
-from db.schemas.tag import Tag
 from exceptions.db import ValueNotFoundInDatabase
 
 
@@ -47,7 +47,7 @@ def create_or_read(
     obj.context = model.context
     obj.expires_on = model.expires_on
     obj.for_detection = model.for_detection
-    obj.permanent_tags = crud.tag.read_by_values(values=model.permanent_tags, db=db)
+    obj.permanent_tags = crud.metadata_tag.read_by_values(values=model.permanent_tags, db=db)
     obj.time = model.time
     obj.type = crud.observable_type.read_by_value(value=model.type, db=db)
     obj.value = model.value
@@ -187,7 +187,7 @@ def update(uuid: UUID, model: ObservableUpdate, db: Session) -> bool:
                     new=update_data["permanent_tags"],
                 )
             )
-            observable.permanent_tags = crud.tag.read_by_values(values=update_data["permanent_tags"], db=db)
+            observable.permanent_tags = crud.metadata_tag.read_by_values(values=update_data["permanent_tags"], db=db)
 
         if "time" in update_data:
             diffs.append(crud.history.create_diff(field="time", old=observable.time, new=update_data["time"]))

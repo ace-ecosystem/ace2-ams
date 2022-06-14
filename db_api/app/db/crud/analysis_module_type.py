@@ -7,7 +7,7 @@ from uuid import UUID
 from api_models.analysis_module_type import AnalysisModuleTypeCreate, AnalysisModuleTypeUpdate
 from api_models.node_directive import NodeDirectiveCreate
 from api_models.observable_type import ObservableTypeCreate
-from api_models.tag import TagCreate
+from api_models.metadata_tag import MetadataTagCreate
 from db import crud
 from db.schemas.analysis_module_type import AnalysisModuleType
 
@@ -30,7 +30,9 @@ def create_or_read(model: AnalysisModuleTypeCreate, db: Session) -> AnalysisModu
             crud.node_directive.create_or_read(NodeDirectiveCreate(value=d), db=db)
             for d in set(model.required_directives)
         ],
-        required_tags=[crud.tag.create_or_read(model=TagCreate(value=t), db=db) for t in set(model.required_tags)],
+        required_tags=[
+            crud.metadata_tag.create_or_read(model=MetadataTagCreate(value=t), db=db) for t in set(model.required_tags)
+        ],
         uuid=model.uuid,
         value=model.value,
         version=model.version,
@@ -107,7 +109,7 @@ def update(uuid: UUID, model: AnalysisModuleTypeUpdate, db: Session) -> bool:
                 )
 
             if "required_tags" in update_data:
-                obj.required_tags = crud.tag.read_by_values(values=update_data["required_tags"], db=db)
+                obj.required_tags = crud.metadata_tag.read_by_values(values=update_data["required_tags"], db=db)
 
             if "value" in update_data:
                 obj.value = update_data["value"]

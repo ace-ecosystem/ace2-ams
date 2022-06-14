@@ -11,10 +11,10 @@ from db.database import Base
 from db.schemas.analysis import Analysis
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
+from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
 from db.schemas.submission_analysis_mapping import submission_analysis_mapping
 from db.schemas.submission_tag_mapping import submission_tag_mapping
-from db.schemas.tag import Tag
 
 
 class SubmissionHistory(Base, HistoryMixin):
@@ -50,9 +50,9 @@ class Submission(Node, HasHistory):
     #
     # Finally, "viewonly" is used on the relationship to prevent attempts to add tags to this list.
 
-    child_analysis_tags: list[Tag] = relationship(
-        "Tag",
-        secondary="join(AnalysisMetadata, Tag, Tag.uuid == AnalysisMetadata.metadata_uuid)."
+    child_analysis_tags: list[MetadataTag] = relationship(
+        "MetadataTag",
+        secondary="join(AnalysisMetadata, MetadataTag, MetadataTag.uuid == AnalysisMetadata.metadata_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == AnalysisMetadata.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
         # NOTE: The secondaryjoin parameter is required specifically when using the
@@ -60,7 +60,7 @@ class Submission(Node, HasHistory):
         # Without it, the query that SQLAlchemy creates results in the returned submissions
         # having every tag from every submission in their child_analysis_tags list.
         secondaryjoin="Metadata.uuid == AnalysisMetadata.metadata_uuid",
-        order_by="asc(Tag.value)",
+        order_by="asc(MetadataTag.value)",
         viewonly=True,
         lazy="selectin",
     )
@@ -76,9 +76,9 @@ class Submission(Node, HasHistory):
         lazy="selectin",
     )
 
-    child_permanent_tags: list[Tag] = relationship(
-        "Tag",
-        secondary="join(Tag, observable_permanent_tag_mapping, Tag.uuid == observable_permanent_tag_mapping.c.tag_uuid)."
+    child_permanent_tags: list[MetadataTag] = relationship(
+        "MetadataTag",
+        secondary="join(MetadataTag, observable_permanent_tag_mapping, MetadataTag.uuid == observable_permanent_tag_mapping.c.tag_uuid)."
         "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == observable_permanent_tag_mapping.c.observable_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
@@ -86,9 +86,9 @@ class Submission(Node, HasHistory):
         # crud.submission.read_all() function to filter submissions by their tags.
         # Without it, the query that SQLAlchemy creates results in the returned submissions
         # having every tag from every submission in their child_permanent_tags list.
-        secondaryjoin="Tag.uuid == observable_permanent_tag_mapping.c.tag_uuid",
-        foreign_keys="[Submission.uuid, Tag.uuid]",
-        order_by="asc(Tag.value)",
+        secondaryjoin="MetadataTag.uuid == observable_permanent_tag_mapping.c.tag_uuid",
+        foreign_keys="[Submission.uuid, MetadataTag.uuid]",
+        order_by="asc(MetadataTag.value)",
         viewonly=True,
         lazy="selectin",
     )
@@ -165,7 +165,7 @@ class Submission(Node, HasHistory):
 
     root_analysis: Analysis = relationship("Analysis", foreign_keys=[root_analysis_uuid], lazy="selectin")
 
-    tags: list[Tag] = relationship("Tag", secondary=submission_tag_mapping, lazy="selectin")
+    tags: list[MetadataTag] = relationship("MetadataTag", secondary=submission_tag_mapping, lazy="selectin")
 
     tool = relationship("SubmissionTool", lazy="selectin")
 

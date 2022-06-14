@@ -26,6 +26,7 @@ from db.schemas.event_vector import EventVector
 from db.schemas.event_vector_queue_mapping import event_vector_queue_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
 from db.schemas.metadata import Metadata
+from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment
 from db.schemas.node_detection_point import NodeDetectionPoint
@@ -52,7 +53,6 @@ from db.schemas.submission_tag_mapping import submission_tag_mapping
 from db.schemas.submission_tool import SubmissionTool
 from db.schemas.submission_tool_instance import SubmissionToolInstance
 from db.schemas.submission_type import SubmissionType
-from db.schemas.tag import Tag
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
 from db.schemas.user_role_mapping import user_role_mapping

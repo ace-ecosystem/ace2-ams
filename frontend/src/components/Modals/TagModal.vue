@@ -11,7 +11,7 @@
     <span class="p-fluid">
       <Chips v-model="formTagValues" data-cy="chips-container" />
       <Dropdown
-        :options="tagStore.allItems"
+        :options="metadataTagStore.allItems"
         option-label="value"
         :filter="true"
         placeholder="Select from existing tags"
@@ -46,7 +46,7 @@
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
 
-  import { Tag } from "@/services/api/tag";
+  import { MetadataTag } from "@/services/api/metadataTag";
   import {
     nodeStores,
     nodeSelectedStores,
@@ -54,8 +54,8 @@
   } from "@/stores/index";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
-  import { useTagStore } from "@/stores/tag";
-  import { tagRead } from "@/models/tag";
+  import { useMetadataTagStore } from "@/stores/metadataTag";
+  import { metadataTagRead } from "@/models/metadataTag";
   import { observableTreeRead } from "@/models/observable";
   import { useObservableStore } from "@/stores/observable";
 
@@ -84,7 +84,7 @@
 
   const authStore = useAuthStore();
   const modalStore = useModalStore();
-  const tagStore = useTagStore();
+  const metadataTagStore = useMetadataTagStore();
 
   const emit = defineEmits(["requestReload"]);
 
@@ -93,7 +93,7 @@
   const isLoading = ref(false);
 
   async function loadAllExistingTags() {
-    await tagStore.readAll();
+    await metadataTagStore.readAll();
   }
 
   async function createAndAddTags() {
@@ -132,7 +132,7 @@
   };
 
   const getExistingTagValues = (uuid: string) => {
-    let tags: tagRead[] = [];
+    let tags: metadataTagRead[] = [];
     if (props.reloadObject == "table") {
       const node = tableStore.visibleQueriedItemById(uuid);
       tags = node ? node.tags : [];
@@ -158,7 +158,7 @@
 
   const createNewTags = async () => {
     for (const tag of uniqueNewTags.value) {
-      await Tag.create({ value: tag });
+      await MetadataTag.create({ value: tag });
     }
     await loadAllExistingTags();
   };
@@ -170,11 +170,11 @@
   });
 
   const existingTagValues = computed(() => {
-    return tagStore.allItems.map((tag) => tag.value);
+    return metadataTagStore.allItems.map((tag) => tag.value);
   });
 
   interface tagEvent {
-    value: tagRead;
+    value: metadataTagRead;
   }
   function addExistingTag(tagEvent: tagEvent) {
     // Add an existing tag to the list of tags to be added

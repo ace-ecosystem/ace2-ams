@@ -32,6 +32,7 @@ from db.schemas.event_source import EventSource
 from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
+from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
 from db.schemas.node_detection_point import NodeDetectionPoint
 from db.schemas.node_threat import NodeThreat
@@ -41,7 +42,6 @@ from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.submission import Submission, SubmissionHistory
 from db.schemas.submission_analysis_mapping import submission_analysis_mapping
-from db.schemas.tag import Tag
 from db.schemas.user import User
 
 
@@ -278,10 +278,10 @@ def build_read_all_query(
         for tag in tags.split(","):
             tag_filters.append(
                 or_(
-                    Event.tags.any(Tag.value == tag),
-                    Event.alerts.any(Submission.tags.any(Tag.value == tag)),
-                    Event.alerts.any(Submission.child_analysis_tags.any(Tag.value == tag)),
-                    Event.alerts.any(Submission.child_permanent_tags.any(Tag.value == tag)),
+                    Event.tags.any(MetadataTag.value == tag),
+                    Event.alerts.any(Submission.tags.any(MetadataTag.value == tag)),
+                    Event.alerts.any(Submission.child_analysis_tags.any(MetadataTag.value == tag)),
+                    Event.alerts.any(Submission.child_permanent_tags.any(MetadataTag.value == tag)),
                 )
             )
         tags_query = select(Event).where(and_(*tag_filters))
@@ -401,7 +401,7 @@ def create_or_read(model: EventCreate, db: Session) -> Event:
     obj.status = crud.event_status.read_by_value(value=model.status, db=db)
     if model.type:
         obj.type = crud.event_type.read_by_value(value=model.type, db=db)
-    obj.tags = crud.tag.read_by_values(values=model.tags, db=db)
+    obj.tags = crud.metadata_tag.read_by_values(values=model.tags, db=db)
     obj.uuid = model.uuid
     obj.vectors = crud.event_vector.read_by_values(values=model.vectors, db=db)
 
@@ -901,7 +901,7 @@ def update(uuid: UUID, model: EventUpdate, db: Session):
         )
 
         if update_data["tags"]:
-            event.tags = crud.tag.read_by_values(values=update_data["tags"], db=db)
+            event.tags = crud.metadata_tag.read_by_values(values=update_data["tags"], db=db)
         else:
             event.tags = []
 

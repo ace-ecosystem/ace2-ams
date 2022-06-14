@@ -12,6 +12,7 @@ from api.routes.event_source import router as event_source_router
 from api.routes.event_status import router as event_status_router
 from api.routes.event_type import router as event_type_router
 from api.routes.event_vector import router as event_vector_router
+from api.routes.metadata_tag import router as metadata_tag_router
 from api.routes.node import router as node_router
 from api.routes.node_comment import router as node_comment_router
 from api.routes.node_detection_point import router as node_detection_point_router
@@ -29,7 +30,6 @@ from api.routes.submission import router as submission_router
 from api.routes.submission_tool import router as submission_tool_router
 from api.routes.submission_tool_instance import router as submission_tool_instance_router
 from api.routes.submission_type import router as submission_type_router
-from api.routes.tag import router as tag_router
 from api.routes.test import router as test_router
 from api.routes.user import router as user_router
 from api.routes.user_role import router as user_role_router
@@ -49,6 +49,7 @@ router.include_router(event_source_router)
 router.include_router(event_status_router)
 router.include_router(event_type_router)
 router.include_router(event_vector_router)
+router.include_router(metadata_tag_router)
 router.include_router(node_router)
 router.include_router(node_comment_router)
 router.include_router(node_detection_point_router)
@@ -66,7 +67,6 @@ router.include_router(submission_router)
 router.include_router(submission_tool_router)
 router.include_router(submission_tool_instance_router)
 router.include_router(submission_type_router)
-router.include_router(tag_router)
 router.include_router(test_router)
 router.include_router(user_router)
 router.include_router(user_role_router)

@@ -16,8 +16,8 @@ from db.schemas.event_tag_mapping import event_tag_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
+from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
-from db.schemas.tag import Tag
 
 
 class EventHistory(Base, HistoryMixin):
@@ -84,7 +84,7 @@ class Event(Node, HasHistory):
 
     status_uuid = Column(UUID(as_uuid=True), ForeignKey("event_status.uuid"), nullable=False)
 
-    tags: list[Tag] = relationship("Tag", secondary=event_tag_mapping, lazy="selectin")
+    tags: list[MetadataTag] = relationship("MetadataTag", secondary=event_tag_mapping, lazy="selectin")
 
     type = relationship("EventType", lazy="selectin")
 

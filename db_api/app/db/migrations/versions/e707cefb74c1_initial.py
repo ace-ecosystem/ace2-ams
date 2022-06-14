@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 049a2165343e
+Revision ID: e707cefb74c1
 Revises: 
-Create Date: 2022-06-10 16:26:56.705107
+Create Date: 2022-06-14 15:05:00.517283
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '049a2165343e'
+revision = 'e707cefb74c1'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -265,6 +265,14 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_event_vector_queue_mapping_event_vector_uuid'), 'event_vector_queue_mapping', ['event_vector_uuid'], unique=False)
     op.create_index(op.f('ix_event_vector_queue_mapping_queue_uuid'), 'event_vector_queue_mapping', ['queue_uuid'], unique=False)
+    op.create_table('metadata_tag',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['uuid'], ['metadata.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_metadata_tag_value'), 'metadata_tag', ['value'], unique=True)
     op.create_table('node_detection_point',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('insert_time', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
@@ -356,11 +364,9 @@ def upgrade() -> None:
     sa.Column('context', sa.String(), nullable=True),
     sa.Column('expires_on', sa.DateTime(timezone=True), nullable=True),
     sa.Column('for_detection', sa.Boolean(), nullable=False),
-    sa.Column('redirection_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
     sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('value', sa.String(), nullable=False),
-    sa.ForeignKeyConstraint(['redirection_uuid'], ['observable.uuid'], ),
     sa.ForeignKeyConstraint(['type_uuid'], ['observable_type.uuid'], ),
     sa.ForeignKeyConstraint(['uuid'], ['node.uuid'], ),
     sa.PrimaryKeyConstraint('uuid'),
@@ -369,14 +375,6 @@ def upgrade() -> None:
     op.create_index(op.f('ix_observable_for_detection'), 'observable', ['for_detection'], unique=False)
     op.create_index('observable_value_trgm', 'observable', ['value'], unique=False, postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.create_index('type_value', 'observable', ['type_uuid', 'value'], unique=False)
-    op.create_table('tag',
-    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('description', sa.String(), nullable=True),
-    sa.Column('value', sa.String(), nullable=False),
-    sa.ForeignKeyConstraint(['uuid'], ['metadata.uuid'], ),
-    sa.PrimaryKeyConstraint('uuid')
-    )
-    op.create_index(op.f('ix_tag_value'), 'tag', ['value'], unique=True)
     op.create_table('user',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('default_alert_queue_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -416,7 +414,7 @@ def upgrade() -> None:
     sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('tag_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.ForeignKeyConstraint(['analysis_module_type_uuid'], ['analysis_module_type.uuid'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['tag_uuid'], ['tag.uuid'], ),
+    sa.ForeignKeyConstraint(['tag_uuid'], ['metadata_tag.uuid'], ),
     sa.PrimaryKeyConstraint('analysis_module_type_uuid', 'tag_uuid')
     )
     op.create_index(op.f('ix_analysis_module_type_tag_mapping_analysis_module_type_uuid'), 'analysis_module_type_tag_mapping', ['analysis_module_type_uuid'], unique=False)
@@ -486,7 +484,7 @@ def upgrade() -> None:
     sa.Column('observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('tag_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.ForeignKeyConstraint(['observable_uuid'], ['observable.uuid'], ),
-    sa.ForeignKeyConstraint(['tag_uuid'], ['tag.uuid'], ),
+    sa.ForeignKeyConstraint(['tag_uuid'], ['metadata_tag.uuid'], ),
     sa.PrimaryKeyConstraint('observable_uuid', 'tag_uuid')
     )
     op.create_index(op.f('ix_observable_permanent_tag_mapping_observable_uuid'), 'observable_permanent_tag_mapping', ['observable_uuid'], unique=False)
@@ -571,7 +569,7 @@ def upgrade() -> None:
     sa.Column('event_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('tag_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.ForeignKeyConstraint(['event_uuid'], ['event.uuid'], ),
-    sa.ForeignKeyConstraint(['tag_uuid'], ['tag.uuid'], ),
+    sa.ForeignKeyConstraint(['tag_uuid'], ['metadata_tag.uuid'], ),
     sa.PrimaryKeyConstraint('event_uuid', 'tag_uuid')
     )
     op.create_index(op.f('ix_event_tag_mapping_event_uuid'), 'event_tag_mapping', ['event_uuid'], unique=False)
@@ -659,7 +657,7 @@ def upgrade() -> None:
     sa.Column('submission_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('tag_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.ForeignKeyConstraint(['submission_uuid'], ['submission.uuid'], ),
-    sa.ForeignKeyConstraint(['tag_uuid'], ['tag.uuid'], ),
+    sa.ForeignKeyConstraint(['tag_uuid'], ['metadata_tag.uuid'], ),
     sa.PrimaryKeyConstraint('submission_uuid', 'tag_uuid')
     )
     op.create_index(op.f('ix_submission_tag_mapping_submission_uuid'), 'submission_tag_mapping', ['submission_uuid'], unique=False)
@@ -744,8 +742,6 @@ def downgrade() -> None:
     op.drop_index('analysis_module_type_target_cached_during_idx', table_name='analysis')
     op.drop_table('analysis')
     op.drop_table('user')
-    op.drop_index(op.f('ix_tag_value'), table_name='tag')
-    op.drop_table('tag')
     op.drop_index('type_value', table_name='observable')
     op.drop_index('observable_value_trgm', table_name='observable', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_index(op.f('ix_observable_for_detection'), table_name='observable')
@@ -776,6 +772,8 @@ def downgrade() -> None:
     op.drop_index('value_trgm', table_name='node_detection_point', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_index(op.f('ix_node_detection_point_node_uuid'), table_name='node_detection_point')
     op.drop_table('node_detection_point')
+    op.drop_index(op.f('ix_metadata_tag_value'), table_name='metadata_tag')
+    op.drop_table('metadata_tag')
     op.drop_index(op.f('ix_event_vector_queue_mapping_queue_uuid'), table_name='event_vector_queue_mapping')
     op.drop_index(op.f('ix_event_vector_queue_mapping_event_vector_uuid'), table_name='event_vector_queue_mapping')
     op.drop_table('event_vector_queue_mapping')

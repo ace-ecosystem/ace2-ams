@@ -34,7 +34,7 @@ class AnalysisModuleType(Base):
     )
 
     required_tags = relationship(
-        "Tag",
+        "MetadataTag",
         secondary=analysis_module_type_tag_mapping,
         passive_deletes=True,
     )

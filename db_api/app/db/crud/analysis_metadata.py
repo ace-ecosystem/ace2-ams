@@ -4,7 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from api_models.analysis_metadata import AnalysisMetadataCreate
-from api_models.tag import TagCreate
+from api_models.metadata_tag import MetadataTagCreate
 from db import crud
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_metadata import AnalysisMetadata
@@ -26,7 +26,7 @@ def create_or_read(
     # Create or read the metadata object based on its type
     metadata_object = None
     if model.type == "tag":
-        metadata_object = crud.tag.create_or_read(model=TagCreate(value=model.value), db=db)
+        metadata_object = crud.metadata_tag.create_or_read(model=MetadataTagCreate(value=model.value), db=db)
 
     # Create the analysis metadata object
     if metadata_object:

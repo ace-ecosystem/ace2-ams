@@ -9,6 +9,7 @@ from tests.factory import event_source
 from tests.factory import event_status
 from tests.factory import event_type
 from tests.factory import event_vector
+from tests.factory import metadata_tag
 from tests.factory import node_comment
 from tests.factory import node_detection_point
 from tests.factory import node_directive
@@ -24,6 +25,5 @@ from tests.factory import submission
 from tests.factory import submission_tool
 from tests.factory import submission_tool_instance
 from tests.factory import submission_type
-from tests.factory import tag
 from tests.factory import user
 from tests.factory import user_role

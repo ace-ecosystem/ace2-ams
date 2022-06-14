@@ -14,5 +14,11 @@ submission_tag_mapping = Table(
         index=True,
         primary_key=True,
     ),
-    Column("tag_uuid", UUID(as_uuid=True), ForeignKey("tag.uuid"), index=True, primary_key=True),
+    Column(
+        "tag_uuid",
+        UUID(as_uuid=True),
+        ForeignKey("metadata_tag.uuid"),
+        index=True,
+        primary_key=True,
+    ),
 )

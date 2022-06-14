@@ -5,10 +5,10 @@ import RemoveTagModal from "@/components/Modals/RemoveTagModal.vue";
 import Dialog from "primevue/dialog";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { metadataObjectReadFactory } from "@mocks/metadata";
-import { tagRead } from "@/models/tag";
+import { metadataTagRead } from "@/models/metadataTag";
 import { alertReadFactory } from "@mocks/alert";
 import { userReadFactory } from "@mocks/user";
-import { Tag } from "@/services/api/tag";
+import { MetadataTag } from "@/services/api/metadataTag";
 import { Alert } from "@/services/api/alert";
 import { observableTreeRead } from "@/models/observable";
 import { ObservableInstance } from "@/services/api/observable";
@@ -21,8 +21,8 @@ const otherTag = metadataObjectReadFactory({ value: "otherTag" });
 function factory(
   args: {
     selected: string[];
-    openAlertTags: tagRead[];
-    existingTags: tagRead[];
+    openAlertTags: metadataTagRead[];
+    existingTags: metadataTagRead[];
     nodeType: "alerts" | "events" | "observable";
     reloadObject: "node" | "table";
     observable: undefined | observableTreeRead;
@@ -202,7 +202,7 @@ describe("RemoveTagModal", () => {
     cy.get("[data-cy='remove-button']").should("be.disabled");
   });
   it("will fetch and use all available tags in nodeTagStore as as existing tag options if the given nodeType is not 'observable' and reloadObject is not 'node'", () => {
-    cy.stub(Tag, "readAll")
+    cy.stub(MetadataTag, "readAll")
       .as("readAllTags")
       .resolves([existingTag, testTag, otherTag]);
 
@@ -273,7 +273,7 @@ describe("RemoveTagModal", () => {
     cy.get("@updateAlert").should("have.been.calledOnce");
   });
   it("will make the expected call to update multiple node's tags w/o tags in form when 'Remove' is clicked and the given nodeType is not 'observable' and reloadObject is not 'node'", () => {
-    cy.stub(Tag, "readAll")
+    cy.stub(MetadataTag, "readAll")
       .as("readAllTags")
       .resolves([existingTag, testTag, otherTag]);
 
@@ -315,7 +315,7 @@ describe("RemoveTagModal", () => {
     cy.get("@updateAlerts").should("have.been.calledOnce");
   });
   it("will show an error if attempt to fetch all node tags fails", () => {
-    cy.stub(Tag, "readAll")
+    cy.stub(MetadataTag, "readAll")
       .as("readAllTags")
       .rejects(new Error("404 request failed !"));
 
