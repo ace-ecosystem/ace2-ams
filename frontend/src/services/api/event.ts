@@ -12,9 +12,9 @@ import {
   detectionPointSummary,
   observableSummary,
   userSummary,
-  urlDomainSummary,
   sandboxSummary,
 } from "@/models/eventSummaries";
+import { urlDomainSummary } from "@/models/summaries";
 import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
 import { eventHistoryReadPage } from "@/models/history";

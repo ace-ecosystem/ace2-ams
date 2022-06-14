@@ -1,5 +1,7 @@
 import pytest
+import uuid
 
+from fastapi import status
 from datetime import datetime
 from urllib.parse import unquote_plus, urlencode
 from uuid import uuid4
@@ -97,3 +99,17 @@ def test_get_alerts_observables(client_valid_access_token, requests_mock):
     assert (len(requests_mock.request_history)) == 2
     assert requests_mock.request_history[1].method == "POST"
     assert requests_mock.request_history[1].url == "http://db-api/api/submission/observables"
+
+
+def test_get_url_domain_summary(client_valid_access_token, requests_mock):
+    alert_uuid = uuid4()
+    requests_mock.get(
+        f"http://db-api/api/submission/{alert_uuid}/summary/url_domain",
+        json={"domains": [], "total": 0},
+    )
+
+    client_valid_access_token.get(f"/api/alert/{alert_uuid}/summary/url_domain")
+
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/submission/{alert_uuid}/summary/url_domain"

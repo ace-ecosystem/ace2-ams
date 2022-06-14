@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import datetime
 from deepdiff import DeepHash
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Load, Session
@@ -15,10 +16,9 @@ from api_models.event_summaries import (
     EmailSummary,
     ObservableSummary,
     SandboxSummary,
-    URLDomainSummary,
-    URLDomainSummaryIndividual,
     UserSummary,
 )
+from api_models.summaries import URLDomainSummary
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis import Analysis
@@ -739,21 +739,8 @@ def read_summary_url_domain(uuid: UUID, db: Session) -> URLDomainSummary:
     # a URLDomainSummary object.
     # NOTE: This assumes the URL values are validated as they are added to the database.
     urls = read_observable_type_from_event(observable_type="url", uuid=uuid, db=db)
-    domain_count: dict[str, URLDomainSummaryIndividual] = {}
-    for url in urls:
-        parsed_url = urlparse(url.value)
-        if parsed_url.hostname not in domain_count:
-            domain_count[parsed_url.hostname] = URLDomainSummaryIndividual(domain=parsed_url.hostname, count=1)
-        else:
-            domain_count[parsed_url.hostname].count += 1
 
-    # Return a list of the URLDomainSummary objects sorted by their count (highest first) then the domain.
-    # There isn't a built-in way to do this type of sort, so first sort by the secondary value (the domain).
-    # Then sort by the primary value (the count).
-    sorted_results = sorted(domain_count.values(), key=lambda x: x.domain)
-    sorted_results = sorted(sorted_results, key=lambda x: x.count, reverse=True)
-
-    return URLDomainSummary(domains=sorted_results, total=len(urls))
+    return crud.helpers.read_summary_url_domain(url_observables=urls, db=db)
 
 
 def read_summary_user(uuid: UUID, db: Session) -> list[UserSummary]:

@@ -83,4 +83,10 @@ describe("Alert calls", () => {
     const res = await api.update([MOCK_ALERT_UPDATE]);
     expect(res).toEqual("Update successful");
   });
+
+  it("will make a get request to the /alert/{uuid}/summary/url_domain endpoint when 'readUrlDomainSummary' is called with a given UUID", async () => {
+    myNock.get("/alert/uuid/summary/url_domain").reply(200, "Read successful");
+    const res = await api.readUrlDomainSummary("uuid");
+    expect(res).toEqual("Read successful");
+  });
 });
