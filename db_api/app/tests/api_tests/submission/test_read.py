@@ -1,3 +1,4 @@
+import pytest
 import uuid
 
 from datetime import timedelta
@@ -20,6 +21,17 @@ def test_get_invalid_uuid(client):
 
 def test_get_nonexistent_uuid(client):
     get = client.get(f"/api/submission/{uuid.uuid4()}")
+    assert get.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ("/summary/url_domain"),
+    ],
+)
+def test_get_summary_nonexistent_submission(client, path):
+    get = client.get(f"/api/submission/{uuid.uuid4()}{path}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
