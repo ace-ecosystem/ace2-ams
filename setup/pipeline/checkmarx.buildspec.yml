@@ -28,10 +28,14 @@ env:
   secrets-manager:
     CHECKMARX_USERNAME: arn:aws:secretsmanager:us-east-2:728226656595:secret:ace2/fAceCyberSec-efZkqU:username
     CHECKMARX_PASSWORD: arn:aws:secretsmanager:us-east-2:728226656595:secret:ace2/fAceCyberSec-efZkqU:password
+    ROOT_CERT: arn:aws:secretsmanager:us-east-2:728226656595:secret:dev/codebuild/-eWqwHx-:cert
     
 phases: 
   pre_build: 
     commands: 
+       - printf '$s\n' "$ROOT_CERT" > root.crt
+       - chmod 644 root.crt
+       - sudo keytool -import -alias 53_root -keystore cacerts -file root.crt
        - export CX_REPO_NAME=$(basename "$CODEBUILD_SOURCE_REPO_URL" .git)
        - export CX_REPO_BRANCH=$(basename "$CODEBUILD_WEBHOOK_HEAD_REF") 
        - |
