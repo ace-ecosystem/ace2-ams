@@ -542,7 +542,7 @@ def read_summary_url_domain(uuid: UUID, db: Session) -> URLDomainSummary:
     observables = read_observables(uuids=[uuid], db=db)
     urls = [observable for observable in observables if observable.type.value == "url"]
 
-    return crud.helpers.read_summary_url_domain(urls=urls)
+    return crud.helpers.read_summary_url_domain(url_observables=urls)
 
 
 def update(model: SubmissionUpdate, db: Session):
