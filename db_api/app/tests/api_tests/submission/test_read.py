@@ -512,7 +512,7 @@ def test_get_filter_submission_type(client, db):
 def test_get_filter_tags(client, db):
     submission1 = factory.submission.create(db=db, tags=["submission_tag"])
     factory.observable.create_or_read(
-        type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, tags=["obs1"]
+        type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, analysis_tags=["obs1"]
     )
     factory.submission.create(db=db, tags=["tag1"])
     factory.submission.create(db=db, tags=["tag2", "tag3", "tag4"])
@@ -538,8 +538,8 @@ def test_get_filter_tags(client, db):
     get = client.get("/api/submission/?tags=obs1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["uuid"] == str(submission1.uuid)
-    assert len(get.json()["items"][0]["child_tags"]) == 1
-    assert get.json()["items"][0]["child_tags"][0]["value"] == "obs1"
+    assert len(get.json()["items"][0]["child_analysis_tags"]) == 1
+    assert get.json()["items"][0]["child_analysis_tags"][0]["value"] == "obs1"
 
     # All the submissions should be returned if you don't specify any tags for the filter
     get = client.get("/api/submission/?tags=")

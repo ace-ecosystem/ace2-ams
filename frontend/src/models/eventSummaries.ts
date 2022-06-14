@@ -1,6 +1,6 @@
 import { UUID } from "./base";
 import { nodeDetectionPointRead } from "./nodeDetectionPoint";
-import { observableRead } from "./observable";
+import { observableInAlertRead } from "./observable";
 import {
   sandboxContactedHost,
   sandboxDnsRequest,
@@ -33,7 +33,7 @@ export interface emailSummary {
   toAddress: string;
 }
 
-export interface observableSummary extends observableRead {
+export interface observableSummary extends observableInAlertRead {
   faqueueHits: number;
   faqueueLink: string;
 }

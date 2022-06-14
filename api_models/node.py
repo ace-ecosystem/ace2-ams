@@ -38,14 +38,6 @@ class NodeUpdate(NodeBase):
     )
 
 
-class NodeTreeItemRead(NodeRead):
-    children: list[dict] = Field(default_factory=list, description="A list of this Node's child Nodes")
-
-    first_appearance: bool = Field(
-        default=True, description="Whether or not this is the first time the object appears in the tree"
-    )
-
-
 class NodeVersion(BaseModel):
     version: UUID4 = Field(description="The current version of the Node")
 

@@ -1548,7 +1548,7 @@ def test_get_filter_tags(client, db):
     event1 = factory.event.create_or_read(name="event1", db=db)
     alert1 = factory.submission.create(event=event1, db=db)
     factory.observable.create_or_read(
-        type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, tags=["obs1"]
+        type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, analysis_tags=["obs1"]
     )
 
     # Create an event with an alert with one tag

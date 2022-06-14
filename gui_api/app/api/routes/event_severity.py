@@ -17,8 +17,8 @@ router = APIRouter(
 #
 
 
-def get_all_event_severitys(limit: Optional[int] = Query(50, le=100), offset: Optional[int] = Query(0)):
+def get_all_event_severities(limit: Optional[int] = Query(50, le=100), offset: Optional[int] = Query(0)):
     return db_api.get(path=f"/event/severity/?limit={limit}&offset={offset}")
 
 
-helpers.api_route_read_all(router, get_all_event_severitys, EventSeverityRead)
+helpers.api_route_read_all(router, get_all_event_severities, EventSeverityRead)

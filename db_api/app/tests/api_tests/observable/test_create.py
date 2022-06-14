@@ -27,11 +27,6 @@ from tests import factory
         ("parent_analysis_uuid", 123),
         ("parent_analysis_uuid", ""),
         ("parent_analysis_uuid", "abc"),
-        ("redirection", ""),
-        ("redirection", 123),
-        ("redirection", {"abc": 123}),
-        ("redirection", {"type": "test_type"}),
-        ("redirection", {"value": "test_value"}),
         ("time", None),
         ("time", ""),
         ("time", "Monday"),
@@ -53,10 +48,7 @@ def test_create_invalid_fields(client, key, value):
     create_json = {"type": "test_type", "value": "test", key: value}
     create = client.post("/api/observable/", json=[create_json])
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    if key == "redirection":
-        assert len(create.json()["detail"]) <= 2
-    else:
-        assert len(create.json()["detail"]) == 1
+    assert len(create.json()["detail"]) == 1
     assert key in create.json()["detail"][0]["loc"]
 
 
@@ -64,7 +56,7 @@ def test_create_invalid_fields(client, key, value):
     "key,values",
     [
         ("directives", INVALID_LIST_STRING_VALUES),
-        ("tags", INVALID_LIST_STRING_VALUES),
+        ("permanent_tags", INVALID_LIST_STRING_VALUES),
         ("threat_actors", INVALID_LIST_STRING_VALUES),
         ("threats", INVALID_LIST_STRING_VALUES),
     ],
@@ -116,7 +108,7 @@ def test_create_nonexistent_parent_analysis(client, db):
 
 @pytest.mark.parametrize(
     "key",
-    [("directives"), ("tags"), ("threat_actors"), ("threats")],
+    [("directives"), ("permanent_tags"), ("threat_actors"), ("threats")],
 )
 def test_create_nonexistent_node_fields(client, db, key):
     submission = factory.submission.create(db=db)
@@ -257,29 +249,6 @@ def test_create_valid_optional_fields(client, db, key, value):
         assert get.json()[key] == value
 
 
-def test_create_valid_redirection(client, db):
-    submission = factory.submission.create(db=db)
-    factory.observable_type.create_or_read(value="test_type", db=db)
-
-    # Create an observable that has a redirection
-    create_json = {
-        "redirection": {
-            "type": "test_type",
-            "value": "test2",
-            "parent_analysis_uuid": str(submission.root_analysis_uuid),
-        },
-        "type": "test_type",
-        "value": "test",
-        "parent_analysis_uuid": str(submission.root_analysis_uuid),
-    }
-    create = client.post("/api/observable/", json=[create_json])
-    assert create.status_code == status.HTTP_201_CREATED
-
-    # There should be 2 observables in the database
-    observables = db.query(Observable).all()
-    assert len(observables) == 2
-
-
 def test_create_valid_required_fields(client, db):
     submission = factory.submission.create(db=db)
     factory.observable_type.create_or_read(value="test_type", db=db)
@@ -300,7 +269,7 @@ def test_create_valid_required_fields(client, db):
     "key,value_lists,helper_create_func",
     [
         ("directives", VALID_LIST_STRING_VALUES, factory.node_directive.create_or_read),
-        ("tags", VALID_LIST_STRING_VALUES, factory.node_tag.create_or_read),
+        ("permanent_tags", VALID_LIST_STRING_VALUES, factory.tag.create_or_read),
         ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
         ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
     ],

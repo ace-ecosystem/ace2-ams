@@ -34,7 +34,6 @@ from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
 from db.schemas.node import Node
 from db.schemas.node_detection_point import NodeDetectionPoint
-from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.observable import Observable
@@ -42,6 +41,7 @@ from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.submission import Submission, SubmissionHistory
 from db.schemas.submission_analysis_mapping import submission_analysis_mapping
+from db.schemas.tag import Tag
 from db.schemas.user import User
 
 
@@ -278,9 +278,10 @@ def build_read_all_query(
         for tag in tags.split(","):
             tag_filters.append(
                 or_(
-                    Event.tags.any(NodeTag.value == tag),
-                    Event.alerts.any(Submission.tags.any(NodeTag.value == tag)),
-                    Event.alerts.any(Submission.child_tags.any(NodeTag.value == tag)),
+                    Event.tags.any(Tag.value == tag),
+                    Event.alerts.any(Submission.tags.any(Tag.value == tag)),
+                    Event.alerts.any(Submission.child_analysis_tags.any(Tag.value == tag)),
+                    Event.alerts.any(Submission.child_permanent_tags.any(Tag.value == tag)),
                 )
             )
         tags_query = select(Event).where(and_(*tag_filters))
@@ -400,6 +401,7 @@ def create_or_read(model: EventCreate, db: Session) -> Event:
     obj.status = crud.event_status.read_by_value(value=model.status, db=db)
     if model.type:
         obj.type = crud.event_type.read_by_value(value=model.type, db=db)
+    obj.tags = crud.tag.read_by_values(values=model.tags, db=db)
     obj.uuid = model.uuid
     obj.vectors = crud.event_vector.read_by_values(values=model.vectors, db=db)
 
@@ -654,8 +656,16 @@ def read_summary_email_headers_body(uuid: UUID, db: Session) -> Optional[EmailHe
 
 def read_summary_observable(uuid: UUID, db: Session) -> list[ObservableSummary]:
     # Verify the event exists
-    read_by_uuid(uuid=uuid, db=db)
+    event = read_by_uuid(uuid=uuid, db=db)
 
+    # Read all of the observables contained in the event. These observables will have their
+    # analysis tags injected into them. This list is then transformed into a dictionary with
+    # the observable UUID as the key.
+    observables_by_uuid: dict[UUID, Observable] = {
+        o.uuid: o for o in crud.submission.read_observables(uuids=event.alert_uuids, db=db)
+    }
+
+    # Read all of the FA Queue analyses contained in the event
     alert_uuid_and_analysis = read_analysis_type_from_event(
         analysis_module_type="FA Queue", starts_with=True, uuid=uuid, db=db
     )
@@ -665,9 +675,9 @@ def read_summary_observable(uuid: UUID, db: Session) -> list[ObservableSummary]:
     results = set()
     for _, faqueue_analysis in alert_uuid_and_analysis:
         analysis_details = FAQueueAnalysisDetails(**faqueue_analysis.details)
-        faqueue_analysis.target.faqueue_hits = analysis_details.hits
-        faqueue_analysis.target.faqueue_link = analysis_details.link
-        results.add(faqueue_analysis.target)
+        observables_by_uuid[faqueue_analysis.target.uuid].faqueue_hits = analysis_details.hits
+        observables_by_uuid[faqueue_analysis.target.uuid].faqueue_link = analysis_details.link
+        results.add(observables_by_uuid[faqueue_analysis.target.uuid])
 
     # Return the observables sorted by their type then value
     return sorted(results, key=lambda x: (x.type.value, x.value))
@@ -880,6 +890,20 @@ def update(uuid: UUID, model: EventUpdate, db: Session):
         diffs.append(crud.history.create_diff(field="status", old=event.status.value, new=update_data["status"]))
 
         event.status = crud.event_status.read_by_value(value=update_data["status"], db=db)
+
+    if "tags" in update_data:
+        diffs.append(
+            crud.history.create_diff(
+                field="tags",
+                old=[x.value for x in event.tags],
+                new=update_data["tags"],
+            )
+        )
+
+        if update_data["tags"]:
+            event.tags = crud.tag.read_by_values(values=update_data["tags"], db=db)
+        else:
+            event.tags = []
 
     if "type" in update_data:
         old = event.type.value if event.type else None

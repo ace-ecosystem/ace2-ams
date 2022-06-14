@@ -8,15 +8,15 @@ from sqlalchemy.sql.selectable import Select
 from typing import Optional
 from uuid import UUID
 
-from api_models.analysis import AnalysisNodeTreeRead
-from api_models.observable import ObservableNodeTreeRead
-from api_models.submission import SubmissionCreate, SubmissionTreeRead, SubmissionUpdate
+from api_models.analysis import AnalysisSubmissionTreeRead
+from api_models.observable import ObservableSubmissionTreeRead
+from api_models.submission import SubmissionCreate, SubmissionUpdate
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
+from db.schemas.analysis_metadata import AnalysisMetadata
 from db.schemas.event import Event
 from db.schemas.node import Node
-from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.observable import Observable
@@ -27,6 +27,7 @@ from db.schemas.submission_analysis_mapping import submission_analysis_mapping
 from db.schemas.submission_tool import SubmissionTool
 from db.schemas.submission_tool_instance import SubmissionToolInstance
 from db.schemas.submission_type import SubmissionType
+from db.schemas.tag import Tag
 from db.schemas.user import User
 
 
@@ -205,7 +206,11 @@ def build_read_all_query(
         tag_filters = []
         for tag in tags.split(","):
             tag_filters.append(
-                or_(Submission.tags.any(NodeTag.value == tag), Submission.child_tags.any(NodeTag.value == tag))
+                or_(
+                    Submission.tags.any(Tag.value == tag),
+                    Submission.child_analysis_tags.any(Tag.value == tag),
+                    Submission.child_permanent_tags.any(Tag.value == tag),
+                )
             )
 
         tags_query = select(Submission).where(and_(*tag_filters))
@@ -338,6 +343,7 @@ def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
         obj.ownership_time = crud.helpers.utcnow()
     obj.queue = crud.queue.read_by_value(value=model.queue, db=db)
     obj.root_analysis = crud.analysis.create_root(db=db)
+    obj.tags = crud.tag.read_by_values(values=model.tags, db=db)
     if model.tool:
         obj.tool = crud.submission_tool.read_by_value(value=model.tool, db=db)
     if model.tool_instance:
@@ -366,6 +372,7 @@ def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
             db=db,
         )
 
+    db.flush()
     return obj
 
 
@@ -394,7 +401,7 @@ def read_all(
     threats: Optional[str] = None,
     tool: Optional[str] = None,
     tool_instance: Optional[str] = None,
-):
+) -> list[Submission]:
     return (
         db.execute(
             build_read_all_query(
@@ -443,6 +450,7 @@ def read_by_uuid(uuid: UUID, db: Session) -> Submission:
 def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
     """Returns a list of the unique observables contained within the given submission UUIDs."""
 
+    # Get a list of all the observables contained within the given submission UUIDs
     query = (
         select(Observable)
         .join(
@@ -458,10 +466,41 @@ def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
             Submission,
             onclause=and_(Submission.uuid == submission_analysis_mapping.c.submission_uuid, Submission.uuid.in_(uuids)),
         )
-        .order_by(ObservableType.value, Observable.value)
     )
 
-    return db.execute(query).unique().scalars().all()
+    # Organize the observables into a dictionary with their UUIDs as the key
+    observables_by_uuid: dict[UUID, Observable] = {o.uuid: o for o in db.execute(query).unique().scalars().all()}
+
+    # Get a list of the analysis metadata tags added to the observables inside of the given submission UUIDs
+    query = (
+        select(AnalysisMetadata)
+        .join(
+            submission_analysis_mapping,
+            onclause=and_(
+                submission_analysis_mapping.c.analysis_uuid == AnalysisMetadata.analysis_uuid,
+                submission_analysis_mapping.c.submission_uuid.in_(uuids),
+            ),
+        )
+        .join(Tag, onclause=Tag.uuid == AnalysisMetadata.metadata_uuid)
+    )
+    analysis_metadata_tags: list[AnalysisMetadata] = db.execute(query).scalars().all()
+
+    # Build a dictionary of the analysis tags with their observable UUIDs as the keys
+    analysis_tags_by_observable_uuid: dict[UUID, list[Tag]] = {}
+    for analysis_metadata in analysis_metadata_tags:
+        if analysis_metadata.observable_uuid not in analysis_tags_by_observable_uuid:
+            analysis_tags_by_observable_uuid[analysis_metadata.observable_uuid] = []
+
+        analysis_tags_by_observable_uuid[analysis_metadata.observable_uuid].append(analysis_metadata.metadata_object)
+
+    # Inject the analysis tags into the observables
+    for observable_uuid in analysis_tags_by_observable_uuid:
+        observables_by_uuid[observable_uuid].analysis_tags = sorted(
+            set(analysis_tags_by_observable_uuid[observable_uuid]), key=lambda t: t.value
+        )
+
+    # Return the list of observables sorted by their type then value
+    return sorted(observables_by_uuid.values(), key=lambda o: (o.type.value, o.value))
 
 
 def read_tree(uuid: UUID, db: Session) -> dict:
@@ -475,9 +514,9 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     # Dictionary of analysis objects where their UUID is the key
     # Dictionary of analysis objects where their target observable UUID is the key
     # Dictionary of observables where their UUID is the key
-    analyses_by_target: dict[UUID, list[AnalysisNodeTreeRead]] = {}
-    analyses_by_uuid: dict[UUID, AnalysisNodeTreeRead] = {}
-    child_observables: dict[UUID, ObservableNodeTreeRead] = {}
+    analyses_by_target: dict[UUID, list[AnalysisSubmissionTreeRead]] = {}
+    analyses_by_uuid: dict[UUID, AnalysisSubmissionTreeRead] = {}
+    child_observables: dict[UUID, ObservableSubmissionTreeRead] = {}
     for db_analysis in db_submission.analyses:
         # Create an empty list if this target observable UUID has not been seen yet.
         if db_analysis.target_uuid not in analyses_by_target:
@@ -493,12 +532,34 @@ def read_tree(uuid: UUID, db: Session) -> dict:
             if db_child_observable.uuid not in child_observables:
                 child_observables[db_child_observable.uuid] = db_child_observable.convert_to_pydantic()
 
+            #
+            # METADATA
+            #
+            # Inject metadata objects added by analysis into the observable model. We could simply add a list
+            # of metadata objects to the observable model, but this would require the GUI to perform extra
+            # work to display certain kinds of metadata (such as tags).
+
+            # Add any tags added by the analysis to the observable model.
+            child_observables[db_child_observable.uuid].analysis_tags += [
+                m.metadata_object.convert_to_pydantic()
+                for m in db_analysis.analysis_metadata
+                if m.metadata_object.metadata_type == "tag" and m.observable_uuid == db_child_observable.uuid
+            ]
+
             # Add the observable as a child to the analysis model.
             analyses_by_uuid[db_analysis.uuid].children.append(child_observables[db_child_observable.uuid])
 
-    # Loop over each overvable and add its analysis as a child
+    # Loop over each overvable in the submission
     for observable_uuid, observable in child_observables.items():
 
+        #
+        # METADATA
+        #
+        # Dedup the various types of metadata that were injected into the observable model.
+
+        observable.analysis_tags = sorted(set(observable.analysis_tags), key=lambda m: m.value)
+
+        # Add its analysis as a child to the observable model.
         if observable_uuid in analyses_by_target:
             observable.children = analyses_by_target[observable_uuid]
 
@@ -593,6 +654,20 @@ def update(model: SubmissionUpdate, db: Session):
     if "queue" in update_data:
         diffs.append(crud.history.create_diff(field="queue", old=submission.queue.value, new=update_data["queue"]))
         submission.queue = crud.queue.read_by_value(value=update_data["queue"], db=db)
+
+    if "tags" in update_data:
+        diffs.append(
+            crud.history.create_diff(
+                field="tags",
+                old=[x.value for x in submission.tags],
+                new=update_data["tags"],
+            )
+        )
+
+        if update_data["tags"]:
+            submission.tags = crud.tag.read_by_values(values=update_data["tags"], db=db)
+        else:
+            submission.tags = []
 
     db.flush()
 

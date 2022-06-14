@@ -1,7 +1,7 @@
 from urllib.parse import unquote_plus, urlencode
 
 
-def test_get_all_event_severitys(client_valid_access_token, requests_mock):
+def test_get_all_event_severities(client_valid_access_token, requests_mock):
     params = urlencode({"limit": 50, "offset": 0})
 
     requests_mock.get(

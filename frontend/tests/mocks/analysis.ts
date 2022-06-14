@@ -62,12 +62,18 @@ export const analysisModuleTypeNodeTreeReadFactory = ({
 export const analysisTreeReadFactory = ({
   analysisModuleType = analysisModuleTypeNodeTreeReadFactory(),
   children = [],
+  errorMessage = null,
   firstAppearance = undefined,
+  stackTrace = null,
+  summary = null,
   uuid = "testUuid",
 }: Partial<analysisTreeRead> = {}): analysisTreeRead => ({
   analysisModuleType: analysisModuleType,
   children: children,
+  errorMessage: errorMessage,
   firstAppearance: firstAppearance,
   nodeType: "analysis",
+  stackTrace: stackTrace,
+  summary: summary,
   uuid: uuid,
 });

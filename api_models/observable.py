@@ -4,15 +4,16 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from api_models import type_str, validators
-from api_models.node import NodeBase, NodeCreate, NodeRead, NodeTreeItemRead, NodeUpdate
+from api_models.analysis_metadata import AnalysisMetadataCreate
+from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
 from api_models.node_detection_point import NodeDetectionPointRead
 from api_models.node_directive import NodeDirectiveRead
 from api_models.node_relationship import NodeRelationshipRead
-from api_models.node_tag import NodeTagRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
 from api_models.observable_type import ObservableTypeRead
+from api_models.tag import TagRead
 
 
 class ObservableBase(NodeBase):
@@ -57,13 +58,17 @@ class ObservableCreateBase(NodeCreate, ObservableBase):
         description="If given, an observable history record will be created and associated with the user"
     )
 
+    metadata: list[AnalysisMetadataCreate] = Field(
+        default_factory=list, description="A list of metadata objects to add to the observable by its parent analysis"
+    )
+
     observable_relationships: "list[ObservableRelationshipCreate]" = Field(
         default_factory=list, description="A list of observable relationships to add to this observable"
     )
 
-    redirection: "Optional[ObservableCreate]" = Field(description="Another observable to which this one should point")
-
-    tags: list[type_str] = Field(default_factory=list, description="A list of tags to add to the observable")
+    permanent_tags: list[type_str] = Field(
+        default_factory=list, description="A list of tags to permanently add to the observable"
+    )
 
     threat_actors: list[type_str] = Field(
         default_factory=list, description="A list of threat actors to add to the observable"
@@ -99,9 +104,7 @@ class ObservableRead(NodeRead, ObservableBase):
         description="A list of observable relationships for this observable"
     )
 
-    redirection: "Optional[ObservableRead]" = Field(description="Another observable to which this one points")
-
-    tags: list[NodeTagRead] = Field(description="A list of tags added to the observable")
+    permanent_tags: list[TagRead] = Field(description="A list of tags permanently added to the observable")
 
     threat_actors: list[NodeThreatActorRead] = Field(description="A list of threat actors added to the observable")
 
@@ -115,8 +118,31 @@ class ObservableRead(NodeRead, ObservableBase):
         orm_mode = True
 
 
-class ObservableNodeTreeRead(ObservableRead, NodeTreeItemRead):
-    """Model used to control which information for an Observable is displayed when getting an alert tree"""
+class ObservableSubmissionRead(ObservableRead):
+    """Model used to control which information for an Observable is displayed when getting Observables contained in a list of Submissions."""
+
+    analysis_tags: list[TagRead] = Field(
+        default_factory=list, description="A list of tags added to the observable by analysis"
+    )
+
+    class Config:
+        orm_mode = True
+
+
+class ObservableSubmissionTreeRead(ObservableRead):
+    """Model used to control which information for an Observable is displayed when getting a submission tree"""
+
+    analysis_tags: list[TagRead] = Field(
+        default_factory=list, description="A list of tags added to the observable by analysis"
+    )
+
+    children: "list[AnalysisSubmissionTreeRead]" = Field(
+        default_factory=list, description="A list of this observable's child analysis"
+    )
+
+    first_appearance: bool = Field(
+        default=True, description="Whether or not this is the first time the object appears in the tree"
+    )
 
     class Config:
         orm_mode = True
@@ -133,9 +159,7 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
         description="If given, an observable history record will be created and associated with the user"
     )
 
-    redirection_uuid: Optional[UUID] = Field(description="The observable UUID to which the observable should redirect")
-
-    tags: Optional[list[type_str]] = Field(description="A list of tags to add to the observable")
+    permanent_tags: Optional[list[type_str]] = Field(description="A list of tags to permanently add to the observable")
 
     threat_actors: Optional[list[type_str]] = Field(description="A list of threat actors to add to the observable")
 
@@ -148,7 +172,7 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
     value: Optional[type_str] = Field(description="The value of the observable")
 
     _prevent_none: classmethod = validators.prevent_none(
-        "directives", "for_detection", "tags", "threat_actors", "threats", "time", "type", "value"
+        "directives", "for_detection", "permanent_tags", "threat_actors", "threats", "time", "type", "value"
     )
 
 
@@ -166,9 +190,10 @@ class ObservableRelationshipRead(NodeRelationshipRead):
 
 # This is needed for the circular relationship between ObservableRead and ObservableRelationshipRead
 # and ObservableCreate <-> AnalysisCreateInObservable.
-from api_models.analysis import AnalysisCreateInObservable
+from api_models.analysis import AnalysisCreateInObservable, AnalysisSubmissionTreeRead
 
 ObservableCreate.update_forward_refs()
 ObservableCreateInSubmission.update_forward_refs()
+ObservableSubmissionRead.update_forward_refs()
+ObservableSubmissionTreeRead.update_forward_refs()
 ObservableRead.update_forward_refs()
-ObservableNodeTreeRead.update_forward_refs()

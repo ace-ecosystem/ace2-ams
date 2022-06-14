@@ -50,7 +50,7 @@ helpers.api_route_create(router, create_event_severity)
 #
 
 
-def get_all_event_severitys(db: Session = Depends(get_db)):
+def get_all_event_severities(db: Session = Depends(get_db)):
     return paginate(conn=db, query=crud.event_severity.build_read_all_query())
 
 
@@ -61,7 +61,7 @@ def get_event_severity(uuid: UUID, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
-helpers.api_route_read_all(router, get_all_event_severitys, EventSeverityRead)
+helpers.api_route_read_all(router, get_all_event_severities, EventSeverityRead)
 helpers.api_route_read(router, get_event_severity, EventSeverityRead)
 
 

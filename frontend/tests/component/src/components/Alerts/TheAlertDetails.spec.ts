@@ -8,6 +8,7 @@ import router from "@/router/index";
 import { alertReadFactory } from "@mocks/alert";
 import { alertRead } from "@/models/alert";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { metadataObjectReadFactory } from "@mocks/metadata";
 import { userReadFactory } from "@mocks/user";
 
 function factory(initialAlertStoreState: {
@@ -38,7 +39,7 @@ describe("TheAlertDetails", () => {
   it("renders correctly when there is an open alert that has no observables with detection points or instructions", () => {
     factory({
       open: alertReadFactory({
-        tags: [genericObjectReadFactory({ value: "TestTag" })],
+        tags: [metadataObjectReadFactory({ value: "TestTag" })],
       }),
       requestReload: false,
     });
@@ -68,7 +69,7 @@ describe("TheAlertDetails", () => {
     const date = new Date(2020, 5, 4, 12, 0, 0, 0);
     factory({
       open: alertReadFactory({
-        tags: [genericObjectReadFactory({ value: "TestTag" })],
+        tags: [metadataObjectReadFactory({ value: "TestTag" })],
         owner: userReadFactory(),
         ownershipTime: date,
         disposition: {
@@ -98,7 +99,7 @@ describe("TheAlertDetails", () => {
     factory({
       open: alertReadFactory({
         instructions: "alert instructions example",
-        tags: [genericObjectReadFactory({ value: "TestTag" })],
+        tags: [metadataObjectReadFactory({ value: "TestTag" })],
       }),
       requestReload: false,
     });
@@ -136,7 +137,7 @@ describe("TheAlertDetails", () => {
           detectionPointB,
           detectionPointC,
         ],
-        tags: [genericObjectReadFactory({ value: "TestTag" })],
+        tags: [metadataObjectReadFactory({ value: "TestTag" })],
       }),
       requestReload: false,
     });
