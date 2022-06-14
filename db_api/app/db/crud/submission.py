@@ -17,6 +17,7 @@ from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
 from db.schemas.analysis_metadata import AnalysisMetadata
 from db.schemas.event import Event
+from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
@@ -28,7 +29,6 @@ from db.schemas.submission_analysis_mapping import submission_analysis_mapping
 from db.schemas.submission_tool import SubmissionTool
 from db.schemas.submission_tool_instance import SubmissionToolInstance
 from db.schemas.submission_type import SubmissionType
-from db.schemas.tag import Tag
 from db.schemas.user import User
 
 
@@ -208,9 +208,9 @@ def build_read_all_query(
         for tag in tags.split(","):
             tag_filters.append(
                 or_(
-                    Submission.tags.any(Tag.value == tag),
-                    Submission.child_analysis_tags.any(Tag.value == tag),
-                    Submission.child_permanent_tags.any(Tag.value == tag),
+                    Submission.tags.any(MetadataTag.value == tag),
+                    Submission.child_analysis_tags.any(MetadataTag.value == tag),
+                    Submission.child_permanent_tags.any(MetadataTag.value == tag),
                 )
             )
 
@@ -344,7 +344,7 @@ def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
         obj.ownership_time = crud.helpers.utcnow()
     obj.queue = crud.queue.read_by_value(value=model.queue, db=db)
     obj.root_analysis = crud.analysis.create_root(db=db)
-    obj.tags = crud.tag.read_by_values(values=model.tags, db=db)
+    obj.tags = crud.metadata_tag.read_by_values(values=model.tags, db=db)
     if model.tool:
         obj.tool = crud.submission_tool.read_by_value(value=model.tool, db=db)
     if model.tool_instance:
@@ -482,12 +482,12 @@ def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
                 submission_analysis_mapping.c.submission_uuid.in_(uuids),
             ),
         )
-        .join(Tag, onclause=Tag.uuid == AnalysisMetadata.metadata_uuid)
+        .join(MetadataTag, onclause=MetadataTag.uuid == AnalysisMetadata.metadata_uuid)
     )
     analysis_metadata_tags: list[AnalysisMetadata] = db.execute(query).scalars().all()
 
     # Build a dictionary of the analysis tags with their observable UUIDs as the keys
-    analysis_tags_by_observable_uuid: dict[UUID, list[Tag]] = {}
+    analysis_tags_by_observable_uuid: dict[UUID, list[MetadataTag]] = {}
     for analysis_metadata in analysis_metadata_tags:
         if analysis_metadata.observable_uuid not in analysis_tags_by_observable_uuid:
             analysis_tags_by_observable_uuid[analysis_metadata.observable_uuid] = []
@@ -676,7 +676,7 @@ def update(model: SubmissionUpdate, db: Session):
         )
 
         if update_data["tags"]:
-            submission.tags = crud.tag.read_by_values(values=update_data["tags"], db=db)
+            submission.tags = crud.metadata_tag.read_by_values(values=update_data["tags"], db=db)
         else:
             submission.tags = []
 

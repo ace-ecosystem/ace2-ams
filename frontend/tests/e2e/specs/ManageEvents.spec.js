@@ -760,8 +760,8 @@ describe("ManageEvents.vue Actions", () => {
     );
   });
   it("will submit and show any event tags when tags are created via tag action", () => {
-    cy.intercept("GET", "/api/tag/?offset=0").as("getTags");
-    cy.intercept("POST", "/api/tag/").as("createTag");
+    cy.intercept("GET", "/api/metadata/tag/?offset=0").as("getTags");
+    cy.intercept("POST", "/api/metadata/tag/").as("createTag");
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",

@@ -136,7 +136,7 @@ def create(
         diffs.append(crud.history.create_diff(field="event_uuid", old=None, new=event.uuid))
 
     if tags:
-        submission.tags = [factory.tag.create_or_read(value=t, db=db) for t in tags]
+        submission.tags = [factory.metadata_tag.create_or_read(value=t, db=db) for t in tags]
 
     if threat_actors:
         submission.threat_actors = [factory.node_threat_actor.create_or_read(value=t, db=db) for t in threat_actors]
@@ -179,7 +179,7 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
         # Make sure that any permanent tags the observable has exist
         if "permanent_tags" in o:
             for tag in o["permanent_tags"]:
-                factory.tag.create_or_read(value=tag, db=db)
+                factory.metadata_tag.create_or_read(value=tag, db=db)
 
         # Build the ObservableCreate model
         observable_model = ObservableCreate(

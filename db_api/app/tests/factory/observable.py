@@ -32,7 +32,7 @@ def create_or_read(
     metadata = []
     if analysis_tags is not None:
         for tag in analysis_tags:
-            factory.tag.create_or_read(value=tag, db=db)
+            factory.metadata_tag.create_or_read(value=tag, db=db)
             metadata.append(AnalysisMetadataCreate(type="tag", value=tag))
 
     if directives is not None:
@@ -41,7 +41,7 @@ def create_or_read(
 
     if permanent_tags is not None:
         for tag in permanent_tags:
-            factory.tag.create_or_read(value=tag, db=db)
+            factory.metadata_tag.create_or_read(value=tag, db=db)
 
     if threat_actors:
         for threat_actor in threat_actors:

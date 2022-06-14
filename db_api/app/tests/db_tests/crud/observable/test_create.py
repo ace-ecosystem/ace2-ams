@@ -166,7 +166,7 @@ def test_create(db):
     initial_submission_version = submission.version
     factory.node_directive.create_or_read(value="directive", db=db)
     factory.node_relationship_type.create_or_read(value="relationship_type", db=db)
-    factory.tag.create_or_read(value="tag", db=db)
+    factory.metadata_tag.create_or_read(value="tag", db=db)
     factory.node_threat_actor.create_or_read(value="threat_actor", db=db)
     factory.node_threat.create_or_read(value="threat", db=db)
     factory.observable.create_or_read(type="type2", value="value2", parent_analysis=submission.root_analysis, db=db)

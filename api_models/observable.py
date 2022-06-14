@@ -13,7 +13,7 @@ from api_models.node_relationship import NodeRelationshipRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
 from api_models.observable_type import ObservableTypeRead
-from api_models.tag import TagRead
+from api_models.metadata_tag import MetadataTagRead
 
 
 class ObservableBase(NodeBase):
@@ -104,7 +104,7 @@ class ObservableRead(NodeRead, ObservableBase):
         description="A list of observable relationships for this observable"
     )
 
-    permanent_tags: list[TagRead] = Field(description="A list of tags permanently added to the observable")
+    permanent_tags: list[MetadataTagRead] = Field(description="A list of tags permanently added to the observable")
 
     threat_actors: list[NodeThreatActorRead] = Field(description="A list of threat actors added to the observable")
 
@@ -121,7 +121,7 @@ class ObservableRead(NodeRead, ObservableBase):
 class ObservableSubmissionRead(ObservableRead):
     """Model used to control which information for an Observable is displayed when getting Observables contained in a list of Submissions."""
 
-    analysis_tags: list[TagRead] = Field(
+    analysis_tags: list[MetadataTagRead] = Field(
         default_factory=list, description="A list of tags added to the observable by analysis"
     )
 
@@ -132,7 +132,7 @@ class ObservableSubmissionRead(ObservableRead):
 class ObservableSubmissionTreeRead(ObservableRead):
     """Model used to control which information for an Observable is displayed when getting a submission tree"""
 
-    analysis_tags: list[TagRead] = Field(
+    analysis_tags: list[MetadataTagRead] = Field(
         default_factory=list, description="A list of tags added to the observable by analysis"
     )
 

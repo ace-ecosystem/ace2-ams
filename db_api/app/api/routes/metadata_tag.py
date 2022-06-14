@@ -5,15 +5,15 @@ from uuid import UUID
 
 from api.routes import helpers
 from api_models.create import Create
-from api_models.tag import TagCreate, TagRead, TagUpdate
+from api_models.metadata_tag import MetadataTagCreate, MetadataTagRead, MetadataTagUpdate
 from db import crud
 from db.database import get_db
-from db.schemas.tag import Tag
+from db.schemas.metadata_tag import MetadataTag
 from exceptions.db import UuidNotFoundInDatabase
 
 
 router = APIRouter(
-    prefix="/tag",
+    prefix="/metadata/tag",
     tags=["Tag"],
 )
 
@@ -24,12 +24,12 @@ router = APIRouter(
 
 
 def create_tag(
-    create: TagCreate,
+    create: MetadataTagCreate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
-    obj = crud.tag.create_or_read(model=create, db=db)
+    obj = crud.metadata_tag.create_or_read(model=create, db=db)
     db.commit()
 
     response.headers["Content-Location"] = request.url_for("get_tag", uuid=obj.uuid)
@@ -46,18 +46,18 @@ helpers.api_route_create(router, create_tag, response_model=Create)
 
 
 def get_all_tags(db: Session = Depends(get_db)):
-    return paginate(conn=db, query=crud.tag.build_read_all_query())
+    return paginate(conn=db, query=crud.metadata_tag.build_read_all_query())
 
 
 def get_tag(uuid: UUID, db: Session = Depends(get_db)):
     try:
-        return crud.tag.read_by_uuid(uuid=uuid, db=db)
+        return crud.metadata_tag.read_by_uuid(uuid=uuid, db=db)
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
 
-helpers.api_route_read_all(router, get_all_tags, TagRead)
-helpers.api_route_read(router, get_tag, TagRead)
+helpers.api_route_read_all(router, get_all_tags, MetadataTagRead)
+helpers.api_route_read(router, get_tag, MetadataTagRead)
 
 
 #
@@ -67,14 +67,14 @@ helpers.api_route_read(router, get_tag, TagRead)
 
 def update_tag(
     uuid: UUID,
-    tag: TagUpdate,
+    tag: MetadataTagUpdate,
     request: Request,
     response: Response,
     db: Session = Depends(get_db),
 ):
     try:
-        if not crud.helpers.update(uuid=uuid, update_model=tag, db_table=Tag, db=db):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update node tag {uuid}")
+        if not crud.helpers.update(uuid=uuid, update_model=tag, db_table=MetadataTag, db=db):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update metadata tag {uuid}")
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
@@ -93,8 +93,8 @@ helpers.api_route_update(router, update_tag)
 
 def delete_tag(uuid: UUID, db: Session = Depends(get_db)):
     try:
-        if not crud.helpers.delete(uuid=uuid, db_table=Tag, db=db):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete node tag {uuid}")
+        if not crud.helpers.delete(uuid=uuid, db_table=MetadataTag, db=db):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete metadata tag {uuid}")
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 

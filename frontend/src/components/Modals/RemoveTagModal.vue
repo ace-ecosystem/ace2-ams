@@ -54,8 +54,8 @@
   } from "@/stores/index";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
-  import { useTagStore } from "@/stores/tag";
-  import { tagRead } from "@/models/tag";
+  import { useMetadataTagStore } from "@/stores/metadataTag";
+  import { metadataTagRead } from "@/models/metadataTag";
   import { observableTreeRead } from "@/models/observable";
   import { useObservableStore } from "@/stores/observable";
 
@@ -84,12 +84,12 @@
 
   const authStore = useAuthStore();
   const modalStore = useModalStore();
-  const nodeTagStore = useTagStore();
+  const metadataTagStore = useMetadataTagStore();
 
   const emit = defineEmits(["requestReload"]);
 
   const formTagValues = ref<string[]>([]);
-  const tagOptions = ref<tagRead[]>([]);
+  const tagOptions = ref<metadataTagRead[]>([]);
   const error = ref<string>();
   const isLoading = ref(false);
 
@@ -100,8 +100,8 @@
       tagOptions.value = nodeStore.open.tags;
     } else {
       try {
-        await nodeTagStore.readAll();
-        tagOptions.value = nodeTagStore.allItems;
+        await metadataTagStore.readAll();
+        tagOptions.value = metadataTagStore.allItems;
       } catch (e: unknown) {
         if (typeof e === "string") {
           error.value = e;
@@ -149,14 +149,14 @@
   };
 
   const existingTagValues = (uuid: string) => {
-    let nodeTags: tagRead[] = [];
+    let tags: metadataTagRead[] = [];
     if (props.reloadObject == "table") {
       const node = tableStore.visibleQueriedItemById(uuid);
-      nodeTags = node ? node.tags : [];
+      tags = node ? node.tags : [];
     } else if (props.reloadObject == "node") {
-      nodeTags = nodeStore.open.tags;
+      tags = nodeStore.open.tags;
     }
-    return nodeTags.map((tag) => tag.value);
+    return tags.map((tag) => tag.value);
   };
 
   const removeObservableTags = async () => {
@@ -174,7 +174,7 @@
   };
 
   interface tagEvent {
-    value: tagRead;
+    value: metadataTagRead;
   }
   function addExistingTagToForm(tagEvent: tagEvent) {
     // Add an existing tag to the list of tags to be added

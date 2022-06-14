@@ -15,7 +15,7 @@ from api_models.queue import QueueRead
 from api_models.submission_tool import SubmissionToolRead
 from api_models.submission_tool_instance import SubmissionToolInstanceRead
 from api_models.submission_type import SubmissionTypeRead
-from api_models.tag import TagRead
+from api_models.metadata_tag import MetadataTagRead
 from api_models.user import UserRead
 
 
@@ -71,7 +71,7 @@ class SubmissionCreate(NodeCreate, SubmissionBase):
 
 
 class SubmissionRead(NodeRead, SubmissionBase):
-    child_analysis_tags: list[TagRead] = Field(
+    child_analysis_tags: list[MetadataTagRead] = Field(
         description="A list of tags added to observables by analysis modules", default_factory=list
     )
 
@@ -79,7 +79,7 @@ class SubmissionRead(NodeRead, SubmissionBase):
         description="A list of detection points added to child Nodes in the submission's tree", default_factory=list
     )
 
-    child_permanent_tags: list[TagRead] = Field(
+    child_permanent_tags: list[MetadataTagRead] = Field(
         description="A list of tags permanently added to observables", default_factory=list
     )
 
@@ -113,7 +113,7 @@ class SubmissionRead(NodeRead, SubmissionBase):
 
     queue: QueueRead = Field(description="The queue containing this submission")
 
-    tags: list[TagRead] = Field(description="A list of tags added to the submission", default_factory=list)
+    tags: list[MetadataTagRead] = Field(description="A list of tags added to the submission", default_factory=list)
 
     threat_actors: list[NodeThreatActorRead] = Field(
         description="A list of threat actors added to the submission", default_factory=list

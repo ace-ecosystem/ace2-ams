@@ -80,7 +80,7 @@ def create_or_read(
     factory.event_status.create_or_read(value=status, queues=[event_queue], db=db)
 
     for t in tags:
-        factory.tag.create_or_read(value=t, db=db)
+        factory.metadata_tag.create_or_read(value=t, db=db)
 
     for t in threat_actors:
         factory.node_threat_actor.create_or_read(value=t, queues=[event_queue], db=db)

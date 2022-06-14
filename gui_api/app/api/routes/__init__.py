@@ -14,6 +14,7 @@ from api.routes.event_severity import router as event_severity_router
 from api.routes.event_status import router as event_status_router
 from api.routes.event_type import router as event_type_router
 from api.routes.event_vector import router as event_vector_router
+from api.routes.metadata_tag import router as metadata_tag_router
 from api.routes.node_comment import router as node_comment_router
 from api.routes.node_detection_point import router as node_detection_point_router
 from api.routes.node_directive import router as node_directive_router
@@ -24,7 +25,6 @@ from api.routes.observable import router as observable_router
 from api.routes.observable_type import router as observable_type_router
 from api.routes.ping import router as ping_router
 from api.routes.queue import router as queue_router
-from api.routes.tag import router as tag_router
 from api.routes.test import router as test_router
 from api.routes.user import router as user_router
 
@@ -45,6 +45,7 @@ router.include_router(event_severity_router)
 router.include_router(event_status_router)
 router.include_router(event_type_router)
 router.include_router(event_vector_router)
+router.include_router(metadata_tag_router)
 router.include_router(node_comment_router)
 router.include_router(node_detection_point_router)
 router.include_router(node_directive_router)
@@ -55,6 +56,5 @@ router.include_router(observable_router)
 router.include_router(observable_type_router)
 router.include_router(ping_router)
 router.include_router(queue_router)
-router.include_router(tag_router)
 router.include_router(test_router)
 router.include_router(user_router)

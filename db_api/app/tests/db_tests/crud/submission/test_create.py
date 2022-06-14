@@ -11,9 +11,9 @@ from tests import factory
 def test_create(db):
     # Create the various objects to link to the submission
     analysis_module_type = factory.analysis_module_type.create_or_read(value="module", db=db)
-    factory.tag.create_or_read(value="tag", db=db)
-    factory.tag.create_or_read(value="o_analysis_tag", db=db)
-    factory.tag.create_or_read(value="o_permanent_tag", db=db)
+    factory.metadata_tag.create_or_read(value="tag", db=db)
+    factory.metadata_tag.create_or_read(value="o_analysis_tag", db=db)
+    factory.metadata_tag.create_or_read(value="o_permanent_tag", db=db)
     factory.node_threat.create_or_read(value="threat", db=db)
     factory.node_threat.create_or_read(value="o_threat", db=db)
     factory.node_threat_actor.create_or_read(value="threat_actor", db=db)

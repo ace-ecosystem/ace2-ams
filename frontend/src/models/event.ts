@@ -7,13 +7,13 @@ import { eventSourceRead } from "./eventSource";
 import { eventStatusRead } from "./eventStatus";
 import { eventTypeRead } from "./eventType";
 import { eventVectorRead } from "./eventVector";
+import { metadataTagRead } from "./metadataTag";
 import { nodeCreate, nodeRead, nodeReadPage, nodeUpdate } from "./node";
 import { nodeCommentRead } from "./nodeComment";
 import { nodeThreatRead } from "./nodeThreat";
 import { nodeThreatActorRead } from "./nodeThreatActor";
 import { observableTypeRead } from "./observableType";
 import { queueRead } from "./queue";
-import { tagRead } from "./tag";
 import { userRead } from "./user";
 
 // High-level event data that will be displayed in Manage Events
@@ -26,7 +26,7 @@ export interface eventSummary {
   preventionTools: string[];
   severity: string;
   status: string;
-  tags: tagRead[];
+  tags: metadataTagRead[];
   threatActors?: string[];
   threats?: string[];
   type: string;
@@ -82,7 +82,7 @@ export interface eventRead extends nodeRead {
   severity: eventSeverityRead | null;
   source: eventSourceRead | null;
   status: eventStatusRead | null;
-  tags: tagRead[];
+  tags: metadataTagRead[];
   threatActors: nodeThreatActorRead[];
   threats: nodeThreatRead[];
   type: eventTypeRead | null;

@@ -17,7 +17,7 @@ observable_permanent_tag_mapping = Table(
     Column(
         "tag_uuid",
         UUID(as_uuid=True),
-        ForeignKey("tag.uuid"),
+        ForeignKey("metadata_tag.uuid"),
         index=True,
         primary_key=True,
     ),
