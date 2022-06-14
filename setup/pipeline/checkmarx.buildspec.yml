@@ -33,7 +33,7 @@ env:
 phases: 
   pre_build: 
     commands: 
-       - printf '$s\n' "$ROOT_CERT" > root.pem
+       - printenv ROOT_CERT > root.pem
        - chmod 644 root.pem
        - cat root.pem
        - keytool -import -alias 53_root -file root.pem -keystore cacerts -storepass changeit
