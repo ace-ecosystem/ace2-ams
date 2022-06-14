@@ -1,5 +1,7 @@
 import pytest
+import uuid
 
+from fastapi import status
 from datetime import datetime
 from urllib.parse import unquote_plus, urlencode
 from uuid import uuid4
@@ -96,6 +98,17 @@ def test_get_alerts_observables(client_valid_access_token, requests_mock):
     assert (len(requests_mock.request_history)) == 2
     assert requests_mock.request_history[1].method == "POST"
     assert requests_mock.request_history[1].url == "http://db-api/api/submission/observables"
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ("/summary/url_domain"),
+    ],
+)
+def test_get_summary_nonexistent_event(client, path):
+    get = client.get(f"/api/submission/{uuid.uuid4()}{path}")
+    assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_get_url_domain_summary(client_valid_access_token, requests_mock):
