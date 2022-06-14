@@ -199,15 +199,27 @@
   const categorizedValueValue = ref();
 
   const propertyValueOptions = computed(() => {
-    if (propertyType.value && propertyType.value.store) {
-      const store = propertyType.value.store();
-      if (propertyType.value.queueDependent) {
-        return store.getItemsByQueue(props.queue);
+    if (propertyType.value) {
+      let options: Record<string, any>[];
+
+      if (propertyType.value.nullOption) {
+        options = [propertyType.value.nullOption];
       } else {
-        return store.allItems;
+        options = [];
+      }
+
+      if (propertyType.value.store) {
+        const store = propertyType.value.store();
+        if (propertyType.value.queueDependent) {
+          options = [...options, ...store.getItemsByQueue(props.queue)];
+        } else {
+          options = [...options, ...store.allItems];
+        }
+
+        return options;
       }
     }
-    return null;
+    return [];
   });
 
   onMounted(() => {

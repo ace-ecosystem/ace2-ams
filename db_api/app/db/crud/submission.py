@@ -188,9 +188,13 @@ def build_read_all_query(
         query = _join_as_subquery(query, observable_value_query)
 
     if owner:
-        owner_query = (
-            select(Submission).join(User, onclause=Submission.owner_uuid == User.uuid).where(User.username == owner)
-        )
+        owner_query = select(Submission)
+        if owner.lower() == "none":
+            owner_query = owner_query.where(Submission.owner_uuid == None)  # pylint: disable=singleton-comparison
+        else:
+            owner_query = (
+                select(Submission).join(User, onclause=Submission.owner_uuid == User.uuid).where(User.username == owner)
+            )
         query = _join_as_subquery(query, owner_query)
 
     if queue:

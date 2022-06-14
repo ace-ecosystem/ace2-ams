@@ -80,6 +80,7 @@ export const ownerProperty: propertyOption = {
   store: useUserStore,
   optionProperty: "displayName",
   valueProperty: "username",
+  nullOption: { displayName: "None", username: "none" },
 };
 
 export const nodeThreatActorProperty: propertyOption = {

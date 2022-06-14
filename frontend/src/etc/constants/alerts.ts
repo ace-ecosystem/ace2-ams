@@ -52,6 +52,7 @@ export const alertDispositionProperty: propertyOption = {
   store: useAlertDispositionStore,
   optionProperty: "value",
   valueProperty: "value",
+  nullOption: { value: "None" },
 };
 
 export const alertDispositionUserProperty: propertyOption = {
@@ -166,6 +167,7 @@ export const alertOwnerProperty: propertyOption = {
   optionProperty: "displayName",
   valueProperty: "username",
 };
+
 export const alertTagsProperty: propertyOption = {
   name: alertPropertyTypes.TAGS_PROPERTY,
   label: "Tags",
