@@ -1,10 +1,6 @@
 <!-- TheAlertDetails.vue -->
 
 <template>
-  <Message v-if="error" severity="error" data-cy="error-message">{{
-    error
-  }}</Message>
-
   <Card v-if="alertStore.openAlertSummary">
     <template #title>
       {{ alertStore.open.name }}
@@ -103,8 +99,6 @@
     { value: "ownerWithTime", label: "Owner" },
     { value: "comments", label: "Comments" },
   ];
-
-  const error = ref<string>();
 
   const scrollToDetection = (detectionUuid: string) => {
     const detection = document.getElementById(detectionUuid);
