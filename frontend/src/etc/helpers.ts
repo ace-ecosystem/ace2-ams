@@ -6,7 +6,7 @@ import {
 } from "@/models/alert";
 import { genericQueueableObjectRead, propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
-import { tagRead } from "@/models/tag";
+import { metadataTagRead } from "@/models/metadataTag";
 import { isValidDate, isObject } from "@/etc/validators";
 import { inputTypes } from "@/etc/constants/base";
 
@@ -206,7 +206,7 @@ export function formatNodeFiltersForAPI(
 
 export function getAllAlertTags(
   alert: alertRead | alertSummary | alertTreeRead,
-): Array<tagRead> {
+): Array<metadataTagRead> {
   const allTags = alert.tags
     .concat(alert.childAnalysisTags)
     .concat(alert.childPermanentTags);

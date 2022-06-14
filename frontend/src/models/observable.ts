@@ -1,6 +1,7 @@
 import { Component } from "vue";
 import { analysisTreeRead } from "./analysis";
 import { historyUsername, UUID } from "./base";
+import { metadataTagRead } from "./metadataTag";
 import { nodeCreate, nodeRead, nodeUpdate } from "./node";
 import { nodeCommentRead } from "./nodeComment";
 import { nodeDetectionPointRead } from "./nodeDetectionPoint";
@@ -9,7 +10,6 @@ import { nodeRelationshipRead } from "./nodeRelationship";
 import { nodeThreatRead } from "./nodeThreat";
 import { nodeThreatActorRead } from "./nodeThreatActor";
 import { observableTypeRead } from "./observableType";
-import { tagRead } from "./tag";
 
 export interface observableCreate extends nodeCreate, historyUsername {
   // The backend API actually allows you to specify a list of AnalysisCreate objects
@@ -36,7 +36,7 @@ export interface observableRead extends nodeRead {
   expiresOn: Date | null;
   forDetection: boolean;
   observableRelationships: observableRelationshipRead[];
-  permanentTags: tagRead[];
+  permanentTags: metadataTagRead[];
   threatActors: nodeThreatActorRead[];
   threats: nodeThreatRead[];
   time: Date;
@@ -45,7 +45,7 @@ export interface observableRead extends nodeRead {
 }
 
 export interface observableInAlertRead extends observableRead {
-  analysisTags: tagRead[];
+  analysisTags: metadataTagRead[];
 }
 
 export interface observableReadPage {
@@ -56,7 +56,7 @@ export interface observableReadPage {
 }
 
 export interface observableTreeRead extends observableRead {
-  analysisTags: tagRead[];
+  analysisTags: metadataTagRead[];
   children: analysisTreeRead[];
   firstAppearance?: boolean;
 }
