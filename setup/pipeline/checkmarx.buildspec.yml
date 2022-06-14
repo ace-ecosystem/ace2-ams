@@ -28,7 +28,8 @@ env:
   secrets-manager:
     CHECKMARX_USERNAME: arn:aws:secretsmanager:us-east-2:728226656595:secret:ace2/fAceCyberSec-efZkqU:username
     CHECKMARX_PASSWORD: arn:aws:secretsmanager:us-east-2:728226656595:secret:ace2/fAceCyberSec-efZkqU:password
-    ROOT_CERT: arn:aws:secretsmanager:us-east-2:728226656595:secret:dev/codebuild/-eWqwHx-:cert
+    ROOT_CERTarn:aws:secretsmanager:us-east-2:728226656595:secret:dev/codebuild/root.cert-eWqwHx:cert
+    # ROOT_CERT: arn:aws:secretsmanager:us-east-2:728226656595:secret:dev/codebuild/-eWqwHx-:cert
     
 phases: 
   pre_build: 
