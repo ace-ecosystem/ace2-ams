@@ -36,7 +36,7 @@ phases:
        - printenv ROOT_CERT > root.pem
        - chmod 644 root.pem
        - cat root.pem
-       - keytool -import -alias 53_root -file root.pem -keystore cacerts -storepass changeit
+       - keytool -import -alias 53_root -file root.pem -keystore cacerts -storepass changeit -noprompt
        - export CX_REPO_NAME=$(basename "$CODEBUILD_SOURCE_REPO_URL" .git)
        - export CX_REPO_BRANCH=$(basename "$CODEBUILD_WEBHOOK_HEAD_REF") 
        - |
