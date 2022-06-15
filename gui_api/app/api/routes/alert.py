@@ -8,8 +8,9 @@ from uuid import UUID
 from api import db_api
 from api.routes import helpers
 from api_models.history import SubmissionHistoryRead
-from api_models.observable import ObservableRead
+from api_models.observable import ObservableSubmissionRead
 from api_models.submission import SubmissionCreate, SubmissionRead, SubmissionUpdate
+from api_models.summaries import URLDomainSummary
 
 
 router = APIRouter(
@@ -176,7 +177,9 @@ def get_alerts_observables(uuids: list[UUID]):
 helpers.api_route_read_all(router, get_all_alerts, SubmissionRead)
 helpers.api_route_read(router, get_alert, dict)
 helpers.api_route_read_all(router, get_alert_history, SubmissionHistoryRead, path="/{uuid}/history")
-helpers.api_route_read(router, get_alerts_observables, list[ObservableRead], methods=["POST"], path="/observables")
+helpers.api_route_read(
+    router, get_alerts_observables, list[ObservableSubmissionRead], methods=["POST"], path="/observables"
+)
 
 
 #
@@ -195,3 +198,15 @@ def update_alerts(
 
 
 helpers.api_route_update(router, update_alerts, path="/")
+
+
+#
+# SUMMARIES
+#
+
+
+def get_url_domain_summary(uuid: UUID):
+    return db_api.get(path=f"/submission/{uuid}/summary/url_domain")
+
+
+helpers.api_route_read(router, get_url_domain_summary, URLDomainSummary, path="/{uuid}/summary/url_domain")

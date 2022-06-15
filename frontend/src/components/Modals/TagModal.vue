@@ -11,7 +11,7 @@
     <span class="p-fluid">
       <Chips v-model="formTagValues" data-cy="chips-container" />
       <Dropdown
-        :options="nodeTagStore.allItems"
+        :options="metadataTagStore.allItems"
         option-label="value"
         :filter="true"
         placeholder="Select from existing tags"
@@ -46,7 +46,7 @@
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
 
-  import { NodeTag } from "@/services/api/nodeTag";
+  import { MetadataTag } from "@/services/api/metadataTag";
   import {
     nodeStores,
     nodeSelectedStores,
@@ -54,8 +54,8 @@
   } from "@/stores/index";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
-  import { useNodeTagStore } from "@/stores/nodeTag";
-  import { nodeTagRead } from "@/models/nodeTag";
+  import { useMetadataTagStore } from "@/stores/metadataTag";
+  import { metadataTagRead } from "@/models/metadataTag";
   import { observableTreeRead } from "@/models/observable";
   import { useObservableStore } from "@/stores/observable";
 
@@ -84,7 +84,7 @@
 
   const authStore = useAuthStore();
   const modalStore = useModalStore();
-  const nodeTagStore = useNodeTagStore();
+  const metadataTagStore = useMetadataTagStore();
 
   const emit = defineEmits(["requestReload"]);
 
@@ -93,7 +93,7 @@
   const isLoading = ref(false);
 
   async function loadAllExistingTags() {
-    await nodeTagStore.readAll();
+    await metadataTagStore.readAll();
   }
 
   async function createAndAddTags() {
@@ -125,21 +125,21 @@
   const addNodeTags = async () => {
     const updateData = selectedStore.selected.map((uuid: any) => ({
       uuid: uuid,
-      tags: deduped([...existingNodeTagValues(uuid), ...formTagValues.value]),
+      tags: deduped([...getExistingTagValues(uuid), ...formTagValues.value]),
     }));
 
     await nodeStore.update(updateData);
   };
 
-  const existingNodeTagValues = (uuid: string) => {
-    let nodeTags: nodeTagRead[] = [];
+  const getExistingTagValues = (uuid: string) => {
+    let tags: metadataTagRead[] = [];
     if (props.reloadObject == "table") {
       const node = tableStore.visibleQueriedItemById(uuid);
-      nodeTags = node ? node.tags : [];
+      tags = node ? node.tags : [];
     } else if (props.reloadObject == "node") {
-      nodeTags = nodeStore.open.tags;
+      tags = nodeStore.open.tags;
     }
-    return nodeTags.map((tag) => tag.value);
+    return tags.map((tag) => tag.value);
   };
 
   const addObservableTags = async () => {
@@ -148,7 +148,7 @@
     if (props.observable) {
       await observableStore.update(props.observable.uuid, {
         tags: deduped([
-          ...props.observable.tags.map((tag) => tag.value),
+          ...props.observable.permanentTags.map((tag) => tag.value),
           ...formTagValues.value,
         ]),
         historyUsername: authStore.user.username,
@@ -158,7 +158,7 @@
 
   const createNewTags = async () => {
     for (const tag of uniqueNewTags.value) {
-      await NodeTag.create({ value: tag });
+      await MetadataTag.create({ value: tag });
     }
     await loadAllExistingTags();
   };
@@ -170,11 +170,11 @@
   });
 
   const existingTagValues = computed(() => {
-    return nodeTagStore.allItems.map((tag) => tag.value);
+    return metadataTagStore.allItems.map((tag) => tag.value);
   });
 
   interface tagEvent {
-    value: nodeTagRead;
+    value: metadataTagRead;
   }
   function addExistingTag(tagEvent: tagEvent) {
     // Add an existing tag to the list of tags to be added

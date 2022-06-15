@@ -18,6 +18,8 @@
   <div v-if="alertStore.open">
     <TheAlertDetails />
     <br />
+    <AlertUrlDomainSummary :alert-uuid="alertID" />
+    <br />
     <Card style="overflow-x: scroll">
       <template #content>
         <div class="p-tree p-component p-tree-wrapper" style="border: none">
@@ -42,6 +44,7 @@
   import ScrollTop from "primevue/scrolltop";
 
   import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
+  import AlertUrlDomainSummary from "@/components/Alerts/AlertUrlDomainSummary.vue";
   import AlertTree from "@/components/Alerts/AlertTree.vue";
   import TheAlertDetails from "@/components/Alerts/TheAlertDetails.vue";
   import { useAlertStore } from "@/stores/alert";

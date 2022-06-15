@@ -1,10 +1,6 @@
 <!-- TheAlertDetails.vue -->
 
 <template>
-  <Message v-if="error" severity="error" data-cy="error-message">{{
-    error
-  }}</Message>
-
   <Card v-if="alertStore.openAlertSummary">
     <template #title>
       {{ alertStore.open.name }}
@@ -13,11 +9,11 @@
         class="p-button-secondary p-button-outlined p-button-sm"
         @click="copyLink"
       />
-      <NodeTagVue
+      <MetadataTag
         v-for="tag in getAllAlertTags(alertStore.open)"
         :key="tag.uuid"
         :tag="tag"
-      ></NodeTagVue>
+      ></MetadataTag>
     </template>
 
     <template #content>
@@ -80,7 +76,7 @@
   import Card from "primevue/card";
   import Message from "primevue/message";
 
-  import NodeTagVue from "@/components/Node/NodeTag.vue";
+  import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
   import { copyToClipboard } from "@/etc/helpers";
   import { useAlertStore } from "@/stores/alert";
@@ -103,8 +99,6 @@
     { value: "ownerWithTime", label: "Owner" },
     { value: "comments", label: "Comments" },
   ];
-
-  const error = ref<string>();
 
   const scrollToDetection = (detectionUuid: string) => {
     const detection = document.getElementById(detectionUuid);

@@ -20,7 +20,16 @@
         formatObservable(obs)
       }}</span>
       <!-- Display each observable's tags -->
-      <NodeTagVue v-for="tag of obs.tags" :key="tag.value" :tag="tag" />
+      <MetadataTag
+        v-for="tag of obs.permanentTags"
+        :key="tag.value"
+        :tag="tag"
+      />
+      <MetadataTag
+        v-for="tag of obs.analysisTags"
+        :key="tag.value"
+        :tag="tag"
+      />
     </li>
   </ul>
 </template>
@@ -30,13 +39,13 @@
   import Skeleton from "primevue/skeleton";
 
   import { useFilterStore } from "@/stores/filter";
-  import NodeTagVue from "@/components/Node/NodeTag.vue";
+  import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
-  import { observableRead } from "@/models/observable";
+  import { observableInAlertRead } from "@/models/observable";
 
   const props = defineProps({
     observables: {
-      type: Array as PropType<observableRead[] | null>,
+      type: Array as PropType<observableInAlertRead[] | null>,
       required: true,
     },
   });
@@ -49,12 +58,12 @@
     return Array.isArray(props.observables) && !props.observables.length;
   });
 
-  const formatObservable = (observable: observableRead) => {
+  const formatObservable = (observable: observableInAlertRead) => {
     return `${observable.type.value} : ${observable.value}`;
   };
 
   const filterStore = useFilterStore();
-  const filterByObservable = (observable: observableRead) => {
+  const filterByObservable = (observable: observableInAlertRead) => {
     filterStore.bulkSetFilters({
       nodeType: "alerts",
       filters: {

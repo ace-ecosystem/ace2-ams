@@ -7,8 +7,9 @@ import EventObservableSummary from "@/components/Events/EventObservableSummary.v
 import router from "@/router/index";
 import { Event } from "@/services/api/event";
 import { observableSummary } from "@/models/eventSummaries";
-import { observableReadFactory } from "@mocks/observable";
+import { observableInAlertReadFactory } from "@mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { metadataObjectReadFactory } from "@mocks/metadata";
 import { userReadFactory } from "@mocks/user";
 import { ObservableInstance } from "@/services/api/observable";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
@@ -41,27 +42,29 @@ describe("EventObservableSummary", () => {
   const resultA: observableSummary = {
     faqueueHits: 10000,
     faqueueLink: "testlink",
-    ...observableReadFactory({ uuid: "ObservableA", value: "HighHits" }),
+    ...observableInAlertReadFactory({ uuid: "ObservableA", value: "HighHits" }),
   };
   const resultB: observableSummary = {
     faqueueHits: 100,
     faqueueLink: "testlink",
-    ...observableReadFactory({
+    ...observableInAlertReadFactory({
       uuid: "ObservableB",
       forDetection: true,
       value: "MediumHits",
-      tags: [genericObjectReadFactory({ value: "TestTag" })],
+      permanentTags: [metadataObjectReadFactory({ value: "TestTag" })],
     }),
   };
   const resultC: observableSummary = {
     faqueueHits: 1,
     faqueueLink: "testlink",
-    ...observableReadFactory({
+    ...observableInAlertReadFactory({
       uuid: "ObservableC",
       value: "LowHits",
       observableRelationships: [
         {
-          relatedNode: observableReadFactory({ value: "RelatedObservable" }),
+          relatedNode: observableInAlertReadFactory({
+            value: "RelatedObservable",
+          }),
           nodeUuid: "nodeUuid",
           uuid: "uuid",
           type: genericObjectReadFactory({ value: "TestRelationship" }),

@@ -11,7 +11,7 @@ import {
   nameProperty,
   observableProperty,
   observableTypesProperty,
-  nodeTagsProperty,
+  tagsProperty,
   nodeThreatsProperty,
   queueProperty,
   ownerProperty,
@@ -29,7 +29,7 @@ const defaultAlertFilters = [
   observableTypesProperty,
   ownerProperty,
   queueProperty,
-  nodeTagsProperty,
+  tagsProperty,
   nodeThreatsProperty,
 ];
 

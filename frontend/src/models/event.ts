@@ -2,14 +2,14 @@ import { historyUsername, pageOptionParams, UUID } from "./base";
 import { alertDispositionRead } from "./alertDisposition";
 import { eventPreventionToolRead } from "./eventPreventionTool";
 import { eventRemediationRead } from "./eventRemediation";
-import { eventRiskLevelRead } from "./eventRiskLevel";
+import { eventSeverityRead } from "./eventSeverity";
 import { eventSourceRead } from "./eventSource";
 import { eventStatusRead } from "./eventStatus";
 import { eventTypeRead } from "./eventType";
 import { eventVectorRead } from "./eventVector";
+import { metadataTagRead } from "./metadataTag";
 import { nodeCreate, nodeRead, nodeReadPage, nodeUpdate } from "./node";
 import { nodeCommentRead } from "./nodeComment";
-import { nodeTagRead } from "./nodeTag";
 import { nodeThreatRead } from "./nodeThreat";
 import { nodeThreatActorRead } from "./nodeThreatActor";
 import { observableTypeRead } from "./observableType";
@@ -24,9 +24,9 @@ export interface eventSummary {
   name: string;
   owner: string;
   preventionTools: string[];
-  riskLevel: string;
+  severity: string;
   status: string;
-  tags: nodeTagRead[];
+  tags: metadataTagRead[];
   threatActors?: string[];
   threats?: string[];
   type: string;
@@ -48,7 +48,7 @@ export interface eventCreate extends nodeCreate, historyUsername {
   preventionTools?: string[];
   queue: string;
   remediationTime?: Date;
-  riskLevel?: string;
+  severity?: string;
   source?: string;
   status: string;
   tags?: string[];
@@ -79,10 +79,10 @@ export interface eventRead extends nodeRead {
   queue: queueRead;
   remediations: eventRemediationRead[];
   remediationTime: Date | null;
-  riskLevel: eventRiskLevelRead | null;
+  severity: eventSeverityRead | null;
   source: eventSourceRead | null;
   status: eventStatusRead | null;
-  tags: nodeTagRead[];
+  tags: metadataTagRead[];
   threatActors: nodeThreatActorRead[];
   threats: nodeThreatRead[];
   type: eventTypeRead | null;
@@ -105,7 +105,7 @@ export interface eventUpdate extends nodeUpdate, historyUsername {
   preventionTools?: string[];
   queue?: string;
   remediationTime?: Date | null;
-  riskLevel?: string | null;
+  severity?: string | null;
   source?: string | null;
   status?: string | null;
   tags?: string[];
@@ -129,7 +129,7 @@ export interface eventFilterParams extends pageOptionParams {
   owner?: userRead;
   preventionTool?: eventPreventionToolRead;
   queue?: queueRead;
-  riskLevel?: eventRiskLevelRead;
+  severity?: eventSeverityRead;
   status?: eventStatusRead;
   tags?: string[];
   threatActor?: nodeThreatActorRead;
@@ -146,7 +146,7 @@ export type eventFilterValues =
       | Date
       | eventPreventionToolRead
       | queueRead
-      | eventRiskLevelRead
+      | eventSeverityRead
       | eventStatusRead
       | eventTypeRead
       | eventVectorRead

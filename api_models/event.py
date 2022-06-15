@@ -7,17 +7,17 @@ from api_models import type_str, validators
 from api_models.alert_disposition import AlertDispositionRead
 from api_models.event_prevention_tool import EventPreventionToolRead
 from api_models.event_remediation import EventRemediationRead
-from api_models.event_risk_level import EventRiskLevelRead
+from api_models.event_severity import EventSeverityRead
 from api_models.event_source import EventSourceRead
 from api_models.event_status import EventStatusRead
 from api_models.event_type import EventTypeRead
 from api_models.event_vector import EventVectorRead
 from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
-from api_models.node_tag import NodeTagRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
 from api_models.queue import QueueRead
+from api_models.metadata_tag import MetadataTagRead
 from api_models.user import UserRead
 
 
@@ -59,7 +59,7 @@ class EventBase(NodeBase):
         description="A list of remediations performed to clean up the attack represented by the event",
     )
 
-    risk_level: Optional[type_str] = Field(description="The risk level assigned to the event")
+    severity: Optional[type_str] = Field(description="The severity assigned to the event")
 
     source: Optional[type_str] = Field(description="The source of the event")
 
@@ -131,13 +131,13 @@ class EventRead(NodeRead, EventBase):
         description="A list of remediations performed to clean up the attack represented by the event"
     )
 
-    risk_level: Optional[EventRiskLevelRead] = Field(description="The risk level assigned to the event")
+    severity: Optional[EventSeverityRead] = Field(description="The severity assigned to the event")
 
     source: Optional[EventSourceRead] = Field(description="The source of the event")
 
     status: EventStatusRead = Field(description="The status assigned to the event")
 
-    tags: list[NodeTagRead] = Field(description="A list of tags added to the event")
+    tags: list[MetadataTagRead] = Field(default_factory=list, description="A list of tags added to the event")
 
     threat_actors: list[NodeThreatActorRead] = Field(description="A list of threat actors added to the event")
 

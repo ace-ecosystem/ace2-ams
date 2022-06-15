@@ -12,9 +12,11 @@ from api_models.event import EventRead
 from db.database import Base
 from db.schemas.event_prevention_tool_mapping import event_prevention_tool_mapping
 from db.schemas.event_remediation_mapping import event_remediation_mapping
+from db.schemas.event_tag_mapping import event_tag_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
+from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
 
 
@@ -70,9 +72,9 @@ class Event(Node, HasHistory):
 
     remediations = relationship("EventRemediation", secondary=event_remediation_mapping, lazy="selectin")
 
-    risk_level = relationship("EventRiskLevel", lazy="selectin")
+    severity = relationship("EventSeverity", lazy="selectin")
 
-    risk_level_uuid = Column(UUID(as_uuid=True), ForeignKey("event_risk_level.uuid"))
+    severity_uuid = Column(UUID(as_uuid=True), ForeignKey("event_severity.uuid"))
 
     source = relationship("EventSource", lazy="selectin")
 
@@ -81,6 +83,8 @@ class Event(Node, HasHistory):
     status = relationship("EventStatus", lazy="selectin")
 
     status_uuid = Column(UUID(as_uuid=True), ForeignKey("event_status.uuid"), nullable=False)
+
+    tags: list[MetadataTag] = relationship("MetadataTag", secondary=event_tag_mapping, lazy="selectin")
 
     type = relationship("EventType", lazy="selectin")
 

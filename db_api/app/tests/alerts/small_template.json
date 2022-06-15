@@ -4,7 +4,7 @@
     {
       "type": "<O_TYPE>",
       "value": "<O_VALUE>",
-      "tags": ["<TAG>", "<TAG>", "<TAG>"],
+      "permanent_tags": ["<TAG>", "<TAG>", "<TAG>"],
       "analyses": [
         {
           "type": "Email Analysis",
@@ -23,7 +23,7 @@
             {
               "type": "<O_TYPE>",
               "value": "<O_VALUE>",
-              "tags": ["<TAG>"],
+              "metadata": [{ "type": "tag", "value": "<TAG>" }],
               "analyses": [
                 {
                   "type": "FA Queue Analysis",
@@ -41,7 +41,7 @@
             {
               "type": "<O_TYPE>",
               "value": "<O_VALUE>",
-              "tags": ["<TAG>"],
+              "metadata": [{ "type": "tag", "value": "<TAG>" }],
               "analyses": [
                 {
                   "type": "FA Queue Analysis",
@@ -147,7 +147,10 @@
     {
       "type": "<O_TYPE>",
       "value": "<O_VALUE>",
-      "tags": ["<TAG>", "<TAG>"]
+      "metadata": [
+        { "type": "tag", "value": "<TAG>" },
+        { "type": "tag", "value": "<TAG>" }
+      ]
     }
   ]
 }

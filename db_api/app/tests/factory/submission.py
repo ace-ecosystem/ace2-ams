@@ -52,9 +52,6 @@ def create(
     if observables is None:
         observables = []
 
-    if update_time is None:
-        update_time = crud.helpers.utcnow()
-
     # Create the alert queue
     factory.queue.create_or_read(value=alert_queue, db=db)
 
@@ -72,7 +69,6 @@ def create(
     # Create the owner user if one was given
     if owner is not None:
         factory.user.create_or_read(username=owner, alert_queue=alert_queue, db=db)
-        diffs.append(crud.history.create_diff(field="owner", old=None, new=owner))
 
     # Create the actual submission
     submission = crud.submission.create_or_read(
@@ -92,6 +88,12 @@ def create(
         db=db,
     )
 
+    if update_time is None:
+        update_time = crud.helpers.utcnow()
+
+    if owner is not None:
+        diffs.append(crud.history.create_diff(field="owner", old=None, new=owner))
+
     # Add the observables to the submission
     for observable in observables:
         factory.observable_type.create_or_read(value=observable.type, db=db)
@@ -107,8 +109,7 @@ def create(
                     history_username=observable.history_username,
                     observable_relationships=observable.observable_relationships,
                     parent_analysis_uuid=submission.root_analysis_uuid,
-                    redirection=observable.redirection,
-                    tags=observable.tags,
+                    permanent_tags=observable.permanent_tags,
                     threat_actors=observable.threat_actors,
                     threats=observable.threats,
                     time=observable.time,
@@ -135,7 +136,7 @@ def create(
         diffs.append(crud.history.create_diff(field="event_uuid", old=None, new=event.uuid))
 
     if tags:
-        submission.tags = [factory.node_tag.create_or_read(value=t, db=db) for t in tags]
+        submission.tags = [factory.metadata_tag.create_or_read(value=t, db=db) for t in tags]
 
     if threat_actors:
         submission.threat_actors = [factory.node_threat_actor.create_or_read(value=t, db=db) for t in threat_actors]
@@ -175,17 +176,18 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
             for relationship in o["observable_relationships"]:
                 factory.node_relationship_type.create_or_read(value=relationship["type"], db=db)
 
-        # Make sure that any tags the observable has exist
-        if "tags" in o:
-            for tag in o["tags"]:
-                factory.node_tag.create_or_read(value=tag, db=db)
+        # Make sure that any permanent tags the observable has exist
+        if "permanent_tags" in o:
+            for tag in o["permanent_tags"]:
+                factory.metadata_tag.create_or_read(value=tag, db=db)
 
         # Build the ObservableCreate model
         observable_model = ObservableCreate(
             detection_points=o.get("detection_points", []),
             for_detection=o.get("for_detection", False),
+            metadata=o.get("metadata", []),
             observable_relationships=o.get("observable_relationships", []),
-            tags=o.get("tags", []),
+            permanent_tags=o.get("permanent_tags", []),
             type=o["type"],
             value=o["value"],
         )
@@ -197,9 +199,9 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
                 # Create the analysis module type object
                 analysis_module_type = factory.analysis_module_type.create_or_read(
                     value=a["type"],
-                    observable_types=a["observable_types"] if "observable_types" in a else None,
-                    required_directives=a["required_directives"] if "required_directives" in a else None,
-                    required_tags=a["required_tags"] if "required_tags" in a else None,
+                    observable_types=a.get("observable_types", None),
+                    required_directives=a.get("required_directives", None),
+                    required_tags=a.get("required_tags", None),
                     db=db,
                 )
 

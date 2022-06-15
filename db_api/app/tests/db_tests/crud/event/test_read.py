@@ -10,7 +10,7 @@ from api_models.analysis_details import (
     SandboxHttpRequest,
     SandboxProcess,
 )
-from api_models.event_summaries import URLDomainSummary
+from api_models.summaries import URLDomainSummary
 from db import crud
 from tests import factory
 
@@ -486,12 +486,12 @@ def test_filter_by_remediations(db):
     assert result == [event3]
 
 
-def test_filter_by_risk_level(db):
+def test_filter_by_severity(db):
     factory.event.create_or_read(name="event1", db=db)
     factory.event.create_or_read(name="event2", db=db)
-    event3 = factory.event.create_or_read(name="event3", risk_level="level3", db=db)
+    event3 = factory.event.create_or_read(name="event3", severity="level3", db=db)
 
-    result = crud.event.read_all(risk_level="level3", db=db)
+    result = crud.event.read_all(severity="level3", db=db)
     assert result == [event3]
 
 
@@ -525,7 +525,7 @@ def test_filter_by_tags(db):
     event3 = factory.event.create_or_read(name="event3", db=db)
     alert3 = factory.submission.create(event=event3, db=db)
     factory.observable.create_or_read(
-        type="type3", value="value3", parent_analysis=alert3.root_analysis, tags=["observable3_tag"], db=db
+        type="type3", value="value3", parent_analysis=alert3.root_analysis, analysis_tags=["observable3_tag"], db=db
     )
 
     result = crud.event.read_all(tags="event1_tag", db=db)
@@ -647,15 +647,15 @@ def test_sort_by_owner(db):
     assert result == [event3, event2, event1]
 
 
-def test_sort_by_risk_level(db):
-    event1 = factory.event.create_or_read(name="event1", risk_level="level1", db=db)
-    event2 = factory.event.create_or_read(name="event2", risk_level="level2", db=db)
-    event3 = factory.event.create_or_read(name="event3", risk_level="level3", db=db)
+def test_sort_by_severity(db):
+    event1 = factory.event.create_or_read(name="event1", severity="level1", db=db)
+    event2 = factory.event.create_or_read(name="event2", severity="level2", db=db)
+    event3 = factory.event.create_or_read(name="event3", severity="level3", db=db)
 
-    result = crud.event.read_all(sort="risk_level|asc", db=db)
+    result = crud.event.read_all(sort="severity|asc", db=db)
     assert result == [event1, event2, event3]
 
-    result = crud.event.read_all(sort="risk_level|desc", db=db)
+    result = crud.event.read_all(sort="severity|desc", db=db)
     assert result == [event3, event2, event1]
 
 
@@ -1030,15 +1030,15 @@ def test_read_summary_observable(db):
     # alert1
     #   o1
     #     a1
-    #       o2 - 127.0.0.1
+    #       o2 - 127.0.0.1, analysis_tag1
     #         a2 - FA Q
     #   o3 - 127.0.0.1
     #     a3 - FA Q
     #
     # alert2
-    #  o1 - 127.0.0.1
+    #  o1 - 127.0.0.1 - analysis_tag2
     #    a1 - FA Q
-    #  o2 - 192.168.1.1
+    #  o2 - 192.168.1.1 - permanent_tag1
     #    a2 - FA Q
     alert1 = factory.submission.create(db=db, event=event)
     alert1_o1 = factory.observable.create_or_read(
@@ -1050,7 +1050,9 @@ def test_read_summary_observable(db):
         submission=alert1,
         target=alert1_o1,
     )
-    alert1_o2 = factory.observable.create_or_read(type="ipv4", value="127.0.0.1", parent_analysis=alert1_a1, db=db)
+    alert1_o2 = factory.observable.create_or_read(
+        type="ipv4", value="127.0.0.1", parent_analysis=alert1_a1, analysis_tags=["analysis_tag1"], db=db
+    )
     factory.analysis.create_or_read(
         db=db,
         analysis_module_type=factory.analysis_module_type.create_or_read(value="FA Queue Type 1", db=db),
@@ -1071,7 +1073,7 @@ def test_read_summary_observable(db):
 
     alert2 = factory.submission.create(db=db, event=event)
     alert2_o1 = factory.observable.create_or_read(
-        type="ipv4", value="127.0.0.1", parent_analysis=alert2.root_analysis, db=db
+        type="ipv4", value="127.0.0.1", parent_analysis=alert2.root_analysis, analysis_tags=["analysis_tag2"], db=db
     )
     factory.analysis.create_or_read(
         db=db,
@@ -1081,7 +1083,7 @@ def test_read_summary_observable(db):
         details={"link": "https://url.to.search/query=asdf", "hits": 10},
     )
     alert2_o2 = factory.observable.create_or_read(
-        type="ipv4", value="192.168.1.1", parent_analysis=alert2.root_analysis, db=db
+        type="ipv4", value="192.168.1.1", parent_analysis=alert2.root_analysis, permanent_tags=["permanent_tag1"], db=db
     )
     # This FA Queue analysis doesn't have a "link" field
     factory.analysis.create_or_read(
@@ -1095,7 +1097,7 @@ def test_read_summary_observable(db):
     # Add a third alert that is not part of the event
     alert3 = factory.submission.create(db=db)
     alert3_o1 = factory.observable.create_or_read(
-        type="ipv4", value="172.16.1.1", parent_analysis=alert3.root_analysis, db=db
+        type="ipv4", value="172.16.1.1", parent_analysis=alert3.root_analysis, analysis_tags=["analysis_tag3"], db=db
     )
     factory.analysis.create_or_read(
         db=db,
@@ -1112,8 +1114,13 @@ def test_read_summary_observable(db):
     assert len(result) == 2
     assert result[0].value == "127.0.0.1"
     assert result[0].faqueue_hits == 10
+    assert [t.value for t in result[0].analysis_tags] == ["analysis_tag1", "analysis_tag2"]
+    assert result[0].permanent_tags == []
+
     assert result[1].value == "192.168.1.1"
     assert result[1].faqueue_hits == 100
+    assert result[1].analysis_tags == []
+    assert [t.value for t in result[1].permanent_tags] == ["permanent_tag1"]
 
 
 def test_read_summary_sandbox(client, db):

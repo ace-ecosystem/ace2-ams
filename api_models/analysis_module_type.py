@@ -4,8 +4,8 @@ from uuid import uuid4
 
 from api_models import type_str, validators
 from api_models.node_directive import NodeDirectiveRead
-from api_models.node_tag import NodeTagRead
 from api_models.observable_type import ObservableTypeRead
+from api_models.metadata_tag import MetadataTagRead
 
 
 class AnalysisModuleTypeBase(BaseModel):
@@ -93,7 +93,7 @@ class AnalysisModuleTypeRead(AnalysisModuleTypeBase):
         list means that no directives are required.""",
     )
 
-    required_tags: list[NodeTagRead] = Field(
+    required_tags: list[MetadataTagRead] = Field(
         description="""A list of tags an observable must have in order to be analyzed by this module. An empty list
         means that no tags are required.""",
     )

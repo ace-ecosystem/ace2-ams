@@ -28,12 +28,10 @@
             {
               "type": "email_address",
               "value": "badguy@evil.com",
-              "node_metadata": {
-                "display": {
-                  "type": "sender"
-                }
-              },
-              "tags": ["from_address"],
+              "metadata": [
+                { "type": "display_type", "value": "sender" },
+                { "type": "tag", "value": "from_address" }
+              ],
               "analyses": [
                 {
                   "type": "FA Queue Analysis",
@@ -72,7 +70,7 @@
             {
               "type": "email_address",
               "value": "goodguy@company.com",
-              "tags": ["recipient"],
+              "metadata": [{ "type": "tag", "value": "recipient" }],
               "analyses": [
                 {
                   "type": "Email Address Analysis",
@@ -96,11 +94,9 @@
             {
               "type": "file",
               "value": "email.rfc822.unknown_plain_text_000",
-              "node_metadata": {
-                "display": {
-                  "value": "email plaintext body"
-                }
-              },
+              "metadata": [
+                { "type": "display_value", "value": "email plaintext body" }
+              ],
               "analyses": [
                 {
                   "type": "URL Extraction Analysis",
@@ -187,13 +183,12 @@
     {
       "type": "ipv4",
       "value": "127.0.0.1",
-      "tags": ["c2", "contacted_host"],
-      "node_metadata": {
-        "display": {
-          "type": "private ip address",
-          "value": "localhost"
-        }
-      },
+      "metadata": [
+        { "type": "display_type", "value": "private ip address" },
+        { "type": "display_value", "value": "localhost" },
+        { "type": "tag", "value": "contacted_host" }
+      ],
+      "permanent_tags": ["c2"],
       "analyses": [
         {
           "type": "FA Queue Analysis",
