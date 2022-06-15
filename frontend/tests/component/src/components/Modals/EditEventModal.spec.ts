@@ -25,7 +25,7 @@ import { NodeThreatActor } from "@/services/api/nodeThreatActor";
 import { NodeThreatType } from "@/services/api/nodeThreatType";
 import { EventPreventionTool } from "@/services/api/eventPreventionTool";
 import { EventRemediation } from "@/services/api/eventRemediation";
-import { EventRiskLevel } from "@/services/api/eventRiskLevel";
+import { EventSeverity } from "@/services/api/eventSeverity";
 import { EventStatus } from "@/services/api/eventStatus";
 import { EventType } from "@/services/api/eventType";
 import { EventVector } from "@/services/api/eventVector";
@@ -70,7 +70,7 @@ describe("EditEventModal", () => {
         queues: [genericObjectReadFactory({ value: "external" })],
       }),
     ]);
-    cy.stub(EventRiskLevel, "readAll").returns([]);
+    cy.stub(EventSeverity, "readAll").returns([]);
     cy.stub(EventRemediation, "readAll").returns([
       queueableObjectReadFactory({
         value: "Test Remediation",

@@ -14,37 +14,48 @@ import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
 import { createTestingPinia } from "@pinia/testing";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { metadataObjectReadFactory } from "@mocks/metadata";
 import { genericQueueableObjectRead } from "@/models/base";
 
 createTestingPinia({ createSpy: vi.fn });
 
 const mockAlertTreeRead = alertTreeReadFactory({
   tags: [
-    genericObjectReadFactory({
+    metadataObjectReadFactory({
       value: "from_address",
       uuid: "uuid3",
       description: null,
+      metadataType: "metadataObject",
     }),
-    genericObjectReadFactory({
+    metadataObjectReadFactory({
       value: "contacted_host",
       uuid: "uuid2",
       description: null,
+      metadataType: "metadataObject",
     }),
-    genericObjectReadFactory({
+    metadataObjectReadFactory({
       value: "contacted_host",
       uuid: "uuid2",
       description: null,
+      metadataType: "metadataObject",
     }),
-    genericObjectReadFactory({
+    metadataObjectReadFactory({
       value: "contacted_host",
       uuid: "uuid2",
       description: null,
+      metadataType: "metadataObject",
     }),
-    genericObjectReadFactory({ value: "c2", uuid: "uuid1", description: null }),
-    genericObjectReadFactory({
+    metadataObjectReadFactory({
+      value: "c2",
+      uuid: "uuid1",
+      description: null,
+      metadataType: "metadataObject",
+    }),
+    metadataObjectReadFactory({
       value: "recipient",
       uuid: "uuid4",
       description: null,
+      metadataType: "metadataObject",
     }),
   ],
 });
@@ -285,21 +296,25 @@ describe("formatNodeFiltersForAPI", () => {
         description: null,
         value: "c2",
         uuid: "uuid1",
+        metadataType: "metadataObject",
       },
       {
         description: null,
         value: "contacted_host",
         uuid: "uuid2",
+        metadataType: "metadataObject",
       },
       {
         description: null,
         value: "from_address",
         uuid: "uuid3",
+        metadataType: "metadataObject",
       },
       {
         description: null,
         value: "recipient",
         uuid: "uuid4",
+        metadataType: "metadataObject",
       },
     ]);
   });

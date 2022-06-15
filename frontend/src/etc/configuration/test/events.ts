@@ -4,7 +4,7 @@ import {
   observableProperty,
   observableTypesProperty,
   ownerProperty,
-  nodeTagsProperty,
+  tagsProperty,
   nodeThreatsProperty,
   nodeCommentProperty,
   queueProperty,
@@ -35,7 +35,7 @@ export const eventFilters: Record<string, readonly propertyOption[]> = {
     observableTypesProperty,
     ownerProperty,
     queueProperty, // Required, do not delete
-    nodeTagsProperty,
+    tagsProperty,
     eventStatusProperty, // Required, do not delete
   ],
   internal: [
@@ -104,8 +104,8 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     { field: "threats", header: "Threats", sortable: false, default: true },
     { field: "type", header: "Type", sortable: true, default: false },
     {
-      field: "riskLevel",
-      header: "Risk Level",
+      field: "severity",
+      header: "Severity",
       sortable: false,
       default: true,
     },
@@ -145,8 +145,8 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     { field: "threats", header: "Threats", sortable: false, default: false },
     { field: "type", header: "Type", sortable: true, default: true },
     {
-      field: "riskLevel",
-      header: "Risk Level",
+      field: "severity",
+      header: "Severity",
       sortable: true,
       default: false,
     },
@@ -186,8 +186,8 @@ export const eventQueueColumnMappings: Record<string, columnOption[]> = {
     { field: "threats", header: "Threats", sortable: false, default: true },
     { field: "type", header: "Type", sortable: true, default: false },
     {
-      field: "riskLevel",
-      header: "Risk Level",
+      field: "severity",
+      header: "Severity",
       sortable: false,
       default: true,
     },

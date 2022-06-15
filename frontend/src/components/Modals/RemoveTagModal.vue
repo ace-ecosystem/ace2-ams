@@ -54,8 +54,8 @@
   } from "@/stores/index";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
-  import { useNodeTagStore } from "@/stores/nodeTag";
-  import { nodeTagRead } from "@/models/nodeTag";
+  import { useMetadataTagStore } from "@/stores/metadataTag";
+  import { metadataTagRead } from "@/models/metadataTag";
   import { observableTreeRead } from "@/models/observable";
   import { useObservableStore } from "@/stores/observable";
 
@@ -84,24 +84,24 @@
 
   const authStore = useAuthStore();
   const modalStore = useModalStore();
-  const nodeTagStore = useNodeTagStore();
+  const metadataTagStore = useMetadataTagStore();
 
   const emit = defineEmits(["requestReload"]);
 
   const formTagValues = ref<string[]>([]);
-  const tagOptions = ref<nodeTagRead[]>([]);
+  const tagOptions = ref<metadataTagRead[]>([]);
   const error = ref<string>();
   const isLoading = ref(false);
 
   const initTagOptions = async () => {
     if (props.nodeType === "observable" && props.observable) {
-      tagOptions.value = props.observable.tags;
+      tagOptions.value = props.observable.permanentTags;
     } else if (props.reloadObject == "node") {
       tagOptions.value = nodeStore.open.tags;
     } else {
       try {
-        await nodeTagStore.readAll();
-        tagOptions.value = nodeTagStore.allItems;
+        await metadataTagStore.readAll();
+        tagOptions.value = metadataTagStore.allItems;
       } catch (e: unknown) {
         if (typeof e === "string") {
           error.value = e;
@@ -118,7 +118,7 @@
       if (props.nodeType == "observable") {
         await removeObservableTags();
       } else {
-        await removeNodeTags();
+        await removeTagsFromObservable();
       }
     } catch (e: unknown) {
       if (typeof e === "string") {
@@ -135,11 +135,11 @@
     }
   }
 
-  const removeNodeTags = async () => {
+  const removeTagsFromObservable = async () => {
     const updateData = selectedStore.selected.map((uuid: any) => ({
       uuid: uuid,
       tags: deduped([
-        ...existingNodeTagValues(uuid),
+        ...existingTagValues(uuid),
         ...formTagValues.value,
       ]).filter((tag) => !formTagValues.value.includes(tag)),
       historyUsername: authStore.user.username,
@@ -148,15 +148,15 @@
     await nodeStore.update(updateData);
   };
 
-  const existingNodeTagValues = (uuid: string) => {
-    let nodeTags: nodeTagRead[] = [];
+  const existingTagValues = (uuid: string) => {
+    let tags: metadataTagRead[] = [];
     if (props.reloadObject == "table") {
       const node = tableStore.visibleQueriedItemById(uuid);
-      nodeTags = node ? node.tags : [];
+      tags = node ? node.tags : [];
     } else if (props.reloadObject == "node") {
-      nodeTags = nodeStore.open.tags;
+      tags = nodeStore.open.tags;
     }
-    return nodeTags.map((tag) => tag.value);
+    return tags.map((tag) => tag.value);
   };
 
   const removeObservableTags = async () => {
@@ -165,7 +165,7 @@
     if (props.observable) {
       await observableStore.update(props.observable.uuid, {
         tags: deduped([
-          ...props.observable.tags.map((tag) => tag.value),
+          ...props.observable.permanentTags.map((tag) => tag.value),
           ...formTagValues.value,
         ]).filter((tag) => !formTagValues.value.includes(tag)),
         historyUsername: authStore.user.username,
@@ -174,7 +174,7 @@
   };
 
   interface tagEvent {
-    value: nodeTagRead;
+    value: metadataTagRead;
   }
   function addExistingTagToForm(tagEvent: tagEvent) {
     // Add an existing tag to the list of tags to be added

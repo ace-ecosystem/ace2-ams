@@ -11,11 +11,11 @@
     >
     <!-- Event Tags -->
     <span v-if="props.showTags" data-cy="tags">
-      <NodeTagVue
+      <MetadataTag
         v-for="tag in props.data.tags"
         :key="tag.uuid"
         :tag="tag"
-      ></NodeTagVue>
+      ></MetadataTag>
     </span>
     <br />
     <!-- Event Comments -->
@@ -63,7 +63,7 @@
   import { computed, defineProps, PropType } from "vue";
   import Button from "primevue/button";
 
-  import NodeTagVue from "@/components/Node/NodeTag.vue";
+  import MetadataTag from "@/components/Metadata/MetadataTag.vue";
   import NodeComment from "@/components/Node/NodeComment.vue";
   import EditEventModal from "@/components/Modals/EditEventModal.vue";
 

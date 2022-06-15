@@ -9,7 +9,7 @@ from api_models.analysis_details import (
     UserAnalysisDetails,
 )
 from api_models.node_detection_point import NodeDetectionPointRead
-from api_models.observable import ObservableRead
+from api_models.observable import ObservableSubmissionRead
 
 
 class DetectionSummary(NodeDetectionPointRead):
@@ -32,7 +32,7 @@ class EmailSummary(EmailAnalysisDetailsBase):
     alert_uuid: UUID4 = Field(description="The UUID of the alert to which this email belongs")
 
 
-class ObservableSummary(ObservableRead):
+class ObservableSummary(ObservableSubmissionRead):
     """Represents an observable summary as used on the event pages."""
 
     faqueue_hits: int = Field(description="The number of hits found by FA Queue Analysis for this observable")
@@ -46,24 +46,6 @@ class SandboxSummary(SandboxAnalysisDetails):
     alert_uuid: UUID4 = Field(description="The UUID of the alert to which this sandbox summary belongs")
 
     process_tree: str = Field(description="The formatted process tree of the sandbox execution", default="")
-
-
-class URLDomainSummaryIndividual(BaseModel):
-    """Represents an individual URL domain summary."""
-
-    domain: type_str = Field(description="The domain from the URL observables")
-
-    count: int = Field(description="The number of times the domain occurred in unique URL observables")
-
-
-class URLDomainSummary(BaseModel):
-    """Represents a URL domain summary as used on the event pages."""
-
-    domains: list[URLDomainSummaryIndividual] = Field(description="The domain from the URL observables")
-
-    total: int = Field(
-        description="The cumulative total of all the counts. count/total gives the ratio of this domain's occurrences."
-    )
 
 
 class UserSummary(UserAnalysisDetails):

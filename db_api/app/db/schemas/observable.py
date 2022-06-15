@@ -11,13 +11,18 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from typing import Optional
 
-from api_models.observable import ObservableNodeTreeRead, ObservableRead, ObservableRelationshipRead
+from api_models.observable import ObservableSubmissionTreeRead, ObservableRead, ObservableRelationshipRead
 from db.database import Base
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
+from db.schemas.metadata_display_type import MetadataDisplayType
+from db.schemas.metadata_display_value import MetadataDisplayValue
+from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
 from db.schemas.node_relationship import NodeRelationship
+from db.schemas.observable_permanent_tag_mapping import observable_permanent_tag_mapping
 
 
 class ObservableHistory(Base, HistoryMixin):
@@ -31,7 +36,16 @@ class Observable(Node, HasHistory):
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
 
+    # This is an empty list that gets populated by certain submission-related queries.
+    analysis_tags: list[MetadataTag] = []
+
     context = Column(String)
+
+    # This gets populated by certain submission-related queries.
+    display_type: Optional[MetadataDisplayType] = None
+
+    # This gets populated by certain submission-related queries.
+    display_value: Optional[MetadataDisplayValue] = None
 
     # Using timezone=True causes PostgreSQL to store the datetime as UTC. Datetimes without timezone
     # information will be assumed to be UTC, whereas datetimes with timezone data will be converted to UTC.
@@ -46,9 +60,9 @@ class Observable(Node, HasHistory):
         order_by="ObservableHistory.action_time",
     )
 
-    redirection_uuid = Column(UUID(as_uuid=True), ForeignKey("observable.uuid"))
-
-    redirection = relationship("Observable", foreign_keys=[redirection_uuid], uselist=False)
+    permanent_tags: list[MetadataTag] = relationship(
+        "MetadataTag", secondary=observable_permanent_tag_mapping, lazy="selectin"
+    )
 
     time = Column(DateTime(timezone=True), server_default=utcnow(), nullable=False)
 
@@ -71,8 +85,8 @@ class Observable(Node, HasHistory):
         UniqueConstraint("type_uuid", "value", name="type_value_uc"),
     )
 
-    def convert_to_pydantic(self) -> ObservableNodeTreeRead:
-        return ObservableNodeTreeRead(**self.to_dict())
+    def convert_to_pydantic(self) -> ObservableSubmissionTreeRead:
+        return ObservableSubmissionTreeRead(**self.to_dict())
 
     def to_dict(self):
         ignore_keys = ["convert_to_pydantic", "history", "history_snapshot", "to_dict"]

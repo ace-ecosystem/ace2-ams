@@ -21,7 +21,10 @@ export interface analysisRead {
 export interface analysisTreeRead {
   analysisModuleType: analysisModuleTypeNodeTreeRead;
   children: observableTreeRead[];
+  errorMessage: string | null;
   firstAppearance?: boolean;
   nodeType: string;
+  stackTrace: string | null;
+  summary: string | null;
   uuid: UUID;
 }

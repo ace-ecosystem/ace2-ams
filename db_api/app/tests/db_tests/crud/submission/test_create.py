@@ -2,6 +2,7 @@ from uuid import uuid4
 from api_models.analysis import AnalysisCreateInObservable
 from api_models.observable import ObservableCreate
 
+from api_models.analysis_metadata import AnalysisMetadataCreate
 from api_models.submission import SubmissionCreate
 from db import crud
 from tests import factory
@@ -10,8 +11,9 @@ from tests import factory
 def test_create(db):
     # Create the various objects to link to the submission
     analysis_module_type = factory.analysis_module_type.create_or_read(value="module", db=db)
-    factory.node_tag.create_or_read(value="tag", db=db)
-    factory.node_tag.create_or_read(value="o_tag", db=db)
+    factory.metadata_tag.create_or_read(value="tag", db=db)
+    factory.metadata_tag.create_or_read(value="o_analysis_tag", db=db)
+    factory.metadata_tag.create_or_read(value="o_permanent_tag", db=db)
     factory.node_threat.create_or_read(value="threat", db=db)
     factory.node_threat.create_or_read(value="o_threat", db=db)
     factory.node_threat_actor.create_or_read(value="threat_actor", db=db)
@@ -44,7 +46,8 @@ def test_create(db):
                         )
                     ],
                     detection_points=["detection_point"],
-                    tags=["o_tag"],
+                    metadata=[AnalysisMetadataCreate(type="tag", value="o_analysis_tag")],
+                    permanent_tags=["o_permanent_tag"],
                     threat_actors=["o_threat_actor"],
                     threats=["o_threat"],
                 )
@@ -67,8 +70,10 @@ def test_create(db):
     assert submission.analyses[1].analysis_module_type_uuid == analysis_module_type.uuid
     assert len(submission.child_detection_points) == 1
     assert submission.child_detection_points[0].value == "detection_point"
-    assert len(submission.child_tags) == 1
-    assert submission.child_tags[0].value == "o_tag"
+    assert len(submission.child_analysis_tags) == 1
+    assert submission.child_analysis_tags[0].value == "o_analysis_tag"
+    assert len(submission.child_permanent_tags) == 1
+    assert submission.child_permanent_tags[0].value == "o_permanent_tag"
     assert len(submission.child_threat_actors) == 1
     assert submission.child_threat_actors[0].value == "o_threat_actor"
     assert len(submission.child_threats) == 1

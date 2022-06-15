@@ -4,13 +4,13 @@ import { useAlertDispositionStore } from "@/stores/alertDisposition";
 import { useAlertToolStore } from "@/stores/alertTool";
 import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";
-import { useNodeTagStore } from "@/stores/nodeTag";
+import { useMetadataTagStore } from "@/stores/metadataTag";
 import { useNodeThreatStore } from "@/stores/nodeThreat";
 import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
 import { useUserStore } from "@/stores/user";
 import {
   nameProperty,
-  nodeTagsProperty,
+  tagsProperty,
   nodeThreatActorProperty,
   nodeThreatsProperty,
   observableProperty,
@@ -176,7 +176,7 @@ export const alertTagsProperty: propertyOption = {
   name: alertPropertyTypes.TAGS_PROPERTY,
   label: "Tags",
   type: inputTypes.CHIPS,
-  store: useNodeTagStore,
+  store: useMetadataTagStore,
   stringRepr: (filter: string[]) => {
     return filter
       .map(function (elem) {
@@ -256,7 +256,7 @@ export const validAlertFilters: propertyOption[] = [
   observableValueProperty,
   ownerProperty,
   queueProperty,
-  nodeTagsProperty,
+  tagsProperty,
   nodeThreatActorProperty,
   nodeThreatsProperty,
   alertToolProperty,

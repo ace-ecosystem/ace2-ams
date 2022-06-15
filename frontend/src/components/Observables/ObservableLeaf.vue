@@ -64,12 +64,23 @@
         @request-reload="reload"
       ></component>
     </span>
-    <span v-if="showTags && observable.tags.length" class="leaf-element">
-      <NodeTagVue
-        v-for="tag in observable.tags"
+    <span
+      v-if="
+        showTags &&
+        (observable.permanentTags.length || observable.analysisTags.length)
+      "
+      class="leaf-element"
+    >
+      <MetadataTag
+        v-for="tag in observable.permanentTags"
         :key="tag.uuid"
         :tag="tag"
-      ></NodeTagVue
+      ></MetadataTag>
+      <MetadataTag
+        v-for="tag in observable.analysisTags"
+        :key="tag.uuid"
+        :tag="tag"
+      ></MetadataTag
     ></span>
   </span>
 </template>
@@ -94,7 +105,7 @@
 
   import type CSS from "csstype";
 
-  import NodeTagVue from "@/components/Node/NodeTag.vue";
+  import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
   import {
     observableActionCommand,
@@ -173,18 +184,13 @@
     let type = observableType.value;
     let value = props.observable.value;
 
-    // TODO: This needs to change once analysis metadata is added
-    // const metadata = props.observable.nodeMetadata;
+    if (props.observable.displayType) {
+      type = `${props.observable.displayType.value} (${props.observable.type.value})`;
+    }
 
-    // if (metadata && metadata.display) {
-    //   if (metadata.display.type) {
-    //     type = `${metadata.display.type} (${observableType.value})`;
-    //   }
-
-    //   if (metadata.display.value) {
-    //     value = metadata.display.value;
-    //   }
-    // }
+    if (props.observable.displayValue) {
+      value = props.observable.displayValue.value;
+    }
 
     const displayValue = `${type}: ${value}`;
 

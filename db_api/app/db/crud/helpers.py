@@ -2,13 +2,17 @@ import contextlib
 
 from datetime import datetime, timezone
 from pydantic import BaseModel
-from sqlalchemy import delete as sql_delete, select, update as sql_update
+from sqlalchemy import select, update as sql_update
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session, undefer
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.sql.selectable import Select
 from typing import Any
+from urllib.parse import urlparse
 from uuid import UUID
+from api_models.summaries import URLDomainSummary, URLDomainSummaryIndividual
+from db.schemas.observable import Observable
+
 
 from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
@@ -31,12 +35,13 @@ def delete(uuid: UUID, db_table: DeclarativeMeta, db: Session) -> bool:
     to an IntegrityError, only the nested transaction is rolled back."""
 
     # Ensure the record exists in the database
-    read_by_uuid(uuid=uuid, db_table=db_table, db=db)
+    obj = read_by_uuid(uuid=uuid, db_table=db_table, db=db)
 
     with db.begin_nested():
         try:
-            result = db.execute(sql_delete(db_table).where(db_table.uuid == uuid))
-            return result.rowcount == 1
+            db.delete(obj)
+            db.flush()
+            return True
         except IntegrityError:
             db.rollback()
 
@@ -119,3 +124,21 @@ def utcnow() -> datetime:
     """Returns a timezone-aware version of datetime.utcnow()."""
 
     return datetime.now(timezone.utc)
+
+
+def read_summary_url_domain(url_observables: list[Observable], db: Session) -> URLDomainSummary:
+    domain_count: dict[str, URLDomainSummaryIndividual] = {}
+    for url in url_observables:
+        parsed_url = urlparse(url.value)
+        if parsed_url.hostname not in domain_count:
+            domain_count[parsed_url.hostname] = URLDomainSummaryIndividual(domain=parsed_url.hostname, count=1)
+        else:
+            domain_count[parsed_url.hostname].count += 1
+
+    # Return a list of the URLDomainSummary objects sorted by their count (highest first) then the domain.
+    # There isn't a built-in way to do this type of sort, so first sort by the secondary value (the domain).
+    # Then sort by the primary value (the count).
+    sorted_results = sorted(domain_count.values(), key=lambda x: x.domain)
+    sorted_results = sorted(sorted_results, key=lambda x: x.count, reverse=True)
+
+    return URLDomainSummary(domains=sorted_results, total=len(url_observables))

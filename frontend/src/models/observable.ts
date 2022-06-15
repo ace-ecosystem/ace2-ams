@@ -1,12 +1,14 @@
 import { Component } from "vue";
 import { analysisTreeRead } from "./analysis";
 import { historyUsername, UUID } from "./base";
+import { metadataDisplayTypeRead } from "./metadataDisplayType";
+import { metadataDisplayValueRead } from "./metadataDisplayValue";
+import { metadataTagRead } from "./metadataTag";
 import { nodeCreate, nodeRead, nodeUpdate } from "./node";
 import { nodeCommentRead } from "./nodeComment";
 import { nodeDetectionPointRead } from "./nodeDetectionPoint";
 import { nodeDirectiveRead } from "./nodeDirective";
 import { nodeRelationshipRead } from "./nodeRelationship";
-import { nodeTagRead } from "./nodeTag";
 import { nodeThreatRead } from "./nodeThreat";
 import { nodeThreatActorRead } from "./nodeThreatActor";
 import { observableTypeRead } from "./observableType";
@@ -19,7 +21,6 @@ export interface observableCreate extends nodeCreate, historyUsername {
   expiresOn?: Date;
   forDetection?: boolean;
   parentAnalysisUuid: UUID;
-  redirection?: observableCreate;
   tags?: string[];
   threatActors?: string[];
   threats?: string[];
@@ -37,13 +38,18 @@ export interface observableRead extends nodeRead {
   expiresOn: Date | null;
   forDetection: boolean;
   observableRelationships: observableRelationshipRead[];
-  redirection: observableRead | null;
-  tags: nodeTagRead[];
+  permanentTags: metadataTagRead[];
   threatActors: nodeThreatActorRead[];
   threats: nodeThreatRead[];
   time: Date;
   type: observableTypeRead;
   value: string;
+}
+
+export interface observableInAlertRead extends observableRead {
+  analysisTags: metadataTagRead[];
+  displayType: metadataDisplayTypeRead | null;
+  displayValue: metadataDisplayValueRead | null;
 }
 
 export interface observableReadPage {
@@ -54,7 +60,10 @@ export interface observableReadPage {
 }
 
 export interface observableTreeRead extends observableRead {
+  analysisTags: metadataTagRead[];
   children: analysisTreeRead[];
+  displayType: metadataDisplayTypeRead | null;
+  displayValue: metadataDisplayValueRead | null;
   firstAppearance?: boolean;
 }
 
@@ -63,7 +72,6 @@ export interface observableUpdate extends nodeUpdate, historyUsername {
   directives?: string[];
   expiresOn?: Date | null;
   forDetection?: boolean;
-  redirectionUuid?: UUID;
   tags?: string[];
   threatActors?: string[];
   threats?: string[];

@@ -1,3 +1,4 @@
+import pytest
 import uuid
 
 from datetime import timedelta
@@ -20,6 +21,17 @@ def test_get_invalid_uuid(client):
 
 def test_get_nonexistent_uuid(client):
     get = client.get(f"/api/submission/{uuid.uuid4()}")
+    assert get.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ("/summary/url_domain"),
+    ],
+)
+def test_get_summary_nonexistent_submission(client, path):
+    get = client.get(f"/api/submission/{uuid.uuid4()}{path}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -512,7 +524,7 @@ def test_get_filter_submission_type(client, db):
 def test_get_filter_tags(client, db):
     submission1 = factory.submission.create(db=db, tags=["submission_tag"])
     factory.observable.create_or_read(
-        type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, tags=["obs1"]
+        type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, analysis_tags=["obs1"]
     )
     factory.submission.create(db=db, tags=["tag1"])
     factory.submission.create(db=db, tags=["tag2", "tag3", "tag4"])
@@ -538,8 +550,8 @@ def test_get_filter_tags(client, db):
     get = client.get("/api/submission/?tags=obs1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["uuid"] == str(submission1.uuid)
-    assert len(get.json()["items"][0]["child_tags"]) == 1
-    assert get.json()["items"][0]["child_tags"][0]["value"] == "obs1"
+    assert len(get.json()["items"][0]["child_analysis_tags"]) == 1
+    assert get.json()["items"][0]["child_analysis_tags"][0]["value"] == "obs1"
 
     # All the submissions should be returned if you don't specify any tags for the filter
     get = client.get("/api/submission/?tags=")
@@ -872,3 +884,53 @@ def test_get_submissions_observables(client, db):
     assert any(o["type"]["value"] == "email_address" and o["value"] == "badguy@bad.com" for o in get.json())
     assert any(o["type"]["value"] == "fqdn" and o["value"] == "bad.com" for o in get.json())
     assert any(o["type"]["value"] == "ipv4" and o["value"] == "127.0.0.1" for o in get.json())
+
+
+def test_read_summary_url_domain(client, db):
+    # Create a submission
+    submission1 = factory.submission.create(db=db)
+
+    # The URL domains summary should be empty
+    get = client.get(f"/api/submission/{submission1.uuid}/summary/url_domain")
+    assert get.json() == {"domains": [], "total": 0}
+
+    # Add some observables to the submission
+    #
+    #   o1 - url - https://example.com
+    #   o2 - url - https://example2.com
+    #   o3 - url - https://example.com/index.html
+    #   o4 - url - https://example3.com
+    #   o5 - ipv4 - 1.2.3.4
+    #   o6 - email_address - name@company.com
+
+    factory.observable.create_or_read(
+        type="url", value="https://example.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example2.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example.com/index.html", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(
+        type="url", value="https://example3.com", parent_analysis=submission1.root_analysis, db=db
+    )
+    factory.observable.create_or_read(type="ipv4", value="1.2.3.4", parent_analysis=submission1.root_analysis, db=db)
+    factory.observable.create_or_read(
+        type="email_address", value="name@company.com", parent_analysis=submission1.root_analysis, db=db
+    )
+
+    # The URL domain summary should now have three entries in it. The https://example.com URL is repeated, so it
+    # only counts once for the purposes of the summary.
+    # Additionally, the results should be sorted by the number of times the domains appeared then by the domain.
+    #
+    # Results: example.com (2), example2.com (1), example3.com (1)
+    get = client.get(f"/api/submission/{submission1.uuid}/summary/url_domain")
+    assert get.json()["total"] == 4
+    assert len(get.json()["domains"]) == 3
+    assert get.json()["domains"][0]["domain"] == "example.com"
+    assert get.json()["domains"][0]["count"] == 2
+    assert get.json()["domains"][1]["domain"] == "example2.com"
+    assert get.json()["domains"][1]["count"] == 1
+    assert get.json()["domains"][2]["domain"] == "example3.com"
+    assert get.json()["domains"][2]["count"] == 1

@@ -171,40 +171,40 @@ def test_update_remediations(db):
     assert event.history[2].snapshot["remediations"] == []
 
 
-def test_update_risk_level(db):
+def test_update_severity(db):
     # Create an event
     event = factory.event.create_or_read(name="test", db=db, history_username="analyst")
     initial_event_version = event.version
 
-    # Create an event risk level
-    factory.event_risk_level.create_or_read(value="test", db=db)
+    # Create an event severity
+    factory.event_severity.create_or_read(value="test", db=db)
 
     # Update the event
-    crud.event.update(uuid=event.uuid, model=EventUpdate(risk_level="test", history_username="analyst"), db=db)
-    assert event.risk_level.value == "test"
+    crud.event.update(uuid=event.uuid, model=EventUpdate(severity="test", history_username="analyst"), db=db)
+    assert event.severity.value == "test"
     assert event.version != initial_event_version
 
     # Verify the history
     assert len(event.history) == 2
     assert event.history[1].action == "UPDATE"
     assert event.history[1].action_by.username == "analyst"
-    assert event.history[1].field == "risk_level"
+    assert event.history[1].field == "severity"
     assert event.history[1].diff["old_value"] is None
     assert event.history[1].diff["new_value"] == "test"
-    assert event.history[1].snapshot["risk_level"]["value"] == "test"
+    assert event.history[1].snapshot["severity"]["value"] == "test"
 
     # Set it back to None
-    crud.event.update(uuid=event.uuid, model=EventUpdate(risk_level=None, history_username="analyst"), db=db)
-    assert event.risk_level is None
+    crud.event.update(uuid=event.uuid, model=EventUpdate(severity=None, history_username="analyst"), db=db)
+    assert event.severity is None
 
     # Verify the history
     assert len(event.history) == 3
     assert event.history[2].action == "UPDATE"
     assert event.history[2].action_by.username == "analyst"
-    assert event.history[2].field == "risk_level"
+    assert event.history[2].field == "severity"
     assert event.history[2].diff["old_value"] == "test"
     assert event.history[2].diff["new_value"] is None
-    assert event.history[2].snapshot["risk_level"] is None
+    assert event.history[2].snapshot["severity"] is None
 
 
 def test_update_source(db):
@@ -346,7 +346,7 @@ def test_update_vectors(db):
 @pytest.mark.parametrize(
     "key,value_lists,helper_create_func",
     [
-        ("tags", VALID_LIST_STRING_VALUES, factory.node_tag.create_or_read),
+        ("tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
         ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
         ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
     ],

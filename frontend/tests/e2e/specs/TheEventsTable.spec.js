@@ -54,7 +54,7 @@ describe("TheEventsTable.vue", () => {
   it("has default columns visible", () => {
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Created, Name, Threats, Risk Level, Status, Owner",
+      "Created, Name, Threats, Severity, Status, Owner",
     );
     // Edit event button column
     cy.get(".p-datatable-thead > tr > :nth-child(3)").should("have.text", "");
@@ -69,7 +69,7 @@ describe("TheEventsTable.vue", () => {
     );
     cy.get(".p-datatable-thead > tr > :nth-child(7)").should(
       "have.text",
-      "Risk Level",
+      "Severity",
     );
     cy.get(".p-datatable-thead > tr > :nth-child(8)").should(
       "have.text",
@@ -89,7 +89,7 @@ describe("TheEventsTable.vue", () => {
     // Test that all of the selected columns are there
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Created, Name, Threat Actors, Threats, Type, Risk Level, Prevention Tools, Remediation, Status, Owner, Vectors, Queue",
+      "Created, Name, Threat Actors, Threats, Type, Severity, Prevention Tools, Remediation, Status, Owner, Vectors, Queue",
     );
     // Close the column multiselect
     cy.get(".p-multiselect-close").click();
@@ -101,7 +101,7 @@ describe("TheEventsTable.vue", () => {
     // Test that it's gone back to the normal columns
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Created, Name, Threats, Risk Level, Status, Owner",
+      "Created, Name, Threats, Severity, Status, Owner",
     );
   });
 
@@ -802,7 +802,7 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Created, Name, Threats, Risk Level, Status, Owner",
+      "Created, Name, Threats, Severity, Status, Owner",
     );
 
     // log out and log back in as 'alice', whose default event queue is 'internal'
@@ -864,7 +864,7 @@ describe("TheEventsTable.vue - Queue Settings", () => {
     // Correct columns should be showing
     cy.get(".p-multiselect-label").should(
       "have.text",
-      "Created, Name, Threats, Risk Level, Status, Owner",
+      "Created, Name, Threats, Severity, Status, Owner",
     );
   });
 });

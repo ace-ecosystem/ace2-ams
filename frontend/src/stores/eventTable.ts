@@ -13,7 +13,7 @@ export function parseEventSummary(event: eventRead): eventSummary {
     name: event.name,
     owner: event.owner ? event.owner.displayName : "None",
     preventionTools: event.preventionTools.map((x) => x.value),
-    riskLevel: event.riskLevel ? event.riskLevel.value : "None",
+    severity: event.severity ? event.severity.value : "None",
     status: event.status ? event.status.value : "None",
     tags: event.tags,
     threatActors: event.threatActors.map((x) => x.value),

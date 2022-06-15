@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import datetime
 from deepdiff import DeepHash
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Load, Session
@@ -15,10 +16,9 @@ from api_models.event_summaries import (
     EmailSummary,
     ObservableSummary,
     SandboxSummary,
-    URLDomainSummary,
-    URLDomainSummaryIndividual,
     UserSummary,
 )
+from api_models.summaries import URLDomainSummary
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis import Analysis
@@ -27,14 +27,14 @@ from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.event import Event, EventHistory
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_remediation import EventRemediation
-from db.schemas.event_risk_level import EventRiskLevel
+from db.schemas.event_severity import EventSeverity
 from db.schemas.event_source import EventSource
 from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
+from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
 from db.schemas.node_detection_point import NodeDetectionPoint
-from db.schemas.node_tag import NodeTag
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.observable import Observable
@@ -66,7 +66,7 @@ def build_read_all_query(
     remediation_time_after: Optional[datetime] = None,
     remediation_time_before: Optional[datetime] = None,
     remediations: Optional[str] = None,
-    risk_level: Optional[str] = None,
+    severity: Optional[str] = None,
     sort: Optional[str] = None,  # Example: created_time|desc,
     source: Optional[str] = None,
     status: Optional[str] = None,
@@ -265,9 +265,9 @@ def build_read_all_query(
         remediations_query = select(Event).where(and_(*remediation_filters))
         query = _join_as_subquery(query, remediations_query)
 
-    if risk_level:
-        risk_level_query = select(Event).join(EventRiskLevel).where(EventRiskLevel.value == risk_level)
-        query = _join_as_subquery(query, risk_level_query)
+    if severity:
+        severity_query = select(Event).join(EventSeverity).where(EventSeverity.value == severity)
+        query = _join_as_subquery(query, severity_query)
 
     if source:
         source_query = select(Event).join(EventSource).where(EventSource.value == source)
@@ -282,9 +282,10 @@ def build_read_all_query(
         for tag in tags.split(","):
             tag_filters.append(
                 or_(
-                    Event.tags.any(NodeTag.value == tag),
-                    Event.alerts.any(Submission.tags.any(NodeTag.value == tag)),
-                    Event.alerts.any(Submission.child_tags.any(NodeTag.value == tag)),
+                    Event.tags.any(MetadataTag.value == tag),
+                    Event.alerts.any(Submission.tags.any(MetadataTag.value == tag)),
+                    Event.alerts.any(Submission.child_analysis_tags.any(MetadataTag.value == tag)),
+                    Event.alerts.any(Submission.child_permanent_tags.any(MetadataTag.value == tag)),
                 )
             )
         tags_query = select(Event).where(and_(*tag_filters))
@@ -364,15 +365,15 @@ def build_read_all_query(
             elif order == "desc":
                 query = query.order_by(User.username.desc())
 
-        # Only sort by risk_level if we are not also filtering by risk_level
-        elif sort_by.lower() == "risk_level" and not risk_level:
-            query = query.outerjoin(EventRiskLevel, onclause=EventRiskLevel.uuid == Event.risk_level_uuid).group_by(
-                Event.uuid, Node.uuid, EventRiskLevel.value
+        # Only sort by severity if we are not also filtering by severity
+        elif sort_by.lower() == "severity" and not severity:
+            query = query.outerjoin(EventSeverity, onclause=EventSeverity.uuid == Event.severity_uuid).group_by(
+                Event.uuid, Node.uuid, EventSeverity.value
             )
             if order == "asc":
-                query = query.order_by(EventRiskLevel.value.asc())
+                query = query.order_by(EventSeverity.value.asc())
             elif order == "desc":
-                query = query.order_by(EventRiskLevel.value.desc())
+                query = query.order_by(EventSeverity.value.desc())
 
         # Only sort by status if we are not also filtering by status
         elif sort_by.lower() == "status" and not status:
@@ -397,13 +398,14 @@ def create_or_read(model: EventCreate, db: Session) -> Event:
         obj.owner = crud.user.read_by_username(username=model.owner, db=db)
     obj.queue = crud.queue.read_by_value(value=model.queue, db=db)
     obj.remediations = crud.event_remediation.read_by_values(values=model.remediations, db=db)
-    if model.risk_level:
-        obj.risk_level = crud.event_risk_level.read_by_value(value=model.risk_level, db=db)
+    if model.severity:
+        obj.severity = crud.event_severity.read_by_value(value=model.severity, db=db)
     if model.source:
         obj.source = crud.event_source.read_by_value(value=model.source, db=db)
     obj.status = crud.event_status.read_by_value(value=model.status, db=db)
     if model.type:
         obj.type = crud.event_type.read_by_value(value=model.type, db=db)
+    obj.tags = crud.metadata_tag.read_by_values(values=model.tags, db=db)
     obj.uuid = model.uuid
     obj.vectors = crud.event_vector.read_by_values(values=model.vectors, db=db)
 
@@ -445,7 +447,7 @@ def read_all(
     remediation_time_after: Optional[datetime] = None,
     remediation_time_before: Optional[datetime] = None,
     remediations: Optional[str] = None,
-    risk_level: Optional[str] = None,
+    severity: Optional[str] = None,
     sort: Optional[str] = None,  # Example: created_time|desc,
     source: Optional[str] = None,
     status: Optional[str] = None,
@@ -477,7 +479,7 @@ def read_all(
                 remediation_time_after=remediation_time_after,
                 remediation_time_before=remediation_time_before,
                 remediations=remediations,
-                risk_level=risk_level,
+                severity=severity,
                 sort=sort,
                 source=source,
                 status=status,
@@ -658,8 +660,16 @@ def read_summary_email_headers_body(uuid: UUID, db: Session) -> Optional[EmailHe
 
 def read_summary_observable(uuid: UUID, db: Session) -> list[ObservableSummary]:
     # Verify the event exists
-    read_by_uuid(uuid=uuid, db=db)
+    event = read_by_uuid(uuid=uuid, db=db)
 
+    # Read all of the observables contained in the event. These observables will have their
+    # analysis tags injected into them. This list is then transformed into a dictionary with
+    # the observable UUID as the key.
+    observables_by_uuid: dict[UUID, Observable] = {
+        o.uuid: o for o in crud.submission.read_observables(uuids=event.alert_uuids, db=db)
+    }
+
+    # Read all of the FA Queue analyses contained in the event
     alert_uuid_and_analysis = read_analysis_type_from_event(
         analysis_module_type="FA Queue", starts_with=True, uuid=uuid, db=db
     )
@@ -669,9 +679,9 @@ def read_summary_observable(uuid: UUID, db: Session) -> list[ObservableSummary]:
     results = set()
     for _, faqueue_analysis in alert_uuid_and_analysis:
         analysis_details = FAQueueAnalysisDetails(**faqueue_analysis.details)
-        faqueue_analysis.target.faqueue_hits = analysis_details.hits
-        faqueue_analysis.target.faqueue_link = analysis_details.link
-        results.add(faqueue_analysis.target)
+        observables_by_uuid[faqueue_analysis.target.uuid].faqueue_hits = analysis_details.hits
+        observables_by_uuid[faqueue_analysis.target.uuid].faqueue_link = analysis_details.link
+        results.add(observables_by_uuid[faqueue_analysis.target.uuid])
 
     # Return the observables sorted by their type then value
     return sorted(results, key=lambda x: (x.type.value, x.value))
@@ -733,21 +743,8 @@ def read_summary_url_domain(uuid: UUID, db: Session) -> URLDomainSummary:
     # a URLDomainSummary object.
     # NOTE: This assumes the URL values are validated as they are added to the database.
     urls = read_observable_type_from_event(observable_type="url", uuid=uuid, db=db)
-    domain_count: dict[str, URLDomainSummaryIndividual] = {}
-    for url in urls:
-        parsed_url = urlparse(url.value)
-        if parsed_url.hostname not in domain_count:
-            domain_count[parsed_url.hostname] = URLDomainSummaryIndividual(domain=parsed_url.hostname, count=1)
-        else:
-            domain_count[parsed_url.hostname].count += 1
 
-    # Return a list of the URLDomainSummary objects sorted by their count (highest first) then the domain.
-    # There isn't a built-in way to do this type of sort, so first sort by the secondary value (the domain).
-    # Then sort by the primary value (the count).
-    sorted_results = sorted(domain_count.values(), key=lambda x: x.domain)
-    sorted_results = sorted(sorted_results, key=lambda x: x.count, reverse=True)
-
-    return URLDomainSummary(domains=sorted_results, total=len(urls))
+    return crud.helpers.read_summary_url_domain(url_observables=urls, db=db)
 
 
 def read_summary_user(uuid: UUID, db: Session) -> list[UserSummary]:
@@ -862,14 +859,14 @@ def update(uuid: UUID, model: EventUpdate, db: Session):
         else:
             event.remediations = []
 
-    if "risk_level" in update_data:
-        old = event.risk_level.value if event.risk_level else None
-        diffs.append(crud.history.create_diff(field="risk_level", old=old, new=update_data["risk_level"]))
+    if "severity" in update_data:
+        old = event.severity.value if event.severity else None
+        diffs.append(crud.history.create_diff(field="severity", old=old, new=update_data["severity"]))
 
-        if update_data["risk_level"]:
-            event.risk_level = crud.event_risk_level.read_by_value(value=update_data["risk_level"], db=db)
+        if update_data["severity"]:
+            event.severity = crud.event_severity.read_by_value(value=update_data["severity"], db=db)
         else:
-            event.risk_level = None
+            event.severity = None
 
     if "source" in update_data:
         old = event.source.value if event.source else None
@@ -884,6 +881,20 @@ def update(uuid: UUID, model: EventUpdate, db: Session):
         diffs.append(crud.history.create_diff(field="status", old=event.status.value, new=update_data["status"]))
 
         event.status = crud.event_status.read_by_value(value=update_data["status"], db=db)
+
+    if "tags" in update_data:
+        diffs.append(
+            crud.history.create_diff(
+                field="tags",
+                old=[x.value for x in event.tags],
+                new=update_data["tags"],
+            )
+        )
+
+        if update_data["tags"]:
+            event.tags = crud.metadata_tag.read_by_values(values=update_data["tags"], db=db)
+        else:
+            event.tags = []
 
     if "type" in update_data:
         old = event.type.value if event.type else None

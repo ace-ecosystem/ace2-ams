@@ -55,7 +55,7 @@ describe("EventSummary", () => {
     "Created",
     "Name",
     "Threats",
-    "Risk Level",
+    "Severity",
     "Status",
     "Owner",
   ];
@@ -86,7 +86,7 @@ describe("EventSummary", () => {
     factory({ eventStore: { open: openEventDefaults, requestReload: false } });
 
     // Select additional column
-    cy.contains("Created, Name, Threats, Risk Level, Status, Owner").click();
+    cy.contains("Created, Name, Threats, Severity, Status, Owner").click();
     cy.get('[aria-label="Queue"]').click();
     cy.get(".p-multiselect-close").click();
 
