@@ -292,6 +292,41 @@ describe("ObservableLeaf", () => {
       },
     });
   });
+
+  it("sets the alert filters to the an observable's type and value when clicked if there is a display type", () => {
+    factory({
+      props: { observable: observableWithDisplayType },
+      config: testConfiguration,
+    });
+    cy.contains("Observable with display type").click();
+    cy.get("@stub-5").should("have.been.calledWith", {
+      nodeType: "alerts",
+      filters: {
+        observable: {
+          category: observableWithDisplayType.type,
+          value: observableWithDisplayType.value,
+        },
+      },
+    });
+  });
+
+  it("sets the alert filters to the an observable's type and value when clicked if there is a display value", () => {
+    factory({
+      props: { observable: observableWithDisplayValue },
+      config: testConfiguration,
+    });
+    cy.contains("displayValue").click();
+    cy.get("@stub-5").should("have.been.calledWith", {
+      nodeType: "alerts",
+      filters: {
+        observable: {
+          category: observableWithDisplayValue.type,
+          value: observableWithDisplayValue.value,
+        },
+      },
+    });
+  });
+
   it("attempts to requestReload on the alert store when child component emits 'requestReload", () => {
     let alertStore: any;
     factory({
