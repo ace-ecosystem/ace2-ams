@@ -232,7 +232,7 @@ def build_read_all_query(
     if owner:
         owner_query = select(Event)
         if owner.lower() == "none":
-            owner_query = owner_query.where(Submission.owner_uuid == None)  # pylint: disable=singleton-comparison
+            owner_query = owner_query.where(Event.owner_uuid == None)  # pylint: disable=singleton-comparison
         else:
             owner_query = owner_query.join(User, onclause=Event.owner_uuid == User.uuid).where(User.username == owner)
         query = _join_as_subquery(query, owner_query)
