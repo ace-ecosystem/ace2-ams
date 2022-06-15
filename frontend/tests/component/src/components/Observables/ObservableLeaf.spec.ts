@@ -144,7 +144,9 @@ describe("ObservableLeaf", () => {
       props: { observable: observableWithDisplayType },
       config: testConfiguration,
     });
-    cy.contains("displayType: Observable with display type")
+    cy.contains(
+      "displayType (testObservableType): Observable with display type",
+    )
       .should("be.visible")
       .should("have.css", { color: "black" });
     cy.findAllByRole("button").should("have.length", 2);

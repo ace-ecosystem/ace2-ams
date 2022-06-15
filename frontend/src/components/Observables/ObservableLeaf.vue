@@ -185,7 +185,7 @@
     let value = props.observable.value;
 
     if (props.observable.displayType) {
-      type = props.observable.displayType.value;
+      type = `${props.observable.displayType.value} (${props.observable.type.value})`;
     }
 
     if (props.observable.displayValue) {
