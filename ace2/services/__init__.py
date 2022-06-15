@@ -1,4 +1,4 @@
 # import all Analysis subclasses in the modules directory
-from ..analysis import Analysis
+from ..service import Service
 from ..models import find
-globals().update(find(__name__, Analysis))
+globals().update(find(__name__, Service))

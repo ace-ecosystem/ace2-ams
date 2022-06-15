@@ -1,5 +1,5 @@
 from ace2 import *
-from ace2.modules import FileType
+from ace2.services import FileTypeAnalysis
 import os
 import pathlib
 import pytest
@@ -10,7 +10,7 @@ def test_file_type_run_condition():
     # test run condition True
     analysis = {
         'id': 1,
-        'type': 'file_type',
+        'type': 'file_type_analysis',
         'target': {
             'type': 'file',
             'value': 'blah',
@@ -21,7 +21,7 @@ def test_file_type_run_condition():
     # test run condition False
     analysis = {
         'id': 1,
-        'type': 'file_type',
+        'type': 'file_type_analysis',
         'target': {
             'type': 'foo',
             'value': 'blah',
@@ -119,8 +119,8 @@ def test_file_type(path, extension, tags, file_type, mime_type):
     }
 
     # run the module
-    analysis = FileType(**analysis)
-    assert analysis.execute(analysis.target) == None
+    analysis = FileTypeAnalysis(**analysis)
+    analysis.execute()
 
     # verify analysis
     assert analysis.target.tags == tags

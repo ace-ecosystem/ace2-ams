@@ -46,12 +46,7 @@ function build_image() {
     docker build --build-arg name=$name --build-arg env=$env -t ace2-$type-$name -f $type/Dockerfile .
 }
 
-# build all libs
-for path in lib/*/ ; do
-    build_image $path
-done
-
 # build all modules
-for path in modules/*/ ; do
+for path in services/*/ ; do
     build_image $path
 done

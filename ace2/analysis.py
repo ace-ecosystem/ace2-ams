@@ -1,18 +1,16 @@
 from __future__ import annotations
-import json
 import os
 from pydantic import Field
 from pydantic.fields import ModelField
 from typing import List, Optional, Type
-import sys
 
-from . import config, queue
-from .callback import Callback
+from . import queue
 from .config import Config
 from .observables import Observable
 from .models import TypedModel, PrivateModel
+from .service import Service
 
-class Analysis(TypedModel):
+class Analysis(Service):
     ''' Base Analysis class for building ICE2 analysis '''
 
     id: int = Field(description='the id of the analysis in the database')
@@ -20,10 +18,6 @@ class Analysis(TypedModel):
     summary: Optional[str] = Field(default=None, description='the analysis summary to display in the GUI')
     observables: Optional[List[Observable]] = Field(default_factory=list, description='the child observables')
     state: Optional[dict] = Field(default_factory=dict, description='non analysis data storage space')
-    callback: Optional[Callback] = Field(
-        default = Callback('execute'),
-        description='callback to execute when running analysis. If None then analysis is complete'
-    )
 
     class Config(Config):
         ''' Base analysis config class '''
@@ -46,22 +40,8 @@ class Analysis(TypedModel):
             config = cls.__config__,
         )
 
-        # add run funciton to module so aws lambda can find it
-        sys.modules[cls.__module__].run = cls.run
-
         # init base subclasses
         super().__init_subclass__()
-
-    @property
-    def config(self) -> Analysis.Config:
-        ''' the loaded analysis config '''
-
-        # load config into cache if we need to
-        if self.private.config == None:
-            self.private.config = self.Config.load(os.path.join('modules', self.type))
-
-        # returned loaded config
-        return self.private.config
 
     @property
     def should_run(self) -> bool:
@@ -71,49 +51,17 @@ class Analysis(TypedModel):
         target = self.target
 
         # load the condition
-        with open(os.path.join(os.environ['ACE2'], 'modules', self.type, 'condition')) as f:
+        with open(os.path.join(os.environ['ACE2'], 'services', self.type, 'condition')) as f:
             condition = f.read()
 
         # evaluate the condition
         return eval(condition)
 
-    @classmethod
-    def run(cls, event:dict, context:dict):
-        ''' AWS lambda function handler that runs analysis on the event
-
-        Args:
-            event: the aws event message
-            context: aws runtime context (we do not use this)
-        '''
-
-        # get the message from the event
-        message = event['Records'][0]
-
-        # create an analysis object from the message
-        self = cls(**json.loads(message['body']))
-
-        # call the current callback function which then tells us what to execute after that
-        self.callback = self.callback.execute(self, self.target)
-
-        # if analysis is not complete then push it back onto the analysis queue
-        if self.callback:
-            queue.add(self.type, self.dict(), delay=self.callback.seconds)
-
-        # if analysis is complete then push it (excluding state info) onto the submission queue
-        else:
-            queue.add('Submission', self.dict(exclude={'callback', 'state'}))
-
-        # delete original message from the analysis queue
-        queue.remove(self.type, message['receiptHandle'])
-
-    def execute(self, observable:Observable) -> Optional[Callback]:
+    def execute(self):
         ''' This is the entry point for running analysis. Subclasses must override this function.
 
         Args:
             observable: the target observable to run analysis on
-
-        Returns:
-            The callback to continue analysis or None if analysis is complete
         '''
 
         raise NotImplementedError()

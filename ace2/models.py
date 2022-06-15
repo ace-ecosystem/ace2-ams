@@ -25,7 +25,8 @@ def find(name:str, base:type) -> dict:
     subclasses = {}
     module = sys.modules[name]
     package_dir = Path(module.__file__).resolve().parent
-    for (_, module_name, _) in iter_modules([package_dir]):
+    module_names = sorted([m for (_, m, _) in iter_modules([package_dir])])
+    for module_name in module_names:
         sub_module_name = f'{module.__name__}.{module_name}'
         try:
             sub_module = import_module(sub_module_name)
