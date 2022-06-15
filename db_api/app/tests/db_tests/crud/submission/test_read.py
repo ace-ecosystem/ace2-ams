@@ -206,10 +206,13 @@ def test_filter_by_observable_value(db):
 
 def test_filter_by_owner(db):
     submission1 = factory.submission.create(owner="analyst", db=db)
-    factory.submission.create(db=db)
+    submission2 = factory.submission.create(db=db)
 
     result = crud.submission.read_all(owner="analyst", db=db)
     assert result == [submission1]
+
+    result = crud.submission.read_all(owner="none", db=db)
+    assert result == [submission2]
 
 
 def test_filter_by_queue(db):
