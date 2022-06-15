@@ -60,6 +60,16 @@ function factory(
   });
 }
 
+const observableWithDisplayType = observableTreeReadFactory({
+  value: "Observable with display type",
+  displayType: metadataObjectReadFactory({ value: "displayType" }),
+});
+
+const observableWithDisplayValue = observableTreeReadFactory({
+  value: "Observable with display value",
+  displayValue: metadataObjectReadFactory({ value: "displayValue" }),
+});
+
 const observableWithTags = observableTreeReadFactory({
   value: "Observable w/ Tags",
   children: [],
@@ -128,6 +138,31 @@ describe("ObservableLeaf", () => {
     cy.findAllByRole("button").should("have.length", 2);
     cy.get("span").contains("testTag");
   });
+
+  it("renders correctly when observable has a display type", () => {
+    factory({
+      props: { observable: observableWithDisplayType },
+      config: testConfiguration,
+    });
+    cy.contains(
+      "displayType (testObservableType): Observable with display type",
+    )
+      .should("be.visible")
+      .should("have.css", { color: "black" });
+    cy.findAllByRole("button").should("have.length", 2);
+  });
+
+  it("renders correctly when observable has a display value", () => {
+    factory({
+      props: { observable: observableWithDisplayValue },
+      config: testConfiguration,
+    });
+    cy.contains("testObservableType: displayValue")
+      .should("be.visible")
+      .should("have.css", { color: "black" });
+    cy.findAllByRole("button").should("have.length", 2);
+  });
+
   it("loads common and observable type-specific actions from config, if available", () => {
     factory({
       props: { observable: ipv4Observable },
@@ -257,6 +292,41 @@ describe("ObservableLeaf", () => {
       },
     });
   });
+
+  it("sets the alert filters to the an observable's type and value when clicked if there is a display type", () => {
+    factory({
+      props: { observable: observableWithDisplayType },
+      config: testConfiguration,
+    });
+    cy.contains("Observable with display type").click();
+    cy.get("@stub-5").should("have.been.calledWith", {
+      nodeType: "alerts",
+      filters: {
+        observable: {
+          category: observableWithDisplayType.type,
+          value: observableWithDisplayType.value,
+        },
+      },
+    });
+  });
+
+  it("sets the alert filters to the an observable's type and value when clicked if there is a display value", () => {
+    factory({
+      props: { observable: observableWithDisplayValue },
+      config: testConfiguration,
+    });
+    cy.contains("displayValue").click();
+    cy.get("@stub-5").should("have.been.calledWith", {
+      nodeType: "alerts",
+      filters: {
+        observable: {
+          category: observableWithDisplayValue.type,
+          value: observableWithDisplayValue.value,
+        },
+      },
+    });
+  });
+
   it("attempts to requestReload on the alert store when child component emits 'requestReload", () => {
     let alertStore: any;
     factory({

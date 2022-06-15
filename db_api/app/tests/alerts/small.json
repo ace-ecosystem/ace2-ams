@@ -28,12 +28,10 @@
             {
               "type": "email_address",
               "value": "badguy@evil.com",
-              "metadata": [{ "type": "tag", "value": "from_address" }],
-              "node_metadata": {
-                "display": {
-                  "type": "sender"
-                }
-              },
+              "metadata": [
+                { "type": "display_type", "value": "sender" },
+                { "type": "tag", "value": "from_address" }
+              ],
               "analyses": [
                 {
                   "type": "FA Queue Analysis",
@@ -96,11 +94,9 @@
             {
               "type": "file",
               "value": "email.rfc822.unknown_plain_text_000",
-              "node_metadata": {
-                "display": {
-                  "value": "email plaintext body"
-                }
-              },
+              "metadata": [
+                { "type": "display_value", "value": "email plaintext body" }
+              ],
               "analyses": [
                 {
                   "type": "URL Extraction Analysis",
@@ -187,14 +183,12 @@
     {
       "type": "ipv4",
       "value": "127.0.0.1",
-      "metadata": [{ "type": "tag", "value": "contacted_host" }],
+      "metadata": [
+        { "type": "display_type", "value": "private ip address" },
+        { "type": "display_value", "value": "localhost" },
+        { "type": "tag", "value": "contacted_host" }
+      ],
       "permanent_tags": ["c2"],
-      "node_metadata": {
-        "display": {
-          "type": "private ip address",
-          "value": "localhost"
-        }
-      },
       "analyses": [
         {
           "type": "FA Queue Analysis",

@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: e707cefb74c1
+Revision ID: f494a9e8f48c
 Revises: 
-Create Date: 2022-06-14 15:05:00.517283
+Create Date: 2022-06-14 19:48:31.399372
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'e707cefb74c1'
+revision = 'f494a9e8f48c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -265,6 +265,22 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_event_vector_queue_mapping_event_vector_uuid'), 'event_vector_queue_mapping', ['event_vector_uuid'], unique=False)
     op.create_index(op.f('ix_event_vector_queue_mapping_queue_uuid'), 'event_vector_queue_mapping', ['queue_uuid'], unique=False)
+    op.create_table('metadata_display_type',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['uuid'], ['metadata.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_metadata_display_type_value'), 'metadata_display_type', ['value'], unique=True)
+    op.create_table('metadata_display_value',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['uuid'], ['metadata.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_metadata_display_value_value'), 'metadata_display_value', ['value'], unique=True)
     op.create_table('metadata_tag',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -774,6 +790,10 @@ def downgrade() -> None:
     op.drop_table('node_detection_point')
     op.drop_index(op.f('ix_metadata_tag_value'), table_name='metadata_tag')
     op.drop_table('metadata_tag')
+    op.drop_index(op.f('ix_metadata_display_value_value'), table_name='metadata_display_value')
+    op.drop_table('metadata_display_value')
+    op.drop_index(op.f('ix_metadata_display_type_value'), table_name='metadata_display_type')
+    op.drop_table('metadata_display_type')
     op.drop_index(op.f('ix_event_vector_queue_mapping_queue_uuid'), table_name='event_vector_queue_mapping')
     op.drop_index(op.f('ix_event_vector_queue_mapping_event_vector_uuid'), table_name='event_vector_queue_mapping')
     op.drop_table('event_vector_queue_mapping')

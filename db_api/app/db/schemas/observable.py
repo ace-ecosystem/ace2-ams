@@ -11,11 +11,14 @@ from sqlalchemy import (
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from typing import Optional
 
 from api_models.observable import ObservableSubmissionTreeRead, ObservableRead, ObservableRelationshipRead
 from db.database import Base
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
+from db.schemas.metadata_display_type import MetadataDisplayType
+from db.schemas.metadata_display_value import MetadataDisplayValue
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
 from db.schemas.node_relationship import NodeRelationship
@@ -37,6 +40,12 @@ class Observable(Node, HasHistory):
     analysis_tags: list[MetadataTag] = []
 
     context = Column(String)
+
+    # This gets populated by certain submission-related queries.
+    display_type: Optional[MetadataDisplayType] = None
+
+    # This gets populated by certain submission-related queries.
+    display_value: Optional[MetadataDisplayValue] = None
 
     # Using timezone=True causes PostgreSQL to store the datetime as UTC. Datetimes without timezone
     # information will be assumed to be UTC, whereas datetimes with timezone data will be converted to UTC.
