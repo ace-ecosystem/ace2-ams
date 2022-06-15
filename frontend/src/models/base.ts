@@ -65,7 +65,11 @@ export interface propertyOption {
   readonly optionProperty?: string;
   readonly valueProperty?: string;
   readonly store?: StoreDefinition;
-  readonly nullOption?: Record<string, unknown>;
+  readonly nullOptions?: {
+    nullOption: Record<string, unknown>;
+    nullableFilter: boolean;
+    nullableEdit: boolean;
+  };
   readonly queueDependent?: boolean;
   readonly stringRepr?: (filter: any) => string;
   readonly displayRepr?: (filter: any) => string;

@@ -200,12 +200,18 @@
 
   const propertyValueOptions = computed(() => {
     if (propertyType.value) {
-      let options: Record<string, any>[];
+      let options: Record<string, any>[] = [];
 
-      if (propertyType.value.nullOption) {
-        options = [propertyType.value.nullOption];
-      } else {
-        options = [];
+      // Add the null option to the list options, only if the null option exists and is enabled for the current form type
+      if (propertyType.value.nullOptions) {
+        if (
+          (props.formType == "filter" &&
+            propertyType.value.nullOptions.nullableFilter) ||
+          (props.formType == "edit" &&
+            propertyType.value.nullOptions.nullableEdit)
+        ) {
+          options = [propertyType.value.nullOptions.nullOption];
+        }
       }
 
       if (propertyType.value.store) {

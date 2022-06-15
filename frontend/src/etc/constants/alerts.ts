@@ -52,7 +52,11 @@ export const alertDispositionProperty: propertyOption = {
   store: useAlertDispositionStore,
   optionProperty: "value",
   valueProperty: "value",
-  nullOption: { value: "None" },
+  nullOptions: {
+    nullOption: { value: "None" },
+    nullableFilter: true,
+    nullableEdit: false,
+  },
 };
 
 export const alertDispositionUserProperty: propertyOption = {

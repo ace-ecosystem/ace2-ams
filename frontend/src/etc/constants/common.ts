@@ -80,7 +80,11 @@ export const ownerProperty: propertyOption = {
   store: useUserStore,
   optionProperty: "displayName",
   valueProperty: "username",
-  nullOption: { displayName: "None", username: "none" },
+  nullOptions: {
+    nullOption: { displayName: "None", username: "none" },
+    nullableFilter: true,
+    nullableEdit: false,
+  },
 };
 
 export const nodeThreatActorProperty: propertyOption = {
