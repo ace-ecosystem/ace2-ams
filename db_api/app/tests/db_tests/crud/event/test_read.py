@@ -426,12 +426,14 @@ def test_filter_by_observable_value(db):
 
 
 def test_filter_by_owner(db):
-    factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db)
-    event3 = factory.event.create_or_read(name="event3", owner="analyst", db=db)
+    event1 = factory.event.create_or_read(name="event1", db=db)
+    event2 = factory.event.create_or_read(name="event3", owner="analyst", db=db)
 
     result = crud.event.read_all(owner="analyst", db=db)
-    assert result == [event3]
+    assert result == [event2]
+
+    result = crud.event.read_all(owner="none", db=db)
+    assert result == [event1]
 
 
 def test_filter_by_prevention_tools(db):

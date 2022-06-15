@@ -508,7 +508,7 @@ describe("Manage Alerts - No Database Changes", () => {
     it("will add new filters through the quick add menu", () => {
       cy.intercept(
         "GET",
-        "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&disposition=IGNORE",
+        "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&disposition=None",
       ).as("getAlerts");
 
       // Open Quick Add menu
@@ -517,7 +517,7 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.get(".p-overlaypanel-content > .p-button").click();
       // Check text
       cy.get(".filter-name-text").should("have.text", "Disposition:");
-      cy.get(".link-text").should("have.text", "IGNORE");
+      cy.get(".link-text").should("have.text", "None");
       cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
       // Open Quick Add menu again
@@ -533,7 +533,7 @@ describe("Manage Alerts - No Database Changes", () => {
       // Type in observable value and submit
       cy.intercept(
         "GET",
-        "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&disposition=IGNORE&observable=ipv4%7C127.0.0.1",
+        "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&disposition=None&observable=ipv4%7C127.0.0.1",
       ).as("getAlerts");
       cy.get(".field > .p-inputtext").click();
       cy.get(":nth-child(2) > .p-inputtext").type("127.0.0.1");
@@ -666,7 +666,7 @@ describe("Manage Alerts - No Database Changes", () => {
     it("will update filters when a given filter is edited through its filter chip", () => {
       cy.intercept(
         "GET",
-        "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&disposition=IGNORE",
+        "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&disposition=None",
       ).as("getAlerts");
 
       // Set the filter using the quick add default
@@ -683,7 +683,7 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.get(".pi-pencil").click();
       // Select a different disposition and submit
       cy.get(".field > .p-dropdown > .p-dropdown-trigger").click();
-      cy.get(".p-dropdown-item:nth-child(5)").click();
+      cy.contains("UNKNOWN").click();
       cy.get("button[name='update-filter']").click();
       cy.wait("@getAlerts").its("state").should("eq", "Complete");
 

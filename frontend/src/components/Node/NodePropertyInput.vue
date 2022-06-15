@@ -199,15 +199,33 @@
   const categorizedValueValue = ref();
 
   const propertyValueOptions = computed(() => {
-    if (propertyType.value && propertyType.value.store) {
-      const store = propertyType.value.store();
-      if (propertyType.value.queueDependent) {
-        return store.getItemsByQueue(props.queue);
-      } else {
-        return store.allItems;
+    if (propertyType.value) {
+      let options: Record<string, any>[] = [];
+
+      // Add the null option to the list options, only if the null option exists and is enabled for the current form type
+      if (propertyType.value.nullOptions) {
+        if (
+          (props.formType == "filter" &&
+            propertyType.value.nullOptions.nullableFilter) ||
+          (props.formType == "edit" &&
+            propertyType.value.nullOptions.nullableEdit)
+        ) {
+          options = [propertyType.value.nullOptions.nullOption];
+        }
+      }
+
+      if (propertyType.value.store) {
+        const store = propertyType.value.store();
+        if (propertyType.value.queueDependent) {
+          options = [...options, ...store.getItemsByQueue(props.queue)];
+        } else {
+          options = [...options, ...store.allItems];
+        }
+
+        return options;
       }
     }
-    return null;
+    return [];
   });
 
   onMounted(() => {

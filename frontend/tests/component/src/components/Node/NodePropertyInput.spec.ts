@@ -37,7 +37,11 @@ function factory(
         }),
       ],
       provide: {
-        availableEditFields: { external: [], intel: [], internal: [] },
+        availableEditFields: {
+          external: testConfiguration.alerts.alertFilters.external,
+          intel: [],
+          internal: [],
+        },
         availableFilters: testConfiguration.alerts.alertFilters,
       },
     },
@@ -80,7 +84,7 @@ describe("NodePropertyInput", () => {
     factory({
       props: {
         modelValue: { propertyType: null, propertyValue: null },
-        queue: "external",
+        queue: "internal",
         formType: "edit",
       },
     });
@@ -123,7 +127,7 @@ describe("NodePropertyInput", () => {
     cy.contains("Name").should("be.visible");
     cy.findByDisplayValue("Test").should("be.visible");
   });
-  it("renders select-type property option correctly (owner)", () => {
+  it("renders select-type property option correctly (owner), incl. showing nullOption when available and nullableFilter is true, and formType is 'filter'", () => {
     factory({
       props: {
         modelValue: { propertyType: "owner", propertyValue: userReadFactory() },
@@ -133,7 +137,21 @@ describe("NodePropertyInput", () => {
       initialState: { userStore: { items: [userReadFactory()] } },
     });
     cy.contains("Owner").should("be.visible");
-    cy.contains("Test Analyst").should("be.visible");
+    cy.contains("Test Analyst").should("be.visible").click();
+    cy.contains("None").should("be.visible");
+  });
+  it("renders select-type property option correctly (owner), incl. NOT showing nullOption when available and nullableEdit is false, and formType is 'edit'", () => {
+    factory({
+      props: {
+        modelValue: { propertyType: "owner", propertyValue: userReadFactory() },
+        queue: "external",
+        formType: "edit",
+      },
+      initialState: { userStore: { items: [userReadFactory()] } },
+    });
+    cy.contains("Owner").should("be.visible");
+    cy.contains("Test Analyst").should("be.visible").click();
+    cy.contains("None").should("not.exist");
   });
   it("renders chip-type property option correctly (tags)", () => {
     factory({
@@ -226,14 +244,14 @@ describe("NodePropertyInput", () => {
       cy.contains("Disposition").click();
       cy.get('[aria-label="Owner"]').click();
       cy.contains("Owner").should("be.visible");
-      cy.contains("Test Analyst").should("be.visible");
+      cy.contains("None").should("be.visible");
       cy.wrap(wrapper.emitted())
         .its("update:modelValue")
         .its(2) // Check the most recently emitted value
         .should("deep.equal", [
           {
             propertyType: "owner",
-            propertyValue: userReadFactory(),
+            propertyValue: { displayName: "None", username: "none" },
           },
         ]);
     });
@@ -254,7 +272,7 @@ describe("NodePropertyInput", () => {
         },
       },
     }).then((wrapper) => {
-      cy.contains("FP").click();
+      cy.contains("None").click();
       cy.get('[aria-label="Bad"]').click();
       cy.contains("Bad").should("be.visible");
       cy.wrap(wrapper.emitted())
