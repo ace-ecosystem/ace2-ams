@@ -433,7 +433,7 @@ def test_filter_by_owner(db):
     result = crud.event.read_all(owner="analyst", db=db)
     assert result == [event3]
 
-    result = crud.event.read_all(disposition="none", db=db)
+    result = crud.event.read_all(owner="none", db=db)
     assert result == [event1, event2]
 
 
