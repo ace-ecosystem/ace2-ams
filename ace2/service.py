@@ -63,24 +63,6 @@ class Service(TypedModel, extra=Extra.allow):
         instruction = Instruction(service=self.dict(), method=method)
         instruction.dispatch(*args, delay=delay, **kwargs)
 
-    def convert(self, value:Any, hint:Type) -> Any:
-        ''' converts value base on hint
-
-        Args:
-            value: the value to convert
-            hint: the type hint to convert to
-
-        Returns:
-            the converted value
-        '''
-
-        # convert Instructions
-        if hint == Instruction:
-            return Instruction(**value)
-
-        # use the value as is
-        return value
-
     @classmethod
     def run(cls, event:dict, context:dict):
         ''' AWS lambda function handler that runs an instruction
@@ -90,30 +72,14 @@ class Service(TypedModel, extra=Extra.allow):
             context: aws runtime context (we do not use this)
         '''
 
-        # turn dict state of instruction into an Instruction object
+        # get the message
         message = event['Records'][0]
-        instruction = Instruction(**json.loads(message['body']))
 
-        # init the Service object from the Instruction service state
-        service = cls(**instruction.service)
+        # run the instruction
+        Instruction(**json.loads(message['body'])).invoke()
 
-        # get the method from the service
-        method = getattr(service, instruction.method)
-
-        # convert args using hints
-        hints = get_type_hints(method)
-        arg_hints = list(hints.values())
-        for i in range(len(args)):
-            args[i] = self.convert(args[i], arg_hints[i])
-
-        for key, value in kwargs.items():
-            kwargs[key] = self.convert(value, hints[key])
-
-        # invoke the method
-        method(*instruction.args, **instruction.kwargs)
-
-        # delete original message from the queue
-        queue.remove(service.type, message['receiptHandle'])
+        # delete the message
+        queue.remove(cls.type, message['receiptHandle'])
 
 class Instruction(PrivateModel):
     ''' message for telling service what to do '''
@@ -123,7 +89,7 @@ class Instruction(PrivateModel):
     args: Optional[List] = Field(default_factory=list, description='list of args to pass to method')
     kwargs: Optional[Dict] = Field(default_factory=dict, description='list of kwargs to pass to method')
 
-    def convert(self, value:Any) -> Any:
+    def serialize(self, value:Any) -> Any:
         ''' converts values into serializable form
 
         Args:
@@ -143,6 +109,24 @@ class Instruction(PrivateModel):
         # use value as is
         return value
 
+    def deserialize(self, value:Any, hint:Type) -> Any:
+        ''' converts value base on hint
+
+        Args:
+            value: the value to convert
+            hint: the type hint to convert to
+
+        Returns:
+            the converted value
+        '''
+
+        # convert Instructions
+        if hint == Instruction:
+            return Instruction(**value)
+
+        # use the value as is
+        return value
+
     def dispatch(self, *args, delay:int=0, **kwargs):
         ''' sends the instruction to the service
 
@@ -154,9 +138,27 @@ class Instruction(PrivateModel):
 
         # convert args
         for arg in args:
-            self.args.append(self.convert(arg))
-        for key, value in kwargs:
-            self.kwargs[key] = self.convert(value)
+            self.args.append(self.serialize(arg))
+        for key, value in kwargs.items():
+            self.kwargs[key] = self.serialize(value)
 
         # queue the instruction
         queue.add(self.service.type, self.dict(), delay=delay)
+
+    def invoke(self):
+        ''' runs the instruction '''
+
+        # get the method from the service
+        method = getattr(self.service, self.method)
+
+        # convert args using hints
+        hints = get_type_hints(method)
+        arg_hints = list(hints.values())
+        for i in range(len(self.args)):
+            self.args[i] = self.deserialize(self.args[i], arg_hints[i])
+
+        for key, value in self.kwargs.items():
+            self.kwargs[key] = self.deserialize(value, hints[key])
+
+        # invoke the method
+        method(*self.args, **self.kwargs)

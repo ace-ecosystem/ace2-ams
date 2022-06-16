@@ -8,52 +8,55 @@ receipt_handle = 0
 # monkeypatch queue with mock queue to avoid needing to connect to sqs
 @pytest.fixture(autouse=True)
 def mock_queue(monkeypatch):
-    # reset queues before each test
-    global queues
-    global receipt_handle
-    queues = {}
-    receipt_handle = 0
-
-    class mock_client():
-        def __init__(self, service):
-            assert service == 'sqs'
+    class MockQueues():
+        def __init__(self):
+            self.queues = {}
+            self.receipt_handle = 0
 
         def send_message(self, QueueUrl=None, MessageBody=None, DelaySeconds=None):
-            global queues
-            global receipt_handle
-
             # create queue if it doesnt exist yet
-            if QueueUrl not in queues:
-                queues[QueueUrl] = {}
+            if QueueUrl not in self.queues:
+                self.queues[QueueUrl] = {}
 
             # add message to queue
-            queues[QueueUrl][receipt_handle] = {
-                'receiptHandle': receipt_handle,
+            self.queues[QueueUrl][self.receipt_handle] = {
+                'receiptHandle': self.receipt_handle,
                 'body': MessageBody,
                 'delaySeconds': DelaySeconds,
             }
 
             # increment receipt handle
-            receipt_handle += 1
+            self.receipt_handle += 1
             
         def delete_message(self, QueueUrl=None, ReceiptHandle=None):
-            global queues
-            del queues[QueueUrl][ReceiptHandle]
+            del self.queues[QueueUrl][ReceiptHandle]
+
+        def get(self, queue):
+            try:
+                queue = f'base/{queue}'
+                key = sorted(self.queues[queue])[0]
+                return self.queues[queue][key]
+
+            except IndexError:
+                return None
+
+        def pop(self, queue):
+            try:
+                queue = f'base/{queue}'
+                key = sorted(self.queues[queue])[0]
+                message = self.queues[queue][key]
+                del self.queues[queue][key]
+                return message
+
+            except IndexError:
+                return None
+
+    mock_queues = MockQueues()
+    def mock_client(service):
+        assert service == 'sqs'
+        return mock_queues
 
     monkeypatch.setattr('ace2.queue.client', mock_client)
     monkeypatch.setattr('ace2.queue.environ', { 'QUEUE_BASE_URL': 'base' })
 
-    def pop_message(queue, delete=True):
-        global queues
-        try:
-            queue = f'base/{queue}'
-            key = sorted(queues[queue])[0]
-            message = queues[queue][key]
-            if delete:
-                del queues[queue][key]
-            return message
-
-        except IndexError:
-            return None
-
-    return pop_message
+    return mock_queues

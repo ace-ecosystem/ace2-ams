@@ -4,7 +4,7 @@ import json
 def test_queue(mock_queue):
     # test adding to a queue
     queue.add('my_queue', {'hello': 'world'}, delay=5)
-    assert mock_queue('my_queue', delete=False) == {
+    assert mock_queue.get('my_queue') == {
         'receiptHandle': 0,
         'body': json.dumps({'hello': 'world'}),
         'delaySeconds': 5,
@@ -12,4 +12,4 @@ def test_queue(mock_queue):
 
     # test removing from a queue
     queue.remove('my_queue', 0)
-    assert mock_queue('my_queue') == None
+    assert mock_queue.get('my_queue') == None

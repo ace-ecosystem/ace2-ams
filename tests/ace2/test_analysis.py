@@ -43,7 +43,7 @@ def test_analysis(mock_queue):
     analysis.start()
 
     # verify database message
-    message = mock_queue('database')
+    message = mock_queue.pop('database')
     assert message['delaySeconds'] == 0
     assert json.loads(message['body']) == {
         'service': {
@@ -85,7 +85,7 @@ def test_analysis(mock_queue):
     analysis.start()
 
     # verify first database message
-    message = mock_queue('database')
+    message = mock_queue.pop('database')
     assert message['delaySeconds'] == 0
     assert json.loads(message['body']) == {
         'service': {
@@ -115,7 +115,7 @@ def test_analysis(mock_queue):
     }
 
     # verify seconds database message
-    message = mock_queue('database')
+    message = mock_queue.pop('database')
     assert message['delaySeconds'] == 0
     assert json.loads(message['body']) == {
         'service': {

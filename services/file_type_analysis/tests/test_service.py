@@ -1,10 +1,6 @@
-import ace2
 from ace2 import *
 from ace2.services.file_type_analysis import FileTypeAnalysis
-import os
-import pathlib
 import pytest
-import yaml
     
 
 def test_file_type_run_condition():
@@ -105,7 +101,7 @@ def test_file_type_run_condition():
     ('empty', '.thmx', ['microsoft_office'], 'empty', 'inode/x-empty'),
     ('empty', '.odt', ['microsoft_office'], 'empty', 'inode/x-empty'),
 ])
-def test_file_type(path, extension, tags, file_type, mime_type):
+def test_file_type(path, extension, tags, file_type, mime_type, mock_queue):
     # create analysis to run
     analysis = {
         'id': 1,
@@ -124,7 +120,8 @@ def test_file_type(path, extension, tags, file_type, mime_type):
     analysis.execute()
 
     # verify analysis
-    assert analysis.target.tags == tags
+    assert analysis.status == 'complete'
+    assert analysis.summary == f'FileType: ({file_type}) ({mime_type})'
     assert analysis.details.file_type == file_type
     assert analysis.details.mime_type == mime_type
-    assert analysis.summary == f'FileType: ({file_type}) ({mime_type})'
+    assert analysis.target.tags == tags
