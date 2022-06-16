@@ -1,6 +1,7 @@
 import json
 
 from datetime import datetime
+from api_models.analysis_metadata import AnalysisMetadataRead
 from api_models.summaries import URLDomainSummary
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func, or_, select
@@ -15,7 +16,6 @@ from api_models.submission import SubmissionCreate, SubmissionUpdate
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
-from db.schemas.analysis_metadata import AnalysisMetadata
 from db.schemas.event import Event
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
@@ -30,6 +30,50 @@ from db.schemas.submission_tool import SubmissionTool
 from db.schemas.submission_tool_instance import SubmissionToolInstance
 from db.schemas.submission_type import SubmissionType
 from db.schemas.user import User
+
+
+def _associate_metadata_with_observable(analysis_uuids: list[UUID], o: Observable):
+    """Adds the matching analysis metadata from the given analysis UUIDs to the observable."""
+
+    # Set the observable's analysis_metadata property with an empty AnalysisMetadataRead object
+    o.analysis_metadata = AnalysisMetadataRead()
+
+    # Loop over each analysis metadata that has ever been added to the observable and only
+    # include ones that were added by analyses with a UUID in the given analysis_uuids list.
+    for m in o.all_analysis_metadata:
+        # Skip this metadata if it is not from one of the given analysis UUIDs
+        if m.analysis_uuid not in analysis_uuids:
+            continue
+
+        # Only add the display_type metadata if one was not already set
+        if m.metadata_object.metadata_type == "display_type" and not o.analysis_metadata.display_type:
+            o.analysis_metadata.display_type = m.metadata_object
+
+        # Only add the display_value metadata if one was not already set
+        elif m.metadata_object.metadata_type == "display_value" and not o.analysis_metadata.display_value:
+            o.analysis_metadata.display_value = m.metadata_object
+
+        # Add each tag metadata
+        elif m.metadata_object.metadata_type == "tag":
+            o.analysis_metadata.tags.append(m.metadata_object)
+
+    # Dedup and sort the analysis metadata on the observable that is a list
+    o.analysis_metadata.tags = sorted(set(o.analysis_metadata.tags), key=lambda m: m.value)
+
+
+def _read_analysis_uuids(submission_uuids: list[UUID], db: Session) -> list[UUID]:
+    """Returns a list of the analysis UUIDs that exist within the given submission UUIDs."""
+
+    return (
+        db.execute(
+            select(submission_analysis_mapping.c.analysis_uuid).where(
+                submission_analysis_mapping.c.submission_uuid.in_(submission_uuids)
+            )
+        )
+        .unique()
+        .scalars()
+        .all()
+    )
 
 
 def build_read_all_query(
@@ -460,61 +504,22 @@ def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
         )
         .join(
             submission_analysis_mapping,
-            onclause=submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid,
+            onclause=and_(
+                submission_analysis_mapping.c.submission_uuid.in_(uuids),
+                submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid,
+            ),
         )
         .join(ObservableType, onclause=ObservableType.uuid == Observable.type_uuid)
-        .join(
-            Submission,
-            onclause=and_(Submission.uuid == submission_analysis_mapping.c.submission_uuid, Submission.uuid.in_(uuids)),
-        )
+        .order_by(ObservableType.value.asc(), Observable.value.asc())
     )
+    observables: list[Observable] = db.execute(query).unique().scalars().all()
 
-    # Organize the observables into a dictionary with their UUIDs as the key
-    observables_by_uuid: dict[UUID, Observable] = {o.uuid: o for o in db.execute(query).unique().scalars().all()}
+    # Associate the analysis metadata with the observables
+    analysis_uuids = _read_analysis_uuids(submission_uuids=uuids, db=db)
+    for observable in observables:
+        _associate_metadata_with_observable(analysis_uuids=analysis_uuids, o=observable)
 
-    # Get a list of the analysis metadata added to the observables inside of the given submission UUIDs
-    query = select(AnalysisMetadata).join(
-        submission_analysis_mapping,
-        onclause=and_(
-            submission_analysis_mapping.c.analysis_uuid == AnalysisMetadata.analysis_uuid,
-            submission_analysis_mapping.c.submission_uuid.in_(uuids),
-        ),
-    )
-    analysis_metadata: list[AnalysisMetadata] = db.execute(query).scalars().all()
-
-    # There are certain types of analysis metadata that we want to inject into the observables.
-    # Loop through all of the analysis metadata inject the metadata into the observables.
-    metadata_tags_by_observable_uuid: dict[UUID, list[MetadataTag]] = {}
-
-    for metadata in analysis_metadata:
-        # Only set the display type if it hasn't been set already
-        if (
-            not observables_by_uuid[metadata.observable_uuid].display_type
-            and metadata.metadata_object.metadata_type == "display_type"
-        ):
-            observables_by_uuid[metadata.observable_uuid].display_type = metadata.metadata_object
-
-        # Only set the display value if it hasn't been set already
-        elif (
-            not observables_by_uuid[metadata.observable_uuid].display_value
-            and metadata.metadata_object.metadata_type == "display_value"
-        ):
-            observables_by_uuid[metadata.observable_uuid].display_value = metadata.metadata_object
-
-        elif metadata.metadata_object.metadata_type == "tag":
-            if metadata.observable_uuid not in metadata_tags_by_observable_uuid:
-                metadata_tags_by_observable_uuid[metadata.observable_uuid] = []
-
-            metadata_tags_by_observable_uuid[metadata.observable_uuid].append(metadata.metadata_object)
-
-    # Inject the analysis tags into the observables
-    for observable_uuid in metadata_tags_by_observable_uuid:
-        observables_by_uuid[observable_uuid].analysis_tags = sorted(
-            set(metadata_tags_by_observable_uuid[observable_uuid]), key=lambda t: t.value
-        )
-
-    # Return the list of observables sorted by their type then value
-    return sorted(observables_by_uuid.values(), key=lambda o: (o.type.value, o.value))
+    return observables
 
 
 def read_tree(uuid: UUID, db: Session) -> dict:
@@ -542,62 +547,18 @@ def read_tree(uuid: UUID, db: Session) -> dict:
         analyses_by_uuid[db_analysis.uuid] = analysis
 
         for db_child_observable in db_analysis.child_observables:
+            # Add the analysis metadata to the observable
+            _associate_metadata_with_observable(analysis_uuids=db_submission.analysis_uuids, o=db_child_observable)
+
             # Add the observable model to the dictionary if it has not been seen yet.
             if db_child_observable.uuid not in child_observables:
                 child_observables[db_child_observable.uuid] = db_child_observable.convert_to_pydantic()
 
-            #
-            # METADATA
-            #
-            # Inject metadata objects added by analysis into the observable model. We could simply add a list
-            # of metadata objects to the observable model, but this would require the GUI to perform extra
-            # work to display certain kinds of metadata (such as tags).
-
-            # Add any tags added by the analysis to the observable model.
-            child_observables[db_child_observable.uuid].analysis_tags += [
-                m.metadata_object.convert_to_pydantic()
-                for m in db_analysis.analysis_metadata
-                if m.metadata_object.metadata_type == "tag" and m.observable_uuid == db_child_observable.uuid
-            ]
-
-            # Only set the observable's display type if it hasn't been set already.
-            if child_observables[db_child_observable.uuid].display_type is None:
-                for m in db_analysis.analysis_metadata:
-                    if (
-                        m.metadata_object.metadata_type == "display_type"
-                        and m.observable_uuid == db_child_observable.uuid
-                    ):
-                        child_observables[
-                            db_child_observable.uuid
-                        ].display_type = m.metadata_object.convert_to_pydantic()
-                        break
-
-            # Only set the observable's display value if it hasn't been set already.
-            if child_observables[db_child_observable.uuid].display_value is None:
-                for m in db_analysis.analysis_metadata:
-                    if (
-                        m.metadata_object.metadata_type == "display_value"
-                        and m.observable_uuid == db_child_observable.uuid
-                    ):
-                        child_observables[
-                            db_child_observable.uuid
-                        ].display_value = m.metadata_object.convert_to_pydantic()
-                        break
-
             # Add the observable as a child to the analysis model.
             analyses_by_uuid[db_analysis.uuid].children.append(child_observables[db_child_observable.uuid])
 
-    # Loop over each overvable in the submission
+    # Loop over each overvable in the submission and add its analysis as children to the observable model
     for observable_uuid, observable in child_observables.items():
-
-        #
-        # METADATA
-        #
-        # Dedup the various types of metadata lists that were injected into the observable model.
-
-        observable.analysis_tags = sorted(set(observable.analysis_tags), key=lambda m: m.value)
-
-        # Add its analysis as a child to the observable model.
         if observable_uuid in analyses_by_target:
             observable.children = analyses_by_target[observable_uuid]
 

@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, String
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
 from typing import Optional
 
@@ -32,6 +33,8 @@ class Submission(Node, HasHistory):
 
     # Analyses are lazy loaded and are not included by default when fetching a submission from the API.
     analyses: list[Analysis] = relationship("Analysis", secondary=submission_analysis_mapping)
+
+    analysis_uuids: list[UUID] = association_proxy("analyses", "uuid")
 
     # The child_* fields use a composite join relationship to get a list of the objects that
     # are applied to any observables that exist in this submission's tree structure. For example, this is

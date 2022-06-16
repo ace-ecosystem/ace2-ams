@@ -13,7 +13,7 @@ def test_create_duplicate_tag(db):
     observable = factory.observable.create_or_read(
         type="type", value="value", parent_analysis=submission.root_analysis, db=db
     )
-    assert submission.root_analysis.analysis_metadata == []
+    assert observable.all_analysis_metadata == []
 
     # Create the first tag
     analysis_metadata = crud.analysis_metadata.create_or_read(
@@ -25,7 +25,7 @@ def test_create_duplicate_tag(db):
         ),
         db=db,
     )
-    assert submission.root_analysis.analysis_metadata == [analysis_metadata]
+    assert observable.all_analysis_metadata == [analysis_metadata]
 
     # Try to create the same tag on the same observable. It should be the same object.
     analysis_metadata2 = crud.analysis_metadata.create_or_read(
@@ -38,7 +38,7 @@ def test_create_duplicate_tag(db):
         db=db,
     )
     assert analysis_metadata2 == analysis_metadata
-    assert submission.root_analysis.analysis_metadata == [analysis_metadata]
+    assert observable.all_analysis_metadata == [analysis_metadata]
 
 
 def test_create_tag_with_uuids(db):
@@ -47,7 +47,7 @@ def test_create_tag_with_uuids(db):
         type="type", value="value", parent_analysis=submission.root_analysis, db=db
     )
 
-    assert submission.root_analysis.analysis_metadata == []
+    assert observable.all_analysis_metadata == []
 
     analysis_metadata = crud.analysis_metadata.create_or_read(
         model=AnalysisMetadataCreate(
@@ -59,4 +59,4 @@ def test_create_tag_with_uuids(db):
         db=db,
     )
 
-    assert submission.root_analysis.analysis_metadata == [analysis_metadata]
+    assert observable.all_analysis_metadata == [analysis_metadata]
