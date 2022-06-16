@@ -33,10 +33,9 @@ env:
 phases: 
   pre_build: 
     commands: 
-       - printenv ROOT_CERT > root.pem
-       - chmod 644 root.pem
-       - keytool -import -alias 53_root -file root.pem -keystore cacerts -storepass changeit -noprompt
-       - mv root.pem /usr/local/share/ca-certificates/root.crt
+       - printenv ROOT_CERT > root.crt
+       - chmod 644 root.crt
+       - mv root.crt /usr/local/share/ca-certificates/root.crt
        - update-ca-certificates
        - export CX_REPO_NAME=$(basename "$CODEBUILD_SOURCE_REPO_URL" .git)
        - export CX_REPO_BRANCH=$(basename "$CODEBUILD_WEBHOOK_HEAD_REF") 
