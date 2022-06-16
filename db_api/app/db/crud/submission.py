@@ -61,8 +61,11 @@ def build_read_all_query(
         s = subquery.subquery()
         return query.join(s, Submission.uuid == s.c.uuid).group_by(Submission.uuid, Node.uuid)
 
-    def _replace_none(values: list):
-        return [None if v.lower() == "none" else v for v in values]
+    def _none_in_list(values: list):
+        if "none" in [v.lower() for v in values]:
+            return True
+
+        return False
 
     query = select(Submission)
 
@@ -72,9 +75,14 @@ def build_read_all_query(
         query = _join_as_subquery(query, alert_query)
 
     if disposition:
-        disposition_query = (
-            select(Submission).join(AlertDisposition).where(AlertDisposition.value.in_(_replace_none(disposition)))
-        )
+        disposition_query = select(Submission)
+        check_for_none = _none_in_list(disposition)
+        if check_for_none:
+            disposition_query = disposition_query.outerjoin(AlertDisposition).where(
+                or_(AlertDisposition.value.in_(disposition), Submission.disposition_uuid == None)
+            )
+        else:
+            disposition_query = disposition_query.join(AlertDisposition).where(AlertDisposition.value.in_(disposition))
 
         query = _join_as_subquery(query, disposition_query)
 
@@ -203,12 +211,16 @@ def build_read_all_query(
         query = _join_as_subquery(query, observable_value_query)
 
     if owner:
-        owner_query = (
-            select(Submission)
-            .join(User, onclause=Submission.owner_uuid == User.uuid)
-            .where(User.username.in_(_replace_none(owner)))
-        )
-
+        owner_query = select(Submission)
+        check_for_none = _none_in_list(owner)
+        if check_for_none:
+            owner_query = owner_query.outerjoin(User, onclause=Submission.owner_uuid == User.uuid).where(
+                or_(User.username.in_(owner), Submission.owner_uuid == None)
+            )
+        else:
+            owner_query = owner_query.join(User, onclause=Submission.owner_uuid == User.uuid).where(
+                User.username.in_(owner)
+            )
         query = _join_as_subquery(query, owner_query)
 
     if queue:
