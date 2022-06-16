@@ -5,7 +5,7 @@ from typing import Optional
 
 def test_analysis(monkeypatch):
     class MyAnalysis(Analysis):
-        class Config(Analysis.Config):
+        class Settings(Analysis.Settings):
             foo: str
 
         class Details(Analysis.Details):
@@ -20,8 +20,8 @@ def test_analysis(monkeypatch):
             # test adding same observable twice
             self.add(IPv4, '127.0.0.1')
 
-            # test details and config
-            self.details.result = self.config.foo
+            # test details and settings
+            self.details.result = self.settings.foo
 
             # test summary
             self.summary = 'hello world'

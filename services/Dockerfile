@@ -7,16 +7,14 @@ COPY --from=ace2 / /
 
 # install source
 ARG name
-COPY services/$name/conditio[n] ${ACE2}/services/$name/condition
-COPY services/$name/model.p[y] ${ACE2}/services/$name/model.py
 COPY services/$name/service.py ${ACE2}/services/$name/service.py
 
 # make service importable
-RUN touch ${ACE2}/services/$name/__init__.py
+RUN echo "from .service import *" > ${ACE2}/services/$name/__init__.py
 
-# install config if one exists
+# install settings
 ARG env
-COPY services/$name/config-$env.ym[l] ${ACE2}/services/$name/config.yml
+COPY services/$name/settings-$env.ym[l] ${ACE2}/services/$name/settings.yml
 
 # test
 COPY services/$name/tests tests

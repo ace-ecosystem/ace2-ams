@@ -10,9 +10,9 @@ FROM ace2-base AS ace2
 RUN pip3 install boto3 pydantic pytest pytest-datadir pyyaml
 # install source
 COPY ace2 ${ACE2}
-# install config if one exists
+# install settings
 ARG env
-COPY config-$env.ym[l] ${ACE2}/config.yml
+COPY settings-$env.ym[l] ${ACE2}/settings.yml
 # test
 COPY tests tests
 RUN pytest -vv && rm -rf tests/ace2

@@ -1,8 +1,6 @@
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
-from pydantic import Field
 import subprocess
-from typing import Optional
 from zipfile import ZipFile
 
 from ace2 import *
@@ -13,6 +11,9 @@ class FileTypeAnalysis(Analysis):
     class Details(Analysis.Details):
         file_type: Optional[str] = Field(default=None, description='human readable file type of the target')
         mime_type: Optional[str] = Field(default=None, description='mime type of the target')
+
+    def should_run(self):
+        return isinstance(self.target, File)
 
     def execute(self):
         # get the human readable type
@@ -162,3 +163,6 @@ class FileTypeAnalysis(Analysis):
 
         # set the summary
         self.summary = f'FileType: ({self.details.file_type}) ({self.details.mime_type})'
+
+        # submit analysis
+        self.submit()

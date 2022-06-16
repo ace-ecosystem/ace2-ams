@@ -98,7 +98,8 @@ class TypedModel(PrivateModel):
 
         # get the subclass from the mapping via type string
         # use current class if no subclass is registered for this type string
-        cls = model_types.get(cls.__name__, {}).get(type, cls)
+        base = TypedModel.get_base_type(cls)
+        cls = model_types.get(base.__name__, {}).get(type, cls)
 
         # construct an instance of the desired class
         return super().__new__(cls)
