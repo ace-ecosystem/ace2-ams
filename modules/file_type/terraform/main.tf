@@ -17,6 +17,10 @@ provider "aws" {
   region = "us-east-2"
 }
 
+data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
+
 module "filetype-idr-analysis-module" {
   source  = "app.terraform.io/FifthThird/idr-analysis-module/aws"
   version = "1.0.5"
