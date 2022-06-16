@@ -137,7 +137,8 @@ def build_read_all_query(
         query = _join_as_subquery(query, insert_time_before_query)
 
     if name:
-        name_query = select(Submission).where(Submission.name.in_(name))
+        clauses = [Submission.name.ilike(f"%{n}%") for n in name]
+        name_query = select(Submission).where(or_(*clauses))
         query = _join_as_subquery(query, name_query).order_by(Submission.name.asc())
 
     if observable:
