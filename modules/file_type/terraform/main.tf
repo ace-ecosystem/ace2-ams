@@ -26,3 +26,14 @@ module "filetype-idr-analysis-module" {
   analysis_ecr_image       = var.analysis_ecr_image
   analysis_lambda_env_vars = var.analysis_lambda_env_vars
 }
+
+resource "aws_cloudwatch_log_subscription_filter" "analysis_lambda_logfilter" {
+  name            = "${var.analysis_module_name}_analysis_logfilter"
+  role_arn        = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/KinesisFirehoseToLambdaRole"
+  log_group_name  = "/ice2/lambda/${var.analysis_module_name}_analysis"
+  filter_pattern  = ""
+  destination_arn = "arn:aws:firehose:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:deliverystream/kinesis-firehose-to-splunk"
+  distribution    = "Random"
+
+  depends_on      = [ module.filetype-idr-analysis-module ]
+}
