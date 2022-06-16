@@ -12,6 +12,12 @@ import { nodeThreatRead } from "./nodeThreat";
 import { nodeThreatActorRead } from "./nodeThreatActor";
 import { observableTypeRead } from "./observableType";
 
+export interface dispositionHistoryIndividual {
+  disposition: string;
+  count: number;
+  percent: number;
+}
+
 export interface observableCreate extends nodeCreate, historyUsername {
   // The backend API actually allows you to specify a list of AnalysisCreate objects
   // when creating an observable, but we have not exposed that functionality in the GUI (yet).
@@ -47,6 +53,7 @@ export interface observableRead extends nodeRead {
 
 export interface observableInAlertRead extends observableRead {
   analysisMetadata: analysisMetadataRead;
+  dispositionHistory: dispositionHistoryIndividual[];
 }
 
 export interface observableReadPage {

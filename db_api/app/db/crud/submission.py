@@ -11,7 +11,7 @@ from typing import Optional
 from uuid import UUID
 
 from api_models.analysis import AnalysisSubmissionTreeRead
-from api_models.observable import ObservableSubmissionTreeRead
+from api_models.observable import DispositionHistoryIndividual, ObservableSubmissionTreeRead
 from api_models.submission import SubmissionCreate, SubmissionUpdate
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
@@ -59,6 +59,32 @@ def _associate_metadata_with_observable(analysis_uuids: list[UUID], o: Observabl
 
     # Dedup and sort the analysis metadata on the observable that is a list
     o.analysis_metadata.tags = sorted(set(o.analysis_metadata.tags), key=lambda m: m.value)
+
+
+def _build_disposition_history(o: Observable):
+    """Counts the alert dispositions and adds the disposition history information to the given observable."""
+
+    counts: dict[Optional[AlertDisposition], int] = {}
+    for disposition in o.alert_dispositions:
+        if disposition not in counts:
+            counts[disposition] = 0
+
+        counts[disposition] += 1
+
+    # Sort the dispositions by their rank, where None disposition is at the end of the list
+    sorted_dispositions: list[AlertDisposition] = sorted(counts.keys(), key=lambda x: x.rank if x else float("inf"))
+
+    # Loop through the sorted dispositions and build the disposition history objects to add to the observable
+    o.disposition_history = []
+    for disposition in sorted_dispositions:
+        disposition_value = disposition.value if disposition else "OPEN"
+        o.disposition_history.append(
+            DispositionHistoryIndividual(
+                disposition=disposition_value,
+                count=counts[disposition],
+                percent=int(counts[disposition] / len(o.alert_dispositions) * 100),
+            )
+        )
 
 
 def _read_analysis_uuids(submission_uuids: list[UUID], db: Session) -> list[UUID]:
@@ -522,6 +548,7 @@ def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
     analysis_uuids = _read_analysis_uuids(submission_uuids=uuids, db=db)
     for observable in observables:
         _associate_metadata_with_observable(analysis_uuids=analysis_uuids, o=observable)
+        _build_disposition_history(o=observable)
 
     return observables
 
@@ -553,6 +580,7 @@ def read_tree(uuid: UUID, db: Session) -> dict:
         for db_child_observable in db_analysis.child_observables:
             # Add the analysis metadata to the observable
             _associate_metadata_with_observable(analysis_uuids=db_submission.analysis_uuids, o=db_child_observable)
+            _build_disposition_history(o=db_child_observable)
 
             # Add the observable model to the dictionary if it has not been seen yet.
             if db_child_observable.uuid not in child_observables:
