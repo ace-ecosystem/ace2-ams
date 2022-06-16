@@ -1,7 +1,5 @@
 import pytest
-import uuid
 
-from fastapi import status
 from datetime import datetime
 from urllib.parse import unquote_plus, urlencode
 from uuid import uuid4
@@ -84,7 +82,7 @@ def test_get_alerts_observables(client_valid_access_token, requests_mock):
                 "value": "value",
                 "node_type": "observable",
                 "uuid": str(uuid4()),
-                "analysis_tags": [],
+                "analysis_metadata": {"display_type": None, "display_value": None, "tags": []},
                 "directives": [],
                 "observable_relationships": [],
                 "permanent_tags": [],
