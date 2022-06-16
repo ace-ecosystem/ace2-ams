@@ -785,3 +785,39 @@ def test_tag_functionality(db):
     # contain any analysis that added tags to it.
     assert submission2_tree["children"][1]["analysis_metadata"]["tags"] == []
     assert submission2_tree["children"][1]["permanent_tags"] == []
+
+
+def test_disposition_history(db):
+    # Create some alert dispositions
+    factory.alert_disposition.create_or_read(value="FALSE_POSITIVE", rank=1, db=db)
+    factory.alert_disposition.create_or_read(value="DELIVERY", rank=2, db=db)
+
+    # Create four alerts that all have the same observable but different dispositions
+    submission1 = factory.submission.create(alert=True, db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission1.root_analysis, db=db)
+
+    submission2 = factory.submission.create(alert=True, disposition="FALSE_POSITIVE", db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission2.root_analysis, db=db)
+
+    submission3 = factory.submission.create(alert=True, disposition="FALSE_POSITIVE", db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission3.root_analysis, db=db)
+
+    submission4 = factory.submission.create(alert=True, disposition="DELIVERY", db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission4.root_analysis, db=db)
+
+    # Read one of the alert trees
+    tree = crud.submission.read_tree(submission1.uuid, db=db)
+
+    # The disposition history for the observable should be sorted by the dispositions' ranks.
+    assert len(tree["children"][0]["disposition_history"]) == 3
+    assert tree["children"][0]["disposition_history"][0] == {"disposition": "FALSE_POSITIVE", "count": 2, "percent": 50}
+    assert tree["children"][0]["disposition_history"][1] == {"disposition": "DELIVERY", "count": 1, "percent": 25}
+    assert tree["children"][0]["disposition_history"][2] == {"disposition": "OPEN", "count": 1, "percent": 25}
+
+    # Similarly, if you read the observables from a set of alerts instead, you should get the same disposition history.
+    observables = crud.submission.read_observables(uuids=[submission1.uuid], db=db)
+    assert len(observables) == 1
+    assert len(observables[0].disposition_history) == 3
+    assert observables[0].disposition_history[0] == {"disposition": "FALSE_POSITIVE", "count": 2, "percent": 50}
+    assert observables[0].disposition_history[1] == {"disposition": "DELIVERY", "count": 1, "percent": 25}
+    assert observables[0].disposition_history[2] == {"disposition": "OPEN", "count": 1, "percent": 25}

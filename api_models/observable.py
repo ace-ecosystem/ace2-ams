@@ -16,6 +16,16 @@ from api_models.node_threat_actor import NodeThreatActorRead
 from api_models.observable_type import ObservableTypeRead
 
 
+class DispositionHistoryIndividual(BaseModel):
+    """Represents an individual disposition history."""
+
+    disposition: type_str = Field(description="The disposition value")
+
+    count: int = Field(description="The number of times the disposition occurred")
+
+    percent: int = Field(description="The percent of times the disposition occurred")
+
+
 class ObservableBase(NodeBase):
     """Represents a unique observable (based on the type+value)."""
 
@@ -122,6 +132,11 @@ class ObservableSubmissionRead(ObservableRead):
     """Model used to control which information for an Observable is displayed when getting Observables contained in a list of Submissions."""
 
     analysis_metadata: AnalysisMetadataRead = Field(description="The analysis metadata for the observable")
+
+    disposition_history: list[DispositionHistoryIndividual] = Field(
+        default_factory=list,
+        description="A list of the dispositions and their counts of alerts that contain this observable",
+    )
 
     class Config:
         orm_mode = True
