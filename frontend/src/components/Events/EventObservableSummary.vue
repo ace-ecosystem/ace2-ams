@@ -151,7 +151,7 @@
           override-node-type="alerts"
         />
         <MetadataTag
-          v-for="tag of slotProps.data.analysisTags"
+          v-for="tag of slotProps.data.analysisMetadata.tags"
           :key="tag.value"
           :tag="tag"
           override-node-type="alerts"

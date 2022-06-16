@@ -8,6 +8,7 @@ import { metadataObjectReadFactory } from "@mocks/metadata";
 import { observableInAlertRead } from "@/models/observable";
 import { observableInAlertReadFactory } from "@mocks/observable";
 import router from "@/router/index";
+import { analysisMetadataReadFactory } from "@mocks/analysisMetadata";
 
 interface AlertTableExpansionProps {
   observables: observableInAlertRead[] | null;
@@ -49,9 +50,9 @@ describe("AlertTableExpansion", () => {
           observableInAlertReadFactory(),
           observableInAlertReadFactory({
             value: "TestObservable2",
-            analysisTags: [
-              metadataObjectReadFactory({ value: "analysisTag1" }),
-            ],
+            analysisMetadata: analysisMetadataReadFactory({
+              tags: [metadataObjectReadFactory({ value: "analysisTag1" })],
+            }),
             permanentTags: [metadataObjectReadFactory({ value: "testTag" })],
           }),
         ],

@@ -15,6 +15,7 @@ import { ObservableInstance } from "@/services/api/observable";
 import ToastService from "primevue/toastservice";
 import Tooltip from "primevue/tooltip";
 import TagModalVue from "@/components/Modals/TagModal.vue";
+import { analysisMetadataReadFactory } from "@mocks/analysisMetadata";
 
 interface ObservableLeafProps {
   observable: observableTreeRead;
@@ -62,12 +63,16 @@ function factory(
 
 const observableWithDisplayType = observableTreeReadFactory({
   value: "Observable with display type",
-  displayType: metadataObjectReadFactory({ value: "displayType" }),
+  analysisMetadata: analysisMetadataReadFactory({
+    displayType: metadataObjectReadFactory({ value: "displayType" }),
+  }),
 });
 
 const observableWithDisplayValue = observableTreeReadFactory({
   value: "Observable with display value",
-  displayValue: metadataObjectReadFactory({ value: "displayValue" }),
+  analysisMetadata: analysisMetadataReadFactory({
+    displayValue: metadataObjectReadFactory({ value: "displayValue" }),
+  }),
 });
 
 const observableWithTags = observableTreeReadFactory({

@@ -67,7 +67,8 @@
     <span
       v-if="
         showTags &&
-        (observable.permanentTags.length || observable.analysisTags.length)
+        (observable.permanentTags.length ||
+          observable.analysisMetadata.tags.length)
       "
       class="leaf-element"
     >
@@ -77,7 +78,7 @@
         :tag="tag"
       ></MetadataTag>
       <MetadataTag
-        v-for="tag in observable.analysisTags"
+        v-for="tag in observable.analysisMetadata.tags"
         :key="tag.uuid"
         :tag="tag"
       ></MetadataTag
@@ -184,12 +185,12 @@
     let type = observableType.value;
     let value = props.observable.value;
 
-    if (props.observable.displayType) {
-      type = `${props.observable.displayType.value} (${props.observable.type.value})`;
+    if (props.observable.analysisMetadata.displayType) {
+      type = `${props.observable.analysisMetadata.displayType.value} (${props.observable.type.value})`;
     }
 
-    if (props.observable.displayValue) {
-      value = props.observable.displayValue.value;
+    if (props.observable.analysisMetadata.displayValue) {
+      value = props.observable.analysisMetadata.displayValue.value;
     }
 
     const displayValue = `${type}: ${value}`;

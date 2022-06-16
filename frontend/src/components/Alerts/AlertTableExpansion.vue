@@ -26,7 +26,7 @@
         :tag="tag"
       />
       <MetadataTag
-        v-for="tag of obs.analysisTags"
+        v-for="tag of obs.analysisMetadata.tags"
         :key="tag.value"
         :tag="tag"
       />
