@@ -3,6 +3,7 @@ import {
   observableRead,
   observableTreeRead,
 } from "@/models/observable";
+import { analysisMetadataReadFactory } from "./analysisMetadata";
 import { genericObjectReadFactory } from "./genericObject";
 
 export const observableReadFactory = ({
@@ -44,12 +45,10 @@ export const observableInAlertReadFactory = ({
   time = new Date("2020-01-01"),
   uuid = "observableUuid1",
   value = "TestObservable",
-  analysisTags = [],
+  analysisMetadata = analysisMetadataReadFactory(),
   comments = [],
   context = null,
   directives = [],
-  displayType = null,
-  displayValue = null,
   detectionPoints = [],
   forDetection = false,
   expiresOn = null,
@@ -63,12 +62,10 @@ export const observableInAlertReadFactory = ({
   time: time,
   uuid: uuid,
   value: value,
-  analysisTags: analysisTags,
+  analysisMetadata: analysisMetadata,
   comments: comments,
   context: context,
   directives: directives,
-  displayType: displayType,
-  displayValue: displayValue,
   detectionPoints: detectionPoints,
   forDetection: forDetection,
   expiresOn: expiresOn,
@@ -82,16 +79,14 @@ export const observableInAlertReadFactory = ({
 });
 
 export const observableTreeReadFactory = ({
-  analysisTags = [],
   children = [],
   time = new Date("2020-01-01"),
   uuid = "observableUuid1",
   value = "TestObservable",
+  analysisMetadata = analysisMetadataReadFactory(),
   comments = [],
   context = null,
   directives = [],
-  displayType = null,
-  displayValue = null,
   detectionPoints = [],
   firstAppearance = undefined,
   forDetection = false,
@@ -103,17 +98,15 @@ export const observableTreeReadFactory = ({
   version = "observableVersion1",
   observableRelationships = [],
 }: Partial<observableTreeRead> = {}): observableTreeRead => ({
-  analysisTags: analysisTags,
   children: children,
   uuid: uuid,
   version: version,
   time: time,
   value: value,
+  analysisMetadata: analysisMetadata,
   comments: comments,
   context: context,
   directives: directives,
-  displayType: displayType,
-  displayValue: displayValue,
   detectionPoints: detectionPoints,
   firstAppearance: firstAppearance,
   forDetection: forDetection,

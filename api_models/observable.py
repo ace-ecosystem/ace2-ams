@@ -4,9 +4,7 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from api_models import type_str, validators
-from api_models.analysis_metadata import AnalysisMetadataCreate
-from api_models.metadata_display_type import MetadataDisplayTypeRead
-from api_models.metadata_display_value import MetadataDisplayValueRead
+from api_models.analysis_metadata import AnalysisMetadataCreate, AnalysisMetadataRead
 from api_models.metadata_tag import MetadataTagRead
 from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
@@ -123,39 +121,17 @@ class ObservableRead(NodeRead, ObservableBase):
 class ObservableSubmissionRead(ObservableRead):
     """Model used to control which information for an Observable is displayed when getting Observables contained in a list of Submissions."""
 
-    analysis_tags: list[MetadataTagRead] = Field(
-        default_factory=list, description="A list of tags added to the observable by analysis"
-    )
-
-    display_type: Optional[MetadataDisplayTypeRead] = Field(
-        description="The type that should be shown for the observable when displaying in the GUI"
-    )
-
-    display_value: Optional[MetadataDisplayValueRead] = Field(
-        description="The value that should be shown for the observable when displaying in the GUI"
-    )
+    analysis_metadata: AnalysisMetadataRead = Field(description="The analysis metadata for the observable")
 
     class Config:
         orm_mode = True
 
 
-class ObservableSubmissionTreeRead(ObservableRead):
+class ObservableSubmissionTreeRead(ObservableSubmissionRead):
     """Model used to control which information for an Observable is displayed when getting a submission tree"""
-
-    analysis_tags: list[MetadataTagRead] = Field(
-        default_factory=list, description="A list of tags added to the observable by analysis"
-    )
 
     children: "list[AnalysisSubmissionTreeRead]" = Field(
         default_factory=list, description="A list of this observable's child analysis"
-    )
-
-    display_type: Optional[MetadataDisplayTypeRead] = Field(
-        description="The type that should be shown for the observable when displaying in the GUI"
-    )
-
-    display_value: Optional[MetadataDisplayValueRead] = Field(
-        description="The value that should be shown for the observable when displaying in the GUI"
     )
 
     first_appearance: bool = Field(

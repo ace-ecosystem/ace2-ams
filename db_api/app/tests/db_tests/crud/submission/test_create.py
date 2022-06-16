@@ -67,7 +67,8 @@ def test_create(db):
 
     assert submission.alert is True
     assert len(submission.analyses) == 2
-    assert submission.analyses[1].analysis_module_type_uuid == analysis_module_type.uuid
+    assert any(a.analysis_module_type_uuid is None for a in submission.analyses)
+    assert any(a.analysis_module_type_uuid == analysis_module_type.uuid for a in submission.analyses)
     assert len(submission.child_detection_points) == 1
     assert submission.child_detection_points[0].value == "detection_point"
     assert len(submission.child_analysis_tags) == 1
