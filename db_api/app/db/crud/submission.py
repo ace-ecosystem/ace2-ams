@@ -224,17 +224,18 @@ def build_read_all_query(
     if tags:
         tag_filters = []
         for t in tags:
-            tag_sub_filters = []
-            for tag in t.split(","):
-                tag_sub_filters.append(
-                    or_(
-                        Submission.tags.any(MetadataTag.value == tag),
-                        Submission.child_analysis_tags.any(MetadataTag.value == tag),
-                        Submission.child_permanent_tags.any(MetadataTag.value == tag),
+            if t:
+                tag_sub_filters = []
+                for tag in t.split(","):
+                    tag_sub_filters.append(
+                        or_(
+                            Submission.tags.any(MetadataTag.value == tag),
+                            Submission.child_analysis_tags.any(MetadataTag.value == tag),
+                            Submission.child_permanent_tags.any(MetadataTag.value == tag),
+                        )
                     )
-                )
 
-            tag_filters.append(and_(*tag_sub_filters))
+                tag_filters.append(and_(*tag_sub_filters))
 
         tags_query = select(Submission).where(or_(*tag_filters))
 
@@ -243,16 +244,17 @@ def build_read_all_query(
     if threat_actors:
         threat_actor_filters = []
         for t in threat_actors:
-            threat_actor_sub_filters = []
-            for threat_actor in t.split(","):
-                threat_actor_sub_filters.append(
-                    or_(
-                        Submission.threat_actors.any(NodeThreatActor.value == threat_actor),
-                        Submission.child_threat_actors.any(NodeThreatActor.value == threat_actor),
+            if t:
+                threat_actor_sub_filters = []
+                for threat_actor in t.split(","):
+                    threat_actor_sub_filters.append(
+                        or_(
+                            Submission.threat_actors.any(NodeThreatActor.value == threat_actor),
+                            Submission.child_threat_actors.any(NodeThreatActor.value == threat_actor),
+                        )
                     )
-                )
 
-            threat_actor_filters.append(and_(*threat_actor_sub_filters))
+                threat_actor_filters.append(and_(*threat_actor_sub_filters))
 
         threat_actor_query = select(Submission).where(and_(*threat_actor_filters))
 
@@ -261,16 +263,17 @@ def build_read_all_query(
     if threats:
         threat_filters = []
         for t in threats:
-            threat_sub_filters = []
-            for threat in t.split(","):
-                threat_sub_filters.append(
-                    or_(
-                        Submission.threats.any(NodeThreat.value == threat),
-                        Submission.child_threats.any(NodeThreat.value == threat),
+            if t:
+                threat_sub_filters = []
+                for threat in t.split(","):
+                    threat_sub_filters.append(
+                        or_(
+                            Submission.threats.any(NodeThreat.value == threat),
+                            Submission.child_threats.any(NodeThreat.value == threat),
+                        )
                     )
-                )
 
-            threat_filters.append(and_(*threat_sub_filters))
+                threat_filters.append(and_(*threat_sub_filters))
 
         threats_query = select(Submission).where(or_(*threat_filters))
 
