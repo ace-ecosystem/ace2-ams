@@ -99,16 +99,28 @@ def test_get_filter_alert(client, db):
 
 def test_get_filter_disposition(client, db):
     factory.submission.create(db=db)
-    factory.submission.create(db=db, disposition="FALSE_POSITIVE")
+    submission1 = factory.submission.create(db=db, disposition="FALSE_POSITIVE")
+    submission2 = factory.submission.create(db=db, disposition="UNKNOWN")
 
     # There should be 2 total submissions
     get = client.get("/api/submission/")
-    assert get.json()["total"] == 2
+    assert get.json()["total"] == 3
 
     # There should only be 1 submission when we filter by the disposition
+    get = client.get("/api/submission/?disposition=FALSE_POSITIVE")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["disposition"]["value"] == "FALSE_POSITIVE"
+
+    # There should only be 1 submission when we filter by none
     get = client.get("/api/submission/?disposition=none")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["disposition"] is None
+
+    # There should be 2 submissions when we filter by FALSE_POSITIVE and UNKNOWN
+    get = client.get("/api/submission/?disposition=FALSE_POSITIVE&disposition=UNKNOWN")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_disposition_user(client, db):
@@ -131,12 +143,12 @@ def test_get_filter_disposition_user_multiple(client, db):
     factory.submission.create(db=db, history_username="analyst")
 
     # This submission was first dispositioned by alice
-    submission = factory.submission.create(
+    submission2 = factory.submission.create(
         db=db, disposition="FALSE_POSITIVE", updated_by_user="alice", history_username="alice"
     )
 
     # This submission was first dispositioned by analyst
-    factory.submission.create(
+    submission3 = factory.submission.create(
         db=db, disposition="FALSE_POSITIVE", updated_by_user="analyst", history_username="analyst"
     )
 
@@ -144,12 +156,12 @@ def test_get_filter_disposition_user_multiple(client, db):
     factory.alert_disposition.create_or_read(value="DELIVERY", rank=2, db=db)
     update = client.patch(
         "/api/submission/",
-        json=[{"disposition": "DELIVERY", "history_username": "analyst", "uuid": str(submission.uuid)}],
+        json=[{"disposition": "DELIVERY", "history_username": "analyst", "uuid": str(submission2.uuid)}],
     )
     assert update.status_code == status.HTTP_204_NO_CONTENT
 
     # Verify that the submission is no longer dispositioned by alice
-    get = client.get(f"/api/submission/{submission.uuid}")
+    get = client.get(f"/api/submission/{submission2.uuid}")
     assert get.json()["disposition_user"]["username"] == "analyst"
 
     # There should be 3 total submissions
@@ -159,7 +171,13 @@ def test_get_filter_disposition_user_multiple(client, db):
     # There should still be 1 submission when we filter by the disposition user alice
     get = client.get("/api/submission/?disposition_user=alice")
     assert get.json()["total"] == 1
-    assert get.json()["items"][0]["uuid"] == str(submission.uuid)
+    assert get.json()["items"][0]["uuid"] == str(submission2.uuid)
+
+    # There should be 3 submissions when we filter by the disposition user analyst and alice
+    get = client.get("/api/submission/?disposition_user=alice&disposition_user=analyst")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission3.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_dispositioned_after(client, db):
@@ -177,9 +195,14 @@ def test_get_filter_dispositioned_after(client, db):
     # There should only be 1 submission when we filter by dispositioned_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"dispositioned_after": now}
-    get = client.get(f"/api/submission/?{urlencode(params)}")
+    params1 = {"dispositioned_after": now}
+    get = client.get(f"/api/submission/?{urlencode(params1)}")
     assert get.json()["total"] == 1
+
+    # There should be 2 submissions when we filter by two dispositioned_after values
+    params2 = {"dispositioned_after": now - timedelta(seconds=5)}
+    get = client.get(f"/api/submission/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
 
 
 def test_get_filter_dispositioned_before(client, db):
@@ -197,9 +220,14 @@ def test_get_filter_dispositioned_before(client, db):
     # There should only be 1 submission when we filter by dispositioned_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"dispositioned_before": now}
-    get = client.get(f"/api/submission/?{urlencode(params)}")
+    params1 = {"dispositioned_before": now}
+    get = client.get(f"/api/submission/?{urlencode(params1)}")
     assert get.json()["total"] == 1
+
+    # There should be 2 submissions when we filter by two dispositioned_before values
+    params2 = {"dispositioned_before": now + timedelta(seconds=6)}
+    get = client.get(f"/api/submission/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
 
 
 def test_get_filter_dispositioned_after_and_before(client, db):
@@ -237,9 +265,14 @@ def test_get_filter_event_time_after(client, db):
     # There should only be 1 submission when we filter by event_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"event_time_after": submission.event_time}
-    get = client.get(f"/api/submission/?{urlencode(params)}")
+    params1 = {"event_time_after": submission.event_time}
+    get = client.get(f"/api/submission/?{urlencode(params1)}")
     assert get.json()["total"] == 1
+
+    # There should be 2 submissions when we filter by multiple event_time_after
+    params2 = {"event_time_after": now - timedelta(seconds=5)}
+    get = client.get(f"/api/submission/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
 
 
 def test_get_filter_event_time_before(client, db):
@@ -254,28 +287,41 @@ def test_get_filter_event_time_before(client, db):
     # There should only be 1 submission when we filter by event_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"event_time_before": submission.event_time}
-    get = client.get(f"/api/submission/?{urlencode(params)}")
+    params1 = {"event_time_before": submission.event_time}
+    get = client.get(f"/api/submission/?{urlencode(params1)}")
     assert get.json()["total"] == 1
+
+    # There should be 2 submissions when we filter by multiple event_time_after
+    params2 = {"event_time_before": now + timedelta(seconds=6)}
+    get = client.get(f"/api/submission/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
 
 
 def test_get_filter_event_uuid(client, db):
     # Create an event
-    event = factory.event.create_or_read(name="Test Event", db=db)
+    event1 = factory.event.create_or_read(name="Test Event", db=db)
+    event2 = factory.event.create_or_read(name="Test Event 2", db=db)
 
     # Create some submissions
     factory.submission.create(db=db)
-    submission = factory.submission.create(db=db, event=event)
+    submission1 = factory.submission.create(db=db, event=event1)
+    submission2 = factory.submission.create(db=db, event=event2)
 
-    # There should be 2 total submissions
+    # There should be 3 total submissions
     get = client.get("/api/submission/")
-    assert get.json()["total"] == 2
+    assert get.json()["total"] == 3
 
     # There should only be 1 submission when we filter by the event_uuid
-    get = client.get(f"/api/submission/?event_uuid={event.uuid}")
+    get = client.get(f"/api/submission/?event_uuid={event1.uuid}")
     assert get.json()["total"] == 1
-    assert get.json()["items"][0]["uuid"] == str(submission.uuid)
-    assert get.json()["items"][0]["event_uuid"] == str(event.uuid)
+    assert get.json()["items"][0]["uuid"] == str(submission1.uuid)
+    assert get.json()["items"][0]["event_uuid"] == str(event1.uuid)
+
+    # There be 2 submissions when we filter by 2 event_uuids
+    get = client.get(f"/api/submission/?event_uuid={event1.uuid}&event_uuid={event2.uuid}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_insert_time_after(client, db):
@@ -290,9 +336,14 @@ def test_get_filter_insert_time_after(client, db):
     # There should only be 1 submission when we filter by insert_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"insert_time_after": submission.insert_time}
-    get = client.get(f"/api/submission/?{urlencode(params)}")
+    params1 = {"insert_time_after": submission.insert_time}
+    get = client.get(f"/api/submission/?{urlencode(params1)}")
     assert get.json()["total"] == 1
+
+    # There should be 2 submissions when we filter by multiple insert_time_after
+    params2 = {"insert_time_after": now - timedelta(seconds=5)}
+    get = client.get(f"/api/submission/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
 
 
 def test_get_filter_insert_time_before(client, db):
@@ -307,14 +358,19 @@ def test_get_filter_insert_time_before(client, db):
     # There should only be 1 submission when we filter by insert_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"insert_time_before": submission.insert_time}
-    get = client.get(f"/api/submission/?{urlencode(params)}")
+    params1 = {"insert_time_before": submission.insert_time}
+    get = client.get(f"/api/submission/?{urlencode(params1)}")
     assert get.json()["total"] == 1
+
+    # There should be 2 submissions when we filter by two insert_time_before values
+    params2 = {"insert_time_before": now + timedelta(seconds=6)}
+    get = client.get(f"/api/submission/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
 
 
 def test_get_filter_name(client, db):
-    factory.submission.create(db=db, name="Test Alert")
-    factory.submission.create(db=db, name="Some Other Alert")
+    submission1 = factory.submission.create(db=db, name="Test Alert")
+    submission2 = factory.submission.create(db=db, name="Some Other Alert")
 
     # There should be 2 total submissions
     get = client.get("/api/submission/")
@@ -324,6 +380,12 @@ def test_get_filter_name(client, db):
     get = client.get("/api/submission/?name=test alert")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "Test Alert"
+
+    # There should be 2 submissions when we filter by two names
+    get = client.get("/api/submission/?name=test alert&name=some other alert")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_observable(client, db):
@@ -368,6 +430,13 @@ def test_get_filter_observable(client, db):
     assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
     assert any(a["uuid"] == str(submission3.uuid) for a in get.json()["items"])
 
+    # There should be 3 submissions when we filter by the test_type2/test_value2 observable and the test_type1/test_value1 observable
+    get = client.get("/api/submission/?observable=test_type1|test_value1&observable=test_type2|test_value2")
+    assert get.json()["total"] == 3
+    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission3.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_observable_types(client, db):
     # Create an empty submission
@@ -405,6 +474,12 @@ def test_get_filter_observable_types(client, db):
     get = client.get("/api/submission/?observable_types=test_type1,test_type2")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["uuid"] == str(submission2.uuid)
+
+    # There should be 2 submissions when we filter by the test_type1 and test_type2 OR just test_type1
+    get = client.get("/api/submission/?observable_types=test_type1,test_type2&observable_types=test_type1")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_observable_value(client, db):
@@ -447,6 +522,13 @@ def test_get_filter_observable_value(client, db):
     get = client.get("/api/submission/?observable_value=test_value1")
     assert get.json()["total"] == 2
     assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission3.uuid) for a in get.json()["items"])
+
+    # There should be 3 submissions when we filter by the test_value1 and test_value2 observable values
+    get = client.get("/api/submission/?observable_value=test_value1&observable_value=test_value2")
+    assert get.json()["total"] == 3
+    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
     assert any(a["uuid"] == str(submission3.uuid) for a in get.json()["items"])
 
 
@@ -492,6 +574,15 @@ def test_get_filter_owner(client, db):
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["owner"]["username"] == "analyst"
 
+    # There should only be 1 submission when we filter by none
+    get = client.get("/api/submission/?owner=none")
+    assert get.json()["total"] == 1
+    assert get.json()["items"][0]["owner"] is None
+
+    # There should be 2 submissions when we filter by none and owner
+    get = client.get("/api/submission/?owner=none&owner=analyst")
+    assert get.json()["total"] == 2
+
 
 def test_get_filter_queue(client, db):
     factory.submission.create(db=db, alert_queue="test_queue1")
@@ -505,6 +596,10 @@ def test_get_filter_queue(client, db):
     get = client.get("/api/submission/?queue=test_queue1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["queue"]["value"] == "test_queue1"
+
+    # There should be 2 submission when we filter by multiple queues
+    get = client.get("/api/submission/?queue=test_queue1&queue=test_queue2")
+    assert get.json()["total"] == 2
 
 
 def test_get_filter_submission_type(client, db):
@@ -520,14 +615,18 @@ def test_get_filter_submission_type(client, db):
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["type"]["value"] == "test_type"
 
+    # There should be 2 submissions when we filter by multiple submission types
+    get = client.get("/api/submission/?submission_type=test_type&submission_type=test_type2")
+    assert get.json()["total"] == 2
+
 
 def test_get_filter_tags(client, db):
     submission1 = factory.submission.create(db=db, tags=["submission_tag"])
     factory.observable.create_or_read(
         type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, analysis_tags=["obs1"]
     )
+    submission2 = factory.submission.create(db=db, tags=["tag2", "tag3", "tag4"])
     factory.submission.create(db=db, tags=["tag1"])
-    factory.submission.create(db=db, tags=["tag2", "tag3", "tag4"])
 
     # There should be 3 total submissions
     get = client.get("/api/submission/")
@@ -553,6 +652,12 @@ def test_get_filter_tags(client, db):
     assert len(get.json()["items"][0]["child_analysis_tags"]) == 1
     assert get.json()["items"][0]["child_analysis_tags"][0]["value"] == "obs1"
 
+    # There should be 2 submissions when we filter by multiple tags
+    get = client.get("/api/submission/?tags=tag2,tag3&tags=obs1")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
+
     # All the submissions should be returned if you don't specify any tags for the filter
     get = client.get("/api/submission/?tags=")
     assert get.json()["total"] == 3
@@ -563,7 +668,7 @@ def test_get_filter_threat_actors(client, db):
     factory.observable.create_or_read(
         type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, threat_actors=["bad_guys"]
     )
-    factory.submission.create(db=db, threat_actors=["test_actor"])
+    submission2 = factory.submission.create(db=db, threat_actors=["test_actor", "threat_actor2"])
 
     # There should be 2 total submissions
     get = client.get("/api/submission/")
@@ -580,6 +685,12 @@ def test_get_filter_threat_actors(client, db):
     assert len(get.json()["items"][0]["child_threat_actors"]) == 1
     assert get.json()["items"][0]["child_threat_actors"][0]["value"] == "bad_guys"
 
+    # There should be 2 submissions when we filter by multiple threat actors
+    get = client.get("/api/submission/?threat_actors=test_actor,threat_actor2&threat_actors=bad_guys")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
+
     # All the submissions should be returned if you don't specify anything for the filter
     get = client.get("/api/submission/?threat_actors=")
     assert get.json()["total"] == 2
@@ -590,8 +701,8 @@ def test_get_filter_threats(client, db):
     factory.observable.create_or_read(
         type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, threats=["malz"]
     )
+    submission2 = factory.submission.create(db=db, threats=["threat2", "threat3", "threat4"])
     factory.submission.create(db=db, threats=["threat1"])
-    factory.submission.create(db=db, threats=["threat2", "threat3", "threat4"])
 
     # There should be 3 total submissions
     get = client.get("/api/submission/")
@@ -616,14 +727,20 @@ def test_get_filter_threats(client, db):
     assert len(get.json()["items"][0]["child_threats"]) == 1
     assert get.json()["items"][0]["child_threats"][0]["value"] == "malz"
 
+    # There should be 2 submissions when we filter by multiple threats
+    get = client.get("/api/submission/?threats=threat2,threat3&threats=malz")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
+
     # All the submissions should be returned if you don't specify any threats for the filter
     get = client.get("/api/submission/?threats=")
     assert get.json()["total"] == 3
 
 
 def test_get_filter_tool(client, db):
-    factory.submission.create(db=db, tool="test_tool1")
-    factory.submission.create(db=db, tool="test_tool2")
+    submission1 = factory.submission.create(db=db, tool="test_tool1")
+    submission2 = factory.submission.create(db=db, tool="test_tool2")
 
     # There should be 2 total submissions
     get = client.get("/api/submission/")
@@ -634,10 +751,16 @@ def test_get_filter_tool(client, db):
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["tool"]["value"] == "test_tool1"
 
+    # There should be 2 submission when we filter by multiple tools
+    get = client.get("/api/submission/?tool=test_tool1&tool=test_tool2")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_tool_instance(client, db):
-    factory.submission.create(db=db, tool_instance="test_tool_instance1")
-    factory.submission.create(db=db, tool_instance="test_tool_instance2")
+    submission1 = factory.submission.create(db=db, tool_instance="test_tool_instance1")
+    submission2 = factory.submission.create(db=db, tool_instance="test_tool_instance2")
 
     # There should be 2 total submissions
     get = client.get("/api/submission/")
@@ -647,6 +770,12 @@ def test_get_filter_tool_instance(client, db):
     get = client.get("/api/submission/?tool_instance=test_tool_instance1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["tool_instance"]["value"] == "test_tool_instance1"
+
+    # There should be 2 submission when we filter by multiple tools
+    get = client.get("/api/submission/?tool_instance=test_tool_instance1&tool_instance=test_tool_instance2")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
 
 
 def test_get_multiple_filters(client, db):

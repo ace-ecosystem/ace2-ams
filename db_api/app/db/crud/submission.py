@@ -266,7 +266,7 @@ def build_read_all_query(
 
                 threat_actor_filters.append(and_(*threat_actor_sub_filters))
 
-        threat_actor_query = select(Submission).where(and_(*threat_actor_filters))
+        threat_actor_query = select(Submission).where(or_(*threat_actor_filters))
 
         query = _join_as_subquery(query, threat_actor_query)
 
