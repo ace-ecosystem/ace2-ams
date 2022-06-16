@@ -10,7 +10,7 @@ ARG name
 COPY services/$name/service.py ${ACE2}/services/$name/service.py
 
 # make service importable
-RUN echo "from .service import *" > ${ACE2}/services/$name/__init__.py
+RUN touch ${ACE2}/services/__init__.py && echo "from .service import *" > ${ACE2}/services/$name/__init__.py
 
 # install settings
 ARG env
@@ -18,7 +18,7 @@ COPY services/$name/settings-$env.ym[l] ${ACE2}/services/$name/settings.yml
 
 # test
 COPY services/$name/tests tests
-RUN pytest -vv && rm -rf tests
+RUN pytest -vv && rm -rf tests /tmp/pytest* && find / -type d -name ".pytest_cache" -exec rm -rf {} +
 
 # uninstall testing tools
 RUN pip3 uninstall -y pytest-datadir pytest

@@ -10,41 +10,50 @@ receipt_handle = 0
 def mock_queue(monkeypatch):
     # reset queues before each test
     global queues
-    queues = {}
     global receipt_handle
+    queues = {}
     receipt_handle = 0
 
-    def add(queue, message, delay=0):
+    class mock_client():
+        def __init__(self, service):
+            assert service == 'sqs'
+
+        def send_message(self, QueueUrl=None, MessageBody=None, DelaySeconds=None):
+            global queues
+            global receipt_handle
+
+            # create queue if it doesnt exist yet
+            if QueueUrl not in queues:
+                queues[QueueUrl] = {}
+
+            # add message to queue
+            queues[QueueUrl][receipt_handle] = {
+                'receiptHandle': receipt_handle,
+                'body': MessageBody,
+                'delaySeconds': DelaySeconds,
+            }
+
+            # increment receipt handle
+            receipt_handle += 1
+            
+        def delete_message(self, QueueUrl=None, ReceiptHandle=None):
+            global queues
+            del queues[QueueUrl][ReceiptHandle]
+
+    monkeypatch.setattr('ace2.queue.client', mock_client)
+    monkeypatch.setattr('ace2.queue.environ', { 'QUEUE_BASE_URL': 'base' })
+
+    def pop_message(queue, delete=True):
         global queues
-        global receipt_handle
+        try:
+            queue = f'base/{queue}'
+            key = sorted(queues[queue])[0]
+            message = queues[queue][key]
+            if delete:
+                del queues[queue][key]
+            return message
 
-        # create queue if it doesnt exist yet
-        if queue not in queues:
-            queues[queue] = {}
+        except IndexError:
+            return None
 
-        # add message to queue
-        queues[queue][receipt_handle] = {
-            'receiptHandle': receipt_handle,
-            'body': json.dumps(message),
-            'delaySeconds': delay,
-        }
-
-        # increment receipt handle
-        receipt_handle += 1
-
-    def remove(queue, receipt_handle):
-        global queues
-        del queues[queue][receipt_handle]
-
-    def get(queue):
-        global queues
-        receipt_handle = sorted(queues[queue])[0]
-        return {
-            'Records': [
-                queues[queue][receipt_handle],
-            ],
-        }
-
-    monkeypatch.setattr('ace2.queue.add', add)
-    monkeypatch.setattr('ace2.queue.remove', remove)
-    monkeypatch.setattr('ace2.queue.get', get)
+    return pop_message

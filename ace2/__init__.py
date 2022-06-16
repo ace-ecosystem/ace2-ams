@@ -6,4 +6,4 @@ from typing import Any, Dict, List, Optional, Union
 from .analysis import Analysis
 from .metadata import *
 from .observables import *
-from .services import Service, Instruction
+from .service import Service, Instruction

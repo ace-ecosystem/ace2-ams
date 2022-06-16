@@ -1,15 +1,16 @@
 from ace2 import *
 import json
-from pydantic import Field
-from typing import Optional
 
-def test_analysis(monkeypatch):
+def test_analysis(mock_queue):
     class MyAnalysis(Analysis):
         class Settings(Analysis.Settings):
             foo: str
 
         class Details(Analysis.Details):
             result: str = Field(default=None, description='some details field')
+
+        def should_run(self):
+            return isinstance(self.target, IPv4)
 
         def execute(self):
             # test adding observable
@@ -26,7 +27,52 @@ def test_analysis(monkeypatch):
             # test summary
             self.summary = 'hello world'
 
-    # run analysis
+            # submit analysis
+            self.submit()
+
+    # test analysis that should not run
+    analysis = {
+        'id': 1,
+        'type': 'my_analysis',
+        'target': {
+            'type': 'fqdn',
+            'value': '127.0.0.1',
+        },
+    }
+    analysis = Analysis(**analysis)
+    analysis.start()
+
+    # verify database message
+    message = mock_queue('database')
+    assert message['delaySeconds'] == 0
+    assert json.loads(message['body']) == {
+        'service': {
+            'type': 'database',
+            'instance': None,
+        },
+        'method': 'submit_analysis',
+        'args': [
+            {
+                'id': 1,
+                'type': 'my_analysis',
+                'instance': None,
+                'status': 'ignored',
+                'target': {
+                    'type': 'fqdn',
+                    'value': '127.0.0.1',
+                    'metadata': [],
+                },
+                'details': {
+                    'result': None,
+                },
+                'observables': [],
+                'summary': None,
+            },
+        ],
+        'kwargs': {},
+    }
+
+    # test analysis that should run
     analysis = {
         'id': 1,
         'type': 'my_analysis',
@@ -35,14 +81,71 @@ def test_analysis(monkeypatch):
             'value': '127.0.0.1',
         },
     }
-    module = MyAnalysis(**analysis)
-    module.execute()
+    analysis = Analysis(**analysis)
+    analysis.start()
 
-    # verify analysis
-    assert isinstance(module, Service)
-    assert module.summary == 'hello world'
-    assert module.details.result == 'bar'
-    assert len(module.observables) == 1
-    observable = module.observables[0]
-    assert isinstance(observable, IPv4)
-    assert observable.value == '127.0.0.1'
+    # verify first database message
+    message = mock_queue('database')
+    assert message['delaySeconds'] == 0
+    assert json.loads(message['body']) == {
+        'service': {
+            'type': 'database',
+            'instance': None,
+        },
+        'method': 'submit_analysis',
+        'args': [
+            {
+                'id': 1,
+                'type': 'my_analysis',
+                'instance': None,
+                'status': 'running',
+                'target': {
+                    'type': 'ipv4',
+                    'value': '127.0.0.1',
+                    'metadata': [],
+                },
+                'details': {
+                    'result': None,
+                },
+                'observables': [],
+                'summary': None,
+            },
+        ],
+        'kwargs': {},
+    }
+
+    # verify seconds database message
+    message = mock_queue('database')
+    assert message['delaySeconds'] == 0
+    assert json.loads(message['body']) == {
+        'service': {
+            'type': 'database',
+            'instance': None,
+        },
+        'method': 'submit_analysis',
+        'args': [
+            {
+                'id': 1,
+                'type': 'my_analysis',
+                'instance': None,
+                'status': 'complete',
+                'target': {
+                    'type': 'ipv4',
+                    'value': '127.0.0.1',
+                    'metadata': [],
+                },
+                'details': {
+                    'result': 'bar',
+                },
+                'observables': [
+                    {
+                        'type': 'ipv4',
+                        'value': '127.0.0.1',
+                        'metadata': [],
+                    },
+                ],
+                'summary': 'hello world',
+            },
+        ],
+        'kwargs': {},
+    }

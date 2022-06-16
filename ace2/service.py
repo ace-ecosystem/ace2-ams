@@ -3,17 +3,17 @@ from inspect import ismethod
 import json
 import os
 from pydantic import Field, Extra
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union, get_type_hints
 import sys
 
-from .. import queue
-from ..settings import Settings
-from ..models import PrivateModel, TypedModel
+from . import queue
+from .settings import Settings
+from .models import PrivateModel, TypedModel
 
 class Service(TypedModel, extra=Extra.allow):
     ''' Base class for making services '''
 
-    instance: Optional[str] = Field(default=None, description='the name of the service instance')
+    instance: Optional[str] = Field(default=None, description='the instance name to load from settings')
 
     def __init__(self, type:str, **kwargs):
         ''' Initializes the service
@@ -63,6 +63,24 @@ class Service(TypedModel, extra=Extra.allow):
         instruction = Instruction(service=self.dict(), method=method)
         instruction.dispatch(*args, delay=delay, **kwargs)
 
+    def convert(self, value:Any, hint:Type) -> Any:
+        ''' converts value base on hint
+
+        Args:
+            value: the value to convert
+            hint: the type hint to convert to
+
+        Returns:
+            the converted value
+        '''
+
+        # convert Instructions
+        if hint == Instruction:
+            return Instruction(**value)
+
+        # use the value as is
+        return value
+
     @classmethod
     def run(cls, event:dict, context:dict):
         ''' AWS lambda function handler that runs an instruction
@@ -74,13 +92,25 @@ class Service(TypedModel, extra=Extra.allow):
 
         # turn dict state of instruction into an Instruction object
         message = event['Records'][0]
-        instruction = Instruction(json.loads(message['body']))
+        instruction = Instruction(**json.loads(message['body']))
 
         # init the Service object from the Instruction service state
         service = cls(**instruction.service)
 
-        # run the method
-        getattr(service, instruction.method)(*instruction.args, **instruction.kwargs)
+        # get the method from the service
+        method = getattr(service, instruction.method)
+
+        # convert args using hints
+        hints = get_type_hints(method)
+        arg_hints = list(hints.values())
+        for i in range(len(args)):
+            args[i] = self.convert(args[i], arg_hints[i])
+
+        for key, value in kwargs.items():
+            kwargs[key] = self.convert(value, hints[key])
+
+        # invoke the method
+        method(*instruction.args, **instruction.kwargs)
 
         # delete original message from the queue
         queue.remove(service.type, message['receiptHandle'])

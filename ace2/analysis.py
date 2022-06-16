@@ -8,13 +8,14 @@ from . import queue
 from .settings import Settings
 from .observables import Observable
 from .models import TypedModel, PrivateModel
-from .services import Service
+from .service import Service
 
 class Analysis(Service):
     ''' Base Analysis class for building ICE2 analysis '''
 
     id: int = Field(description='the id of the analysis in the database')
     target: Observable = Field(description='the observable that the analysis is performed on')
+    status: Optional[str] = Field(default='queued', description='the status of the analysis')
     summary: Optional[str] = Field(default=None, description='the analysis summary to display in the GUI')
     observables: Optional[List[Observable]] = Field(default_factory=list, description='the child observables')
     state: Optional[dict] = Field(default_factory=dict, description='non analysis data storage space')
@@ -48,10 +49,13 @@ class Analysis(Service):
 
         # mark analysis as ignored if it should not run
         if not self.should_run():
-            Service('database').dispatch('ignore_analysis', self)
+            self.status = 'ignored'
+            Service('database').dispatch('submit_analysis', self.dict(exclude={'state'}))
             return
 
         # execute the analysis
+        self.status = 'running'
+        Service('database').dispatch('submit_analysis', self.dict(exclude={'state'}))
         self.execute()
 
     def should_run(self) -> bool:
@@ -94,4 +98,5 @@ class Analysis(Service):
     def submit(self):
         ''' submits the analysis to the database service '''
 
+        self.status = 'complete'
         Service('database').dispatch('submit_analysis', self.dict(exclude={'state'}))

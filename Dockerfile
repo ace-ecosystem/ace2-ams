@@ -15,4 +15,4 @@ ARG env
 COPY settings-$env.ym[l] ${ACE2}/settings.yml
 # test
 COPY tests tests
-RUN pytest -vv && rm -rf tests/ace2
+RUN pytest -vv && rm -rf tests/ace2 /tmp/pytest* && find / -type d -name ".pytest_cache" -exec rm -rf {} +
