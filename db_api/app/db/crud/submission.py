@@ -143,7 +143,7 @@ def build_read_all_query(
 
     if observable:
         observable_split = [o.split("|", maxsplit=1) for o in observable]
-        observable_types_query = (
+        observable_query = (
             select(Submission)
             .join(
                 submission_analysis_mapping,
@@ -159,30 +159,28 @@ def build_read_all_query(
             .where(or_(and_(ObservableType.value == o[0], Observable.value == o[1]) for o in observable_split))
         )
 
-        query = _join_as_subquery(query, observable_types_query)
+        query = _join_as_subquery(query, observable_query)
 
     if observable_types:
-        observable_types_filters = []
+        type_filters = []
         for o in observable_types:
-            type_filters = [func.count(1).filter(ObservableType.value == t) > 0 for t in o.split(",")]
-            observable_types_filters.append(
-                select(Submission)
-                .join(
-                    submission_analysis_mapping,
-                    onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid,
-                )
-                .join(
-                    analysis_child_observable_mapping,
-                    onclause=analysis_child_observable_mapping.c.analysis_uuid
-                    == submission_analysis_mapping.c.analysis_uuid,
-                )
-                .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
-                .join(ObservableType)
-                .having(and_(*type_filters))
-                .group_by(Submission.uuid, Node.uuid)
-            )
+            type_filters.append([func.count(1).filter(ObservableType.value == t) > 0 for t in o.split(",")])
 
-        tags_query = select(Submission).where(or_(*observable_types_filters))
+        observable_types_query = (
+            select(Submission)
+            .join(
+                submission_analysis_mapping, onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid
+            )
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .join(ObservableType)
+            .having(or_(and_(*sub_type_filters) for sub_type_filters in type_filters))
+            .group_by(Submission.uuid, Node.uuid)
+        )
 
         query = _join_as_subquery(query, observable_types_query)
 
