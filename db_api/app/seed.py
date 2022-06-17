@@ -17,7 +17,7 @@ from db.schemas.event_source import EventSource
 from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
-from db.schemas.node_directive import NodeDirective
+from db.schemas.metadata_directive import MetadataDirective
 from db.schemas.node_relationship_type import NodeRelationshipType
 from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.observable_type import ObservableType
@@ -81,12 +81,17 @@ def seed(db: Session):
             db.add(queues[value])
             print(f"Adding queue: {value}")
 
+    # Add the rest of the objects from the config into the database
     if "alert_disposition" in data:
         for rank, value in enumerate(data["alert_disposition"]):
             db.add(AlertDisposition(rank=rank, value=value))
             print(f"Adding alert disposition: {rank}:{value}")
 
-    # Add the rest of the objects from the config into the database
+    if "directive" in data:
+        for directive in data["directive"]:
+            db.add(MetadataDirective(value=directive["value"], description=directive["description"]))
+            print(f"Adding directive: {value}")
+
     if "event_prevention_tool" in data:
         add_queueable_values(
             db=db,
@@ -151,11 +156,6 @@ def seed(db: Session):
             key="node_threat_type",
             print_value="node threat type",
         )
-
-    if "node_directive" in data:
-        for directive in data["node_directive"]:
-            db.add(NodeDirective(value=directive["value"], description=directive["description"]))
-            print(f"Adding node directive type: {value}")
 
     if "observable_type" in data:
         for value in data["observable_type"]:

@@ -13,6 +13,7 @@ import { alertReadFactory } from "@mocks/alert";
 import { Alert } from "@/services/api/alert";
 import { TestingOptions } from "@pinia/testing";
 import { testConfiguration } from "@/etc/configuration/test/index";
+import { metadataObjectReadFactory } from "@mocks/metadata";
 
 const testAlertTypeA = "testAlertTypeA";
 const testAlertTypeB = "testAlertTypeB";
@@ -20,7 +21,7 @@ const testQueueA = "testQueueA";
 const testQueueB = "testQueueB";
 const testObservableTypeA = "file";
 const testObservableTypeB = "ipv4";
-const testNodeDirective = "testNodeDirective";
+const testDirective = "testDirective";
 
 const testTime = new Date(Date.UTC(2022, 2, 29, 12, 0, 0, 0)).getTime();
 
@@ -36,8 +37,8 @@ const initialState = {
       defaultAlertQueue: genericObjectReadFactory({ value: testQueueA }),
     }),
   },
-  nodeDirectiveStore: {
-    items: [genericObjectReadFactory({ value: testNodeDirective })],
+  metadataDirectiveStore: {
+    items: [metadataObjectReadFactory({ value: testDirective })],
   },
   observableTypeStore: {
     items: [
@@ -145,8 +146,8 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alertDescription: "Manual Alert",
         name: "Manual Alert",
         observables: [
-          { type: "ipv4", value: testObservableValueA },
-          { type: "ipv4", value: testObservableValueB },
+          { type: "ipv4", value: testObservableValueA, analysisMetadata: [] },
+          { type: "ipv4", value: testObservableValueB, analysisMetadata: [] },
         ],
       })
       .as("CreateAlertA")
@@ -186,7 +187,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
           {
             type: "ipv4",
             value: testObservableValueA,
-            directives: ["testNodeDirective"],
+            analysisMetadata: [{ type: "directive", value: "testDirective" }],
           },
         ],
       })
@@ -200,7 +201,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
     cy.get('[aria-label="ipv4"]').click();
     cy.get("[name=observable-value] input").type(testObservableValueA);
     cy.contains("No directives selected").click();
-    cy.contains("testNodeDirective").click();
+    cy.contains("testDirective").click();
 
     // Submit
     cy.contains("Submit Alert").eq(0).click();
@@ -220,8 +221,8 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alertDescription: "Manual Alert",
         name: "Manual Alert",
         observables: [
-          { type: "ipv4", value: "4.3.2.1" },
-          { type: "ipv4", value: "8.7.6.5" },
+          { type: "ipv4", value: "4.3.2.1", analysisMetadata: [] },
+          { type: "ipv4", value: "8.7.6.5", analysisMetadata: [] },
         ],
       })
       .as("CreateAlertA")
@@ -255,7 +256,9 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alert: true,
         alertDescription: "Manual Alert 1.2.3.4",
         name: "Manual Alert 1.2.3.4",
-        observables: [{ type: "ipv4", value: testObservableValueA }],
+        observables: [
+          { type: "ipv4", value: testObservableValueA, analysisMetadata: [] },
+        ],
       })
       .as("CreateAlertA")
       .resolves(alertReadFactory({ uuid: "alertA" }));
@@ -265,7 +268,9 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alert: true,
         alertDescription: "Manual Alert 5.6.7.8",
         name: "Manual Alert 5.6.7.8",
-        observables: [{ type: "ipv4", value: testObservableValueB }],
+        observables: [
+          { type: "ipv4", value: testObservableValueB, analysisMetadata: [] },
+        ],
       })
       .as("CreateAlertB")
       .resolves(alertReadFactory({ uuid: "alertB" }));
@@ -302,7 +307,9 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alert: true,
         alertDescription: "Manual Alert 1.2.3.4",
         name: "Manual Alert 1.2.3.4",
-        observables: [{ type: "ipv4", value: testObservableValueA }],
+        observables: [
+          { type: "ipv4", value: testObservableValueA, analysisMetadata: [] },
+        ],
       })
       .as("CreateAlertA")
       .resolves(alertReadFactory({ uuid: "alertA" }));
@@ -312,7 +319,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alert: true,
         alertDescription: "Manual Alert 4.3.2.1",
         name: "Manual Alert 4.3.2.1",
-        observables: [{ type: "ipv4", value: "4.3.2.1" }],
+        observables: [{ type: "ipv4", value: "4.3.2.1", analysisMetadata: [] }],
       })
       .as("CreateAlertB")
       .resolves(alertReadFactory({ uuid: "alertB" }));
@@ -322,7 +329,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alert: true,
         alertDescription: "Manual Alert 8.7.6.5",
         name: "Manual Alert 8.7.6.5",
-        observables: [{ type: "ipv4", value: "8.7.6.5" }],
+        observables: [{ type: "ipv4", value: "8.7.6.5", analysisMetadata: [] }],
       })
       .as("CreateAlertC")
       .resolves(alertReadFactory({ uuid: "alertC" }));

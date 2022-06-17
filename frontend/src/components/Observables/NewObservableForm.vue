@@ -89,7 +89,7 @@
             class="inputfield w-full"
             option-label="value"
             option-value="value"
-            :options="nodeDirectiveStore.items"
+            :options="metadataDirectiveStore.items"
           />
         </div>
         <div class="field col-1">
@@ -134,7 +134,7 @@
   import { DatePicker } from "v-calendar";
 
   import { useObservableTypeStore } from "@/stores/observableType";
-  import { useNodeDirectiveStore } from "@/stores/nodeDirective";
+  import { useMetadataDirectiveStore } from "@/stores/metadataDirective";
 
   const emit = defineEmits(["update:modelValue"]);
 
@@ -144,7 +144,7 @@
     multiAdd: boolean;
     invalid: boolean;
     value: any;
-    directives?: string[];
+    directives: string[];
   }
 
   const props = defineProps({
@@ -156,7 +156,7 @@
 
   const observablesCopy = ref<formObservable[]>(props.modelValue);
   const observableTypeStore = useObservableTypeStore();
-  const nodeDirectiveStore = useNodeDirectiveStore();
+  const metadataDirectiveStore = useMetadataDirectiveStore();
 
   onMounted(() => {
     // observablesCopy.value = props.modelValue;

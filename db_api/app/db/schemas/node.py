@@ -3,7 +3,6 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from db.database import Base
-from db.schemas.node_directive_mapping import node_directive_mapping
 from db.schemas.node_threat_actor_mapping import node_threat_actor_mapping
 from db.schemas.node_threat_mapping import node_threat_mapping
 
@@ -17,8 +16,6 @@ class Node(Base):
     comments = relationship("NodeComment", lazy="selectin")
 
     detection_points = relationship("NodeDetectionPoint", lazy="selectin")
-
-    directives = relationship("NodeDirective", secondary=node_directive_mapping, lazy="selectin")
 
     node_type = Column(String)
 

@@ -5,9 +5,9 @@ from sqlalchemy.sql.selectable import Select
 from uuid import UUID
 
 from api_models.analysis_module_type import AnalysisModuleTypeCreate, AnalysisModuleTypeUpdate
-from api_models.node_directive import NodeDirectiveCreate
-from api_models.observable_type import ObservableTypeCreate
+from api_models.metadata_directive import MetadataDirectiveCreate
 from api_models.metadata_tag import MetadataTagCreate
+from api_models.observable_type import ObservableTypeCreate
 from db import crud
 from db.schemas.analysis_module_type import AnalysisModuleType
 
@@ -27,7 +27,7 @@ def create_or_read(model: AnalysisModuleTypeCreate, db: Session) -> AnalysisModu
             for o in set(model.observable_types)
         ],
         required_directives=[
-            crud.node_directive.create_or_read(NodeDirectiveCreate(value=d), db=db)
+            crud.metadata_directive.create_or_read(MetadataDirectiveCreate(value=d), db=db)
             for d in set(model.required_directives)
         ],
         required_tags=[
@@ -104,7 +104,7 @@ def update(uuid: UUID, model: AnalysisModuleTypeUpdate, db: Session) -> bool:
                 )
 
             if "required_directives" in update_data:
-                obj.required_directives = crud.node_directive.read_by_values(
+                obj.required_directives = crud.metadata_directive.read_by_values(
                     values=update_data["required_directives"], db=db
                 )
 

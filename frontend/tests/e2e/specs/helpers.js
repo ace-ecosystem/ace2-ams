@@ -24,7 +24,9 @@ export function visitUrl(options) {
   cy.intercept("GET", "/api/event/status/?offset=0").as("eventStatus");
   cy.intercept("GET", "/api/event/type/?offset=0").as("eventType");
   cy.intercept("GET", "/api/event/vector/?offset=0").as("eventVector");
-  cy.intercept("GET", "/api/node/directive/?offset=0").as("nodeDirective");
+  cy.intercept("GET", "/api/metadata/directive/?offset=0").as(
+    "metadataDirective",
+  );
   cy.intercept("GET", "/api/observable/type/?offset=0").as("observableType");
   cy.intercept("GET", "/api/queue/?offset=0").as("queue");
   cy.intercept("GET", "/api/user/?offset=0").as("user");
@@ -45,7 +47,7 @@ export function visitUrl(options) {
     "@eventStatus",
     "@eventType",
     "@eventVector",
-    "@nodeDirective",
+    "@metadataDirective",
     "@observableType",
     "@queue",
     "@user",

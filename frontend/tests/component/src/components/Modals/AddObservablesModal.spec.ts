@@ -10,13 +10,14 @@ import { userReadFactory } from "@mocks/user";
 import { alertTreeReadFactory } from "@mocks/alert";
 import { ObservableInstance } from "@/services/api/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { metadataObjectReadFactory } from "@mocks/metadata";
 
 const testObservableValueA = "1.2.3.4";
 const testObservableValueB = "5.6.7.8";
 const testObservableValueMultiA = "4.3.2.1,8.7.6.5";
 const testObservableTypeA = "file";
 const testObservableTypeB = "ipv4";
-const testNodeDirective = "testNodeDirective";
+const testDirective = "testDirective";
 
 function factory() {
   mount(AddObservablesModal, {
@@ -30,8 +31,8 @@ function factory() {
             alertStore: {
               open: alertTreeReadFactory(),
             },
-            nodeDirectiveStore: {
-              items: [genericObjectReadFactory({ value: testNodeDirective })],
+            metadataDirectiveStore: {
+              items: [metadataObjectReadFactory({ value: testDirective })],
             },
             observableTypeStore: {
               items: [
@@ -115,7 +116,7 @@ describe("AssignModal", () => {
         {
           type: "ipv4",
           value: testObservableValueA,
-          directives: ["testNodeDirective"],
+          directives: ["testDirective"],
           historyUsername: "analyst",
           parentAnalysisUuid: "testRootAnalysisUuid",
         },
@@ -130,7 +131,7 @@ describe("AssignModal", () => {
     cy.get('[aria-label="ipv4"]').click();
     cy.get("[name=observable-value] input").type(testObservableValueA);
     cy.contains("No directives selected").click();
-    cy.contains("testNodeDirective").click();
+    cy.contains("testDirective").click();
 
     // Submit
     cy.contains("Add!").click();

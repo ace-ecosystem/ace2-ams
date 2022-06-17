@@ -3,9 +3,9 @@ from typing import Optional
 from uuid import uuid4
 
 from api_models import type_str, validators
-from api_models.node_directive import NodeDirectiveRead
-from api_models.observable_type import ObservableTypeRead
+from api_models.metadata_directive import MetadataDirectiveRead
 from api_models.metadata_tag import MetadataTagRead
+from api_models.observable_type import ObservableTypeRead
 
 
 class AnalysisModuleTypeBase(BaseModel):
@@ -88,7 +88,7 @@ class AnalysisModuleTypeRead(AnalysisModuleTypeBase):
         An empty list means it supports ALL observable types."""
     )
 
-    required_directives: list[NodeDirectiveRead] = Field(
+    required_directives: list[MetadataDirectiveRead] = Field(
         description="""A list of directives an observable must have in order to be analyzed by this module. An empty
         list means that no directives are required.""",
     )

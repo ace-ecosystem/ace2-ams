@@ -26,14 +26,13 @@ from db.schemas.event_vector import EventVector
 from db.schemas.event_vector_queue_mapping import event_vector_queue_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
 from db.schemas.metadata import Metadata
+from db.schemas.metadata_directive import MetadataDirective
 from db.schemas.metadata_display_type import MetadataDisplayType
 from db.schemas.metadata_display_value import MetadataDisplayValue
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment
 from db.schemas.node_detection_point import NodeDetectionPoint
-from db.schemas.node_directive import NodeDirective
-from db.schemas.node_directive_mapping import node_directive_mapping
 from db.schemas.node_relationship import NodeRelationship
 from db.schemas.node_relationship_type import NodeRelationshipType
 from db.schemas.node_threat import NodeThreat

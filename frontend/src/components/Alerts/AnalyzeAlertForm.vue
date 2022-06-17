@@ -222,13 +222,20 @@
     const submissionObservable = {
       type: observable.type,
       value: observable.value,
+      analysisMetadata: [],
     };
+
     if (observable.time) {
       submissionObservable["time"] = observable.time;
     }
-    if (observable.directives && observable.directives.length) {
-      submissionObservable["directives"] = observable.directives;
+
+    for (const directive of observable.directives) {
+      submissionObservable.analysisMetadata.push({
+        type: "directive",
+        value: directive,
+      });
     }
+
     return submissionObservable;
   };
 
@@ -272,6 +279,7 @@
         time: multiObservable.time,
         multiAdd: multiObservable.multiAdd,
         invalid: multiObservable.invalid,
+        directives: multiObservable.directives,
       };
       splitObservables.push(subObservable);
     }
