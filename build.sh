@@ -62,7 +62,7 @@ for path in $services ; do
         else
             echo "$line"
         fi
-    done < Dockerfile | docker build --build-arg name=$name --build-arg settings=$settings -t ace2-services-$name -f - .
+    done < Dockerfile | docker build --build-arg name=$name --build-arg settings=$settings -t $name -f - .
 done
 
 # remove dangling images
