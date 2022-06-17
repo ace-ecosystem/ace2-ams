@@ -93,18 +93,26 @@ describe("FilterModal", () => {
     factory({ filters: { alerts: { name: ["test name"] }, events: {} } });
     cy.contains("Clear").click();
     cy.contains("Submit").click();
-    cy.get("@spy-4").should("have.been.calledOnceWith", {
+    cy.get("@spy-5").should("have.been.calledOnceWith", {
       nodeType: "alerts",
     }); //clearAll
     cy.get("[data-cy=FilterModal]").should("not.exist");
   });
   it("updates filter store with filters in form when 'Submit' button is clicked", () => {
     factory({ filters: { alerts: { name: ["test name"] }, events: {} } });
+    cy.contains("Add").click();
+    cy.get('[data-cy="filter-input"]').should("have.length", 2);
+    cy.contains("Disposition").click();
+    cy.get("[aria-label='Name']").last().click();
+    cy.get('[data-cy="property-input-value"]')
+      .last()
+      .click()
+      .type("test value 2");
     cy.contains("Submit").click();
     cy.get("@spy-1").should("have.been.calledOnceWith", {
       nodeType: "alerts",
       filters: {
-        name: "test name",
+        name: ["test name", "test value 2"],
       },
     }); //bulkSetFilters
     cy.get("[data-cy=FilterModal]").should("not.exist");
