@@ -1,6 +1,5 @@
 from __future__ import annotations
-import os
-from os import environ
+from builtins import open # this allows us to monkeypatch open for testing
 from typing import Optional
 from yaml import safe_load
 from .models import PrivateModel
@@ -21,7 +20,7 @@ class Settings(PrivateModel):
         '''
 
         # load settings yaml into settings object
-        with open(os.path.join(environ['ACE2'], path, 'settings.yml')) as f:
+        with open('settings.yml') as f:
             settings_dict = safe_load(f.read()) or {}
         settings = settings_dict[section] if section else settings_dict
         return cls(**settings)

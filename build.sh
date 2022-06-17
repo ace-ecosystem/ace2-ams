@@ -3,26 +3,44 @@
 # bail on any error
 set -e
 
+usage() {
+    echo "Builds ACE2 service images"
+    echo ""
+    echo "Usage: $0 [<options>] dir ..."
+    echo ""
+    echo "Options:"
+    echo "    -d           use dev settings"
+    echo ""
+    echo "Args:"
+    echo "    dir          list of service directories to build images for"
+    echo "                 if no directories are given then build all images"
+    echo ""
+    exit
+}
+
 # get optional args
-env="prod"
-while getopts "e:" flag; do
+settings="settings.yml"
+while getopts hd: flag; do
 case "$flag" in
-    e) env=$OPTARG;;
+    d) settings="settings-dev.yml";;
+    h) usage;;
+    ?) usage;;
 esac
 done
 
 # suppress scan suggestions
 export DOCKER_SCAN_SUGGEST=false
 
-# build ace2 base
-docker build --target ace2-base -t ace2-base -f Dockerfile .
+# build all services by default
+services=${@:$OPTIND}
+if [ "$services" = "" ]; then
+    services="services/*/"
+fi
 
-# build ace2
-docker build --build-arg env=$env -t ace2 -f Dockerfile .
-
-function build_image() {
+## build all modules
+for path in $services ; do
     # get path without trailing slashes
-    path=$(echo $1 | sed 's:/*$::')
+    path=$(echo $path | sed 's:/*$::')
 
     # get image type from path
     type=${path%/*}
@@ -35,18 +53,17 @@ function build_image() {
         return
     fi
 
-    # build image base
-    if [ -f "$path/Dockerfile" ]; then
-        docker build -t ace2-$type-$name-base -f $path/Dockerfile .
-    else
-        docker build --target ace2-base -t ace2-$type-$name-base -f Dockerfile .
-    fi
-
-    # build image
-    docker build --build-arg name=$name --build-arg env=$env -t ace2-$type-$name -f $type/Dockerfile .
-}
-
-# build all modules
-for path in services/*/ ; do
-    build_image $path
+    # merge service dockerfile commands into Dockerfile and build the image
+    while read -r line; do 
+        if [[ "$line" == "DEPENDENCIES" ]]; then 
+            if [ -f "$path/Dockerfile" ]; then
+                cat $path/Dockerfile
+            fi
+        else
+            echo "$line"
+        fi
+    done < Dockerfile | docker build --build-arg name=$name --build-arg settings=$settings -t ace2-services-$name -f - .
 done
+
+# remove dangling images
+docker image prune -f

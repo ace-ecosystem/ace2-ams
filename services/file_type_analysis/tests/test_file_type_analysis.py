@@ -1,7 +1,7 @@
 from ace2 import *
-from ace2.services.file_type_analysis import FileTypeAnalysis
+from service import FileTypeAnalysis
 import pytest
-    
+
 
 def test_file_type_run_condition():
     # test run condition True
