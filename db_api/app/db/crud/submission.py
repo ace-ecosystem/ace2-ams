@@ -61,6 +61,10 @@ def _associate_metadata_with_observable(analysis_uuids: list[UUID], o: Observabl
         elif m.metadata_object.metadata_type == "tag":
             o.analysis_metadata.tags.append(m.metadata_object)
 
+        # Only add the time metadata if one was not already set
+        elif m.metadata_object.metadata_type == "time" and not o.analysis_metadata.time:
+            o.analysis_metadata.time = m.metadata_object
+
     # Dedup and sort the analysis metadata on the observable that is a list
     o.analysis_metadata.directives = sorted(set(o.analysis_metadata.directives), key=lambda x: x.value)
     o.analysis_metadata.tags = sorted(set(o.analysis_metadata.tags), key=lambda m: m.value)

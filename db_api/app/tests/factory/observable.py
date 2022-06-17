@@ -62,6 +62,10 @@ def create_or_read(
         for threat in threats:
             factory.node_threat.create_or_read(value=threat, db=db)
 
+    if time is not None:
+        factory.metadata_time.create_or_read(value=time, db=db)
+        metadata.append(AnalysisMetadataCreate(type="time", value=time))
+
     obj = crud.observable.create_or_read(
         model=ObservableCreate(
             analysis_metadata=metadata,
@@ -73,7 +77,6 @@ def create_or_read(
             permanent_tags=permanent_tags or [],
             threat_actors=threat_actors or [],
             threats=threats or [],
-            time=time or crud.helpers.utcnow(),
             type=type,
             value=value,
         ),

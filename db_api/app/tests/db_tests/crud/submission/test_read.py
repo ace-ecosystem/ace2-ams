@@ -384,10 +384,11 @@ def test_read_observables(db):
     # Create a submission tree where the same observable type+value appears twice
     #
     # submission
-    #   o1 - analysis_tag1, display_type1, directive1
+    #   o1 - analysis_tag1, display_type1, directive1, time1
     #     a
     #       o1 - analysis_tag2
     #   o2 - analysis_tag3, permanent_tag1, display_value1
+    time1 = crud.helpers.utcnow()
     submission = factory.submission.create(db=db)
     observable1 = factory.observable.create_or_read(
         type="fqdn",
@@ -396,6 +397,7 @@ def test_read_observables(db):
         analysis_tags=["analysis_tag1"],
         directives=["directive1"],
         display_type="display_type1",
+        time=time1,
         db=db,
     )
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test", db=db)
@@ -457,8 +459,10 @@ def test_read_observables(db):
 
     assert result[0].type.value == "email_address" and result[0].value == "badguy@bad.com"
     assert result[0].analysis_metadata.tags == []
+    assert result[0].analysis_metadata.directives == []
     assert result[0].analysis_metadata.display_type is None
     assert result[0].analysis_metadata.display_value is None
+    assert result[0].analysis_metadata.time is None
     assert result[0].permanent_tags == []
 
     assert result[1].type.value == "fqdn" and result[1].value == "bad.com"
@@ -466,12 +470,15 @@ def test_read_observables(db):
     assert [t.value for t in result[1].analysis_metadata.tags] == ["analysis_tag1", "analysis_tag2"]
     assert result[1].analysis_metadata.display_type.value == "display_type1"
     assert result[1].analysis_metadata.display_value is None
+    assert result[1].analysis_metadata.time.value == time1
     assert result[1].permanent_tags == []
 
     assert result[2].type.value == "ipv4" and result[2].value == "127.0.0.1"
+    assert result[2].analysis_metadata.directives == []
     assert [t.value for t in result[2].analysis_metadata.tags] == ["analysis_tag3"]
     assert result[2].analysis_metadata.display_type is None
     assert result[2].analysis_metadata.display_value.value == "display_value1"
+    assert result[0].analysis_metadata.time is None
     assert [t.value for t in result[2].permanent_tags] == ["permanent_tag1"]
 
 

@@ -178,7 +178,6 @@ def test_create(db):
             permanent_tags=["tag"],
             threat_actors=["threat_actor"],
             threats=["threat"],
-            time=now,
             type="type1",
             value="test",
             parent_analysis_uuid=submission.root_analysis_uuid,
@@ -203,7 +202,6 @@ def test_create(db):
     assert observable.threat_actors[0].value == "threat_actor"
     assert len(observable.threats) == 1
     assert observable.threats[0].value == "threat"
-    assert observable.time == now
     assert observable.type.value == "type1"
     assert observable.value == "test"
     assert submission.version != initial_submission_version

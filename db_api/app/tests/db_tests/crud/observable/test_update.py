@@ -61,7 +61,6 @@ UPDATED_TIME = NOW + timedelta(days=1)
         ("expires_on", NOW, UPDATED_TIME),
         ("for_detection", True, False),
         ("for_detection", True, True),
-        ("time", NOW, UPDATED_TIME),
         ("value", "test", "test2"),
         ("value", "test", "test"),
     ],
@@ -90,11 +89,11 @@ def test_update(db, key, initial_value, updated_value):
     assert observable.history[1].field == key
 
     old_value = initial_value
-    if key in ["expires_on", "time"]:
+    if key == "expires_on":
         old_value = initial_value.isoformat()
 
     new_value = updated_value
-    if key in ["expires_on", "time"] and updated_value:
+    if key == "expires_on" and updated_value:
         new_value = updated_value.isoformat()
 
     assert observable.history[1].diff["old_value"] == old_value

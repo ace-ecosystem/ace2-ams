@@ -25,10 +25,6 @@ from tests import factory
         ("for_detection", 123),
         ("for_detection", None),
         ("for_detection", "True"),
-        ("time", None),
-        ("time", ""),
-        ("time", "Monday"),
-        ("time", "2022-01-01"),
         ("type", 123),
         ("type", None),
         ("type", ""),
@@ -213,11 +209,6 @@ def test_update_valid_node_fields(client, db, key, value_lists, helper_create_fu
         ("expires_on", 1609459200, None),
         ("for_detection", True, False),
         ("for_detection", True, True),
-        ("time", "2021-01-01T00:00:00+00:00", 1640995200),
-        ("time", "2021-01-01T00:00:00+00:00", "2022-01-01T00:00:00Z"),
-        ("time", "2021-01-01T00:00:00+00:00", "2022-01-01 00:00:00"),
-        ("time", "2021-01-01T00:00:00+00:00", "2022-01-01 00:00:00.000000"),
-        ("time", "2021-01-01T00:00:00+00:00", "2021-12-31 19:00:00-05:00"),
         ("value", "test", "test2"),
         ("value", "test", "test"),
     ],
@@ -248,7 +239,7 @@ def test_update(client, db, key, initial_value, updated_value):
     assert history.json()["items"][1]["field"] == key
 
     # If the test is for expires_on, make sure that the retrieved value matches the proper UTC timestamp
-    if key in ["expires_on", "time"]:
+    if key == "expires_on":
         if initial_value:
             assert history.json()["items"][1]["diff"]["old_value"] == parse("2021-01-01T00:00:00+00:00").isoformat()
         else:
