@@ -104,7 +104,6 @@ def test_update(db, key, initial_value, updated_value):
 @pytest.mark.parametrize(
     "key,value_lists,helper_create_func",
     [
-        ("directives", VALID_LIST_STRING_VALUES, factory.node_directive.create_or_read),
         ("permanent_tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
         ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
         ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
@@ -119,7 +118,6 @@ def test_update_node_fields(db, key, value_lists, helper_create_func):
         observable = factory.observable.create_or_read(
             type="test_type",
             value=f"test{i}",
-            directives=["remove_me"],
             permanent_tags=["remove_me"],
             threat_actors=["remove_me"],
             threats=["remove_me"],

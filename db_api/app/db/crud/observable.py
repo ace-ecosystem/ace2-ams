@@ -109,7 +109,7 @@ def create_or_read(
     parent_analysis.child_observables.append(obj)
 
     # If there was any metadata given, it is assumed that it was added by the observable's parent analysis.
-    for metadata in model.metadata:
+    for metadata in model.analysis_metadata:
         crud.analysis_metadata.create_or_read(model=metadata, analysis=parent_analysis, observable=obj, db=db)
 
     # Update the alert versions that contain the parent analysis

@@ -74,7 +74,6 @@
   import AccordionTab from "primevue/accordiontab";
   import Button from "primevue/button";
   import Card from "primevue/card";
-  import Message from "primevue/message";
 
   import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
@@ -83,7 +82,6 @@
   import { getAllAlertTags } from "@/etc/helpers";
   import AlertTableCell from "./AlertTableCell.vue";
   import { alertSummary } from "@/models/alert";
-  import { ref } from "@pinia/testing/node_modules/vue-demi";
 
   const alertStore = useAlertStore();
 

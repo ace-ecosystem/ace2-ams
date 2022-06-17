@@ -384,7 +384,7 @@ def test_read_observables(db):
     # Create a submission tree where the same observable type+value appears twice
     #
     # submission
-    #   o1 - analysis_tag1, display_type1
+    #   o1 - analysis_tag1, display_type1, directive1
     #     a
     #       o1 - analysis_tag2
     #   o2 - analysis_tag3, permanent_tag1, display_value1
@@ -394,6 +394,7 @@ def test_read_observables(db):
         value="bad.com",
         parent_analysis=submission.root_analysis,
         analysis_tags=["analysis_tag1"],
+        directives=["directive1"],
         display_type="display_type1",
         db=db,
     )
@@ -461,6 +462,7 @@ def test_read_observables(db):
     assert result[0].permanent_tags == []
 
     assert result[1].type.value == "fqdn" and result[1].value == "bad.com"
+    assert [d.value for d in result[1].analysis_metadata.directives] == ["directive1"]
     assert [t.value for t in result[1].analysis_metadata.tags] == ["analysis_tag1", "analysis_tag2"]
     assert result[1].analysis_metadata.display_type.value == "display_type1"
     assert result[1].analysis_metadata.display_value is None

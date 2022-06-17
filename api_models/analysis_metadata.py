@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, UUID4
 from typing import Optional
 
 from api_models import type_str
+from api_models.metadata_directive import MetadataDirectiveRead
 from api_models.metadata_display_type import MetadataDisplayTypeRead
 from api_models.metadata_display_value import MetadataDisplayValueRead
 from api_models.metadata_tag import MetadataTagRead
@@ -25,6 +26,10 @@ class AnalysisMetadataCreate(BaseModel):
 
 class AnalysisMetadataRead(BaseModel):
     """Represents the collection of analysis metadata that was added to an observable."""
+
+    directives: list[MetadataDirectiveRead] = Field(
+        default_factory=list, description="A list of directives added to the observable"
+    )
 
     display_type: Optional[MetadataDisplayTypeRead] = Field(description="The display type of the observable")
 

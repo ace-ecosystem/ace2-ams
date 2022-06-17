@@ -5,11 +5,11 @@ from uuid import UUID, uuid4
 
 from api_models import type_str, validators
 from api_models.analysis_metadata import AnalysisMetadataCreate, AnalysisMetadataRead
+from api_models.metadata_directive import MetadataDirectiveRead
 from api_models.metadata_tag import MetadataTagRead
 from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
 from api_models.node_detection_point import NodeDetectionPointRead
-from api_models.node_directive import NodeDirectiveRead
 from api_models.node_relationship import NodeRelationshipRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
@@ -56,20 +56,16 @@ class ObservableCreateBase(NodeCreate, ObservableBase):
         default_factory=list, description="A list of analysis results to add as children to the observable"
     )
 
+    analysis_metadata: list[AnalysisMetadataCreate] = Field(
+        default_factory=list, description="A list of metadata objects to add to the observable by its parent analysis"
+    )
+
     detection_points: list[type_str] = Field(
         default_factory=list, description="A list of detection points to add to the observable"
     )
 
-    directives: list[type_str] = Field(
-        default_factory=list, description="A list of directives to add to the observable"
-    )
-
     history_username: Optional[type_str] = Field(
         description="If given, an observable history record will be created and associated with the user"
-    )
-
-    metadata: list[AnalysisMetadataCreate] = Field(
-        default_factory=list, description="A list of metadata objects to add to the observable by its parent analysis"
     )
 
     observable_relationships: "list[ObservableRelationshipCreate]" = Field(
@@ -107,8 +103,6 @@ class ObservableRead(NodeRead, ObservableBase):
     detection_points: list[NodeDetectionPointRead] = Field(
         description="A list of detection points added to the observable", default_factory=list
     )
-
-    directives: list[NodeDirectiveRead] = Field(description="A list of directives added to the observable")
 
     observable_relationships: "list[ObservableRelationshipRead]" = Field(
         description="A list of observable relationships for this observable"
@@ -158,8 +152,6 @@ class ObservableSubmissionTreeRead(ObservableSubmissionRead):
 
 
 class ObservableUpdate(NodeUpdate, ObservableBase):
-    directives: Optional[list[type_str]] = Field(description="A list of directives to add to the observable")
-
     for_detection: Optional[StrictBool] = Field(
         description="Whether or not this observable should be included in the observable detection exports"
     )
@@ -181,7 +173,7 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
     value: Optional[type_str] = Field(description="The value of the observable")
 
     _prevent_none: classmethod = validators.prevent_none(
-        "directives", "for_detection", "permanent_tags", "threat_actors", "threats", "time", "type", "value"
+        "for_detection", "permanent_tags", "threat_actors", "threats", "time", "type", "value"
     )
 
 

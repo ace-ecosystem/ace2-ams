@@ -45,8 +45,11 @@ def test_create(db):
                             analysis_module_type_uuid=analysis_module_type.uuid, submission_uuid=submission_uuid
                         )
                     ],
+                    analysis_metadata=[
+                        AnalysisMetadataCreate(type="directive", value="o_analysis_directive"),
+                        AnalysisMetadataCreate(type="tag", value="o_analysis_tag"),
+                    ],
                     detection_points=["detection_point"],
-                    metadata=[AnalysisMetadataCreate(type="tag", value="o_analysis_tag")],
                     permanent_tags=["o_permanent_tag"],
                     threat_actors=["o_threat_actor"],
                     threats=["o_threat"],

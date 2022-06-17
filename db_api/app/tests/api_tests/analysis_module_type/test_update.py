@@ -112,7 +112,7 @@ def test_update_valid_list_fields(client, db, key, values):
     if key == "observable_types":
         create_func = factory.observable_type.create_or_read
     elif key == "required_directives":
-        create_func = factory.node_directive.create_or_read
+        create_func = factory.metadata_directive.create_or_read
     else:
         create_func = factory.metadata_tag.create_or_read
 

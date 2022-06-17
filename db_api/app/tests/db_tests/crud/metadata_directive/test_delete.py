@@ -3,12 +3,12 @@ from tests import factory
 
 
 def test_delete(db):
-    obj = factory.node_directive.create_or_read(value="test", db=db)
-    assert crud.node_directive.delete(uuid=obj.uuid, db=db) is True
+    obj = factory.metadata_directive.create_or_read(value="test", db=db)
+    assert crud.metadata_directive.delete(uuid=obj.uuid, db=db) is True
 
 
 def test_unable_to_delete(db):
-    obj = factory.node_directive.create_or_read(value="test", db=db)
+    obj = factory.metadata_directive.create_or_read(value="test", db=db)
 
     submission = factory.submission.create(db=db)
     factory.observable.create_or_read(
@@ -16,4 +16,4 @@ def test_unable_to_delete(db):
     )
 
     # You should not be able to delete it now that it is in use
-    assert crud.node_directive.delete(uuid=obj.uuid, db=db) is False
+    assert crud.metadata_directive.delete(uuid=obj.uuid, db=db) is False
