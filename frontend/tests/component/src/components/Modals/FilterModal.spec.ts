@@ -66,10 +66,13 @@ describe("FilterModal", () => {
     cy.get('[data-cy="filter-input"]').should("not.exist");
   });
   it("renders correctly when there are current filters are set", () => {
-    factory({ filters: { alerts: { name: ["test name"] }, events: {} } });
-    cy.get('[data-cy="filter-input"]').should("have.length", 1);
-    cy.contains("Name").should("be.visible");
+    factory({
+      filters: { alerts: { name: ["test name", "test name 2"] }, events: {} },
+    });
+    cy.get('[data-cy="filter-input"]').should("have.length", 2);
+    cy.findAllByText("Name").should("have.length", 2);
     cy.findByDisplayValue("test name").should("be.visible");
+    cy.findByDisplayValue("test name 2").should("be.visible");
   });
   it("clears filters in filter form when 'Clear' button clicked", () => {
     factory({ filters: { alerts: { name: ["test name"] }, events: {} } });
