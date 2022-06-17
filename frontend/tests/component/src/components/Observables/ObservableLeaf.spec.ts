@@ -208,7 +208,7 @@ describe("ObservableLeaf", () => {
     });
     cy.get("[data-cy='show-actions-menu-button']").click();
     cy.contains("Update Expiration").click();
-    cy.get("@stub-10").should("have.been.calledOnce");
+    cy.get("@stub-11").should("have.been.calledOnce");
     cy.findByRole("menu").should("not.exist"); // Menu should have been closed
   });
   it("attempts to run command when 'command'-type observable action clicked", () => {
@@ -285,10 +285,12 @@ describe("ObservableLeaf", () => {
     cy.get("@stub-5").should("have.been.calledWith", {
       nodeType: "alerts",
       filters: {
-        observable: {
-          category: observableWithTags.type,
-          value: observableWithTags.value,
-        },
+        observable: [
+          {
+            category: observableWithTags.type,
+            value: observableWithTags.value,
+          },
+        ],
       },
     });
   });
@@ -302,10 +304,12 @@ describe("ObservableLeaf", () => {
     cy.get("@stub-5").should("have.been.calledWith", {
       nodeType: "alerts",
       filters: {
-        observable: {
-          category: observableWithDisplayType.type,
-          value: observableWithDisplayType.value,
-        },
+        observable: [
+          {
+            category: observableWithDisplayType.type,
+            value: observableWithDisplayType.value,
+          },
+        ],
       },
     });
   });
@@ -319,10 +323,12 @@ describe("ObservableLeaf", () => {
     cy.get("@stub-5").should("have.been.calledWith", {
       nodeType: "alerts",
       filters: {
-        observable: {
-          category: observableWithDisplayValue.type,
-          value: observableWithDisplayValue.value,
-        },
+        observable: [
+          {
+            category: observableWithDisplayValue.type,
+            value: observableWithDisplayValue.value,
+          },
+        ],
       },
     });
   });
