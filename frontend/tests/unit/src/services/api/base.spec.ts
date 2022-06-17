@@ -106,9 +106,16 @@ describe("BaseAPI calls", () => {
     ]);
   });
 
-  it("will correctly format URL parameters when given", async () => {
-    myNock.get("/read?limit=5&offset=0").reply(200, "Read successful");
-    const res = await api.read("/read", { limit: 5, offset: 0 });
+  it("will correctly format URL parameters when given, including duplicates and camelCase params", async () => {
+    myNock
+      .get("/read?offset=0&foo=1&foo=2&foo=3&foo_bar=2&foo_bar=3&fizz_buzz=1")
+      .reply(200, "Read successful");
+    const res = await api.read("/read", {
+      offset: 0, // single word, non-array
+      foo: [1, 2, 3], // single word, array
+      fizzBuzz: 1, // camelCase, non-array
+      fooBar: [2, 3], // camelCase, array
+    });
     expect(res).toEqual("Read successful");
   });
 

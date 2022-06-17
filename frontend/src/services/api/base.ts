@@ -55,7 +55,23 @@ export class BaseApi {
       }
 
       if (options.params) {
-        config["params"] = this.formatOutgoingData(options.params);
+        // Have to use URLSearchParams in order to have duplicate paramters correctly formatted
+        // Passing an object like {foo: [1, 2, 3]} to axios will result in a query string of foo[]=1&foo[]=2&foo[]=3, which FastAPI doesn't like
+        // By appending duplicate parameters to URLSearchParams as below, we can get the correct query string, foo=1&foo=2&foo=3
+        const p = new URLSearchParams();
+        const formattedParams = this.formatOutgoingData(options.params);
+        for (const param in formattedParams) {
+          // If the paramter is an array, then we need to append each element of the array to URLSearchParams
+          if (Array.isArray(formattedParams[param])) {
+            for (const item of formattedParams[param] as string) {
+              p.append(param, item);
+            }
+          } else {
+            // Otherwise, we can just append the parameter to URLSearchParams
+            p.append(param, formattedParams[param] as string);
+          }
+        }
+        config["params"] = p;
       }
     }
 
