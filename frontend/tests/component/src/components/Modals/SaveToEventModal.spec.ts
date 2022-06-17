@@ -15,11 +15,11 @@ const openStatus = queueableObjectReadFactory({ value: "OPEN" });
 const closedStatus = queueableObjectReadFactory({ value: "CLOSED" });
 
 const defaultReadAllPagesOpen = {
-  status: openStatus,
+  status: [openStatus],
   sort: "created_time|asc",
 };
 const defaultReadAllPagesClosed = {
-  status: closedStatus,
+  status: [closedStatus],
   sort: "created_time|asc",
 };
 
