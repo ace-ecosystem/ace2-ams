@@ -94,11 +94,15 @@
   });
 
   const submitFilters = computed(() => {
-    let submitFilters: { [index: string]: unknown } = {};
+    let submitFilters: { [index: string]: unknown[] } = {};
     for (const index in formFilters.value) {
       const filter = formFilters.value[index];
       if (filter.propertyType) {
-        submitFilters[filter.propertyType] = filter.propertyValue;
+        if (!submitFilters[filter.propertyType]) {
+          submitFilters[filter.propertyType] = [filter.propertyValue];
+        } else {
+          submitFilters[filter.propertyType].push(filter.propertyValue);
+        }
       }
     }
     return submitFilters;
@@ -129,11 +133,13 @@
 
   const loadFormFilters = () => {
     formFilters.value = [];
-    for (const filter in filterStore.$state[nodeType]) {
-      formFilters.value.push({
-        propertyType: filter,
-        propertyValue: filterStore.$state[nodeType][filter],
-      });
+    for (const filterType in filterStore.$state[nodeType]) {
+      for (const filter of filterStore.$state[nodeType][filterType]) {
+        formFilters.value.push({
+          propertyType: filterType,
+          propertyValue: filter,
+        });
+      }
     }
   };
 

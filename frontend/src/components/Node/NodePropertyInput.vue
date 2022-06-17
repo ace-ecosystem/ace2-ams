@@ -314,7 +314,7 @@
     let val = newValue;
     if (isObject(newValue)) {
       if ("value" in newValue) {
-        if ("category" in newValue) {
+        if ("category" in newValue || !isObject(newValue.value)) {
           val = newValue;
         } else {
           val = newValue.value;

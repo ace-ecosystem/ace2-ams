@@ -171,12 +171,22 @@
     let link = `${window.location.origin}/manage_${nodeType}`;
     // If there are filters set, build the link for it
     if (Object.keys(filterStore[nodeType]).length) {
-      let urlParams = new URLSearchParams(
-        formatNodeFiltersForAPI(
-          validFilterOptions[nodeType],
-          filterStore[nodeType],
-        ) as unknown as URLSearchParams,
+      let urlParams = new URLSearchParams();
+      const formattedParams = formatNodeFiltersForAPI(
+        validFilterOptions[nodeType],
+        filterStore[nodeType],
       );
+      for (const param in formattedParams) {
+        // If the paramter is an array, then we need to append each element of the array to URLSearchParams
+        if (Array.isArray(formattedParams[param])) {
+          for (const item of formattedParams[param] as string) {
+            urlParams.append(param, item);
+          }
+        } else {
+          // Otherwise, we can just append the parameter to URLSearchParams
+          urlParams.append(param, formattedParams[param] as string);
+        }
+      }
       link = `${
         window.location.origin
       }/manage_${nodeType}?${urlParams.toString()}`;
