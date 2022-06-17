@@ -748,7 +748,7 @@ describe("Manage Alerts - Single Alert Tests", () => {
   });
 
   describe("Tags", () => {
-    it.only("will add given tags to an alert via the tag modal", () => {
+    it("will add given tags to an alert via the tag modal", () => {
       cy.intercept("GET", "/api/metadata/tag/?offset=0").as("getTags");
       cy.intercept("POST", "/api/metadata/tag").as("addTags");
       cy.intercept("PATCH", "/api/alert/").as("updateAlert");
