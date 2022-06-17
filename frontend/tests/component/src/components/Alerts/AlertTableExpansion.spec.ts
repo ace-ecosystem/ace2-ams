@@ -74,7 +74,7 @@ describe("AlertTableExpansion", () => {
     cy.get("@stub-1").should("have.been.calledWith", {
       nodeType: "alerts",
       filters: {
-        observable: { category: observable.type, value: observable.value },
+        observable: [{ category: observable.type, value: observable.value }],
       },
     });
   });
