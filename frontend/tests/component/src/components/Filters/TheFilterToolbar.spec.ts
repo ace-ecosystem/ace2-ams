@@ -88,7 +88,7 @@ describe("TheFilterToolbar", () => {
     cy.get("@stub-2").should("have.been.calledOnceWith", {
       nodeType: "alerts",
       filterName: "disposition",
-      filterValue: "None",
+      filterValue: { value: "None" },
     }); // set filter
     cy.get('[data-cy="quick-add-filter-panel"]').should("not.exist");
   });
@@ -96,21 +96,23 @@ describe("TheFilterToolbar", () => {
     factory();
     cy.get('[data-cy="edit-filter-button"]').siblings().click();
     cy.contains("Edit").click();
-    cy.get("@stub-6").should("have.been.calledOnceWith", "EditFilterModal"); // Open modal
+    cy.get("@stub-7").should("have.been.calledOnceWith", "EditFilterModal"); // Open modal
   });
   it("resets filters when 'Reset' button clicked in filter menu dropdown", () => {
     factory();
     cy.get('[data-cy="edit-filter-button"]').siblings().click();
     cy.contains("Reset").click();
-    cy.get("@stub-4").should("have.been.calledOnceWith", {
+    cy.get("@stub-5").should("have.been.calledOnceWith", {
       nodeType: "alerts",
     }); // clear all
     cy.get("@stub-1").should("have.been.calledOnceWith", {
       nodeType: "alerts",
       filters: {
-        queue: {
-          value: "external",
-        },
+        queue: [
+          {
+            value: "external",
+          },
+        ],
       },
     }); // set filters to defaults
   });
@@ -118,7 +120,7 @@ describe("TheFilterToolbar", () => {
     factory();
     cy.get('[data-cy="edit-filter-button"]').siblings().click();
     cy.contains("Clear All").click();
-    cy.get("@stub-4").should("have.been.calledOnceWith", {
+    cy.get("@stub-5").should("have.been.calledOnceWith", {
       nodeType: "alerts",
     }); // clear all
   });
