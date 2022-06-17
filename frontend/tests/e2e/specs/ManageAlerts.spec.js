@@ -748,10 +748,14 @@ describe("Manage Alerts - Single Alert Tests", () => {
   });
 
   describe("Tags", () => {
-    it("will add given tags to an alert via the tag modal", () => {
-      cy.intercept("GET", "/api/metadata/tag/?offset=0").as("getNodeTags");
+    it.only("will add given tags to an alert via the tag modal", () => {
+      cy.intercept("GET", "/api/metadata/tag/?offset=0").as("getTags");
       cy.intercept("POST", "/api/metadata/tag").as("addTags");
       cy.intercept("PATCH", "/api/alert/").as("updateAlert");
+      cy.intercept(
+        "GET",
+        "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0",
+      ).as("getAlerts");
 
       // Get first visible alert checkbox
       cy.get(".p-checkbox-box").eq(1).click();
@@ -759,7 +763,7 @@ describe("Manage Alerts - Single Alert Tests", () => {
       cy.get("[data-cy=tag-button]").click();
 
       cy.get(".p-dialog-content").should("be.visible");
-      cy.wait("@getNodeTags").its("state").should("eq", "Complete");
+      cy.wait("@getTags").its("state").should("eq", "Complete");
       // Type a tag
       cy.get(".p-chips > .p-inputtext").click().type("TestTag").type("{enter}");
       // Select a tag from the dropdown
@@ -770,6 +774,8 @@ describe("Manage Alerts - Single Alert Tests", () => {
       cy.get(".p-dialog-content").should("not.exist");
       cy.wait("@addTags").its("state").should("eq", "Complete");
       cy.wait("@updateAlert").its("state").should("eq", "Complete");
+      // Wait for the alert table to reload
+      cy.wait("@getAlerts").its("state").should("eq", "Complete");
       // Check for the tags after adding
       cy.get("[data-cy='tags']")
         .eq(0)
