@@ -16,6 +16,7 @@ import { createTestingPinia } from "@pinia/testing";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { metadataObjectReadFactory } from "@mocks/metadata";
 import { genericQueueableObjectRead } from "@/models/base";
+import { useAlertDispositionStore } from "@/stores/alertDisposition";
 
 createTestingPinia({ createSpy: vi.fn });
 
@@ -75,8 +76,10 @@ describe("parseFilters", () => {
 
     expect(results).toEqual({
       observableTypes: [
-        { value: "ipv4", description: null, uuid: "1" },
-        { value: "file", description: null, uuid: "2" },
+        [
+          { value: "ipv4", description: null, uuid: "1" },
+          { value: "file", description: null, uuid: "2" },
+        ],
       ],
     });
   });
@@ -85,7 +88,7 @@ describe("parseFilters", () => {
     const results = parseFilters({ tags: "tagA,tagB" }, alertFilters.external);
 
     expect(results).toEqual({
-      tags: ["tagA", "tagB"],
+      tags: [["tagA", "tagB"]],
     });
   });
 
@@ -122,7 +125,58 @@ describe("parseFilters", () => {
     const results = parseFilters({ owner: "analystB" }, alertFilters.external);
 
     expect(results).toEqual({
-      owner: mockUserB,
+      owner: [mockUserB],
+    });
+  });
+
+  it("will correctly parse and add any nullable select filters (complex)", async () => {
+    const mockUserA: userRead = {
+      defaultAlertQueue: { description: null, uuid: "1", value: "default" },
+      defaultEventQueue: { description: null, uuid: "1", value: "default" },
+      displayName: "Test Analyst",
+      email: "analyst@test.com",
+      enabled: true,
+      roles: [],
+      timezone: "UTC",
+      training: false,
+      username: "analystA",
+      uuid: "1",
+    };
+
+    const mockUserB: userRead = {
+      defaultAlertQueue: { description: null, uuid: "1", value: "default" },
+      defaultEventQueue: { description: null, uuid: "1", value: "default" },
+      displayName: "Test Analyst",
+      email: "analyst@test.com",
+      enabled: true,
+      roles: [],
+      timezone: "UTC",
+      training: false,
+      username: "analystB",
+      uuid: "1",
+    };
+
+    const userStore = useUserStore();
+    userStore.items = [mockUserA, mockUserB];
+
+    const results = parseFilters({ owner: "none" }, alertFilters.external);
+
+    expect(results).toEqual({
+      owner: [{ displayName: "None", username: "none" }],
+    });
+  });
+
+  it("will correctly parse and add any nullable select filters (simple)", async () => {
+    const dispositionStore = useAlertDispositionStore();
+    dispositionStore.items = [];
+
+    const results = parseFilters(
+      { disposition: "None" },
+      alertFilters.external,
+    );
+
+    expect(results).toEqual({
+      disposition: [{ value: "None" }],
     });
   });
 
@@ -136,13 +190,13 @@ describe("parseFilters", () => {
     );
 
     expect(results).toEqual({
-      eventTimeBefore: new Date("2022-01-08T16:31:51.000Z"),
+      eventTimeBefore: [new Date("2022-01-08T16:31:51.000Z")],
     });
   });
 
   it("will skip any date filters that fail to parse", async () => {
     const results = parseFilters(
-      { eventTimeBefore: "Bad Date" },
+      { eventTimeBefore: ["Bad Date"] },
       alertFilters.external,
     );
 
@@ -153,7 +207,7 @@ describe("parseFilters", () => {
     const results = parseFilters({ name: "test name" }, alertFilters.external);
 
     expect(results).toEqual({
-      name: "test name",
+      name: ["test name"],
     });
   });
   it("will correctly parse and add any catetgorized value filters", async () => {
@@ -169,10 +223,12 @@ describe("parseFilters", () => {
     );
 
     expect(results).toEqual({
-      observable: {
-        category: { value: "ipv4", description: null, uuid: "1" },
-        value: "1.2.3.4",
-      },
+      observable: [
+        {
+          category: { value: "ipv4", description: null, uuid: "1" },
+          value: "1.2.3.4",
+        },
+      ],
     });
   });
   it("will correctly parse and add any combined filters", async () => {
@@ -226,18 +282,104 @@ describe("parseFilters", () => {
     );
 
     expect(results).toEqual({
-      tags: ["tagA", "tagB"],
-      owner: mockUserB,
+      tags: [["tagA", "tagB"]],
+      owner: [mockUserB],
       observableTypes: [
-        { value: "ipv4", description: null, uuid: "1" },
-        { value: "file", description: null, uuid: "2" },
+        [
+          { value: "ipv4", description: null, uuid: "1" },
+          { value: "file", description: null, uuid: "2" },
+        ],
       ],
-      eventTimeBefore: new Date("2022-01-08T16:31:51.000Z"),
-      name: "test name",
-      observable: {
-        category: { value: "ipv4", description: null, uuid: "1" },
-        value: "1.2.3.4",
+      eventTimeBefore: [new Date("2022-01-08T16:31:51.000Z")],
+      name: ["test name"],
+      observable: [
+        {
+          category: { value: "ipv4", description: null, uuid: "1" },
+          value: "1.2.3.4",
+        },
+      ],
+    });
+  });
+  it("will correctly parse and add any combined filters with multiple filter values", async () => {
+    const observableTypeStore = useObservableTypeStore();
+    observableTypeStore.items = [
+      { value: "ipv4", description: null, uuid: "1" },
+      { value: "file", description: null, uuid: "2" },
+    ];
+
+    const mockUserA: userRead = {
+      defaultAlertQueue: { description: null, uuid: "1", value: "default" },
+      defaultEventQueue: { description: null, uuid: "1", value: "default" },
+      displayName: "Test Analyst",
+      email: "analyst@test.com",
+      enabled: true,
+      roles: [],
+      timezone: "UTC",
+      training: false,
+      username: "analystA",
+      uuid: "1",
+    };
+
+    const mockUserB: userRead = {
+      defaultAlertQueue: { description: null, uuid: "1", value: "default" },
+      defaultEventQueue: { description: null, uuid: "1", value: "default" },
+      displayName: "Test Analyst",
+      email: "analyst@test.com",
+      enabled: true,
+      roles: [],
+      timezone: "UTC",
+      training: false,
+      username: "analystB",
+      uuid: "1",
+    };
+
+    const userStore = useUserStore();
+    userStore.items = [mockUserA, mockUserB];
+
+    const results = parseFilters(
+      {
+        observable: ["ipv4|1.2.3.4", "ipv4|5.6.7.8"],
+        eventTimeBefore: [
+          "Sat Jan 08 2022 11:31:51 GMT-0500 (Eastern Standard Time)",
+          "Sat Jan 10 2022 11:31:51 GMT-0500 (Eastern Standard Time)",
+        ],
+        name: ["test name", "test name 2"],
+        observableTypes: ["ipv4,file,fake", "ipv4"],
+        fake: ["blah"],
+        owner: ["analystB", "analystA"],
+        tags: ["tagA,tagB", "tagC,tagD"],
       },
+      alertFilters.external,
+    );
+
+    expect(results).toEqual({
+      tags: [
+        ["tagA", "tagB"],
+        ["tagC", "tagD"],
+      ],
+      owner: [mockUserB, mockUserA],
+      observableTypes: [
+        [
+          { value: "ipv4", description: null, uuid: "1" },
+          { value: "file", description: null, uuid: "2" },
+        ],
+        [{ value: "ipv4", description: null, uuid: "1" }],
+      ],
+      eventTimeBefore: [
+        new Date("2022-01-08T16:31:51.000Z"),
+        new Date("2022-01-10T16:31:51.000Z"),
+      ],
+      name: ["test name", "test name 2"],
+      observable: [
+        {
+          category: { value: "ipv4", description: null, uuid: "1" },
+          value: "1.2.3.4",
+        },
+        {
+          category: { value: "ipv4", description: null, uuid: "1" },
+          value: "5.6.7.8",
+        },
+      ],
     });
   });
 });

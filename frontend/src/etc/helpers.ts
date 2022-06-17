@@ -54,10 +54,10 @@ export function dateParser(key: string, value: unknown): Date | unknown {
 }
 
 export function parseFilters(
-  queryFilters: Record<string, string>,
+  queryFilters: Record<string, string | string[]>,
   availableFilters: readonly propertyOption[],
 ): alertFilterParams | eventFilterParams {
-  const parsedFilters: Record<string, unknown> = {};
+  const parsedFilters: Record<string, unknown[]> = {};
 
   // parse each filter
   for (const filterName in queryFilters) {
@@ -72,106 +72,119 @@ export function parseFilters(
       continue;
     }
 
-    let filterValueUnparsed:
-      | string
-      | string[]
-      | Date
-      | { category: string; value: string } = queryFilters[filterName]; // the filter value from URL
-    // format filterValueUnparsed for GUI if method available
-    if (filterNameObject.parseStringRepr) {
-      filterValueUnparsed = filterNameObject.parseStringRepr(
-        queryFilters[filterName],
-      );
-    }
+    const filterValueUnparsedArray = Array.isArray(queryFilters[filterName])
+      ? queryFilters[filterName]
+      : [queryFilters[filterName]];
 
-    // use correct property for determinining equality (default is 'value')
-    const filterValueProperty = filterNameObject.valueProperty
-      ? filterNameObject.valueProperty
-      : "value";
+    for (const value of filterValueUnparsedArray) {
+      // format filterValue for GUI if method available
+      const filterValue = filterNameObject.parseStringRepr
+        ? filterNameObject.parseStringRepr(value as any)
+        : value;
 
-    // load the filter options store if available
-    let store = null; // store that may be used to find filter value object
-    if (filterNameObject.store) {
-      store = filterNameObject.store();
-    }
+      // use correct property for determinining equality (default is 'value')
+      const filterValueProperty = filterNameObject.valueProperty
+        ? filterNameObject.valueProperty
+        : "value";
 
-    let filterValueParsed = null; // the target filter value, might be an Object, Array, Date, or string
-    // based on the filter type, parse/format the filter value
-    switch (filterNameObject.type) {
-      case inputTypes.MULTISELECT:
-        // look up each array item in store, add to filter value
-        filterValueParsed = [];
-        if (store && Array.isArray(filterValueUnparsed)) {
-          for (const value of filterValueUnparsed) {
-            const valueObject = store.allItems.find(
-              (element: Record<string, unknown>) => {
-                return element[filterValueProperty] === value;
-              },
-            );
-            if (valueObject) {
-              filterValueParsed.push(valueObject);
+      // load the filter options store if available
+      let store = null; // store that may be used to find filter value object
+      if (filterNameObject.store) {
+        store = filterNameObject.store();
+      }
+
+      let filterValueParsed = null; // the target filter value, might be an Object, Array, Date, or string
+      // based on the filter type, parse/format the filter value
+      switch (filterNameObject.type) {
+        case inputTypes.MULTISELECT:
+          // look up each array item in store, add to filter value
+          filterValueParsed = [];
+          if (store && Array.isArray(filterValue)) {
+            for (const value of filterValue) {
+              const valueObject = store.allItems.find(
+                (element: Record<string, unknown>) => {
+                  return element[filterValueProperty] === value;
+                },
+              );
+              if (valueObject) {
+                filterValueParsed.push(valueObject);
+              }
             }
           }
-        }
-        filterValueParsed = filterValueParsed.length ? filterValueParsed : null;
-        break;
+          filterValueParsed = filterValueParsed.length
+            ? filterValueParsed
+            : null;
+          break;
 
-      case inputTypes.CHIPS:
-        // array of strings, handled in parseFormattedFilterString
-        filterValueParsed = filterValueUnparsed;
-        break;
+        case inputTypes.CHIPS:
+          // array of strings, handled in parseFormattedFilterString
+          filterValueParsed = filterValue;
+          break;
 
-      case inputTypes.SELECT:
-        // look item up in store
-        if (store) {
-          filterValueParsed = store.allItems.find(
-            (element: Record<string, unknown>) => {
-              return element[filterValueProperty] === filterValueUnparsed;
-            },
+        case inputTypes.SELECT:
+          // look item up in store
+          if (store) {
+            filterValueParsed = store.allItems.find(
+              (element: Record<string, unknown>) => {
+                return element[filterValueProperty] === filterValue;
+              },
+            );
+          }
+
+          if (
+            !filterValueParsed &&
+            filterNameObject.nullOptions?.nullableFilter &&
+            filterValue ===
+              filterNameObject.nullOptions?.nullOption[filterValueProperty]
+          ) {
+            filterValueParsed = filterNameObject.nullOptions?.nullOption;
+          }
+          break;
+
+        case inputTypes.DATE:
+          // Date string, handled in parseFormattedFilterString
+          filterValueParsed = isValidDate(filterValue) ? filterValue : null;
+          break;
+
+        case inputTypes.INPUT_TEXT:
+          // does not need parsing
+          filterValueParsed = filterValue;
+          break;
+
+        case inputTypes.CATEGORIZED_VALUE:
+          // look up category value in store, sub-value stays untouched
+          if (store && isObject(filterValue)) {
+            const unparsedCategory = filterValue.category;
+            const category = store.allItems.find(
+              (element: Record<string, unknown>) => {
+                return element[filterValueProperty] === unparsedCategory;
+              },
+            );
+            filterValueParsed = {
+              category: category,
+              value: filterValue.value,
+            };
+          }
+          break;
+
+        // Unsupported filter types will be ignored
+        default:
+          console.log(
+            `Unsupported filter type found: ${filterNameObject.type}`,
           );
+          continue;
+      }
+
+      // If filter value was successfully parsed add it to the new filter object
+      if (filterValueParsed) {
+        if (parsedFilters[filterName]) {
+          parsedFilters[filterName].push(filterValueParsed);
+        } else {
+          parsedFilters[filterName] = [filterValueParsed];
         }
-        break;
-
-      case inputTypes.DATE:
-        // Date string, handled in parseFormattedFilterString
-        filterValueParsed = isValidDate(filterValueUnparsed)
-          ? filterValueUnparsed
-          : null;
-        break;
-
-      case inputTypes.INPUT_TEXT:
-        // does not need parsing
-        filterValueParsed = filterValueUnparsed;
-        break;
-
-      case inputTypes.CATEGORIZED_VALUE:
-        // look up category value in store, sub-value stays untouched
-        if (store && isObject(filterValueUnparsed)) {
-          const unparsedCategory = filterValueUnparsed.category;
-          const category = store.allItems.find(
-            (element: Record<string, unknown>) => {
-              return element[filterValueProperty] === unparsedCategory;
-            },
-          );
-          filterValueParsed = {
-            category: category,
-            value: filterValueUnparsed.value,
-          };
-        }
-        break;
-
-      // Unsupported filter types will be ignored
-      default:
-        console.log(`Unsupported filter type found: ${filterNameObject.type}`);
-        continue;
-    }
-
-    // If filter value was successfully parsed add it to the new filter object
-    if (filterValueParsed) {
-      parsedFilters[filterName] = filterValueParsed;
+      }
     }
   }
-
   return parsedFilters;
 }
 
