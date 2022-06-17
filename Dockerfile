@@ -1,7 +1,8 @@
 # set the base image in single location
 ARG base=public.ecr.aws/lambda/python:3.9
 
-# build ace2 base image
+
+# install and test ace2 core code 
 FROM $base AS ace2
     # install ace2 deps
     RUN pip3 install boto3 pydantic pytest pytest-datadir pyyaml
@@ -17,12 +18,19 @@ FROM $base AS ace2
         rm -rf /tmp/pytest* &&\
         find / \( -name "*.pyc" -or -name ".pytest_cache" -or -name "__pycache__" \) -exec rm -rf {} +
 
-# build service image
-FROM $base AS service
+
+# install service dependencies
+FROM $base AS base
     DEPENDENCIES
 
-    # copy everything from ace2 base image
+
+# build service image
+FROM $base AS service
+    # copy everything from ace2 stage
     COPY --from=ace2 / /
+
+    # copy everything from base stage
+    COPY --from=base / /
 
     # install source
     ARG name
@@ -41,5 +49,8 @@ FROM $base AS service
         find / \( -name "*.pyc" -or -name ".pytest_cache" -or -name "__pycache__" \) -exec rm -rf {} + &&\
         pip3 uninstall -y pytest-datadir pytest
 
-    # set entrypoint
+
+# squash layers into final image
+FROM $base AS final
+    COPY --from=service / /
     CMD [ "service.run" ]
