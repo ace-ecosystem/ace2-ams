@@ -12,8 +12,8 @@ FROM $base AS ace2
 
     # run tests
     # remove test files
-    COPY tests tests
-    RUN pytest -vv &&\
+    RUN mv ace2/tests tests &&\
+        pytest -vv &&\
         rm -rf tests/ace2 &&\
         rm -rf /tmp/pytest* &&\
         find / \( -name "*.pyc" -or -name ".pytest_cache" -or -name "__pycache__" \) -exec rm -rf {} +
