@@ -40,9 +40,18 @@ export const useFilterStore = defineStore({
       nodeType: "alerts" | "events";
       filters: alertFilterParams | eventFilterParams;
     }) {
-      const nonEmptyFilters = Object.fromEntries(
-        Object.entries(payload.filters).filter(([_, v]) => !isEmpty(v)),
-      );
+      const nonEmptyFilters = {} as alertFilterParams | eventFilterParams;
+      for (const [name, valueArray] of Object.entries(payload.filters)) {
+        // Remove any falsy/empty values from the filter value array
+        const valueArrayEmptiesRemoved = valueArray.filter(
+          (value: unknown) => !isEmpty(value),
+        );
+        // If the value array is empty, skip it entirely
+        if (valueArrayEmptiesRemoved.length) {
+          nonEmptyFilters[name as string] = valueArrayEmptiesRemoved;
+        }
+      }
+
       this.$state[payload.nodeType] = nonEmptyFilters;
       localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
@@ -52,8 +61,27 @@ export const useFilterStore = defineStore({
       filterName: alertFilterNameTypes | eventFilterNameTypes;
       filterValue: alertFilterValues | eventFilterValues;
     }) {
+      // If the filter value is 'empty' (empty string or list), don't add it
       if (!isEmpty(payload.filterValue)) {
-        this.$state[payload.nodeType][payload.filterName] = payload.filterValue;
+        // If there is already a value for this filter type, add it to the list
+        if (this.$state[payload.nodeType][payload.filterName]) {
+          // If the value is already in the list, don't add it again
+          if (
+            !this.$state[payload.nodeType][payload.filterName].includes(
+              payload.filterValue,
+            )
+          ) {
+            this.$state[payload.nodeType][payload.filterName].push(
+              payload.filterValue,
+            );
+          }
+        } else {
+          // Otherwise, create a new list with the value
+          this.$state[payload.nodeType][payload.filterName] = [
+            payload.filterValue,
+          ];
+        }
+        // Update the local storage with the new filters
         localStorage.setItem("aceFilters", JSON.stringify(this.$state));
       }
     },
@@ -63,6 +91,27 @@ export const useFilterStore = defineStore({
       filterName: alertFilterNameTypes | eventFilterNameTypes;
     }) {
       delete this.$state[payload.nodeType][payload.filterName];
+      localStorage.setItem("aceFilters", JSON.stringify(this.$state));
+    },
+
+    unsetFilterValue(payload: {
+      nodeType: "alerts" | "events";
+      filterName: alertFilterNameTypes | eventFilterNameTypes;
+      filterValue: alertFilterValues | eventFilterValues;
+    }) {
+      // Remove the given filterValue from the list of values for this filter type
+      this.$state[payload.nodeType][payload.filterName] = this.$state[
+        payload.nodeType
+      ][payload.filterName].filter(
+        (v: alertFilterValues | eventFilterValues) => v !== payload.filterValue,
+      );
+
+      // If the list of values for this filter type is empty, remove the filter type entirely
+      if (this.$state[payload.nodeType][payload.filterName].length === 0) {
+        delete this.$state[payload.nodeType][payload.filterName];
+      }
+
+      // Update the local storage with the updated filters
       localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
 
