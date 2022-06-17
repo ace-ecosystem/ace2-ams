@@ -180,7 +180,7 @@
 
   const getEventsWithStatus = async (status: eventStatusRead) => {
     const allEvents = await Event.readAllPages({
-      status: status,
+      status: [status],
       sort: "created_time|asc",
     });
 

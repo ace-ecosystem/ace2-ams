@@ -60,9 +60,9 @@ describe("TheFilterToolbar", () => {
   it("renders as expected when there are filters applied", () => {
     factory({
       alerts: {
-        name: "test name",
-        eventTimeAfter: new Date(2022, 4, 22, 12, 0, 0),
-        eventTimeBefore: new Date(2022, 4, 23, 12, 0, 0),
+        name: ["test name"],
+        eventTimeAfter: [new Date(2022, 4, 22, 12, 0, 0)],
+        eventTimeBefore: [new Date(2022, 4, 23, 12, 0, 0)],
       },
       events: {},
     });

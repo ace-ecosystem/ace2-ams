@@ -105,7 +105,7 @@
     // reset all to start
     filterStore.clearAll({ nodeType: nodeType });
     if (nodeType === "alerts") {
-      const filters: { queue?: queueRead } = {};
+      const filters: { queue?: queueRead[] } = {};
       // look for owner == current user OR none
       // currently explicit "no owner" filter is unavailable so, skip this one for now
       // filters.owner = authStore.user;
@@ -115,26 +115,30 @@
       // filters.disposition = null;
 
       // look for alerts in current user's preferred queue
-      filters.queue = currentUserSettingsStore.queues.alerts
-        ? currentUserSettingsStore.queues.alerts
-        : authStore.user.defaultAlertQueue;
+      filters.queue = [
+        currentUserSettingsStore.queues.alerts
+          ? currentUserSettingsStore.queues.alerts
+          : authStore.user.defaultAlertQueue,
+      ];
 
       filterStore.bulkSetFilters({ nodeType: nodeType, filters: filters });
     } else if (nodeType === "events") {
-      const filters: { queue?: queueRead; status?: eventStatusRead } = {};
+      const filters: { queue?: queueRead[]; status?: eventStatusRead[] } = {};
       // look for events with 'OPEN' or "INTERNAL COLLECTION" (?) status
       // can't do OR filters right now, look only for 'OPEN' events
       const openStatus = eventStatusStore.items.find((status) => {
         return status.value === "OPEN";
       });
       if (openStatus) {
-        filters.status = openStatus;
+        filters.status = [openStatus];
       }
 
       // look for events in current user's preferred queue
-      filters.queue = currentUserSettingsStore.queues.events
-        ? currentUserSettingsStore.queues.events
-        : authStore.user.defaultEventQueue;
+      filters.queue = [
+        currentUserSettingsStore.queues.events
+          ? currentUserSettingsStore.queues.events
+          : authStore.user.defaultEventQueue,
+      ];
 
       filterStore.bulkSetFilters({ nodeType: nodeType, filters: filters });
     }
