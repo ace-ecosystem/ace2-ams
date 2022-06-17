@@ -188,14 +188,20 @@ export function formatNodeFiltersForAPI(
       return filter.name === param;
     });
 
-    // if so, check if the param's value needs to be formatted, and replace with the newly formatted val
+    // if so, check if the params values need to be formatted, and replace with the newly formatted values
     if (filterType) {
       // First check if there is a method provided to get string representation
       if (filterType.stringRepr) {
-        paramValue = filterType.stringRepr(paramValue) as never;
+        paramValue = paramValue.map(filterType.stringRepr) as never;
         // Otherwise check if the param's value is a specific property
-      } else if (filterType.valueProperty && isObject(paramValue)) {
-        paramValue = paramValue[filterType.valueProperty];
+      } else if (
+        filterType.valueProperty &&
+        Array.isArray(paramValue) &&
+        paramValue.every(isObject)
+      ) {
+        paramValue = paramValue.map(
+          (v: any) => v[filterType.valueProperty as string],
+        );
       }
     }
 

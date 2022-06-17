@@ -246,26 +246,66 @@ describe("formatNodeFiltersForAPI", () => {
   const MOCK_PARAMS: alertFilterParams = {
     limit: 10,
     offset: 10,
-    name: "Test Name",
-    disposition: {
-      rank: 0,
-      description: null,
-      uuid: "1",
-      value: "FALSE_POSITIVE",
-    },
+    name: ["Test Name", "Test Name 2"],
+    disposition: [
+      {
+        rank: 0,
+        description: null,
+        uuid: "1",
+        value: "FALSE_POSITIVE",
+      },
+      {
+        rank: 1,
+        description: null,
+        uuid: "2",
+        value: "IGNORE",
+      },
+    ],
     observableTypes: [
-      { value: "testA", description: null, uuid: "1" },
-      { value: "testB", description: null, uuid: "2" },
+      [
+        { value: "testA", description: null, uuid: "1" },
+        { value: "testB", description: null, uuid: "2" },
+      ],
+      [{ value: "testC", description: null, uuid: "3" }],
     ],
-    tags: ["tagA", "tagB"],
+    tags: [["tagA", "tagB"], ["tagC"]],
     threats: [
-      { value: "threatA", description: null, types: [], uuid: "1", queues: [] },
-      { value: "threatB", description: null, types: [], uuid: "2", queues: [] },
+      [
+        {
+          value: "threatA",
+          description: null,
+          types: [],
+          uuid: "1",
+          queues: [],
+        },
+        {
+          value: "threatB",
+          description: null,
+          types: [],
+          uuid: "2",
+          queues: [],
+        },
+      ],
+      [
+        {
+          value: "threatC",
+          description: null,
+          types: [],
+          uuid: "3",
+          queues: [],
+        },
+      ],
     ],
-    observable: {
-      category: { value: "test", description: null, uuid: "1" },
-      value: "example",
-    },
+    observable: [
+      {
+        category: { value: "test", description: null, uuid: "1" },
+        value: "example",
+      },
+      {
+        category: { value: "test2", description: null, uuid: "2" },
+        value: "example2",
+      },
+    ],
   };
   it("will correctly parse and add any multiselect filters", async () => {
     const formattedFilters = formatNodeFiltersForAPI(
@@ -275,12 +315,12 @@ describe("formatNodeFiltersForAPI", () => {
     expect(formattedFilters).toEqual({
       limit: 10,
       offset: 10,
-      disposition: "FALSE_POSITIVE",
-      name: "Test Name",
-      threats: "threatA,threatB",
-      observableTypes: "testA,testB",
-      tags: "tagA,tagB",
-      observable: "test|example",
+      disposition: ["FALSE_POSITIVE", "IGNORE"],
+      name: ["Test Name", "Test Name 2"],
+      threats: ["threatA,threatB", "threatC"],
+      observableTypes: ["testA,testB", "testC"],
+      tags: ["tagA,tagB", "tagC"],
+      observable: ["test|example", "test2|example2"],
     });
   });
 
