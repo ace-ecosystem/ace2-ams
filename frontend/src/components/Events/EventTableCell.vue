@@ -70,6 +70,7 @@
   import { useModalStore } from "@/stores/modal";
   import { useEventTableStore } from "@/stores/eventTable";
   import { eventSummary } from "@/models/event";
+  import { prettyPrintDateString } from "@/etc/helpers";
 
   const eventTableStore = useEventTableStore();
   const modalStore = useModalStore();
@@ -89,8 +90,7 @@
 
   const formatDateTime = (dateTime: string) => {
     if (dateTime) {
-      const d = new Date(dateTime);
-      return d.toLocaleString("en-US", { timeZone: "UTC" });
+      return prettyPrintDateString(dateTime);
     }
 
     return "None";

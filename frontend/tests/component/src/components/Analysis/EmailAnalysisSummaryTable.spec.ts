@@ -52,7 +52,7 @@ describe("EmailAnalysisSummaryTable", () => {
         messageId: "<123abc@evil.com>",
         replyToAddress: null,
         subject: "Hello",
-        time: new Date(Date.UTC(2022, 2, 29, 12, 0, 0, 0)),
+        time: "2022-02-29T12:00:00.000000+00:00",
         toAddress: "to@company.com",
       },
     ];

@@ -116,7 +116,7 @@
     observableTreeRead,
   } from "@/models/observable";
   import type { observableActionSubTypes } from "@/models/observable";
-  import { copyToClipboard } from "@/etc/helpers";
+  import { copyToClipboard, prettyPrintDateString } from "@/etc/helpers";
   import { useAlertStore } from "@/stores/alert";
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
@@ -195,10 +195,10 @@
 
     const displayValue = `${type}: ${value}`;
 
-    if (props.observable.time) {
-      return `${displayValue} @ ${new Date(
-        props.observable.time,
-      ).toLocaleString("en-US", { timeZone: "UTC" })} UTC`;
+    if (props.observable.analysisMetadata.time) {
+      return `${displayValue} @ ${prettyPrintDateString(
+        props.observable.analysisMetadata.time.value,
+      )}`;
     }
 
     return displayValue;

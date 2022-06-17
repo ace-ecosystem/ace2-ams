@@ -7,7 +7,6 @@ import { analysisMetadataReadFactory } from "./analysisMetadata";
 import { genericObjectReadFactory } from "./genericObject";
 
 export const observableReadFactory = ({
-  time = new Date("2020-01-01"),
   uuid = "observableUuid1",
   value = "TestObservable",
   comments = [],
@@ -22,7 +21,6 @@ export const observableReadFactory = ({
   version = "observableVersion1",
   observableRelationships = [],
 }: Partial<observableRead> = {}): observableRead => ({
-  time: time,
   uuid: uuid,
   value: value,
   comments: comments,
@@ -40,7 +38,6 @@ export const observableReadFactory = ({
 });
 
 export const observableInAlertReadFactory = ({
-  time = new Date("2020-01-01"),
   uuid = "observableUuid1",
   value = "TestObservable",
   analysisMetadata = analysisMetadataReadFactory(),
@@ -56,7 +53,6 @@ export const observableInAlertReadFactory = ({
   version = "observableVersion1",
   observableRelationships = [],
 }: Partial<observableInAlertRead> = {}): observableInAlertRead => ({
-  time: time,
   uuid: uuid,
   value: value,
   analysisMetadata: analysisMetadata,
@@ -77,7 +73,6 @@ export const observableInAlertReadFactory = ({
 
 export const observableTreeReadFactory = ({
   children = [],
-  time = new Date("2020-01-01"),
   uuid = "observableUuid1",
   value = "TestObservable",
   analysisMetadata = analysisMetadataReadFactory(),
@@ -97,7 +92,6 @@ export const observableTreeReadFactory = ({
   children: children,
   uuid: uuid,
   version: version,
-  time: time,
   value: value,
   analysisMetadata: analysisMetadata,
   comments: comments,

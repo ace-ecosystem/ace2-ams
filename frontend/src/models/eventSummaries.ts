@@ -29,7 +29,7 @@ export interface emailSummary {
   messageId: string;
   replyToAddress: string | null;
   subject: string | null;
-  time: Date;
+  time: string;
   toAddress: string;
 }
 

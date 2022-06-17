@@ -36,7 +36,7 @@ describe("NodeComment", () => {
     factory({
       props: {
         comment: commentReadFactory({
-          insertTime: new Date(2022, 3, 25, 12, 0, 0),
+          insertTime: "2022-03-25T12:00:00.000000+00:00",
         }),
         includeTime: true,
       },

@@ -226,7 +226,10 @@
     };
 
     if (observable.time) {
-      submissionObservable["time"] = observable.time;
+      submissionObservable.analysisMetadata.push({
+        type: "time",
+        value: observable.time,
+      });
     }
 
     for (const directive of observable.directives) {

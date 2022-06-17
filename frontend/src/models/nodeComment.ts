@@ -10,7 +10,7 @@ export interface nodeCommentCreate {
 }
 
 export interface nodeCommentRead {
-  insertTime: Date;
+  insertTime: string;
   nodeUuid: UUID;
   user: userRead;
   uuid: UUID;

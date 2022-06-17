@@ -7,10 +7,10 @@ import AlertTableCell from "@/components/Alerts/AlertTableCell.vue";
 import { alertSummary } from "@/models/alert";
 import { alertSummaryFactory } from "@mocks/alert";
 import { commentReadFactory } from "@mocks/comment";
-import { metadataObjectReadFactory } from "@mocks/metadata";
 import { testConfiguration } from "@/etc/configuration/test";
 
 import router from "@/router/index";
+import { metadataTagReadFactory } from "@mocks/metadata";
 
 interface AlertTableCellProps {
   data: alertSummary;
@@ -20,7 +20,7 @@ interface AlertTableCellProps {
 const mockAlert: alertSummary = alertSummaryFactory({
   name: "Test",
   comments: [commentReadFactory({ value: "Test comment" })],
-  tags: [metadataObjectReadFactory({ value: "testTag" })],
+  tags: [metadataTagReadFactory({ value: "testTag" })],
 });
 
 const defaultProps: AlertTableCellProps = {

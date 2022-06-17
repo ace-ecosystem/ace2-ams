@@ -92,6 +92,7 @@
   import Timeline from "primevue/timeline";
 
   import { parseEventSummary } from "@/stores/eventTable";
+  import { prettyPrintDateString } from "@/etc/helpers";
 
   interface eventTimeEntry {
     label: string;
@@ -134,8 +135,8 @@
     if (datetime == "TBD") {
       return datetime;
     }
-    const d = new Date(datetime);
-    return `${d.toLocaleString("en-US", { timeZone: "UTC" })} UTC`;
+
+    return prettyPrintDateString(datetime);
   };
 
   const onColumnToggle = (val: any) => {

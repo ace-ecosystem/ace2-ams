@@ -8,8 +8,8 @@ import router from "@/router/index";
 import { alertReadFactory } from "@mocks/alert";
 import { alertRead } from "@/models/alert";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import { metadataObjectReadFactory } from "@mocks/metadata";
 import { userReadFactory } from "@mocks/user";
+import { metadataTagReadFactory } from "@mocks/metadata";
 
 function factory(initialAlertStoreState: {
   open: null | alertRead;
@@ -39,7 +39,7 @@ describe("TheAlertDetails", () => {
   it("renders correctly when there is an open alert that has no observables with detection points or instructions", () => {
     factory({
       open: alertReadFactory({
-        tags: [metadataObjectReadFactory({ value: "TestTag" })],
+        tags: [metadataTagReadFactory({ value: "TestTag" })],
       }),
       requestReload: false,
     });
@@ -66,10 +66,10 @@ describe("TheAlertDetails", () => {
     cy.contains("No detections found").should("be.visible");
   });
   it("renders correctly when there is an open alert has an owner and disposition set (uses the correct alertSummary fields)", () => {
-    const date = new Date(2020, 5, 4, 12, 0, 0, 0);
+    const date = "2020-05-04T12:00:00.000000+00:00";
     factory({
       open: alertReadFactory({
-        tags: [metadataObjectReadFactory({ value: "TestTag" })],
+        tags: [metadataTagReadFactory({ value: "TestTag" })],
         owner: userReadFactory(),
         ownershipTime: date,
         disposition: {
@@ -99,7 +99,7 @@ describe("TheAlertDetails", () => {
     factory({
       open: alertReadFactory({
         instructions: "alert instructions example",
-        tags: [metadataObjectReadFactory({ value: "TestTag" })],
+        tags: [metadataTagReadFactory({ value: "TestTag" })],
       }),
       requestReload: false,
     });
@@ -111,19 +111,19 @@ describe("TheAlertDetails", () => {
   });
   it("renders correctly when there is an open alert that does have observables with detection points", () => {
     const detectionPointA = {
-      insertTime: new Date(),
+      insertTime: "2020-05-04T12:00:00.000000+00:00",
       nodeUuid: "nodeUuidB",
       uuid: "uuidB",
       value: "detectionA",
     };
     const detectionPointB = {
-      insertTime: new Date(),
+      insertTime: "2020-05-04T12:00:00.000000+00:00",
       nodeUuid: "nodeUuidB",
       uuid: "uuidB",
       value: "detectionB",
     };
     const detectionPointC = {
-      insertTime: new Date(),
+      insertTime: "2020-05-04T12:00:00.000000+00:00",
       nodeUuid: "nodeUuidC",
       uuid: "uuidC",
       value: "detectionC",
@@ -137,7 +137,7 @@ describe("TheAlertDetails", () => {
           detectionPointB,
           detectionPointC,
         ],
-        tags: [metadataObjectReadFactory({ value: "TestTag" })],
+        tags: [metadataTagReadFactory({ value: "TestTag" })],
       }),
       requestReload: false,
     });

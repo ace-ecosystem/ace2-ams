@@ -11,9 +11,9 @@ import {
   analysisModuleTypeNodeTreeReadFactory,
   analysisTreeReadFactory,
 } from "@mocks/analysis";
-import { metadataObjectReadFactory } from "@mocks/metadata";
 import { testConfiguration } from "@/etc/configuration/test";
 import ToastService from "primevue/toastservice";
+import { metadataTagReadFactory } from "@mocks/metadata";
 
 const childObservable = observableTreeReadFactory({
   value: "Child Observable",
@@ -27,7 +27,7 @@ const childAnalysis = analysisTreeReadFactory({
 const parentObservable = observableTreeReadFactory({
   value: "Parent Observable",
   children: [childAnalysis],
-  permanentTags: [metadataObjectReadFactory({ value: "testTag" })],
+  permanentTags: [metadataTagReadFactory({ value: "testTag" })],
 });
 const parentAnalysis = analysisTreeReadFactory({
   analysisModuleType: analysisModuleTypeNodeTreeReadFactory({

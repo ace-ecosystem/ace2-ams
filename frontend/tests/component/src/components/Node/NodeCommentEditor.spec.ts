@@ -8,10 +8,10 @@ import NodeCommentEditor from "@/components/Node/NodeCommentEditor.vue";
 import { nodeCommentRead } from "@/models/nodeComment";
 
 let comments = [
-  commentReadFactory({ insertTime: new Date(2022, 4, 25, 12, 0, 0, 0) }),
+  commentReadFactory({ insertTime: "2022-04-25T12:00:00.000000+00:00" }),
   commentReadFactory({
     value: "Other comment",
-    insertTime: new Date(2022, 4, 25, 1, 0, 0, 0),
+    insertTime: "2022-04-25T01:00:00.000000+00:00",
   }),
 ];
 
@@ -37,10 +37,10 @@ describe("NodeCommentEditor", () => {
   // these props get updated in some tests, need to reset value here
   beforeEach(() => {
     comments = [
-      commentReadFactory({ insertTime: new Date(2022, 4, 25, 12, 0, 0, 0) }),
+      commentReadFactory({ insertTime: "2022-04-25T12:00:00.000000+00:00" }),
       commentReadFactory({
         value: "Other comment",
-        insertTime: new Date(2022, 4, 25, 1, 0, 0, 0),
+        insertTime: "2022-04-25T01:00:00.000000+00:00",
       }),
     ];
   });
@@ -76,7 +76,7 @@ describe("NodeCommentEditor", () => {
   });
   it("does update comment value if edit panel opened, comment edited, and saved", () => {
     factory([
-      commentReadFactory({ insertTime: new Date(2022, 4, 25, 12, 0, 0, 0) }),
+      commentReadFactory({ insertTime: "2022-04-25T12:00:00.000000+00:00" }),
     ]);
     cy.get('[data-cy="edit-comment-button"]').first().click();
     cy.contains("5/25/2022, 12:00:00 PM (Test Analyst) A test comment").should(
@@ -108,7 +108,7 @@ describe("NodeCommentEditor", () => {
   });
   it("correctly updates comment data when selecting from recent comments", () => {
     factory([
-      commentReadFactory({ insertTime: new Date(2022, 4, 25, 12, 0, 0, 0) }),
+      commentReadFactory({ insertTime: "2022-04-25T12:00:00.000000+00:00" }),
     ]);
     cy.get('[data-cy="edit-comment-button"]').first().click();
     cy.contains("5/25/2022, 12:00:00 PM (Test Analyst) A test comment").should(

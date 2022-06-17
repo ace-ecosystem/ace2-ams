@@ -26,7 +26,7 @@ describe("EventDetectionsSummary", () => {
     const result: detectionPointSummary = {
       alertUuid: "alertUuid",
       count: 3,
-      insertTime: new Date(3, 14, 2022),
+      insertTime: "2022-03-14T00:00:00.000000+00:00",
       nodeUuid: "nodeUuid",
       uuid: "detectionUuid",
       value: "Test detection point",

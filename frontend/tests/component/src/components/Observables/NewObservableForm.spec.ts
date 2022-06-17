@@ -5,7 +5,7 @@ import { testConfiguration } from "@/etc/configuration/test/index";
 import NewObservableForm from "@/components/Observables/NewObservableForm.vue";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { metadataObjectReadFactory } from "@mocks/metadata";
+import { metadataDirectiveReadFactory } from "@mocks/metadata";
 
 const testObservableTypeA = "file";
 const testObservableTypeB = "ipv4";
@@ -19,7 +19,7 @@ function factory() {
         createCustomCypressPinia({
           initialState: {
             metadataDirectiveStore: {
-              items: [metadataObjectReadFactory({ value: testDirective })],
+              items: [metadataDirectiveReadFactory({ value: testDirective })],
             },
             observableTypeStore: {
               items: [

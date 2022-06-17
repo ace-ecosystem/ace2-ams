@@ -8,7 +8,7 @@ import router from "@/router/index";
 import { eventSummary } from "@/models/event";
 import { commentReadFactory } from "@mocks/comment";
 import { eventSummaryFactory } from "@mocks/events";
-import { metadataObjectReadFactory } from "@mocks/metadata";
+import { metadataTagReadFactory } from "@mocks/metadata";
 
 interface EventTableCellProps {
   data: eventSummary;
@@ -20,7 +20,7 @@ const mockEvent: eventSummary = eventSummaryFactory({
   name: "Test",
   createdTime: new Date(Date.UTC(2022, 2, 24)),
   comments: [commentReadFactory({ value: "Test comment" })],
-  tags: [metadataObjectReadFactory({ value: "testTag" })],
+  tags: [metadataTagReadFactory({ value: "testTag" })],
   threats: ["threat A", "threat B"],
   queue: "testEventQueue",
 });

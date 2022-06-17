@@ -10,7 +10,7 @@ import { userReadFactory } from "@mocks/user";
 import { alertTreeReadFactory } from "@mocks/alert";
 import { ObservableInstance } from "@/services/api/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import { metadataObjectReadFactory } from "@mocks/metadata";
+import { metadataDirectiveReadFactory } from "@mocks/metadata";
 
 const testObservableValueA = "1.2.3.4";
 const testObservableValueB = "5.6.7.8";
@@ -32,7 +32,7 @@ function factory() {
               open: alertTreeReadFactory(),
             },
             metadataDirectiveStore: {
-              items: [metadataObjectReadFactory({ value: testDirective })],
+              items: [metadataDirectiveReadFactory({ value: testDirective })],
             },
             observableTypeStore: {
               items: [

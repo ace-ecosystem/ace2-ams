@@ -53,6 +53,16 @@ export function dateParser(key: string, value: unknown): Date | unknown {
   return value;
 }
 
+export function prettyPrintDateString(
+  dateString: string,
+  timezone?: string,
+): string {
+  const tz = timezone || "UTC";
+  return `${new Date(dateString).toLocaleString("en-US", {
+    timeZone: tz,
+  })} ${tz}`;
+}
+
 export function parseFilters(
   queryFilters: Record<string, string>,
   availableFilters: readonly propertyOption[],
@@ -181,7 +191,7 @@ export function formatNodeFiltersForAPI(
 ): Record<string, string> | Record<string, number> {
   const formattedParams = {} as alertFilterParams;
   for (const param in params) {
-    let paramValue = params[param] as any;
+    let paramValue = params[param] as unknown;
 
     //  check if the given param is specific to node and not pageOptionParams, i.e. disposition
     const filterType = availableFilters.find((filter) => {
@@ -229,7 +239,7 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
     description: alert.description ? alert.description : "",
     disposition: alert.disposition ? alert.disposition.value : "OPEN",
     dispositionTime: alert.dispositionTime
-      ? new Date(alert.dispositionTime)
+      ? prettyPrintDateString(alert.dispositionTime)
       : null,
     dispositionUser: alert.dispositionUser
       ? alert.dispositionUser.displayName
@@ -240,17 +250,19 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
             alert.dispositionUser.displayName
           } @ ${new Date(alert.dispositionTime).toISOString()}`
         : "OPEN",
-    eventTime: new Date(alert.eventTime),
+    eventTime: prettyPrintDateString(alert.eventTime),
     eventUuid: alert.eventUuid ? alert.eventUuid : "None",
-    insertTime: new Date(alert.insertTime),
+    insertTime: prettyPrintDateString(alert.insertTime),
     name: alert.name,
     owner: alert.owner ? alert.owner.displayName : "None",
-    ownershipTime: alert.ownershipTime ? new Date(alert.ownershipTime) : null,
+    ownershipTime: alert.ownershipTime
+      ? prettyPrintDateString(alert.ownershipTime)
+      : null,
     ownerWithTime:
       alert.owner && alert.ownershipTime
-        ? `${alert.owner.displayName} @ ${new Date(
+        ? `${alert.owner.displayName} @ ${prettyPrintDateString(
             alert.ownershipTime,
-          ).toISOString()}`
+          )}`
         : "None",
     queue: alert.queue.value,
     tags: alert.tags,

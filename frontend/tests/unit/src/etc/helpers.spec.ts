@@ -14,48 +14,36 @@ import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
 import { createTestingPinia } from "@pinia/testing";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import { metadataObjectReadFactory } from "@mocks/metadata";
+import { metadataTagReadFactory } from "@mocks/metadata";
 import { genericQueueableObjectRead } from "@/models/base";
 
 createTestingPinia({ createSpy: vi.fn });
 
 const mockAlertTreeRead = alertTreeReadFactory({
   tags: [
-    metadataObjectReadFactory({
+    metadataTagReadFactory({
       value: "from_address",
       uuid: "uuid3",
-      description: null,
-      metadataType: "metadataObject",
     }),
-    metadataObjectReadFactory({
+    metadataTagReadFactory({
       value: "contacted_host",
       uuid: "uuid2",
-      description: null,
-      metadataType: "metadataObject",
     }),
-    metadataObjectReadFactory({
-      value: "contacted_host",
-      uuid: "uuid2",
-      description: null,
-      metadataType: "metadataObject",
-    }),
-    metadataObjectReadFactory({
-      value: "contacted_host",
-      uuid: "uuid2",
-      description: null,
-      metadataType: "metadataObject",
-    }),
-    metadataObjectReadFactory({
+    // metadataTagReadFactory({
+    //   value: "contacted_host",
+    //   uuid: "uuid2",
+    // }),
+    // metadataTagReadFactory({
+    //   value: "contacted_host",
+    //   uuid: "uuid2",
+    // }),
+    metadataTagReadFactory({
       value: "c2",
       uuid: "uuid1",
-      description: null,
-      metadataType: "metadataObject",
     }),
-    metadataObjectReadFactory({
+    metadataTagReadFactory({
       value: "recipient",
       uuid: "uuid4",
-      description: null,
-      metadataType: "metadataObject",
     }),
   ],
 });

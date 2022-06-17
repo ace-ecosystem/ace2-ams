@@ -13,7 +13,7 @@ import { alertReadFactory } from "@mocks/alert";
 import { Alert } from "@/services/api/alert";
 import { TestingOptions } from "@pinia/testing";
 import { testConfiguration } from "@/etc/configuration/test/index";
-import { metadataObjectReadFactory } from "@mocks/metadata";
+import { metadataDirectiveReadFactory } from "@mocks/metadata";
 
 const testAlertTypeA = "testAlertTypeA";
 const testAlertTypeB = "testAlertTypeB";
@@ -38,7 +38,7 @@ const initialState = {
     }),
   },
   metadataDirectiveStore: {
-    items: [metadataObjectReadFactory({ value: testDirective })],
+    items: [metadataDirectiveReadFactory({ value: testDirective })],
   },
   observableTypeStore: {
     items: [
