@@ -7,7 +7,7 @@ import {
 import { genericQueueableObjectRead, propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
 import { metadataTagRead } from "@/models/metadataTag";
-import { isValidDate, isObject } from "@/etc/validators";
+import { isValidDate, isObject, isValidDateString } from "@/etc/validators";
 import { inputTypes } from "@/etc/constants/base";
 
 export const camelToSnakeCase = (str: string): string =>
@@ -54,11 +54,22 @@ export function dateParser(key: string, value: unknown): Date | unknown {
 }
 
 export function prettyPrintDateString(
-  dateString: string,
+  datetime: string | Date,
   timezone?: string,
-): string {
+): string | Date {
+  // Convert the datetime to a string if it is a Date object.
+  if (datetime instanceof Date) {
+    datetime = datetime.toISOString();
+  }
+
+  // If the datetime is not a valid date string, return it as-is.
+  if (!isValidDateString(datetime)) {
+    return datetime;
+  }
+
+  // Return the formatted datetime string according to the given timezone (or UTC).
   const tz = timezone || "UTC";
-  return `${new Date(dateString).toLocaleString("en-US", {
+  return `${new Date(datetime).toLocaleString("en-US", {
     timeZone: tz,
   })} ${tz}`;
 }
@@ -248,7 +259,7 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
       alert.disposition && alert.dispositionUser && alert.dispositionTime
         ? `${alert.disposition.value} by ${
             alert.dispositionUser.displayName
-          } @ ${new Date(alert.dispositionTime).toISOString()}`
+          } @ ${prettyPrintDateString(alert.dispositionTime)}`
         : "OPEN",
     eventTime: prettyPrintDateString(alert.eventTime),
     eventUuid: alert.eventUuid ? alert.eventUuid : "None",

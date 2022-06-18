@@ -70,7 +70,11 @@
   import NodeComment from "@/components/Node/NodeComment.vue";
 
   import { alertSummary } from "@/models/alert";
-  import { getAllAlertTags, getAlertLink } from "@/etc/helpers";
+  import {
+    getAllAlertTags,
+    getAlertLink,
+    prettyPrintDateString,
+  } from "@/etc/helpers";
 
   const config = inject("config") as Record<string, any>;
 
@@ -91,7 +95,7 @@
   });
 
   const formatDateTime = (dateTime: string) => {
-    return dateTime || "None";
+    return prettyPrintDateString(dateTime) || "None";
   };
 </script>
 

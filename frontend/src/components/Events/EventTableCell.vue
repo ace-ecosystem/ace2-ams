@@ -89,11 +89,7 @@
   });
 
   const formatDateTime = (dateTime: string) => {
-    if (dateTime) {
-      return prettyPrintDateString(dateTime);
-    }
-
-    return "None";
+    return prettyPrintDateString(dateTime) || "None";
   };
 
   const getEventLink = (uuid: string) => {
