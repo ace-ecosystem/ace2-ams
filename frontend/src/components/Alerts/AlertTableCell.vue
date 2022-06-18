@@ -73,7 +73,7 @@
   import {
     getAllAlertTags,
     getAlertLink,
-    prettyPrintDateString,
+    prettyPrintDateTime,
   } from "@/etc/helpers";
 
   const config = inject("config") as Record<string, any>;
@@ -95,7 +95,7 @@
   });
 
   const formatDateTime = (dateTime: string) => {
-    return prettyPrintDateString(dateTime) || "None";
+    return prettyPrintDateTime(dateTime) || "None";
   };
 </script>
 

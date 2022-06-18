@@ -92,7 +92,7 @@
   import Timeline from "primevue/timeline";
 
   import { parseEventSummary } from "@/stores/eventTable";
-  import { prettyPrintDateString } from "@/etc/helpers";
+  import { prettyPrintDateTime } from "@/etc/helpers";
 
   interface eventTimeEntry {
     label: string;
@@ -136,7 +136,7 @@
       return datetime;
     }
 
-    return prettyPrintDateString(datetime);
+    return prettyPrintDateTime(datetime);
   };
 
   const onColumnToggle = (val: any) => {

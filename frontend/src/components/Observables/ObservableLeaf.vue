@@ -116,7 +116,7 @@
     observableTreeRead,
   } from "@/models/observable";
   import type { observableActionSubTypes } from "@/models/observable";
-  import { copyToClipboard, prettyPrintDateString } from "@/etc/helpers";
+  import { copyToClipboard, prettyPrintDateTime } from "@/etc/helpers";
   import { useAlertStore } from "@/stores/alert";
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
@@ -196,7 +196,7 @@
     const displayValue = `${type}: ${value}`;
 
     if (props.observable.analysisMetadata.time) {
-      return `${displayValue} @ ${prettyPrintDateString(
+      return `${displayValue} @ ${prettyPrintDateTime(
         props.observable.analysisMetadata.time.value,
       )}`;
     }

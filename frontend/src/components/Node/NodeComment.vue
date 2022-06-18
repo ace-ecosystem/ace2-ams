@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-  import { prettyPrintDateString } from "@/etc/helpers";
+  import { prettyPrintDateTime } from "@/etc/helpers";
   import { nodeCommentRead } from "@/models/nodeComment";
   import { defineProps, PropType } from "vue";
 
@@ -18,7 +18,7 @@
 
   const formatComment = (comment: nodeCommentRead) => {
     if (props.includeTime) {
-      return `${prettyPrintDateString(comment.insertTime)} (${
+      return `${prettyPrintDateTime(comment.insertTime)} (${
         comment.user.displayName
       }) ${comment.value}`;
     }

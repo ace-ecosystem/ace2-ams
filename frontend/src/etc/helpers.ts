@@ -53,7 +53,7 @@ export function dateParser(key: string, value: unknown): Date | unknown {
   return value;
 }
 
-export function prettyPrintDateString(
+export function prettyPrintDateTime(
   datetime: string | Date,
   timezone?: string,
 ): string | Date {
@@ -250,7 +250,7 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
     description: alert.description ? alert.description : "",
     disposition: alert.disposition ? alert.disposition.value : "OPEN",
     dispositionTime: alert.dispositionTime
-      ? prettyPrintDateString(alert.dispositionTime)
+      ? prettyPrintDateTime(alert.dispositionTime)
       : null,
     dispositionUser: alert.dispositionUser
       ? alert.dispositionUser.displayName
@@ -259,19 +259,19 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
       alert.disposition && alert.dispositionUser && alert.dispositionTime
         ? `${alert.disposition.value} by ${
             alert.dispositionUser.displayName
-          } @ ${prettyPrintDateString(alert.dispositionTime)}`
+          } @ ${prettyPrintDateTime(alert.dispositionTime)}`
         : "OPEN",
-    eventTime: prettyPrintDateString(alert.eventTime),
+    eventTime: prettyPrintDateTime(alert.eventTime),
     eventUuid: alert.eventUuid ? alert.eventUuid : "None",
-    insertTime: prettyPrintDateString(alert.insertTime),
+    insertTime: prettyPrintDateTime(alert.insertTime),
     name: alert.name,
     owner: alert.owner ? alert.owner.displayName : "None",
     ownershipTime: alert.ownershipTime
-      ? prettyPrintDateString(alert.ownershipTime)
+      ? prettyPrintDateTime(alert.ownershipTime)
       : null,
     ownerWithTime:
       alert.owner && alert.ownershipTime
-        ? `${alert.owner.displayName} @ ${prettyPrintDateString(
+        ? `${alert.owner.displayName} @ ${prettyPrintDateTime(
             alert.ownershipTime,
           )}`
         : "None",

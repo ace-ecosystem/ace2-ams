@@ -70,7 +70,7 @@
   import { useModalStore } from "@/stores/modal";
   import { useEventTableStore } from "@/stores/eventTable";
   import { eventSummary } from "@/models/event";
-  import { prettyPrintDateString } from "@/etc/helpers";
+  import { prettyPrintDateTime } from "@/etc/helpers";
 
   const eventTableStore = useEventTableStore();
   const modalStore = useModalStore();
@@ -89,7 +89,7 @@
   });
 
   const formatDateTime = (dateTime: string) => {
-    return prettyPrintDateString(dateTime) || "None";
+    return prettyPrintDateTime(dateTime) || "None";
   };
 
   const getEventLink = (uuid: string) => {
