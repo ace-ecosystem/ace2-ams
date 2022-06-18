@@ -76,7 +76,7 @@ describe("EventTableCell", () => {
     // Comments
     cy.contains("(Test Analyst) Test comment");
   });
-  it("correctly renders an event time-type cell", () => {
+  it.only("correctly renders an event time-type cell", () => {
     const props: EventTableCellProps = {
       data: mockEvent,
       field: "createdTime",

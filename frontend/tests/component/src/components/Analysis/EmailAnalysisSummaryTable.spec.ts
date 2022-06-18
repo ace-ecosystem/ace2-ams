@@ -70,7 +70,7 @@ describe("EmailAnalysisSummaryTable", () => {
     ];
     const emailSummaryTableValues = [
       "Alert",
-      "3/29/2022, 12:00:00 PM",
+      "3/1/2022, 12:00:00 PM UTC",
       "123abc@evil.com",
       "to@company.com",
       "Hello",

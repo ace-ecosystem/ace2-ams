@@ -41,9 +41,9 @@ describe("NodeComment", () => {
         includeTime: true,
       },
     });
-    cy.contains("4/25/2022, 12:00:00 PM (Test Analyst) A test comment").should(
-      "be.visible",
-    );
+    cy.contains(
+      "3/25/2022, 12:00:00 PM UTC (Test Analyst) A test comment",
+    ).should("be.visible");
   });
   it("renders as expected with includeLineBreak set to false", () => {
     factory({

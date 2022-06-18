@@ -49,10 +49,10 @@ describe("TheAlertDetails", () => {
     cy.get("tr").should("have.length", 11);
     cy.contains("Insert Time")
       .siblings()
-      .should("have.text", "3/24/2022, 12:00:00 AM");
+      .should("have.text", "2/24/2022, 12:00:00 AM UTC");
     cy.contains("Event Time")
       .siblings()
-      .should("have.text", "3/24/2022, 12:00:00 AM");
+      .should("have.text", "2/24/2022, 12:00:00 AM UTC");
     cy.contains("Tool").siblings().should("have.text", "testAlertTool");
     cy.contains("Tool Instance")
       .siblings()
@@ -89,11 +89,11 @@ describe("TheAlertDetails", () => {
       .siblings()
       .should(
         "have.text",
-        "FALSE POSITIVE by Test Analyst @ 2020-06-04T16:00:00.000Z",
+        "FALSE POSITIVE by Test Analyst @ 5/4/2020, 12:00:00 PM UTC",
       );
     cy.contains("Owner")
       .siblings()
-      .should("have.text", "Test Analyst @ 2020-06-04T16:00:00.000Z");
+      .should("have.text", "Test Analyst @ 5/4/2020, 12:00:00 PM UTC");
   });
   it("renders correctly when there is an open alert that has instructions available", () => {
     factory({

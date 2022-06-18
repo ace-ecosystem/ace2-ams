@@ -93,7 +93,7 @@ describe("AlertTableCell", () => {
       field: "comments",
     };
     factory({ props: props });
-    cy.contains("12/31/2019, 7:00:00 PM (Test Analyst) Test comment");
+    cy.contains("1/1/2020, 12:00:00 AM UTC (Test Analyst) Test comment");
   });
   it("correctly renders a generic alert cell (queue)", () => {
     const props: AlertTableCellProps = {
