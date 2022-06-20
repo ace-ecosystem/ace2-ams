@@ -54,9 +54,11 @@ export function dateParser(key: string, value: unknown): Date | unknown {
 }
 
 export function prettyPrintDateTime(
-  datetime: string | Date,
+  datetime: string | Date | null,
   timezone?: string,
-): string | Date {
+): string {
+  if (!datetime) return "None";
+
   // Convert the datetime to a string if it is a Date object.
   if (datetime instanceof Date) {
     datetime = datetime.toISOString();

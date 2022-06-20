@@ -94,8 +94,15 @@
     return undefined;
   });
 
-  const formatDateTime = (dateTime: string) => {
-    return prettyPrintDateTime(dateTime) || "None";
+  const formatDateTime = (dateTime: unknown) => {
+    if (
+      typeof dateTime === "string" ||
+      dateTime instanceof Date ||
+      dateTime === null
+    ) {
+      return prettyPrintDateTime(dateTime) || "None";
+    }
+    return dateTime;
   };
 </script>
 
