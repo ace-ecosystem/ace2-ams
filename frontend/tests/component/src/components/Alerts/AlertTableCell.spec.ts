@@ -85,7 +85,7 @@ describe("AlertTableCell", () => {
       field: "eventTime",
     };
     factory({ props: props });
-    cy.contains("3/24/2022, 12:00:00 AM");
+    cy.contains("2/24/2022, 12:00:00 AM UTC");
   });
   it("correctly renders an alert comments cell", () => {
     const props: AlertTableCellProps = {

@@ -29,14 +29,6 @@ const mockAlertTreeRead = alertTreeReadFactory({
       value: "contacted_host",
       uuid: "uuid2",
     }),
-    // metadataTagReadFactory({
-    //   value: "contacted_host",
-    //   uuid: "uuid2",
-    // }),
-    // metadataTagReadFactory({
-    //   value: "contacted_host",
-    //   uuid: "uuid2",
-    // }),
     metadataTagReadFactory({
       value: "c2",
       uuid: "uuid1",
@@ -281,28 +273,28 @@ describe("formatNodeFiltersForAPI", () => {
     const result = getAllAlertTags(mockAlertTreeRead);
     expect(result).toEqual([
       {
-        description: null,
+        description: "A tag object",
         value: "c2",
         uuid: "uuid1",
-        metadataType: "metadataObject",
+        metadataType: "tag",
       },
       {
-        description: null,
+        description: "A tag object",
         value: "contacted_host",
         uuid: "uuid2",
-        metadataType: "metadataObject",
+        metadataType: "tag",
       },
       {
-        description: null,
+        description: "A tag object",
         value: "from_address",
         uuid: "uuid3",
-        metadataType: "metadataObject",
+        metadataType: "tag",
       },
       {
-        description: null,
+        description: "A tag object",
         value: "recipient",
         uuid: "uuid4",
-        metadataType: "metadataObject",
+        metadataType: "tag",
       },
     ]);
   });
