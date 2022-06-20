@@ -70,7 +70,7 @@ describe("TheAlertsTable", () => {
     const defaultColumnValues = [
       "",
       "",
-      "3/24/2022, 12:00:00 AM",
+      "2/24/2022, 12:00:00 AM UTC",
       "Test Alert",
       "None",
       "OPEN",

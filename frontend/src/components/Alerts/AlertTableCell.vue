@@ -70,7 +70,11 @@
   import NodeComment from "@/components/Node/NodeComment.vue";
 
   import { alertSummary } from "@/models/alert";
-  import { getAllAlertTags, getAlertLink } from "@/etc/helpers";
+  import {
+    getAllAlertTags,
+    getAlertLink,
+    prettyPrintDateTime,
+  } from "@/etc/helpers";
 
   const config = inject("config") as Record<string, any>;
 
@@ -90,17 +94,15 @@
     return undefined;
   });
 
-  const formatDateTime = (dateTime: any) => {
-    if (typeof dateTime === "string") {
-      return dateTime;
+  const formatDateTime = (dateTime: unknown) => {
+    if (
+      typeof dateTime === "string" ||
+      dateTime instanceof Date ||
+      dateTime === null
+    ) {
+      return prettyPrintDateTime(dateTime) || "None";
     }
-
-    if (dateTime) {
-      const d = new Date(dateTime);
-      return d.toLocaleString("en-US", { timeZone: "UTC" });
-    }
-
-    return "None";
+    return dateTime;
   };
 </script>
 

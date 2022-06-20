@@ -31,7 +31,6 @@ export interface observableCreate extends nodeCreate, historyUsername {
   tags?: string[];
   threatActors?: string[];
   threats?: string[];
-  time?: Date;
   type: string;
   value: string;
   [key: string]: unknown;
@@ -41,13 +40,12 @@ export interface observableRead extends nodeRead {
   comments: nodeCommentRead[];
   context: string | null;
   detectionPoints: nodeDetectionPointRead[];
-  expiresOn: Date | null;
+  expiresOn: string | null;
   forDetection: boolean;
   observableRelationships: observableRelationshipRead[];
   permanentTags: metadataTagRead[];
   threatActors: nodeThreatActorRead[];
   threats: nodeThreatRead[];
-  time: Date;
   type: observableTypeRead;
   value: string;
 }
@@ -76,7 +74,6 @@ export interface observableUpdate extends nodeUpdate, historyUsername {
   tags?: string[];
   threatActors?: string[];
   threats?: string[];
-  time?: Date;
   type?: string;
   value?: string;
   [key: string]: unknown;

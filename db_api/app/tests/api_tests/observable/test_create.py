@@ -27,10 +27,6 @@ from tests import factory
         ("parent_analysis_uuid", 123),
         ("parent_analysis_uuid", ""),
         ("parent_analysis_uuid", "abc"),
-        ("time", None),
-        ("time", ""),
-        ("time", "Monday"),
-        ("time", "2022-01-01"),
         ("type", 123),
         ("type", None),
         ("type", ""),
@@ -212,11 +208,6 @@ def test_create_bulk(client, db):
         ("expires_on", "2021-12-31 19:00:00-05:00"),
         ("for_detection", False),
         ("for_detection", True),
-        ("time", 1640995200),
-        ("time", "2022-01-01T00:00:00Z"),
-        ("time", "2022-01-01 00:00:00"),
-        ("time", "2022-01-01 00:00:00.000000"),
-        ("time", "2021-12-31 19:00:00-05:00"),
         ("uuid", str(uuid.uuid4())),
     ],
 )
@@ -242,7 +233,7 @@ def test_create_valid_optional_fields(client, db, key, value):
     get = client.get(create.headers["Content-Location"])
 
     # If the test is for expires_on, make sure that the retrieved value matches the proper UTC timestamp
-    if key in ["expires_on", "time"] and value:
+    if key == "expires_on" and value:
         assert get.json()[key] == "2022-01-01T00:00:00+00:00"
     else:
         assert get.json()[key] == value

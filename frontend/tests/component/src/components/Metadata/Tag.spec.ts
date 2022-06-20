@@ -3,10 +3,10 @@ import PrimeVue from "primevue/config";
 
 import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 import router from "@/router/index";
-import { metadataObjectReadFactory } from "@mocks/metadata";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
+import { metadataTagReadFactory } from "@mocks/metadata";
 
-const testTag = metadataObjectReadFactory({ value: "testTag" });
+const testTag = metadataTagReadFactory({ value: "testTag" });
 
 function factory(
   nodeType: "alerts" | "events" = "alerts",

@@ -111,7 +111,6 @@ def create(
                     permanent_tags=observable.permanent_tags,
                     threat_actors=observable.threat_actors,
                     threats=observable.threats,
-                    time=observable.time,
                     type=observable.type,
                     value=observable.value,
                 ),

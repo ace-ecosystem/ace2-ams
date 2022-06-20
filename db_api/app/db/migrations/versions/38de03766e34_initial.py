@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 6e9253f24a51
+Revision ID: 38de03766e34
 Revises: 
-Create Date: 2022-06-16 20:15:55.011336
+Create Date: 2022-06-17 18:02:28.035697
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '6e9253f24a51'
+revision = '38de03766e34'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -281,6 +281,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_metadata_tag_value'), 'metadata_tag', ['value'], unique=True)
+    op.create_table('metadata_time',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.DateTime(timezone=True), nullable=False),
+    sa.ForeignKeyConstraint(['uuid'], ['metadata.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_metadata_time_value'), 'metadata_time', ['value'], unique=True)
     op.create_table('node_detection_point',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('insert_time', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
@@ -780,6 +788,8 @@ def downgrade() -> None:
     op.drop_index('value_trgm', table_name='node_detection_point', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_index(op.f('ix_node_detection_point_node_uuid'), table_name='node_detection_point')
     op.drop_table('node_detection_point')
+    op.drop_index(op.f('ix_metadata_time_value'), table_name='metadata_time')
+    op.drop_table('metadata_time')
     op.drop_index(op.f('ix_metadata_tag_value'), table_name='metadata_tag')
     op.drop_table('metadata_tag')
     op.drop_index(op.f('ix_metadata_display_value_value'), table_name='metadata_display_value')

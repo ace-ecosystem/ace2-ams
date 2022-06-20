@@ -13,6 +13,7 @@ from tests.factory import metadata_directive
 from tests.factory import metadata_display_type
 from tests.factory import metadata_display_value
 from tests.factory import metadata_tag
+from tests.factory import metadata_time
 from tests.factory import node_comment
 from tests.factory import node_detection_point
 from tests.factory import node_relationship

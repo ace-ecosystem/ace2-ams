@@ -7,10 +7,10 @@ import AlertTableCell from "@/components/Alerts/AlertTableCell.vue";
 import { alertSummary } from "@/models/alert";
 import { alertSummaryFactory } from "@mocks/alert";
 import { commentReadFactory } from "@mocks/comment";
-import { metadataObjectReadFactory } from "@mocks/metadata";
 import { testConfiguration } from "@/etc/configuration/test";
 
 import router from "@/router/index";
+import { metadataTagReadFactory } from "@mocks/metadata";
 
 interface AlertTableCellProps {
   data: alertSummary;
@@ -20,7 +20,7 @@ interface AlertTableCellProps {
 const mockAlert: alertSummary = alertSummaryFactory({
   name: "Test",
   comments: [commentReadFactory({ value: "Test comment" })],
-  tags: [metadataObjectReadFactory({ value: "testTag" })],
+  tags: [metadataTagReadFactory({ value: "testTag" })],
 });
 
 const defaultProps: AlertTableCellProps = {
@@ -85,7 +85,7 @@ describe("AlertTableCell", () => {
       field: "eventTime",
     };
     factory({ props: props });
-    cy.contains("3/24/2022, 12:00:00 AM");
+    cy.contains("2/24/2022, 12:00:00 AM UTC");
   });
   it("correctly renders an alert comments cell", () => {
     const props: AlertTableCellProps = {
@@ -93,7 +93,7 @@ describe("AlertTableCell", () => {
       field: "comments",
     };
     factory({ props: props });
-    cy.contains("12/31/2019, 7:00:00 PM (Test Analyst) Test comment");
+    cy.contains("1/1/2020, 12:00:00 AM UTC (Test Analyst) Test comment");
   });
   it("correctly renders a generic alert cell (queue)", () => {
     const props: AlertTableCellProps = {

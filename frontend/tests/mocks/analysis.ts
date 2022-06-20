@@ -30,10 +30,10 @@ export const analysisModuleTypeReadFactory = ({
 
 export const analysisReadFactory = ({
   analysisModuleType = analysisModuleTypeReadFactory(),
-  cachedUntil = new Date(),
+  cachedUntil = null,
   details = { test: "test description" },
   errorMessage = null,
-  runTime = new Date(),
+  runTime = "2020-01-01T00:00:00.000000+00:00",
   stackTrace = null,
   summary = null,
   nodeType = "analysis",

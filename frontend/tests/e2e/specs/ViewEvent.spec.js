@@ -1407,7 +1407,7 @@ describe("Email Analysis Details", () => {
       .should("have.text", "Alert");
     cy.get(".p-datatable-tbody > :nth-child(1) > td")
       .eq(1)
-      .should("have.text", "3/18/2022, 12:00:00 PM");
+      .should("have.text", "3/18/2022, 12:00:00 PM UTC");
     cy.get(".p-datatable-tbody > :nth-child(1) > td")
       .eq(2)
       .should("have.text", "badguy@evil.com");

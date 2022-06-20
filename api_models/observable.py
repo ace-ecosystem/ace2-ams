@@ -44,8 +44,6 @@ class ObservableBase(NodeBase):
         description="Whether or not this observable should be included in the observable detection exports",
     )
 
-    time: datetime = Field(default_factory=datetime.utcnow, description="The time this observable was observed")
-
     type: type_str = Field(description="The type of the observable")
 
     value: type_str = Field(description="The value of the observable")
@@ -165,8 +163,6 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
     threat_actors: Optional[list[type_str]] = Field(description="A list of threat actors to add to the observable")
 
     threats: Optional[list[type_str]] = Field(description="A list of threats to add to the observable")
-
-    time: Optional[datetime] = Field(description="The time this observable was observed")
 
     type: Optional[type_str] = Field(description="The type of the observable")
 

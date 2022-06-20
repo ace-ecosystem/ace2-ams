@@ -16,7 +16,7 @@ interface historyBase {
   uuid: UUID;
   action: string;
   actionBy: userRead;
-  actionTime: Date;
+  actionTime: string;
   recordUuid: UUID;
   field: string | null;
   diff: diff | null;

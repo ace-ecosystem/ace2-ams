@@ -8,6 +8,7 @@ from api_models.metadata_directive import MetadataDirectiveCreate
 from api_models.metadata_display_type import MetadataDisplayTypeCreate
 from api_models.metadata_display_value import MetadataDisplayValueCreate
 from api_models.metadata_tag import MetadataTagCreate
+from api_models.metadata_time import MetadataTimeCreate
 from db import crud
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_metadata import AnalysisMetadata
@@ -46,6 +47,9 @@ def create_or_read(
 
     elif model.type == "tag":
         metadata_object = crud.metadata_tag.create_or_read(model=MetadataTagCreate(value=model.value), db=db)
+
+    elif model.type == "time":
+        metadata_object = crud.metadata_time.create_or_read(model=MetadataTimeCreate(value=model.value), db=db)
 
     # Create the analysis metadata object
     if metadata_object:

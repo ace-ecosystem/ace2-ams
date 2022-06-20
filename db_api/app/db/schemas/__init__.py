@@ -30,6 +30,7 @@ from db.schemas.metadata_directive import MetadataDirective
 from db.schemas.metadata_display_type import MetadataDisplayType
 from db.schemas.metadata_display_value import MetadataDisplayValue
 from db.schemas.metadata_tag import MetadataTag
+from db.schemas.metadata_time import MetadataTime
 from db.schemas.node import Node
 from db.schemas.node_comment import NodeComment
 from db.schemas.node_detection_point import NodeDetectionPoint

@@ -36,14 +36,14 @@ describe("NodeComment", () => {
     factory({
       props: {
         comment: commentReadFactory({
-          insertTime: new Date(2022, 3, 25, 12, 0, 0),
+          insertTime: "2022-03-25T12:00:00.000000+00:00",
         }),
         includeTime: true,
       },
     });
-    cy.contains("4/25/2022, 12:00:00 PM (Test Analyst) A test comment").should(
-      "be.visible",
-    );
+    cy.contains(
+      "3/25/2022, 12:00:00 PM UTC (Test Analyst) A test comment",
+    ).should("be.visible");
   });
   it("renders as expected with includeLineBreak set to false", () => {
     factory({
