@@ -43,7 +43,7 @@ export interface observableRead extends nodeRead {
   expiresOn: string | null;
   forDetection: boolean;
   observableRelationships: observableRelationshipRead[];
-  permanentTags: metadataTagRead[];
+  tags: metadataTagRead[];
   threatActors: nodeThreatActorRead[];
   threats: nodeThreatRead[];
   type: observableTypeRead;

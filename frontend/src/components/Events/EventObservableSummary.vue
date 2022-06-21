@@ -145,7 +145,7 @@
     <Column field="tags" header="Tags">
       <template #body="slotProps">
         <MetadataTag
-          v-for="tag of slotProps.data.permanentTags"
+          v-for="tag of slotProps.data.tags"
           :key="tag.value"
           :tag="tag"
           override-node-type="alerts"

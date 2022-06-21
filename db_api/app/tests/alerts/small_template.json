@@ -4,7 +4,7 @@
     {
       "type": "<O_TYPE>",
       "value": "<O_VALUE>",
-      "permanent_tags": ["<TAG>", "<TAG>", "<TAG>"],
+      "tags": ["<TAG>", "<TAG>", "<TAG>"],
       "analyses": [
         {
           "type": "Email Analysis",

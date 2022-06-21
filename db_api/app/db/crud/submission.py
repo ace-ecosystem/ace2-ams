@@ -293,7 +293,7 @@ def build_read_all_query(
                 or_(
                     Submission.tags.any(MetadataTag.value == tag),
                     Submission.child_analysis_tags.any(MetadataTag.value == tag),
-                    Submission.child_permanent_tags.any(MetadataTag.value == tag),
+                    Submission.child_tags.any(MetadataTag.value == tag),
                 )
             )
 

@@ -85,7 +85,7 @@ def test_get_alerts_observables(client_valid_access_token, requests_mock):
                 "analysis_metadata": {"display_type": None, "display_value": None, "tags": []},
                 "directives": [],
                 "observable_relationships": [],
-                "permanent_tags": [],
+                "tags": [],
                 "threat_actors": [],
                 "threats": [],
             }
