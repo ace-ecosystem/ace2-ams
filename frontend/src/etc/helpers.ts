@@ -217,7 +217,7 @@ export function formatNodeFiltersForAPI(
 ): Record<string, string> | Record<string, number> {
   const formattedParams = {} as alertFilterParams;
   for (const param in params) {
-    let paramValue = params[param] as unknown;
+    let paramValue = params[param] as any;
 
     //  check if the given param is specific to node and not pageOptionParams, i.e. disposition
     const filterType = availableFilters.find((filter) => {
