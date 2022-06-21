@@ -149,7 +149,7 @@ def build_read_all_query(
             .join(Submission, onclause=Submission.event_uuid == Event.uuid)
             .where(
                 or_(
-                    Event.disposition_time > disposition_time_after,
+                    or_(Event.disposition_time > d for d in disposition_time_after),
                     Submission.history.any(
                         and_(
                             SubmissionHistory.field == "disposition",
@@ -167,7 +167,7 @@ def build_read_all_query(
             .join(Submission, onclause=Submission.event_uuid == Event.uuid)
             .where(
                 or_(
-                    Event.disposition_time < disposition_time_before,
+                    or_(Event.disposition_time < d for d in disposition_time_before),
                     Submission.history.any(
                         and_(
                             SubmissionHistory.field == "disposition",
