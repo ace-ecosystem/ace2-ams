@@ -59,6 +59,7 @@ def get_all_alerts(
     insert_time_after: Optional[list[datetime]] = Query(None),
     insert_time_before: Optional[list[datetime]] = Query(None),
     name: Optional[list[str]] = Query(None),
+    not_name: Optional[list[str]] = Query(None),
     observable: Optional[list[str]] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
     observable_types: Optional[list[str]] = Query(None),
     observable_value: Optional[list[str]] = Query(None),
@@ -148,6 +149,10 @@ def get_all_alerts(
     if name:
         for name_item in name:
             query_params += f"&name={name_item}"
+
+    if not_name:
+        for not_name_item in not_name:
+            query_params += f"&not_name={not_name_item}"
 
     if observable:
         for observable_item in observable:

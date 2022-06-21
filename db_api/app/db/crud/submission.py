@@ -126,6 +126,7 @@ def build_read_all_query(
     insert_time_after: Optional[list[datetime]] = None,
     insert_time_before: Optional[list[datetime]] = None,
     name: Optional[list[str]] = None,
+    not_name: Optional[list[str]] = None,
     observable: Optional[list[str]] = None,  # Example: type|value
     observable_types: Optional[list[str]] = None,
     observable_value: Optional[list[str]] = None,
@@ -256,6 +257,11 @@ def build_read_all_query(
         clauses = [Submission.name.ilike(f"%{n}%") for n in name]
         name_query = select(Submission).where(or_(*clauses))
         query = _join_as_subquery(query, name_query).order_by(Submission.name.asc())
+
+    if not_name:
+        clauses = [~Submission.name.ilike(f"%{n}%") for n in not_name]
+        not_name_query = select(Submission).where(and_(*clauses))
+        query = _join_as_subquery(query, not_name_query).order_by(Submission.name.asc())
 
     if observable:
         observable_split = [o.split("|", maxsplit=1) for o in observable]
@@ -546,6 +552,7 @@ def read_all(
     insert_time_after: Optional[list[datetime]] = None,
     insert_time_before: Optional[list[datetime]] = None,
     name: Optional[list[str]] = None,
+    not_name: Optional[list[str]] = None,
     observable: Optional[list[str]] = None,  # Example: type|value
     observable_types: Optional[list[str]] = None,
     observable_value: Optional[list[str]] = None,
@@ -576,6 +583,7 @@ def read_all(
                 insert_time_after=insert_time_after,
                 insert_time_before=insert_time_before,
                 name=name,
+                not_name=not_name,
                 observable=observable,  # Example: type|value
                 observable_types=observable_types,
                 observable_value=observable_value,
