@@ -148,7 +148,7 @@
     if (props.observable) {
       await observableStore.update(props.observable.uuid, {
         tags: deduped([
-          ...props.observable.permanentTags.map((tag) => tag.value),
+          ...props.observable.tags.map((tag) => tag.value),
           ...formTagValues.value,
         ]),
         historyUsername: authStore.user.username,

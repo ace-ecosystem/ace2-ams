@@ -243,7 +243,7 @@ def test_filter_by_tags(db):
         type="type3",
         value="value3",
         parent_analysis=submission3.root_analysis,
-        permanent_tags=["observable3_permanent_tag"],
+        tags=["observable3_tag"],
         db=db,
     )
 
@@ -253,7 +253,7 @@ def test_filter_by_tags(db):
         value="value4",
         parent_analysis=submission4.root_analysis,
         analysis_tags=["observable4_analysis_tag"],
-        permanent_tags=["observable4_permanent_tag"],
+        tags=["observable4_tag"],
         db=db,
     )
 
@@ -265,7 +265,7 @@ def test_filter_by_tags(db):
         value="value5",
         parent_analysis=submission5.root_analysis,
         analysis_tags=["observable5_analysis_tag"],
-        permanent_tags=["observable5_permanent_tag"],
+        tags=["observable5_tag"],
         db=db,
     )
 
@@ -277,7 +277,7 @@ def test_filter_by_tags(db):
     result_submission1 = crud.submission.read_all(tags="submission1_tag", db=db)
     assert result_submission1 == [submission1]
     assert result_submission1[0].child_analysis_tags == []
-    assert result_submission1[0].child_permanent_tags == []
+    assert result_submission1[0].child_tags == []
     assert [t.value for t in result_submission1[0].tags] == ["submission1_tag"]
 
     # Verify that submission2 is returned when filtering by the "observable2_analysis_tag" tag.
@@ -285,25 +285,25 @@ def test_filter_by_tags(db):
     result_submission2 = crud.submission.read_all(tags="observable2_analysis_tag", db=db)
     assert result_submission2 == [submission2]
     assert [t.value for t in result_submission2[0].child_analysis_tags] == ["observable2_analysis_tag"]
-    assert result_submission2[0].child_permanent_tags == []
+    assert result_submission2[0].child_tags == []
     assert result_submission2[0].tags == []
 
-    # Verify that submission3 is returned when filtering by the "observable3_permanent_tag" tag.
+    # Verify that submission3 is returned when filtering by the "observable3_tag" tag.
     # Additionally, verify that the submission's tag relationships contain the expected tags.
-    result_submission3 = crud.submission.read_all(tags="observable3_permanent_tag", db=db)
+    result_submission3 = crud.submission.read_all(tags="observable3_tag", db=db)
     assert result_submission3 == [submission3]
     assert result_submission3[0].child_analysis_tags == []
-    assert [t.value for t in result_submission3[0].child_permanent_tags] == ["observable3_permanent_tag"]
+    assert [t.value for t in result_submission3[0].child_tags] == ["observable3_tag"]
     assert result_submission3[0].tags == []
 
     # Verify that submission4 is returned when filtering by the multiple tags in submission4.
     # Additionally, verify that the submission's tag relationships contain the expected tags.
     result_submission4 = crud.submission.read_all(
-        tags="submission4_tag,observable4_analysis_tag,observable4_permanent_tag", db=db
+        tags="submission4_tag,observable4_analysis_tag,observable4_tag", db=db
     )
     assert result_submission4 == [submission4]
     assert [t.value for t in result_submission4[0].child_analysis_tags] == ["observable4_analysis_tag"]
-    assert [t.value for t in result_submission4[0].child_permanent_tags] == ["observable4_permanent_tag"]
+    assert [t.value for t in result_submission4[0].child_tags] == ["observable4_tag"]
     assert [t.value for t in result_submission4[0].tags] == ["submission4_tag"]
 
 
@@ -387,7 +387,7 @@ def test_read_observables(db):
     #   o1 - analysis_tag1, display_type1, directive1, time1
     #     a
     #       o1 - analysis_tag2
-    #   o2 - analysis_tag3, permanent_tag1, display_value1
+    #   o2 - analysis_tag3, tag1, display_value1
     time1 = crud.helpers.utcnow()
     submission = factory.submission.create(db=db)
     observable1 = factory.observable.create_or_read(
@@ -413,14 +413,14 @@ def test_read_observables(db):
         parent_analysis=submission.root_analysis,
         analysis_tags=["analysis_tag3"],
         display_value="display_value1",
-        permanent_tags=["permanent_tag1"],
+        tags=["tag1"],
         db=db,
     )
 
     # Create a second submission tree with a duplicate observable from the first submission
     #
     # submission
-    #   o2 - permanent_tag1, other_display_value
+    #   o2 - tag1, other_display_value
     #   o3
     submission2 = factory.submission.create(db=db)
     factory.observable.create_or_read(
@@ -453,7 +453,7 @@ def test_read_observables(db):
     #
     # email_address: badguy@bad.com (no permanent or analysis tags)
     # fqdn: bad.com (analysis_tag1, analysis_tag2)
-    # ipv4: 127.0.0.1 (analysis_tag3, permanent_tag1)
+    # ipv4: 127.0.0.1 (analysis_tag3, tag1)
     result = crud.submission.read_observables(uuids=[submission.uuid, submission2.uuid], db=db)
     assert len(result) == 3
 
@@ -463,7 +463,7 @@ def test_read_observables(db):
     assert result[0].analysis_metadata.display_type is None
     assert result[0].analysis_metadata.display_value is None
     assert result[0].analysis_metadata.time is None
-    assert result[0].permanent_tags == []
+    assert result[0].tags == []
 
     assert result[1].type.value == "fqdn" and result[1].value == "bad.com"
     assert [d.value for d in result[1].analysis_metadata.directives] == ["directive1"]
@@ -471,7 +471,7 @@ def test_read_observables(db):
     assert result[1].analysis_metadata.display_type.value == "display_type1"
     assert result[1].analysis_metadata.display_value is None
     assert result[1].analysis_metadata.time.value == time1
-    assert result[1].permanent_tags == []
+    assert result[1].tags == []
 
     assert result[2].type.value == "ipv4" and result[2].value == "127.0.0.1"
     assert result[2].analysis_metadata.directives == []
@@ -479,7 +479,7 @@ def test_read_observables(db):
     assert result[2].analysis_metadata.display_type is None
     assert result[2].analysis_metadata.display_value.value == "display_value1"
     assert result[0].analysis_metadata.time is None
-    assert [t.value for t in result[2].permanent_tags] == ["permanent_tag1"]
+    assert [t.value for t in result[2].tags] == ["tag1"]
 
 
 def test_read_submission_tree(db):
@@ -500,8 +500,8 @@ def test_read_submission_tree(db):
     assert submission.child_analysis_tags[2].value == "recipient"
 
     # The small.json has one permanent tag applied to an observable.
-    assert len(submission.child_permanent_tags) == 1
-    assert submission.child_permanent_tags[0].value == "c2"
+    assert len(submission.child_tags) == 1
+    assert submission.child_tags[0].value == "c2"
 
 
 def test_sort_by_disposition(db):
@@ -667,7 +667,7 @@ def test_tag_functionality(db):
     """
     Submission1
         RootAnalysis1
-            O1 - permanent_tag1
+            O1 - tag1
                 A1 - adds tag z_analysis1_tag to O2
                     O2 - analysis2_tag, z_analysis1_tag (should show all analysis tags in this alert for the observable)
             O3
@@ -676,7 +676,7 @@ def test_tag_functionality(db):
 
     Submission2
         RootAnalysis2
-            O1 - should have permanent_tag1 because it is a permanent tag
+            O1 - should have tag1 because it is a permanent tag
             O2 - should not have any tags because the alert does not contain analysis A1 or A2
     """
 
@@ -687,7 +687,7 @@ def test_tag_functionality(db):
         type="type1",
         value="value1",
         parent_analysis=submission1.root_analysis,
-        permanent_tags=["permanent_tag1"],
+        tags=["tag1"],
         db=db,
     )
 
@@ -722,19 +722,19 @@ def test_tag_functionality(db):
 
     # Verify the tag relationships on the submissions
     assert [t.value for t in submission1.child_analysis_tags] == ["analysis2_tag", "z_analysis1_tag"]
-    assert [t.value for t in submission1.child_permanent_tags] == ["permanent_tag1"]
+    assert [t.value for t in submission1.child_tags] == ["tag1"]
 
     assert submission2.child_analysis_tags == []
-    assert [t.value for t in submission2.child_permanent_tags] == ["permanent_tag1"]
+    assert [t.value for t in submission2.child_tags] == ["tag1"]
 
     # The two instances of O1 across both submissions should be the same observable
     assert sub1_o1.uuid == sub2_o1.uuid
 
-    # The two instances of O1 should both have the permanent_tag1 tag
-    assert len(sub1_o1.permanent_tags) == 1
-    assert sub1_o1.permanent_tags[0].value == "permanent_tag1"
-    assert len(sub2_o1.permanent_tags) == 1
-    assert sub2_o1.permanent_tags[0].value == "permanent_tag1"
+    # The two instances of O1 should both have the tag1 tag
+    assert len(sub1_o1.tags) == 1
+    assert sub1_o1.tags[0].value == "tag1"
+    assert len(sub2_o1.tags) == 1
+    assert sub2_o1.tags[0].value == "tag1"
 
     # The three instances of O2 across both submissions should be the same observable
     assert a1_o2.uuid == a2_o2.uuid == sub2_o2.uuid
@@ -750,8 +750,8 @@ def test_tag_functionality(db):
     assert submission1_tree["children"][1]["uuid"] == str(sub1_o3.uuid)
 
     # Verify the tags for O1 in the first submission
-    assert len(submission1_tree["children"][0]["permanent_tags"]) == 1
-    assert submission1_tree["children"][0]["permanent_tags"][0]["value"] == "permanent_tag1"
+    assert len(submission1_tree["children"][0]["tags"]) == 1
+    assert submission1_tree["children"][0]["tags"][0]["value"] == "tag1"
 
     # Verify the tags for O2 in the first submission under A1. It should have two tags, even though
     # its parent analysis A1 only added one tag. The tags should be in alphabetical order, not the
@@ -786,14 +786,14 @@ def test_tag_functionality(db):
     assert submission2_tree["children"][1]["uuid"] == str(sub2_o2.uuid)
 
     # Verify the tags for O1 in the second submission
-    assert len(submission2_tree["children"][0]["permanent_tags"]) == 1
-    assert submission2_tree["children"][0]["permanent_tags"][0]["value"] == "permanent_tag1"
+    assert len(submission2_tree["children"][0]["tags"]) == 1
+    assert submission2_tree["children"][0]["tags"][0]["value"] == "tag1"
 
     # Verify the tags for O2 in the second submission. Even though it is the exact same observable
     # object as in the first submission, it shouldn't have any tags because the submission does not
     # contain any analysis that added tags to it.
     assert submission2_tree["children"][1]["analysis_metadata"]["tags"] == []
-    assert submission2_tree["children"][1]["permanent_tags"] == []
+    assert submission2_tree["children"][1]["tags"] == []
 
 
 def test_disposition_history(db):

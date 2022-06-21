@@ -38,7 +38,7 @@ def create_or_read(
             "history_username",
             "observable_relationships",
             "parent_analysis_uuid",
-            "permanent_tags",
+            "tags",
         },
     )
 
@@ -46,7 +46,7 @@ def create_or_read(
     obj.context = model.context
     obj.expires_on = model.expires_on
     obj.for_detection = model.for_detection
-    obj.permanent_tags = crud.metadata_tag.read_by_values(values=model.permanent_tags, db=db)
+    obj.tags = crud.metadata_tag.read_by_values(values=model.tags, db=db)
     obj.type = crud.observable_type.read_by_value(value=model.type, db=db)
     obj.value = model.value
 
@@ -177,15 +177,15 @@ def update(uuid: UUID, model: ObservableUpdate, db: Session) -> bool:
             )
             observable.for_detection = update_data["for_detection"]
 
-        if "permanent_tags" in update_data:
+        if "tags" in update_data:
             diffs.append(
                 crud.history.create_diff(
-                    field="permanent_tags",
-                    old=[x.value for x in observable.permanent_tags],
-                    new=update_data["permanent_tags"],
+                    field="tags",
+                    old=[x.value for x in observable.tags],
+                    new=update_data["tags"],
                 )
             )
-            observable.permanent_tags = crud.metadata_tag.read_by_values(values=update_data["permanent_tags"], db=db)
+            observable.tags = crud.metadata_tag.read_by_values(values=update_data["tags"], db=db)
 
         if "type" in update_data:
             diffs.append(crud.history.create_diff(field="type", old=observable.type.value, new=update_data["type"]))

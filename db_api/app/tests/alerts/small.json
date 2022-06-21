@@ -188,7 +188,7 @@
         { "type": "display_value", "value": "localhost" },
         { "type": "tag", "value": "contacted_host" }
       ],
-      "permanent_tags": ["c2"],
+      "tags": ["c2"],
       "analyses": [
         {
           "type": "FA Queue Analysis",

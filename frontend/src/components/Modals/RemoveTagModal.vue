@@ -95,7 +95,7 @@
 
   const initTagOptions = async () => {
     if (props.nodeType === "observable" && props.observable) {
-      tagOptions.value = props.observable.permanentTags;
+      tagOptions.value = props.observable.tags;
     } else if (props.reloadObject == "node") {
       tagOptions.value = nodeStore.open.tags;
     } else {
@@ -165,7 +165,7 @@
     if (props.observable) {
       await observableStore.update(props.observable.uuid, {
         tags: deduped([
-          ...props.observable.permanentTags.map((tag) => tag.value),
+          ...props.observable.tags.map((tag) => tag.value),
           ...formTagValues.value,
         ]).filter((tag) => !formTagValues.value.includes(tag)),
         historyUsername: authStore.user.username,

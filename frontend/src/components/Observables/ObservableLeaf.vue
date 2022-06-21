@@ -67,13 +67,12 @@
     <span
       v-if="
         showTags &&
-        (observable.permanentTags.length ||
-          observable.analysisMetadata.tags.length)
+        (observable.tags.length || observable.analysisMetadata.tags.length)
       "
       class="leaf-element"
     >
       <MetadataTag
-        v-for="tag in observable.permanentTags"
+        v-for="tag in observable.tags"
         :key="tag.uuid"
         :tag="tag"
       ></MetadataTag>

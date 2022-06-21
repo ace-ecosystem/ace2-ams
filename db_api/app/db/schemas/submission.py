@@ -79,17 +79,17 @@ class Submission(Node, HasHistory):
         lazy="selectin",
     )
 
-    child_permanent_tags: list[MetadataTag] = relationship(
+    child_tags: list[MetadataTag] = relationship(
         "MetadataTag",
-        secondary="join(MetadataTag, observable_permanent_tag_mapping, MetadataTag.uuid == observable_permanent_tag_mapping.c.tag_uuid)."
-        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == observable_permanent_tag_mapping.c.observable_uuid)."
+        secondary="join(MetadataTag, observable_tag_mapping, MetadataTag.uuid == observable_tag_mapping.c.tag_uuid)."
+        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == observable_tag_mapping.c.observable_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
         # NOTE: The secondaryjoin parameter is required specifically when using the
         # crud.submission.read_all() function to filter submissions by their tags.
         # Without it, the query that SQLAlchemy creates results in the returned submissions
-        # having every tag from every submission in their child_permanent_tags list.
-        secondaryjoin="MetadataTag.uuid == observable_permanent_tag_mapping.c.tag_uuid",
+        # having every tag from every submission in their child_tags list.
+        secondaryjoin="MetadataTag.uuid == observable_tag_mapping.c.tag_uuid",
         foreign_keys="[Submission.uuid, MetadataTag.uuid]",
         order_by="asc(MetadataTag.value)",
         viewonly=True,

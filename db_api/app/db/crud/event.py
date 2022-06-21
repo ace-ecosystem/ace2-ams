@@ -285,7 +285,7 @@ def build_read_all_query(
                     Event.tags.any(MetadataTag.value == tag),
                     Event.alerts.any(Submission.tags.any(MetadataTag.value == tag)),
                     Event.alerts.any(Submission.child_analysis_tags.any(MetadataTag.value == tag)),
-                    Event.alerts.any(Submission.child_permanent_tags.any(MetadataTag.value == tag)),
+                    Event.alerts.any(Submission.child_tags.any(MetadataTag.value == tag)),
                 )
             )
         tags_query = select(Event).where(and_(*tag_filters))

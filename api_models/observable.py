@@ -70,9 +70,7 @@ class ObservableCreateBase(NodeCreate, ObservableBase):
         default_factory=list, description="A list of observable relationships to add to this observable"
     )
 
-    permanent_tags: list[type_str] = Field(
-        default_factory=list, description="A list of tags to permanently add to the observable"
-    )
+    tags: list[type_str] = Field(default_factory=list, description="A list of tags to add to the observable")
 
     threat_actors: list[type_str] = Field(
         default_factory=list, description="A list of threat actors to add to the observable"
@@ -106,7 +104,7 @@ class ObservableRead(NodeRead, ObservableBase):
         description="A list of observable relationships for this observable"
     )
 
-    permanent_tags: list[MetadataTagRead] = Field(description="A list of tags permanently added to the observable")
+    tags: list[MetadataTagRead] = Field(description="A list of tags added to the observable")
 
     threat_actors: list[NodeThreatActorRead] = Field(description="A list of threat actors added to the observable")
 
@@ -158,7 +156,7 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
         description="If given, an observable history record will be created and associated with the user"
     )
 
-    permanent_tags: Optional[list[type_str]] = Field(description="A list of tags to permanently add to the observable")
+    tags: Optional[list[type_str]] = Field(description="A list of tags to add to the observable")
 
     threat_actors: Optional[list[type_str]] = Field(description="A list of threat actors to add to the observable")
 
@@ -169,7 +167,7 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
     value: Optional[type_str] = Field(description="The value of the observable")
 
     _prevent_none: classmethod = validators.prevent_none(
-        "for_detection", "permanent_tags", "threat_actors", "threats", "time", "type", "value"
+        "for_detection", "tags", "threat_actors", "threats", "time", "type", "value"
     )
 
 

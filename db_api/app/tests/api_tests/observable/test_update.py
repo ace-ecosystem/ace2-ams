@@ -43,7 +43,7 @@ def test_update_invalid_fields(client, key, value):
 @pytest.mark.parametrize(
     "key,values",
     [
-        ("permanent_tags", INVALID_LIST_STRING_VALUES),
+        ("tags", INVALID_LIST_STRING_VALUES),
         ("threat_actors", INVALID_LIST_STRING_VALUES),
         ("threats", INVALID_LIST_STRING_VALUES),
     ],
@@ -91,7 +91,7 @@ def test_update_duplicate_type_value(client, db):
 
 @pytest.mark.parametrize(
     "key",
-    [("permanent_tags"), ("threat_actors"), ("threats")],
+    [("tags"), ("threat_actors"), ("threats")],
 )
 def test_update_nonexistent_node_fields(client, db, key):
     submission = factory.submission.create(db=db)
@@ -146,7 +146,7 @@ def test_update_type(client, db):
 @pytest.mark.parametrize(
     "key,value_lists,helper_create_func",
     [
-        ("permanent_tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
+        ("tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
         ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
         ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
     ],
@@ -160,7 +160,7 @@ def test_update_valid_node_fields(client, db, key, value_lists, helper_create_fu
         observable = factory.observable.create_or_read(
             type="test_type",
             value=f"test{i}",
-            permanent_tags=["remove_me"],
+            tags=["remove_me"],
             threat_actors=["remove_me"],
             threats=["remove_me"],
             parent_analysis=submission.root_analysis,

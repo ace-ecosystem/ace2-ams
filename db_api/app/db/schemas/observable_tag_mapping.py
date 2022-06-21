@@ -4,8 +4,8 @@ from sqlalchemy.dialects.postgresql import UUID
 from db.database import Base
 
 
-observable_permanent_tag_mapping = Table(
-    "observable_permanent_tag_mapping",
+observable_tag_mapping = Table(
+    "observable_tag_mapping",
     Base.metadata,
     Column(
         "observable_uuid",

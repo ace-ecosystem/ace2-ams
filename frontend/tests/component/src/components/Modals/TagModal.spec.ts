@@ -250,7 +250,7 @@ describe("TagModal", () => {
       reloadObject: "node",
 
       observable: observableTreeReadFactory({
-        permanentTags: [testTag, existingTag],
+        tags: [testTag, existingTag],
       }),
     });
     cy.contains("Select from existing tags").click();

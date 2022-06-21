@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 38de03766e34
+Revision ID: 8ecf40aa22be
 Revises: 
-Create Date: 2022-06-17 18:02:28.035697
+Create Date: 2022-06-21 15:42:13.346434
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '38de03766e34'
+revision = '8ecf40aa22be'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -496,15 +496,15 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_observable_history_action_by_user_uuid'), 'observable_history', ['action_by_user_uuid'], unique=False)
     op.create_index(op.f('ix_observable_history_record_uuid'), 'observable_history', ['record_uuid'], unique=False)
-    op.create_table('observable_permanent_tag_mapping',
+    op.create_table('observable_tag_mapping',
     sa.Column('observable_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('tag_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.ForeignKeyConstraint(['observable_uuid'], ['observable.uuid'], ),
     sa.ForeignKeyConstraint(['tag_uuid'], ['metadata_tag.uuid'], ),
     sa.PrimaryKeyConstraint('observable_uuid', 'tag_uuid')
     )
-    op.create_index(op.f('ix_observable_permanent_tag_mapping_observable_uuid'), 'observable_permanent_tag_mapping', ['observable_uuid'], unique=False)
-    op.create_index(op.f('ix_observable_permanent_tag_mapping_tag_uuid'), 'observable_permanent_tag_mapping', ['tag_uuid'], unique=False)
+    op.create_index(op.f('ix_observable_tag_mapping_observable_uuid'), 'observable_tag_mapping', ['observable_uuid'], unique=False)
+    op.create_index(op.f('ix_observable_tag_mapping_tag_uuid'), 'observable_tag_mapping', ['tag_uuid'], unique=False)
     op.create_table('user_history',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('action', sa.String(), nullable=False),
@@ -733,9 +733,9 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_user_history_record_uuid'), table_name='user_history')
     op.drop_index(op.f('ix_user_history_action_by_user_uuid'), table_name='user_history')
     op.drop_table('user_history')
-    op.drop_index(op.f('ix_observable_permanent_tag_mapping_tag_uuid'), table_name='observable_permanent_tag_mapping')
-    op.drop_index(op.f('ix_observable_permanent_tag_mapping_observable_uuid'), table_name='observable_permanent_tag_mapping')
-    op.drop_table('observable_permanent_tag_mapping')
+    op.drop_index(op.f('ix_observable_tag_mapping_tag_uuid'), table_name='observable_tag_mapping')
+    op.drop_index(op.f('ix_observable_tag_mapping_observable_uuid'), table_name='observable_tag_mapping')
+    op.drop_table('observable_tag_mapping')
     op.drop_index(op.f('ix_observable_history_record_uuid'), table_name='observable_history')
     op.drop_index(op.f('ix_observable_history_action_by_user_uuid'), table_name='observable_history')
     op.drop_table('observable_history')
