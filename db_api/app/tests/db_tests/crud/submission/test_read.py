@@ -390,7 +390,7 @@ def test_filter_by_tags(db):
 
     # Verify that OR filters works as expected, returning submissions that match either of the specified tags filters.
     result_submission5 = crud.submission.read_all(
-        tags=["submission1_tag", "submission4_tag,observable4_analysis_tag,observable4_permanent_tag"], db=db
+        tags=["submission1_tag", "submission4_tag,observable4_analysis_tag,observable4_tag"], db=db
     )
     assert len(result_submission5) == 2
     assert submission1 in result_submission5
