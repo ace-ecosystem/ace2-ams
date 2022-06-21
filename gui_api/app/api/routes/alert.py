@@ -47,6 +47,7 @@ def get_all_alerts(
     offset: Optional[int] = Query(0),
     alert_type: Optional[list[str]] = Query(None),
     disposition: Optional[list[str]] = Query(None),
+    not_disposition: Optional[list[str]] = Query(None),
     disposition_user: Optional[list[str]] = Query(None),
     dispositioned_after: Optional[list[datetime]] = Query(None),
     dispositioned_before: Optional[list[datetime]] = Query(None),
@@ -97,6 +98,10 @@ def get_all_alerts(
     if disposition:
         for disposition_item in disposition:
             query_params += f"&disposition={disposition_item}"
+
+    if not_disposition:
+        for d in not_disposition:
+            query_params += f"&not_disposition={d}"
 
     if disposition_user:
         for disposition_user_item in disposition_user:

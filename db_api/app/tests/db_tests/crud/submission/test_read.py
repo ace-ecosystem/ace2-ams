@@ -33,6 +33,25 @@ def test_filter_by_disposition(db):
     assert submission2 in result
 
 
+def test_filter_by_not_disposition(db):
+    submission1 = factory.submission.create(disposition="DELIVERY", db=db)
+    submission2 = factory.submission.create(db=db)
+    submission3 = factory.submission.create(disposition="FALSE_POSITIVE", db=db)
+
+    result = crud.submission.read_all(not_disposition=["DELIVERY"], db=db)
+    assert len(result) == 2
+    assert submission2 in result
+    assert submission3 in result
+
+    result = crud.submission.read_all(not_disposition=["none"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission3 in result
+
+    result = crud.submission.read_all(not_disposition=["DELIVERY", "none"], db=db)
+    assert result == [submission3]
+
+
 def test_filter_by_disposition_user(db):
     submission1 = factory.submission.create(
         disposition="DELIVERY",

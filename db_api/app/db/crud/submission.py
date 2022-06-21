@@ -114,6 +114,7 @@ def _read_analysis_uuids(submission_uuids: list[UUID], db: Session) -> list[UUID
 def build_read_all_query(
     alert: Optional[bool] = None,
     disposition: Optional[list[str]] = None,
+    not_disposition: Optional[list[str]] = None,
     disposition_user: Optional[list[str]] = None,
     dispositioned_after: Optional[list[datetime]] = None,
     dispositioned_before: Optional[list[datetime]] = None,
@@ -140,11 +141,8 @@ def build_read_all_query(
         s = subquery.subquery()
         return query.join(s, Submission.uuid == s.c.uuid).group_by(Submission.uuid, Node.uuid)
 
-    def _none_in_list(values: list):
-        if "none" in [v.lower() for v in values]:
-            return True
-
-        return False
+    def _none_in_list(values: list[str]):
+        return "none" in [v.lower() for v in values]
 
     query = select(Submission)
 
@@ -155,8 +153,7 @@ def build_read_all_query(
 
     if disposition:
         disposition_query = select(Submission)
-        check_for_none = _none_in_list(disposition)
-        if check_for_none:
+        if _none_in_list(disposition):
             disposition_query = disposition_query.outerjoin(AlertDisposition).where(
                 or_(AlertDisposition.value.in_(disposition), Submission.disposition_uuid == None)
             )
@@ -164,6 +161,19 @@ def build_read_all_query(
             disposition_query = disposition_query.join(AlertDisposition).where(AlertDisposition.value.in_(disposition))
 
         query = _join_as_subquery(query, disposition_query)
+
+    if not_disposition:
+        not_disposition_query = select(Submission)
+        if _none_in_list(not_disposition):
+            not_disposition_query = not_disposition_query.join(AlertDisposition).where(
+                AlertDisposition.value.not_in(not_disposition)
+            )
+        else:
+            not_disposition_query = not_disposition_query.outerjoin(AlertDisposition).where(
+                or_(AlertDisposition.value.not_in(not_disposition), Submission.disposition_uuid == None)
+            )
+
+        query = _join_as_subquery(query, not_disposition_query)
 
     if disposition_user:
         disposition_user_query = select(Submission).where(
@@ -291,8 +301,7 @@ def build_read_all_query(
 
     if owner:
         owner_query = select(Submission)
-        check_for_none = _none_in_list(owner)
-        if check_for_none:
+        if _none_in_list(owner):
             owner_query = owner_query.outerjoin(User, onclause=Submission.owner_uuid == User.uuid).where(
                 or_(User.username.in_(owner), Submission.owner_uuid == None)
             )
@@ -506,6 +515,7 @@ def read_all(
     db: Session,
     alert: Optional[bool] = None,
     disposition: Optional[list[str]] = None,
+    not_disposition: Optional[list[str]] = None,
     disposition_user: Optional[list[str]] = None,
     dispositioned_after: Optional[list[datetime]] = None,
     dispositioned_before: Optional[list[datetime]] = None,
@@ -533,6 +543,7 @@ def read_all(
             build_read_all_query(
                 alert=alert,
                 disposition=disposition,
+                not_disposition=not_disposition,
                 disposition_user=disposition_user,
                 dispositioned_after=dispositioned_after,
                 dispositioned_before=dispositioned_before,

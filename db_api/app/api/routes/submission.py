@@ -58,6 +58,7 @@ def get_all_submissions(
     db: Session = Depends(get_db),
     alert: Optional[bool] = None,
     disposition: Optional[list[str]] = Query(None),
+    not_disposition: Optional[list[str]] = Query(None),
     disposition_user: Optional[list[str]] = Query(None),
     dispositioned_after: Optional[list[datetime]] = Query(None),
     dispositioned_before: Optional[list[datetime]] = Query(None),
@@ -103,6 +104,7 @@ def get_all_submissions(
         query=crud.submission.build_read_all_query(
             alert=alert,
             disposition=disposition,
+            not_disposition=not_disposition,
             disposition_user=disposition_user,
             dispositioned_after=dispositioned_after,
             dispositioned_before=dispositioned_before,
