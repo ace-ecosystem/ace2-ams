@@ -359,6 +359,7 @@ describe("TheEventsTable.vue - Remove Alerts", () => {
         alert_count: 6,
         name: "Test Event 5",
       },
+      timeout: 50000,
     });
   });
 
