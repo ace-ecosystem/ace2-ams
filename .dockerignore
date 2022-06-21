@@ -1,0 +1,20 @@
+# editor files
+**.swp
+
+# compiled python
+**.pyc
+**/__pycache__
+
+# setup files
+setup
+build.sh
+**/Dockerfile
+**/.dockerignore
+**.tf
+**.tfvars
+**/terraform
+
+# get files
+publish.sh
+.git
+.gitignore
