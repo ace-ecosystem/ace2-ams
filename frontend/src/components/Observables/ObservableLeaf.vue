@@ -82,6 +82,20 @@
         :tag="tag"
       ></MetadataTag
     ></span>
+    <span
+      v-if="showDispositionTags && observable.dispositionHistory.length"
+      class="leaf-element"
+    >
+      <AlertDispositionTag
+        v-for="entry in observable.dispositionHistory"
+        :key="entry.disposition"
+        style="cursor: pointer"
+        :disposition="entry.disposition"
+        :disposition-count="entry.count"
+        :percent="entry.percent"
+        @click="filterByObservableAndDisposition(observable, entry.disposition)"
+      ></AlertDispositionTag>
+    </span>
   </span>
 </template>
 
@@ -105,6 +119,7 @@
 
   import type CSS from "csstype";
 
+  import AlertDispositionTag from "@/components/Alerts/AlertDispositionTag.vue";
   import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
   import {
@@ -117,8 +132,10 @@
   import type { observableActionSubTypes } from "@/models/observable";
   import { copyToClipboard, prettyPrintDateTime } from "@/etc/helpers";
   import { useAlertStore } from "@/stores/alert";
+  import { useAlertDispositionStore } from "@/stores/alertDisposition";
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
+  import { alertDispositionRead } from "@/models/alertDisposition";
 
   const config = inject("config") as Record<string, any>;
 
@@ -130,9 +147,11 @@
     showCopyToClipboard: { type: Boolean, required: false, default: true },
     showActionsMenu: { type: Boolean, required: false, default: true },
     showTags: { type: Boolean, required: false, default: true },
+    showDispositionTags: { type: Boolean, required: false, default: true },
   });
 
   const alertStore = useAlertStore();
+  const alertDispositionStore = useAlertDispositionStore();
   const filterStore = useFilterStore();
   const modalStore = useModalStore();
   const toast = useToast();
@@ -271,6 +290,47 @@
     router.replace({
       path: "/manage_alerts",
     });
+  };
+
+  const filterByObservableAndDisposition = (
+    obs: observableTreeRead,
+    disposition: string,
+  ) => {
+    const dispositionObject = getDispositionObject(disposition);
+
+    filterStore.clearAll({ nodeType: "alerts" });
+
+    if (dispositionObject) {
+      filterStore.setFilter({
+        nodeType: "alerts",
+        filterName: "disposition",
+        filterValue: dispositionObject,
+      });
+    }
+
+    filterStore.setFilter({
+      nodeType: "alerts",
+      filterName: "observable",
+      filterValue: {
+        category: obs.type,
+        value: obs.value,
+      },
+    });
+    router.replace({
+      path: "/manage_alerts",
+    });
+  };
+
+  const getDispositionObject = (
+    disposition: string,
+  ): alertDispositionRead | undefined => {
+    if (disposition == "OPEN") {
+      return { value: "None" } as alertDispositionRead;
+    } else {
+      return alertDispositionStore.items.find(
+        (item) => item.value == disposition,
+      );
+    }
   };
 
   const showError = (args: {
