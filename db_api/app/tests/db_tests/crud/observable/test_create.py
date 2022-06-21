@@ -52,7 +52,7 @@ def test_create_nonexistent_tag(db):
     with pytest.raises(ValueNotFoundInDatabase):
         crud.observable.create_or_read(
             model=ObservableCreate(
-                type="test", value="test", parent_analysis_uuid=submission.root_analysis_uuid, permanent_tags=["asdf"]
+                type="test", value="test", parent_analysis_uuid=submission.root_analysis_uuid, tags=["asdf"]
             ),
             db=db,
         )
@@ -175,7 +175,7 @@ def test_create(db):
             observable_relationships=[
                 ObservableRelationshipCreate(relationship_type="relationship_type", type="type2", value="value2")
             ],
-            permanent_tags=["tag"],
+            tags=["tag"],
             threat_actors=["threat_actor"],
             threats=["threat"],
             type="type1",
@@ -196,8 +196,8 @@ def test_create(db):
     assert len(observable.observable_relationships) == 1
     assert observable.observable_relationships[0].related_node.type.value == "type2"
     assert observable.observable_relationships[0].related_node.value == "value2"
-    assert len(observable.permanent_tags) == 1
-    assert observable.permanent_tags[0].value == "tag"
+    assert len(observable.tags) == 1
+    assert observable.tags[0].value == "tag"
     assert len(observable.threat_actors) == 1
     assert observable.threat_actors[0].value == "threat_actor"
     assert len(observable.threats) == 1

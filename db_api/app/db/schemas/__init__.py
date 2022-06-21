@@ -45,7 +45,7 @@ from db.schemas.node_threat_queue_mapping import node_threat_queue_mapping
 from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.node_threat_type_queue_mapping import node_threat_type_queue_mapping
 from db.schemas.observable import Observable
-from db.schemas.observable_permanent_tag_mapping import observable_permanent_tag_mapping
+from db.schemas.observable_tag_mapping import observable_tag_mapping
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.seed import Seed

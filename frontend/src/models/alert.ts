@@ -37,7 +37,7 @@ export interface alertRead extends nodeRead {
   alert: boolean;
   childAnalysisTags: metadataTagRead[];
   childDetectionPoints: nodeDetectionPointRead[];
-  childPermanentTags: metadataTagRead[];
+  childTags: metadataTagRead[];
   childThreatActors: nodeThreatActorRead[];
   childThreats: nodeThreatRead[];
   comments: nodeCommentRead[];
@@ -65,7 +65,7 @@ export interface alertRead extends nodeRead {
 // High-level alert data that will be displayed in Manage Alerts or in an event
 export interface alertSummary {
   childAnalysisTags: metadataTagRead[];
-  childPermanentTags: metadataTagRead[];
+  childTags: metadataTagRead[];
   comments: nodeCommentRead[];
   description: string;
   disposition: string;

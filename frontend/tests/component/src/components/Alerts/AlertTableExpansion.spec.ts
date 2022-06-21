@@ -53,7 +53,7 @@ describe("AlertTableExpansion", () => {
             analysisMetadata: analysisMetadataReadFactory({
               tags: [metadataTagReadFactory({ value: "analysisTag1" })],
             }),
-            permanentTags: [metadataTagReadFactory({ value: "testTag" })],
+            tags: [metadataTagReadFactory({ value: "testTag" })],
           }),
         ],
       },

@@ -251,7 +251,7 @@ export function getAllAlertTags(
 ): Array<metadataTagRead> {
   const allTags = alert.tags
     .concat(alert.childAnalysisTags)
-    .concat(alert.childPermanentTags);
+    .concat(alert.childTags);
 
   // Return a sorted and deduplicated list of the tags based on the tag value.
   return [...new Map(allTags.map((v) => [v.uuid, v])).values()].sort((a, b) =>
@@ -266,7 +266,7 @@ export function getAlertLink(alert: alertRead | alertSummary): string {
 export function parseAlertSummary(alert: alertRead): alertSummary {
   return {
     childAnalysisTags: alert.childAnalysisTags,
-    childPermanentTags: alert.childPermanentTags,
+    childTags: alert.childTags,
     comments: alert.comments,
     description: alert.description ? alert.description : "",
     disposition: alert.disposition ? alert.disposition.value : "OPEN",

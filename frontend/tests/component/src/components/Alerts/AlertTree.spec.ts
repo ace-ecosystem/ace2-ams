@@ -27,7 +27,7 @@ const childAnalysis = analysisTreeReadFactory({
 const parentObservable = observableTreeReadFactory({
   value: "Parent Observable",
   children: [childAnalysis],
-  permanentTags: [metadataTagReadFactory({ value: "testTag" })],
+  tags: [metadataTagReadFactory({ value: "testTag" })],
 });
 const parentAnalysis = analysisTreeReadFactory({
   analysisModuleType: analysisModuleTypeNodeTreeReadFactory({

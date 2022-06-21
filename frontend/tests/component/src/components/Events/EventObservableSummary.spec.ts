@@ -51,7 +51,7 @@ describe("EventObservableSummary", () => {
       uuid: "ObservableB",
       forDetection: true,
       value: "MediumHits",
-      permanentTags: [metadataTagReadFactory({ value: "TestTag" })],
+      tags: [metadataTagReadFactory({ value: "TestTag" })],
     }),
   };
   const resultC: observableSummary = {

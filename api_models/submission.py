@@ -79,9 +79,7 @@ class SubmissionRead(NodeRead, SubmissionBase):
         description="A list of detection points added to child Nodes in the submission's tree", default_factory=list
     )
 
-    child_permanent_tags: list[MetadataTagRead] = Field(
-        description="A list of tags permanently added to observables", default_factory=list
-    )
+    child_tags: list[MetadataTagRead] = Field(description="A list of tags added to observables", default_factory=list)
 
     child_threat_actors: list[NodeThreatActorRead] = Field(
         description="A list of threat actors added to child Nodes in the submission's tree", default_factory=list

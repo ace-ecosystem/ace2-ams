@@ -106,7 +106,7 @@ describe("RemoveTagModal", () => {
       nodeType: "observable",
       reloadObject: "node",
       observable: observableTreeReadFactory({
-        permanentTags: [existingTag, testTag],
+        tags: [existingTag, testTag],
       }),
     });
 
@@ -138,7 +138,7 @@ describe("RemoveTagModal", () => {
       nodeType: "observable",
       reloadObject: "node",
       observable: observableTreeReadFactory({
-        permanentTags: [existingTag, testTag],
+        tags: [existingTag, testTag],
       }),
     });
     cy.get('[data-cy="chips-container"]')
@@ -170,7 +170,7 @@ describe("RemoveTagModal", () => {
       nodeType: "observable",
       reloadObject: "node",
       observable: observableTreeReadFactory({
-        permanentTags: [existingTag, testTag],
+        tags: [existingTag, testTag],
       }),
     });
     cy.get("[data-cy='remove-button']").should("be.disabled");
@@ -237,7 +237,7 @@ describe("RemoveTagModal", () => {
       nodeType: "observable",
       reloadObject: "node",
       observable: observableTreeReadFactory({
-        permanentTags: [existingTag, testTag],
+        tags: [existingTag, testTag],
       }),
     });
 
@@ -347,7 +347,7 @@ describe("RemoveTagModal", () => {
       nodeType: "observable",
       reloadObject: "node",
       observable: observableTreeReadFactory({
-        permanentTags: [existingTag, testTag],
+        tags: [existingTag, testTag],
       }),
     });
 

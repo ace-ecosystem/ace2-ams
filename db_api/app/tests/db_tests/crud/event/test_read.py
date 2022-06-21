@@ -1190,7 +1190,7 @@ def test_read_summary_observable(db):
     # alert2
     #  o1 - 127.0.0.1 - analysis_tag2
     #    a1 - FA Q
-    #  o2 - 192.168.1.1 - permanent_tag1
+    #  o2 - 192.168.1.1 - tag1
     #    a2 - FA Q
     alert1 = factory.submission.create(db=db, event=event)
     alert1_o1 = factory.observable.create_or_read(
@@ -1235,7 +1235,7 @@ def test_read_summary_observable(db):
         details={"link": "https://url.to.search/query=asdf", "hits": 10},
     )
     alert2_o2 = factory.observable.create_or_read(
-        type="ipv4", value="192.168.1.1", parent_analysis=alert2.root_analysis, permanent_tags=["permanent_tag1"], db=db
+        type="ipv4", value="192.168.1.1", parent_analysis=alert2.root_analysis, tags=["tag1"], db=db
     )
     # This FA Queue analysis doesn't have a "link" field
     factory.analysis.create_or_read(
@@ -1267,12 +1267,12 @@ def test_read_summary_observable(db):
     assert result[0].value == "127.0.0.1"
     assert result[0].faqueue_hits == 10
     assert [t.value for t in result[0].analysis_metadata.tags] == ["analysis_tag1", "analysis_tag2"]
-    assert result[0].permanent_tags == []
+    assert result[0].tags == []
 
     assert result[1].value == "192.168.1.1"
     assert result[1].faqueue_hits == 100
     assert result[1].analysis_metadata.tags == []
-    assert [t.value for t in result[1].permanent_tags] == ["permanent_tag1"]
+    assert [t.value for t in result[1].tags] == ["tag1"]
 
 
 def test_read_summary_sandbox(client, db):

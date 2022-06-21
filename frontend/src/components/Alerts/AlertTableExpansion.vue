@@ -20,11 +20,7 @@
         formatObservable(obs)
       }}</span>
       <!-- Display each observable's tags -->
-      <MetadataTag
-        v-for="tag of obs.permanentTags"
-        :key="tag.value"
-        :tag="tag"
-      />
+      <MetadataTag v-for="tag of obs.tags" :key="tag.value" :tag="tag" />
       <MetadataTag
         v-for="tag of obs.analysisMetadata.tags"
         :key="tag.value"

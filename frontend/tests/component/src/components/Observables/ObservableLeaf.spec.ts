@@ -83,7 +83,7 @@ const observableWithDisplayValue = observableTreeReadFactory({
 const observableWithTags = observableTreeReadFactory({
   value: "Observable w/ Tags",
   children: [],
-  permanentTags: [metadataTagReadFactory({ value: "testTag" })],
+  tags: [metadataTagReadFactory({ value: "testTag" })],
 });
 
 const observableWithTime = observableTreeReadFactory({

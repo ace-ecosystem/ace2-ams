@@ -26,7 +26,7 @@ export const alertTreeReadFactory = ({
   children = [],
   childAnalysisTags = [],
   childDetectionPoints = [],
-  childPermanentTags = [],
+  childTags = [],
   childThreatActors = [],
   childThreats = [],
   comments = [],
@@ -57,7 +57,7 @@ export const alertTreeReadFactory = ({
   children: children,
   childAnalysisTags: childAnalysisTags,
   childDetectionPoints: childDetectionPoints,
-  childPermanentTags: childPermanentTags,
+  childTags: childTags,
   childThreatActors: childThreatActors,
   childThreats: childThreats,
   comments: comments,
@@ -88,7 +88,7 @@ export const alertTreeReadFactory = ({
 export const alertReadFactory = ({
   childAnalysisTags = [],
   childDetectionPoints = [],
-  childPermanentTags = [],
+  childTags = [],
   childThreatActors = [],
   childThreats = [],
   comments = [],
@@ -117,7 +117,7 @@ export const alertReadFactory = ({
   alert: true,
   childAnalysisTags: childAnalysisTags,
   childDetectionPoints: childDetectionPoints,
-  childPermanentTags: childPermanentTags,
+  childTags: childTags,
   childThreatActors: childThreatActors,
   childThreats: childThreats,
   comments: comments,
@@ -147,7 +147,7 @@ export const alertReadFactory = ({
 // These defaults are made with the defaults of the alert and alertTree factories in mind
 export const alertSummaryFactory = ({
   childAnalysisTags = [],
-  childPermanentTags = [],
+  childTags = [],
   comments = [],
   description = "",
   disposition = "OPEN",
@@ -169,7 +169,7 @@ export const alertSummaryFactory = ({
   uuid = "testAlertUuid",
 }: Partial<alertSummary> = {}): alertSummary => ({
   childAnalysisTags: childAnalysisTags,
-  childPermanentTags: childPermanentTags,
+  childTags: childTags,
   comments: comments,
   description: description,
   disposition: disposition,
