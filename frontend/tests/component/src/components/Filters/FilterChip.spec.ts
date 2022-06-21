@@ -35,6 +35,17 @@ describe("FilterChip", () => {
     factory({ filterName: "name", filterValue: ["test name"] });
     cy.contains("Name:").should("be.visible");
     cy.contains("test name").should("be.visible");
+    cy.get('[data-cy="filter-chip-edit-button"]').should("have.length", 1);
+    cy.get('[data-cy="filter-chip-add-button"]').should("have.length", 1);
+  });
+  it("correctly renders if there are multiple values set for a filter", () => {
+    factory({ filterName: "name", filterValue: ["test name", "test name 2"] });
+    cy.contains("Name:").should("be.visible");
+    cy.contains("test name").should("be.visible");
+    cy.contains("|").should("be.visible");
+    cy.contains("test name 2").should("be.visible");
+    cy.get('[data-cy="filter-chip-edit-button"]').should("have.length", 2);
+    cy.get('[data-cy="filter-chip-add-button"]').should("have.length", 1);
   });
   it("correctly renders if  filterNameObject provides a stringRepr method (ex. date)", () => {
     factory({
@@ -52,14 +63,15 @@ describe("FilterChip", () => {
   it("unsets filter if filter value is clicked", () => {
     factory({ filterName: "name", filterValue: ["test name"] });
     cy.contains("test name").click();
-    cy.get("@stub-5").should("have.been.calledWith", {
+    cy.get("@stub-6").should("have.been.calledWith", {
       nodeType: "alerts",
       filterName: "name",
+      filterValue: "test name",
     });
   });
-  it("unsets filter if clear filter (X button) is clicked", () => {
+  it("unsets filter if filter name is clicked is clicked", () => {
     factory({ filterName: "name", filterValue: ["test name"] });
-    cy.get('[data-cy="filter-chip-remove-button"]').click();
+    cy.contains("Name").click();
     cy.get("@stub-5").should("have.been.calledWith", {
       nodeType: "alerts",
       filterName: "name",
@@ -67,12 +79,17 @@ describe("FilterChip", () => {
   });
   it("attempts to update filter when new value is entered in edit filter panel", () => {
     factory({ filterName: "name", filterValue: ["test name"] });
-    cy.get('[data-cy="filter-chip-edit-button"]').click();
+    cy.get('[data-cy="filter-chip-edit-button"]').first().click();
     cy.get('[data-cy="filter-chip-submit-button"]').click();
-    cy.get("@stub-4").should("have.been.calledWith", {
+    cy.get("@stub-6").should("have.been.calledWith", {
       nodeType: "alerts",
       filterName: "name",
       filterValue: "test name",
+    });
+    cy.get("@stub-4").should("have.been.calledWith", {
+      nodeType: "alerts",
+      filterName: "name",
+      filterValue: undefined, // This will be undefined because NodePropertyInput is stubbed
     });
   });
 });
