@@ -18,14 +18,15 @@ from fastapi import status
         ("uuid", 1),
         ("uuid", "abc"),
         ("uuid", ""),
-        ("value", 123),
         ("value", None),
         ("value", ""),
+        ("value", "Monday"),
+        ("value", "2022-01-01"),
     ],
 )
 def test_create_invalid_fields(client, key, value):
-    create_json = {"value": "test", key: value}
-    create = client.post("/api/node/directive/", json=create_json)
+    create_json = {"value": "2022-01-01T00:00:00Z", key: value}
+    create = client.post("/api/metadata/time/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -36,9 +37,9 @@ def test_create_invalid_fields(client, key, value):
     ],
 )
 def test_create_missing_required_fields(client, key):
-    create_json = {"value": "test"}
+    create_json = {"value": "2022-01-01T00:00:00Z"}
     del create_json[key]
-    create = client.post("/api/node/directive/", json=create_json)
+    create = client.post("/api/metadata/time/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -53,7 +54,7 @@ def test_create_missing_required_fields(client, key):
 )
 def test_create_valid_optional_fields(client, key, value):
     # Create the object
-    create = client.post("/api/node/directive/", json={key: value, "value": "test"})
+    create = client.post("/api/metadata/time/", json={key: value, "value": "2022-01-01T00:00:00Z"})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
@@ -63,9 +64,9 @@ def test_create_valid_optional_fields(client, key, value):
 
 def test_create_valid_required_fields(client):
     # Create the object
-    create = client.post("/api/node/directive/", json={"value": "test"})
+    create = client.post("/api/metadata/time/", json={"value": "2022-01-01T00:00:00Z"})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
     get = client.get(create.headers["Content-Location"])
-    assert get.json()["value"] == "test"
+    assert get.json()["value"] == "2022-01-01T00:00:00+00:00"

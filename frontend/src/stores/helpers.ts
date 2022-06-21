@@ -1,5 +1,4 @@
 import { useAlertDispositionStore } from "./alertDisposition";
-import { useEventVectorStore } from "./eventVector";
 import { useAlertToolStore } from "./alertTool";
 import { useAlertTypeStore } from "./alertType";
 import { useAlertToolInstanceStore } from "./alertToolInstance";
@@ -12,8 +11,9 @@ import { useEventSeverityStore } from "./eventSeverity";
 import { useEventStatusStore } from "./eventStatus";
 import { useEventTableStore } from "./eventTable";
 import { useEventTypeStore } from "./eventType";
+import { useEventVectorStore } from "./eventVector";
 import { useFilterStore } from "./filter";
-import { useNodeDirectiveStore } from "./nodeDirective";
+import { useMetadataDirectiveStore } from "./metadataDirective";
 import { useNodeThreatStore } from "./nodeThreat";
 import { useNodeThreatActorStore } from "./nodeThreatActor";
 import { useNodeThreatTypeStore } from "./nodeThreatType";
@@ -32,7 +32,7 @@ export async function populateCommonStores(): Promise<void> {
   const eventStatusStore = useEventStatusStore();
   const eventTypeStore = useEventTypeStore();
   const eventVectorStore = useEventVectorStore();
-  const nodeDirectiveStore = useNodeDirectiveStore();
+  const metadataDirectiveStore = useMetadataDirectiveStore();
   const observableTypeStore = useObservableTypeStore();
   const queueStore = useQueueStore();
   const userStore = useUserStore();
@@ -47,7 +47,7 @@ export async function populateCommonStores(): Promise<void> {
     eventStatusStore.readAll(),
     eventTypeStore.readAll(),
     eventVectorStore.readAll(),
-    nodeDirectiveStore.readAll(),
+    metadataDirectiveStore.readAll(),
     observableTypeStore.readAll(),
     queueStore.readAll(),
     userStore.readAll(),

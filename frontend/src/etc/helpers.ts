@@ -7,7 +7,7 @@ import {
 import { genericQueueableObjectRead, propertyOption } from "@/models/base";
 import { eventFilterParams } from "@/models/event";
 import { metadataTagRead } from "@/models/metadataTag";
-import { isValidDate, isObject } from "@/etc/validators";
+import { isValidDate, isObject, isValidDateString } from "@/etc/validators";
 import { inputTypes } from "@/etc/constants/base";
 
 export const camelToSnakeCase = (str: string): string =>
@@ -51,6 +51,29 @@ export function dateParser(key: string, value: unknown): Date | unknown {
     }
   }
   return value;
+}
+
+export function prettyPrintDateTime(
+  datetime: string | Date | null,
+  timezone?: string,
+): string {
+  if (!datetime) return "None";
+
+  // Convert the datetime to a string if it is a Date object.
+  if (datetime instanceof Date) {
+    datetime = datetime.toISOString();
+  }
+
+  // If the datetime is not a valid date string, return it as-is.
+  if (!isValidDateString(datetime)) {
+    return datetime;
+  }
+
+  // Return the formatted datetime string according to the given timezone (or UTC).
+  const tz = timezone || "UTC";
+  return `${new Date(datetime).toLocaleString("en-US", {
+    timeZone: tz,
+  })} ${tz}`;
 }
 
 export function parseFilters(
@@ -194,7 +217,7 @@ export function formatNodeFiltersForAPI(
 ): Record<string, string> | Record<string, number> {
   const formattedParams = {} as alertFilterParams;
   for (const param in params) {
-    let paramValue = params[param] as any;
+    let paramValue = params[param] as unknown;
 
     //  check if the given param is specific to node and not pageOptionParams, i.e. disposition
     const filterType = availableFilters.find((filter) => {
@@ -248,7 +271,7 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
     description: alert.description ? alert.description : "",
     disposition: alert.disposition ? alert.disposition.value : "OPEN",
     dispositionTime: alert.dispositionTime
-      ? new Date(alert.dispositionTime)
+      ? prettyPrintDateTime(alert.dispositionTime)
       : null,
     dispositionUser: alert.dispositionUser
       ? alert.dispositionUser.displayName
@@ -257,19 +280,21 @@ export function parseAlertSummary(alert: alertRead): alertSummary {
       alert.disposition && alert.dispositionUser && alert.dispositionTime
         ? `${alert.disposition.value} by ${
             alert.dispositionUser.displayName
-          } @ ${new Date(alert.dispositionTime).toISOString()}`
+          } @ ${prettyPrintDateTime(alert.dispositionTime)}`
         : "OPEN",
-    eventTime: new Date(alert.eventTime),
+    eventTime: prettyPrintDateTime(alert.eventTime),
     eventUuid: alert.eventUuid ? alert.eventUuid : "None",
-    insertTime: new Date(alert.insertTime),
+    insertTime: prettyPrintDateTime(alert.insertTime),
     name: alert.name,
     owner: alert.owner ? alert.owner.displayName : "None",
-    ownershipTime: alert.ownershipTime ? new Date(alert.ownershipTime) : null,
+    ownershipTime: alert.ownershipTime
+      ? prettyPrintDateTime(alert.ownershipTime)
+      : null,
     ownerWithTime:
       alert.owner && alert.ownershipTime
-        ? `${alert.owner.displayName} @ ${new Date(
+        ? `${alert.owner.displayName} @ ${prettyPrintDateTime(
             alert.ownershipTime,
-          ).toISOString()}`
+          )}`
         : "None",
     queue: alert.queue.value,
     tags: alert.tags,

@@ -64,6 +64,7 @@
   import { onMounted, ref, defineProps } from "vue";
   import { Event } from "@/services/api/event";
   import { emailSummary } from "@/models/eventSummaries";
+  import { prettyPrintDateTime } from "@/etc/helpers";
 
   const props = defineProps({
     eventUuid: { type: String, required: true },
@@ -87,12 +88,7 @@
   });
 
   const formatDateTime = (dateTime: string) => {
-    if (dateTime) {
-      const d = new Date(dateTime);
-      return d.toLocaleString("en-US", { timeZone: "UTC" });
-    }
-
-    return "None";
+    return prettyPrintDateTime(dateTime) || "None";
   };
 
   const formatList = (list: []) => {

@@ -1266,12 +1266,12 @@ def test_read_summary_observable(db):
     assert len(result) == 2
     assert result[0].value == "127.0.0.1"
     assert result[0].faqueue_hits == 10
-    assert [t.value for t in result[0].analysis_tags] == ["analysis_tag1", "analysis_tag2"]
+    assert [t.value for t in result[0].analysis_metadata.tags] == ["analysis_tag1", "analysis_tag2"]
     assert result[0].permanent_tags == []
 
     assert result[1].value == "192.168.1.1"
     assert result[1].faqueue_hits == 100
-    assert result[1].analysis_tags == []
+    assert result[1].analysis_metadata.tags == []
     assert [t.value for t in result[1].permanent_tags] == ["permanent_tag1"]
 
 

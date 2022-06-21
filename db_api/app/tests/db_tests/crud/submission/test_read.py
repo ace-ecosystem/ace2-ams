@@ -499,17 +499,20 @@ def test_read_observables(db):
     # Create a submission tree where the same observable type+value appears twice
     #
     # submission
-    #   o1 - analysis_tag1, display_type1
+    #   o1 - analysis_tag1, display_type1, directive1, time1
     #     a
     #       o1 - analysis_tag2
     #   o2 - analysis_tag3, permanent_tag1, display_value1
+    time1 = crud.helpers.utcnow()
     submission = factory.submission.create(db=db)
     observable1 = factory.observable.create_or_read(
         type="fqdn",
         value="bad.com",
         parent_analysis=submission.root_analysis,
         analysis_tags=["analysis_tag1"],
+        directives=["directive1"],
         display_type="display_type1",
+        time=time1,
         db=db,
     )
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test", db=db)
@@ -568,22 +571,29 @@ def test_read_observables(db):
     # ipv4: 127.0.0.1 (analysis_tag3, permanent_tag1)
     result = crud.submission.read_observables(uuids=[submission.uuid, submission2.uuid], db=db)
     assert len(result) == 3
+
     assert result[0].type.value == "email_address" and result[0].value == "badguy@bad.com"
-    assert result[0].analysis_tags == []
-    assert result[0].display_type is None
-    assert result[0].display_value is None
+    assert result[0].analysis_metadata.tags == []
+    assert result[0].analysis_metadata.directives == []
+    assert result[0].analysis_metadata.display_type is None
+    assert result[0].analysis_metadata.display_value is None
+    assert result[0].analysis_metadata.time is None
     assert result[0].permanent_tags == []
 
     assert result[1].type.value == "fqdn" and result[1].value == "bad.com"
-    assert [t.value for t in result[1].analysis_tags] == ["analysis_tag1", "analysis_tag2"]
-    assert result[1].display_type.value == "display_type1"
-    assert result[1].display_value is None
+    assert [d.value for d in result[1].analysis_metadata.directives] == ["directive1"]
+    assert [t.value for t in result[1].analysis_metadata.tags] == ["analysis_tag1", "analysis_tag2"]
+    assert result[1].analysis_metadata.display_type.value == "display_type1"
+    assert result[1].analysis_metadata.display_value is None
+    assert result[1].analysis_metadata.time.value == time1
     assert result[1].permanent_tags == []
 
     assert result[2].type.value == "ipv4" and result[2].value == "127.0.0.1"
-    assert [t.value for t in result[2].analysis_tags] == ["analysis_tag3"]
-    assert result[2].display_type is None
-    assert result[2].display_value.value == "display_value1"
+    assert result[2].analysis_metadata.directives == []
+    assert [t.value for t in result[2].analysis_metadata.tags] == ["analysis_tag3"]
+    assert result[2].analysis_metadata.display_type is None
+    assert result[2].analysis_metadata.display_value.value == "display_value1"
+    assert result[0].analysis_metadata.time is None
     assert [t.value for t in result[2].permanent_tags] == ["permanent_tag1"]
 
 
@@ -771,16 +781,18 @@ def test_read_summary_url_domain(db):
 def test_tag_functionality(db):
     """
     Submission1
-        O1 - permanent_tag1
-            A1 - adds tag z_analysis1_tag to O2
-                O2 - analysis2_tag, z_analysis1_tag (should show all analysis tags in this alert for the observable)
-        O3
-            A2 - adds tag analysis2_tag to O2
-                O2 - analysis2_tag, z_analysis1_tag (should show all analysis tags in this alert for the observable)
+        RootAnalysis1
+            O1 - permanent_tag1
+                A1 - adds tag z_analysis1_tag to O2
+                    O2 - analysis2_tag, z_analysis1_tag (should show all analysis tags in this alert for the observable)
+            O3
+                A2 - adds tag analysis2_tag to O2
+                    O2 - analysis2_tag, z_analysis1_tag (should show all analysis tags in this alert for the observable)
 
     Submission2
-        O1 - should have permanent_tag1 because it is a permanent tag
-        O2 - should not have any tags because the alert does not contain analysis A1 or A2
+        RootAnalysis2
+            O1 - should have permanent_tag1 because it is a permanent tag
+            O2 - should not have any tags because the alert does not contain analysis A1 or A2
     """
 
     # Create the submission1 tree structure
@@ -859,23 +871,27 @@ def test_tag_functionality(db):
     # Verify the tags for O2 in the first submission under A1. It should have two tags, even though
     # its parent analysis A1 only added one tag. The tags should be in alphabetical order, not the
     # order in which they were added by the analyses.
-    assert len(o1_a1.analysis_metadata) == 1
-    assert o1_a1.analysis_metadata[0].metadata_object.value == "z_analysis1_tag"
-    assert len(submission1_tree["children"][0]["children"][0]["children"][0]["analysis_tags"]) == 2
-    assert submission1_tree["children"][0]["children"][0]["children"][0]["analysis_tags"][0]["value"] == "analysis2_tag"
+    assert len(submission1_tree["children"][0]["children"][0]["children"][0]["analysis_metadata"]["tags"]) == 2
     assert (
-        submission1_tree["children"][0]["children"][0]["children"][0]["analysis_tags"][1]["value"] == "z_analysis1_tag"
+        submission1_tree["children"][0]["children"][0]["children"][0]["analysis_metadata"]["tags"][0]["value"]
+        == "analysis2_tag"
+    )
+    assert (
+        submission1_tree["children"][0]["children"][0]["children"][0]["analysis_metadata"]["tags"][1]["value"]
+        == "z_analysis1_tag"
     )
 
     # Verify the tags for O2 in the first submission under A2. It should have two tags, even though
     # its parent analysis A2 only added one tag. The tags should be in alphabetical order, not the
     # order in which they were added by the analyses.
-    assert len(o3_a2.analysis_metadata) == 1
-    assert o3_a2.analysis_metadata[0].metadata_object.value == "analysis2_tag"
-    assert len(submission1_tree["children"][1]["children"][0]["children"][0]["analysis_tags"]) == 2
-    assert submission1_tree["children"][1]["children"][0]["children"][0]["analysis_tags"][0]["value"] == "analysis2_tag"
+    assert len(submission1_tree["children"][1]["children"][0]["children"][0]["analysis_metadata"]["tags"]) == 2
     assert (
-        submission1_tree["children"][1]["children"][0]["children"][0]["analysis_tags"][1]["value"] == "z_analysis1_tag"
+        submission1_tree["children"][1]["children"][0]["children"][0]["analysis_metadata"]["tags"][0]["value"]
+        == "analysis2_tag"
+    )
+    assert (
+        submission1_tree["children"][1]["children"][0]["children"][0]["analysis_metadata"]["tags"][1]["value"]
+        == "z_analysis1_tag"
     )
 
     # The second submission should have two child observables, and they should be in the order
@@ -891,5 +907,41 @@ def test_tag_functionality(db):
     # Verify the tags for O2 in the second submission. Even though it is the exact same observable
     # object as in the first submission, it shouldn't have any tags because the submission does not
     # contain any analysis that added tags to it.
-    assert len(submission2_tree["children"][1]["analysis_tags"]) == 0
-    assert len(submission2_tree["children"][1]["permanent_tags"]) == 0
+    assert submission2_tree["children"][1]["analysis_metadata"]["tags"] == []
+    assert submission2_tree["children"][1]["permanent_tags"] == []
+
+
+def test_disposition_history(db):
+    # Create some alert dispositions
+    factory.alert_disposition.create_or_read(value="FALSE_POSITIVE", rank=1, db=db)
+    factory.alert_disposition.create_or_read(value="DELIVERY", rank=2, db=db)
+
+    # Create four alerts that all have the same observable but different dispositions
+    submission1 = factory.submission.create(alert=True, db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission1.root_analysis, db=db)
+
+    submission2 = factory.submission.create(alert=True, disposition="FALSE_POSITIVE", db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission2.root_analysis, db=db)
+
+    submission3 = factory.submission.create(alert=True, disposition="FALSE_POSITIVE", db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission3.root_analysis, db=db)
+
+    submission4 = factory.submission.create(alert=True, disposition="DELIVERY", db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission4.root_analysis, db=db)
+
+    # Read one of the alert trees
+    tree = crud.submission.read_tree(submission1.uuid, db=db)
+
+    # The disposition history for the observable should be sorted by the dispositions' ranks.
+    assert len(tree["children"][0]["disposition_history"]) == 3
+    assert tree["children"][0]["disposition_history"][0] == {"disposition": "FALSE_POSITIVE", "count": 2, "percent": 50}
+    assert tree["children"][0]["disposition_history"][1] == {"disposition": "DELIVERY", "count": 1, "percent": 25}
+    assert tree["children"][0]["disposition_history"][2] == {"disposition": "OPEN", "count": 1, "percent": 25}
+
+    # Similarly, if you read the observables from a set of alerts instead, you should get the same disposition history.
+    observables = crud.submission.read_observables(uuids=[submission1.uuid], db=db)
+    assert len(observables) == 1
+    assert len(observables[0].disposition_history) == 3
+    assert observables[0].disposition_history[0] == {"disposition": "FALSE_POSITIVE", "count": 2, "percent": 50}
+    assert observables[0].disposition_history[1] == {"disposition": "DELIVERY", "count": 1, "percent": 25}
+    assert observables[0].disposition_history[2] == {"disposition": "OPEN", "count": 1, "percent": 25}

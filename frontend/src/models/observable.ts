@@ -1,30 +1,36 @@
 import { Component } from "vue";
 import { analysisTreeRead } from "./analysis";
+import {
+  analysisMetadataCreate,
+  analysisMetadataRead,
+} from "./analysisMetadata";
 import { historyUsername, UUID } from "./base";
-import { metadataDisplayTypeRead } from "./metadataDisplayType";
-import { metadataDisplayValueRead } from "./metadataDisplayValue";
 import { metadataTagRead } from "./metadataTag";
 import { nodeCreate, nodeRead, nodeUpdate } from "./node";
 import { nodeCommentRead } from "./nodeComment";
 import { nodeDetectionPointRead } from "./nodeDetectionPoint";
-import { nodeDirectiveRead } from "./nodeDirective";
 import { nodeRelationshipRead } from "./nodeRelationship";
 import { nodeThreatRead } from "./nodeThreat";
 import { nodeThreatActorRead } from "./nodeThreatActor";
 import { observableTypeRead } from "./observableType";
 
+export interface dispositionHistoryIndividual {
+  disposition: string;
+  count: number;
+  percent: number;
+}
+
 export interface observableCreate extends nodeCreate, historyUsername {
   // The backend API actually allows you to specify a list of AnalysisCreate objects
   // when creating an observable, but we have not exposed that functionality in the GUI (yet).
+  analysisMetadata?: analysisMetadataCreate[];
   context?: string;
-  directives?: string[];
   expiresOn?: Date;
   forDetection?: boolean;
   parentAnalysisUuid: UUID;
   tags?: string[];
   threatActors?: string[];
   threats?: string[];
-  time?: Date;
   type: string;
   value: string;
   [key: string]: unknown;
@@ -34,22 +40,19 @@ export interface observableRead extends nodeRead {
   comments: nodeCommentRead[];
   context: string | null;
   detectionPoints: nodeDetectionPointRead[];
-  directives: nodeDirectiveRead[];
-  expiresOn: Date | null;
+  expiresOn: string | null;
   forDetection: boolean;
   observableRelationships: observableRelationshipRead[];
   permanentTags: metadataTagRead[];
   threatActors: nodeThreatActorRead[];
   threats: nodeThreatRead[];
-  time: Date;
   type: observableTypeRead;
   value: string;
 }
 
 export interface observableInAlertRead extends observableRead {
-  analysisTags: metadataTagRead[];
-  displayType: metadataDisplayTypeRead | null;
-  displayValue: metadataDisplayValueRead | null;
+  analysisMetadata: analysisMetadataRead;
+  dispositionHistory: dispositionHistoryIndividual[];
 }
 
 export interface observableReadPage {
@@ -59,23 +62,18 @@ export interface observableReadPage {
   total: number;
 }
 
-export interface observableTreeRead extends observableRead {
-  analysisTags: metadataTagRead[];
+export interface observableTreeRead extends observableInAlertRead {
   children: analysisTreeRead[];
-  displayType: metadataDisplayTypeRead | null;
-  displayValue: metadataDisplayValueRead | null;
   firstAppearance?: boolean;
 }
 
 export interface observableUpdate extends nodeUpdate, historyUsername {
   context?: string;
-  directives?: string[];
   expiresOn?: Date | null;
   forDetection?: boolean;
   tags?: string[];
   threatActors?: string[];
   threats?: string[];
-  time?: Date;
   type?: string;
   value?: string;
   [key: string]: unknown;

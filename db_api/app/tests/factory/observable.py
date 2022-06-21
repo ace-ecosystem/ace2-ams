@@ -39,7 +39,8 @@ def create_or_read(
 
     if directives is not None:
         for directive in directives:
-            factory.node_directive.create_or_read(value=directive, db=db)
+            factory.metadata_directive.create_or_read(value=directive, db=db)
+            metadata.append(AnalysisMetadataCreate(type="directive", value=directive))
 
     if display_type is not None:
         factory.metadata_display_type.create_or_read(value=display_type, db=db)
@@ -61,19 +62,21 @@ def create_or_read(
         for threat in threats:
             factory.node_threat.create_or_read(value=threat, db=db)
 
+    if time is not None:
+        factory.metadata_time.create_or_read(value=time, db=db)
+        metadata.append(AnalysisMetadataCreate(type="time", value=time))
+
     obj = crud.observable.create_or_read(
         model=ObservableCreate(
+            analysis_metadata=metadata,
             context=context,
             detection_points=detection_points or [],
-            directives=directives or [],
             expires_on=expires_on,
             for_detection=for_detection,
             history_username=history_username,
-            metadata=metadata,
             permanent_tags=permanent_tags or [],
             threat_actors=threat_actors or [],
             threats=threats or [],
-            time=time or crud.helpers.utcnow(),
             type=type,
             value=value,
         ),

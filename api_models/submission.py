@@ -135,15 +135,6 @@ class SubmissionRead(NodeRead, SubmissionBase):
         orm_mode = True
 
 
-class SubmissionTreeRead(SubmissionRead):
-    children: list[ObservableSubmissionTreeRead] = Field(
-        default_factory=list, description="A list of this submission's child observables"
-    )
-
-    class Config:
-        orm_mode = True
-
-
 class SubmissionUpdate(NodeUpdate, SubmissionBase):
     disposition: Optional[type_str] = Field(description="The disposition assigned to this submission")
 
@@ -169,7 +160,9 @@ class SubmissionUpdate(NodeUpdate, SubmissionBase):
 class SubmissionTreeRead(SubmissionRead):
     root_analysis_uuid: UUID4 = Field(description="The UUID the submission's root analysis")
 
-    children: list[dict] = Field(default_factory=list, description="A list of this submission's child objects")
+    children: list[ObservableSubmissionTreeRead] = Field(
+        default_factory=list, description="A list of this submission's child observables"
+    )
 
     class Config:
         orm_mode = True

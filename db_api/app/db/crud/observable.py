@@ -47,7 +47,6 @@ def create_or_read(
     obj.expires_on = model.expires_on
     obj.for_detection = model.for_detection
     obj.permanent_tags = crud.metadata_tag.read_by_values(values=model.permanent_tags, db=db)
-    obj.time = model.time
     obj.type = crud.observable_type.read_by_value(value=model.type, db=db)
     obj.value = model.value
 
@@ -109,7 +108,7 @@ def create_or_read(
     parent_analysis.child_observables.append(obj)
 
     # If there was any metadata given, it is assumed that it was added by the observable's parent analysis.
-    for metadata in model.metadata:
+    for metadata in model.analysis_metadata:
         crud.analysis_metadata.create_or_read(model=metadata, analysis=parent_analysis, observable=obj, db=db)
 
     # Update the alert versions that contain the parent analysis
@@ -187,10 +186,6 @@ def update(uuid: UUID, model: ObservableUpdate, db: Session) -> bool:
                 )
             )
             observable.permanent_tags = crud.metadata_tag.read_by_values(values=update_data["permanent_tags"], db=db)
-
-        if "time" in update_data:
-            diffs.append(crud.history.create_diff(field="time", old=observable.time, new=update_data["time"]))
-            observable.time = update_data["time"]
 
         if "type" in update_data:
             diffs.append(crud.history.create_diff(field="type", old=observable.type.value, new=update_data["type"]))

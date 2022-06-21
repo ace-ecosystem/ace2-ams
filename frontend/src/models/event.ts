@@ -60,25 +60,25 @@ export interface eventCreate extends nodeCreate, historyUsername {
 }
 
 export interface eventRead extends nodeRead {
-  alertTime: Date | null;
+  alertTime: string | null;
   alertUuids: UUID[];
   analysisTypes: string[];
-  autoAlertTime: Date | null;
-  autoDispositionTime: Date | null;
-  autoEventTime: Date | null;
-  autoOwnershipTime: Date | null;
+  autoAlertTime: string | null;
+  autoDispositionTime: string | null;
+  autoEventTime: string | null;
+  autoOwnershipTime: string | null;
   comments: nodeCommentRead[];
-  containTime: Date | null;
-  createdTime: Date;
-  dispositionTime: Date | null;
-  eventTime: Date | null;
+  containTime: string | null;
+  createdTime: string;
+  dispositionTime: string | null;
+  eventTime: string | null;
   name: string;
   owner: userRead | null;
-  ownershipTime: Date | null;
+  ownershipTime: string | null;
   preventionTools: eventPreventionToolRead[];
   queue: queueRead;
   remediations: eventRemediationRead[];
-  remediationTime: Date | null;
+  remediationTime: string | null;
   severity: eventSeverityRead | null;
   source: eventSourceRead | null;
   status: eventStatusRead | null;

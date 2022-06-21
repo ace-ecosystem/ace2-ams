@@ -103,7 +103,6 @@ def create(
                     analyses=observable.analyses,
                     context=observable.context,
                     detection_points=observable.detection_points,
-                    directives=observable.directives,
                     expires_on=observable.expires_on,
                     for_detction=observable.for_detection,
                     history_username=observable.history_username,
@@ -112,7 +111,6 @@ def create(
                     permanent_tags=observable.permanent_tags,
                     threat_actors=observable.threat_actors,
                     threats=observable.threats,
-                    time=observable.time,
                     type=observable.type,
                     value=observable.value,
                 ),
@@ -183,9 +181,9 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
 
         # Build the ObservableCreate model
         observable_model = ObservableCreate(
+            analysis_metadata=o.get("metadata", []),
             detection_points=o.get("detection_points", []),
             for_detection=o.get("for_detection", False),
-            metadata=o.get("metadata", []),
             observable_relationships=o.get("observable_relationships", []),
             permanent_tags=o.get("permanent_tags", []),
             type=o["type"],

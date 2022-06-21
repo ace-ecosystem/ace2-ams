@@ -16,9 +16,6 @@ def create(
 ) -> DeclarativeMeta:
     obj: Node = db_node_type(**model.dict(exclude=exclude))
 
-    if hasattr(model, "directives") and model.directives:
-        obj.directives = crud.node_directive.read_by_values(values=model.directives, db=db)
-
     if hasattr(model, "threat_actors") and model.threat_actors:
         obj.threat_actors = crud.node_threat_actor.read_by_values(values=model.threat_actors, db=db)
 
@@ -49,15 +46,6 @@ def update(
         raise VersionMismatch(
             f"Node version {update_data['version']} does not match the database version {node.version}"
         )
-
-    if "directives" in update_data:
-        diffs.append(
-            crud.history.create_diff(
-                field="directives", old=[x.value for x in node.directives], new=update_data["directives"]
-            )
-        )
-
-        node.directives = crud.node_directive.read_by_values(values=update_data["directives"], db=db)
 
     if "threat_actors" in update_data:
         diffs.append(

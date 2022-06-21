@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: f494a9e8f48c
+Revision ID: 38de03766e34
 Revises: 
-Create Date: 2022-06-14 19:48:31.399372
+Create Date: 2022-06-17 18:02:28.035697
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'f494a9e8f48c'
+revision = '38de03766e34'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -101,13 +101,6 @@ def upgrade() -> None:
     sa.Column('version', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.PrimaryKeyConstraint('uuid')
     )
-    op.create_table('node_directive',
-    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
-    sa.Column('description', sa.String(), nullable=True),
-    sa.Column('value', sa.String(), nullable=False),
-    sa.PrimaryKeyConstraint('uuid')
-    )
-    op.create_index(op.f('ix_node_directive_value'), 'node_directive', ['value'], unique=True)
     op.create_table('node_relationship_type',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -184,15 +177,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_user_role_value'), 'user_role', ['value'], unique=True)
-    op.create_table('analysis_module_type_directive_mapping',
-    sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('directive_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.ForeignKeyConstraint(['analysis_module_type_uuid'], ['analysis_module_type.uuid'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['directive_uuid'], ['node_directive.uuid'], ),
-    sa.PrimaryKeyConstraint('analysis_module_type_uuid', 'directive_uuid')
-    )
-    op.create_index(op.f('ix_analysis_module_type_directive_mapping_analysis_module_type_uuid'), 'analysis_module_type_directive_mapping', ['analysis_module_type_uuid'], unique=False)
-    op.create_index(op.f('ix_analysis_module_type_directive_mapping_directive_uuid'), 'analysis_module_type_directive_mapping', ['directive_uuid'], unique=False)
     op.create_table('analysis_module_type_observable_type_mapping',
     sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('observable_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -265,6 +249,14 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_event_vector_queue_mapping_event_vector_uuid'), 'event_vector_queue_mapping', ['event_vector_uuid'], unique=False)
     op.create_index(op.f('ix_event_vector_queue_mapping_queue_uuid'), 'event_vector_queue_mapping', ['queue_uuid'], unique=False)
+    op.create_table('metadata_directive',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['uuid'], ['metadata.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_metadata_directive_value'), 'metadata_directive', ['value'], unique=True)
     op.create_table('metadata_display_type',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -289,6 +281,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_metadata_tag_value'), 'metadata_tag', ['value'], unique=True)
+    op.create_table('metadata_time',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.DateTime(timezone=True), nullable=False),
+    sa.ForeignKeyConstraint(['uuid'], ['metadata.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_metadata_time_value'), 'metadata_time', ['value'], unique=True)
     op.create_table('node_detection_point',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('insert_time', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
@@ -300,15 +300,6 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_node_detection_point_node_uuid'), 'node_detection_point', ['node_uuid'], unique=False)
     op.create_index('value_trgm', 'node_detection_point', ['value'], unique=False, postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
-    op.create_table('node_directive_mapping',
-    sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.Column('directive_uuid', postgresql.UUID(as_uuid=True), nullable=False),
-    sa.ForeignKeyConstraint(['directive_uuid'], ['node_directive.uuid'], ),
-    sa.ForeignKeyConstraint(['node_uuid'], ['node.uuid'], ),
-    sa.PrimaryKeyConstraint('node_uuid', 'directive_uuid')
-    )
-    op.create_index(op.f('ix_node_directive_mapping_directive_uuid'), 'node_directive_mapping', ['directive_uuid'], unique=False)
-    op.create_index(op.f('ix_node_directive_mapping_node_uuid'), 'node_directive_mapping', ['node_uuid'], unique=False)
     op.create_table('node_relationship',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=True),
@@ -426,6 +417,15 @@ def upgrade() -> None:
     )
     op.create_index('analysis_module_type_target_cached_during_idx', 'analysis', ['analysis_module_type_uuid', 'target_uuid', 'cached_during'], unique=False)
     op.create_index(op.f('ix_analysis_run_time'), 'analysis', ['run_time'], unique=False)
+    op.create_table('analysis_module_type_directive_mapping',
+    sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('directive_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.ForeignKeyConstraint(['analysis_module_type_uuid'], ['analysis_module_type.uuid'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['directive_uuid'], ['metadata_directive.uuid'], ),
+    sa.PrimaryKeyConstraint('analysis_module_type_uuid', 'directive_uuid')
+    )
+    op.create_index(op.f('ix_analysis_module_type_directive_mapping_analysis_module_type_uuid'), 'analysis_module_type_directive_mapping', ['analysis_module_type_uuid'], unique=False)
+    op.create_index(op.f('ix_analysis_module_type_directive_mapping_directive_uuid'), 'analysis_module_type_directive_mapping', ['directive_uuid'], unique=False)
     op.create_table('analysis_module_type_tag_mapping',
     sa.Column('analysis_module_type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('tag_uuid', postgresql.UUID(as_uuid=True), nullable=False),
@@ -754,6 +754,9 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_analysis_module_type_tag_mapping_tag_uuid'), table_name='analysis_module_type_tag_mapping')
     op.drop_index(op.f('ix_analysis_module_type_tag_mapping_analysis_module_type_uuid'), table_name='analysis_module_type_tag_mapping')
     op.drop_table('analysis_module_type_tag_mapping')
+    op.drop_index(op.f('ix_analysis_module_type_directive_mapping_directive_uuid'), table_name='analysis_module_type_directive_mapping')
+    op.drop_index(op.f('ix_analysis_module_type_directive_mapping_analysis_module_type_uuid'), table_name='analysis_module_type_directive_mapping')
+    op.drop_table('analysis_module_type_directive_mapping')
     op.drop_index(op.f('ix_analysis_run_time'), table_name='analysis')
     op.drop_index('analysis_module_type_target_cached_during_idx', table_name='analysis')
     op.drop_table('analysis')
@@ -782,18 +785,19 @@ def downgrade() -> None:
     op.drop_table('node_threat_actor_mapping')
     op.drop_index(op.f('ix_node_relationship_node_uuid'), table_name='node_relationship')
     op.drop_table('node_relationship')
-    op.drop_index(op.f('ix_node_directive_mapping_node_uuid'), table_name='node_directive_mapping')
-    op.drop_index(op.f('ix_node_directive_mapping_directive_uuid'), table_name='node_directive_mapping')
-    op.drop_table('node_directive_mapping')
     op.drop_index('value_trgm', table_name='node_detection_point', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_index(op.f('ix_node_detection_point_node_uuid'), table_name='node_detection_point')
     op.drop_table('node_detection_point')
+    op.drop_index(op.f('ix_metadata_time_value'), table_name='metadata_time')
+    op.drop_table('metadata_time')
     op.drop_index(op.f('ix_metadata_tag_value'), table_name='metadata_tag')
     op.drop_table('metadata_tag')
     op.drop_index(op.f('ix_metadata_display_value_value'), table_name='metadata_display_value')
     op.drop_table('metadata_display_value')
     op.drop_index(op.f('ix_metadata_display_type_value'), table_name='metadata_display_type')
     op.drop_table('metadata_display_type')
+    op.drop_index(op.f('ix_metadata_directive_value'), table_name='metadata_directive')
+    op.drop_table('metadata_directive')
     op.drop_index(op.f('ix_event_vector_queue_mapping_queue_uuid'), table_name='event_vector_queue_mapping')
     op.drop_index(op.f('ix_event_vector_queue_mapping_event_vector_uuid'), table_name='event_vector_queue_mapping')
     op.drop_table('event_vector_queue_mapping')
@@ -818,9 +822,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_analysis_module_type_observable_type_mapping_observable_type_uuid'), table_name='analysis_module_type_observable_type_mapping')
     op.drop_index(op.f('ix_analysis_module_type_observable_type_mapping_analysis_module_type_uuid'), table_name='analysis_module_type_observable_type_mapping')
     op.drop_table('analysis_module_type_observable_type_mapping')
-    op.drop_index(op.f('ix_analysis_module_type_directive_mapping_directive_uuid'), table_name='analysis_module_type_directive_mapping')
-    op.drop_index(op.f('ix_analysis_module_type_directive_mapping_analysis_module_type_uuid'), table_name='analysis_module_type_directive_mapping')
-    op.drop_table('analysis_module_type_directive_mapping')
     op.drop_index(op.f('ix_user_role_value'), table_name='user_role')
     op.drop_table('user_role')
     op.drop_index(op.f('ix_submission_type_value'), table_name='submission_type')
@@ -843,8 +844,6 @@ def downgrade() -> None:
     op.drop_table('node_threat')
     op.drop_index(op.f('ix_node_relationship_type_value'), table_name='node_relationship_type')
     op.drop_table('node_relationship_type')
-    op.drop_index(op.f('ix_node_directive_value'), table_name='node_directive')
-    op.drop_table('node_directive')
     op.drop_table('node')
     op.drop_table('metadata')
     op.drop_index(op.f('ix_event_vector_value'), table_name='event_vector')

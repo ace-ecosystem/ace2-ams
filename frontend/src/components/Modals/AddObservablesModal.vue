@@ -58,7 +58,7 @@
     multiAdd: boolean;
     invalid: boolean;
     value: string;
-    directives?: string[];
+    directives: string[];
   }
   const emit = defineEmits(["requestReload"]);
 

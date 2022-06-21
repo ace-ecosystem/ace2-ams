@@ -45,19 +45,6 @@ def test_create_nonexistent_history_username(db):
         )
 
 
-def test_create_nonexistent_node_directive(db):
-    submission = factory.submission.create(db=db)
-    factory.observable_type.create_or_read(value="test", db=db)
-
-    with pytest.raises(ValueNotFoundInDatabase):
-        crud.observable.create_or_read(
-            model=ObservableCreate(
-                type="test", value="test", parent_analysis_uuid=submission.root_analysis_uuid, directives=["asdf"]
-            ),
-            db=db,
-        )
-
-
 def test_create_nonexistent_tag(db):
     submission = factory.submission.create(db=db)
     factory.observable_type.create_or_read(value="test", db=db)
@@ -164,7 +151,7 @@ def test_create(db):
     now = crud.helpers.utcnow()
     submission = factory.submission.create(db=db)
     initial_submission_version = submission.version
-    factory.node_directive.create_or_read(value="directive", db=db)
+    factory.metadata_directive.create_or_read(value="directive", db=db)
     factory.node_relationship_type.create_or_read(value="relationship_type", db=db)
     factory.metadata_tag.create_or_read(value="tag", db=db)
     factory.node_threat_actor.create_or_read(value="threat_actor", db=db)
@@ -182,7 +169,6 @@ def test_create(db):
             ],
             context="context",
             detection_points=["detection_point"],
-            directives=["directive"],
             expires_on=now,
             for_detection=True,
             history_username="analyst",
@@ -192,7 +178,6 @@ def test_create(db):
             permanent_tags=["tag"],
             threat_actors=["threat_actor"],
             threats=["threat"],
-            time=now,
             type="type1",
             value="test",
             parent_analysis_uuid=submission.root_analysis_uuid,
@@ -203,8 +188,6 @@ def test_create(db):
     assert observable.context == "context"
     assert len(observable.detection_points) == 1
     assert observable.detection_points[0].value == "detection_point"
-    assert len(observable.directives) == 1
-    assert observable.directives[0].value == "directive"
     assert observable.expires_on == now
     assert observable.for_detection is True
     # There should be three history records: one for creating the observable, one for updating the detection points,
@@ -219,7 +202,6 @@ def test_create(db):
     assert observable.threat_actors[0].value == "threat_actor"
     assert len(observable.threats) == 1
     assert observable.threats[0].value == "threat"
-    assert observable.time == now
     assert observable.type.value == "type1"
     assert observable.value == "test"
     assert submission.version != initial_submission_version

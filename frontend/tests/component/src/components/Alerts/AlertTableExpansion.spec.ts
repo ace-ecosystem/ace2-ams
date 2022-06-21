@@ -4,10 +4,11 @@ import PrimeVue from "primevue/config";
 import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
 
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { metadataObjectReadFactory } from "@mocks/metadata";
 import { observableInAlertRead } from "@/models/observable";
 import { observableInAlertReadFactory } from "@mocks/observable";
 import router from "@/router/index";
+import { analysisMetadataReadFactory } from "@mocks/analysisMetadata";
+import { metadataTagReadFactory } from "@mocks/metadata";
 
 interface AlertTableExpansionProps {
   observables: observableInAlertRead[] | null;
@@ -49,10 +50,10 @@ describe("AlertTableExpansion", () => {
           observableInAlertReadFactory(),
           observableInAlertReadFactory({
             value: "TestObservable2",
-            analysisTags: [
-              metadataObjectReadFactory({ value: "analysisTag1" }),
-            ],
-            permanentTags: [metadataObjectReadFactory({ value: "testTag" })],
+            analysisMetadata: analysisMetadataReadFactory({
+              tags: [metadataTagReadFactory({ value: "analysisTag1" })],
+            }),
+            permanentTags: [metadataTagReadFactory({ value: "testTag" })],
           }),
         ],
       },

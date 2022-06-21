@@ -10,15 +10,15 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
-from typing import Optional
 
 from api_models.observable import ObservableSubmissionTreeRead, ObservableRead, ObservableRelationshipRead
 from db.database import Base
+from db.schemas.alert_disposition import AlertDisposition
+from db.schemas.analysis_metadata import AnalysisMetadata
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
-from db.schemas.metadata_display_type import MetadataDisplayType
-from db.schemas.metadata_display_value import MetadataDisplayValue
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
 from db.schemas.node_relationship import NodeRelationship
@@ -36,16 +36,35 @@ class Observable(Node, HasHistory):
 
     uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
 
-    # This is an empty list that gets populated by certain submission-related queries.
-    analysis_tags: list[MetadataTag] = []
+    # NOTE: You could alter this relationship to directly return a list of AlertDisposition objects. However,
+    # a SQLAlchemy relationship only returns unique/distinct objects. So if an observable appears in multiple alerts
+    # that have the same disposition, you will only receive a single instance of that disposition in the relationship.
+    #
+    # Instead, the relationship is set up to return a list of alerts, and then an association proxy is used
+    # to get a list of the alerts' dispositions.
+    alerts = relationship(
+        "Submission",
+        secondary="join(Submission, submission_analysis_mapping, and_(Submission.alert == True, submission_analysis_mapping.c.submission_uuid == Submission.uuid))."
+        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.analysis_uuid == submission_analysis_mapping.c.analysis_uuid)",
+        primaryjoin="Observable.uuid == analysis_child_observable_mapping.c.observable_uuid",
+        foreign_keys="[Submission.uuid, Observable.uuid]",
+        viewonly=True,
+        lazy="selectin",
+    )
+
+    alert_dispositions: list[AlertDisposition] = association_proxy("alerts", "disposition")
+
+    all_analysis_metadata: list[AnalysisMetadata] = relationship(
+        "AnalysisMetadata", primaryjoin="AnalysisMetadata.observable_uuid == Observable.uuid", lazy="selectin"
+    )
+
+    # This gets populated by certain submission-related queries.
+    analysis_metadata = None
 
     context = Column(String)
 
     # This gets populated by certain submission-related queries.
-    display_type: Optional[MetadataDisplayType] = None
-
-    # This gets populated by certain submission-related queries.
-    display_value: Optional[MetadataDisplayValue] = None
+    disposition_history = None
 
     # Using timezone=True causes PostgreSQL to store the datetime as UTC. Datetimes without timezone
     # information will be assumed to be UTC, whereas datetimes with timezone data will be converted to UTC.

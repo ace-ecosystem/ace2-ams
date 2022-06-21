@@ -45,8 +45,11 @@ def test_create(db):
                             analysis_module_type_uuid=analysis_module_type.uuid, submission_uuid=submission_uuid
                         )
                     ],
+                    analysis_metadata=[
+                        AnalysisMetadataCreate(type="directive", value="o_analysis_directive"),
+                        AnalysisMetadataCreate(type="tag", value="o_analysis_tag"),
+                    ],
                     detection_points=["detection_point"],
-                    metadata=[AnalysisMetadataCreate(type="tag", value="o_analysis_tag")],
                     permanent_tags=["o_permanent_tag"],
                     threat_actors=["o_threat_actor"],
                     threats=["o_threat"],
@@ -67,7 +70,8 @@ def test_create(db):
 
     assert submission.alert is True
     assert len(submission.analyses) == 2
-    assert submission.analyses[1].analysis_module_type_uuid == analysis_module_type.uuid
+    assert any(a.analysis_module_type_uuid is None for a in submission.analyses)
+    assert any(a.analysis_module_type_uuid == analysis_module_type.uuid for a in submission.analyses)
     assert len(submission.child_detection_points) == 1
     assert submission.child_detection_points[0].value == "detection_point"
     assert len(submission.child_analysis_tags) == 1

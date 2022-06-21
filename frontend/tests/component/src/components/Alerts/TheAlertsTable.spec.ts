@@ -8,7 +8,7 @@ import { Alert } from "@/services/api/alert";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { alertRead } from "@/models/alert";
 import { alertReadFactory } from "@mocks/alert";
-import { observableReadFactory } from "@mocks/observable";
+import { observableInAlertReadFactory } from "@mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import ToastService from "primevue/toastservice";
 import { testConfiguration } from "@/etc/configuration/test/index";
@@ -70,7 +70,7 @@ describe("TheAlertsTable", () => {
     const defaultColumnValues = [
       "",
       "",
-      "3/24/2022, 12:00:00 AM",
+      "2/24/2022, 12:00:00 AM UTC",
       "Test Alert",
       "None",
       "OPEN",
@@ -97,15 +97,15 @@ describe("TheAlertsTable", () => {
   it("attempts to fetch and show observables when alert dropdown is clicked", () => {
     // The database sorts the returned observables by their type then their value
     const testObservables = [
-      observableReadFactory({
+      observableInAlertReadFactory({
         type: genericObjectReadFactory({ value: "A-Type" }),
         value: "Z-Value",
       }),
-      observableReadFactory({
+      observableInAlertReadFactory({
         type: genericObjectReadFactory({ value: "B-Type" }),
         value: "A-Value",
       }),
-      observableReadFactory({
+      observableInAlertReadFactory({
         type: genericObjectReadFactory({ value: "B-Type" }),
         value: "Z-Value",
       }),

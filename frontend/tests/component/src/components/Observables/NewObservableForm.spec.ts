@@ -5,10 +5,11 @@ import { testConfiguration } from "@/etc/configuration/test/index";
 import NewObservableForm from "@/components/Observables/NewObservableForm.vue";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
+import { metadataDirectiveReadFactory } from "@mocks/metadata";
 
 const testObservableTypeA = "file";
 const testObservableTypeB = "ipv4";
-const testNodeDirective = "testNodeDirective";
+const testDirective = "testDirective";
 
 function factory() {
   mount(NewObservableForm, {
@@ -17,8 +18,8 @@ function factory() {
         PrimeVue,
         createCustomCypressPinia({
           initialState: {
-            nodeDirectiveStore: {
-              items: [genericObjectReadFactory({ value: testNodeDirective })],
+            metadataDirectiveStore: {
+              items: [metadataDirectiveReadFactory({ value: testDirective })],
             },
             observableTypeStore: {
               items: [

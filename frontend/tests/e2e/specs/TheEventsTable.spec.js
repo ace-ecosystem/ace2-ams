@@ -26,6 +26,7 @@ describe("TheEventsTable.vue", () => {
         alert_count: 6,
         name: "Test Event 5",
       },
+      timeout: 60000,
     });
   });
 

@@ -3,7 +3,6 @@ import PrimeVue from "primevue/config";
 
 import TagModal from "@/components/Modals/TagModal.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { metadataObjectReadFactory } from "@mocks/metadata";
 import { metadataTagRead } from "@/models/metadataTag";
 import { alertReadFactory } from "@mocks/alert";
 import { userReadFactory } from "@mocks/user";
@@ -12,9 +11,10 @@ import { Alert } from "@/services/api/alert";
 import { observableTreeRead } from "@/models/observable";
 import { ObservableInstance } from "@/services/api/observable";
 import { observableTreeReadFactory } from "@mocks/observable";
+import { metadataTagReadFactory } from "@mocks/metadata";
 
-const existingTag = metadataObjectReadFactory({ value: "existingTag" });
-const testTag = metadataObjectReadFactory({ value: "testTag" });
+const existingTag = metadataTagReadFactory({ value: "existingTag" });
+const testTag = metadataTagReadFactory({ value: "testTag" });
 
 function factory(
   args: {

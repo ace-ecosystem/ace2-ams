@@ -14,7 +14,7 @@ import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
 import { createTestingPinia } from "@pinia/testing";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import { metadataObjectReadFactory } from "@mocks/metadata";
+import { metadataTagReadFactory } from "@mocks/metadata";
 import { genericQueueableObjectRead } from "@/models/base";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
 
@@ -22,41 +22,21 @@ createTestingPinia({ createSpy: vi.fn });
 
 const mockAlertTreeRead = alertTreeReadFactory({
   tags: [
-    metadataObjectReadFactory({
+    metadataTagReadFactory({
       value: "from_address",
       uuid: "uuid3",
-      description: null,
-      metadataType: "metadataObject",
     }),
-    metadataObjectReadFactory({
+    metadataTagReadFactory({
       value: "contacted_host",
       uuid: "uuid2",
-      description: null,
-      metadataType: "metadataObject",
     }),
-    metadataObjectReadFactory({
-      value: "contacted_host",
-      uuid: "uuid2",
-      description: null,
-      metadataType: "metadataObject",
-    }),
-    metadataObjectReadFactory({
-      value: "contacted_host",
-      uuid: "uuid2",
-      description: null,
-      metadataType: "metadataObject",
-    }),
-    metadataObjectReadFactory({
+    metadataTagReadFactory({
       value: "c2",
       uuid: "uuid1",
-      description: null,
-      metadataType: "metadataObject",
     }),
-    metadataObjectReadFactory({
+    metadataTagReadFactory({
       value: "recipient",
       uuid: "uuid4",
-      description: null,
-      metadataType: "metadataObject",
     }),
   ],
 });
@@ -475,28 +455,28 @@ describe("formatNodeFiltersForAPI", () => {
     const result = getAllAlertTags(mockAlertTreeRead);
     expect(result).toEqual([
       {
-        description: null,
+        description: "A tag object",
         value: "c2",
         uuid: "uuid1",
-        metadataType: "metadataObject",
+        metadataType: "tag",
       },
       {
-        description: null,
+        description: "A tag object",
         value: "contacted_host",
         uuid: "uuid2",
-        metadataType: "metadataObject",
+        metadataType: "tag",
       },
       {
-        description: null,
+        description: "A tag object",
         value: "from_address",
         uuid: "uuid3",
-        metadataType: "metadataObject",
+        metadataType: "tag",
       },
       {
-        description: null,
+        description: "A tag object",
         value: "recipient",
         uuid: "uuid4",
-        metadataType: "metadataObject",
+        metadataType: "tag",
       },
     ]);
   });

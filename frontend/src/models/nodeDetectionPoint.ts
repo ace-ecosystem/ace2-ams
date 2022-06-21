@@ -8,7 +8,7 @@ export interface nodeDetectionPointCreate {
 }
 
 export interface nodeDetectionPointRead {
-  insertTime: Date;
+  insertTime: string;
   nodeUuid: UUID;
   uuid: UUID;
   value: string;

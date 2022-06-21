@@ -17,7 +17,7 @@ analysis_module_type_directive_mapping = Table(
     Column(
         "directive_uuid",
         UUID(as_uuid=True),
-        ForeignKey("node_directive.uuid"),
+        ForeignKey("metadata_directive.uuid"),
         index=True,
         primary_key=True,
     ),

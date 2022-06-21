@@ -35,19 +35,19 @@ describe("EventSummary", () => {
     queue: genericObjectReadFactory({ value: "external" }),
   });
   const openEventManual = eventReadFactory({
-    eventTime: manualTime,
-    alertTime: manualTime,
-    ownershipTime: manualTime,
-    dispositionTime: manualTime,
-    containTime: manualTime,
-    remediationTime: manualTime,
+    eventTime: manualTime.toISOString(),
+    alertTime: manualTime.toISOString(),
+    ownershipTime: manualTime.toISOString(),
+    dispositionTime: manualTime.toISOString(),
+    containTime: manualTime.toISOString(),
+    remediationTime: manualTime.toISOString(),
     queue: genericObjectReadFactory({ value: "external" }),
   });
   const openEventAuto = eventReadFactory({
-    autoEventTime: autoTime,
-    autoAlertTime: autoTime,
-    autoOwnershipTime: autoTime,
-    autoDispositionTime: autoTime,
+    autoEventTime: autoTime.toISOString(),
+    autoAlertTime: autoTime.toISOString(),
+    autoOwnershipTime: autoTime.toISOString(),
+    autoDispositionTime: autoTime.toISOString(),
     queue: genericObjectReadFactory({ value: "external" }),
   });
 

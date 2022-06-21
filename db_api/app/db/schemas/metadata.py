@@ -13,6 +13,3 @@ class Metadata(Base):
     metadata_type = Column(String)
 
     __mapper_args__ = {"polymorphic_identity": "metadata", "polymorphic_on": metadata_type, "with_polymorphic": "*"}
-
-    def convert_to_pydantic(self):  # pragma: no cover
-        raise NotImplementedError("A Metadata subclass must implement convert_to_pydantic")

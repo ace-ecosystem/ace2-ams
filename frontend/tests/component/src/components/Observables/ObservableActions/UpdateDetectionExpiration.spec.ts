@@ -50,7 +50,7 @@ describe("UpdateDetectionExpiration", () => {
   });
   const doesExpire = observableTreeReadFactory({
     forDetection: true,
-    expiresOn: expirationDate,
+    expiresOn: expirationDate.toISOString(),
   });
 
   it("renders correctly if observable does have an expiration datetime", () => {

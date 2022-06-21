@@ -4,18 +4,26 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from api_models import type_str, validators
-from api_models.analysis_metadata import AnalysisMetadataCreate
-from api_models.metadata_display_type import MetadataDisplayTypeRead
-from api_models.metadata_display_value import MetadataDisplayValueRead
+from api_models.analysis_metadata import AnalysisMetadataCreate, AnalysisMetadataRead
+from api_models.metadata_directive import MetadataDirectiveRead
 from api_models.metadata_tag import MetadataTagRead
 from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
 from api_models.node_detection_point import NodeDetectionPointRead
-from api_models.node_directive import NodeDirectiveRead
 from api_models.node_relationship import NodeRelationshipRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
 from api_models.observable_type import ObservableTypeRead
+
+
+class DispositionHistoryIndividual(BaseModel):
+    """Represents an individual disposition history."""
+
+    disposition: type_str = Field(description="The disposition value")
+
+    count: int = Field(description="The number of times the disposition occurred")
+
+    percent: int = Field(description="The percent of times the disposition occurred")
 
 
 class ObservableBase(NodeBase):
@@ -36,8 +44,6 @@ class ObservableBase(NodeBase):
         description="Whether or not this observable should be included in the observable detection exports",
     )
 
-    time: datetime = Field(default_factory=datetime.utcnow, description="The time this observable was observed")
-
     type: type_str = Field(description="The type of the observable")
 
     value: type_str = Field(description="The value of the observable")
@@ -48,20 +54,16 @@ class ObservableCreateBase(NodeCreate, ObservableBase):
         default_factory=list, description="A list of analysis results to add as children to the observable"
     )
 
+    analysis_metadata: list[AnalysisMetadataCreate] = Field(
+        default_factory=list, description="A list of metadata objects to add to the observable by its parent analysis"
+    )
+
     detection_points: list[type_str] = Field(
         default_factory=list, description="A list of detection points to add to the observable"
     )
 
-    directives: list[type_str] = Field(
-        default_factory=list, description="A list of directives to add to the observable"
-    )
-
     history_username: Optional[type_str] = Field(
         description="If given, an observable history record will be created and associated with the user"
-    )
-
-    metadata: list[AnalysisMetadataCreate] = Field(
-        default_factory=list, description="A list of metadata objects to add to the observable by its parent analysis"
     )
 
     observable_relationships: "list[ObservableRelationshipCreate]" = Field(
@@ -100,8 +102,6 @@ class ObservableRead(NodeRead, ObservableBase):
         description="A list of detection points added to the observable", default_factory=list
     )
 
-    directives: list[NodeDirectiveRead] = Field(description="A list of directives added to the observable")
-
     observable_relationships: "list[ObservableRelationshipRead]" = Field(
         description="A list of observable relationships for this observable"
     )
@@ -123,39 +123,22 @@ class ObservableRead(NodeRead, ObservableBase):
 class ObservableSubmissionRead(ObservableRead):
     """Model used to control which information for an Observable is displayed when getting Observables contained in a list of Submissions."""
 
-    analysis_tags: list[MetadataTagRead] = Field(
-        default_factory=list, description="A list of tags added to the observable by analysis"
-    )
+    analysis_metadata: AnalysisMetadataRead = Field(description="The analysis metadata for the observable")
 
-    display_type: Optional[MetadataDisplayTypeRead] = Field(
-        description="The type that should be shown for the observable when displaying in the GUI"
-    )
-
-    display_value: Optional[MetadataDisplayValueRead] = Field(
-        description="The value that should be shown for the observable when displaying in the GUI"
+    disposition_history: list[DispositionHistoryIndividual] = Field(
+        default_factory=list,
+        description="A list of the dispositions and their counts of alerts that contain this observable",
     )
 
     class Config:
         orm_mode = True
 
 
-class ObservableSubmissionTreeRead(ObservableRead):
+class ObservableSubmissionTreeRead(ObservableSubmissionRead):
     """Model used to control which information for an Observable is displayed when getting a submission tree"""
-
-    analysis_tags: list[MetadataTagRead] = Field(
-        default_factory=list, description="A list of tags added to the observable by analysis"
-    )
 
     children: "list[AnalysisSubmissionTreeRead]" = Field(
         default_factory=list, description="A list of this observable's child analysis"
-    )
-
-    display_type: Optional[MetadataDisplayTypeRead] = Field(
-        description="The type that should be shown for the observable when displaying in the GUI"
-    )
-
-    display_value: Optional[MetadataDisplayValueRead] = Field(
-        description="The value that should be shown for the observable when displaying in the GUI"
     )
 
     first_appearance: bool = Field(
@@ -167,8 +150,6 @@ class ObservableSubmissionTreeRead(ObservableRead):
 
 
 class ObservableUpdate(NodeUpdate, ObservableBase):
-    directives: Optional[list[type_str]] = Field(description="A list of directives to add to the observable")
-
     for_detection: Optional[StrictBool] = Field(
         description="Whether or not this observable should be included in the observable detection exports"
     )
@@ -183,14 +164,12 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
 
     threats: Optional[list[type_str]] = Field(description="A list of threats to add to the observable")
 
-    time: Optional[datetime] = Field(description="The time this observable was observed")
-
     type: Optional[type_str] = Field(description="The type of the observable")
 
     value: Optional[type_str] = Field(description="The value of the observable")
 
     _prevent_none: classmethod = validators.prevent_none(
-        "directives", "for_detection", "permanent_tags", "threat_actors", "threats", "time", "type", "value"
+        "for_detection", "permanent_tags", "threat_actors", "threats", "time", "type", "value"
     )
 
 

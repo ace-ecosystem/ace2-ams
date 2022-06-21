@@ -7,7 +7,6 @@ import router from "@/router/index";
 import { observableActionUrl, observableTreeRead } from "@/models/observable";
 import { observableTreeReadFactory } from "@mocks/observable";
 import { genericObjectReadFactory } from "@mocks/genericObject";
-import { metadataObjectReadFactory } from "@mocks/metadata";
 import { userReadFactory } from "@mocks/user";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { testConfiguration } from "@/etc/configuration/test";
@@ -15,6 +14,13 @@ import { ObservableInstance } from "@/services/api/observable";
 import ToastService from "primevue/toastservice";
 import Tooltip from "primevue/tooltip";
 import TagModalVue from "@/components/Modals/TagModal.vue";
+import { analysisMetadataReadFactory } from "@mocks/analysisMetadata";
+import {
+  metadataDisplayTypeReadFactory,
+  metadataDisplayValueReadFactory,
+  metadataTagReadFactory,
+  metadataTimeReadFactory,
+} from "@mocks/metadata";
 
 interface ObservableLeafProps {
   observable: observableTreeRead;
@@ -62,24 +68,32 @@ function factory(
 
 const observableWithDisplayType = observableTreeReadFactory({
   value: "Observable with display type",
-  displayType: metadataObjectReadFactory({ value: "displayType" }),
+  analysisMetadata: analysisMetadataReadFactory({
+    displayType: metadataDisplayTypeReadFactory({ value: "displayType" }),
+  }),
 });
 
 const observableWithDisplayValue = observableTreeReadFactory({
   value: "Observable with display value",
-  displayValue: metadataObjectReadFactory({ value: "displayValue" }),
+  analysisMetadata: analysisMetadataReadFactory({
+    displayValue: metadataDisplayValueReadFactory({ value: "displayValue" }),
+  }),
 });
 
 const observableWithTags = observableTreeReadFactory({
   value: "Observable w/ Tags",
   children: [],
-  permanentTags: [metadataObjectReadFactory({ value: "testTag" })],
+  permanentTags: [metadataTagReadFactory({ value: "testTag" })],
 });
 
 const observableWithTime = observableTreeReadFactory({
   value: "Observable w/ Time",
   children: [],
-  time: new Date(2022, 5, 5, 12, 0, 0, 0),
+  analysisMetadata: analysisMetadataReadFactory({
+    time: metadataTimeReadFactory({
+      value: "2022-02-24T00:00:00.000000+00:00",
+    }),
+  }),
 });
 
 const observableWithDetectionPoints = observableTreeReadFactory({
@@ -87,12 +101,12 @@ const observableWithDetectionPoints = observableTreeReadFactory({
   firstAppearance: true,
   detectionPoints: [
     {
-      insertTime: new Date(),
+      insertTime: "2022-02-24T00:00:00.000000+00:00",
       nodeUuid: "1",
       ...genericObjectReadFactory({ uuid: "1", value: "detection point A" }),
     },
     {
-      insertTime: new Date(),
+      insertTime: "2022-02-24T00:00:00.000000+00:00",
       nodeUuid: "1",
       ...genericObjectReadFactory({ uuid: "2", value: "detection point B" }),
     },
@@ -273,7 +287,7 @@ describe("ObservableLeaf", () => {
     });
     cy.get("span").should(
       "contain.text",
-      "testObservableType: Observable w/ Time @ 6/5/2022, 4:00:00 PM",
+      "testObservableType: Observable w/ Time @ 2/24/2022, 12:00:00 AM UTC",
     );
   });
   it("sets the alert filters to the an observable's type and value when clicked", () => {

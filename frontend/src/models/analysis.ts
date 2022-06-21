@@ -7,12 +7,12 @@ import { observableRead, observableTreeRead } from "./observable";
 
 export interface analysisRead {
   analysisModuleType: analysisModuleTypeRead;
-  cachedUntil: Date;
+  cachedUntil: string | null;
   childObservables: observableRead[];
   details: Record<string, unknown> | null;
   errorMessage: string | null;
   nodeType: string;
-  runTime: Date;
+  runTime: string;
   stackTrace: string | null;
   summary: string | null;
   uuid: UUID;

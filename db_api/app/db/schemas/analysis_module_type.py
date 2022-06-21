@@ -28,7 +28,7 @@ class AnalysisModuleType(Base):
     )
 
     required_directives = relationship(
-        "NodeDirective",
+        "MetadataDirective",
         secondary=analysis_module_type_directive_mapping,
         passive_deletes=True,
     )
