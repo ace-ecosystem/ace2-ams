@@ -180,7 +180,9 @@ def test_filter_by_event_uuid(db):
     event2 = factory.event.create_or_read(name="test 2", db=db)
     submission1 = factory.submission.create(event=event, db=db)
     submission2 = factory.submission.create(event=event2, db=db)
+    submission3 = factory.submission.create(db=db)
 
+    # event_uuid
     result = crud.submission.read_all(event_uuid=[event.uuid], db=db)
     assert result == [submission1]
 
@@ -188,6 +190,9 @@ def test_filter_by_event_uuid(db):
     assert len(result) == 2
     assert submission1 in result
     assert submission2 in result
+
+    # not_event_uuid
+    assert crud.submission.read_all(not_event_uuid=[event.uuid, event2.uuid], db=db) == [submission3]
 
 
 def test_filter_by_insert_time_after(db):

@@ -111,6 +111,7 @@ def get_all_submissions(
             dispositioned_after=dispositioned_after,
             dispositioned_before=dispositioned_before,
             event_uuid=event_uuid,
+            not_event_uuid=not_event_uuid,
             event_time_after=event_time_after,
             event_time_before=event_time_before,
             insert_time_after=insert_time_after,

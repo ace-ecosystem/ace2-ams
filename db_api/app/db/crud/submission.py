@@ -120,6 +120,7 @@ def build_read_all_query(
     dispositioned_after: Optional[list[datetime]] = None,
     dispositioned_before: Optional[list[datetime]] = None,
     event_uuid: Optional[list[UUID]] = None,
+    not_event_uuid: Optional[list[UUID]] = None,
     event_time_after: Optional[list[datetime]] = None,
     event_time_before: Optional[list[datetime]] = None,
     insert_time_after: Optional[list[datetime]] = None,
@@ -234,12 +235,14 @@ def build_read_all_query(
         query = _join_as_subquery(query, event_time_before_query)
 
     if event_uuid:
-        event_uuid_query = (
-            select(Submission)
-            .join(Event, onclause=Submission.event_uuid == Event.uuid)
-            .where(Event.uuid.in_(event_uuid))
-        )
+        event_uuid_query = select(Submission).where(Submission.event_uuid.in_(event_uuid))
         query = _join_as_subquery(query, event_uuid_query)
+
+    if not_event_uuid:
+        not_event_uuid_query = select(Submission).where(
+            or_(Submission.event_uuid == None, ~Submission.event_uuid.in_(not_event_uuid))
+        )
+        query = _join_as_subquery(query, not_event_uuid_query)
 
     if insert_time_after:
         insert_time_after_query = select(Submission).where(or_(Submission.insert_time > i for i in insert_time_after))
@@ -537,6 +540,7 @@ def read_all(
     dispositioned_after: Optional[list[datetime]] = None,
     dispositioned_before: Optional[list[datetime]] = None,
     event_uuid: Optional[list[UUID]] = None,
+    not_event_uuid: Optional[list[UUID]] = None,
     event_time_after: Optional[list[datetime]] = None,
     event_time_before: Optional[list[datetime]] = None,
     insert_time_after: Optional[list[datetime]] = None,
@@ -566,6 +570,7 @@ def read_all(
                 dispositioned_after=dispositioned_after,
                 dispositioned_before=dispositioned_before,
                 event_uuid=event_uuid,
+                not_event_uuid=not_event_uuid,
                 event_time_after=event_time_after,
                 event_time_before=event_time_before,
                 insert_time_after=insert_time_after,

@@ -53,6 +53,7 @@ def get_all_alerts(
     dispositioned_after: Optional[list[datetime]] = Query(None),
     dispositioned_before: Optional[list[datetime]] = Query(None),
     event_uuid: Optional[list[UUID]] = Query(None),
+    not_event_uuid: Optional[list[UUID]] = Query(None),
     event_time_after: Optional[list[datetime]] = Query(None),
     event_time_before: Optional[list[datetime]] = Query(None),
     insert_time_after: Optional[list[datetime]] = Query(None),
@@ -131,6 +132,10 @@ def get_all_alerts(
     if event_uuid:
         for event_uuid_item in event_uuid:
             query_params += f"&event_uuid={event_uuid_item}"
+
+    if not_event_uuid:
+        for not_event_uuid_item in not_event_uuid:
+            query_params += f"&not_event_uuid={not_event_uuid_item}"
 
     if insert_time_after:
         for insert_time_after_item in insert_time_after:
