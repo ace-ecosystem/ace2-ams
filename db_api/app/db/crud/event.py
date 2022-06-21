@@ -264,11 +264,12 @@ def build_read_all_query(
     if prevention_tools:
         prevention_tool_filters = []
         for prevention_tool in prevention_tools:
-            prevention_tool_sub_filters = []
-            for p in prevention_tool.split(","):
-                prevention_tool_sub_filters.append(Event.prevention_tools.any(EventPreventionTool.value == p))
+            if prevention_tool:
+                prevention_tool_sub_filters = []
+                for p in prevention_tool.split(","):
+                    prevention_tool_sub_filters.append(Event.prevention_tools.any(EventPreventionTool.value == p))
 
-            prevention_tool_filters.append(and_(*prevention_tool_sub_filters))
+                prevention_tool_filters.append(and_(*prevention_tool_sub_filters))
 
         prevention_tools_query = select(Event).where(or_(*prevention_tool_filters))
         query = _join_as_subquery(query, prevention_tools_query)
@@ -292,42 +293,44 @@ def build_read_all_query(
     if remediations:
         remediation_filters = []
         for remediation in remediations:
-            remediation_sub_filters = []
-            for r in remediation.split(","):
-                remediation_sub_filters.append(Event.remediations.any(EventRemediation.value == r))
+            if remediation:
+                remediation_sub_filters = []
+                for r in remediation.split(","):
+                    remediation_sub_filters.append(Event.remediations.any(EventRemediation.value == r))
 
-            remediation_filters.append(and_(*remediation_sub_filters))
+                remediation_filters.append(and_(*remediation_sub_filters))
 
         remediations_query = select(Event).where(or_(*remediation_filters))
         query = _join_as_subquery(query, remediations_query)
 
-    if severity:
+    if severity and all(len(s) for s in severity):
         severity_query = select(Event).join(EventSeverity).where(EventSeverity.value.in_(severity))
         query = _join_as_subquery(query, severity_query)
 
-    if source:
-        source_query = select(Event).join(EventSource).where(EventSource.value.in_(source))
+    if source and all(len(s) for s in source):
+        source_query = select(Event).join(EventSource).where(EventSource.value.in_([s for s in source if len(s)]))
         query = _join_as_subquery(query, source_query)
 
-    if status:
-        status_query = select(Event).join(EventStatus).where(EventStatus.value.in_(status))
+    if status and all(len(s) for s in status):
+        status_query = select(Event).join(EventStatus).where(EventStatus.value.in_([s for s in status if len(s)]))
         query = _join_as_subquery(query, status_query)
 
     if tags:
         tag_filters = []
         for tag in tags:
-            tag_sub_filters = []
-            for t in tag.split(","):
-                tag_sub_filters.append(
-                    or_(
-                        Event.tags.any(MetadataTag.value == t),
-                        Event.alerts.any(Submission.tags.any(MetadataTag.value == t)),
-                        Event.alerts.any(Submission.child_analysis_tags.any(MetadataTag.value == t)),
-                        Event.alerts.any(Submission.child_permanent_tags.any(MetadataTag.value == t)),
+            if tag:
+                tag_sub_filters = []
+                for t in tag.split(","):
+                    tag_sub_filters.append(
+                        or_(
+                            Event.tags.any(MetadataTag.value == t),
+                            Event.alerts.any(Submission.tags.any(MetadataTag.value == t)),
+                            Event.alerts.any(Submission.child_analysis_tags.any(MetadataTag.value == t)),
+                            Event.alerts.any(Submission.child_permanent_tags.any(MetadataTag.value == t)),
+                        )
                     )
-                )
 
-            tag_filters.append(and_(*tag_sub_filters))
+                tag_filters.append(and_(*tag_sub_filters))
 
         tags_query = select(Event).where(or_(*tag_filters))
         query = _join_as_subquery(query, tags_query)
@@ -335,17 +338,18 @@ def build_read_all_query(
     if threat_actors:
         threat_actor_filters = []
         for threat in threat_actors:
-            threat_actor_sub_filters = []
-            for t in threat.split(","):
-                threat_actor_sub_filters.append(
-                    or_(
-                        Event.threat_actors.any(NodeThreatActor.value == t),
-                        Event.alerts.any(Submission.threat_actors.any(NodeThreatActor.value == t)),
-                        Event.alerts.any(Submission.child_threat_actors.any(NodeThreatActor.value == t)),
+            if threat:
+                threat_actor_sub_filters = []
+                for t in threat.split(","):
+                    threat_actor_sub_filters.append(
+                        or_(
+                            Event.threat_actors.any(NodeThreatActor.value == t),
+                            Event.alerts.any(Submission.threat_actors.any(NodeThreatActor.value == t)),
+                            Event.alerts.any(Submission.child_threat_actors.any(NodeThreatActor.value == t)),
+                        )
                     )
-                )
 
-            threat_actor_filters.append(and_(*threat_actor_sub_filters))
+                threat_actor_filters.append(and_(*threat_actor_sub_filters))
 
         threat_actors_query = select(Event).where(or_(*threat_actor_filters))
         query = _join_as_subquery(query, threat_actors_query)
@@ -353,17 +357,18 @@ def build_read_all_query(
     if threats:
         threat_filters = []
         for threat in threats:
-            threat_sub_filters = []
-            for t in threat.split(","):
-                threat_sub_filters.append(
-                    or_(
-                        Event.threats.any(NodeThreat.value == t),
-                        Event.alerts.any(Submission.threats.any(NodeThreat.value == t)),
-                        Event.alerts.any(Submission.child_threats.any(NodeThreat.value == t)),
+            if threat:
+                threat_sub_filters = []
+                for t in threat.split(","):
+                    threat_sub_filters.append(
+                        or_(
+                            Event.threats.any(NodeThreat.value == t),
+                            Event.alerts.any(Submission.threats.any(NodeThreat.value == t)),
+                            Event.alerts.any(Submission.child_threats.any(NodeThreat.value == t)),
+                        )
                     )
-                )
 
-            threat_filters.append(and_(*threat_sub_filters))
+                threat_filters.append(and_(*threat_sub_filters))
 
         threats_query = select(Event).where(or_(*threat_filters))
         query = _join_as_subquery(query, threats_query)
@@ -371,11 +376,12 @@ def build_read_all_query(
     if vectors:
         vector_filters = []
         for vector in vectors:
-            vector_sub_filters = []
-            for v in vector.split(","):
-                vector_sub_filters.append(Event.vectors.any(EventVector.value == v))
+            if vector:
+                vector_sub_filters = []
+                for v in vector.split(","):
+                    vector_sub_filters.append(Event.vectors.any(EventVector.value == v))
 
-            vector_filters.append(and_(*vector_sub_filters))
+                vector_filters.append(and_(*vector_sub_filters))
 
         vectors_query = select(Event).where(or_(*vector_filters))
         query = _join_as_subquery(query, vectors_query)
