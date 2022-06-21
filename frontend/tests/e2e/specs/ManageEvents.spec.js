@@ -348,11 +348,7 @@ describe("ManageEvents.vue Filtering", () => {
     // Edit the filter
     cy.get('[data-cy="filter-chip-edit-button"]').click();
     cy.get('[data-cy="filter-chip-edit-panel"]').should("be.visible");
-    cy.get('[data-cy="property-input-value"]')
-      .should("have.value", "Test")
-      .click()
-      .clear()
-      .type("NewValue");
+    cy.get('[data-cy="property-input-value"]').click().clear().type("NewValue");
     cy.get('[data-cy="filter-chip-submit-button"]').click();
     cy.wait("@getEventsNameFilter2").its("state").should("eq", "Complete");
 
@@ -393,7 +389,7 @@ describe("ManageEvents.vue Filtering", () => {
     cy.wait("@getEventsNameFilter").its("state").should("eq", "Complete");
 
     // Click the delete button to remove
-    cy.get('[data-cy="filter-chip-remove-button"]').click();
+    cy.contains("Name:").click();
     cy.get(".p-chip").should("not.exist");
     cy.wait("@getEventsDefault").its("state").should("eq", "Complete");
   });
@@ -515,7 +511,7 @@ describe("ManageEvents.vue Filtering", () => {
   it("successfully sets and clears the date range picker start", () => {
     cy.intercept(
       "GET",
-      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&created_after=2020-01-01T00:00:00.000",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&created_after=2020-01-01T00%3A00%3A00.000",
     ).as("getEventsCreatedAfterFilter");
 
     cy.intercept(
@@ -551,7 +547,7 @@ describe("ManageEvents.vue Filtering", () => {
   it("successfully sets and clears the date range picker end", () => {
     cy.intercept(
       "GET",
-      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&created_before=2020-01-01T00:00:00.000",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0&created_before=2020-01-01T00%3A00%3A00.000",
     ).as("getEventsCreatedBeforeFilter");
 
     cy.intercept(
@@ -928,7 +924,7 @@ describe("ManageEvents.vue Filter Queues", () => {
     cy.get('[aria-label="internal"]').click();
 
     // Open list of options
-    cy.get('[data-cy="property-input-type"]').click();
+    cy.get('[data-cy="property-input-type"]').first().click();
     // There should be 7 options
     cy.get(".p-dropdown-item").should("have.length", 7);
   });
@@ -953,11 +949,13 @@ describe("ManageEvents.vue Filter Queues", () => {
     cy.get('[aria-label="internal"]').click();
 
     // Open list of options
-    cy.get('[data-cy="property-input-type"]').click();
+    cy.get('[data-cy="property-input-type"]').first().click();
     // Select the 'status' type filter
     cy.get('[aria-label="Status"]').click();
     // Open the filter value options
-    cy.get('[data-cy="property-input-value"] > .p-dropdown-label').click();
+    cy.get('[data-cy="property-input-value"] > .p-dropdown-label')
+      .first()
+      .click();
     // Check that correct options are available
     cy.get('[aria-label="CLOSED"]').should("exist");
     cy.get('[aria-label="IGNORE"]').should("exist");

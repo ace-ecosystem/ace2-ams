@@ -517,7 +517,7 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.get(".p-overlaypanel-content > .p-button").click();
       // Check text
       cy.get(".filter-name-text").should("have.text", "Disposition:");
-      cy.get(".link-text").should("have.text", "None");
+      cy.get(".link-text").should("have.text", "Disposition:None");
       cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
       // Open Quick Add menu again
@@ -627,7 +627,7 @@ describe("Manage Alerts - No Database Changes", () => {
       // Check that the filter chip is visible and has right text
       cy.get(".p-chip").should("exist");
       cy.get(".filter-name-text").should("have.text", "Tags:");
-      cy.get(".link-text").should("have.text", "c2");
+      cy.get(".link-text").should("have.text", "Tags:c2");
     });
 
     it("will delete a filter and remove chip when it's value in the filter chip is clicked", () => {
@@ -641,12 +641,12 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
       // Click the filter value
-      cy.get(".p-chip > .link-text").click();
+      cy.contains("Tags:c2").click();
       cy.get(".p-chip").should("not.exist");
       cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
     });
 
-    it("will delete a filter and remove chip when the close icon in the filter chip is clicked", () => {
+    it("will delete a filter and remove chip when the filter type is clicked", () => {
       cy.intercept(
         "GET",
         "/api/alert/?sort=event_time%7Cdesc&limit=10&offset=0&tags=c2",
@@ -657,7 +657,7 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.wait("@getAlerts").its("state").should("eq", "Complete");
 
       // Click the close icon
-      cy.get(".p-chip > .pi-times-circle").click();
+      cy.contains("Tags:").click();
       cy.get(".transparent-toolbar").should("not.exist");
       cy.get(".p-chip").should("not.exist");
       cy.wait("@getAlertsDefaultRows").its("state").should("eq", "Complete");
@@ -689,7 +689,7 @@ describe("Manage Alerts - No Database Changes", () => {
 
       // Verify that the filter changed
       cy.get(".filter-name-text").should("have.text", "Disposition:");
-      cy.get(".link-text").should("have.text", "UNKNOWN");
+      cy.get(".link-text").should("have.text", "Disposition:UNKNOWN");
     });
   });
 });
