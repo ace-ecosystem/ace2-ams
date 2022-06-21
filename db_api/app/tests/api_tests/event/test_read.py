@@ -1010,7 +1010,7 @@ def test_get_all_empty(client):
 
 def test_get_filter_alert_time_after(client, db):
     event1 = factory.event.create_or_read(name="event1", db=db)
-    factory.submission.create(event=event1, insert_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    alert1 = factory.submission.create(event=event1, insert_time=datetime.utcnow() - timedelta(seconds=5), db=db)
 
     event2 = factory.event.create_or_read(name="event2", db=db)
     alert2 = factory.submission.create(event=event2, insert_time=datetime.utcnow(), db=db)
@@ -1025,11 +1025,17 @@ def test_get_filter_alert_time_after(client, db):
     # There should only be 1 event when we filter by alert_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"alert_time_after": alert2.insert_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"alert_time_after": alert2.insert_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
     assert parse(get.json()["items"][0]["auto_alert_time"]) == alert3.insert_time
+
+    params2 = {"alert_time_after": alert1.insert_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_alert_time_before(client, db):
@@ -1040,7 +1046,7 @@ def test_get_filter_alert_time_before(client, db):
     alert2 = factory.submission.create(event=event2, insert_time=datetime.utcnow(), db=db)
 
     event3 = factory.event.create_or_read(name="event3", db=db)
-    factory.submission.create(event=event3, insert_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    alert3 = factory.submission.create(event=event3, insert_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1049,17 +1055,23 @@ def test_get_filter_alert_time_before(client, db):
     # There should only be 1 event when we filter by alert_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"alert_time_before": alert2.insert_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"alert_time_before": alert2.insert_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
     assert parse(get.json()["items"][0]["auto_alert_time"]) == alert1.insert_time
 
+    params2 = {"alert_time_before": alert3.insert_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_contain_time_after(client, db):
-    factory.event.create_or_read(name="event1", contain_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    event1 = factory.event.create_or_read(name="event1", contain_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = factory.event.create_or_read(name="event2", contain_time=datetime.utcnow(), db=db)
-    factory.event.create_or_read(name="event3", contain_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    event3 = factory.event.create_or_read(name="event3", contain_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1068,16 +1080,22 @@ def test_get_filter_contain_time_after(client, db):
     # There should only be 1 event when we filter by contain_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"contain_time_after": event2.contain_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"contain_time_after": event2.contain_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
+    params2 = {"contain_time_after": event1.contain_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_contain_time_before(client, db):
-    factory.event.create_or_read(name="event1", contain_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    event1 = factory.event.create_or_read(name="event1", contain_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = factory.event.create_or_read(name="event2", contain_time=datetime.utcnow(), db=db)
-    factory.event.create_or_read(name="event3", contain_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    event3 = factory.event.create_or_read(name="event3", contain_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1086,16 +1104,22 @@ def test_get_filter_contain_time_before(client, db):
     # There should only be 1 event when we filter by contain_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"contain_time_before": event2.contain_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"contain_time_before": event2.contain_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
 
+    params2 = {"contain_time_before": event3.contain_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_created_time_after(client, db):
-    factory.event.create_or_read(name="event1", created_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    event1 = factory.event.create_or_read(name="event1", created_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = factory.event.create_or_read(name="event2", created_time=datetime.utcnow(), db=db)
-    factory.event.create_or_read(name="event3", created_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    event3 = factory.event.create_or_read(name="event3", created_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1104,16 +1128,22 @@ def test_get_filter_created_time_after(client, db):
     # There should only be 1 event when we filter by created_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"created_time_after": event2.created_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"created_time_after": event2.created_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
+    params2 = {"created_time_after": event1.created_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_created_time_before(client, db):
-    factory.event.create_or_read(name="event1", created_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    event1 = factory.event.create_or_read(name="event1", created_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = factory.event.create_or_read(name="event2", created_time=datetime.utcnow(), db=db)
-    factory.event.create_or_read(name="event3", created_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    event3 = factory.event.create_or_read(name="event3", created_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1122,10 +1152,16 @@ def test_get_filter_created_time_before(client, db):
     # There should only be 1 event when we filter by created_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"created_time_before": event2.created_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"created_time_before": event2.created_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
+
+    params2 = {"created_time_before": event3.created_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_disposition(client, db):
@@ -1172,10 +1208,16 @@ def test_get_filter_disposition_time_after(client, db):
     # There should only be 1 event when we filter by disposition_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"disposition_time_after": now}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"disposition_time_after": now}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
+
+    params2 = {"disposition_time_after": now - timedelta(seconds=5)}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_disposition_time_before(client, db):
@@ -1201,10 +1243,16 @@ def test_get_filter_disposition_time_before(client, db):
     # There should only be 1 event when we filter by disposition_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"disposition_time_before": now}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"disposition_time_before": now}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
+
+    params2 = {"disposition_time_before": now + timedelta(seconds=5)}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_event_type(client, db):
@@ -1427,9 +1475,13 @@ def test_get_filter_queue(client, db):
 
 
 def test_get_filter_remediation_time_after(client, db):
-    factory.event.create_or_read(name="event1", remediation_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    event1 = factory.event.create_or_read(
+        name="event1", remediation_time=datetime.utcnow() - timedelta(seconds=5), db=db
+    )
     event2 = factory.event.create_or_read(name="event2", remediation_time=datetime.utcnow(), db=db)
-    factory.event.create_or_read(name="event3", remediation_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    event3 = factory.event.create_or_read(
+        name="event3", remediation_time=datetime.utcnow() + timedelta(seconds=5), db=db
+    )
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1438,16 +1490,26 @@ def test_get_filter_remediation_time_after(client, db):
     # There should only be 1 event when we filter by remediation_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"remediation_time_after": event2.remediation_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"remediation_time_after": event2.remediation_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
+    params2 = {"remediation_time_after": event1.remediation_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_remediation_time_before(client, db):
-    factory.event.create_or_read(name="event1", remediation_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    event1 = factory.event.create_or_read(
+        name="event1", remediation_time=datetime.utcnow() - timedelta(seconds=5), db=db
+    )
     event2 = factory.event.create_or_read(name="event2", remediation_time=datetime.utcnow(), db=db)
-    factory.event.create_or_read(name="event3", remediation_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    event3 = factory.event.create_or_read(
+        name="event3", remediation_time=datetime.utcnow() + timedelta(seconds=5), db=db
+    )
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1456,10 +1518,16 @@ def test_get_filter_remediation_time_before(client, db):
     # There should only be 1 event when we filter by remediation_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"remediation_time_before": event2.remediation_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"remediation_time_before": event2.remediation_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
+
+    params2 = {"remediation_time_before": event3.remediation_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_remediations(client, db):
