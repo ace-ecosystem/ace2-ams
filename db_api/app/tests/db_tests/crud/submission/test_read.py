@@ -1,4 +1,5 @@
 from datetime import timedelta
+from re import sub
 
 from api_models.observable import ObservableCreateInSubmission
 from api_models.submission import SubmissionUpdate
@@ -18,12 +19,18 @@ def test_filter_by_alert(db):
 def test_filter_by_disposition(db):
     submission1 = factory.submission.create(disposition="DELIVERY", db=db)
     submission2 = factory.submission.create(db=db)
+    factory.submission.create(disposition="FALSE_POSITIVE", db=db)
 
-    result = crud.submission.read_all(disposition="DELIVERY", db=db)
+    result = crud.submission.read_all(disposition=["DELIVERY"], db=db)
     assert result == [submission1]
 
-    result = crud.submission.read_all(disposition="none", db=db)
+    result = crud.submission.read_all(disposition=["none"], db=db)
     assert result == [submission2]
+
+    result = crud.submission.read_all(disposition=["DELIVERY", "none"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_disposition_user(db):
@@ -35,7 +42,7 @@ def test_filter_by_disposition_user(db):
     )
     factory.submission.create(db=db)
 
-    result = crud.submission.read_all(disposition_user="analyst", db=db)
+    result = crud.submission.read_all(disposition_user=["analyst"], db=db)
     assert result == [submission1]
 
     # Another analyst dispositions the same alert
@@ -47,7 +54,10 @@ def test_filter_by_disposition_user(db):
 
     # The submission should still be returned when filtering by analyst since it uses the submission's history
     assert submission1.disposition_user.username == "analyst2"
-    result = crud.submission.read_all(disposition_user="analyst", db=db)
+    result = crud.submission.read_all(disposition_user=["analyst"], db=db)
+    assert result == [submission1]
+
+    result = crud.submission.read_all(disposition_user=["analyst", "analyst2"], db=db)
     assert result == [submission1]
 
 
@@ -61,7 +71,7 @@ def test_filter_by_dispositioned_after(db):
         history_username="analyst",
         db=db,
     )
-    factory.submission.create(
+    submission2 = factory.submission.create(
         disposition="DELIVERY", updated_by_user="analyst", update_time=now, history_username="analyst", db=db
     )
     submission3 = factory.submission.create(
@@ -72,8 +82,13 @@ def test_filter_by_dispositioned_after(db):
         db=db,
     )
 
-    result = crud.submission.read_all(dispositioned_after=now, db=db)
+    result = crud.submission.read_all(dispositioned_after=[now], db=db)
     assert result == [submission3]
+
+    result = crud.submission.read_all(dispositioned_after=[now, now - timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert submission2 in result
+    assert submission3 in result
 
 
 def test_filter_by_dispositioned_before(db):
@@ -86,7 +101,7 @@ def test_filter_by_dispositioned_before(db):
         history_username="analyst",
         db=db,
     )
-    factory.submission.create(
+    submission2 = factory.submission.create(
         disposition="DELIVERY", updated_by_user="analyst", update_time=now, history_username="analyst", db=db
     )
     factory.submission.create(
@@ -97,72 +112,108 @@ def test_filter_by_dispositioned_before(db):
         db=db,
     )
 
-    result = crud.submission.read_all(dispositioned_before=now, db=db)
+    result = crud.submission.read_all(dispositioned_before=[now], db=db)
     assert result == [submission1]
+
+    result = crud.submission.read_all(dispositioned_before=[now, now + timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_event_time_after(db):
     now = crud.helpers.utcnow()
 
     factory.submission.create(event_time=now - timedelta(seconds=5), db=db)
-    factory.submission.create(event_time=now, db=db)
+    submission2 = factory.submission.create(event_time=now, db=db)
     submission3 = factory.submission.create(event_time=now + timedelta(seconds=5), db=db)
 
-    result = crud.submission.read_all(event_time_after=now, db=db)
+    result = crud.submission.read_all(event_time_after=[now], db=db)
     assert result == [submission3]
+
+    result = crud.submission.read_all(event_time_after=[now, now - timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert submission2 in result
+    assert submission3 in result
 
 
 def test_filter_by_event_time_before(db):
     now = crud.helpers.utcnow()
 
     submission1 = factory.submission.create(event_time=now - timedelta(seconds=5), db=db)
-    factory.submission.create(event_time=now, db=db)
+    submission2 = factory.submission.create(event_time=now, db=db)
     factory.submission.create(event_time=now + timedelta(seconds=5), db=db)
 
-    result = crud.submission.read_all(event_time_before=now, db=db)
+    result = crud.submission.read_all(event_time_before=[now], db=db)
     assert result == [submission1]
+
+    result = crud.submission.read_all(event_time_before=[now, now + timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_event_uuid(db):
     event = factory.event.create_or_read(name="test", db=db)
+    event2 = factory.event.create_or_read(name="test 2", db=db)
     submission1 = factory.submission.create(event=event, db=db)
-    factory.submission.create(db=db)
+    submission2 = factory.submission.create(event=event2, db=db)
 
-    result = crud.submission.read_all(event_uuid=event.uuid, db=db)
+    result = crud.submission.read_all(event_uuid=[event.uuid], db=db)
     assert result == [submission1]
+
+    result = crud.submission.read_all(event_uuid=[event.uuid, event2.uuid], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_insert_time_after(db):
     now = crud.helpers.utcnow()
 
     factory.submission.create(insert_time=now - timedelta(seconds=5), db=db)
-    factory.submission.create(insert_time=now, db=db)
+    submission2 = factory.submission.create(insert_time=now, db=db)
     submission3 = factory.submission.create(insert_time=now + timedelta(seconds=5), db=db)
 
-    result = crud.submission.read_all(insert_time_after=now, db=db)
+    result = crud.submission.read_all(insert_time_after=[now], db=db)
     assert result == [submission3]
+
+    result = crud.submission.read_all(insert_time_after=[now, now - timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert submission2 in result
+    assert submission3 in result
 
 
 def test_filter_by_insert_time_before(db):
     now = crud.helpers.utcnow()
 
     submission1 = factory.submission.create(insert_time=now - timedelta(seconds=5), db=db)
-    factory.submission.create(insert_time=now, db=db)
+    submission2 = factory.submission.create(insert_time=now, db=db)
     factory.submission.create(insert_time=now + timedelta(seconds=5), db=db)
 
-    result = crud.submission.read_all(insert_time_before=now, db=db)
+    result = crud.submission.read_all(insert_time_before=[now], db=db)
     assert result == [submission1]
+
+    result = crud.submission.read_all(insert_time_before=[now, now + timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_name(db):
     submission1 = factory.submission.create(name="submission1", db=db)
     submission2 = factory.submission.create(name="submission2", db=db)
 
-    result = crud.submission.read_all(name="submission1", db=db)
+    result = crud.submission.read_all(name=["submission1"], db=db)
     assert result == [submission1]
 
-    result = crud.submission.read_all(name="submission", db=db)
+    result = crud.submission.read_all(name=["submission"], db=db)
     assert result == [submission1, submission2]
+
+    result = crud.submission.read_all(name=["submission1", "submission2"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_observable(db):
@@ -172,10 +223,17 @@ def test_filter_by_observable(db):
         observables=[ObservableCreateInSubmission(type="type", value="value")], db=db
     )
 
-    factory.submission.create(observables=[ObservableCreateInSubmission(type="type", value="value2")], db=db)
+    submission2 = factory.submission.create(
+        observables=[ObservableCreateInSubmission(type="type", value="value2")], db=db
+    )
 
-    result = crud.submission.read_all(observable="type|value", db=db)
+    result = crud.submission.read_all(observable=["type|value"], db=db)
     assert result == [submission1]
+
+    result = crud.submission.read_all(observable=["type|value", "type|value2"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_observable_types(db):
@@ -186,10 +244,17 @@ def test_filter_by_observable_types(db):
         observables=[ObservableCreateInSubmission(type="type", value="value")], db=db
     )
 
-    factory.submission.create(observables=[ObservableCreateInSubmission(type="type2", value="value2")], db=db)
+    submission2 = factory.submission.create(
+        observables=[ObservableCreateInSubmission(type="type2", value="value2")], db=db
+    )
 
-    result = crud.submission.read_all(observable_types="type", db=db)
+    result = crud.submission.read_all(observable_types=["type"], db=db)
     assert result == [submission1]
+
+    result = crud.submission.read_all(observable_types=["type", "type2"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_observable_value(db):
@@ -199,29 +264,46 @@ def test_filter_by_observable_value(db):
         observables=[ObservableCreateInSubmission(type="type", value="value")], db=db
     )
 
-    factory.submission.create(observables=[ObservableCreateInSubmission(type="type", value="value2")], db=db)
+    submission2 = factory.submission.create(
+        observables=[ObservableCreateInSubmission(type="type", value="value2")], db=db
+    )
 
-    result = crud.submission.read_all(observable_value="value", db=db)
+    result = crud.submission.read_all(observable_value=["value"], db=db)
     assert result == [submission1]
+
+    result = crud.submission.read_all(observable_value=["value", "value2"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_owner(db):
     submission1 = factory.submission.create(owner="analyst", db=db)
     submission2 = factory.submission.create(db=db)
 
-    result = crud.submission.read_all(owner="analyst", db=db)
+    result = crud.submission.read_all(owner=["analyst"], db=db)
     assert result == [submission1]
 
-    result = crud.submission.read_all(owner="none", db=db)
+    result = crud.submission.read_all(owner=["none"], db=db)
     assert result == [submission2]
+
+    result = crud.submission.read_all(owner=["none", "analyst"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_queue(db):
     submission1 = factory.submission.create(alert_queue="queue1", db=db)
-    factory.submission.create(alert_queue="queue2", db=db)
+    submission2 = factory.submission.create(alert_queue="queue2", db=db)
 
-    result = crud.submission.read_all(queue="queue1", db=db)
+    result = crud.submission.read_all(queue=["queue1"], db=db)
     assert result == [submission1]
+
+    result = crud.submission.read_all(queue=["queue1", "queue2"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_tags(db):
@@ -274,7 +356,7 @@ def test_filter_by_tags(db):
 
     # Verify that submission1 is returned when filtering by the "submission1_tag" tag.
     # Additionally, verify that the submission's tag relationships contain the expected tags.
-    result_submission1 = crud.submission.read_all(tags="submission1_tag", db=db)
+    result_submission1 = crud.submission.read_all(tags=["submission1_tag"], db=db)
     assert result_submission1 == [submission1]
     assert result_submission1[0].child_analysis_tags == []
     assert result_submission1[0].child_permanent_tags == []
@@ -282,7 +364,7 @@ def test_filter_by_tags(db):
 
     # Verify that submission2 is returned when filtering by the "observable2_analysis_tag" tag.
     # Additionally, verify that the submission's tag relationships contain the expected tags.
-    result_submission2 = crud.submission.read_all(tags="observable2_analysis_tag", db=db)
+    result_submission2 = crud.submission.read_all(tags=["observable2_analysis_tag"], db=db)
     assert result_submission2 == [submission2]
     assert [t.value for t in result_submission2[0].child_analysis_tags] == ["observable2_analysis_tag"]
     assert result_submission2[0].child_permanent_tags == []
@@ -290,7 +372,7 @@ def test_filter_by_tags(db):
 
     # Verify that submission3 is returned when filtering by the "observable3_permanent_tag" tag.
     # Additionally, verify that the submission's tag relationships contain the expected tags.
-    result_submission3 = crud.submission.read_all(tags="observable3_permanent_tag", db=db)
+    result_submission3 = crud.submission.read_all(tags=["observable3_permanent_tag"], db=db)
     assert result_submission3 == [submission3]
     assert result_submission3[0].child_analysis_tags == []
     assert [t.value for t in result_submission3[0].child_permanent_tags] == ["observable3_permanent_tag"]
@@ -299,12 +381,20 @@ def test_filter_by_tags(db):
     # Verify that submission4 is returned when filtering by the multiple tags in submission4.
     # Additionally, verify that the submission's tag relationships contain the expected tags.
     result_submission4 = crud.submission.read_all(
-        tags="submission4_tag,observable4_analysis_tag,observable4_permanent_tag", db=db
+        tags=["submission4_tag,observable4_analysis_tag,observable4_permanent_tag"], db=db
     )
     assert result_submission4 == [submission4]
     assert [t.value for t in result_submission4[0].child_analysis_tags] == ["observable4_analysis_tag"]
     assert [t.value for t in result_submission4[0].child_permanent_tags] == ["observable4_permanent_tag"]
     assert [t.value for t in result_submission4[0].tags] == ["submission4_tag"]
+
+    # Verify that OR filters works as expected, returning submissions that match either of the specified tags filters.
+    result_submission5 = crud.submission.read_all(
+        tags=["submission1_tag", "submission4_tag,observable4_analysis_tag,observable4_permanent_tag"], db=db
+    )
+    assert len(result_submission5) == 2
+    assert submission1 in result_submission5
+    assert submission4 in result_submission5
 
 
 def test_filter_by_threat_actors(db):
@@ -323,11 +413,16 @@ def test_filter_by_threat_actors(db):
         db=db,
     )
 
-    result = crud.submission.read_all(threat_actors="submission2_actor", db=db)
+    result = crud.submission.read_all(threat_actors=["submission2_actor"], db=db)
     assert result == [submission2]
 
-    result = crud.submission.read_all(threat_actors="observable3_actor", db=db)
+    result = crud.submission.read_all(threat_actors=["observable3_actor"], db=db)
     assert result == [submission3]
+
+    result = crud.submission.read_all(threat_actors=["observable3_actor", "submission2_actor"], db=db)
+    assert len(result) == 2
+    assert submission3 in result
+    assert submission2 in result
 
 
 def test_filter_by_threats(db):
@@ -342,35 +437,55 @@ def test_filter_by_threats(db):
         type="type3", value="value3", parent_analysis=submission3.root_analysis, threats=["observable3_actor"], db=db
     )
 
-    result = crud.submission.read_all(threats="submission2_actor", db=db)
+    result = crud.submission.read_all(threats=["submission2_actor"], db=db)
     assert result == [submission2]
 
-    result = crud.submission.read_all(threats="observable3_actor", db=db)
+    result = crud.submission.read_all(threats=["observable3_actor"], db=db)
     assert result == [submission3]
+
+    result = crud.submission.read_all(threats=["observable3_actor", "submission2_actor"], db=db)
+    assert len(result) == 2
+    assert submission3 in result
+    assert submission2 in result
 
 
 def test_filter_by_tool(db):
     submission1 = factory.submission.create(tool="tool1", db=db)
-    factory.submission.create(tool="tool2", db=db)
+    submission2 = factory.submission.create(tool="tool2", db=db)
 
-    result = crud.submission.read_all(tool="tool1", db=db)
+    result = crud.submission.read_all(tool=["tool1"], db=db)
     assert result == [submission1]
+
+    result = crud.submission.read_all(tool=["tool1", "tool2"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_tool_instance(db):
     submission1 = factory.submission.create(tool_instance="tool_instance1", db=db)
-    factory.submission.create(tool_instance="tool_instance2", db=db)
+    submission2 = factory.submission.create(tool_instance="tool_instance2", db=db)
 
-    result = crud.submission.read_all(tool_instance="tool_instance1", db=db)
+    result = crud.submission.read_all(tool_instance=["tool_instance1"], db=db)
     assert result == [submission1]
+
+    result = crud.submission.read_all(tool_instance=["tool_instance1", "tool_instance2"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_filter_by_type(db):
     submission1 = factory.submission.create(submission_type="type1", db=db)
-    factory.submission.create(submission_type="type2", db=db)
+    submission2 = factory.submission.create(submission_type="type2", db=db)
 
-    result = crud.submission.read_all(submission_type="type1", db=db)
+    result = crud.submission.read_all(submission_type=["type1"], db=db)
     assert result == [submission1]
+
+    result = crud.submission.read_all(submission_type=["type1", "type2"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
 
 
 def test_read_all_history(db):
