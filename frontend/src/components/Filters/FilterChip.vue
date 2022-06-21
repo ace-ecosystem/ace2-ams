@@ -4,31 +4,42 @@
 <template>
   <span v-if="filterNameObject" style="padding: 2px" data-cy="filter-chip">
     <Chip>
-      <span class="p-chip-text filter-name-text chip-content"
+      <span
+        class="p-chip-text link-text filter-name-text chip-content"
+        @click="unsetFilter"
         >{{ filterLabel }}:</span
       >
       <span
+        v-for="(value, index) in filterValue"
+        :key="(formatValue(value) as string)"
         data-cy="filter-chip-content"
         class="link-text p-chip-text chip-content"
-        style="padding-left: 2px; padding-right: 2px; font-weight: bold"
-        @click="unsetFilter"
       >
-        {{ formatValue(filterValue as any) }}</span
+        <span
+          style="padding-left: 2px; padding-right: 2px; font-weight: bold"
+          @click="unsetFilterValue(value)"
+          >{{ formatValue(value as any) }}</span
+        >
+        <i
+          data-cy="filter-chip-edit-button"
+          class="pi pi-pencil icon-button chip-content"
+          style="cursor: pointer"
+          @click="
+            toggleQuickEditMenu($event);
+            setFilterModelOldValue(value);
+            resetFilterModel();
+          "
+        />
+        <span v-if="!(index == filterValue!.length - 1)">|</span></span
       >
       <i
-        data-cy="filter-chip-edit-button"
-        class="pi pi-pencil icon-button chip-content"
+        data-cy="filter-chip-add-button"
+        class="pi pi-plus-circle icon-button chip-content"
         style="cursor: pointer"
         @click="
           toggleQuickEditMenu($event);
           resetFilterModel();
         "
-      />
-      <i
-        data-cy="filter-chip-remove-button"
-        class="pi pi-times-circle icon-button chip-content"
-        style="cursor: pointer"
-        @click="unsetFilter"
       />
     </Chip>
     <OverlayPanel
@@ -55,6 +66,7 @@
         @click="
           updateFilter();
           toggleQuickEditMenu($event);
+          setFilterModelOldValue();
         "
       />
     </OverlayPanel>
@@ -62,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-  import { inject, computed, defineProps, ref } from "vue";
+  import { inject, computed, defineProps, ref, PropType } from "vue";
 
   import { useFilterStore } from "@/stores/filter";
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";
@@ -93,9 +105,22 @@
     op.value.toggle(event);
   };
 
+  const setFilterModelOldValue = (
+    value?: alertFilterValues | eventFilterValues,
+  ) => {
+    if (value) {
+      filterModelOldValue.value = value;
+    } else {
+      filterModelOldValue.value = undefined;
+    }
+  };
+
   const props = defineProps({
     filterName: { type: String, required: true },
-    filterValue: { type: [String, Object, Array, Date], required: true },
+    filterValue: {
+      type: Array as PropType<alertFilterValues[] | eventFilterValues[]>,
+      required: true,
+    },
   });
 
   const validFilters = {
@@ -109,9 +134,11 @@
       })
     : null;
 
+  const filterModelOldValue = ref<alertFilterValues | eventFilterValues>();
+
   const filterModel = ref({
     propertyType: props.filterName,
-    propertyValue: props.filterValue,
+    propertyValue: undefined as alertFilterValues | eventFilterValues,
   });
 
   const filterLabel = computed(() => {
@@ -124,11 +151,16 @@
   function resetFilterModel() {
     filterModel.value = {
       propertyType: props.filterName,
-      propertyValue: props.filterValue,
+      propertyValue: undefined as alertFilterValues | eventFilterValues,
     };
   }
 
   function updateFilter() {
+    filterStore.unsetFilterValue({
+      nodeType: nodeType,
+      filterName: props.filterName,
+      filterValue: filterModelOldValue.value,
+    });
     filterStore.setFilter({
       nodeType: nodeType,
       filterName: props.filterName,
@@ -142,6 +174,14 @@
     filterStore.unsetFilter({
       nodeType: nodeType,
       filterName: props.filterName,
+    });
+  }
+
+  function unsetFilterValue(value: alertFilterValues | eventFilterValues) {
+    filterStore.unsetFilterValue({
+      nodeType: nodeType,
+      filterName: props.filterName,
+      filterValue: value,
     });
   }
 

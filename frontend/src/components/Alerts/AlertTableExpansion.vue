@@ -63,10 +63,12 @@
     filterStore.bulkSetFilters({
       nodeType: "alerts",
       filters: {
-        observable: {
-          category: observable.type,
-          value: observable.value,
-        },
+        observable: [
+          {
+            category: observable.type,
+            value: observable.value,
+          },
+        ],
       },
     });
   };

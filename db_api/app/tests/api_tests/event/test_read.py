@@ -1010,7 +1010,7 @@ def test_get_all_empty(client):
 
 def test_get_filter_alert_time_after(client, db):
     event1 = factory.event.create_or_read(name="event1", db=db)
-    factory.submission.create(event=event1, insert_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    alert1 = factory.submission.create(event=event1, insert_time=datetime.utcnow() - timedelta(seconds=5), db=db)
 
     event2 = factory.event.create_or_read(name="event2", db=db)
     alert2 = factory.submission.create(event=event2, insert_time=datetime.utcnow(), db=db)
@@ -1025,11 +1025,17 @@ def test_get_filter_alert_time_after(client, db):
     # There should only be 1 event when we filter by alert_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"alert_time_after": alert2.insert_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"alert_time_after": alert2.insert_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
     assert parse(get.json()["items"][0]["auto_alert_time"]) == alert3.insert_time
+
+    params2 = {"alert_time_after": alert1.insert_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_alert_time_before(client, db):
@@ -1040,7 +1046,7 @@ def test_get_filter_alert_time_before(client, db):
     alert2 = factory.submission.create(event=event2, insert_time=datetime.utcnow(), db=db)
 
     event3 = factory.event.create_or_read(name="event3", db=db)
-    factory.submission.create(event=event3, insert_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    alert3 = factory.submission.create(event=event3, insert_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1049,17 +1055,23 @@ def test_get_filter_alert_time_before(client, db):
     # There should only be 1 event when we filter by alert_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"alert_time_before": alert2.insert_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"alert_time_before": alert2.insert_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
     assert parse(get.json()["items"][0]["auto_alert_time"]) == alert1.insert_time
 
+    params2 = {"alert_time_before": alert3.insert_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_contain_time_after(client, db):
-    factory.event.create_or_read(name="event1", contain_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    event1 = factory.event.create_or_read(name="event1", contain_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = factory.event.create_or_read(name="event2", contain_time=datetime.utcnow(), db=db)
-    factory.event.create_or_read(name="event3", contain_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    event3 = factory.event.create_or_read(name="event3", contain_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1068,16 +1080,22 @@ def test_get_filter_contain_time_after(client, db):
     # There should only be 1 event when we filter by contain_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"contain_time_after": event2.contain_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"contain_time_after": event2.contain_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
+    params2 = {"contain_time_after": event1.contain_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_contain_time_before(client, db):
-    factory.event.create_or_read(name="event1", contain_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    event1 = factory.event.create_or_read(name="event1", contain_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = factory.event.create_or_read(name="event2", contain_time=datetime.utcnow(), db=db)
-    factory.event.create_or_read(name="event3", contain_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    event3 = factory.event.create_or_read(name="event3", contain_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1086,16 +1104,22 @@ def test_get_filter_contain_time_before(client, db):
     # There should only be 1 event when we filter by contain_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"contain_time_before": event2.contain_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"contain_time_before": event2.contain_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
 
+    params2 = {"contain_time_before": event3.contain_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_created_time_after(client, db):
-    factory.event.create_or_read(name="event1", created_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    event1 = factory.event.create_or_read(name="event1", created_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = factory.event.create_or_read(name="event2", created_time=datetime.utcnow(), db=db)
-    factory.event.create_or_read(name="event3", created_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    event3 = factory.event.create_or_read(name="event3", created_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1104,16 +1128,22 @@ def test_get_filter_created_time_after(client, db):
     # There should only be 1 event when we filter by created_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"created_time_after": event2.created_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"created_time_after": event2.created_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
+    params2 = {"created_time_after": event1.created_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_created_time_before(client, db):
-    factory.event.create_or_read(name="event1", created_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    event1 = factory.event.create_or_read(name="event1", created_time=datetime.utcnow() - timedelta(seconds=5), db=db)
     event2 = factory.event.create_or_read(name="event2", created_time=datetime.utcnow(), db=db)
-    factory.event.create_or_read(name="event3", created_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    event3 = factory.event.create_or_read(name="event3", created_time=datetime.utcnow() + timedelta(seconds=5), db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1122,10 +1152,16 @@ def test_get_filter_created_time_before(client, db):
     # There should only be 1 event when we filter by created_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"created_time_before": event2.created_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"created_time_before": event2.created_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
+
+    params2 = {"created_time_before": event3.created_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_disposition(client, db):
@@ -1147,6 +1183,11 @@ def test_get_filter_disposition(client, db):
     get = client.get("/api/event/?disposition=FALSE_POSITIVE")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event2"
+
+    get = client.get("/api/event/?disposition=FALSE_POSITIVE&disposition=none")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_disposition_time_after(client, db):
@@ -1172,10 +1213,16 @@ def test_get_filter_disposition_time_after(client, db):
     # There should only be 1 event when we filter by disposition_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"disposition_time_after": now}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"disposition_time_after": now}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
+
+    params2 = {"disposition_time_after": now - timedelta(seconds=5)}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_disposition_time_before(client, db):
@@ -1201,15 +1248,21 @@ def test_get_filter_disposition_time_before(client, db):
     # There should only be 1 event when we filter by disposition_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"disposition_time_before": now}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"disposition_time_before": now}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
 
+    params2 = {"disposition_time_before": now + timedelta(seconds=5)}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_event_type(client, db):
-    factory.event.create_or_read(name="event1", db=db, event_type="test_type")
-    factory.event.create_or_read(name="event2", db=db, event_type="test_type2")
+    event1 = factory.event.create_or_read(name="event1", db=db, event_type="test_type")
+    event2 = factory.event.create_or_read(name="event2", db=db, event_type="test_type2")
 
     # There should be 2 total events
     get = client.get("/api/event/")
@@ -1220,10 +1273,16 @@ def test_get_filter_event_type(client, db):
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["type"]["value"] == "test_type"
 
+    # There should be 2 total events when we filter by test_type1 and test_type2
+    get = client.get("/api/event/?event_type=test_type&event_type=test_type2")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_name(client, db):
-    factory.event.create_or_read(db=db, name="Test Event")
-    factory.event.create_or_read(db=db, name="Some Other Event")
+    event1 = factory.event.create_or_read(db=db, name="Test Event")
+    event2 = factory.event.create_or_read(db=db, name="Some Other Event")
 
     # There should be 2 total events
     get = client.get("/api/event/")
@@ -1233,6 +1292,12 @@ def test_get_filter_name(client, db):
     get = client.get("/api/event/?name=test")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "Test Event"
+
+    # There should be 2 total events when we filter by both names
+    get = client.get("/api/event/?name=test&name=other")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_observable(client, db):
@@ -1281,6 +1346,13 @@ def test_get_filter_observable(client, db):
     assert any(a["name"] == "event3" for a in get.json()["items"])
     assert any(a["name"] == "event4" for a in get.json()["items"])
 
+    # There should be 3 events when we filter by the test_type1/test_value1 and test_type2/test_value2 observable
+    get = client.get("/api/event/?observable=test_type1|test_value1&observable=test_type2|test_value2")
+    assert get.json()["total"] == 3
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event4.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_observable_types(client, db):
     # Create an empty event
@@ -1321,6 +1393,12 @@ def test_get_filter_observable_types(client, db):
     get = client.get("/api/event/?observable_types=test_type1,test_type2")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
+
+    # There should be 2 events when we filter by (test_type1 and test_type2) or just test_type1
+    get = client.get("/api/event/?observable_types=test_type1,test_type2&observable_types=test_type1")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_observable_value(client, db):
@@ -1369,11 +1447,18 @@ def test_get_filter_observable_value(client, db):
     assert any(a["name"] == "event2" for a in get.json()["items"])
     assert any(a["name"] == "event4" for a in get.json()["items"])
 
+    # There should be 3 events when we filter by the test_value1 and test_value2 observable value
+    get = client.get("/api/event/?observable_value=test_value1&observable_value=test_value2")
+    assert get.json()["total"] == 3
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event4.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_owner(client, db):
     factory.user.create_or_read(username="analyst", db=db)
-    factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db, owner="analyst")
+    event1 = factory.event.create_or_read(name="event1", db=db)
+    event2 = factory.event.create_or_read(name="event2", db=db, owner="analyst")
 
     # There should be 2 total events
     get = client.get("/api/event/")
@@ -1384,11 +1469,17 @@ def test_get_filter_owner(client, db):
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["owner"]["username"] == "analyst"
 
+    # There should be 2 events when we filter by owner and none
+    get = client.get("/api/event/?owner=analyst&owner=none")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_prevention_tools(client, db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db, prevention_tools=["value1"])
-    factory.event.create_or_read(name="event3", db=db, prevention_tools=["value2", "value3"])
+    event2 = factory.event.create_or_read(name="event2", db=db, prevention_tools=["value1"])
+    event3 = factory.event.create_or_read(name="event3", db=db, prevention_tools=["value2", "value3"])
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1411,10 +1502,16 @@ def test_get_filter_prevention_tools(client, db):
     get = client.get("/api/event/?prevention_tools=")
     assert get.json()["total"] == 3
 
+    # There should be 2 events when we filter by value1 OR (value2 AND value3)
+    get = client.get("/api/event/?prevention_tools=value1&prevention_tools=value2,value3")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_queue(client, db):
-    factory.event.create_or_read(name="event1", db=db, event_queue="test_queue1")
-    factory.event.create_or_read(name="event2", db=db, event_queue="test_queue2")
+    event1 = factory.event.create_or_read(name="event1", db=db, event_queue="test_queue1")
+    event2 = factory.event.create_or_read(name="event2", db=db, event_queue="test_queue2")
 
     # There should be 2 total events
     get = client.get("/api/event/")
@@ -1425,11 +1522,21 @@ def test_get_filter_queue(client, db):
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["queue"]["value"] == "test_queue1"
 
+    # There should be 2 events when we filter by two different queues
+    get = client.get("/api/event/?queue=test_queue1&queue=test_queue2")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_remediation_time_after(client, db):
-    factory.event.create_or_read(name="event1", remediation_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    event1 = factory.event.create_or_read(
+        name="event1", remediation_time=datetime.utcnow() - timedelta(seconds=5), db=db
+    )
     event2 = factory.event.create_or_read(name="event2", remediation_time=datetime.utcnow(), db=db)
-    factory.event.create_or_read(name="event3", remediation_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    event3 = factory.event.create_or_read(
+        name="event3", remediation_time=datetime.utcnow() + timedelta(seconds=5), db=db
+    )
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1438,16 +1545,26 @@ def test_get_filter_remediation_time_after(client, db):
     # There should only be 1 event when we filter by remediation_time_after. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"remediation_time_after": event2.remediation_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"remediation_time_after": event2.remediation_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
+    params2 = {"remediation_time_after": event1.remediation_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_remediation_time_before(client, db):
-    factory.event.create_or_read(name="event1", remediation_time=datetime.utcnow() - timedelta(seconds=5), db=db)
+    event1 = factory.event.create_or_read(
+        name="event1", remediation_time=datetime.utcnow() - timedelta(seconds=5), db=db
+    )
     event2 = factory.event.create_or_read(name="event2", remediation_time=datetime.utcnow(), db=db)
-    factory.event.create_or_read(name="event3", remediation_time=datetime.utcnow() + timedelta(seconds=5), db=db)
+    event3 = factory.event.create_or_read(
+        name="event3", remediation_time=datetime.utcnow() + timedelta(seconds=5), db=db
+    )
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1456,16 +1573,22 @@ def test_get_filter_remediation_time_before(client, db):
     # There should only be 1 event when we filter by remediation_time_before. But the timestamp
     # has a timezone specified, which uses the + symbol that needs to be urlencoded since it
     # is a reserved URL character.
-    params = {"remediation_time_before": event2.remediation_time}
-    get = client.get(f"/api/event/?{urlencode(params)}")
+    params1 = {"remediation_time_before": event2.remediation_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event1"
+
+    params2 = {"remediation_time_before": event3.remediation_time}
+    get = client.get(f"/api/event/?{urlencode(params1)}&{urlencode(params2)}")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event1.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_remediations(client, db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db, remediations=["value1"])
-    factory.event.create_or_read(name="event3", db=db, remediations=["value2", "value3"])
+    event2 = factory.event.create_or_read(name="event2", db=db, remediations=["value1"])
+    event3 = factory.event.create_or_read(name="event3", db=db, remediations=["value2", "value3"])
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1488,14 +1611,21 @@ def test_get_filter_remediations(client, db):
     get = client.get("/api/event/?remediations=")
     assert get.json()["total"] == 3
 
+    # There should 2 events when we filter by value1 OR (value2 AND value3)
+    get = client.get("/api/event/?remediations=value1&remediations=value2,value3")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_severity(client, db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db, severity="value1")
+    event2 = factory.event.create_or_read(name="event2", db=db, severity="value1")
+    event3 = factory.event.create_or_read(name="event3", db=db, severity="value2")
 
     # There should be 2 total events
     get = client.get("/api/event/")
-    assert get.json()["total"] == 2
+    assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by value1
     get = client.get("/api/event/?severity=value1")
@@ -1504,16 +1634,23 @@ def test_get_filter_severity(client, db):
 
     # All the events should be returned if you don't specify any value for the filter
     get = client.get("/api/event/?severity=")
+    assert get.json()["total"] == 3
+
+    # There should 2 events when we filter by value1 OR value2
+    get = client.get("/api/event/?severity=value1&severity=value2")
     assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_source(client, db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db, source="value1")
+    event2 = factory.event.create_or_read(name="event2", db=db, source="value1")
+    event3 = factory.event.create_or_read(name="event3", db=db, source="value2")
 
     # There should be 2 total events
     get = client.get("/api/event/")
-    assert get.json()["total"] == 2
+    assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by value1
     get = client.get("/api/event/?source=value1")
@@ -1522,16 +1659,23 @@ def test_get_filter_source(client, db):
 
     # All the events should be returned if you don't specify any value for the filter
     get = client.get("/api/event/?source=")
+    assert get.json()["total"] == 3
+
+    # There should 2 events when we filter by value1 OR value2
+    get = client.get("/api/event/?source=value1&source=value2")
     assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_status(client, db):
     factory.event.create_or_read(name="event1", db=db, status="value1")
-    factory.event.create_or_read(name="event2", db=db, status="value2")
+    event2 = factory.event.create_or_read(name="event2", db=db, status="value2")
+    event3 = factory.event.create_or_read(name="event3", db=db, status="value3")
 
     # There should be 2 total events
     get = client.get("/api/event/")
-    assert get.json()["total"] == 2
+    assert get.json()["total"] == 3
 
     # There should only be 1 event when we filter by value1
     get = client.get("/api/event/?status=value1")
@@ -1540,7 +1684,13 @@ def test_get_filter_status(client, db):
 
     # All the events should be returned if you don't specify any value for the filter
     get = client.get("/api/event/?status=")
+    assert get.json()["total"] == 3
+
+    # There should 2 events when we filter by value1 OR value2
+    get = client.get("/api/event/?status=value2&status=value3")
     assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_tags(client, db):
@@ -1591,6 +1741,12 @@ def test_get_filter_tags(client, db):
     get = client.get("/api/event/?tags=")
     assert get.json()["total"] == 4
 
+    # There should be 2 events when we filter by tag1 OR (tag2 AND tag3)
+    get = client.get("/api/event/?tags=tag1&tags=tag2,tag3")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_threat_actors(client, db):
     event1 = factory.event.create_or_read(name="event1", db=db)
@@ -1627,6 +1783,12 @@ def test_get_filter_threat_actors(client, db):
     # All the alerts should be returned if you don't specify anything for the filter
     get = client.get("/api/event/?threat_actors=")
     assert get.json()["total"] == 3
+
+    # There should be 2 events when we filter by test_actor OR test_actor2
+    get = client.get("/api/event/?threat_actors=test_actor&threat_actors=test_actor2")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
 
 
 def test_get_filter_threats(client, db):
@@ -1665,11 +1827,17 @@ def test_get_filter_threats(client, db):
     get = client.get("/api/event/?threats=")
     assert get.json()["total"] == 3
 
+    # There should be 2 events when we filter by threat1 OR (threat2 AND threat3)
+    get = client.get("/api/event/?threats=threat1&threats=threat2,threat3")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
+
 
 def test_get_filter_vectors(client, db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db, vectors=["value1"])
-    factory.event.create_or_read(name="event3", db=db, vectors=["value2", "value3"])
+    event2 = factory.event.create_or_read(name="event2", db=db, vectors=["value1"])
+    event3 = factory.event.create_or_read(name="event3", db=db, vectors=["value2", "value3"])
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1691,6 +1859,12 @@ def test_get_filter_vectors(client, db):
     # All the events should be returned if you don't specify any value for the filter
     get = client.get("/api/event/?vectors=")
     assert get.json()["total"] == 3
+
+    # There should be 2 events when we filter by value1 OR (value2 AND value3)
+    get = client.get("/api/event/?vectors=value1&vectors=value2,value3")
+    assert get.json()["total"] == 2
+    assert any(a["uuid"] == str(event2.uuid) for a in get.json()["items"])
+    assert any(a["uuid"] == str(event3.uuid) for a in get.json()["items"])
 
 
 def test_get_multiple_filters(client, db):

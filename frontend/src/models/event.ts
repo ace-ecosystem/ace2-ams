@@ -118,23 +118,23 @@ export interface eventUpdate extends nodeUpdate, historyUsername {
 }
 
 export interface eventFilterParams extends pageOptionParams {
-  createdAfter?: Date;
-  createdBefore?: Date;
-  disposition?: alertDispositionRead;
-  eventType?: eventTypeRead;
-  name?: string;
-  observable?: { category: observableTypeRead; value: string };
-  observableTypes?: observableTypeRead[];
-  observableValue?: string;
-  owner?: userRead;
-  preventionTool?: eventPreventionToolRead;
-  queue?: queueRead;
-  severity?: eventSeverityRead;
-  status?: eventStatusRead;
-  tags?: string[];
-  threatActor?: nodeThreatActorRead;
-  threats?: nodeThreatRead[];
-  vector?: eventVectorRead;
+  createdAfter?: Date[];
+  createdBefore?: Date[];
+  disposition?: alertDispositionRead[];
+  eventType?: eventTypeRead[];
+  name?: string[];
+  observable?: { category: observableTypeRead; value: string }[];
+  observableTypes?: observableTypeRead[][];
+  observableValue?: string[];
+  owner?: userRead[];
+  preventionTool?: eventPreventionToolRead[];
+  queue?: queueRead[];
+  severity?: eventSeverityRead[];
+  status?: eventStatusRead[];
+  tags?: string[][];
+  threatActor?: nodeThreatActorRead[];
+  threats?: nodeThreatRead[][];
+  vector?: eventVectorRead[];
   [key: string]: any;
 }
 

@@ -39,10 +39,10 @@ describe("DateRangePicker", () => {
   it("renders as expected when there are date filters set", () => {
     factory({
       filters: {
-        eventTimeAfter: new Date(Date.UTC(2022, 4, 25, 12, 0, 0, 0)),
-        eventTimeBefore: new Date(Date.UTC(2022, 4, 30, 12, 0, 0, 0)),
-        insertTimeAfter: new Date(Date.UTC(2022, 2, 25, 12, 0, 0, 0)),
-        insertTimeBefore: new Date(Date.UTC(2022, 2, 30, 12, 0, 0, 0)),
+        eventTimeAfter: [new Date(Date.UTC(2022, 4, 25, 12, 0, 0, 0))],
+        eventTimeBefore: [new Date(Date.UTC(2022, 4, 30, 12, 0, 0, 0))],
+        insertTimeAfter: [new Date(Date.UTC(2022, 2, 25, 12, 0, 0, 0))],
+        insertTimeBefore: [new Date(Date.UTC(2022, 2, 30, 12, 0, 0, 0))],
       },
     });
     // Make sure the "Event Time" filters are the ones that are showing
@@ -64,10 +64,10 @@ describe("DateRangePicker", () => {
   it("correctly clears the 'start' date filter the clear button is clicked", () => {
     factory({
       filters: {
-        eventTimeAfter: new Date(Date.UTC(2022, 4, 25, 12, 0, 0, 0)),
-        eventTimeBefore: new Date(Date.UTC(2022, 4, 30, 12, 0, 0, 0)),
-        insertTimeAfter: new Date(Date.UTC(2022, 2, 25, 12, 0, 0, 0)),
-        insertTimeBefore: new Date(Date.UTC(2022, 2, 30, 12, 0, 0, 0)),
+        eventTimeAfter: [new Date(Date.UTC(2022, 4, 25, 12, 0, 0, 0))],
+        eventTimeBefore: [new Date(Date.UTC(2022, 4, 30, 12, 0, 0, 0))],
+        insertTimeAfter: [new Date(Date.UTC(2022, 2, 25, 12, 0, 0, 0))],
+        insertTimeBefore: [new Date(Date.UTC(2022, 2, 30, 12, 0, 0, 0))],
       },
     });
     cy.get('[data-cy="date-range-picker-start-clear"]').click();
@@ -92,10 +92,10 @@ describe("DateRangePicker", () => {
   it("correctly clears the 'end' date filter the clear button is clicked", () => {
     factory({
       filters: {
-        eventTimeAfter: new Date(Date.UTC(2022, 4, 25, 12, 0, 0, 0)),
-        eventTimeBefore: new Date(Date.UTC(2022, 4, 30, 12, 0, 0, 0)),
-        insertTimeAfter: new Date(Date.UTC(2022, 2, 25, 12, 0, 0, 0)),
-        insertTimeBefore: new Date(Date.UTC(2022, 2, 30, 12, 0, 0, 0)),
+        eventTimeAfter: [new Date(Date.UTC(2022, 4, 25, 12, 0, 0, 0))],
+        eventTimeBefore: [new Date(Date.UTC(2022, 4, 30, 12, 0, 0, 0))],
+        insertTimeAfter: [new Date(Date.UTC(2022, 2, 25, 12, 0, 0, 0))],
+        insertTimeBefore: [new Date(Date.UTC(2022, 2, 30, 12, 0, 0, 0))],
       },
     });
     cy.get('[data-cy="date-range-picker-end-clear"]').click();
@@ -241,10 +241,10 @@ describe("DateRangePicker", () => {
   it("clears currently set date filters when date filter type is changed", () => {
     factory({
       filters: {
-        eventTimeAfter: new Date(Date.UTC(2022, 4, 25, 12, 0, 0, 0)),
-        eventTimeBefore: new Date(Date.UTC(2022, 4, 30, 12, 0, 0, 0)),
-        insertTimeAfter: new Date(Date.UTC(2022, 2, 25, 12, 0, 0, 0)),
-        insertTimeBefore: new Date(Date.UTC(2022, 2, 30, 12, 0, 0, 0)),
+        eventTimeAfter: [new Date(Date.UTC(2022, 4, 25, 12, 0, 0, 0))],
+        eventTimeBefore: [new Date(Date.UTC(2022, 4, 30, 12, 0, 0, 0))],
+        insertTimeAfter: [new Date(Date.UTC(2022, 2, 25, 12, 0, 0, 0))],
+        insertTimeBefore: [new Date(Date.UTC(2022, 2, 30, 12, 0, 0, 0))],
       },
     });
     cy.get('[data-cy="date-range-picker-options-button"]').click();

@@ -134,8 +134,13 @@ def test_filter_by_alert_time_after_alert_insert_time(db):
     event3 = factory.event.create_or_read(name="event3", db=db)
     factory.submission.create(event=event3, insert_time=now + timedelta(seconds=5), db=db)
 
-    result = crud.event.read_all(alert_time_after=now, db=db)
+    result = crud.event.read_all(alert_time_after=[now], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(alert_time_after=[now, now - timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_alert_time_before_alert_insert_time(db):
@@ -150,8 +155,13 @@ def test_filter_by_alert_time_before_alert_insert_time(db):
     event3 = factory.event.create_or_read(name="event3", db=db)
     factory.submission.create(event=event3, insert_time=now + timedelta(seconds=5), db=db)
 
-    result = crud.event.read_all(alert_time_before=now, db=db)
+    result = crud.event.read_all(alert_time_before=[now], db=db)
     assert result == [event1]
+
+    result = crud.event.read_all(alert_time_before=[now, now + timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event2 in result
 
 
 def test_filter_by_alert_time_after_event_alert_time(db):
@@ -166,8 +176,13 @@ def test_filter_by_alert_time_after_event_alert_time(db):
     event3 = factory.event.create_or_read(name="event3", alert_time=now + timedelta(seconds=5), db=db)
     factory.submission.create(event=event3, insert_time=now - timedelta(days=1), db=db)
 
-    result = crud.event.read_all(alert_time_after=now, db=db)
+    result = crud.event.read_all(alert_time_after=[now], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(alert_time_after=[now, now - timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_alert_time_before_event_alert_time(db):
@@ -182,52 +197,75 @@ def test_filter_by_alert_time_before_event_alert_time(db):
     event3 = factory.event.create_or_read(name="event3", alert_time=now + timedelta(seconds=5), db=db)
     factory.submission.create(event=event3, db=db)
 
-    result = crud.event.read_all(alert_time_before=now, db=db)
+    result = crud.event.read_all(alert_time_before=[now], db=db)
     assert result == [event1]
+
+    result = crud.event.read_all(alert_time_before=[now, now + timedelta(seconds=3)], db=db)
+    assert len(result) == 3
 
 
 def test_filter_by_contain_time_after(db):
     now = crud.helpers.utcnow()
 
     factory.event.create_or_read(name="event1", contain_time=now - timedelta(seconds=5), db=db)
-    factory.event.create_or_read(name="event2", contain_time=now, db=db)
+    event2 = factory.event.create_or_read(name="event2", contain_time=now, db=db)
     event3 = factory.event.create_or_read(name="event3", contain_time=now + timedelta(seconds=5), db=db)
 
-    result = crud.event.read_all(contain_time_after=now, db=db)
+    result = crud.event.read_all(contain_time_after=[now], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(contain_time_after=[now, now - timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_contain_time_before(db):
     now = crud.helpers.utcnow()
 
     event1 = factory.event.create_or_read(name="event1", contain_time=now - timedelta(seconds=5), db=db)
-    factory.event.create_or_read(name="event2", contain_time=now, db=db)
+    event2 = factory.event.create_or_read(name="event2", contain_time=now, db=db)
     factory.event.create_or_read(name="event3", contain_time=now + timedelta(seconds=5), db=db)
 
-    result = crud.event.read_all(contain_time_before=now, db=db)
+    result = crud.event.read_all(contain_time_before=[now], db=db)
     assert result == [event1]
+
+    result = crud.event.read_all(contain_time_before=[now, now + timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event2 in result
 
 
 def test_filter_by_created_time_after(db):
     now = crud.helpers.utcnow()
 
     factory.event.create_or_read(name="event1", created_time=now - timedelta(seconds=5), db=db)
-    factory.event.create_or_read(name="event2", created_time=now, db=db)
+    event2 = factory.event.create_or_read(name="event2", created_time=now, db=db)
     event3 = factory.event.create_or_read(name="event3", created_time=now + timedelta(seconds=5), db=db)
 
-    result = crud.event.read_all(created_time_after=now, db=db)
+    result = crud.event.read_all(created_time_after=[now], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(created_time_after=[now, now - timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_created_time_before(db):
     now = crud.helpers.utcnow()
 
     event1 = factory.event.create_or_read(name="event1", created_time=now - timedelta(seconds=5), db=db)
-    factory.event.create_or_read(name="event2", created_time=now, db=db)
+    event2 = factory.event.create_or_read(name="event2", created_time=now, db=db)
     factory.event.create_or_read(name="event3", created_time=now + timedelta(seconds=5), db=db)
 
-    result = crud.event.read_all(created_time_before=now, db=db)
+    result = crud.event.read_all(created_time_before=[now], db=db)
     assert result == [event1]
+
+    result = crud.event.read_all(created_time_before=[now, now + timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event2 in result
 
 
 def test_filter_by_disposition(db):
@@ -240,11 +278,16 @@ def test_filter_by_disposition(db):
     event3 = factory.event.create_or_read(name="event3", db=db)
     factory.submission.create(event=event3, disposition="DELIVERY", db=db)
 
-    result = crud.event.read_all(disposition="DELIVERY", db=db)
+    result = crud.event.read_all(disposition=["DELIVERY"], db=db)
     assert result == [event3]
 
-    result = crud.event.read_all(disposition="none", db=db)
+    result = crud.event.read_all(disposition=["none"], db=db)
     assert result == [event1]
+
+    result = crud.event.read_all(disposition=["none", "DELIVERY"], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event3 in result
 
 
 def test_filter_by_disposition_time_after_event_disposition_time(db):
@@ -259,8 +302,13 @@ def test_filter_by_disposition_time_after_event_disposition_time(db):
     event3 = factory.event.create_or_read(name="event3", disposition_time=now + timedelta(seconds=5), db=db)
     factory.submission.create(event=event3, db=db)
 
-    result = crud.event.read_all(disposition_time_after=now, db=db)
+    result = crud.event.read_all(disposition_time_after=[now], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(disposition_time_after=[now, now - timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_disposition_time_before_event_disposition_time(db):
@@ -275,8 +323,13 @@ def test_filter_by_disposition_time_before_event_disposition_time(db):
     event3 = factory.event.create_or_read(name="event3", disposition_time=now + timedelta(seconds=5), db=db)
     factory.submission.create(event=event3, db=db)
 
-    result = crud.event.read_all(disposition_time_before=now, db=db)
+    result = crud.event.read_all(disposition_time_before=[now], db=db)
     assert result == [event1]
+
+    result = crud.event.read_all(disposition_time_before=[now, now + timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event2 in result
 
 
 def test_filter_by_disposition_time_after_alert_disposition_time(db):
@@ -312,8 +365,13 @@ def test_filter_by_disposition_time_after_alert_disposition_time(db):
         db=db,
     )
 
-    result = crud.event.read_all(disposition_time_after=now, db=db)
+    result = crud.event.read_all(disposition_time_after=[now], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(disposition_time_after=[now, now - timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_disposition_time_before_alert_disposition_time(db):
@@ -349,17 +407,27 @@ def test_filter_by_disposition_time_before_alert_disposition_time(db):
         db=db,
     )
 
-    result = crud.event.read_all(disposition_time_before=now, db=db)
+    result = crud.event.read_all(disposition_time_before=[now], db=db)
     assert result == [event1]
+
+    result = crud.event.read_all(disposition_time_before=[now, now + timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event2 in result
 
 
 def test_filter_by_event_type(db):
     factory.event.create_or_read(name="event1", event_type="type1", db=db)
-    factory.event.create_or_read(name="event2", event_type="type2", db=db)
+    event2 = factory.event.create_or_read(name="event2", event_type="type2", db=db)
     event3 = factory.event.create_or_read(name="event3", event_type="type3", db=db)
 
-    result = crud.event.read_all(event_type="type3", db=db)
+    result = crud.event.read_all(event_type=["type3"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(event_type=["type2", "type3"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_name(db):
@@ -367,11 +435,16 @@ def test_filter_by_name(db):
     event2 = factory.event.create_or_read(name="event2", db=db)
     event3 = factory.event.create_or_read(name="event3", db=db)
 
-    result = crud.event.read_all(name="event3", db=db)
+    result = crud.event.read_all(name=["event3"], db=db)
     assert result == [event3]
 
-    result = crud.event.read_all(name="event", db=db)
+    result = crud.event.read_all(name=["event"], db=db)
     assert result == [event1, event2, event3]
+
+    result = crud.event.read_all(name=["event3", "event2"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_observable(db):
@@ -387,8 +460,13 @@ def test_filter_by_observable(db):
     alert3 = factory.submission.create(event=event3, db=db)
     factory.observable.create_or_read(type="type3", value="value3", parent_analysis=alert3.root_analysis, db=db)
 
-    result = crud.event.read_all(observable="type3|value3", db=db)
+    result = crud.event.read_all(observable=["type3|value3"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(observable=["type3|value3", "type2|value2"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_observable_types(db):
@@ -404,8 +482,13 @@ def test_filter_by_observable_types(db):
     alert3 = factory.submission.create(event=event3, db=db)
     factory.observable.create_or_read(type="type3", value="value3", parent_analysis=alert3.root_analysis, db=db)
 
-    result = crud.event.read_all(observable_types="type3", db=db)
+    result = crud.event.read_all(observable_types=["type3"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(observable_types=["type2", "type3"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_observable_value(db):
@@ -421,95 +504,145 @@ def test_filter_by_observable_value(db):
     alert3 = factory.submission.create(event=event3, db=db)
     factory.observable.create_or_read(type="type3", value="value3", parent_analysis=alert3.root_analysis, db=db)
 
-    result = crud.event.read_all(observable_value="value3", db=db)
+    result = crud.event.read_all(observable_value=["value3"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(observable_value=["value2", "value3"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_owner(db):
     event1 = factory.event.create_or_read(name="event1", db=db)
     event2 = factory.event.create_or_read(name="event3", owner="analyst", db=db)
 
-    result = crud.event.read_all(owner="analyst", db=db)
+    result = crud.event.read_all(owner=["analyst"], db=db)
     assert result == [event2]
 
-    result = crud.event.read_all(owner="none", db=db)
+    result = crud.event.read_all(owner=["none"], db=db)
     assert result == [event1]
+
+    result = crud.event.read_all(owner=["none", "analyst"], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event2 in result
 
 
 def test_filter_by_prevention_tools(db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db)
+    event2 = factory.event.create_or_read(name="event2", prevention_tools=["tool2"], db=db)
     event3 = factory.event.create_or_read(name="event3", prevention_tools=["tool3"], db=db)
 
-    result = crud.event.read_all(prevention_tools="tool3", db=db)
+    result = crud.event.read_all(prevention_tools=["tool3"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(prevention_tools=["tool2", "tool3"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_queue(db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db)
+    event2 = factory.event.create_or_read(name="event2", event_queue="queue2", db=db)
     event3 = factory.event.create_or_read(name="event3", event_queue="queue3", db=db)
 
-    result = crud.event.read_all(queue="queue3", db=db)
+    result = crud.event.read_all(queue=["queue3"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(queue=["queue2", "queue3"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_remediation_time_after(db):
     now = crud.helpers.utcnow()
 
     factory.event.create_or_read(name="event1", remediation_time=now - timedelta(seconds=5), db=db)
-    factory.event.create_or_read(name="event2", remediation_time=now, db=db)
+    event2 = factory.event.create_or_read(name="event2", remediation_time=now, db=db)
     event3 = factory.event.create_or_read(name="event3", remediation_time=now + timedelta(seconds=5), db=db)
 
-    result = crud.event.read_all(remediation_time_after=now, db=db)
+    result = crud.event.read_all(remediation_time_after=[now], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(remediation_time_after=[now, now - timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_remediation_time_before(db):
     now = crud.helpers.utcnow()
 
     event1 = factory.event.create_or_read(name="event1", remediation_time=now - timedelta(seconds=5), db=db)
-    factory.event.create_or_read(name="event2", remediation_time=now, db=db)
+    event2 = factory.event.create_or_read(name="event2", remediation_time=now, db=db)
     factory.event.create_or_read(name="event3", remediation_time=now + timedelta(seconds=5), db=db)
 
-    result = crud.event.read_all(remediation_time_before=now, db=db)
+    result = crud.event.read_all(remediation_time_before=[now], db=db)
     assert result == [event1]
+
+    result = crud.event.read_all(remediation_time_before=[now, now + timedelta(seconds=5)], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event2 in result
 
 
 def test_filter_by_remediations(db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db)
+    event2 = factory.event.create_or_read(name="event2", remediations=["remediation2"], db=db)
     event3 = factory.event.create_or_read(name="event3", remediations=["remediation3"], db=db)
 
-    result = crud.event.read_all(remediations="remediation3", db=db)
+    result = crud.event.read_all(remediations=["remediation3"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(remediations=["remediation2", "remediation3"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_severity(db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db)
+    event2 = factory.event.create_or_read(name="event2", severity="level2", db=db)
     event3 = factory.event.create_or_read(name="event3", severity="level3", db=db)
 
-    result = crud.event.read_all(severity="level3", db=db)
+    result = crud.event.read_all(severity=["level3"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(severity=["level2", "level3"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_source(db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db)
+    event2 = factory.event.create_or_read(name="event2", source="source2", db=db)
     event3 = factory.event.create_or_read(name="event3", source="source3", db=db)
 
-    result = crud.event.read_all(source="source3", db=db)
+    result = crud.event.read_all(source=["source3"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(source=["source2", "source3"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_status(db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db)
+    event2 = factory.event.create_or_read(name="event2", status="status2", db=db)
     event3 = factory.event.create_or_read(name="event3", status="status3", db=db)
 
-    result = crud.event.read_all(status="status3", db=db)
+    result = crud.event.read_all(status=["status3"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(status=["status2", "status3"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_filter_by_tags(db):
@@ -527,14 +660,19 @@ def test_filter_by_tags(db):
         type="type3", value="value3", parent_analysis=alert3.root_analysis, analysis_tags=["observable3_tag"], db=db
     )
 
-    result = crud.event.read_all(tags="event1_tag", db=db)
+    result = crud.event.read_all(tags=["event1_tag"], db=db)
     assert result == [event1]
 
-    result = crud.event.read_all(tags="alert2_tag", db=db)
+    result = crud.event.read_all(tags=["alert2_tag"], db=db)
     assert result == [event2]
 
-    result = crud.event.read_all(tags="observable3_tag", db=db)
+    result = crud.event.read_all(tags=["observable3_tag"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(tags=["event1_tag", "observable3_tag"], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event3 in result
 
 
 def test_filter_by_threat_actors(db):
@@ -552,14 +690,19 @@ def test_filter_by_threat_actors(db):
         type="type3", value="value3", parent_analysis=alert3.root_analysis, threat_actors=["observable3_actor"], db=db
     )
 
-    result = crud.event.read_all(threat_actors="event1_actor", db=db)
+    result = crud.event.read_all(threat_actors=["event1_actor"], db=db)
     assert result == [event1]
 
-    result = crud.event.read_all(threat_actors="alert2_actor", db=db)
+    result = crud.event.read_all(threat_actors=["alert2_actor"], db=db)
     assert result == [event2]
 
-    result = crud.event.read_all(threat_actors="observable3_actor", db=db)
+    result = crud.event.read_all(threat_actors=["observable3_actor"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(threat_actors=["event1_actor", "observable3_actor"], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event3 in result
 
 
 def test_filter_by_threats(db):
@@ -577,23 +720,33 @@ def test_filter_by_threats(db):
         type="type3", value="value3", parent_analysis=alert3.root_analysis, threats=["observable3_actor"], db=db
     )
 
-    result = crud.event.read_all(threats="event1_actor", db=db)
+    result = crud.event.read_all(threats=["event1_actor"], db=db)
     assert result == [event1]
 
-    result = crud.event.read_all(threats="alert2_actor", db=db)
+    result = crud.event.read_all(threats=["alert2_actor"], db=db)
     assert result == [event2]
 
-    result = crud.event.read_all(threats="observable3_actor", db=db)
+    result = crud.event.read_all(threats=["observable3_actor"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(threats=["event1_actor", "observable3_actor"], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event3 in result
 
 
 def test_filter_by_vectors(db):
     factory.event.create_or_read(name="event1", db=db)
-    factory.event.create_or_read(name="event2", db=db)
+    event2 = factory.event.create_or_read(name="event2", vectors=["vector2"], db=db)
     event3 = factory.event.create_or_read(name="event3", vectors=["vector3"], db=db)
 
-    result = crud.event.read_all(vectors="vector3", db=db)
+    result = crud.event.read_all(vectors=["vector3"], db=db)
     assert result == [event3]
+
+    result = crud.event.read_all(vectors=["vector2", "vector3"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
 
 
 def test_sort_by_created_time(db):

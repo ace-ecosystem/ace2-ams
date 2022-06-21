@@ -260,10 +260,12 @@
     filterStore.bulkSetFilters({
       nodeType: "alerts",
       filters: {
-        observable: {
-          category: obs.type,
-          value: obs.value,
-        },
+        observable: [
+          {
+            category: obs.type,
+            value: obs.value,
+          },
+        ],
       },
     });
     router.replace({

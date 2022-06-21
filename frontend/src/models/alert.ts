@@ -113,28 +113,28 @@ export interface alertUpdate extends nodeUpdate, historyUsername {
 }
 
 export interface alertFilterParams extends pageOptionParams {
-  alertType?: alertTypeRead;
-  disposition?: alertDispositionRead;
-  dispositionUser?: userRead;
-  dispositionedAfter?: Date;
-  dispositionedBefore?: Date;
-  eventUuid?: string;
-  eventTimeAfter?: Date;
-  eventTimeBefore?: Date;
-  insertTimeAfter?: Date;
-  insertTimeBefore?: Date;
-  name?: string;
-  observable?: { category: observableTypeRead; value: string };
-  observableTypes?: observableTypeRead[];
-  observableValue?: string;
-  owner?: userRead;
-  queue?: queueRead;
+  alertType?: alertTypeRead[];
+  disposition?: alertDispositionRead[];
+  dispositionUser?: userRead[];
+  dispositionedAfter?: Date[];
+  dispositionedBefore?: Date[];
+  eventUuid?: string[];
+  eventTimeAfter?: Date[];
+  eventTimeBefore?: Date[];
+  insertTimeAfter?: Date[];
+  insertTimeBefore?: Date[];
+  name?: string[];
+  observable?: { category: observableTypeRead; value: string }[];
+  observableTypes?: observableTypeRead[][];
+  observableValue?: string[];
+  owner?: userRead[];
+  queue?: queueRead[];
   sort?: string;
-  tags?: string[];
-  threatActor?: nodeThreatActorRead;
-  threats?: nodeThreatRead[];
-  tool?: alertToolRead;
-  toolInstance?: alertToolInstanceRead;
+  tags?: string[][];
+  threatActor?: nodeThreatActorRead[];
+  threats?: nodeThreatRead[][];
+  tool?: alertToolRead[];
+  toolInstance?: alertToolInstanceRead[];
   [key: string]: any;
 }
 

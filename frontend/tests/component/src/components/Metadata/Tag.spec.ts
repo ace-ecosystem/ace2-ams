@@ -35,7 +35,7 @@ describe("MetadataTag", () => {
     cy.get("@stub-1").should("have.been.calledOnceWith", {
       nodeType: "alerts",
       filters: {
-        tags: ["testTag"],
+        tags: [["testTag"]],
       },
     });
   });
@@ -45,7 +45,7 @@ describe("MetadataTag", () => {
     cy.get("@stub-1").should("have.been.calledOnceWith", {
       nodeType: "events",
       filters: {
-        tags: ["testTag"],
+        tags: [["testTag"]],
       },
     });
   });
@@ -55,7 +55,7 @@ describe("MetadataTag", () => {
     cy.get("@stub-1").should("have.been.calledOnceWith", {
       nodeType: "alerts",
       filters: {
-        tags: ["testTag"],
+        tags: [["testTag"]],
       },
     });
   });

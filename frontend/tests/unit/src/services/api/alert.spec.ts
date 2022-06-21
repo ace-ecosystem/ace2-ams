@@ -19,26 +19,34 @@ const MOCK_ALERT_UPDATE: alertUpdate = {
 const MOCK_PARAMS: alertFilterParams = {
   limit: 10,
   offset: 10,
-  name: "Test Name",
-  disposition: {
-    rank: 0,
-    description: null,
-    uuid: "1",
-    value: "FALSE_POSITIVE",
-  },
+  name: ["Test Name"],
+  disposition: [
+    {
+      rank: 0,
+      description: null,
+      uuid: "1",
+      value: "FALSE_POSITIVE",
+    },
+  ],
   observableTypes: [
-    { value: "testA", description: null, uuid: "1" },
-    { value: "testB", description: null, uuid: "2" },
+    [
+      { value: "testA", description: null, uuid: "1" },
+      { value: "testB", description: null, uuid: "2" },
+    ],
   ],
-  tags: ["tagA", "tagB"],
+  tags: [["tagA", "tagB"]],
   threats: [
-    { value: "threatA", description: null, queues: [], types: [], uuid: "1" },
-    { value: "threatB", description: null, queues: [], types: [], uuid: "2" },
+    [
+      { value: "threatA", description: null, queues: [], types: [], uuid: "1" },
+      { value: "threatB", description: null, queues: [], types: [], uuid: "2" },
+    ],
   ],
-  observable: {
-    category: { value: "test", description: null, uuid: "1" },
-    value: "example",
-  },
+  observable: [
+    {
+      category: { value: "test", description: null, uuid: "1" },
+      value: "example",
+    },
+  ],
 };
 
 describe("Alert calls", () => {

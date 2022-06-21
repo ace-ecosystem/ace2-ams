@@ -45,22 +45,22 @@ helpers.api_route_create(router, create_alert)
 def get_all_alerts(
     limit: Optional[int] = Query(50, le=100),
     offset: Optional[int] = Query(0),
-    alert_type: Optional[str] = None,
-    disposition: Optional[str] = None,
-    disposition_user: Optional[str] = None,
-    dispositioned_after: Optional[datetime] = None,
-    dispositioned_before: Optional[datetime] = None,
-    event_uuid: Optional[UUID] = None,
-    event_time_after: Optional[datetime] = None,
-    event_time_before: Optional[datetime] = None,
-    insert_time_after: Optional[datetime] = None,
-    insert_time_before: Optional[datetime] = None,
-    name: Optional[str] = None,
-    observable: Optional[str] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
-    observable_types: Optional[str] = None,
-    observable_value: Optional[str] = None,
-    owner: Optional[str] = None,
-    queue: Optional[str] = None,
+    alert_type: Optional[list[str]] = Query(None),
+    disposition: Optional[list[str]] = Query(None),
+    disposition_user: Optional[list[str]] = Query(None),
+    dispositioned_after: Optional[list[datetime]] = Query(None),
+    dispositioned_before: Optional[list[datetime]] = Query(None),
+    event_uuid: Optional[list[UUID]] = Query(None),
+    event_time_after: Optional[list[datetime]] = Query(None),
+    event_time_before: Optional[list[datetime]] = Query(None),
+    insert_time_after: Optional[list[datetime]] = Query(None),
+    insert_time_before: Optional[list[datetime]] = Query(None),
+    name: Optional[list[str]] = Query(None),
+    observable: Optional[list[str]] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
+    observable_types: Optional[list[str]] = Query(None),
+    observable_value: Optional[list[str]] = Query(None),
+    owner: Optional[list[str]] = Query(None),
+    queue: Optional[list[str]] = Query(None),
     sort: Optional[str] = Query(
         None,
         regex=""
@@ -80,78 +80,99 @@ def get_all_alerts(
         "(desc)"
         ")$",
     ),  # Example: event_time|desc,
-    tags: Optional[str] = None,
-    threat_actors: Optional[str] = None,
-    threats: Optional[str] = None,
-    tool: Optional[str] = None,
-    tool_instance: Optional[str] = None,
+    tags: Optional[list[str]] = Query(None),
+    threat_actors: Optional[list[str]] = Query(None),
+    threats: Optional[list[str]] = Query(None),
+    tool: Optional[list[str]] = Query(None),
+    tool_instance: Optional[list[str]] = Query(None),
 ):
     # alert=True is hardcoded in the query to the database API so that the GUI only receives
     # submissions that are considered to be alerts.
     query_params = f"?limit={limit}&offset={offset}&alert=True"
 
     if alert_type:
-        query_params += f"&alert_type={alert_type}"
+        for alert_type_item in alert_type:
+            query_params += f"&alert_type={alert_type_item}"
 
     if disposition:
-        query_params += f"&disposition={disposition}"
+        for disposition_item in disposition:
+            query_params += f"&disposition={disposition_item}"
 
     if disposition_user:
-        query_params += f"&disposition_user={disposition_user}"
+        for disposition_user_item in disposition_user:
+            query_params += f"&disposition_user={disposition_user_item}"
 
     if dispositioned_after:
-        query_params += f"&dispositioned_after={dispositioned_after}"
+        for dispositioned_after_item in dispositioned_after:
+            query_params += f"&dispositioned_after={dispositioned_after_item}"
 
     if dispositioned_before:
-        query_params += f"&dispositioned_before={dispositioned_before}"
+        for dispositioned_before_item in dispositioned_before:
+            query_params += f"&dispositioned_before={dispositioned_before_item}"
 
     if event_time_after:
-        query_params += f"&event_time_after={event_time_after}"
+        for event_time_after_item in event_time_after:
+            query_params += f"&event_time_after={event_time_after_item}"
 
     if event_time_before:
-        query_params += f"&event_time_before={event_time_before}"
+        for event_time_before_item in event_time_before:
+            query_params += f"&event_time_before={event_time_before_item}"
 
     if event_uuid:
-        query_params += f"&event_uuid={event_uuid}"
+        for event_uuid_item in event_uuid:
+            query_params += f"&event_uuid={event_uuid_item}"
 
     if insert_time_after:
-        query_params += f"&insert_time_after={insert_time_after}"
+        for insert_time_after_item in insert_time_after:
+            query_params += f"&insert_time_after={insert_time_after_item}"
 
     if insert_time_before:
-        query_params += f"&insert_time_before={insert_time_before}"
+        for insert_time_before_item in insert_time_before:
+            query_params += f"&insert_time_before={insert_time_before_item}"
 
     if name:
-        query_params += f"&name={name}"
+        for name_item in name:
+            query_params += f"&name={name_item}"
 
     if observable:
-        query_params += f"&observable={observable}"
+        for observable_item in observable:
+            query_params += f"&observable={observable_item}"
 
     if observable_types:
-        query_params += f"&observable_types={observable_types}"
+        for observable_types_item in observable_types:
+            query_params += f"&observable_types={observable_types_item}"
 
     if observable_value:
-        query_params += f"&observable_value={observable_value}"
+        for observable_value_item in observable_value:
+            query_params += f"&observable_value={observable_value_item}"
 
     if owner:
-        query_params += f"&owner={owner}"
+        for owner_item in owner:
+            query_params += f"&owner={owner_item}"
 
     if queue:
-        query_params += f"&queue={queue}"
+        for queue_item in queue:
+            query_params += f"&queue={queue_item}"
 
     if tags:
-        query_params += f"&tags={tags}"
+        for tags_item in tags:
+            query_params += f"&tags={tags_item}"
 
     if threat_actors:
-        query_params += f"&threat_actors={threat_actors}"
+        for threat_actors_item in threat_actors:
+            query_params += f"&threat_actors={threat_actors_item}"
 
     if threats:
-        query_params += f"&threats={threats}"
+        for threats_item in threats:
+            query_params += f"&threats={threats_item}"
 
     if tool:
-        query_params += f"&tool={tool}"
+        for tool_item in tool:
+            query_params += f"&tool={tool_item}"
 
     if tool_instance:
-        query_params += f"&tool_instance={tool_instance}"
+        for tool_instance_item in tool_instance:
+            query_params += f"&tool_instance={tool_instance_item}"
 
     if sort:
         query_params += f"&sort={sort}"

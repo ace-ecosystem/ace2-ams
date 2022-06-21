@@ -31,12 +31,12 @@ describe("filters Actions", () => {
 
     store.bulkSetFilters({
       nodeType: "alerts",
-      filters: { testFilterName: "testFilterValue" },
+      filters: { testFilterName: ["testFilterValue"] },
     });
 
     const expectedState = {
       alerts: {
-        testFilterName: "testFilterValue",
+        testFilterName: ["testFilterValue"],
       },
       events: {},
     };
@@ -51,16 +51,16 @@ describe("filters Actions", () => {
     store.bulkSetFilters({
       nodeType: "alerts",
       filters: {
-        testFilterName: "",
-        testFilterName2: [],
-        testFilterName3: null,
-        testFilterName4: "testFilterValue",
+        testFilterName: [""],
+        testFilterName2: [[]],
+        testFilterName3: [null],
+        testFilterName4: ["testFilterValue"],
       },
     });
 
     expect(store.$state).toEqual({
       alerts: {
-        testFilterName4: "testFilterValue",
+        testFilterName4: ["testFilterValue"],
       },
       events: {},
     });
@@ -69,6 +69,7 @@ describe("filters Actions", () => {
   it("will add a new property and specified to a given filter object upon the setFilter action", () => {
     expect(localStorage.getItem("aceFilters")).toStrictEqual(null);
 
+    // Adding a filter from empty
     store.setFilter({
       nodeType: "alerts",
       filterName: "testFilterName",
@@ -77,7 +78,7 @@ describe("filters Actions", () => {
 
     const expectedState = {
       alerts: {
-        testFilterName: "testFilterValue",
+        testFilterName: ["testFilterValue"],
       },
       events: {},
     };
@@ -85,6 +86,38 @@ describe("filters Actions", () => {
     expect(store.$state).toEqual(expectedState);
     expect(localStorage.getItem("aceFilters")).toEqual(
       JSON.stringify(expectedState),
+    );
+
+    // Adding a filter from a non-empty list
+    store.setFilter({
+      nodeType: "alerts",
+      filterName: "testFilterName",
+      filterValue: "testFilterValue2",
+    });
+
+    const expectedState2 = {
+      alerts: {
+        testFilterName: ["testFilterValue", "testFilterValue2"],
+      },
+      events: {},
+    };
+
+    expect(store.$state).toEqual(expectedState2);
+    expect(localStorage.getItem("aceFilters")).toEqual(
+      JSON.stringify(expectedState2),
+    );
+
+    // Adding a duplicate filter should not change the list
+    // Adding a filter from a non-empty list
+    store.setFilter({
+      nodeType: "alerts",
+      filterName: "testFilterName",
+      filterValue: "testFilterValue2",
+    });
+
+    expect(store.$state).toEqual(expectedState2);
+    expect(localStorage.getItem("aceFilters")).toEqual(
+      JSON.stringify(expectedState2),
     );
   });
 
@@ -112,16 +145,60 @@ describe("filters Actions", () => {
     });
   });
 
-  it("will delete a given property for a given filter object upon the unsetFilter action", () => {
-    store.$state = { alerts: { name: "test" }, events: {} };
+  it("will delete a given value given filter type object upon the unsetFilterValue action", () => {
+    store.$state = { alerts: { name: ["test", "test2"] }, events: {} };
     localStorage.setItem(
       "aceFilters",
-      JSON.stringify({ alerts: { name: "test" }, events: {} }),
+      JSON.stringify({ alerts: { name: ["test", "test2"] }, events: {} }),
     );
 
-    expect(store.alerts).toEqual({ name: "test" });
+    expect(store.alerts).toEqual({ name: ["test", "test2"] });
     expect(localStorage.getItem("aceFilters")).toStrictEqual(
-      JSON.stringify({ alerts: { name: "test" }, events: {} }),
+      JSON.stringify({ alerts: { name: ["test", "test2"] }, events: {} }),
+    );
+
+    store.unsetFilterValue({
+      nodeType: "alerts",
+      filterName: "name",
+      filterValue: "test",
+    });
+
+    expect(store.$state).toEqual({
+      alerts: { name: ["test2"] },
+      events: {},
+    });
+
+    expect(localStorage.getItem("aceFilters")).toStrictEqual(
+      JSON.stringify({ alerts: { name: ["test2"] }, events: {} }),
+    );
+
+    // If there are no values left, the filter will be deleted
+    store.unsetFilterValue({
+      nodeType: "alerts",
+      filterName: "name",
+      filterValue: "test2",
+    });
+
+    expect(store.$state).toEqual({
+      alerts: {},
+      events: {},
+    });
+
+    expect(localStorage.getItem("aceFilters")).toStrictEqual(
+      JSON.stringify({ alerts: {}, events: {} }),
+    );
+  });
+
+  it("will delete a given property for a given filter object upon the unsetFilter action", () => {
+    store.$state = { alerts: { name: ["test"] }, events: {} };
+    localStorage.setItem(
+      "aceFilters",
+      JSON.stringify({ alerts: { name: ["test"] }, events: {} }),
+    );
+
+    expect(store.alerts).toEqual({ name: ["test"] });
+    expect(localStorage.getItem("aceFilters")).toStrictEqual(
+      JSON.stringify({ alerts: { name: ["test"] }, events: {} }),
     );
 
     store.unsetFilter({
@@ -141,21 +218,21 @@ describe("filters Actions", () => {
 
   it("will delete all properties from a given filter object upon the clearAll action", () => {
     store.$state = {
-      alerts: { name: "test", description: "test" },
+      alerts: { name: ["test"], description: ["test"] },
       events: {},
     };
     localStorage.setItem(
       "aceFilters",
       JSON.stringify({
-        alerts: { name: "test", description: "test" },
+        alerts: { name: ["test"], description: ["test"] },
         events: {},
       }),
     );
 
-    expect(store.alerts).toEqual({ name: "test", description: "test" });
+    expect(store.alerts).toEqual({ name: ["test"], description: ["test"] });
     expect(localStorage.getItem("aceFilters")).toStrictEqual(
       JSON.stringify({
-        alerts: { name: "test", description: "test" },
+        alerts: { name: ["test"], description: ["test"] },
         events: {},
       }),
     );
