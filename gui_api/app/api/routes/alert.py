@@ -49,6 +49,7 @@ def get_all_alerts(
     disposition: Optional[list[str]] = Query(None),
     not_disposition: Optional[list[str]] = Query(None),
     disposition_user: Optional[list[str]] = Query(None),
+    not_disposition_user: Optional[list[str]] = Query(None),
     dispositioned_after: Optional[list[datetime]] = Query(None),
     dispositioned_before: Optional[list[datetime]] = Query(None),
     event_uuid: Optional[list[UUID]] = Query(None),
@@ -100,12 +101,16 @@ def get_all_alerts(
             query_params += f"&disposition={disposition_item}"
 
     if not_disposition:
-        for d in not_disposition:
-            query_params += f"&not_disposition={d}"
+        for not_disposition_item in not_disposition:
+            query_params += f"&not_disposition={not_disposition_item}"
 
     if disposition_user:
         for disposition_user_item in disposition_user:
             query_params += f"&disposition_user={disposition_user_item}"
+
+    if not_disposition_user:
+        for not_disposition_user_item in not_disposition_user:
+            query_params += f"&not_disposition_user={not_disposition_user_item}"
 
     if dispositioned_after:
         for dispositioned_after_item in dispositioned_after:

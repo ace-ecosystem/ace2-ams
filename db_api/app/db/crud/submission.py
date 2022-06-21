@@ -116,6 +116,7 @@ def build_read_all_query(
     disposition: Optional[list[str]] = None,
     not_disposition: Optional[list[str]] = None,
     disposition_user: Optional[list[str]] = None,
+    not_disposition_user: Optional[list[str]] = None,
     dispositioned_after: Optional[list[datetime]] = None,
     dispositioned_before: Optional[list[datetime]] = None,
     event_uuid: Optional[list[UUID]] = None,
@@ -166,11 +167,11 @@ def build_read_all_query(
         not_disposition_query = select(Submission)
         if _none_in_list(not_disposition):
             not_disposition_query = not_disposition_query.join(AlertDisposition).where(
-                AlertDisposition.value.not_in(not_disposition)
+                ~AlertDisposition.value.in_(not_disposition)
             )
         else:
             not_disposition_query = not_disposition_query.outerjoin(AlertDisposition).where(
-                or_(AlertDisposition.value.not_in(not_disposition), Submission.disposition_uuid == None)
+                or_(~AlertDisposition.value.in_(not_disposition), Submission.disposition_uuid == None)
             )
 
         query = _join_as_subquery(query, not_disposition_query)
@@ -186,6 +187,21 @@ def build_read_all_query(
         )
 
         query = _join_as_subquery(query, disposition_user_query)
+
+    if not_disposition_user:
+        not_disposition_user_query = select(Submission).where(
+            or_(
+                Submission.disposition_uuid == None,
+                ~Submission.history.any(
+                    and_(
+                        SubmissionHistory.field == "disposition",
+                        SubmissionHistory.action_by.has(User.username.in_(not_disposition_user)),
+                    )
+                ),
+            )
+        )
+
+        query = _join_as_subquery(query, not_disposition_user_query)
 
     if dispositioned_after:
         dispositioned_after_query = select(Submission).where(
@@ -517,6 +533,7 @@ def read_all(
     disposition: Optional[list[str]] = None,
     not_disposition: Optional[list[str]] = None,
     disposition_user: Optional[list[str]] = None,
+    not_disposition_user: Optional[list[str]] = None,
     dispositioned_after: Optional[list[datetime]] = None,
     dispositioned_before: Optional[list[datetime]] = None,
     event_uuid: Optional[list[UUID]] = None,
@@ -545,6 +562,7 @@ def read_all(
                 disposition=disposition,
                 not_disposition=not_disposition,
                 disposition_user=disposition_user,
+                not_disposition_user=not_disposition_user,
                 dispositioned_after=dispositioned_after,
                 dispositioned_before=dispositioned_before,
                 event_uuid=event_uuid,

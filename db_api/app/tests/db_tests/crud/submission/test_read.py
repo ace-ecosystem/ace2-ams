@@ -58,8 +58,9 @@ def test_filter_by_disposition_user(db):
         history_username="analyst",
         db=db,
     )
-    factory.submission.create(db=db)
+    submission2 = factory.submission.create(db=db)
 
+    # disposition_user
     result = crud.submission.read_all(disposition_user=["analyst"], db=db)
     assert result == [submission1]
 
@@ -77,6 +78,9 @@ def test_filter_by_disposition_user(db):
 
     result = crud.submission.read_all(disposition_user=["analyst", "analyst2"], db=db)
     assert result == [submission1]
+
+    # not_disposition_user
+    assert crud.submission.read_all(not_disposition_user=["analyst"], db=db) == [submission2]
 
 
 def test_filter_by_dispositioned_after(db):
