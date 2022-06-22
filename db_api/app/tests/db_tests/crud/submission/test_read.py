@@ -443,7 +443,7 @@ def test_filter_by_tags(db):
         type="type6", value="value6", parent_analysis=submission6.root_analysis, tags=["other_tag"], db=db
     )
 
-    # tag
+    # tags
 
     # Verify that submission1 is returned when filtering by the "submission1_tag" tag.
     # Additionally, verify that the submission's tag relationships contain the expected tags.
@@ -487,7 +487,7 @@ def test_filter_by_tags(db):
     assert submission1 in result_submission5
     assert submission4 in result_submission5
 
-    # not_tag
+    # not_tags
     result = crud.submission.read_all(not_tags=["other_tag"], db=db)
     assert len(result) == 4
     assert submission1 in result

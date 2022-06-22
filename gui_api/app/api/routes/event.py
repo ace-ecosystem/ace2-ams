@@ -63,6 +63,23 @@ def get_all_events(
     disposition_time_before: Optional[list[datetime]] = Query(None),
     event_type: Optional[list[str]] = Query(None),
     name: Optional[list[str]] = Query(None),
+    not_disposition: Optional[list[str]] = Query(None),
+    not_event_type: Optional[list[str]] = Query(None),
+    not_name: Optional[list[str]] = Query(None),
+    not_observable: Optional[list[str]] = Query(None),  # type|value
+    not_observable_types: Optional[list[str]] = Query(None),
+    not_observable_value: Optional[list[str]] = Query(None),
+    not_owner: Optional[list[str]] = Query(None),
+    not_prevention_tools: Optional[list[str]] = Query(None),
+    not_queue: Optional[list[str]] = Query(None),
+    not_remediations: Optional[list[str]] = Query(None),
+    not_severity: Optional[list[str]] = Query(None),
+    not_source: Optional[list[str]] = Query(None),
+    not_status: Optional[list[str]] = Query(None),
+    not_tags: Optional[list[str]] = Query(None),
+    not_threat_actors: Optional[list[str]] = Query(None),
+    not_threats: Optional[list[str]] = Query(None),
+    not_vectors: Optional[list[str]] = Query(None),
     observable: Optional[list[str]] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
     observable_types: Optional[list[str]] = Query(None),
     observable_value: Optional[list[str]] = Query(None),
@@ -99,115 +116,183 @@ def get_all_events(
     query_params = f"?limit={limit}&offset={offset}"
 
     if alert_time_after:
-        for alert_time_after_item in alert_time_after:
-            query_params += f"&alert_time_after={alert_time_after_item}"
+        for item in alert_time_after:
+            query_params += f"&alert_time_after={item}"
 
     if alert_time_before:
-        for alert_time_before_item in alert_time_before:
-            query_params += f"&alert_time_before={alert_time_before_item}"
+        for item in alert_time_before:
+            query_params += f"&alert_time_before={item}"
 
     if contain_time_after:
-        for contain_time_after_item in contain_time_after:
-            query_params += f"&contain_time_after={contain_time_after_item}"
+        for item in contain_time_after:
+            query_params += f"&contain_time_after={item}"
 
     if contain_time_before:
-        for contain_time_before_item in contain_time_before:
-            query_params += f"&contain_time_before={contain_time_before_item}"
+        for item in contain_time_before:
+            query_params += f"&contain_time_before={item}"
 
     if created_time_after:
-        for created_time_after_item in created_time_after:
-            query_params += f"&created_time_after={created_time_after_item}"
+        for item in created_time_after:
+            query_params += f"&created_time_after={item}"
 
     if created_time_before:
-        for created_time_before_item in created_time_before:
-            query_params += f"&created_time_before={created_time_before_item}"
+        for item in created_time_before:
+            query_params += f"&created_time_before={item}"
 
     if disposition:
-        for disposition_item in disposition:
-            query_params += f"&disposition={disposition_item}"
+        for item in disposition:
+            query_params += f"&disposition={item}"
 
     if disposition_time_after:
-        for disposition_time_after_item in disposition_time_after:
-            query_params += f"&disposition_time_after={disposition_time_after_item}"
+        for item in disposition_time_after:
+            query_params += f"&disposition_time_after={item}"
 
     if disposition_time_before:
-        for disposition_time_before_item in disposition_time_before:
-            query_params += f"&disposition_time_before={disposition_time_before_item}"
+        for item in disposition_time_before:
+            query_params += f"&disposition_time_before={item}"
 
     if event_type:
-        for event_type_item in event_type:
-            query_params += f"&event_type={event_type_item}"
+        for item in event_type:
+            query_params += f"&event_type={item}"
 
     if name:
-        for name_item in name:
-            query_params += f"&name={name_item}"
+        for item in name:
+            query_params += f"&name={item}"
+
+    if not_disposition:
+        for item in not_disposition:
+            query_params += f"&not_disposition={item}"
+
+    if not_event_type:
+        for item in not_event_type:
+            query_params += f"&not_event_type={item}"
+
+    if not_name:
+        for item in not_name:
+            query_params += f"&not_name={item}"
+
+    if not_observable:
+        for item in not_observable:
+            query_params += f"&not_observable={item}"
+
+    if not_observable_types:
+        for item in not_observable_types:
+            query_params += f"&not_observable_types={item}"
+
+    if not_observable_value:
+        for item in not_observable_value:
+            query_params += f"&not_observable_value={item}"
+
+    if not_owner:
+        for item in not_owner:
+            query_params += f"&not_owner={item}"
+
+    if not_prevention_tools:
+        for item in not_prevention_tools:
+            query_params += f"&not_prevention_tools={item}"
+
+    if not_queue:
+        for item in not_queue:
+            query_params += f"&not_queue={item}"
+
+    if not_remediations:
+        for item in not_remediations:
+            query_params += f"&not_remediations={item}"
+
+    if not_severity:
+        for item in not_severity:
+            query_params += f"&not_severity={item}"
+
+    if not_source:
+        for item in not_source:
+            query_params += f"&not_source={item}"
+
+    if not_status:
+        for item in not_status:
+            query_params += f"&not_status={item}"
+
+    if not_tags:
+        for item in not_tags:
+            query_params += f"&not_tags={item}"
+
+    if not_threat_actors:
+        for item in not_threat_actors:
+            query_params += f"&not_threat_actors={item}"
+
+    if not_threats:
+        for item in not_threats:
+            query_params += f"&not_threats={item}"
+
+    if not_vectors:
+        for item in not_vectors:
+            query_params += f"&not_vectors={item}"
 
     if observable:
-        for observable_item in observable:
-            query_params += f"&observable={observable_item}"
+        for item in observable:
+            query_params += f"&observable={item}"
 
     if observable_types:
-        for observable_types_item in observable_types:
-            query_params += f"&observable_types={observable_types_item}"
+        for item in observable_types:
+            query_params += f"&observable_types={item}"
 
     if observable_value:
-        for observable_value_item in observable_value:
-            query_params += f"&observable_value={observable_value_item}"
+        for item in observable_value:
+            query_params += f"&observable_value={item}"
 
     if owner:
-        for owner_item in owner:
-            query_params += f"&owner={owner_item}"
+        for item in owner:
+            query_params += f"&owner={item}"
 
     if prevention_tools:
-        for prevention_tools_item in prevention_tools:
-            query_params += f"&prevention_tools={prevention_tools_item}"
+        for item in prevention_tools:
+            query_params += f"&prevention_tools={item}"
 
     if queue:
-        for queue_item in queue:
-            query_params += f"&queue={queue_item}"
+        for item in queue:
+            query_params += f"&queue={item}"
 
     if remediation_time_after:
-        for remediation_time_after_item in remediation_time_after:
-            query_params += f"&remediation_time_after={remediation_time_after_item}"
+        for item in remediation_time_after:
+            query_params += f"&remediation_time_after={item}"
 
     if remediation_time_before:
-        for remediation_time_before_item in remediation_time_before:
-            query_params += f"&remediation_time_before={remediation_time_before_item}"
+        for item in remediation_time_before:
+            query_params += f"&remediation_time_before={item}"
 
     if remediations:
-        for remediations_item in remediations:
-            query_params += f"&remediations={remediations_item}"
+        for item in remediations:
+            query_params += f"&remediations={item}"
 
     if severity:
-        for severity_item in severity:
-            query_params += f"&severity={severity_item}"
+        for item in severity:
+            query_params += f"&severity={item}"
 
     if sort:
         query_params += f"&sort={sort}"
 
     if source:
-        for source_item in source:
-            query_params += f"&source={source_item}"
+        for item in source:
+            query_params += f"&source={item}"
 
     if status:
-        for status_item in status:
-            query_params += f"&status={status_item}"
+        for item in status:
+            query_params += f"&status={item}"
 
     if tags:
-        for tags_item in tags:
-            query_params += f"&tags={tags_item}"
+        for item in tags:
+            query_params += f"&tags={item}"
 
     if threat_actors:
-        for threat_actors_item in threat_actors:
-            query_params += f"&threat_actors={threat_actors_item}"
+        for item in threat_actors:
+            query_params += f"&threat_actors={item}"
 
     if threats:
-        for threats_item in threats:
-            query_params += f"&threats={threats_item}"
+        for item in threats:
+            query_params += f"&threats={item}"
 
     if vectors:
-        for vectors_item in vectors:
-            query_params += f"&vectors={vectors_item}"
+        for item in vectors:
+            query_params += f"&vectors={item}"
 
     return db_api.get(path=f"/event/{query_params}")
 

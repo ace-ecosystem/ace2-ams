@@ -1,11 +1,10 @@
 from datetime import datetime
 from datetime import datetime
 from deepdiff import DeepHash
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, not_, or_, select
 from sqlalchemy.orm import Load, Session
 from sqlalchemy.sql.selectable import Select
 from typing import Optional
-from urllib.parse import urlparse
 from uuid import UUID
 from api_models.analysis_details import FAQueueAnalysisDetails, SandboxProcess
 
@@ -57,6 +56,23 @@ def build_read_all_query(
     disposition_time_before: Optional[list[datetime]] = None,
     event_type: Optional[list[str]] = None,
     name: Optional[list[str]] = None,
+    not_disposition: Optional[list[str]] = None,
+    not_event_type: Optional[list[str]] = None,
+    not_name: Optional[list[str]] = None,
+    not_observable: Optional[list[str]] = None,  # type|value
+    not_observable_types: Optional[list[str]] = None,
+    not_observable_value: Optional[list[str]] = None,
+    not_owner: Optional[list[str]] = None,
+    not_prevention_tools: Optional[list[str]] = None,
+    not_queue: Optional[list[str]] = None,
+    not_remediations: Optional[list[str]] = None,
+    not_severity: Optional[list[str]] = None,
+    not_source: Optional[list[str]] = None,
+    not_status: Optional[list[str]] = None,
+    not_tags: Optional[list[str]] = None,
+    not_threat_actors: Optional[list[str]] = None,
+    not_threats: Optional[list[str]] = None,
+    not_vectors: Optional[list[str]] = None,
     observable: Optional[list[str]] = None,  # type|value
     observable_types: Optional[list[str]] = None,
     observable_value: Optional[list[str]] = None,
@@ -80,10 +96,7 @@ def build_read_all_query(
         return query.join(s, Event.uuid == s.c.uuid).group_by(Event.uuid, Node.uuid)
 
     def _none_in_list(values: list):
-        if "none" in [v.lower() for v in values]:
-            return True
-
-        return False
+        return "none" in [v.lower() for v in values]
 
     query = select(Event)
 
@@ -187,6 +200,227 @@ def build_read_all_query(
         clauses = [Event.name.ilike(f"%{n}%") for n in name]
         name_query = select(Event).where(or_(*clauses))
         query = _join_as_subquery(query, name_query).order_by(Event.name.asc())
+
+    if not_disposition:
+        disposition_query = select(Event).join(Submission, onclause=Submission.event_uuid == Event.uuid)
+        if _none_in_list(not_disposition):
+            disposition_query = disposition_query.join(AlertDisposition).where(
+                ~AlertDisposition.value.in_(not_disposition)
+            )
+        else:
+            disposition_query = disposition_query.outerjoin(AlertDisposition).where(
+                or_(~AlertDisposition.value.in_(not_disposition), Submission.disposition_uuid == None)
+            )
+
+        query = _join_as_subquery(query, disposition_query)
+
+    if not_event_type:
+        type_query = select(Event).join(EventType).where(~EventType.value.in_(not_event_type))
+        query = _join_as_subquery(query, type_query)
+
+    if not_name:
+        clauses = [~Event.name.ilike(f"%{n}%") for n in not_name]
+        name_query = select(Event).where(and_(*clauses))
+        query = _join_as_subquery(query, name_query).order_by(Event.name.asc())
+
+    if not_observable:
+        observable_split = [o.split("|", maxsplit=1) for o in not_observable]
+        observable_types_query = (
+            select(Event)
+            .join(Submission, onclause=Submission.event_uuid == Event.uuid)
+            .join(
+                submission_analysis_mapping, onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid
+            )
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .join(ObservableType)
+            .where(not_(or_(and_(ObservableType.value == o[0], Observable.value == o[1]) for o in observable_split)))
+        )
+
+        query = _join_as_subquery(query, observable_types_query)
+
+    if not_observable_types:
+        type_filters = []
+        for o in not_observable_types:
+            type_filters.append([func.count(1).filter(ObservableType.value == t) > 0 for t in o.split(",")])
+
+        observable_types_query = (
+            select(Event)
+            .join(Submission, onclause=Submission.event_uuid == Event.uuid)
+            .join(
+                submission_analysis_mapping, onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid
+            )
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .join(ObservableType)
+            .having(not_(or_(and_(*sub_type_filters) for sub_type_filters in type_filters)))
+            .group_by(Event.uuid, Node.uuid)
+        )
+
+        query = _join_as_subquery(query, observable_types_query)
+
+    if not_observable_value:
+        observable_value_query = (
+            select(Event)
+            .join(Submission, onclause=Submission.event_uuid == Event.uuid)
+            .join(
+                submission_analysis_mapping, onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid
+            )
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .where(~Observable.value.in_(not_observable_value))
+        )
+
+        query = _join_as_subquery(query, observable_value_query)
+
+    if not_owner:
+        owner_query = select(Event)
+        if _none_in_list(not_owner):
+            owner_query = owner_query.join(User, onclause=Event.owner_uuid == User.uuid).where(
+                ~User.username.in_(not_owner)
+            )
+        else:
+            owner_query = owner_query.outerjoin(User, onclause=Event.owner_uuid == User.uuid).where(
+                or_(~User.username.in_(not_owner), Event.owner_uuid == None)
+            )
+        query = _join_as_subquery(query, owner_query)
+
+    if not_prevention_tools:
+        prevention_tool_filters = []
+        for prevention_tool in not_prevention_tools:
+            if prevention_tool:
+                prevention_tool_sub_filters = []
+                for p in prevention_tool.split(","):
+                    prevention_tool_sub_filters.append(~Event.prevention_tools.any(EventPreventionTool.value == p))
+
+                prevention_tool_filters.append(or_(*prevention_tool_sub_filters))
+
+        prevention_tools_query = select(Event).where(and_(*prevention_tool_filters))
+        query = _join_as_subquery(query, prevention_tools_query)
+
+    if not_queue:
+        queue_query = select(Event).join(Queue).where(~Queue.value.in_(not_queue))
+        query = _join_as_subquery(query, queue_query)
+
+    if not_remediations:
+        remediation_filters = []
+        for remediation in not_remediations:
+            if remediation:
+                remediation_sub_filters = []
+                for p in remediation.split(","):
+                    remediation_sub_filters.append(~Event.remediations.any(EventRemediation.value == p))
+
+                remediation_filters.append(or_(*remediation_sub_filters))
+
+        remediations_query = select(Event).where(and_(*remediation_filters))
+        query = _join_as_subquery(query, remediations_query)
+
+    if not_severity:
+        severity_query = select(Event)
+        if _none_in_list(not_severity):
+            severity_query = severity_query.join(EventSeverity).where(~EventSeverity.value.in_(not_severity))
+        else:
+            severity_query = severity_query.outerjoin(EventSeverity).where(
+                or_(Event.severity_uuid == None, ~EventSeverity.value.in_(not_severity))
+            )
+        query = _join_as_subquery(query, severity_query)
+
+    if not_source:
+        source_query = select(Event)
+        if _none_in_list(not_source):
+            source_query = source_query.join(EventSource).where(~EventSource.value.in_(not_source))
+        else:
+            source_query = source_query.outerjoin(EventSource).where(
+                or_(Event.source_uuid == None, ~EventSource.value.in_(not_source))
+            )
+        query = _join_as_subquery(query, source_query)
+
+    if not_status:
+        status_query = select(Event).join(EventStatus).where(~EventStatus.value.in_(not_status))
+        query = _join_as_subquery(query, status_query)
+
+    if not_tags:
+        tag_filters = []
+        for tag in not_tags:
+            if tag:
+                tag_sub_filters = []
+                for t in tag.split(","):
+                    tag_sub_filters.append(
+                        and_(
+                            ~Event.tags.any(MetadataTag.value == t),
+                            ~Event.alerts.any(Submission.tags.any(MetadataTag.value == t)),
+                            ~Event.alerts.any(Submission.child_analysis_tags.any(MetadataTag.value == t)),
+                            ~Event.alerts.any(Submission.child_tags.any(MetadataTag.value == t)),
+                        )
+                    )
+
+                tag_filters.append(or_(*tag_sub_filters))
+
+        tags_query = select(Event).where(and_(*tag_filters))
+        query = _join_as_subquery(query, tags_query)
+
+    if not_threat_actors:
+        threat_actor_filters = []
+        for threat in not_threat_actors:
+            if threat:
+                threat_actor_sub_filters = []
+                for t in threat.split(","):
+                    threat_actor_sub_filters.append(
+                        and_(
+                            ~Event.threat_actors.any(NodeThreatActor.value == t),
+                            ~Event.alerts.any(Submission.threat_actors.any(NodeThreatActor.value == t)),
+                            ~Event.alerts.any(Submission.child_threat_actors.any(NodeThreatActor.value == t)),
+                        )
+                    )
+
+                threat_actor_filters.append(or_(*threat_actor_sub_filters))
+
+        threat_actors_query = select(Event).where(and_(*threat_actor_filters))
+        query = _join_as_subquery(query, threat_actors_query)
+
+    if not_threats:
+        threat_filters = []
+        for threat in not_threats:
+            if threat:
+                threat_sub_filters = []
+                for t in threat.split(","):
+                    threat_sub_filters.append(
+                        and_(
+                            ~Event.threats.any(NodeThreat.value == t),
+                            ~Event.alerts.any(Submission.threats.any(NodeThreat.value == t)),
+                            ~Event.alerts.any(Submission.child_threats.any(NodeThreat.value == t)),
+                        )
+                    )
+
+                threat_filters.append(or_(*threat_sub_filters))
+
+        threats_query = select(Event).where(and_(*threat_filters))
+        query = _join_as_subquery(query, threats_query)
+
+    if not_vectors:
+        vector_filters = []
+        for vector in not_vectors:
+            if vector:
+                vector_sub_filters = []
+                for v in vector.split(","):
+                    vector_sub_filters.append(~Event.vectors.any(EventVector.value == v))
+
+                vector_filters.append(or_(*vector_sub_filters))
+
+        vectors_query = select(Event).where(and_(*vector_filters))
+        query = _join_as_subquery(query, vectors_query)
 
     if observable:
         observable_split = [o.split("|", maxsplit=1) for o in observable]
@@ -303,16 +537,16 @@ def build_read_all_query(
         remediations_query = select(Event).where(or_(*remediation_filters))
         query = _join_as_subquery(query, remediations_query)
 
-    if severity and all(len(s) for s in severity):
-        severity_query = select(Event).join(EventSeverity).where(EventSeverity.value.in_(severity))
+    if severity:
+        severity_query = select(Event).join(EventSeverity).where(EventSeverity.value.in_([s for s in severity if s]))
         query = _join_as_subquery(query, severity_query)
 
-    if source and all(len(s) for s in source):
-        source_query = select(Event).join(EventSource).where(EventSource.value.in_([s for s in source if len(s)]))
+    if source:
+        source_query = select(Event).join(EventSource).where(EventSource.value.in_([s for s in source if s]))
         query = _join_as_subquery(query, source_query)
 
-    if status and all(len(s) for s in status):
-        status_query = select(Event).join(EventStatus).where(EventStatus.value.in_([s for s in status if len(s)]))
+    if status:
+        status_query = select(Event).join(EventStatus).where(EventStatus.value.in_([s for s in status if s]))
         query = _join_as_subquery(query, status_query)
 
     if tags:
@@ -496,6 +730,23 @@ def read_all(
     disposition_time_before: Optional[list[datetime]] = None,
     event_type: Optional[list[str]] = None,
     name: Optional[list[str]] = None,
+    not_disposition: Optional[list[str]] = None,
+    not_event_type: Optional[list[str]] = None,
+    not_name: Optional[list[str]] = None,
+    not_observable: Optional[list[str]] = None,  # type|value
+    not_observable_types: Optional[list[str]] = None,
+    not_observable_value: Optional[list[str]] = None,
+    not_owner: Optional[list[str]] = None,
+    not_prevention_tools: Optional[list[str]] = None,
+    not_queue: Optional[list[str]] = None,
+    not_remediations: Optional[list[str]] = None,
+    not_severity: Optional[list[str]] = None,
+    not_source: Optional[list[str]] = None,
+    not_status: Optional[list[str]] = None,
+    not_tags: Optional[list[str]] = None,
+    not_threat_actors: Optional[list[str]] = None,
+    not_threats: Optional[list[str]] = None,
+    not_vectors: Optional[list[str]] = None,
     observable: Optional[list[str]] = None,  # type|value
     observable_types: Optional[list[str]] = None,
     observable_value: Optional[list[str]] = None,
@@ -528,6 +779,23 @@ def read_all(
                 disposition_time_before=disposition_time_before,
                 event_type=event_type,
                 name=name,
+                not_disposition=not_disposition,
+                not_event_type=not_event_type,
+                not_name=not_name,
+                not_observable=not_observable,
+                not_observable_types=not_observable_types,
+                not_observable_value=not_observable_value,
+                not_owner=not_owner,
+                not_prevention_tools=not_prevention_tools,
+                not_queue=not_queue,
+                not_remediations=not_remediations,
+                not_severity=not_severity,
+                not_source=not_source,
+                not_status=not_status,
+                not_tags=not_tags,
+                not_threat_actors=not_threat_actors,
+                not_threats=not_threats,
+                not_vectors=not_vectors,
                 observable=observable,
                 observable_types=observable_types,
                 observable_value=observable_value,
