@@ -90,6 +90,7 @@ def get_all_alerts(
         ")$",
     ),  # Example: event_time|desc,
     tags: Optional[list[str]] = Query(None),
+    not_tags: Optional[list[str]] = Query(None),
     threat_actors: Optional[list[str]] = Query(None),
     threats: Optional[list[str]] = Query(None),
     tool: Optional[list[str]] = Query(None),
@@ -202,6 +203,10 @@ def get_all_alerts(
     if tags:
         for tags_item in tags:
             query_params += f"&tags={tags_item}"
+
+    if not_tags:
+        for not_tags_item in not_tags:
+            query_params += f"&not_tags={not_tags_item}"
 
     if threat_actors:
         for threat_actors_item in threat_actors:

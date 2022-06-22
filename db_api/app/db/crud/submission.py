@@ -140,6 +140,7 @@ def build_read_all_query(
     sort: Optional[str] = None,  # Example: event_time|desc
     submission_type: Optional[list[str]] = None,
     tags: Optional[list[str]] = None,
+    not_tags: Optional[list[str]] = None,
     threat_actors: Optional[list[str]] = None,
     threats: Optional[list[str]] = None,
     tool: Optional[list[str]] = None,
@@ -446,6 +447,26 @@ def build_read_all_query(
 
         query = _join_as_subquery(query, tags_query)
 
+    if not_tags:
+        tag_filters = []
+        for t in not_tags:
+            if t:
+                tag_sub_filters = []
+                for tag in t.split(","):
+                    tag_sub_filters.append(
+                        and_(
+                            ~Submission.tags.any(MetadataTag.value == tag),
+                            ~Submission.child_analysis_tags.any(MetadataTag.value == tag),
+                            ~Submission.child_tags.any(MetadataTag.value == tag),
+                        )
+                    )
+
+                tag_filters.append(or_(*tag_sub_filters))
+
+        tags_query = select(Submission).where(and_(*tag_filters))
+
+        query = _join_as_subquery(query, tags_query)
+
     if threat_actors:
         threat_actor_filters = []
         for t in threat_actors:
@@ -648,6 +669,7 @@ def read_all(
     sort: Optional[str] = None,  # Example: event_time|desc
     submission_type: Optional[list[str]] = None,
     tags: Optional[list[str]] = None,
+    not_tags: Optional[list[str]] = None,
     threat_actors: Optional[list[str]] = None,
     threats: Optional[list[str]] = None,
     tool: Optional[list[str]] = None,
@@ -684,6 +706,7 @@ def read_all(
                 sort=sort,  # Example: event_time|desc
                 submission_type=submission_type,
                 tags=tags,
+                not_tags=not_tags,
                 threat_actors=threat_actors,
                 threats=threats,
                 tool=tool,

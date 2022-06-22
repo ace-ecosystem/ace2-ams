@@ -421,7 +421,7 @@ def test_filter_by_tags(db):
 
     # Create some submissions that should not be returned in the results. This is to help ensure that
     # the submission tag relationships are configured properly and do not include tags they shouldn't.
-    submission5 = factory.submission.create(tags=["submission5_tag"], db=db)
+    submission5 = factory.submission.create(tags=["submission5_tag", "other_tag"], db=db)
     factory.observable.create_or_read(
         type="type5",
         value="value5",
@@ -431,8 +431,12 @@ def test_filter_by_tags(db):
         db=db,
     )
 
-    submission6 = factory.submission.create(db=db)
-    factory.observable.create_or_read(type="type6", value="value6", parent_analysis=submission6.root_analysis, db=db)
+    submission6 = factory.submission.create(tags=["submission6_tag"], db=db)
+    factory.observable.create_or_read(
+        type="type6", value="value6", parent_analysis=submission6.root_analysis, tags=["other_tag"], db=db
+    )
+
+    # tag
 
     # Verify that submission1 is returned when filtering by the "submission1_tag" tag.
     # Additionally, verify that the submission's tag relationships contain the expected tags.
@@ -475,6 +479,21 @@ def test_filter_by_tags(db):
     assert len(result_submission5) == 2
     assert submission1 in result_submission5
     assert submission4 in result_submission5
+
+    # not_tag
+    result = crud.submission.read_all(not_tags=["other_tag"], db=db)
+    assert len(result) == 4
+    assert submission1 in result
+    assert submission2 in result
+    assert submission3 in result
+    assert submission4 in result
+
+    result = crud.submission.read_all(not_tags=["submission5_tag", "submission6_tag"], db=db)
+    assert len(result) == 4
+    assert submission1 in result
+    assert submission2 in result
+    assert submission3 in result
+    assert submission4 in result
 
 
 def test_filter_by_threat_actors(db):
