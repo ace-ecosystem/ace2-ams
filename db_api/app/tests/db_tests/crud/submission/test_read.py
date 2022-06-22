@@ -80,7 +80,7 @@ def test_filter_by_disposition_user(db):
     assert result == [submission1]
 
     # not_disposition_user
-    assert crud.submission.read_all(not_disposition_user=["analyst"], db=db) == [submission2]
+    assert crud.submission.read_all(not_disposition_user=["analyst", "analyst2"], db=db) == [submission2]
 
 
 def test_filter_by_dispositioned_after(db):
@@ -246,6 +246,7 @@ def test_filter_by_name(db):
 
     # not_name
     assert crud.submission.read_all(not_name=["submission"], db=db) == [submission3]
+    assert crud.submission.read_all(not_name=["submission1", "submission2"], db=db) == [submission3]
 
 
 def test_filter_by_observable(db):
@@ -351,6 +352,7 @@ def test_filter_by_observable_value(db):
 def test_filter_by_owner(db):
     submission1 = factory.submission.create(owner="analyst", db=db)
     submission2 = factory.submission.create(db=db)
+    submission3 = factory.submission.create(owner="analyst2", db=db)
 
     # owner
     result = crud.submission.read_all(owner=["analyst"], db=db)
@@ -365,13 +367,18 @@ def test_filter_by_owner(db):
     assert submission2 in result
 
     # not_owner
-    assert crud.submission.read_all(not_owner=["none"], db=db) == [submission1]
-    assert crud.submission.read_all(not_owner=["analyst"], db=db) == [submission2]
+    result = crud.submission.read_all(not_owner=["none"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission3 in result
+
+    assert crud.submission.read_all(not_owner=["analyst", "analyst2"], db=db) == [submission2]
 
 
 def test_filter_by_queue(db):
     submission1 = factory.submission.create(alert_queue="queue1", db=db)
     submission2 = factory.submission.create(alert_queue="queue2", db=db)
+    submission3 = factory.submission.create(db=db)
 
     # queue
     result = crud.submission.read_all(queue=["queue1"], db=db)
@@ -383,7 +390,7 @@ def test_filter_by_queue(db):
     assert submission2 in result
 
     # not_queue
-    assert crud.submission.read_all(not_queue=["queue1"], db=db) == [submission2]
+    assert crud.submission.read_all(not_queue=["queue1", "queue2"], db=db) == [submission3]
 
 
 def test_filter_by_tags(db):
@@ -551,6 +558,7 @@ def test_filter_by_threats(db):
 def test_filter_by_tool(db):
     submission1 = factory.submission.create(tool="tool1", db=db)
     submission2 = factory.submission.create(tool="tool2", db=db)
+    submission3 = factory.submission.create(db=db)
 
     # tool
     result = crud.submission.read_all(tool=["tool1"], db=db)
@@ -562,12 +570,13 @@ def test_filter_by_tool(db):
     assert submission2 in result
 
     # not_tool
-    assert crud.submission.read_all(not_tool=["tool1"], db=db) == [submission2]
+    assert crud.submission.read_all(not_tool=["tool1", "tool2"], db=db) == [submission3]
 
 
 def test_filter_by_tool_instance(db):
     submission1 = factory.submission.create(tool_instance="tool_instance1", db=db)
     submission2 = factory.submission.create(tool_instance="tool_instance2", db=db)
+    submission3 = factory.submission.create(db=db)
 
     # tool_instance
     result = crud.submission.read_all(tool_instance=["tool_instance1"], db=db)
@@ -579,7 +588,7 @@ def test_filter_by_tool_instance(db):
     assert submission2 in result
 
     # not_tool_instance
-    assert crud.submission.read_all(not_tool_instance=["tool_instance1"], db=db) == [submission2]
+    assert crud.submission.read_all(not_tool_instance=["tool_instance1", "tool_instance2"], db=db) == [submission3]
 
 
 def test_filter_by_type(db):
