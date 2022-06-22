@@ -146,8 +146,7 @@ def build_read_all_query(
 
     if disposition:
         disposition_query = select(Event).join(Submission, onclause=Submission.event_uuid == Event.uuid)
-        check_for_none = _none_in_list(disposition)
-        if check_for_none:
+        if _none_in_list(disposition):
             disposition_query = disposition_query.outerjoin(AlertDisposition).where(
                 or_(AlertDisposition.value.in_(disposition), Submission.disposition_uuid == None)
             )
@@ -193,7 +192,13 @@ def build_read_all_query(
         query = _join_as_subquery(query, disposition_time_before_query)
 
     if event_type:
-        type_query = select(Event).join(EventType).where(EventType.value.in_(event_type))
+        type_query = select(Event)
+        if _none_in_list(event_type):
+            type_query = type_query.outerjoin(EventType).where(
+                or_(Event.type_uuid == None, EventType.value.in_(event_type))
+            )
+        else:
+            type_query = type_query.join(EventType).where(EventType.value.in_(event_type))
         query = _join_as_subquery(query, type_query)
 
     if name:
@@ -215,7 +220,13 @@ def build_read_all_query(
         query = _join_as_subquery(query, disposition_query)
 
     if not_event_type:
-        type_query = select(Event).join(EventType).where(~EventType.value.in_(not_event_type))
+        type_query = select(Event)
+        if _none_in_list(not_event_type):
+            type_query = type_query.join(EventType).where(~EventType.value.in_(not_event_type))
+        else:
+            type_query = type_query.outerjoin(EventType).where(
+                or_(Event.type_uuid == None, ~EventType.value.in_(not_event_type))
+            )
         query = _join_as_subquery(query, type_query)
 
     if not_name:
@@ -486,8 +497,7 @@ def build_read_all_query(
 
     if owner:
         owner_query = select(Event)
-        check_for_none = _none_in_list(owner)
-        if check_for_none:
+        if _none_in_list(owner):
             owner_query = owner_query.outerjoin(User, onclause=Event.owner_uuid == User.uuid).where(
                 or_(Event.owner_uuid == None, User.username.in_(owner))
             )
@@ -538,11 +548,23 @@ def build_read_all_query(
         query = _join_as_subquery(query, remediations_query)
 
     if severity:
-        severity_query = select(Event).join(EventSeverity).where(EventSeverity.value.in_([s for s in severity if s]))
+        severity_query = select(Event)
+        if _none_in_list(severity):
+            severity_query = severity_query.outerjoin(EventSeverity).where(
+                or_(Event.severity_uuid == None, EventSeverity.value.in_(severity))
+            )
+        else:
+            severity_query = severity_query.join(EventSeverity).where(EventSeverity.value.in_(severity))
         query = _join_as_subquery(query, severity_query)
 
     if source:
-        source_query = select(Event).join(EventSource).where(EventSource.value.in_([s for s in source if s]))
+        source_query = select(Event)
+        if _none_in_list(source):
+            source_query = source_query.outerjoin(EventSource).where(
+                or_(Event.source_uuid == None, EventSource.value.in_(source))
+            )
+        else:
+            source_query = source_query.join(EventSource).where(EventSource.value.in_(source))
         query = _join_as_subquery(query, source_query)
 
     if status:

@@ -431,11 +431,13 @@ def test_filter_by_disposition_time_before_alert_disposition_time(db):
 
 
 def test_filter_by_event_type(db):
-    factory.event.create_or_read(name="event1", event_type="type1", db=db)
+    event1 = factory.event.create_or_read(name="event1", event_type=None, db=db)
     event2 = factory.event.create_or_read(name="event2", event_type="type2", db=db)
     event3 = factory.event.create_or_read(name="event3", event_type="type3", db=db)
 
     # event_type
+    assert crud.event.read_all(event_type=["none"], db=db) == [event1]
+
     result = crud.event.read_all(event_type=["type3"], db=db)
     assert result == [event3]
 
@@ -445,7 +447,12 @@ def test_filter_by_event_type(db):
     assert event3 in result
 
     # not_event_type
-    assert crud.event.read_all(not_event_type=["type1", "type2"], db=db) == [event3]
+    assert crud.event.read_all(not_event_type=["none", "type2"], db=db) == [event3]
+
+    result = crud.event.read_all(not_event_type=["type2"], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event3 in result
 
 
 def test_filter_by_name(db):
@@ -677,11 +684,13 @@ def test_filter_by_remediations(db):
 
 
 def test_filter_by_severity(db):
-    event1 = factory.event.create_or_read(name="event1", db=db)
+    event1 = factory.event.create_or_read(name="event1", severity=None, db=db)
     event2 = factory.event.create_or_read(name="event2", severity="level2", db=db)
     event3 = factory.event.create_or_read(name="event3", severity="level3", db=db)
 
     # severity
+    assert crud.event.read_all(severity=["none"], db=db) == [event1]
+
     result = crud.event.read_all(severity=["level3"], db=db)
     assert result == [event3]
 
@@ -700,11 +709,13 @@ def test_filter_by_severity(db):
 
 
 def test_filter_by_source(db):
-    event1 = factory.event.create_or_read(name="event1", db=db)
+    event1 = factory.event.create_or_read(name="event1", source=None, db=db)
     event2 = factory.event.create_or_read(name="event2", source="source2", db=db)
     event3 = factory.event.create_or_read(name="event3", source="source3", db=db)
 
     # source
+    assert crud.event.read_all(source=["none"], db=db) == [event1]
+
     result = crud.event.read_all(source=["source3"], db=db)
     assert result == [event3]
 
