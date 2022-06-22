@@ -5,7 +5,7 @@ from uuid import UUID
 
 from api import db_api
 from api.routes import helpers
-from api_models.node_detection_point import NodeDetectionPointCreate, NodeDetectionPointRead
+from api_models.metadata_detection_point import MetadataDetectionPointCreate, MetadataDetectionPointRead
 
 
 router = APIRouter(
@@ -20,7 +20,7 @@ router = APIRouter(
 
 
 def create_node_detection_points(
-    node_detection_points: list[NodeDetectionPointCreate],
+    node_detection_points: list[MetadataDetectionPointCreate],
     request: Request,
     response: Response,
 ):
@@ -41,4 +41,4 @@ def get_node_detection_point(uuid: UUID):
     return db_api.get(path=f"/node/detection_point/{uuid}")
 
 
-helpers.api_route_read(router, get_node_detection_point, NodeDetectionPointRead)
+helpers.api_route_read(router, get_node_detection_point, MetadataDetectionPointRead)

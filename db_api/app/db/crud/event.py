@@ -22,6 +22,7 @@ from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
+from db.schemas.analysis_metadata import AnalysisMetadata
 from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.event import Event, EventHistory
 from db.schemas.event_prevention_tool import EventPreventionTool
@@ -31,9 +32,10 @@ from db.schemas.event_source import EventSource
 from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
+from db.schemas.metadata import Metadata
+from db.schemas.metadata_detection_point import MetadataDetectionPoint
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
-from db.schemas.node_detection_point import NodeDetectionPoint
 from db.schemas.node_threat import NodeThreat
 from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.observable import Observable
@@ -978,15 +980,21 @@ def read_summary_detection_point(uuid: UUID, db: Session) -> list[DetectionSumma
     # Get all the detection points (and their parent alert UUIDs) performed in the event.
     # The query results are turned into a dictionary with the parent alert UUID as the key.
     query = (
-        select([Submission.uuid, NodeDetectionPoint])
-        .join(Observable, onclause=Observable.uuid == NodeDetectionPoint.node_uuid)
-        .join(
-            analysis_child_observable_mapping,
-            onclause=analysis_child_observable_mapping.c.observable_uuid == Observable.uuid,
-        )
+        select([Submission.uuid, AnalysisMetadata])
         .join(
             submission_analysis_mapping,
-            onclause=submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid,
+            onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid,
+        )
+        .join(
+            analysis_child_observable_mapping,
+            onclause=analysis_child_observable_mapping.c.analysis_uuid == submission_analysis_mapping.c.analysis_uuid,
+        )
+        .join(
+            AnalysisMetadata,
+            onclause=and_(
+                AnalysisMetadata.metadata_object.has(Metadata.metadata_type == "detection_point"),
+                AnalysisMetadata.analysis_uuid == submission_analysis_mapping.c.analysis_uuid,
+            ),
         )
         .join(
             Submission,
@@ -996,17 +1004,17 @@ def read_summary_detection_point(uuid: UUID, db: Session) -> list[DetectionSumma
         )
     )
 
-    alert_uuid_and_detection: list[tuple[UUID, NodeDetectionPoint]] = db.execute(query).unique().all()
+    alert_uuid_and_analysis_metadata: list[tuple[UUID, AnalysisMetadata]] = db.execute(query).unique().all()
 
     # Loop through the database results to count the number of times each detection point value occurred
     results: dict[UUID, DetectionSummary] = {}
-    for alert_uuid, detection_point in alert_uuid_and_detection:
-        if detection_point.value not in results:
-            results[detection_point.value] = detection_point
-            results[detection_point.value].count = 1
-            results[detection_point.value].alert_uuid = alert_uuid
+    for alert_uuid, analysis_metadata in alert_uuid_and_analysis_metadata:
+        if analysis_metadata.metadata_object.value not in results:
+            results[analysis_metadata.metadata_object.value] = analysis_metadata.metadata_object
+            results[analysis_metadata.metadata_object.value].count = 1
+            results[analysis_metadata.metadata_object.value].alert_uuid = alert_uuid
         else:
-            results[detection_point.value].count += 1
+            results[analysis_metadata.metadata_object.value].count += 1
 
     # Return the summaries sorted by their values
     return sorted(results.values(), key=lambda x: x.value)

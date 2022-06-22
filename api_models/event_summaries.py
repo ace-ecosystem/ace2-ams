@@ -8,11 +8,11 @@ from api_models.analysis_details import (
     SandboxAnalysisDetails,
     UserAnalysisDetails,
 )
-from api_models.node_detection_point import NodeDetectionPointRead
+from api_models.metadata_detection_point import MetadataDetectionPointRead
 from api_models.observable import ObservableSubmissionRead
 
 
-class DetectionSummary(NodeDetectionPointRead):
+class DetectionSummary(MetadataDetectionPointRead):
     """Represents an individual detection point found in an event."""
 
     alert_uuid: UUID4 = Field(description="An alert UUID in which this detection point was found")

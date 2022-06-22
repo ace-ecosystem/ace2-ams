@@ -105,7 +105,6 @@ def create(
                 model=ObservableCreate(
                     analyses=observable.analyses,
                     context=observable.context,
-                    detection_points=observable.detection_points,
                     expires_on=observable.expires_on,
                     for_detction=observable.for_detection,
                     history_username=observable.history_username,

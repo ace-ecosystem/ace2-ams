@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 8ecf40aa22be
+Revision ID: ca3f14267fff
 Revises: 
-Create Date: 2022-06-21 15:42:13.346434
+Create Date: 2022-06-22 18:17:55.249313
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '8ecf40aa22be'
+revision = 'ca3f14267fff'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -249,6 +249,14 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_event_vector_queue_mapping_event_vector_uuid'), 'event_vector_queue_mapping', ['event_vector_uuid'], unique=False)
     op.create_index(op.f('ix_event_vector_queue_mapping_queue_uuid'), 'event_vector_queue_mapping', ['queue_uuid'], unique=False)
+    op.create_table('metadata_detection_point',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['uuid'], ['metadata.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_metadata_detection_point_value'), 'metadata_detection_point', ['value'], unique=True)
     op.create_table('metadata_directive',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -289,17 +297,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_metadata_time_value'), 'metadata_time', ['value'], unique=True)
-    op.create_table('node_detection_point',
-    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
-    sa.Column('insert_time', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
-    sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('value', sa.String(), nullable=False),
-    sa.ForeignKeyConstraint(['node_uuid'], ['node.uuid'], ),
-    sa.PrimaryKeyConstraint('uuid'),
-    sa.UniqueConstraint('node_uuid', 'value', name='node_detection_point_value_uc')
-    )
-    op.create_index(op.f('ix_node_detection_point_node_uuid'), 'node_detection_point', ['node_uuid'], unique=False)
-    op.create_index('value_trgm', 'node_detection_point', ['value'], unique=False, postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.create_table('node_relationship',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('node_uuid', postgresql.UUID(as_uuid=True), nullable=True),
@@ -785,9 +782,6 @@ def downgrade() -> None:
     op.drop_table('node_threat_actor_mapping')
     op.drop_index(op.f('ix_node_relationship_node_uuid'), table_name='node_relationship')
     op.drop_table('node_relationship')
-    op.drop_index('value_trgm', table_name='node_detection_point', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
-    op.drop_index(op.f('ix_node_detection_point_node_uuid'), table_name='node_detection_point')
-    op.drop_table('node_detection_point')
     op.drop_index(op.f('ix_metadata_time_value'), table_name='metadata_time')
     op.drop_table('metadata_time')
     op.drop_index(op.f('ix_metadata_tag_value'), table_name='metadata_tag')
@@ -798,6 +792,8 @@ def downgrade() -> None:
     op.drop_table('metadata_display_type')
     op.drop_index(op.f('ix_metadata_directive_value'), table_name='metadata_directive')
     op.drop_table('metadata_directive')
+    op.drop_index(op.f('ix_metadata_detection_point_value'), table_name='metadata_detection_point')
+    op.drop_table('metadata_detection_point')
     op.drop_index(op.f('ix_event_vector_queue_mapping_queue_uuid'), table_name='event_vector_queue_mapping')
     op.drop_index(op.f('ix_event_vector_queue_mapping_event_vector_uuid'), table_name='event_vector_queue_mapping')
     op.drop_table('event_vector_queue_mapping')
