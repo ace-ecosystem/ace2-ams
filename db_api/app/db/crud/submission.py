@@ -130,6 +130,7 @@ def build_read_all_query(
     observable: Optional[list[str]] = None,  # Example: type|value
     not_observable: Optional[list[str]] = None,  # Example: type|value
     observable_types: Optional[list[str]] = None,
+    not_observable_types: Optional[list[str]] = None,
     observable_value: Optional[list[str]] = None,
     owner: Optional[list[str]] = None,
     queue: Optional[list[str]] = None,
@@ -322,6 +323,29 @@ def build_read_all_query(
             .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
             .join(ObservableType)
             .having(or_(and_(*sub_type_filters) for sub_type_filters in type_filters))
+            .group_by(Submission.uuid, Node.uuid)
+        )
+
+        query = _join_as_subquery(query, observable_types_query)
+
+    if not_observable_types:
+        type_filters = []
+        for o in not_observable_types:
+            type_filters.append([func.count(1).filter(ObservableType.value == t) > 0 for t in o.split(",")])
+
+        observable_types_query = (
+            select(Submission)
+            .join(
+                submission_analysis_mapping, onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid
+            )
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .join(ObservableType)
+            .having(not_(or_(and_(*sub_type_filters) for sub_type_filters in type_filters)))
             .group_by(Submission.uuid, Node.uuid)
         )
 
@@ -577,6 +601,7 @@ def read_all(
     observable: Optional[list[str]] = None,  # Example: type|value
     not_observable: Optional[list[str]] = None,  # Example: type|value
     observable_types: Optional[list[str]] = None,
+    not_observable_types: Optional[list[str]] = None,
     observable_value: Optional[list[str]] = None,
     owner: Optional[list[str]] = None,
     queue: Optional[list[str]] = None,
@@ -609,6 +634,7 @@ def read_all(
                 observable=observable,  # Example: type|value
                 not_observable=not_observable,  # Example: type|value
                 observable_types=observable_types,
+                not_observable_types=not_observable_types,
                 observable_value=observable_value,
                 owner=owner,
                 queue=queue,

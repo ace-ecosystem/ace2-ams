@@ -74,6 +74,7 @@ def get_all_submissions(
     observable: Optional[list[str]] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
     not_observable: Optional[list[str]] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
     observable_types: Optional[list[str]] = Query(None),
+    not_observable_types: Optional[list[str]] = Query(None),
     observable_value: Optional[list[str]] = Query(None),
     owner: Optional[list[str]] = Query(None),
     queue: Optional[list[str]] = Query(None),
@@ -124,6 +125,7 @@ def get_all_submissions(
             observable=observable,
             not_observable=not_observable,
             observable_types=observable_types,
+            not_observable_types=not_observable_types,
             observable_value=observable_value,
             owner=owner,
             queue=queue,
