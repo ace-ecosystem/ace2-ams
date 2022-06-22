@@ -40,7 +40,7 @@
       <Menu
         id="overlayMenu"
         ref="menu"
-        :model="(itemsFiltered as unknown as MenuItem[])"
+        :model="(itemsFiltered as unknown as MenuItemType[])"
         :popup="true"
       >
         <template #item="{ item }">
@@ -82,6 +82,15 @@
         :tag="tag"
       ></MetadataTag
     ></span>
+    <span
+      v-if="showDispositionTags && observable.dispositionHistory.length"
+      class="leaf-element"
+    >
+      <ObservableDispositionHistoryGroup
+        :observable="observable"
+        :reroute-to-manage-alerts="true"
+      ></ObservableDispositionHistoryGroup>
+    </span>
   </span>
 </template>
 
@@ -105,6 +114,7 @@
 
   import type CSS from "csstype";
 
+  import ObservableDispositionHistoryGroup from "@/components/Observables/ObservableDispositionHistoryGroup.vue";
   import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
   import {
@@ -122,6 +132,8 @@
 
   const config = inject("config") as Record<string, any>;
 
+  type MenuItemType = typeof MenuItem;
+
   const props = defineProps({
     observable: {
       type: Object as PropType<observableTreeRead>,
@@ -130,6 +142,7 @@
     showCopyToClipboard: { type: Boolean, required: false, default: true },
     showActionsMenu: { type: Boolean, required: false, default: true },
     showTags: { type: Boolean, required: false, default: true },
+    showDispositionTags: { type: Boolean, required: false, default: true },
   });
 
   const alertStore = useAlertStore();
