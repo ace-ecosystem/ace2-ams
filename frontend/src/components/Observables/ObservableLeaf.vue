@@ -8,7 +8,7 @@
       >{{ displayValue }}
     </span>
     <span
-      v-for="detection in observable.detectionPoints"
+      v-for="detection in observable.analysisMetadata.detectionPoints"
       :id="detection.uuid"
       :key="detection.uuid"
       v-tooltip.right="{
