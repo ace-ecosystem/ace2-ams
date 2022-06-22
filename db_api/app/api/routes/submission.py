@@ -80,6 +80,7 @@ def get_all_submissions(
     owner: Optional[list[str]] = Query(None),
     not_owner: Optional[list[str]] = Query(None),
     queue: Optional[list[str]] = Query(None),
+    not_queue: Optional[list[str]] = Query(None),
     sort: Optional[str] = Query(
         None,
         regex=""
@@ -133,6 +134,7 @@ def get_all_submissions(
             owner=owner,
             not_owner=not_owner,
             queue=queue,
+            not_queue=not_queue,
             sort=sort,
             submission_type=submission_type,
             tags=tags,

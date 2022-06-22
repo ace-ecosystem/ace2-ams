@@ -136,6 +136,7 @@ def build_read_all_query(
     owner: Optional[list[str]] = None,
     not_owner: Optional[list[str]] = None,
     queue: Optional[list[str]] = None,
+    not_queue: Optional[list[str]] = None,
     sort: Optional[str] = None,  # Example: event_time|desc
     submission_type: Optional[list[str]] = None,
     tags: Optional[list[str]] = None,
@@ -417,6 +418,10 @@ def build_read_all_query(
         queue_query = select(Submission).join(Queue).where(Queue.value.in_(queue))
         query = _join_as_subquery(query, queue_query)
 
+    if not_queue:
+        queue_query = select(Submission).join(Queue).where(~Queue.value.in_(not_queue))
+        query = _join_as_subquery(query, queue_query)
+
     if submission_type:
         type_query = select(Submission).join(SubmissionType).where(SubmissionType.value.in_(submission_type))
         query = _join_as_subquery(query, type_query)
@@ -639,6 +644,7 @@ def read_all(
     owner: Optional[list[str]] = None,
     not_owner: Optional[list[str]] = None,
     queue: Optional[list[str]] = None,
+    not_queue: Optional[list[str]] = None,
     sort: Optional[str] = None,  # Example: event_time|desc
     submission_type: Optional[list[str]] = None,
     tags: Optional[list[str]] = None,
@@ -674,6 +680,7 @@ def read_all(
                 owner=owner,
                 not_owner=not_owner,
                 queue=queue,
+                not_queue=not_queue,
                 sort=sort,  # Example: event_time|desc
                 submission_type=submission_type,
                 tags=tags,

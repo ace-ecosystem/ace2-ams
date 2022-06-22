@@ -373,6 +373,7 @@ def test_filter_by_queue(db):
     submission1 = factory.submission.create(alert_queue="queue1", db=db)
     submission2 = factory.submission.create(alert_queue="queue2", db=db)
 
+    # queue
     result = crud.submission.read_all(queue=["queue1"], db=db)
     assert result == [submission1]
 
@@ -380,6 +381,9 @@ def test_filter_by_queue(db):
     assert len(result) == 2
     assert submission1 in result
     assert submission2 in result
+
+    # not_queue
+    assert crud.submission.read_all(not_queue=["queue1"], db=db) == [submission2]
 
 
 def test_filter_by_tags(db):

@@ -69,6 +69,7 @@ def get_all_alerts(
     owner: Optional[list[str]] = Query(None),
     not_owner: Optional[list[str]] = Query(None),
     queue: Optional[list[str]] = Query(None),
+    not_queue: Optional[list[str]] = Query(None),
     sort: Optional[str] = Query(
         None,
         regex=""
@@ -193,6 +194,10 @@ def get_all_alerts(
     if queue:
         for queue_item in queue:
             query_params += f"&queue={queue_item}"
+
+    if not_queue:
+        for not_queue_item in not_queue:
+            query_params += f"&not_queue={not_queue_item}"
 
     if tags:
         for tags_item in tags:
