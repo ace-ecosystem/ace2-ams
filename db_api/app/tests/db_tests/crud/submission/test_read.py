@@ -326,6 +326,11 @@ def test_filter_by_observable_value(db):
         observables=[ObservableCreateInSubmission(type="type", value="value2")], db=db
     )
 
+    submission3 = factory.submission.create(
+        observables=[ObservableCreateInSubmission(type="other_type", value="other_value")], db=db
+    )
+
+    # observable_value
     result = crud.submission.read_all(observable_value=["value"], db=db)
     assert result == [submission1]
 
@@ -333,6 +338,14 @@ def test_filter_by_observable_value(db):
     assert len(result) == 2
     assert submission1 in result
     assert submission2 in result
+
+    # not_observable_value
+    result = crud.submission.read_all(not_observable_value=["value"], db=db)
+    assert len(result) == 2
+    assert submission2 in result
+    assert submission3 in result
+
+    assert crud.submission.read_all(not_observable_value=["value", "value2"], db=db) == [submission3]
 
 
 def test_filter_by_owner(db):

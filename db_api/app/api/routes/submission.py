@@ -76,6 +76,7 @@ def get_all_submissions(
     observable_types: Optional[list[str]] = Query(None),
     not_observable_types: Optional[list[str]] = Query(None),
     observable_value: Optional[list[str]] = Query(None),
+    not_observable_value: Optional[list[str]] = Query(None),
     owner: Optional[list[str]] = Query(None),
     queue: Optional[list[str]] = Query(None),
     sort: Optional[str] = Query(
@@ -127,6 +128,7 @@ def get_all_submissions(
             observable_types=observable_types,
             not_observable_types=not_observable_types,
             observable_value=observable_value,
+            not_observable_value=not_observable_value,
             owner=owner,
             queue=queue,
             sort=sort,

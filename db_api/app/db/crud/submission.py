@@ -132,6 +132,7 @@ def build_read_all_query(
     observable_types: Optional[list[str]] = None,
     not_observable_types: Optional[list[str]] = None,
     observable_value: Optional[list[str]] = None,
+    not_observable_value: Optional[list[str]] = None,
     owner: Optional[list[str]] = None,
     queue: Optional[list[str]] = None,
     sort: Optional[str] = None,  # Example: event_time|desc
@@ -365,6 +366,24 @@ def build_read_all_query(
             )
             .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
             .where(Observable.value.in_(observable_value))
+        )
+
+        query = _join_as_subquery(query, observable_value_query)
+
+    if not_observable_value:
+        observable_value_query = (
+            select(Submission)
+            .join(
+                submission_analysis_mapping,
+                onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid,
+            )
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .where(~Observable.value.in_(not_observable_value))
         )
 
         query = _join_as_subquery(query, observable_value_query)
@@ -603,6 +622,7 @@ def read_all(
     observable_types: Optional[list[str]] = None,
     not_observable_types: Optional[list[str]] = None,
     observable_value: Optional[list[str]] = None,
+    not_observable_value: Optional[list[str]] = None,
     owner: Optional[list[str]] = None,
     queue: Optional[list[str]] = None,
     sort: Optional[str] = None,  # Example: event_time|desc
@@ -636,6 +656,7 @@ def read_all(
                 observable_types=observable_types,
                 not_observable_types=not_observable_types,
                 observable_value=observable_value,
+                not_observable_value=not_observable_value,
                 owner=owner,
                 queue=queue,
                 sort=sort,  # Example: event_time|desc
