@@ -609,7 +609,7 @@ def build_read_all_query(
         query = _join_as_subquery(query, source_query)
 
     if status:
-        status_query = select(Event).join(EventStatus).where(EventStatus.value.in_([s for s in status if s]))
+        status_query = select(Event).join(EventStatus).where(EventStatus.value.in_(status))
         query = _join_as_subquery(query, status_query)
 
     if tags:

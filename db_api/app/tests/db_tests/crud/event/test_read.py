@@ -438,8 +438,10 @@ def test_filter_by_event_type(db):
     # event_type
     assert crud.event.read_all(event_type=["none"], db=db) == [event1]
 
-    result = crud.event.read_all(event_type=["type3"], db=db)
-    assert result == [event3]
+    result = crud.event.read_all(event_type=["none", "type3"], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event3 in result
 
     result = crud.event.read_all(event_type=["type2", "type3"], db=db)
     assert len(result) == 2
@@ -447,6 +449,11 @@ def test_filter_by_event_type(db):
     assert event3 in result
 
     # not_event_type
+    result = crud.event.read_all(not_event_type=["none"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
+
     assert crud.event.read_all(not_event_type=["none", "type2"], db=db) == [event3]
 
     result = crud.event.read_all(not_event_type=["type2"], db=db)
@@ -589,6 +596,8 @@ def test_filter_by_owner(db):
     assert event2 in result
 
     # not_owner
+    assert crud.event.read_all(not_owner=["none", "analyst"], db=db) == [event3]
+
     result = crud.event.read_all(not_owner=["none"], db=db)
     assert len(result) == 2
     assert event2 in result
@@ -691,8 +700,10 @@ def test_filter_by_severity(db):
     # severity
     assert crud.event.read_all(severity=["none"], db=db) == [event1]
 
-    result = crud.event.read_all(severity=["level3"], db=db)
-    assert result == [event3]
+    result = crud.event.read_all(severity=["none", "level3"], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event3 in result
 
     result = crud.event.read_all(severity=["level2", "level3"], db=db)
     assert len(result) == 2
@@ -700,6 +711,7 @@ def test_filter_by_severity(db):
     assert event3 in result
 
     # not_severity
+    assert crud.event.read_all(not_severity=["none", "level2"], db=db) == [event3]
     assert crud.event.read_all(not_severity=["level2", "level3"], db=db) == [event1]
 
     result = crud.event.read_all(not_severity=["none"], db=db)
@@ -719,12 +731,13 @@ def test_filter_by_source(db):
     result = crud.event.read_all(source=["source3"], db=db)
     assert result == [event3]
 
-    result = crud.event.read_all(source=["source2", "source3"], db=db)
+    result = crud.event.read_all(source=["none", "source3"], db=db)
     assert len(result) == 2
-    assert event2 in result
+    assert event1 in result
     assert event3 in result
 
     # not_source
+    assert crud.event.read_all(not_source=["none", "source2"], db=db) == [event3]
     assert crud.event.read_all(not_source=["source2", "source3"], db=db) == [event1]
 
     result = crud.event.read_all(not_source=["none"], db=db)

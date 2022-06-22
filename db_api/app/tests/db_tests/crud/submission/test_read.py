@@ -63,6 +63,11 @@ def test_filter_by_disposition_user(db):
     # disposition_user
     assert crud.submission.read_all(disposition_user=["none"], db=db) == [submission2]
 
+    result = crud.submission.read_all(disposition_user=["none", "analyst"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
+
     result = crud.submission.read_all(disposition_user=["analyst"], db=db)
     assert result == [submission1]
 
@@ -83,6 +88,7 @@ def test_filter_by_disposition_user(db):
 
     # not_disposition_user
     assert crud.submission.read_all(not_disposition_user=["none"], db=db) == [submission1]
+    assert crud.submission.read_all(not_disposition_user=["none", "analyst"], db=db) == []
     assert crud.submission.read_all(not_disposition_user=["analyst", "analyst2"], db=db) == [submission2]
 
 
@@ -188,6 +194,11 @@ def test_filter_by_event_uuid(db):
     # event_uuid
     assert crud.submission.read_all(event_uuid=["none"], db=db) == [submission3]
 
+    result = crud.submission.read_all(event_uuid=["none", event.uuid], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission3 in result
+
     result = crud.submission.read_all(event_uuid=[event.uuid], db=db)
     assert result == [submission1]
 
@@ -202,6 +213,7 @@ def test_filter_by_event_uuid(db):
     assert submission1 in result
     assert submission2 in result
 
+    assert crud.submission.read_all(not_event_uuid=["none", event.uuid], db=db) == [submission2]
     assert crud.submission.read_all(not_event_uuid=[event.uuid, event2.uuid], db=db) == [submission3]
 
 
@@ -382,6 +394,7 @@ def test_filter_by_owner(db):
     assert submission1 in result
     assert submission3 in result
 
+    assert crud.submission.read_all(not_owner=["none", "analyst2"], db=db) == [submission1]
     assert crud.submission.read_all(not_owner=["analyst", "analyst2"], db=db) == [submission2]
 
 
@@ -568,9 +581,16 @@ def test_filter_by_threats(db):
 def test_filter_by_tool(db):
     submission1 = factory.submission.create(tool="tool1", db=db)
     submission2 = factory.submission.create(tool="tool2", db=db)
-    submission3 = factory.submission.create(db=db)
+    submission3 = factory.submission.create(tool=None, db=db)
 
     # tool
+    assert crud.submission.read_all(tool=["none"], db=db) == [submission3]
+
+    result = crud.submission.read_all(tool=["none", "tool1"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission3 in result
+
     result = crud.submission.read_all(tool=["tool1"], db=db)
     assert result == [submission1]
 
@@ -580,15 +600,28 @@ def test_filter_by_tool(db):
     assert submission2 in result
 
     # not_tool
+    result = crud.submission.read_all(not_tool=["none"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
+
+    assert crud.submission.read_all(not_tool=["none", "tool2"], db=db) == [submission1]
     assert crud.submission.read_all(not_tool=["tool1", "tool2"], db=db) == [submission3]
 
 
 def test_filter_by_tool_instance(db):
     submission1 = factory.submission.create(tool_instance="tool_instance1", db=db)
     submission2 = factory.submission.create(tool_instance="tool_instance2", db=db)
-    submission3 = factory.submission.create(db=db)
+    submission3 = factory.submission.create(tool_instance=None, db=db)
 
     # tool_instance
+    assert crud.submission.read_all(tool_instance=["none"], db=db) == [submission3]
+
+    result = crud.submission.read_all(tool_instance=["none", "tool_instance1"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission3 in result
+
     result = crud.submission.read_all(tool_instance=["tool_instance1"], db=db)
     assert result == [submission1]
 
@@ -598,6 +631,12 @@ def test_filter_by_tool_instance(db):
     assert submission2 in result
 
     # not_tool_instance
+    result = crud.submission.read_all(not_tool_instance=["none"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
+
+    assert crud.submission.read_all(not_tool_instance=["none", "tool_instance2"], db=db) == [submission1]
     assert crud.submission.read_all(not_tool_instance=["tool_instance1", "tool_instance2"], db=db) == [submission3]
 
 
