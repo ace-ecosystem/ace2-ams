@@ -61,6 +61,8 @@ def test_filter_by_disposition_user(db):
     submission2 = factory.submission.create(db=db)
 
     # disposition_user
+    assert crud.submission.read_all(disposition_user=["none"], db=db) == [submission2]
+
     result = crud.submission.read_all(disposition_user=["analyst"], db=db)
     assert result == [submission1]
 
@@ -80,6 +82,7 @@ def test_filter_by_disposition_user(db):
     assert result == [submission1]
 
     # not_disposition_user
+    assert crud.submission.read_all(not_disposition_user=["none"], db=db) == [submission1]
     assert crud.submission.read_all(not_disposition_user=["analyst", "analyst2"], db=db) == [submission2]
 
 
@@ -183,6 +186,8 @@ def test_filter_by_event_uuid(db):
     submission3 = factory.submission.create(db=db)
 
     # event_uuid
+    assert crud.submission.read_all(event_uuid=["none"], db=db) == [submission3]
+
     result = crud.submission.read_all(event_uuid=[event.uuid], db=db)
     assert result == [submission1]
 
@@ -192,6 +197,11 @@ def test_filter_by_event_uuid(db):
     assert submission2 in result
 
     # not_event_uuid
+    result = crud.submission.read_all(not_event_uuid=["none"], db=db)
+    assert len(result) == 2
+    assert submission1 in result
+    assert submission2 in result
+
     assert crud.submission.read_all(not_event_uuid=[event.uuid, event2.uuid], db=db) == [submission3]
 
 

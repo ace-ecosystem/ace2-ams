@@ -153,8 +153,11 @@ def build_read_all_query(
         s = subquery.subquery()
         return query.join(s, Submission.uuid == s.c.uuid).group_by(Submission.uuid, Node.uuid)
 
-    def _none_in_list(values: list[str]):
-        return "none" in [v.lower() for v in values]
+    def _none_in_list(values: list):
+        return "none" in [str(v).lower() for v in values]
+
+    def _non_none_values(values: list) -> list:
+        return [v for v in values if str(v).lower() != "none"]
 
     query = select(Submission)
 
@@ -166,23 +169,45 @@ def build_read_all_query(
     if disposition:
         disposition_query = select(Submission)
         if _none_in_list(disposition):
-            disposition_query = disposition_query.outerjoin(AlertDisposition).where(
-                or_(AlertDisposition.value.in_(disposition), Submission.disposition_uuid == None)
-            )
+            values = _non_none_values(disposition)
+            if values:
+                disposition_query = disposition_query.outerjoin(AlertDisposition).where(
+                    or_(AlertDisposition.value.in_(values), Submission.disposition_uuid == None)
+                )
+            else:
+                disposition_query = disposition_query.where(Submission.disposition_uuid == None)
         else:
             disposition_query = disposition_query.join(AlertDisposition).where(AlertDisposition.value.in_(disposition))
 
         query = _join_as_subquery(query, disposition_query)
 
     if disposition_user:
-        disposition_user_query = select(Submission).where(
-            Submission.history.any(
-                and_(
-                    SubmissionHistory.field == "disposition",
-                    SubmissionHistory.action_by.has(User.username.in_(disposition_user)),
+        disposition_user_query = select(Submission)
+        if _none_in_list(disposition_user):
+            values = _non_none_values(disposition_user)
+            if values:
+                disposition_user_query = disposition_user_query.where(
+                    or_(
+                        Submission.disposition_user_uuid == None,
+                        Submission.history.any(
+                            and_(
+                                SubmissionHistory.field == "disposition",
+                                SubmissionHistory.action_by.has(User.username.in_(values)),
+                            )
+                        ),
+                    )
                 )
+            else:
+                disposition_user_query = disposition_user_query.where(Submission.disposition_user_uuid == None)
+        else:
+            disposition_user_query = disposition_user_query.where(
+                Submission.history.any(
+                    and_(
+                        SubmissionHistory.field == "disposition",
+                        SubmissionHistory.action_by.has(User.username.in_(disposition_user)),
+                    )
+                ),
             )
-        )
 
         query = _join_as_subquery(query, disposition_user_query)
 
@@ -217,7 +242,18 @@ def build_read_all_query(
         query = _join_as_subquery(query, event_time_before_query)
 
     if event_uuid:
-        event_uuid_query = select(Submission).where(Submission.event_uuid.in_(event_uuid))
+        event_uuid_query = select(Submission)
+        if _none_in_list(event_uuid):
+            values = _non_none_values(event_uuid)
+            if values:
+                event_uuid_query = event_uuid_query.where(
+                    or_(Submission.event_uuid.in_(values), Submission.event_uuid == None)
+                )
+            else:
+                event_uuid_query = event_uuid_query.where(Submission.event_uuid == None)
+        else:
+            event_uuid_query = event_uuid_query.where(Submission.event_uuid.in_(event_uuid))
+
         query = _join_as_subquery(query, event_uuid_query)
 
     if insert_time_after:
@@ -236,9 +272,13 @@ def build_read_all_query(
     if not_disposition:
         not_disposition_query = select(Submission)
         if _none_in_list(not_disposition):
-            not_disposition_query = not_disposition_query.join(AlertDisposition).where(
-                ~AlertDisposition.value.in_(not_disposition)
-            )
+            values = _non_none_values(not_disposition)
+            if values:
+                not_disposition_query = not_disposition_query.join(AlertDisposition).where(
+                    ~AlertDisposition.value.in_(values)
+                )
+            else:
+                not_disposition_query = not_disposition_query.where(Submission.disposition_uuid != None)
         else:
             not_disposition_query = not_disposition_query.outerjoin(AlertDisposition).where(
                 or_(~AlertDisposition.value.in_(not_disposition), Submission.disposition_uuid == None)
@@ -247,25 +287,54 @@ def build_read_all_query(
         query = _join_as_subquery(query, not_disposition_query)
 
     if not_disposition_user:
-        not_disposition_user_query = select(Submission).where(
-            or_(
-                Submission.disposition_uuid == None,
-                ~Submission.history.any(
+        disposition_user_query = select(Submission)
+        if _none_in_list(not_disposition_user):
+            values = _non_none_values(not_disposition_user)
+            if values:
+                disposition_user_query = disposition_user_query.where(
                     and_(
-                        SubmissionHistory.field == "disposition",
-                        SubmissionHistory.action_by.has(User.username.in_(not_disposition_user)),
+                        Submission.disposition_user_uuid != None,
+                        ~Submission.history.any(
+                            and_(
+                                SubmissionHistory.field == "disposition",
+                                SubmissionHistory.action_by.has(User.username.in_(values)),
+                            )
+                        ),
                     )
-                ),
+                )
+            else:
+                disposition_user_query = disposition_user_query.where(Submission.disposition_user_uuid != None)
+        else:
+            disposition_user_query = disposition_user_query.where(
+                or_(
+                    Submission.disposition_uuid == None,
+                    ~Submission.history.any(
+                        and_(
+                            SubmissionHistory.field == "disposition",
+                            SubmissionHistory.action_by.has(User.username.in_(not_disposition_user)),
+                        )
+                    ),
+                )
             )
-        )
 
-        query = _join_as_subquery(query, not_disposition_user_query)
+        query = _join_as_subquery(query, disposition_user_query)
 
     if not_event_uuid:
-        not_event_uuid_query = select(Submission).where(
-            or_(Submission.event_uuid == None, ~Submission.event_uuid.in_(not_event_uuid))
-        )
-        query = _join_as_subquery(query, not_event_uuid_query)
+        event_uuid_query = select(Submission)
+        if _none_in_list(not_event_uuid):
+            values = _non_none_values(not_event_uuid)
+            if values:
+                event_uuid_query = event_uuid_query.where(
+                    and_(~Submission.event_uuid.in_(values), Submission.event_uuid != None)
+                )
+            else:
+                event_uuid_query = event_uuid_query.where(Submission.event_uuid != None)
+        else:
+            event_uuid_query = event_uuid_query.where(
+                or_(Submission.event_uuid == None, ~Submission.event_uuid.in_(not_event_uuid))
+            )
+
+        query = _join_as_subquery(query, event_uuid_query)
 
     if not_name:
         clauses = [~Submission.name.ilike(f"%{n}%") for n in not_name]
@@ -336,9 +405,13 @@ def build_read_all_query(
     if not_owner:
         owner_query = select(Submission)
         if _none_in_list(not_owner):
-            owner_query = owner_query.join(User, onclause=Submission.owner_uuid == User.uuid).where(
-                ~User.username.in_(not_owner)
-            )
+            values = _non_none_values(not_owner)
+            if values:
+                owner_query = owner_query.outerjoin(User, onclause=Submission.owner_uuid == User.uuid).where(
+                    and_(Submission.owner_uuid != None, ~User.username.in_(values))
+                )
+            else:
+                owner_query = owner_query.where(Submission.owner_uuid != None)
         else:
             owner_query = owner_query.outerjoin(User, onclause=Submission.owner_uuid == User.uuid).where(
                 or_(~User.username.in_(not_owner), Submission.owner_uuid == None)
@@ -374,14 +447,36 @@ def build_read_all_query(
         query = _join_as_subquery(query, tags_query)
 
     if not_tool:
-        tool_query = select(Submission).join(SubmissionTool).where(~SubmissionTool.value.in_(not_tool))
-        query = _join_as_subquery(query, tool_query)
+        not_tool_query = select(Submission)
+        if _none_in_list(not_tool):
+            values = _non_none_values(not_tool)
+            if values:
+                not_tool_query = not_tool_query.join(SubmissionTool).where(~SubmissionTool.value.in_(values))
+            else:
+                not_tool_query = not_tool_query.where(Submission.tool_uuid != None)
+        else:
+            not_tool_query = not_tool_query.outerjoin(SubmissionTool).where(
+                or_(~SubmissionTool.value.in_(not_tool), Submission.tool_uuid == None)
+            )
+
+        query = _join_as_subquery(query, not_tool_query)
 
     if not_tool_instance:
-        tool_instance_query = (
-            select(Submission).join(SubmissionToolInstance).where(~SubmissionToolInstance.value.in_(not_tool_instance))
-        )
-        query = _join_as_subquery(query, tool_instance_query)
+        not_tool_instance_query = select(Submission)
+        if _none_in_list(not_tool_instance):
+            values = _non_none_values(not_tool_instance)
+            if values:
+                not_tool_instance_query = not_tool_instance_query.join(SubmissionToolInstance).where(
+                    ~SubmissionToolInstance.value.in_(values)
+                )
+            else:
+                not_tool_instance_query = not_tool_instance_query.where(Submission.tool_instance_uuid != None)
+        else:
+            not_tool_instance_query = not_tool_instance_query.outerjoin(SubmissionToolInstance).where(
+                or_(~SubmissionToolInstance.value.in_(not_tool_instance), Submission.tool_instance_uuid == None)
+            )
+
+        query = _join_as_subquery(query, not_tool_instance_query)
 
     if observable:
         observable_split = [o.split("|", maxsplit=1) for o in observable]
@@ -447,9 +542,13 @@ def build_read_all_query(
     if owner:
         owner_query = select(Submission)
         if _none_in_list(owner):
-            owner_query = owner_query.outerjoin(User, onclause=Submission.owner_uuid == User.uuid).where(
-                or_(User.username.in_(owner), Submission.owner_uuid == None)
-            )
+            values = _non_none_values(owner)
+            if values:
+                owner_query = owner_query.outerjoin(User, onclause=Submission.owner_uuid == User.uuid).where(
+                    or_(User.username.in_(values), Submission.owner_uuid == None)
+                )
+            else:
+                owner_query = owner_query.where(Submission.owner_uuid == None)
         else:
             owner_query = owner_query.join(User, onclause=Submission.owner_uuid == User.uuid).where(
                 User.username.in_(owner)
@@ -523,13 +622,35 @@ def build_read_all_query(
         query = _join_as_subquery(query, threats_query)
 
     if tool:
-        tool_query = select(Submission).join(SubmissionTool).where(SubmissionTool.value.in_(tool))
+        tool_query = select(Submission)
+        if _none_in_list(tool):
+            values = _non_none_values(tool)
+            if values:
+                tool_query = tool_query.outerjoin(SubmissionTool).where(
+                    or_(SubmissionTool.value.in_(values), Submission.tool_uuid == None)
+                )
+            else:
+                tool_query = tool_query.where(Submission.tool_uuid == None)
+        else:
+            tool_query = tool_query.join(SubmissionTool).where(SubmissionTool.value.in_(tool))
+
         query = _join_as_subquery(query, tool_query)
 
     if tool_instance:
-        tool_instance_query = (
-            select(Submission).join(SubmissionToolInstance).where(SubmissionToolInstance.value.in_(tool_instance))
-        )
+        tool_instance_query = select(Submission)
+        if _none_in_list(tool_instance):
+            values = _non_none_values(tool_instance)
+            if values:
+                tool_instance_query = tool_instance_query.outerjoin(SubmissionToolInstance).where(
+                    or_(SubmissionToolInstance.value.in_(values), Submission.tool_instance_uuid == None)
+                )
+            else:
+                tool_instance_query = tool_instance_query.where(Submission.tool_instance_uuid == None)
+        else:
+            tool_instance_query = tool_instance_query.join(SubmissionToolInstance).where(
+                SubmissionToolInstance.value.in_(tool_instance)
+            )
+
         query = _join_as_subquery(query, tool_instance_query)
 
     if sort:
