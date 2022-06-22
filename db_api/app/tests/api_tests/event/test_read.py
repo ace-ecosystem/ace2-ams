@@ -1498,10 +1498,6 @@ def test_get_filter_prevention_tools(client, db):
     assert any(t["value"] == "value2" for t in get.json()["items"][0]["prevention_tools"])
     assert any(t["value"] == "value3" for t in get.json()["items"][0]["prevention_tools"])
 
-    # All the events should be returned if you don't specify any value for the filter
-    get = client.get("/api/event/?prevention_tools=")
-    assert get.json()["total"] == 3
-
     # There should be 2 events when we filter by value1 OR (value2 AND value3)
     get = client.get("/api/event/?prevention_tools=value1&prevention_tools=value2,value3")
     assert get.json()["total"] == 2
@@ -1607,10 +1603,6 @@ def test_get_filter_remediations(client, db):
     assert any(t["value"] == "value2" for t in get.json()["items"][0]["remediations"])
     assert any(t["value"] == "value3" for t in get.json()["items"][0]["remediations"])
 
-    # All the events should be returned if you don't specify any value for the filter
-    get = client.get("/api/event/?remediations=")
-    assert get.json()["total"] == 3
-
     # There should 2 events when we filter by value1 OR (value2 AND value3)
     get = client.get("/api/event/?remediations=value1&remediations=value2,value3")
     assert get.json()["total"] == 2
@@ -1631,10 +1623,6 @@ def test_get_filter_severity(client, db):
     get = client.get("/api/event/?severity=value1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["severity"]["value"] == "value1"
-
-    # All the events should be returned if you don't specify any value for the filter
-    get = client.get("/api/event/?severity=")
-    assert get.json()["total"] == 3
 
     # There should 2 events when we filter by value1 OR value2
     get = client.get("/api/event/?severity=value1&severity=value2")
@@ -1657,10 +1645,6 @@ def test_get_filter_source(client, db):
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["source"]["value"] == "value1"
 
-    # All the events should be returned if you don't specify any value for the filter
-    get = client.get("/api/event/?source=")
-    assert get.json()["total"] == 3
-
     # There should 2 events when we filter by value1 OR value2
     get = client.get("/api/event/?source=value1&source=value2")
     assert get.json()["total"] == 2
@@ -1681,10 +1665,6 @@ def test_get_filter_status(client, db):
     get = client.get("/api/event/?status=value1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["status"]["value"] == "value1"
-
-    # All the events should be returned if you don't specify any value for the filter
-    get = client.get("/api/event/?status=")
-    assert get.json()["total"] == 3
 
     # There should 2 events when we filter by value1 OR value2
     get = client.get("/api/event/?status=value2&status=value3")
@@ -1737,10 +1717,6 @@ def test_get_filter_tags(client, db):
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event4"
 
-    # All the events should be returned if you don't specify any tags for the filter
-    get = client.get("/api/event/?tags=")
-    assert get.json()["total"] == 4
-
     # There should be 2 events when we filter by tag1 OR (tag2 AND tag3)
     get = client.get("/api/event/?tags=tag1&tags=tag2,tag3")
     assert get.json()["total"] == 2
@@ -1779,10 +1755,6 @@ def test_get_filter_threat_actors(client, db):
     get = client.get("/api/event/?threat_actors=test_actor2")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
-
-    # All the alerts should be returned if you don't specify anything for the filter
-    get = client.get("/api/event/?threat_actors=")
-    assert get.json()["total"] == 3
 
     # There should be 2 events when we filter by test_actor OR test_actor2
     get = client.get("/api/event/?threat_actors=test_actor&threat_actors=test_actor2")
@@ -1823,10 +1795,6 @@ def test_get_filter_threats(client, db):
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event3"
 
-    # All the alerts should be returned if you don't specify anything for the filter
-    get = client.get("/api/event/?threats=")
-    assert get.json()["total"] == 3
-
     # There should be 2 events when we filter by threat1 OR (threat2 AND threat3)
     get = client.get("/api/event/?threats=threat1&threats=threat2,threat3")
     assert get.json()["total"] == 2
@@ -1855,10 +1823,6 @@ def test_get_filter_vectors(client, db):
     assert len(get.json()["items"][0]["vectors"]) == 2
     assert any(t["value"] == "value2" for t in get.json()["items"][0]["vectors"])
     assert any(t["value"] == "value3" for t in get.json()["items"][0]["vectors"])
-
-    # All the events should be returned if you don't specify any value for the filter
-    get = client.get("/api/event/?vectors=")
-    assert get.json()["total"] == 3
 
     # There should be 2 events when we filter by value1 OR (value2 AND value3)
     get = client.get("/api/event/?vectors=value1&vectors=value2,value3")

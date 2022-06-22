@@ -56,6 +56,19 @@ def get_all_alerts(
     insert_time_after: Optional[list[datetime]] = Query(None),
     insert_time_before: Optional[list[datetime]] = Query(None),
     name: Optional[list[str]] = Query(None),
+    not_alert_type: Optional[list[str]] = Query(None),
+    not_disposition: Optional[list[str]] = Query(None),
+    not_disposition_user: Optional[list[str]] = Query(None),
+    not_event_uuid: Optional[list[UUID]] = Query(None),
+    not_name: Optional[list[str]] = Query(None),
+    not_observable: Optional[list[str]] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
+    not_observable_types: Optional[list[str]] = Query(None),
+    not_observable_value: Optional[list[str]] = Query(None),
+    not_owner: Optional[list[str]] = Query(None),
+    not_queue: Optional[list[str]] = Query(None),
+    not_tags: Optional[list[str]] = Query(None),
+    not_tool: Optional[list[str]] = Query(None),
+    not_tool_instance: Optional[list[str]] = Query(None),
     observable: Optional[list[str]] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
     observable_types: Optional[list[str]] = Query(None),
     observable_value: Optional[list[str]] = Query(None),
@@ -91,88 +104,140 @@ def get_all_alerts(
     query_params = f"?limit={limit}&offset={offset}&alert=True"
 
     if alert_type:
-        for alert_type_item in alert_type:
-            query_params += f"&alert_type={alert_type_item}"
+        for item in alert_type:
+            query_params += f"&submission_type={item}"
 
     if disposition:
-        for disposition_item in disposition:
-            query_params += f"&disposition={disposition_item}"
+        for item in disposition:
+            query_params += f"&disposition={item}"
 
     if disposition_user:
-        for disposition_user_item in disposition_user:
-            query_params += f"&disposition_user={disposition_user_item}"
+        for item in disposition_user:
+            query_params += f"&disposition_user={item}"
 
     if dispositioned_after:
-        for dispositioned_after_item in dispositioned_after:
-            query_params += f"&dispositioned_after={dispositioned_after_item}"
+        for item in dispositioned_after:
+            query_params += f"&dispositioned_after={item}"
 
     if dispositioned_before:
-        for dispositioned_before_item in dispositioned_before:
-            query_params += f"&dispositioned_before={dispositioned_before_item}"
+        for item in dispositioned_before:
+            query_params += f"&dispositioned_before={item}"
 
     if event_time_after:
-        for event_time_after_item in event_time_after:
-            query_params += f"&event_time_after={event_time_after_item}"
+        for item in event_time_after:
+            query_params += f"&event_time_after={item}"
 
     if event_time_before:
-        for event_time_before_item in event_time_before:
-            query_params += f"&event_time_before={event_time_before_item}"
+        for item in event_time_before:
+            query_params += f"&event_time_before={item}"
 
     if event_uuid:
-        for event_uuid_item in event_uuid:
-            query_params += f"&event_uuid={event_uuid_item}"
+        for item in event_uuid:
+            query_params += f"&event_uuid={item}"
 
     if insert_time_after:
-        for insert_time_after_item in insert_time_after:
-            query_params += f"&insert_time_after={insert_time_after_item}"
+        for item in insert_time_after:
+            query_params += f"&insert_time_after={item}"
 
     if insert_time_before:
-        for insert_time_before_item in insert_time_before:
-            query_params += f"&insert_time_before={insert_time_before_item}"
+        for item in insert_time_before:
+            query_params += f"&insert_time_before={item}"
 
     if name:
-        for name_item in name:
-            query_params += f"&name={name_item}"
+        for item in name:
+            query_params += f"&name={item}"
+
+    if not_alert_type:
+        for item in not_alert_type:
+            query_params += f"&not_submission_type={item}"
+
+    if not_disposition:
+        for item in not_disposition:
+            query_params += f"&not_disposition={item}"
+
+    if not_disposition_user:
+        for item in not_disposition_user:
+            query_params += f"&not_disposition_user={item}"
+
+    if not_event_uuid:
+        for item in not_event_uuid:
+            query_params += f"&not_event_uuid={item}"
+
+    if not_name:
+        for item in not_name:
+            query_params += f"&not_name={item}"
+
+    if not_observable:
+        for item in not_observable:
+            query_params += f"&not_observable={item}"
+
+    if not_observable_types:
+        for item in not_observable_types:
+            query_params += f"&not_observable_types={item}"
+
+    if not_observable_value:
+        for item in not_observable_value:
+            query_params += f"&not_observable_value={item}"
+
+    if not_owner:
+        for item in not_owner:
+            query_params += f"&not_owner={item}"
+
+    if not_queue:
+        for item in not_queue:
+            query_params += f"&not_queue={item}"
+
+    if not_tags:
+        for item in not_tags:
+            query_params += f"&not_tags={item}"
+
+    if not_tool:
+        for item in not_tool:
+            query_params += f"&not_tool={item}"
+
+    if not_tool_instance:
+        for item in not_tool_instance:
+            query_params += f"&not_tool_instance={item}"
 
     if observable:
-        for observable_item in observable:
-            query_params += f"&observable={observable_item}"
+        for item in observable:
+            query_params += f"&observable={item}"
 
     if observable_types:
-        for observable_types_item in observable_types:
-            query_params += f"&observable_types={observable_types_item}"
+        for item in observable_types:
+            query_params += f"&observable_types={item}"
 
     if observable_value:
-        for observable_value_item in observable_value:
-            query_params += f"&observable_value={observable_value_item}"
+        for item in observable_value:
+            query_params += f"&observable_value={item}"
 
     if owner:
-        for owner_item in owner:
-            query_params += f"&owner={owner_item}"
+        for item in owner:
+            query_params += f"&owner={item}"
 
     if queue:
-        for queue_item in queue:
-            query_params += f"&queue={queue_item}"
+        for item in queue:
+            query_params += f"&queue={item}"
 
     if tags:
-        for tags_item in tags:
-            query_params += f"&tags={tags_item}"
+        for item in tags:
+            query_params += f"&tags={item}"
 
     if threat_actors:
-        for threat_actors_item in threat_actors:
-            query_params += f"&threat_actors={threat_actors_item}"
+        for item in threat_actors:
+            query_params += f"&threat_actors={item}"
 
     if threats:
-        for threats_item in threats:
-            query_params += f"&threats={threats_item}"
+        for item in threats:
+            query_params += f"&threats={item}"
 
     if tool:
-        for tool_item in tool:
-            query_params += f"&tool={tool_item}"
+        for item in tool:
+            query_params += f"&tool={item}"
 
     if tool_instance:
-        for tool_instance_item in tool_instance:
-            query_params += f"&tool_instance={tool_instance_item}"
+        for item in tool_instance:
+            query_params += f"&tool_instance={item}"
 
     if sort:
         query_params += f"&sort={sort}"

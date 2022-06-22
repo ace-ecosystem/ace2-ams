@@ -32,8 +32,8 @@ def create(
     tags: Optional[list[str]] = None,
     threat_actors: Optional[list[str]] = None,
     threats: Optional[list[str]] = None,
-    tool: str = "test_tool",
-    tool_instance: str = "test_tool_instance",
+    tool: Optional[str] = None,
+    tool_instance: Optional[str] = None,
     update_time: Optional[datetime] = None,
     updated_by_user: str = "analyst",
 ):
@@ -58,9 +58,12 @@ def create(
     # Create the submission type
     factory.submission_type.create_or_read(value=submission_type, db=db)
 
-    # Create the tool and tool instance
-    factory.submission_tool.create_or_read(value=tool, db=db)
-    factory.submission_tool_instance.create_or_read(value=tool_instance, db=db)
+    # Create the tool and tool instance if they were given
+    if tool:
+        factory.submission_tool.create_or_read(value=tool, db=db)
+
+    if tool_instance:
+        factory.submission_tool_instance.create_or_read(value=tool_instance, db=db)
 
     # Create the history user if one was given
     if history_username is not None:

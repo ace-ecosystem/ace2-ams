@@ -278,6 +278,7 @@ def test_filter_by_disposition(db):
     event3 = factory.event.create_or_read(name="event3", db=db)
     factory.submission.create(event=event3, disposition="DELIVERY", db=db)
 
+    # disposition
     result = crud.event.read_all(disposition=["DELIVERY"], db=db)
     assert result == [event3]
 
@@ -288,6 +289,19 @@ def test_filter_by_disposition(db):
     assert len(result) == 2
     assert event1 in result
     assert event3 in result
+
+    # not_disposition
+    result = crud.event.read_all(not_disposition=["DELIVERY"], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event2 in result
+
+    result = crud.event.read_all(not_disposition=["none"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
+
+    assert crud.event.read_all(not_disposition=["DELIVERY", "none"], db=db) == [event2]
 
 
 def test_filter_by_disposition_time_after_event_disposition_time(db):
@@ -417,16 +431,34 @@ def test_filter_by_disposition_time_before_alert_disposition_time(db):
 
 
 def test_filter_by_event_type(db):
-    factory.event.create_or_read(name="event1", event_type="type1", db=db)
+    event1 = factory.event.create_or_read(name="event1", event_type=None, db=db)
     event2 = factory.event.create_or_read(name="event2", event_type="type2", db=db)
     event3 = factory.event.create_or_read(name="event3", event_type="type3", db=db)
 
-    result = crud.event.read_all(event_type=["type3"], db=db)
-    assert result == [event3]
+    # event_type
+    assert crud.event.read_all(event_type=["none"], db=db) == [event1]
+
+    result = crud.event.read_all(event_type=["none", "type3"], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event3 in result
 
     result = crud.event.read_all(event_type=["type2", "type3"], db=db)
     assert len(result) == 2
     assert event2 in result
+    assert event3 in result
+
+    # not_event_type
+    result = crud.event.read_all(not_event_type=["none"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
+
+    assert crud.event.read_all(not_event_type=["none", "type2"], db=db) == [event3]
+
+    result = crud.event.read_all(not_event_type=["type2"], db=db)
+    assert len(result) == 2
+    assert event1 in result
     assert event3 in result
 
 
@@ -434,7 +466,9 @@ def test_filter_by_name(db):
     event1 = factory.event.create_or_read(name="event1", db=db)
     event2 = factory.event.create_or_read(name="event2", db=db)
     event3 = factory.event.create_or_read(name="event3", db=db)
+    event4 = factory.event.create_or_read(name="some other name", db=db)
 
+    # name
     result = crud.event.read_all(name=["event3"], db=db)
     assert result == [event3]
 
@@ -445,6 +479,10 @@ def test_filter_by_name(db):
     assert len(result) == 2
     assert event2 in result
     assert event3 in result
+
+    # not_name
+    assert crud.event.read_all(not_name=["event"], db=db) == [event4]
+    assert crud.event.read_all(not_name=["event1", "event3"], db=db) == [event2, event4]
 
 
 def test_filter_by_observable(db):
@@ -460,6 +498,7 @@ def test_filter_by_observable(db):
     alert3 = factory.submission.create(event=event3, db=db)
     factory.observable.create_or_read(type="type3", value="value3", parent_analysis=alert3.root_analysis, db=db)
 
+    # observable
     result = crud.event.read_all(observable=["type3|value3"], db=db)
     assert result == [event3]
 
@@ -467,6 +506,14 @@ def test_filter_by_observable(db):
     assert len(result) == 2
     assert event2 in result
     assert event3 in result
+
+    # not_observable
+    result = crud.event.read_all(not_observable=["type1|value1"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
+
+    assert crud.event.read_all(not_observable=["type1|value1", "type2|value2"], db=db) == [event3]
 
 
 def test_filter_by_observable_types(db):
@@ -482,6 +529,7 @@ def test_filter_by_observable_types(db):
     alert3 = factory.submission.create(event=event3, db=db)
     factory.observable.create_or_read(type="type3", value="value3", parent_analysis=alert3.root_analysis, db=db)
 
+    # observable_types
     result = crud.event.read_all(observable_types=["type3"], db=db)
     assert result == [event3]
 
@@ -489,6 +537,14 @@ def test_filter_by_observable_types(db):
     assert len(result) == 2
     assert event2 in result
     assert event3 in result
+
+    # not_observable_types
+    result = crud.event.read_all(not_observable_types=["type1"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
+
+    assert crud.event.read_all(not_observable_types=["type1", "type2"], db=db) == [event3]
 
 
 def test_filter_by_observable_value(db):
@@ -504,6 +560,7 @@ def test_filter_by_observable_value(db):
     alert3 = factory.submission.create(event=event3, db=db)
     factory.observable.create_or_read(type="type3", value="value3", parent_analysis=alert3.root_analysis, db=db)
 
+    # observable_value
     result = crud.event.read_all(observable_value=["value3"], db=db)
     assert result == [event3]
 
@@ -512,11 +569,21 @@ def test_filter_by_observable_value(db):
     assert event2 in result
     assert event3 in result
 
+    # not_observable_value
+    result = crud.event.read_all(not_observable_value=["value1"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
+
+    assert crud.event.read_all(not_observable_value=["value1", "value2"], db=db) == [event3]
+
 
 def test_filter_by_owner(db):
     event1 = factory.event.create_or_read(name="event1", db=db)
-    event2 = factory.event.create_or_read(name="event3", owner="analyst", db=db)
+    event2 = factory.event.create_or_read(name="event2", owner="analyst", db=db)
+    event3 = factory.event.create_or_read(name="event3", owner="analyst2", db=db)
 
+    # owner
     result = crud.event.read_all(owner=["analyst"], db=db)
     assert result == [event2]
 
@@ -528,12 +595,23 @@ def test_filter_by_owner(db):
     assert event1 in result
     assert event2 in result
 
+    # not_owner
+    assert crud.event.read_all(not_owner=["none", "analyst"], db=db) == [event3]
+
+    result = crud.event.read_all(not_owner=["none"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
+
+    assert crud.event.read_all(not_owner=["analyst", "analyst2"], db=db) == [event1]
+
 
 def test_filter_by_prevention_tools(db):
-    factory.event.create_or_read(name="event1", db=db)
+    event1 = factory.event.create_or_read(name="event1", db=db)
     event2 = factory.event.create_or_read(name="event2", prevention_tools=["tool2"], db=db)
     event3 = factory.event.create_or_read(name="event3", prevention_tools=["tool3"], db=db)
 
+    # prevention_tools
     result = crud.event.read_all(prevention_tools=["tool3"], db=db)
     assert result == [event3]
 
@@ -542,12 +620,16 @@ def test_filter_by_prevention_tools(db):
     assert event2 in result
     assert event3 in result
 
+    # not_prevention_tools
+    assert crud.event.read_all(not_prevention_tools=["tool2", "tool3"], db=db) == [event1]
+
 
 def test_filter_by_queue(db):
-    factory.event.create_or_read(name="event1", db=db)
+    event1 = factory.event.create_or_read(name="event1", db=db)
     event2 = factory.event.create_or_read(name="event2", event_queue="queue2", db=db)
     event3 = factory.event.create_or_read(name="event3", event_queue="queue3", db=db)
 
+    # queue
     result = crud.event.read_all(queue=["queue3"], db=db)
     assert result == [event3]
 
@@ -555,6 +637,9 @@ def test_filter_by_queue(db):
     assert len(result) == 2
     assert event2 in result
     assert event3 in result
+
+    # not_queue
+    assert crud.event.read_all(not_queue=["queue2", "queue3"], db=db) == [event1]
 
 
 def test_filter_by_remediation_time_after(db):
@@ -590,10 +675,11 @@ def test_filter_by_remediation_time_before(db):
 
 
 def test_filter_by_remediations(db):
-    factory.event.create_or_read(name="event1", db=db)
+    event1 = factory.event.create_or_read(name="event1", db=db)
     event2 = factory.event.create_or_read(name="event2", remediations=["remediation2"], db=db)
     event3 = factory.event.create_or_read(name="event3", remediations=["remediation3"], db=db)
 
+    # remediations
     result = crud.event.read_all(remediations=["remediation3"], db=db)
     assert result == [event3]
 
@@ -602,40 +688,70 @@ def test_filter_by_remediations(db):
     assert event2 in result
     assert event3 in result
 
+    # not_remediations
+    assert crud.event.read_all(not_remediations=["remediation2", "remediation3"], db=db) == [event1]
+
 
 def test_filter_by_severity(db):
-    factory.event.create_or_read(name="event1", db=db)
+    event1 = factory.event.create_or_read(name="event1", severity=None, db=db)
     event2 = factory.event.create_or_read(name="event2", severity="level2", db=db)
     event3 = factory.event.create_or_read(name="event3", severity="level3", db=db)
 
-    result = crud.event.read_all(severity=["level3"], db=db)
-    assert result == [event3]
+    # severity
+    assert crud.event.read_all(severity=["none"], db=db) == [event1]
+
+    result = crud.event.read_all(severity=["none", "level3"], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event3 in result
 
     result = crud.event.read_all(severity=["level2", "level3"], db=db)
     assert len(result) == 2
     assert event2 in result
     assert event3 in result
 
+    # not_severity
+    assert crud.event.read_all(not_severity=["none", "level2"], db=db) == [event3]
+    assert crud.event.read_all(not_severity=["level2", "level3"], db=db) == [event1]
+
+    result = crud.event.read_all(not_severity=["none"], db=db)
+    assert len(result) == 2
+    assert event2 in result
+    assert event3 in result
+
 
 def test_filter_by_source(db):
-    factory.event.create_or_read(name="event1", db=db)
+    event1 = factory.event.create_or_read(name="event1", source=None, db=db)
     event2 = factory.event.create_or_read(name="event2", source="source2", db=db)
     event3 = factory.event.create_or_read(name="event3", source="source3", db=db)
+
+    # source
+    assert crud.event.read_all(source=["none"], db=db) == [event1]
 
     result = crud.event.read_all(source=["source3"], db=db)
     assert result == [event3]
 
-    result = crud.event.read_all(source=["source2", "source3"], db=db)
+    result = crud.event.read_all(source=["none", "source3"], db=db)
+    assert len(result) == 2
+    assert event1 in result
+    assert event3 in result
+
+    # not_source
+    assert crud.event.read_all(not_source=["none", "source2"], db=db) == [event3]
+    assert crud.event.read_all(not_source=["source2", "source3"], db=db) == [event1]
+
+    result = crud.event.read_all(not_source=["none"], db=db)
     assert len(result) == 2
     assert event2 in result
     assert event3 in result
 
 
 def test_filter_by_status(db):
-    factory.event.create_or_read(name="event1", db=db)
+    event1 = factory.event.create_or_read(name="event1", db=db)
     event2 = factory.event.create_or_read(name="event2", status="status2", db=db)
     event3 = factory.event.create_or_read(name="event3", status="status3", db=db)
 
+    # status
     result = crud.event.read_all(status=["status3"], db=db)
     assert result == [event3]
 
@@ -643,6 +759,9 @@ def test_filter_by_status(db):
     assert len(result) == 2
     assert event2 in result
     assert event3 in result
+
+    # not_status
+    assert crud.event.read_all(not_status=["status2", "status3"], db=db) == [event1]
 
 
 def test_filter_by_tags(db):
@@ -660,6 +779,7 @@ def test_filter_by_tags(db):
         type="type3", value="value3", parent_analysis=alert3.root_analysis, analysis_tags=["observable3_tag"], db=db
     )
 
+    # tags
     result = crud.event.read_all(tags=["event1_tag"], db=db)
     assert result == [event1]
 
@@ -673,6 +793,9 @@ def test_filter_by_tags(db):
     assert len(result) == 2
     assert event1 in result
     assert event3 in result
+
+    # not_tags
+    assert crud.event.read_all(not_tags=["event1_tag", "alert2_tag"], db=db) == [event3]
 
 
 def test_filter_by_threat_actors(db):
@@ -690,6 +813,7 @@ def test_filter_by_threat_actors(db):
         type="type3", value="value3", parent_analysis=alert3.root_analysis, threat_actors=["observable3_actor"], db=db
     )
 
+    # threat_actors
     result = crud.event.read_all(threat_actors=["event1_actor"], db=db)
     assert result == [event1]
 
@@ -704,42 +828,50 @@ def test_filter_by_threat_actors(db):
     assert event1 in result
     assert event3 in result
 
+    # not_threat_actors
+    assert crud.event.read_all(not_threat_actors=["event1_actor", "alert2_actor"], db=db) == [event3]
+
 
 def test_filter_by_threats(db):
-    event1 = factory.event.create_or_read(name="event1", threats=["event1_actor"], db=db)
+    event1 = factory.event.create_or_read(name="event1", threats=["event1_threat"], db=db)
     alert1 = factory.submission.create(event=event1, db=db)
     factory.observable.create_or_read(type="type1", value="value1", parent_analysis=alert1.root_analysis, db=db)
 
     event2 = factory.event.create_or_read(name="event2", db=db)
-    alert2 = factory.submission.create(event=event2, threats=["alert2_actor"], db=db)
+    alert2 = factory.submission.create(event=event2, threats=["alert2_threat"], db=db)
     factory.observable.create_or_read(type="type2", value="value2", parent_analysis=alert2.root_analysis, db=db)
 
     event3 = factory.event.create_or_read(name="event3", db=db)
     alert3 = factory.submission.create(event=event3, db=db)
     factory.observable.create_or_read(
-        type="type3", value="value3", parent_analysis=alert3.root_analysis, threats=["observable3_actor"], db=db
+        type="type3", value="value3", parent_analysis=alert3.root_analysis, threats=["observable3_threat"], db=db
     )
 
-    result = crud.event.read_all(threats=["event1_actor"], db=db)
+    # threats
+    result = crud.event.read_all(threats=["event1_threat"], db=db)
     assert result == [event1]
 
-    result = crud.event.read_all(threats=["alert2_actor"], db=db)
+    result = crud.event.read_all(threats=["alert2_threat"], db=db)
     assert result == [event2]
 
-    result = crud.event.read_all(threats=["observable3_actor"], db=db)
+    result = crud.event.read_all(threats=["observable3_threat"], db=db)
     assert result == [event3]
 
-    result = crud.event.read_all(threats=["event1_actor", "observable3_actor"], db=db)
+    result = crud.event.read_all(threats=["event1_threat", "observable3_threat"], db=db)
     assert len(result) == 2
     assert event1 in result
     assert event3 in result
 
+    # not_threats
+    assert crud.event.read_all(not_threats=["event1_threat", "alert2_threat"], db=db) == [event3]
+
 
 def test_filter_by_vectors(db):
-    factory.event.create_or_read(name="event1", db=db)
+    event1 = factory.event.create_or_read(name="event1", db=db)
     event2 = factory.event.create_or_read(name="event2", vectors=["vector2"], db=db)
     event3 = factory.event.create_or_read(name="event3", vectors=["vector3"], db=db)
 
+    # vectors
     result = crud.event.read_all(vectors=["vector3"], db=db)
     assert result == [event3]
 
@@ -747,6 +879,9 @@ def test_filter_by_vectors(db):
     assert len(result) == 2
     assert event2 in result
     assert event3 in result
+
+    # not_vectors
+    assert crud.event.read_all(not_vectors=["vector2", "vector3"], db=db) == [event1]
 
 
 def test_sort_by_created_time(db):

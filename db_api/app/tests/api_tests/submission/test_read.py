@@ -658,10 +658,6 @@ def test_get_filter_tags(client, db):
     assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
     assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
 
-    # All the submissions should be returned if you don't specify any tags for the filter
-    get = client.get("/api/submission/?tags=")
-    assert get.json()["total"] == 3
-
 
 def test_get_filter_threat_actors(client, db):
     submission1 = factory.submission.create(db=db)
@@ -690,10 +686,6 @@ def test_get_filter_threat_actors(client, db):
     assert get.json()["total"] == 2
     assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
     assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
-
-    # All the submissions should be returned if you don't specify anything for the filter
-    get = client.get("/api/submission/?threat_actors=")
-    assert get.json()["total"] == 2
 
 
 def test_get_filter_threats(client, db):
@@ -732,10 +724,6 @@ def test_get_filter_threats(client, db):
     assert get.json()["total"] == 2
     assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
     assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
-
-    # All the submissions should be returned if you don't specify any threats for the filter
-    get = client.get("/api/submission/?threats=")
-    assert get.json()["total"] == 3
 
 
 def test_get_filter_tool(client, db):
