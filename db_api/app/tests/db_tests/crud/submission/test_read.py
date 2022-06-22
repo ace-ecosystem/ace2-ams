@@ -585,7 +585,9 @@ def test_filter_by_tool_instance(db):
 def test_filter_by_type(db):
     submission1 = factory.submission.create(submission_type="type1", db=db)
     submission2 = factory.submission.create(submission_type="type2", db=db)
+    submission3 = factory.submission.create(db=db)
 
+    # submission_type
     result = crud.submission.read_all(submission_type=["type1"], db=db)
     assert result == [submission1]
 
@@ -593,6 +595,9 @@ def test_filter_by_type(db):
     assert len(result) == 2
     assert submission1 in result
     assert submission2 in result
+
+    # not_submission_type
+    assert crud.submission.read_all(not_submission_type=["type1", "type2"], db=db) == [submission3]
 
 
 def test_read_all_history(db):

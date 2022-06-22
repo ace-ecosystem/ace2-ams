@@ -46,6 +46,7 @@ def get_all_alerts(
     limit: Optional[int] = Query(50, le=100),
     offset: Optional[int] = Query(0),
     alert_type: Optional[list[str]] = Query(None),
+    not_alert_type: Optional[list[str]] = Query(None),
     disposition: Optional[list[str]] = Query(None),
     not_disposition: Optional[list[str]] = Query(None),
     disposition_user: Optional[list[str]] = Query(None),
@@ -104,7 +105,11 @@ def get_all_alerts(
 
     if alert_type:
         for alert_type_item in alert_type:
-            query_params += f"&alert_type={alert_type_item}"
+            query_params += f"&submission_type={alert_type_item}"
+
+    if not_alert_type:
+        for not_alert_type_item in not_alert_type:
+            query_params += f"&not_submission_type={not_alert_type_item}"
 
     if disposition:
         for disposition_item in disposition:

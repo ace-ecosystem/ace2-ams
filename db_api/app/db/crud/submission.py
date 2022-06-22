@@ -139,6 +139,7 @@ def build_read_all_query(
     not_queue: Optional[list[str]] = None,
     sort: Optional[str] = None,  # Example: event_time|desc
     submission_type: Optional[list[str]] = None,
+    not_submission_type: Optional[list[str]] = None,
     tags: Optional[list[str]] = None,
     not_tags: Optional[list[str]] = None,
     threat_actors: Optional[list[str]] = None,
@@ -429,6 +430,10 @@ def build_read_all_query(
         type_query = select(Submission).join(SubmissionType).where(SubmissionType.value.in_(submission_type))
         query = _join_as_subquery(query, type_query)
 
+    if not_submission_type:
+        type_query = select(Submission).join(SubmissionType).where(~SubmissionType.value.in_(not_submission_type))
+        query = _join_as_subquery(query, type_query)
+
     if tags:
         tag_filters = []
         for t in tags:
@@ -680,6 +685,7 @@ def read_all(
     not_queue: Optional[list[str]] = None,
     sort: Optional[str] = None,  # Example: event_time|desc
     submission_type: Optional[list[str]] = None,
+    not_submission_type: Optional[list[str]] = None,
     tags: Optional[list[str]] = None,
     not_tags: Optional[list[str]] = None,
     threat_actors: Optional[list[str]] = None,
@@ -719,6 +725,7 @@ def read_all(
                 not_queue=not_queue,
                 sort=sort,  # Example: event_time|desc
                 submission_type=submission_type,
+                not_submission_type=not_submission_type,
                 tags=tags,
                 not_tags=not_tags,
                 threat_actors=threat_actors,
