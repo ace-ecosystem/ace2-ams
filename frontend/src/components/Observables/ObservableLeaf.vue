@@ -40,7 +40,7 @@
       <Menu
         id="overlayMenu"
         ref="menu"
-        :model="(itemsFiltered as unknown as MenuItem[])"
+        :model="(itemsFiltered as unknown as MenuItemType[])"
         :popup="true"
       >
         <template #item="{ item }">
@@ -138,6 +138,8 @@
   import { alertDispositionRead } from "@/models/alertDisposition";
 
   const config = inject("config") as Record<string, any>;
+
+  type MenuItemType = typeof MenuItem;
 
   const props = defineProps({
     observable: {
