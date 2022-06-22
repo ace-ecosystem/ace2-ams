@@ -2,6 +2,7 @@ import { mount } from "@cypress/vue";
 import PrimeVue from "primevue/config";
 
 import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
+import { testConfiguration } from "@/etc/configuration/test/index";
 
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { observableInAlertRead } from "@/models/observable";
@@ -26,7 +27,7 @@ function factory(
   return mount(AlertTableExpansion, {
     global: {
       plugins: [createCustomCypressPinia(), PrimeVue, router],
-      provide: { nodeType: "alerts" },
+      provide: { nodeType: "alerts", config: testConfiguration },
     },
     propsData: args.props,
   });
@@ -43,7 +44,7 @@ describe("AlertTableExpansion", () => {
     cy.get("ul").should("not.exist");
     cy.contains("No observables exist for this alert.");
   });
-  it("renders with observables containing observables with tags", () => {
+  it("renders with alerts containing observables with tags", () => {
     factory({
       props: {
         observables: [
@@ -64,7 +65,7 @@ describe("AlertTableExpansion", () => {
     cy.get("li").eq(1).contains("testTag");
     cy.get("li").eq(1).contains("analysisTag1");
   });
-  it("renders with observables containing observables with tags", () => {
+  it("correctly filters on observable when observable clicked", () => {
     const observable = observableInAlertReadFactory();
     factory({
       props: {
@@ -78,5 +79,23 @@ describe("AlertTableExpansion", () => {
         observable: [{ category: observable.type, value: observable.value }],
       },
     });
+  });
+  it("renders with alerts containing observables with dispositionHistory", () => {
+    const observable = observableInAlertReadFactory({
+      dispositionHistory: [
+        { count: 1, disposition: "testDisposition", percent: 100 },
+      ],
+    });
+    factory({
+      props: {
+        observables: [observable],
+      },
+    });
+    cy.contains("testObservableType : TestObservable");
+    cy.get("[data-cy=disposition-tag]")
+      .should("be.visible")
+      .should("contain.text", "testDisposition")
+      .should("contain.text", "100%")
+      .should("contain.text", "(1)");
   });
 });

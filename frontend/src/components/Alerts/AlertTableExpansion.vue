@@ -26,6 +26,10 @@
         :key="tag.value"
         :tag="tag"
       />
+      <ObservableDispositionHistoryGroup
+        :observable="obs"
+        :reroute-to-manage-alerts="false"
+      ></ObservableDispositionHistoryGroup>
     </li>
   </ul>
 </template>
@@ -35,6 +39,8 @@
   import Skeleton from "primevue/skeleton";
 
   import { useFilterStore } from "@/stores/filter";
+
+  import ObservableDispositionHistoryGroup from "@/components/Observables/ObservableDispositionHistoryGroup.vue";
   import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
   import { observableInAlertRead } from "@/models/observable";

@@ -96,6 +96,14 @@ const observableWithTime = observableTreeReadFactory({
   }),
 });
 
+const observableWithDispositionHistory = observableTreeReadFactory({
+  value: "Observable w/ DispositionHistory",
+  children: [],
+  dispositionHistory: [
+    { count: 1, disposition: "testDisposition", percent: 100 },
+  ],
+});
+
 const observableWithDetectionPoints = observableTreeReadFactory({
   value: "Observable w/ Detection Points",
   firstAppearance: true,
@@ -289,6 +297,17 @@ describe("ObservableLeaf", () => {
       "contain.text",
       "testObservableType: Observable w/ Time @ 2/24/2022, 12:00:00 AM UTC",
     );
+  });
+  it("displays disposition history group for observable, if available", () => {
+    factory({
+      props: { observable: observableWithDispositionHistory },
+      config: testConfiguration,
+    });
+    cy.get("[data-cy=disposition-tag]")
+      .should("be.visible")
+      .should("contain.text", "testDisposition")
+      .should("contain.text", "100%")
+      .should("contain.text", "(1)");
   });
   it("sets the alert filters to the an observable's type and value when clicked", () => {
     factory({
