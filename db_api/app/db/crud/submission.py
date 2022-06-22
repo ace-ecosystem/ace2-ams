@@ -144,7 +144,9 @@ def build_read_all_query(
     threat_actors: Optional[list[str]] = None,
     threats: Optional[list[str]] = None,
     tool: Optional[list[str]] = None,
+    not_tool: Optional[list[str]] = None,
     tool_instance: Optional[list[str]] = None,
+    not_tool_instance: Optional[list[str]] = None,
 ) -> Select:
     def _join_as_subquery(query: Select, subquery: Select):
         s = subquery.subquery()
@@ -509,9 +511,19 @@ def build_read_all_query(
         tool_query = select(Submission).join(SubmissionTool).where(SubmissionTool.value.in_(tool))
         query = _join_as_subquery(query, tool_query)
 
+    if not_tool:
+        tool_query = select(Submission).join(SubmissionTool).where(~SubmissionTool.value.in_(not_tool))
+        query = _join_as_subquery(query, tool_query)
+
     if tool_instance:
         tool_instance_query = (
             select(Submission).join(SubmissionToolInstance).where(SubmissionToolInstance.value.in_(tool_instance))
+        )
+        query = _join_as_subquery(query, tool_instance_query)
+
+    if not_tool_instance:
+        tool_instance_query = (
+            select(Submission).join(SubmissionToolInstance).where(~SubmissionToolInstance.value.in_(not_tool_instance))
         )
         query = _join_as_subquery(query, tool_instance_query)
 
@@ -673,7 +685,9 @@ def read_all(
     threat_actors: Optional[list[str]] = None,
     threats: Optional[list[str]] = None,
     tool: Optional[list[str]] = None,
+    not_tool: Optional[list[str]] = None,
     tool_instance: Optional[list[str]] = None,
+    not_tool_instance: Optional[list[str]] = None,
 ) -> list[Submission]:
     return (
         db.execute(
@@ -710,7 +724,9 @@ def read_all(
                 threat_actors=threat_actors,
                 threats=threats,
                 tool=tool,
+                not_tool=not_tool,
                 tool_instance=tool_instance,
+                not_tool_instance=not_tool_instance,
             )
         )
         .scalars()

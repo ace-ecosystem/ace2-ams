@@ -94,7 +94,9 @@ def get_all_alerts(
     threat_actors: Optional[list[str]] = Query(None),
     threats: Optional[list[str]] = Query(None),
     tool: Optional[list[str]] = Query(None),
+    not_tool: Optional[list[str]] = Query(None),
     tool_instance: Optional[list[str]] = Query(None),
+    not_tool_instance: Optional[list[str]] = Query(None),
 ):
     # alert=True is hardcoded in the query to the database API so that the GUI only receives
     # submissions that are considered to be alerts.
@@ -220,9 +222,17 @@ def get_all_alerts(
         for tool_item in tool:
             query_params += f"&tool={tool_item}"
 
+    if not_tool:
+        for not_tool_item in not_tool:
+            query_params += f"&not_tool={not_tool_item}"
+
     if tool_instance:
         for tool_instance_item in tool_instance:
             query_params += f"&tool_instance={tool_instance_item}"
+
+    if not_tool_instance:
+        for not_tool_instance_item in not_tool_instance:
+            query_params += f"&not_tool_instance={not_tool_instance_item}"
 
     if sort:
         query_params += f"&sort={sort}"

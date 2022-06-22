@@ -552,6 +552,7 @@ def test_filter_by_tool(db):
     submission1 = factory.submission.create(tool="tool1", db=db)
     submission2 = factory.submission.create(tool="tool2", db=db)
 
+    # tool
     result = crud.submission.read_all(tool=["tool1"], db=db)
     assert result == [submission1]
 
@@ -560,11 +561,15 @@ def test_filter_by_tool(db):
     assert submission1 in result
     assert submission2 in result
 
+    # not_tool
+    assert crud.submission.read_all(not_tool=["tool1"], db=db) == [submission2]
+
 
 def test_filter_by_tool_instance(db):
     submission1 = factory.submission.create(tool_instance="tool_instance1", db=db)
     submission2 = factory.submission.create(tool_instance="tool_instance2", db=db)
 
+    # tool_instance
     result = crud.submission.read_all(tool_instance=["tool_instance1"], db=db)
     assert result == [submission1]
 
@@ -572,6 +577,9 @@ def test_filter_by_tool_instance(db):
     assert len(result) == 2
     assert submission1 in result
     assert submission2 in result
+
+    # not_tool_instance
+    assert crud.submission.read_all(not_tool_instance=["tool_instance1"], db=db) == [submission2]
 
 
 def test_filter_by_type(db):

@@ -106,7 +106,9 @@ def get_all_submissions(
     threat_actors: Optional[list[str]] = Query(None),
     threats: Optional[list[str]] = Query(None),
     tool: Optional[list[str]] = Query(None),
+    not_tool: Optional[list[str]] = Query(None),
     tool_instance: Optional[list[str]] = Query(None),
+    not_tool_instance: Optional[list[str]] = Query(None),
 ):
     return paginate(
         conn=db,
@@ -143,7 +145,9 @@ def get_all_submissions(
             threat_actors=threat_actors,
             threats=threats,
             tool=tool,
+            not_tool=not_tool,
             tool_instance=tool_instance,
+            not_tool_instance=not_tool_instance,
         ),
     )
 
