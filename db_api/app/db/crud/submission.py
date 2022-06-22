@@ -114,40 +114,40 @@ def _read_analysis_uuids(submission_uuids: list[UUID], db: Session) -> list[UUID
 def build_read_all_query(
     alert: Optional[bool] = None,
     disposition: Optional[list[str]] = None,
-    not_disposition: Optional[list[str]] = None,
     disposition_user: Optional[list[str]] = None,
-    not_disposition_user: Optional[list[str]] = None,
     dispositioned_after: Optional[list[datetime]] = None,
     dispositioned_before: Optional[list[datetime]] = None,
     event_uuid: Optional[list[UUID]] = None,
-    not_event_uuid: Optional[list[UUID]] = None,
     event_time_after: Optional[list[datetime]] = None,
     event_time_before: Optional[list[datetime]] = None,
     insert_time_after: Optional[list[datetime]] = None,
     insert_time_before: Optional[list[datetime]] = None,
     name: Optional[list[str]] = None,
+    not_disposition: Optional[list[str]] = None,
+    not_disposition_user: Optional[list[str]] = None,
+    not_event_uuid: Optional[list[UUID]] = None,
     not_name: Optional[list[str]] = None,
-    observable: Optional[list[str]] = None,  # Example: type|value
     not_observable: Optional[list[str]] = None,  # Example: type|value
-    observable_types: Optional[list[str]] = None,
     not_observable_types: Optional[list[str]] = None,
-    observable_value: Optional[list[str]] = None,
     not_observable_value: Optional[list[str]] = None,
-    owner: Optional[list[str]] = None,
     not_owner: Optional[list[str]] = None,
-    queue: Optional[list[str]] = None,
     not_queue: Optional[list[str]] = None,
+    not_submission_type: Optional[list[str]] = None,
+    not_tags: Optional[list[str]] = None,
+    not_tool: Optional[list[str]] = None,
+    not_tool_instance: Optional[list[str]] = None,
+    observable: Optional[list[str]] = None,  # Example: type|value
+    observable_types: Optional[list[str]] = None,
+    observable_value: Optional[list[str]] = None,
+    owner: Optional[list[str]] = None,
+    queue: Optional[list[str]] = None,
     sort: Optional[str] = None,  # Example: event_time|desc
     submission_type: Optional[list[str]] = None,
-    not_submission_type: Optional[list[str]] = None,
     tags: Optional[list[str]] = None,
-    not_tags: Optional[list[str]] = None,
     threat_actors: Optional[list[str]] = None,
     threats: Optional[list[str]] = None,
     tool: Optional[list[str]] = None,
-    not_tool: Optional[list[str]] = None,
     tool_instance: Optional[list[str]] = None,
-    not_tool_instance: Optional[list[str]] = None,
 ) -> Select:
     def _join_as_subquery(query: Select, subquery: Select):
         s = subquery.subquery()
@@ -174,19 +174,6 @@ def build_read_all_query(
 
         query = _join_as_subquery(query, disposition_query)
 
-    if not_disposition:
-        not_disposition_query = select(Submission)
-        if _none_in_list(not_disposition):
-            not_disposition_query = not_disposition_query.join(AlertDisposition).where(
-                ~AlertDisposition.value.in_(not_disposition)
-            )
-        else:
-            not_disposition_query = not_disposition_query.outerjoin(AlertDisposition).where(
-                or_(~AlertDisposition.value.in_(not_disposition), Submission.disposition_uuid == None)
-            )
-
-        query = _join_as_subquery(query, not_disposition_query)
-
     if disposition_user:
         disposition_user_query = select(Submission).where(
             Submission.history.any(
@@ -198,21 +185,6 @@ def build_read_all_query(
         )
 
         query = _join_as_subquery(query, disposition_user_query)
-
-    if not_disposition_user:
-        not_disposition_user_query = select(Submission).where(
-            or_(
-                Submission.disposition_uuid == None,
-                ~Submission.history.any(
-                    and_(
-                        SubmissionHistory.field == "disposition",
-                        SubmissionHistory.action_by.has(User.username.in_(not_disposition_user)),
-                    )
-                ),
-            )
-        )
-
-        query = _join_as_subquery(query, not_disposition_user_query)
 
     if dispositioned_after:
         dispositioned_after_query = select(Submission).where(
@@ -248,12 +220,6 @@ def build_read_all_query(
         event_uuid_query = select(Submission).where(Submission.event_uuid.in_(event_uuid))
         query = _join_as_subquery(query, event_uuid_query)
 
-    if not_event_uuid:
-        not_event_uuid_query = select(Submission).where(
-            or_(Submission.event_uuid == None, ~Submission.event_uuid.in_(not_event_uuid))
-        )
-        query = _join_as_subquery(query, not_event_uuid_query)
-
     if insert_time_after:
         insert_time_after_query = select(Submission).where(or_(Submission.insert_time > i for i in insert_time_after))
         query = _join_as_subquery(query, insert_time_after_query)
@@ -267,30 +233,44 @@ def build_read_all_query(
         name_query = select(Submission).where(or_(*clauses))
         query = _join_as_subquery(query, name_query).order_by(Submission.name.asc())
 
+    if not_disposition:
+        not_disposition_query = select(Submission)
+        if _none_in_list(not_disposition):
+            not_disposition_query = not_disposition_query.join(AlertDisposition).where(
+                ~AlertDisposition.value.in_(not_disposition)
+            )
+        else:
+            not_disposition_query = not_disposition_query.outerjoin(AlertDisposition).where(
+                or_(~AlertDisposition.value.in_(not_disposition), Submission.disposition_uuid == None)
+            )
+
+        query = _join_as_subquery(query, not_disposition_query)
+
+    if not_disposition_user:
+        not_disposition_user_query = select(Submission).where(
+            or_(
+                Submission.disposition_uuid == None,
+                ~Submission.history.any(
+                    and_(
+                        SubmissionHistory.field == "disposition",
+                        SubmissionHistory.action_by.has(User.username.in_(not_disposition_user)),
+                    )
+                ),
+            )
+        )
+
+        query = _join_as_subquery(query, not_disposition_user_query)
+
+    if not_event_uuid:
+        not_event_uuid_query = select(Submission).where(
+            or_(Submission.event_uuid == None, ~Submission.event_uuid.in_(not_event_uuid))
+        )
+        query = _join_as_subquery(query, not_event_uuid_query)
+
     if not_name:
         clauses = [~Submission.name.ilike(f"%{n}%") for n in not_name]
         not_name_query = select(Submission).where(and_(*clauses))
         query = _join_as_subquery(query, not_name_query).order_by(Submission.name.asc())
-
-    if observable:
-        observable_split = [o.split("|", maxsplit=1) for o in observable]
-        observable_query = (
-            select(Submission)
-            .join(
-                submission_analysis_mapping,
-                onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid,
-            )
-            .join(
-                analysis_child_observable_mapping,
-                onclause=analysis_child_observable_mapping.c.analysis_uuid
-                == submission_analysis_mapping.c.analysis_uuid,
-            )
-            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
-            .join(ObservableType)
-            .where(or_(and_(ObservableType.value == o[0], Observable.value == o[1]) for o in observable_split))
-        )
-
-        query = _join_as_subquery(query, observable_query)
 
     if not_observable:
         observable_split = [o.split("|", maxsplit=1) for o in not_observable]
@@ -308,6 +288,117 @@ def build_read_all_query(
             .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
             .join(ObservableType)
             .where(not_(or_(and_(ObservableType.value == o[0], Observable.value == o[1]) for o in observable_split)))
+        )
+
+        query = _join_as_subquery(query, observable_query)
+
+    if not_observable_types:
+        type_filters = []
+        for o in not_observable_types:
+            type_filters.append([func.count(1).filter(ObservableType.value == t) > 0 for t in o.split(",")])
+
+        observable_types_query = (
+            select(Submission)
+            .join(
+                submission_analysis_mapping, onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid
+            )
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .join(ObservableType)
+            .having(not_(or_(and_(*sub_type_filters) for sub_type_filters in type_filters)))
+            .group_by(Submission.uuid, Node.uuid)
+        )
+
+        query = _join_as_subquery(query, observable_types_query)
+
+    if not_observable_value:
+        observable_value_query = (
+            select(Submission)
+            .join(
+                submission_analysis_mapping,
+                onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid,
+            )
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .where(~Observable.value.in_(not_observable_value))
+        )
+
+        query = _join_as_subquery(query, observable_value_query)
+
+    if not_owner:
+        owner_query = select(Submission)
+        if _none_in_list(not_owner):
+            owner_query = owner_query.join(User, onclause=Submission.owner_uuid == User.uuid).where(
+                ~User.username.in_(not_owner)
+            )
+        else:
+            owner_query = owner_query.outerjoin(User, onclause=Submission.owner_uuid == User.uuid).where(
+                or_(~User.username.in_(not_owner), Submission.owner_uuid == None)
+            )
+        query = _join_as_subquery(query, owner_query)
+
+    if not_queue:
+        queue_query = select(Submission).join(Queue).where(~Queue.value.in_(not_queue))
+        query = _join_as_subquery(query, queue_query)
+
+    if not_submission_type:
+        type_query = select(Submission).join(SubmissionType).where(~SubmissionType.value.in_(not_submission_type))
+        query = _join_as_subquery(query, type_query)
+
+    if not_tags:
+        tag_filters = []
+        for t in not_tags:
+            if t:
+                tag_sub_filters = []
+                for tag in t.split(","):
+                    tag_sub_filters.append(
+                        and_(
+                            ~Submission.tags.any(MetadataTag.value == tag),
+                            ~Submission.child_analysis_tags.any(MetadataTag.value == tag),
+                            ~Submission.child_tags.any(MetadataTag.value == tag),
+                        )
+                    )
+
+                tag_filters.append(or_(*tag_sub_filters))
+
+        tags_query = select(Submission).where(and_(*tag_filters))
+
+        query = _join_as_subquery(query, tags_query)
+
+    if not_tool:
+        tool_query = select(Submission).join(SubmissionTool).where(~SubmissionTool.value.in_(not_tool))
+        query = _join_as_subquery(query, tool_query)
+
+    if not_tool_instance:
+        tool_instance_query = (
+            select(Submission).join(SubmissionToolInstance).where(~SubmissionToolInstance.value.in_(not_tool_instance))
+        )
+        query = _join_as_subquery(query, tool_instance_query)
+
+    if observable:
+        observable_split = [o.split("|", maxsplit=1) for o in observable]
+        observable_query = (
+            select(Submission)
+            .join(
+                submission_analysis_mapping,
+                onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid,
+            )
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .join(ObservableType)
+            .where(or_(and_(ObservableType.value == o[0], Observable.value == o[1]) for o in observable_split))
         )
 
         query = _join_as_subquery(query, observable_query)
@@ -335,29 +426,6 @@ def build_read_all_query(
 
         query = _join_as_subquery(query, observable_types_query)
 
-    if not_observable_types:
-        type_filters = []
-        for o in not_observable_types:
-            type_filters.append([func.count(1).filter(ObservableType.value == t) > 0 for t in o.split(",")])
-
-        observable_types_query = (
-            select(Submission)
-            .join(
-                submission_analysis_mapping, onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid
-            )
-            .join(
-                analysis_child_observable_mapping,
-                onclause=analysis_child_observable_mapping.c.analysis_uuid
-                == submission_analysis_mapping.c.analysis_uuid,
-            )
-            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
-            .join(ObservableType)
-            .having(not_(or_(and_(*sub_type_filters) for sub_type_filters in type_filters)))
-            .group_by(Submission.uuid, Node.uuid)
-        )
-
-        query = _join_as_subquery(query, observable_types_query)
-
     if observable_value:
         observable_value_query = (
             select(Submission)
@@ -376,24 +444,6 @@ def build_read_all_query(
 
         query = _join_as_subquery(query, observable_value_query)
 
-    if not_observable_value:
-        observable_value_query = (
-            select(Submission)
-            .join(
-                submission_analysis_mapping,
-                onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid,
-            )
-            .join(
-                analysis_child_observable_mapping,
-                onclause=analysis_child_observable_mapping.c.analysis_uuid
-                == submission_analysis_mapping.c.analysis_uuid,
-            )
-            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
-            .where(~Observable.value.in_(not_observable_value))
-        )
-
-        query = _join_as_subquery(query, observable_value_query)
-
     if owner:
         owner_query = select(Submission)
         if _none_in_list(owner):
@@ -406,32 +456,12 @@ def build_read_all_query(
             )
         query = _join_as_subquery(query, owner_query)
 
-    if not_owner:
-        owner_query = select(Submission)
-        if _none_in_list(not_owner):
-            owner_query = owner_query.join(User, onclause=Submission.owner_uuid == User.uuid).where(
-                ~User.username.in_(not_owner)
-            )
-        else:
-            owner_query = owner_query.outerjoin(User, onclause=Submission.owner_uuid == User.uuid).where(
-                or_(~User.username.in_(not_owner), Submission.owner_uuid == None)
-            )
-        query = _join_as_subquery(query, owner_query)
-
     if queue:
         queue_query = select(Submission).join(Queue).where(Queue.value.in_(queue))
         query = _join_as_subquery(query, queue_query)
 
-    if not_queue:
-        queue_query = select(Submission).join(Queue).where(~Queue.value.in_(not_queue))
-        query = _join_as_subquery(query, queue_query)
-
     if submission_type:
         type_query = select(Submission).join(SubmissionType).where(SubmissionType.value.in_(submission_type))
-        query = _join_as_subquery(query, type_query)
-
-    if not_submission_type:
-        type_query = select(Submission).join(SubmissionType).where(~SubmissionType.value.in_(not_submission_type))
         query = _join_as_subquery(query, type_query)
 
     if tags:
@@ -451,26 +481,6 @@ def build_read_all_query(
                 tag_filters.append(and_(*tag_sub_filters))
 
         tags_query = select(Submission).where(or_(*tag_filters))
-
-        query = _join_as_subquery(query, tags_query)
-
-    if not_tags:
-        tag_filters = []
-        for t in not_tags:
-            if t:
-                tag_sub_filters = []
-                for tag in t.split(","):
-                    tag_sub_filters.append(
-                        and_(
-                            ~Submission.tags.any(MetadataTag.value == tag),
-                            ~Submission.child_analysis_tags.any(MetadataTag.value == tag),
-                            ~Submission.child_tags.any(MetadataTag.value == tag),
-                        )
-                    )
-
-                tag_filters.append(or_(*tag_sub_filters))
-
-        tags_query = select(Submission).where(and_(*tag_filters))
 
         query = _join_as_subquery(query, tags_query)
 
@@ -516,19 +526,9 @@ def build_read_all_query(
         tool_query = select(Submission).join(SubmissionTool).where(SubmissionTool.value.in_(tool))
         query = _join_as_subquery(query, tool_query)
 
-    if not_tool:
-        tool_query = select(Submission).join(SubmissionTool).where(~SubmissionTool.value.in_(not_tool))
-        query = _join_as_subquery(query, tool_query)
-
     if tool_instance:
         tool_instance_query = (
             select(Submission).join(SubmissionToolInstance).where(SubmissionToolInstance.value.in_(tool_instance))
-        )
-        query = _join_as_subquery(query, tool_instance_query)
-
-    if not_tool_instance:
-        tool_instance_query = (
-            select(Submission).join(SubmissionToolInstance).where(~SubmissionToolInstance.value.in_(not_tool_instance))
         )
         query = _join_as_subquery(query, tool_instance_query)
 
@@ -660,80 +660,80 @@ def read_all(
     db: Session,
     alert: Optional[bool] = None,
     disposition: Optional[list[str]] = None,
-    not_disposition: Optional[list[str]] = None,
     disposition_user: Optional[list[str]] = None,
-    not_disposition_user: Optional[list[str]] = None,
     dispositioned_after: Optional[list[datetime]] = None,
     dispositioned_before: Optional[list[datetime]] = None,
     event_uuid: Optional[list[UUID]] = None,
-    not_event_uuid: Optional[list[UUID]] = None,
     event_time_after: Optional[list[datetime]] = None,
     event_time_before: Optional[list[datetime]] = None,
     insert_time_after: Optional[list[datetime]] = None,
     insert_time_before: Optional[list[datetime]] = None,
     name: Optional[list[str]] = None,
+    not_disposition: Optional[list[str]] = None,
+    not_disposition_user: Optional[list[str]] = None,
+    not_event_uuid: Optional[list[UUID]] = None,
     not_name: Optional[list[str]] = None,
-    observable: Optional[list[str]] = None,  # Example: type|value
     not_observable: Optional[list[str]] = None,  # Example: type|value
-    observable_types: Optional[list[str]] = None,
     not_observable_types: Optional[list[str]] = None,
-    observable_value: Optional[list[str]] = None,
     not_observable_value: Optional[list[str]] = None,
-    owner: Optional[list[str]] = None,
     not_owner: Optional[list[str]] = None,
-    queue: Optional[list[str]] = None,
     not_queue: Optional[list[str]] = None,
+    not_submission_type: Optional[list[str]] = None,
+    not_tags: Optional[list[str]] = None,
+    not_tool: Optional[list[str]] = None,
+    not_tool_instance: Optional[list[str]] = None,
+    observable: Optional[list[str]] = None,  # Example: type|value
+    observable_types: Optional[list[str]] = None,
+    observable_value: Optional[list[str]] = None,
+    owner: Optional[list[str]] = None,
+    queue: Optional[list[str]] = None,
     sort: Optional[str] = None,  # Example: event_time|desc
     submission_type: Optional[list[str]] = None,
-    not_submission_type: Optional[list[str]] = None,
     tags: Optional[list[str]] = None,
-    not_tags: Optional[list[str]] = None,
     threat_actors: Optional[list[str]] = None,
     threats: Optional[list[str]] = None,
     tool: Optional[list[str]] = None,
-    not_tool: Optional[list[str]] = None,
     tool_instance: Optional[list[str]] = None,
-    not_tool_instance: Optional[list[str]] = None,
 ) -> list[Submission]:
     return (
         db.execute(
             build_read_all_query(
                 alert=alert,
                 disposition=disposition,
-                not_disposition=not_disposition,
                 disposition_user=disposition_user,
-                not_disposition_user=not_disposition_user,
                 dispositioned_after=dispositioned_after,
                 dispositioned_before=dispositioned_before,
                 event_uuid=event_uuid,
-                not_event_uuid=not_event_uuid,
                 event_time_after=event_time_after,
                 event_time_before=event_time_before,
                 insert_time_after=insert_time_after,
                 insert_time_before=insert_time_before,
                 name=name,
+                not_disposition=not_disposition,
+                not_disposition_user=not_disposition_user,
+                not_event_uuid=not_event_uuid,
                 not_name=not_name,
-                observable=observable,  # Example: type|value
                 not_observable=not_observable,  # Example: type|value
-                observable_types=observable_types,
                 not_observable_types=not_observable_types,
-                observable_value=observable_value,
                 not_observable_value=not_observable_value,
-                owner=owner,
                 not_owner=not_owner,
-                queue=queue,
                 not_queue=not_queue,
+                not_submission_type=not_submission_type,
+                not_tags=not_tags,
+                not_tool=not_tool,
+                not_tool_instance=not_tool_instance,
+                observable=observable,  # Example: type|value
+                observable_types=observable_types,
+                observable_value=observable_value,
+                owner=owner,
+                queue=queue,
                 sort=sort,  # Example: event_time|desc
                 submission_type=submission_type,
-                not_submission_type=not_submission_type,
                 tags=tags,
-                not_tags=not_tags,
                 threat_actors=threat_actors,
                 threats=threats,
                 tool=tool,
-                not_tool=not_tool,
                 tool_instance=tool_instance,
-                not_tool_instance=not_tool_instance,
             )
         )
         .scalars()
