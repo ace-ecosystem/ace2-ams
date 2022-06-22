@@ -8,7 +8,6 @@ from uuid import uuid4
 @pytest.mark.parametrize(
     "param,value",
     [
-        ("alert_type", "test_type"),
         ("disposition", "FALSE_POSITIVE"),
         ("disposition_user", "analyst"),
         ("dispositioned_after", datetime.now()),
@@ -19,6 +18,18 @@ from uuid import uuid4
         ("insert_time_after", datetime.now()),
         ("insert_time_before", datetime.now()),
         ("name", "test"),
+        ("not_disposition", "test"),
+        ("not_disposition_user", "test"),
+        ("not_event_uuid", uuid4()),
+        ("not_name", "test"),
+        ("not_observable", "fqdn|test.com"),
+        ("not_observable_types", "test"),
+        ("not_observable_value", "test"),
+        ("not_owner", "test"),
+        ("not_queue", "test"),
+        ("not_tags", "test"),
+        ("not_tool", "test"),
+        ("not_tool_instance", "test"),
         ("observable", "fqdn|test.com"),
         ("observable_types", "fqdn,ipv4"),
         ("observable_value", "test.com"),
@@ -44,6 +55,44 @@ def test_get_all_alerts(client_valid_access_token, requests_mock, param, value):
     assert (len(requests_mock.request_history)) == 2
     assert requests_mock.request_history[1].method == "GET"
     assert unquote_plus(requests_mock.request_history[1].url) == unquote_plus(f"http://db-api/api/submission/?{params}")
+
+
+# NOTE: This separate test is needed because the GUI API parameter uses "alert_type" but the
+# DB API parameter uses "submission_type".
+def test_get_all_alerts_alert_type(client_valid_access_token, requests_mock):
+    gui_params = urlencode({"limit": 50, "offset": 0, "alert": True, "alert_type": "test_type"})
+    db_params = urlencode({"limit": 50, "offset": 0, "alert": True, "submission_type": "test_type"})
+
+    requests_mock.get(
+        f"http://db-api/api/submission/?{db_params}", json={"items": [], "total": 0, "limit": 50, "offset": 0}
+    )
+
+    client_valid_access_token.get(f"/api/alert/?{gui_params}")
+
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert unquote_plus(requests_mock.request_history[1].url) == unquote_plus(
+        f"http://db-api/api/submission/?{db_params}"
+    )
+
+
+# NOTE: This separate test is needed because the GUI API parameter uses "not_alert_type" but the
+# DB API parameter uses "not_submission_type".
+def test_get_all_alerts_not_alert_type(client_valid_access_token, requests_mock):
+    gui_params = urlencode({"limit": 50, "offset": 0, "alert": True, "not_alert_type": "test_type"})
+    db_params = urlencode({"limit": 50, "offset": 0, "alert": True, "not_submission_type": "test_type"})
+
+    requests_mock.get(
+        f"http://db-api/api/submission/?{db_params}", json={"items": [], "total": 0, "limit": 50, "offset": 0}
+    )
+
+    client_valid_access_token.get(f"/api/alert/?{gui_params}")
+
+    assert (len(requests_mock.request_history)) == 2
+    assert requests_mock.request_history[1].method == "GET"
+    assert unquote_plus(requests_mock.request_history[1].url) == unquote_plus(
+        f"http://db-api/api/submission/?{db_params}"
+    )
 
 
 def test_get_alert(client_valid_access_token, requests_mock):
