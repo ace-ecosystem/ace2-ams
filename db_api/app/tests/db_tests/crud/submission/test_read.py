@@ -230,7 +230,7 @@ def test_filter_by_insert_time_before(db):
 def test_filter_by_name(db):
     submission1 = factory.submission.create(name="submission1", db=db)
     submission2 = factory.submission.create(name="submission2", db=db)
-    submission3 = factory.submission.create(name="some other alert", db=db)
+    submission3 = factory.submission.create(name="some other thing", db=db)
 
     # name
     result = crud.submission.read_all(name=["submission1"], db=db)
@@ -259,6 +259,11 @@ def test_filter_by_observable(db):
         observables=[ObservableCreateInSubmission(type="type", value="value2")], db=db
     )
 
+    submission3 = factory.submission.create(
+        observables=[ObservableCreateInSubmission(type="other_type", value="other_value")], db=db
+    )
+
+    # observable
     result = crud.submission.read_all(observable=["type|value"], db=db)
     assert result == [submission1]
 
@@ -266,6 +271,14 @@ def test_filter_by_observable(db):
     assert len(result) == 2
     assert submission1 in result
     assert submission2 in result
+
+    # not_observable
+    result = crud.submission.read_all(not_observable=["type|value"], db=db)
+    assert len(result) == 2
+    assert submission2 in result
+    assert submission3 in result
+
+    assert crud.submission.read_all(not_observable=["type|value", "type|value2"], db=db) == [submission3]
 
 
 def test_filter_by_observable_types(db):

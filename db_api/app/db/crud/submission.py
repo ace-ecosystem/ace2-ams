@@ -4,7 +4,7 @@ from datetime import datetime
 from api_models.analysis_metadata import AnalysisMetadataRead
 from api_models.summaries import URLDomainSummary
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, not_, or_, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
 from typing import Optional
@@ -128,6 +128,7 @@ def build_read_all_query(
     name: Optional[list[str]] = None,
     not_name: Optional[list[str]] = None,
     observable: Optional[list[str]] = None,  # Example: type|value
+    not_observable: Optional[list[str]] = None,  # Example: type|value
     observable_types: Optional[list[str]] = None,
     observable_value: Optional[list[str]] = None,
     owner: Optional[list[str]] = None,
@@ -279,6 +280,26 @@ def build_read_all_query(
             .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
             .join(ObservableType)
             .where(or_(and_(ObservableType.value == o[0], Observable.value == o[1]) for o in observable_split))
+        )
+
+        query = _join_as_subquery(query, observable_query)
+
+    if not_observable:
+        observable_split = [o.split("|", maxsplit=1) for o in not_observable]
+        observable_query = (
+            select(Submission)
+            .join(
+                submission_analysis_mapping,
+                onclause=submission_analysis_mapping.c.submission_uuid == Submission.uuid,
+            )
+            .join(
+                analysis_child_observable_mapping,
+                onclause=analysis_child_observable_mapping.c.analysis_uuid
+                == submission_analysis_mapping.c.analysis_uuid,
+            )
+            .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
+            .join(ObservableType)
+            .where(not_(or_(and_(ObservableType.value == o[0], Observable.value == o[1]) for o in observable_split)))
         )
 
         query = _join_as_subquery(query, observable_query)
@@ -554,6 +575,7 @@ def read_all(
     name: Optional[list[str]] = None,
     not_name: Optional[list[str]] = None,
     observable: Optional[list[str]] = None,  # Example: type|value
+    not_observable: Optional[list[str]] = None,  # Example: type|value
     observable_types: Optional[list[str]] = None,
     observable_value: Optional[list[str]] = None,
     owner: Optional[list[str]] = None,
@@ -585,6 +607,7 @@ def read_all(
                 name=name,
                 not_name=not_name,
                 observable=observable,  # Example: type|value
+                not_observable=not_observable,  # Example: type|value
                 observable_types=observable_types,
                 observable_value=observable_value,
                 owner=owner,

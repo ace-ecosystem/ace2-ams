@@ -61,6 +61,7 @@ def get_all_alerts(
     name: Optional[list[str]] = Query(None),
     not_name: Optional[list[str]] = Query(None),
     observable: Optional[list[str]] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
+    not_observable: Optional[list[str]] = Query(None, regex="^[\w\-]+\|.+$"),  # type|value
     observable_types: Optional[list[str]] = Query(None),
     observable_value: Optional[list[str]] = Query(None),
     owner: Optional[list[str]] = Query(None),
@@ -157,6 +158,10 @@ def get_all_alerts(
     if observable:
         for observable_item in observable:
             query_params += f"&observable={observable_item}"
+
+    if not_observable:
+        for not_observable_item in not_observable:
+            query_params += f"&not_observable={not_observable_item}"
 
     if observable_types:
         for observable_types_item in observable_types:
