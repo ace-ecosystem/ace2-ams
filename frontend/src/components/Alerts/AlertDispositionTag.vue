@@ -43,7 +43,7 @@
       style["backgroundColor"] = "white";
       style["color"] = "black";
       style["borderStyle"] = "solid";
-      style["borderWidth"] = "1px";
+      style["borderWidth"] = "thin";
     }
     return style;
   });
