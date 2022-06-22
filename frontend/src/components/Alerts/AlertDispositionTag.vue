@@ -1,5 +1,5 @@
 <template>
-  <span class="tag">
+  <span class="tag" data-cy="disposition-tag">
     <Tag rounded :style="tagStyle"
       ><span class="tag"> {{ disposition }} </span>
       <span v-if="percent">{{ percent }}% </span>
