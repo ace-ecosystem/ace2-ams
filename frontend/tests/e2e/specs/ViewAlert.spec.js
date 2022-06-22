@@ -112,7 +112,7 @@ describe("ViewAlert.vue", () => {
       cy.get(":nth-child(3) > .header-cell").should("contain.text", "Tool");
       cy.get(":nth-child(3) > .content-cell > span").should(
         "contain.text",
-        "test_tool",
+        "None",
       );
       cy.get(":nth-child(4) > .header-cell").should(
         "contain.text",
@@ -120,7 +120,7 @@ describe("ViewAlert.vue", () => {
       );
       cy.get(":nth-child(4) > .content-cell > span").should(
         "contain.text",
-        "test_tool_instance",
+        "None",
       );
       cy.get(":nth-child(5) > .header-cell").should("contain.text", "Type");
       cy.get(":nth-child(5) > .content-cell > span").should(
