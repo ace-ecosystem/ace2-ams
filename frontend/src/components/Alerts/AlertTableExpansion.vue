@@ -26,6 +26,15 @@
         :key="tag.value"
         :tag="tag"
       />
+      <AlertDispositionTag
+        v-for="entry in obs.dispositionHistory"
+        :key="entry.disposition"
+        style="cursor: pointer"
+        :disposition="entry.disposition"
+        :disposition-count="entry.count"
+        :percent="entry.percent"
+        @click="filterByObservableAndDisposition(obs, entry.disposition)"
+      ></AlertDispositionTag>
     </li>
   </ul>
 </template>
@@ -35,9 +44,17 @@
   import Skeleton from "primevue/skeleton";
 
   import { useFilterStore } from "@/stores/filter";
+  import { useAlertDispositionStore } from "@/stores/alertDisposition";
+
+  import type CSS from "csstype";
+
+  import AlertDispositionTag from "@/components/Alerts/AlertDispositionTag.vue";
   import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
   import { observableInAlertRead } from "@/models/observable";
+  import { alertDispositionRead } from "@/models/alertDisposition";
+
+  const alertDispositionStore = useAlertDispositionStore();
 
   const props = defineProps({
     observables: {
@@ -71,6 +88,44 @@
         ],
       },
     });
+  };
+
+  const filterByObservableAndDisposition = (
+    obs: observableInAlertRead,
+    disposition: string,
+  ) => {
+    const dispositionObject = getDispositionObject(disposition);
+
+    filterStore.clearAll({ nodeType: "alerts" });
+
+    if (dispositionObject) {
+      filterStore.setFilter({
+        nodeType: "alerts",
+        filterName: "disposition",
+        filterValue: dispositionObject,
+      });
+    }
+
+    filterStore.setFilter({
+      nodeType: "alerts",
+      filterName: "observable",
+      filterValue: {
+        category: obs.type,
+        value: obs.value,
+      },
+    });
+  };
+
+  const getDispositionObject = (
+    disposition: string,
+  ): alertDispositionRead | undefined => {
+    if (disposition == "OPEN") {
+      return { value: "None" } as alertDispositionRead;
+    } else {
+      return alertDispositionStore.items.find(
+        (item) => item.value == disposition,
+      );
+    }
   };
 </script>
 
