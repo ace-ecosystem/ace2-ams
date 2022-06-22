@@ -67,6 +67,7 @@ def get_all_alerts(
     observable_value: Optional[list[str]] = Query(None),
     not_observable_value: Optional[list[str]] = Query(None),
     owner: Optional[list[str]] = Query(None),
+    not_owner: Optional[list[str]] = Query(None),
     queue: Optional[list[str]] = Query(None),
     sort: Optional[str] = Query(
         None,
@@ -184,6 +185,10 @@ def get_all_alerts(
     if owner:
         for owner_item in owner:
             query_params += f"&owner={owner_item}"
+
+    if not_owner:
+        for not_owner_item in not_owner:
+            query_params += f"&not_owner={not_owner_item}"
 
     if queue:
         for queue_item in queue:

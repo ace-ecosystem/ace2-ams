@@ -352,6 +352,7 @@ def test_filter_by_owner(db):
     submission1 = factory.submission.create(owner="analyst", db=db)
     submission2 = factory.submission.create(db=db)
 
+    # owner
     result = crud.submission.read_all(owner=["analyst"], db=db)
     assert result == [submission1]
 
@@ -362,6 +363,10 @@ def test_filter_by_owner(db):
     assert len(result) == 2
     assert submission1 in result
     assert submission2 in result
+
+    # not_owner
+    assert crud.submission.read_all(not_owner=["none"], db=db) == [submission1]
+    assert crud.submission.read_all(not_owner=["analyst"], db=db) == [submission2]
 
 
 def test_filter_by_queue(db):

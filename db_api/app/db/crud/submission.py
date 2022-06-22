@@ -134,6 +134,7 @@ def build_read_all_query(
     observable_value: Optional[list[str]] = None,
     not_observable_value: Optional[list[str]] = None,
     owner: Optional[list[str]] = None,
+    not_owner: Optional[list[str]] = None,
     queue: Optional[list[str]] = None,
     sort: Optional[str] = None,  # Example: event_time|desc
     submission_type: Optional[list[str]] = None,
@@ -400,6 +401,18 @@ def build_read_all_query(
             )
         query = _join_as_subquery(query, owner_query)
 
+    if not_owner:
+        owner_query = select(Submission)
+        if _none_in_list(not_owner):
+            owner_query = owner_query.join(User, onclause=Submission.owner_uuid == User.uuid).where(
+                ~User.username.in_(not_owner)
+            )
+        else:
+            owner_query = owner_query.outerjoin(User, onclause=Submission.owner_uuid == User.uuid).where(
+                or_(~User.username.in_(not_owner), Submission.owner_uuid == None)
+            )
+        query = _join_as_subquery(query, owner_query)
+
     if queue:
         queue_query = select(Submission).join(Queue).where(Queue.value.in_(queue))
         query = _join_as_subquery(query, queue_query)
@@ -624,6 +637,7 @@ def read_all(
     observable_value: Optional[list[str]] = None,
     not_observable_value: Optional[list[str]] = None,
     owner: Optional[list[str]] = None,
+    not_owner: Optional[list[str]] = None,
     queue: Optional[list[str]] = None,
     sort: Optional[str] = None,  # Example: event_time|desc
     submission_type: Optional[list[str]] = None,
@@ -658,6 +672,7 @@ def read_all(
                 observable_value=observable_value,
                 not_observable_value=not_observable_value,
                 owner=owner,
+                not_owner=not_owner,
                 queue=queue,
                 sort=sort,  # Example: event_time|desc
                 submission_type=submission_type,
