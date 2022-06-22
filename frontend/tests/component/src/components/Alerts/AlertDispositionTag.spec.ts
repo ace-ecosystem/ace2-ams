@@ -15,7 +15,6 @@ const blue = "rgb(0, 191, 255)";
 const white = "rgb(255, 255, 255)";
 const black = "rgb(0, 0, 0)";
 const solid = "solid";
-const thin = "1.11111px";
 
 function factory(props: AlertDispositionTagProps) {
   mount(AlertDispositionTag, {
@@ -45,8 +44,7 @@ describe("AlertDispositionTag", () => {
       .parent()
       .should("have.css", "background-color", white)
       .should("have.css", "color", black)
-      .should("have.css", "border-style", solid)
-      .should("have.css", "border-width", thin);
+      .should("have.css", "border-style", solid);
   });
   it("renders correctly if dispositionCount prop is provided", () => {
     factory({ disposition: "TEST", dispositionCount: 5 });

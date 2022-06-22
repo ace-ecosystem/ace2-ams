@@ -47,7 +47,7 @@ describe("ViewAlert.vue", () => {
     });
 
     it("Renders the expected number of tags", () => {
-      cy.get(".p-tag").should("have.length", 8);
+      cy.get(".p-tag").should("have.length", 21);
     });
 
     it("will reroute to the Manage Alerts page with observable filter applied when observable clicked", () => {
