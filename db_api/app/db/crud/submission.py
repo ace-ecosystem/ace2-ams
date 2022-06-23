@@ -19,8 +19,6 @@ from db.schemas.analysis_child_observable_mapping import analysis_child_observab
 from db.schemas.event import Event
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
-from db.schemas.node_threat import NodeThreat
-from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
@@ -29,6 +27,8 @@ from db.schemas.submission_analysis_mapping import submission_analysis_mapping
 from db.schemas.submission_tool import SubmissionTool
 from db.schemas.submission_tool_instance import SubmissionToolInstance
 from db.schemas.submission_type import SubmissionType
+from db.schemas.threat import Threat
+from db.schemas.threat_actor import ThreatActor
 from db.schemas.user import User
 
 
@@ -596,8 +596,8 @@ def build_read_all_query(
                 for threat_actor in t.split(","):
                     threat_actor_sub_filters.append(
                         or_(
-                            Submission.threat_actors.any(NodeThreatActor.value == threat_actor),
-                            Submission.child_threat_actors.any(NodeThreatActor.value == threat_actor),
+                            Submission.threat_actors.any(ThreatActor.value == threat_actor),
+                            Submission.child_threat_actors.any(ThreatActor.value == threat_actor),
                         )
                     )
 
@@ -615,8 +615,8 @@ def build_read_all_query(
                 for threat in t.split(","):
                     threat_sub_filters.append(
                         or_(
-                            Submission.threats.any(NodeThreat.value == threat),
-                            Submission.child_threats.any(NodeThreat.value == threat),
+                            Submission.threats.any(Threat.value == threat),
+                            Submission.child_threats.any(Threat.value == threat),
                         )
                     )
 

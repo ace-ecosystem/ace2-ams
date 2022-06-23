@@ -18,12 +18,12 @@ from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
 from db.schemas.metadata_directive import MetadataDirective
-from db.schemas.node_threat_type import NodeThreatType
 from db.schemas.observable_relationship_type import ObservableRelationshipType
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.seed import Seed
 from db.schemas.submission_type import SubmissionType
+from db.schemas.threat_type import ThreatType
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
 
@@ -147,13 +147,13 @@ def seed(db: Session):
             db.add(ObservableRelationshipType(value=value))
             print(f"Adding node relationship type: {value}")
 
-    if "node_threat_type" in data:
+    if "threat_type" in data:
         add_queueable_values(
             db=db,
-            db_table=NodeThreatType,
+            db_table=ThreatType,
             queues=queues,
             data=data,
-            key="node_threat_type",
+            key="threat_type",
             print_value="node threat type",
         )
 

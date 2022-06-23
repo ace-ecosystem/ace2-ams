@@ -285,8 +285,8 @@ def test_update_queue(client, db):
     "key,value_lists,helper_create_func",
     [
         ("tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
-        ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
-        ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
+        ("threat_actors", VALID_LIST_STRING_VALUES, factory.threat_actor.create_or_read),
+        ("threats", VALID_LIST_STRING_VALUES, factory.threat.create_or_read),
     ],
 )
 def test_update_valid_node_fields(client, db, key, value_lists, helper_create_func):

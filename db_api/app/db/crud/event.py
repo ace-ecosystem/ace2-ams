@@ -36,13 +36,13 @@ from db.schemas.metadata import Metadata
 from db.schemas.metadata_detection_point import MetadataDetectionPoint
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
-from db.schemas.node_threat import NodeThreat
-from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.submission import Submission, SubmissionHistory
 from db.schemas.submission_analysis_mapping import submission_analysis_mapping
+from db.schemas.threat import Threat
+from db.schemas.threat_actor import ThreatActor
 from db.schemas.user import User
 
 
@@ -421,9 +421,9 @@ def build_read_all_query(
                 for t in threat.split(","):
                     threat_actor_sub_filters.append(
                         and_(
-                            ~Event.threat_actors.any(NodeThreatActor.value == t),
-                            ~Event.alerts.any(Submission.threat_actors.any(NodeThreatActor.value == t)),
-                            ~Event.alerts.any(Submission.child_threat_actors.any(NodeThreatActor.value == t)),
+                            ~Event.threat_actors.any(ThreatActor.value == t),
+                            ~Event.alerts.any(Submission.threat_actors.any(ThreatActor.value == t)),
+                            ~Event.alerts.any(Submission.child_threat_actors.any(ThreatActor.value == t)),
                         )
                     )
 
@@ -440,9 +440,9 @@ def build_read_all_query(
                 for t in threat.split(","):
                     threat_sub_filters.append(
                         and_(
-                            ~Event.threats.any(NodeThreat.value == t),
-                            ~Event.alerts.any(Submission.threats.any(NodeThreat.value == t)),
-                            ~Event.alerts.any(Submission.child_threats.any(NodeThreat.value == t)),
+                            ~Event.threats.any(Threat.value == t),
+                            ~Event.alerts.any(Submission.threats.any(Threat.value == t)),
+                            ~Event.alerts.any(Submission.child_threats.any(Threat.value == t)),
                         )
                     )
 
@@ -642,9 +642,9 @@ def build_read_all_query(
                 for t in threat.split(","):
                     threat_actor_sub_filters.append(
                         or_(
-                            Event.threat_actors.any(NodeThreatActor.value == t),
-                            Event.alerts.any(Submission.threat_actors.any(NodeThreatActor.value == t)),
-                            Event.alerts.any(Submission.child_threat_actors.any(NodeThreatActor.value == t)),
+                            Event.threat_actors.any(ThreatActor.value == t),
+                            Event.alerts.any(Submission.threat_actors.any(ThreatActor.value == t)),
+                            Event.alerts.any(Submission.child_threat_actors.any(ThreatActor.value == t)),
                         )
                     )
 
@@ -661,9 +661,9 @@ def build_read_all_query(
                 for t in threat.split(","):
                     threat_sub_filters.append(
                         or_(
-                            Event.threats.any(NodeThreat.value == t),
-                            Event.alerts.any(Submission.threats.any(NodeThreat.value == t)),
-                            Event.alerts.any(Submission.child_threats.any(NodeThreat.value == t)),
+                            Event.threats.any(Threat.value == t),
+                            Event.alerts.any(Submission.threats.any(Threat.value == t)),
+                            Event.alerts.any(Submission.child_threats.any(Threat.value == t)),
                         )
                     )
 

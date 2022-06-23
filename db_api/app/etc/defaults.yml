@@ -138,7 +138,19 @@ event_vector:
     - unknown
     - usb
     - webmail
-node_threat_type:
+observable_relationship_type:
+  - DOWNLOADED_FROM
+  - EXECUTED_ON
+  - IS_HASH_OF
+  - LOGGED_INTO
+  - REDIRECTED_FROM
+observable_type:
+  - file
+  - ipv4
+  - url
+submission_type:
+  - manual
+threat_type:
   external:
     - botnet
     - customer threat
@@ -160,18 +172,6 @@ node_threat_type:
     - rat
     - rootkit
     - some internal value
-observable_relationship_type:
-  - DOWNLOADED_FROM
-  - EXECUTED_ON
-  - IS_HASH_OF
-  - LOGGED_INTO
-  - REDIRECTED_FROM
-observable_type:
-  - file
-  - ipv4
-  - url
-submission_type:
-  - manual
 user_role:
   - admin
   - analyst

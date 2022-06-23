@@ -102,23 +102,23 @@ class Submission(Node, HasHistory):
     )
 
     child_threat_actors = relationship(
-        "NodeThreatActor",
-        secondary="join(NodeThreatActor, node_threat_actor_mapping, NodeThreatActor.uuid == node_threat_actor_mapping.c.threat_actor_uuid)."
-        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == node_threat_actor_mapping.c.node_uuid)."
+        "ThreatActor",
+        secondary="join(ThreatActor, threat_actor_mapping, ThreatActor.uuid == threat_actor_mapping.c.threat_actor_uuid)."
+        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == threat_actor_mapping.c.node_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
-        order_by="asc(NodeThreatActor.value)",
+        order_by="asc(ThreatActor.value)",
         viewonly=True,
         lazy="selectin",
     )
 
     child_threats = relationship(
-        "NodeThreat",
-        secondary="join(NodeThreat, node_threat_mapping, NodeThreat.uuid == node_threat_mapping.c.threat_uuid)."
-        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == node_threat_mapping.c.node_uuid)."
+        "Threat",
+        secondary="join(Threat, threat_mapping, Threat.uuid == threat_mapping.c.threat_uuid)."
+        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == threat_mapping.c.node_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
-        order_by="asc(NodeThreat.value)",
+        order_by="asc(Threat.value)",
         viewonly=True,
         lazy="selectin",
     )

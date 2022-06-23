@@ -17,10 +17,10 @@ def create(
     obj: Node = db_table(**model.dict(exclude=exclude))
 
     if hasattr(model, "threat_actors") and model.threat_actors:
-        obj.threat_actors = crud.node_threat_actor.read_by_values(values=model.threat_actors, db=db)
+        obj.threat_actors = crud.threat_actor.read_by_values(values=model.threat_actors, db=db)
 
     if hasattr(model, "threats") and model.threats:
-        obj.threats = crud.node_threat.read_by_values(values=model.threats, db=db)
+        obj.threats = crud.threat.read_by_values(values=model.threats, db=db)
 
     return obj
 
@@ -53,13 +53,13 @@ def update(
                 field="threat_actors", old=[x.value for x in node.threat_actors], new=update_data["threat_actors"]
             )
         )
-        node.threat_actors = crud.node_threat_actor.read_by_values(values=update_data["threat_actors"], db=db)
+        node.threat_actors = crud.threat_actor.read_by_values(values=update_data["threat_actors"], db=db)
 
     if "threats" in update_data:
         diffs.append(
             crud.history.create_diff(field="threats", old=[x.value for x in node.threats], new=update_data["threats"])
         )
-        node.threats = crud.node_threat.read_by_values(values=update_data["threats"], db=db)
+        node.threats = crud.threat.read_by_values(values=update_data["threats"], db=db)
 
     # Update the node version
     update_version(node=node, db=db)

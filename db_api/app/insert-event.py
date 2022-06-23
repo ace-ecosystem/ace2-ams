@@ -72,11 +72,11 @@ if args.tags:
 
 if args.threat_actors:
     event.threat_actors = [
-        factory.node_threat_actor.create_or_read(value=t, db=db) for t in args.threat_actors.split(",")
+        factory.threat_actor.create_or_read(value=t, db=db) for t in args.threat_actors.split(",")
     ]
 
 if args.threats:
-    event.threats = [factory.node_threat.create_or_read(value=t, db=db) for t in args.threats.split(",")]
+    event.threats = [factory.threat.create_or_read(value=t, db=db) for t in args.threats.split(",")]
 
 if args.type:
     event.type = factory.event_type.create_or_read(value=args.type, db=db)

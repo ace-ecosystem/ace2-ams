@@ -16,8 +16,8 @@ def test_create(db):
     factory.event_type.create_or_read(value="phish", db=db)
     factory.event_vector.create_or_read(value="email", db=db)
     factory.metadata_tag.create_or_read(value="tag", db=db)
-    factory.node_threat.create_or_read(value="threat", db=db)
-    factory.node_threat_actor.create_or_read(value="actor", db=db)
+    factory.threat.create_or_read(value="threat", db=db)
+    factory.threat_actor.create_or_read(value="actor", db=db)
 
     # Create the event
     now = crud.helpers.utcnow()

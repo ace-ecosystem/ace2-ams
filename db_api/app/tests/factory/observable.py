@@ -61,11 +61,11 @@ def create_or_read(
 
     if threat_actors:
         for threat_actor in threat_actors:
-            factory.node_threat_actor.create_or_read(value=threat_actor, db=db)
+            factory.threat_actor.create_or_read(value=threat_actor, db=db)
 
     if threats:
         for threat in threats:
-            factory.node_threat.create_or_read(value=threat, db=db)
+            factory.threat.create_or_read(value=threat, db=db)
 
     if time is not None:
         factory.metadata_time.create_or_read(value=time, db=db)

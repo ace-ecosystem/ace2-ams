@@ -58,7 +58,7 @@ def test_create_nonexistent_tag(db):
         )
 
 
-def test_create_nonexistent_node_threat_actors(db):
+def test_create_nonexistent_threat_actors(db):
     submission = factory.submission.create(db=db)
     factory.observable_type.create_or_read(value="test", db=db)
 
@@ -71,7 +71,7 @@ def test_create_nonexistent_node_threat_actors(db):
         )
 
 
-def test_create_nonexistent_node_threats(db):
+def test_create_nonexistent_threats(db):
     submission = factory.submission.create(db=db)
     factory.observable_type.create_or_read(value="test", db=db)
 
@@ -153,8 +153,8 @@ def test_create(db):
     initial_submission_version = submission.version
     factory.observable_relationship_type.create_or_read(value="relationship_type", db=db)
     factory.metadata_tag.create_or_read(value="tag", db=db)
-    factory.node_threat_actor.create_or_read(value="threat_actor", db=db)
-    factory.node_threat.create_or_read(value="threat", db=db)
+    factory.threat_actor.create_or_read(value="threat_actor", db=db)
+    factory.threat.create_or_read(value="threat", db=db)
     factory.observable.create_or_read(type="type2", value="value2", parent_analysis=submission.root_analysis, db=db)
     factory.observable_type.create_or_read(value="type1", db=db)
     factory.observable_type.create_or_read(value="type3", db=db)

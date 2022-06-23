@@ -139,10 +139,10 @@ def create(
         submission.tags = [factory.metadata_tag.create_or_read(value=t, db=db) for t in tags]
 
     if threat_actors:
-        submission.threat_actors = [factory.node_threat_actor.create_or_read(value=t, db=db) for t in threat_actors]
+        submission.threat_actors = [factory.threat_actor.create_or_read(value=t, db=db) for t in threat_actors]
 
     if threats:
-        submission.threats = [factory.node_threat.create_or_read(value=threat, db=db) for threat in threats]
+        submission.threats = [factory.threat.create_or_read(value=threat, db=db) for threat in threats]
 
     if history_username and diffs and updated_by_user:
         crud.history.record_node_update_history(
