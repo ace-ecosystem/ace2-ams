@@ -5,7 +5,7 @@ from fastapi import status
 
 from db import crud
 from tests import factory
-from tests.api_tests.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
+from tests.api_tests.helpers import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 
 
 #
