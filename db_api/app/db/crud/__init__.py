@@ -18,7 +18,6 @@ from db.crud import metadata_display_type
 from db.crud import metadata_display_value
 from db.crud import metadata_tag
 from db.crud import metadata_time
-from db.crud import node
 from db.crud import event_comment
 from db.crud import observable_type
 from db.crud import observable

@@ -166,6 +166,8 @@ class Submission(Base, HasHistory):
 
     type_uuid = Column(UUID(as_uuid=True), ForeignKey("submission_type.uuid"), nullable=False, index=True)
 
+    version = Column(UUID(as_uuid=True), server_default=func.gen_random_uuid(), nullable=False)
+
     __table_args__ = (
         Index(
             "name_trgm",

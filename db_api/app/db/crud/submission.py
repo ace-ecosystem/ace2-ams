@@ -8,7 +8,7 @@ from sqlalchemy import and_, func, not_, or_, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
 from typing import Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from api_models.analysis import AnalysisSubmissionTreeRead
 from api_models.observable import DispositionHistoryIndividual, ObservableSubmissionTreeRead
@@ -16,9 +16,7 @@ from api_models.submission import SubmissionCreate, SubmissionUpdate
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
-from db.schemas.event import Event
 from db.schemas.metadata_tag import MetadataTag
-from db.schemas.node import Node
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
@@ -30,6 +28,7 @@ from db.schemas.submission_type import SubmissionType
 from db.schemas.threat import Threat
 from db.schemas.threat_actor import ThreatActor
 from db.schemas.user import User
+from exceptions.db import VersionMismatch
 
 
 def _associate_metadata_with_observable(analysis_uuids: list[UUID], o: Observable):
@@ -156,7 +155,7 @@ def build_read_all_query(
 ) -> Select:
     def _join_as_subquery(query: Select, subquery: Select):
         s = subquery.subquery()
-        return query.join(s, Submission.uuid == s.c.uuid).group_by(Submission.uuid, Node.uuid)
+        return query.join(s, Submission.uuid == s.c.uuid).group_by(Submission.uuid)
 
     def _none_in_list(values: list):
         return "none" in [str(v).lower() for v in values]
@@ -384,7 +383,7 @@ def build_read_all_query(
             .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
             .join(ObservableType)
             .having(not_(or_(and_(*sub_type_filters) for sub_type_filters in type_filters)))
-            .group_by(Submission.uuid, Node.uuid)
+            .group_by(Submission.uuid)
         )
 
         query = _join_as_subquery(query, observable_types_query)
@@ -521,7 +520,7 @@ def build_read_all_query(
             .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
             .join(ObservableType)
             .having(or_(and_(*sub_type_filters) for sub_type_filters in type_filters))
-            .group_by(Submission.uuid, Node.uuid)
+            .group_by(Submission.uuid)
         )
 
         query = _join_as_subquery(query, observable_types_query)
@@ -679,7 +678,7 @@ def build_read_all_query(
         # Only sort by disposition_user if we are not also filtering by disposition_user
         elif sort_by.lower() == "disposition_user" and not disposition_user:
             query = query.outerjoin(User, onclause=Submission.disposition_user_uuid == User.uuid).group_by(
-                Submission.uuid, Node.uuid, User.username
+                Submission.uuid, User.username
             )
             if order == "asc":
                 query = query.order_by(User.username.asc())
@@ -707,7 +706,7 @@ def build_read_all_query(
         # Only sort by owner if we are not also filtering by owner
         elif sort_by.lower() == "owner" and not owner:
             query = query.outerjoin(User, onclause=Submission.owner_uuid == User.uuid).group_by(
-                Submission.uuid, Node.uuid, User.username
+                Submission.uuid, User.username
             )
             if order == "asc":
                 query = query.order_by(User.username.asc())
@@ -732,10 +731,8 @@ def build_read_all_query(
 
 
 def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
-    # Create the new submission Node using the data from the request
-    obj: Submission = crud.node.create(
-        model=model, db_table=Submission, db=db, exclude={"history_username", "observables"}
-    )
+    # Create the new submission using the data from the request
+    obj = Submission(**model.dict(exclude={"history_username", "observables"}))
 
     # Set the various submission properties
     obj.alert = model.alert
@@ -772,9 +769,10 @@ def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
     # Add a submission history entry if the history username was given. This would typically only be
     # supplied by the GUI when an analyst creates a manual alert.
     if model.history_username is not None:
-        crud.history.record_node_create_history(
-            record_node=obj,
+        crud.history.record_create_history(
+            history_table=SubmissionHistory,
             action_by=crud.user.read_by_username(username=model.history_username, db=db),
+            record=obj,
             db=db,
         )
 
@@ -994,11 +992,23 @@ def read_summary_url_domain(uuid: UUID, db: Session) -> URLDomainSummary:
 
 
 def update(model: SubmissionUpdate, db: Session):
-    # Update the Node attributes
-    submission, diffs = crud.node.update(model=model, uuid=model.uuid, db_table=Submission, db=db)
+    # Read the current submission
+    submission = read_by_uuid(uuid=model.uuid, db=db)
+
+    # Capture all of the diffs that were made (for adding to the history tables)
+    diffs: list[crud.history.Diff] = []
 
     # Get the data that was given in the request and use it to update the database object
     update_data = model.dict(exclude_unset=True)
+
+    # Return an exception if the passed in version does not match the submission's current version
+    if "version" in update_data and update_data["version"] != submission.version:
+        raise VersionMismatch(
+            f"Submission version {update_data['version']} does not match the database version {submission.version}"
+        )
+
+    # Update the current version
+    submission.version = uuid4()
 
     if "description" in update_data:
         diffs.append(
@@ -1024,7 +1034,7 @@ def update(model: SubmissionUpdate, db: Session):
             submission.event = crud.event.read_by_uuid(uuid=update_data["event_uuid"], db=db)
 
             # This counts as editing the event, so it should receive a new version.
-            crud.node.update_version(node=submission.event, db=db)
+            submission.event.version = uuid4()
         else:
             submission.event = None
 
@@ -1072,9 +1082,10 @@ def update(model: SubmissionUpdate, db: Session):
     # Add a submission history entry if the history username was given. This would typically only be
     # supplied by the GUI when an analyst updates an alert.
     if model.history_username is not None:
-        crud.history.record_node_update_history(
-            record_node=submission,
+        crud.history.record_update_history(
+            history_table=SubmissionHistory,
             action_by=crud.user.read_by_username(username=model.history_username, db=db),
+            record=submission,
             diffs=diffs,
             db=db,
         )
@@ -1096,6 +1107,6 @@ def update_submission_versions(analysis_uuid: UUID, db: Session):
 
     # Update each submission's version
     for submission in submissions:
-        crud.node.update_version(node=submission, db=db)
+        submission.version = uuid4()
 
     db.flush()

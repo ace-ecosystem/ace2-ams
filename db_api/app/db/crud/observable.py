@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
 from typing import Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from api_models.analysis import AnalysisCreate
 from api_models.observable import ObservableCreate, ObservableUpdate
@@ -14,7 +14,7 @@ from db import crud
 from db.schemas.analysis import Analysis
 from db.schemas.observable import Observable, ObservableHistory
 from db.schemas.observable_type import ObservableType
-from exceptions.db import ValueNotFoundInDatabase
+from exceptions.db import ValueNotFoundInDatabase, VersionMismatch
 
 
 def build_read_all_query() -> Select:
@@ -26,18 +26,17 @@ def create_or_read(
     db: Session,
     parent_analysis: Optional[Analysis] = None,
 ) -> Observable:
-    # Create the new observable Node using the data from the request
-    obj: Observable = crud.node.create(
-        model=model,
-        db_table=Observable,
-        db=db,
-        exclude={
-            "analyses",
-            "history_username",
-            "observable_relationships",
-            "parent_analysis_uuid",
-            "tags",
-        },
+    # Create the new observable using the data from the request
+    obj = Observable(
+        **model.dict(
+            exclude={
+                "analyses",
+                "history_username",
+                "observable_relationships",
+                "parent_analysis_uuid",
+                "tags",
+            }
+        )
     )
 
     # Set the various observable properties
@@ -52,9 +51,10 @@ def create_or_read(
         # Add an observable history entry if the history username was given. This would typically only be
         # supplied by the GUI when an analyst creates a manual alert or adds an observable to an alert.
         if model.history_username is not None:
-            crud.history.record_node_create_history(
-                record_node=obj,
+            crud.history.record_create_history(
+                history_table=ObservableHistory,
                 action_by=crud.user.read_by_username(username=model.history_username, db=db),
+                record=obj,
                 db=db,
             )
     else:
@@ -142,11 +142,23 @@ def read_by_uuid(uuid: UUID, db: Session) -> Observable:
 
 def update(uuid: UUID, model: ObservableUpdate, db: Session) -> bool:
     with db.begin_nested():
-        # Update the Node attributes
-        observable, diffs = crud.node.update(model=model, uuid=uuid, db_table=Observable, db=db)
+        # Read the current observable
+        observable = read_by_uuid(uuid=uuid, db=db)
+
+        # Capture all of the diffs that were made (for adding to the history tables)
+        diffs: list[crud.history.Diff] = []
 
         # Get the data that was given in the request and use it to update the database object
         update_data = model.dict(exclude_unset=True)
+
+        # Return an exception if the passed in version does not match the observable's current version
+        if "version" in update_data and update_data["version"] != observable.version:
+            raise VersionMismatch(
+                f"Observable version {update_data['version']} does not match the database version {observable.version}"
+            )
+
+        # Update the current version
+        observable.version = uuid4()
 
         if "context" in update_data:
             diffs.append(crud.history.create_diff(field="context", old=observable.context, new=update_data["context"]))
@@ -193,9 +205,10 @@ def update(uuid: UUID, model: ObservableUpdate, db: Session) -> bool:
 
     # Add an observable history entry if the update was successful and the history username was given.
     if model.history_username:
-        crud.history.record_node_update_history(
-            record_node=observable,
+        crud.history.record_update_history(
+            history_table=ObservableHistory,
             action_by=crud.user.read_by_username(username=model.history_username, db=db),
+            record=observable,
             diffs=diffs,
             db=db,
         )

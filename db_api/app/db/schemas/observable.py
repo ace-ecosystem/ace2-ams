@@ -93,6 +93,8 @@ class Observable(Base, HasHistory):
 
     value = Column(String, nullable=False)
 
+    version = Column(UUID(as_uuid=True), server_default=func.gen_random_uuid(), nullable=False)
+
     __table_args__ = (
         Index(
             "observable_value_trgm",

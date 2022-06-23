@@ -99,6 +99,8 @@ class Event(Base, HasHistory):
 
     vectors = relationship("EventVector", secondary=event_vector_mapping, lazy="selectin")
 
+    version = Column(UUID(as_uuid=True), server_default=func.gen_random_uuid(), nullable=False)
+
     def convert_to_pydantic(self) -> EventRead:
         return EventRead(**self.__dict__)
 
