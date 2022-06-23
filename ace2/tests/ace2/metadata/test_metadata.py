@@ -13,7 +13,7 @@ def test_metadata():
     assert metadata.dict() == state
 
     # create metadata from constructor
-    metadata2 = Metadata('foo', 'bar')
+    metadata2 = Metadata('bar', type='foo')
     assert isinstance(metadata2, Metadata)
     assert metadata2.type == 'foo'
     assert metadata2.value == 'bar'

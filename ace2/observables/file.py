@@ -21,7 +21,7 @@ class File(Observable):
         storage_id = storage.upload(path)
 
         # use the storage id as the value for the observable
-        super().__init__(self.type, storage_id, **kwargs)
+        super().__init__(storage_id, **kwargs)
 
         # set the local path so we use it instead of downloading another copy
         self.private.path = path

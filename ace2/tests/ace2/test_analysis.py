@@ -84,37 +84,7 @@ def test_analysis(mock_queue):
     analysis = Analysis(**analysis)
     analysis.start()
 
-    # verify first database message
-    message = mock_queue.pop('database')
-    assert message['delaySeconds'] == 0
-    assert json.loads(message['body']) == {
-        'service': {
-            'type': 'database',
-            'instance': None,
-        },
-        'method': 'submit_analysis',
-        'args': [
-            {
-                'id': 1,
-                'type': 'my_analysis',
-                'instance': None,
-                'status': 'running',
-                'target': {
-                    'type': 'ipv4',
-                    'value': '127.0.0.1',
-                    'metadata': [],
-                },
-                'details': {
-                    'result': None,
-                },
-                'observables': [],
-                'summary': None,
-            },
-        ],
-        'kwargs': {},
-    }
-
-    # verify seconds database message
+    # verify database message
     message = mock_queue.pop('database')
     assert message['delaySeconds'] == 0
     assert json.loads(message['body']) == {

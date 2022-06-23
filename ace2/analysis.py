@@ -1,26 +1,22 @@
-from __future__ import annotations
-import os
 from pydantic import Field
 from pydantic.fields import ModelField
 from typing import List, Optional, Type
 
-from . import queue
-from .settings import Settings
+from .models import PrivateModel
 from .observables import Observable
-from .models import TypedModel, PrivateModel
-from .service import Service
+from .service import Instruction, Service
 
 class Analysis(Service):
     ''' Base Analysis class for building ICE2 analysis '''
 
     id: int = Field(description='the id of the analysis in the database')
     target: Observable = Field(description='the observable that the analysis is performed on')
-    status: Optional[str] = Field(default='queued', description='the status of the analysis')
+    status: Optional[str] = Field(default='running', description='the status of the analysis')
     summary: Optional[str] = Field(default=None, description='the analysis summary to display in the GUI')
     observables: Optional[List[Observable]] = Field(default_factory=list, description='the child observables')
     state: Optional[dict] = Field(default_factory=dict, description='non analysis data storage space')
 
-    class Settings(Settings):
+    class Settings(Service.Settings):
         ''' Base analysis settings class '''
         
         cache_seconds: Optional[int] = Field(default=None, description='number of seconds until analysis expires')
@@ -47,15 +43,16 @@ class Analysis(Service):
     def start(self):
         ''' This is the entry point for running analysis '''
 
-        # mark analysis as ignored if it should not run
+        # import database service here to prevent circular import issue
+        from .services import Database
+
+        # stop and mark analysis as ignored if it should not run
         if not self.should_run():
             self.status = 'ignored'
-            Service('database').dispatch('submit_analysis', self.dict(exclude={'state'}))
+            Instruction.send(Database().submit_analysis, self.dict(exclude={'state'}))
             return
 
         # execute the analysis
-        self.status = 'running'
-        Service('database').dispatch('submit_analysis', self.dict(exclude={'state'}))
         self.execute()
 
     def should_run(self) -> bool:
@@ -98,5 +95,9 @@ class Analysis(Service):
     def submit(self):
         ''' submits the analysis to the database service '''
 
+        # import database service here to prevent circular import issue
+        from .services import Database
+
+        # mark analysis complete and submit to the database
         self.status = 'complete'
-        Service('database').dispatch('submit_analysis', self.dict(exclude={'state'}))
+        Instruction.send(Database().submit_analysis, self.dict(exclude={'state'}))
