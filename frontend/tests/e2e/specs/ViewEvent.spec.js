@@ -1474,7 +1474,7 @@ describe("Email Analysis Details", () => {
   });
 });
 
-describe.only("Detection Summary Details", () => {
+describe("Detection Summary Details", () => {
   beforeEach(() => {
     cy.resetDatabase();
     cy.login();
