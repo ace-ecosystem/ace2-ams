@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 3e50ffdaa9f7
+Revision ID: 6bb2342f728c
 Revises: 
-Create Date: 2022-06-23 12:26:20.266721
+Create Date: 2022-06-23 15:06:32.380809
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '3e50ffdaa9f7'
+revision = '6bb2342f728c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -97,7 +97,7 @@ def upgrade() -> None:
     )
     op.create_table('node',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
-    sa.Column('node_type', sa.String(), nullable=True),
+    sa.Column('object_type', sa.String(), nullable=True),
     sa.Column('version', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.PrimaryKeyConstraint('uuid')
     )
