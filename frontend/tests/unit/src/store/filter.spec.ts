@@ -31,12 +31,20 @@ describe("filters Actions", () => {
 
     store.bulkSetFilters({
       nodeType: "alerts",
-      filters: { testFilterName: ["testFilterValue"] },
+      filters: {
+        testFilterName: {
+          included: ["testFilterValue"],
+          notIncluded: ["testFilterValue2"],
+        },
+      },
     });
 
     const expectedState = {
       alerts: {
-        testFilterName: ["testFilterValue"],
+        testFilterName: {
+          included: ["testFilterValue"],
+          notIncluded: ["testFilterValue2"],
+        },
       },
       events: {},
     };
@@ -51,16 +59,22 @@ describe("filters Actions", () => {
     store.bulkSetFilters({
       nodeType: "alerts",
       filters: {
-        testFilterName: [""],
-        testFilterName2: [[]],
-        testFilterName3: [null],
-        testFilterName4: ["testFilterValue"],
+        testFilterName: { included: [""], notIncluded: [""] },
+        testFilterName2: { included: [[]], notIncluded: [[]] },
+        testFilterName3: { included: [null], notIncluded: [null] },
+        testFilterName4: {
+          included: ["testFilterValue"],
+          notIncluded: ["testFilterValue2"],
+        },
       },
     });
 
     expect(store.$state).toEqual({
       alerts: {
-        testFilterName4: ["testFilterValue"],
+        testFilterName4: {
+          included: ["testFilterValue"],
+          notIncluded: ["testFilterValue2"],
+        },
       },
       events: {},
     });
@@ -74,11 +88,12 @@ describe("filters Actions", () => {
       nodeType: "alerts",
       filterName: "testFilterName",
       filterValue: "testFilterValue",
+      isIncluded: true,
     });
 
     const expectedState = {
       alerts: {
-        testFilterName: ["testFilterValue"],
+        testFilterName: { included: ["testFilterValue"], notIncluded: [] },
       },
       events: {},
     };
@@ -93,11 +108,15 @@ describe("filters Actions", () => {
       nodeType: "alerts",
       filterName: "testFilterName",
       filterValue: "testFilterValue2",
+      isIncluded: true,
     });
 
     const expectedState2 = {
       alerts: {
-        testFilterName: ["testFilterValue", "testFilterValue2"],
+        testFilterName: {
+          included: ["testFilterValue", "testFilterValue2"],
+          notIncluded: [],
+        },
       },
       events: {},
     };
@@ -113,11 +132,35 @@ describe("filters Actions", () => {
       nodeType: "alerts",
       filterName: "testFilterName",
       filterValue: "testFilterValue2",
+      isIncluded: true,
     });
 
     expect(store.$state).toEqual(expectedState2);
     expect(localStorage.getItem("aceFilters")).toEqual(
       JSON.stringify(expectedState2),
+    );
+
+    const expectedState3 = {
+      alerts: {
+        testFilterName: {
+          included: ["testFilterValue", "testFilterValue2"],
+          notIncluded: ["testFilterValue"],
+        },
+      },
+      events: {},
+    };
+
+    // Adding a filter to the notIncluded list
+    store.setFilter({
+      nodeType: "alerts",
+      filterName: "testFilterName",
+      filterValue: "testFilterValue",
+      isIncluded: false,
+    });
+
+    expect(store.$state).toEqual(expectedState3);
+    expect(localStorage.getItem("aceFilters")).toEqual(
+      JSON.stringify(expectedState3),
     );
   });
 
@@ -126,6 +169,7 @@ describe("filters Actions", () => {
       nodeType: "alerts",
       filterName: "testFilterName",
       filterValue: [],
+      isIncluded: true,
     });
 
     expect(store.$state).toEqual({
@@ -137,6 +181,7 @@ describe("filters Actions", () => {
       nodeType: "alerts",
       filterName: "testFilterName",
       filterValue: "",
+      isIncluded: true,
     });
 
     expect(store.$state).toEqual({
@@ -146,30 +191,68 @@ describe("filters Actions", () => {
   });
 
   it("will delete a given value given filter type object upon the unsetFilterValue action", () => {
-    store.$state = { alerts: { name: ["test", "test2"] }, events: {} };
+    store.$state = {
+      alerts: { name: { included: ["test", "test2"], notIncluded: ["test"] } },
+      events: {},
+    };
     localStorage.setItem(
       "aceFilters",
-      JSON.stringify({ alerts: { name: ["test", "test2"] }, events: {} }),
+      JSON.stringify({
+        alerts: {
+          name: { included: ["test", "test2"], notIncluded: ["test"] },
+        },
+        events: {},
+      }),
     );
 
-    expect(store.alerts).toEqual({ name: ["test", "test2"] });
+    expect(store.alerts).toEqual({
+      name: { included: ["test", "test2"], notIncluded: ["test"] },
+    });
     expect(localStorage.getItem("aceFilters")).toStrictEqual(
-      JSON.stringify({ alerts: { name: ["test", "test2"] }, events: {} }),
+      JSON.stringify({
+        alerts: {
+          name: { included: ["test", "test2"], notIncluded: ["test"] },
+        },
+        events: {},
+      }),
     );
 
     store.unsetFilterValue({
       nodeType: "alerts",
       filterName: "name",
       filterValue: "test",
+      isIncluded: true,
     });
 
     expect(store.$state).toEqual({
-      alerts: { name: ["test2"] },
+      alerts: { name: { included: ["test2"], notIncluded: ["test"] } },
       events: {},
     });
 
     expect(localStorage.getItem("aceFilters")).toStrictEqual(
-      JSON.stringify({ alerts: { name: ["test2"] }, events: {} }),
+      JSON.stringify({
+        alerts: { name: { included: ["test2"], notIncluded: ["test"] } },
+        events: {},
+      }),
+    );
+
+    store.unsetFilterValue({
+      nodeType: "alerts",
+      filterName: "name",
+      filterValue: "test",
+      isIncluded: false,
+    });
+
+    expect(store.$state).toEqual({
+      alerts: { name: { included: ["test2"], notIncluded: [] } },
+      events: {},
+    });
+
+    expect(localStorage.getItem("aceFilters")).toStrictEqual(
+      JSON.stringify({
+        alerts: { name: { included: ["test2"], notIncluded: [] } },
+        events: {},
+      }),
     );
 
     // If there are no values left, the filter will be deleted
@@ -177,6 +260,7 @@ describe("filters Actions", () => {
       nodeType: "alerts",
       filterName: "name",
       filterValue: "test2",
+      isIncluded: true,
     });
 
     expect(store.$state).toEqual({
@@ -190,15 +274,26 @@ describe("filters Actions", () => {
   });
 
   it("will delete a given property for a given filter object upon the unsetFilter action", () => {
-    store.$state = { alerts: { name: ["test"] }, events: {} };
+    store.$state = {
+      alerts: { name: { included: ["test"], notIncluded: [] } },
+      events: {},
+    };
     localStorage.setItem(
       "aceFilters",
-      JSON.stringify({ alerts: { name: ["test"] }, events: {} }),
+      JSON.stringify({
+        alerts: { name: { included: ["test"], notIncluded: [] } },
+        events: {},
+      }),
     );
 
-    expect(store.alerts).toEqual({ name: ["test"] });
+    expect(store.alerts).toEqual({
+      name: { included: ["test"], notIncluded: [] },
+    });
     expect(localStorage.getItem("aceFilters")).toStrictEqual(
-      JSON.stringify({ alerts: { name: ["test"] }, events: {} }),
+      JSON.stringify({
+        alerts: { name: { included: ["test"], notIncluded: [] } },
+        events: {},
+      }),
     );
 
     store.unsetFilter({
@@ -218,21 +313,33 @@ describe("filters Actions", () => {
 
   it("will delete all properties from a given filter object upon the clearAll action", () => {
     store.$state = {
-      alerts: { name: ["test"], description: ["test"] },
+      alerts: {
+        name: { included: ["test"], notIncluded: [] },
+        description: { included: ["test"], notIncluded: [] },
+      },
       events: {},
     };
     localStorage.setItem(
       "aceFilters",
       JSON.stringify({
-        alerts: { name: ["test"], description: ["test"] },
+        alerts: {
+          name: { included: ["test"], notIncluded: [] },
+          description: { included: ["test"], notIncluded: [] },
+        },
         events: {},
       }),
     );
 
-    expect(store.alerts).toEqual({ name: ["test"], description: ["test"] });
+    expect(store.alerts).toEqual({
+      name: { included: ["test"], notIncluded: [] },
+      description: { included: ["test"], notIncluded: [] },
+    });
     expect(localStorage.getItem("aceFilters")).toStrictEqual(
       JSON.stringify({
-        alerts: { name: ["test"], description: ["test"] },
+        alerts: {
+          name: { included: ["test"], notIncluded: [] },
+          description: { included: ["test"], notIncluded: [] },
+        },
         events: {},
       }),
     );

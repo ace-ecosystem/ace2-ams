@@ -113,28 +113,43 @@ export interface alertUpdate extends nodeUpdate, historyUsername {
 }
 
 export interface alertFilterParams extends pageOptionParams {
-  alertType?: alertTypeRead[];
-  disposition?: alertDispositionRead[];
-  dispositionUser?: userRead[];
-  dispositionedAfter?: Date[];
-  dispositionedBefore?: Date[];
-  eventUuid?: string[];
-  eventTimeAfter?: Date[];
-  eventTimeBefore?: Date[];
-  insertTimeAfter?: Date[];
-  insertTimeBefore?: Date[];
-  name?: string[];
-  observable?: { category: observableTypeRead; value: string }[];
-  observableTypes?: observableTypeRead[][];
-  observableValue?: string[];
-  owner?: userRead[];
-  queue?: queueRead[];
+  alertType?: { included: alertTypeRead[]; notIncluded: alertTypeRead[] };
+  disposition?: {
+    included: alertDispositionRead[];
+    notIncluded: alertDispositionRead[];
+  };
+  dispositionUser?: { included: userRead[]; notIncluded: userRead[] };
+  dispositionedAfter?: { included: Date[]; notIncluded: Date[] };
+  dispositionedBefore?: { included: Date[]; notIncluded: Date[] };
+  eventUuid?: { included: UUID[]; notIncluded: UUID[] };
+  eventTimeAfter?: { included: Date[]; notIncluded: Date[] };
+  eventTimeBefore?: { included: Date[]; notIncluded: Date[] };
+  insertTimeAfter?: { included: Date[]; notIncluded: Date[] };
+  insertTimeBefore?: { included: Date[]; notIncluded: Date[] };
+  name?: { included: string[]; notIncluded: string[] };
+  owner?: { included: userRead[]; notIncluded: userRead[] };
+  observableType?: {
+    included: observableTypeRead[];
+    notIncluded: observableTypeRead[];
+  };
+  queue?: { included: queueRead[]; notIncluded: queueRead[] };
+  observableValue?: { included: string[]; notIncluded: string[] };
+  threatActor?: {
+    included: nodeThreatActorRead[];
+    notIncluded: nodeThreatActorRead[];
+  };
+  threats?: { included: nodeThreatRead[]; notIncluded: nodeThreatRead[] };
+  tool?: { included: alertToolRead[]; notIncluded: alertToolRead[] };
+  toolInstance?: {
+    included: alertToolInstanceRead[];
+    notIncluded: alertToolInstanceRead[];
+  };
+  tags?: { included: string[]; notIncluded: string[] };
+  observable?: {
+    included: { category: observableTypeRead; value: string }[];
+    notIncluded: { category: observableTypeRead; value: string }[];
+  };
   sort?: string;
-  tags?: string[][];
-  threatActor?: nodeThreatActorRead[];
-  threats?: nodeThreatRead[][];
-  tool?: alertToolRead[];
-  toolInstance?: alertToolInstanceRead[];
   [key: string]: any;
 }
 

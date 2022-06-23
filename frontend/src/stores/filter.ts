@@ -41,14 +41,20 @@ export const useFilterStore = defineStore({
       filters: alertFilterParams | eventFilterParams;
     }) {
       const nonEmptyFilters = {} as alertFilterParams | eventFilterParams;
-      for (const [name, valueArray] of Object.entries(payload.filters)) {
-        // Remove any falsy/empty values from the filter value array
-        const valueArrayEmptiesRemoved = valueArray.filter(
+      for (const [name, valueObject] of Object.entries(payload.filters)) {
+        // Remove any falsy/empty values from the filter value included and notIncluded arrays
+        const includedEmptiesRemoved = valueObject.included.filter(
           (value: unknown) => !isEmpty(value),
         );
-        // If the value array is empty, skip it entirely
-        if (valueArrayEmptiesRemoved.length) {
-          nonEmptyFilters[name as string] = valueArrayEmptiesRemoved;
+        const notIncludedEmptiesRemoved = valueObject.notIncluded.filter(
+          (value: unknown) => !isEmpty(value),
+        );
+        // If either included or notIncluded is not empty, add the filter
+        if (includedEmptiesRemoved.length || notIncludedEmptiesRemoved.length) {
+          nonEmptyFilters[name as string] = {
+            included: includedEmptiesRemoved,
+            notIncluded: notIncludedEmptiesRemoved,
+          };
         }
       }
 
@@ -60,26 +66,36 @@ export const useFilterStore = defineStore({
       nodeType: "alerts" | "events";
       filterName: alertFilterNameTypes | eventFilterNameTypes;
       filterValue: alertFilterValues | eventFilterValues;
+      isIncluded: boolean;
     }) {
+      let list = "included";
+      if (!payload.isIncluded) {
+        list = "notIncluded";
+      }
+
       // If the filter value is 'empty' (empty string or list), don't add it
       if (!isEmpty(payload.filterValue)) {
         // If there is already a value for this filter type, add it to the list
         if (this.$state[payload.nodeType][payload.filterName]) {
           // If the value is already in the list, don't add it again
           if (
-            !this.$state[payload.nodeType][payload.filterName].includes(
+            !this.$state[payload.nodeType][payload.filterName][list].includes(
               payload.filterValue,
             )
           ) {
-            this.$state[payload.nodeType][payload.filterName].push(
+            this.$state[payload.nodeType][payload.filterName][list].push(
               payload.filterValue,
             );
           }
         } else {
           // Otherwise, create a new list with the value
-          this.$state[payload.nodeType][payload.filterName] = [
+          this.$state[payload.nodeType][payload.filterName] = {
+            included: [],
+            notIncluded: [],
+          };
+          this.$state[payload.nodeType][payload.filterName][list].push(
             payload.filterValue,
-          ];
+          );
         }
         // Update the local storage with the new filters
         localStorage.setItem("aceFilters", JSON.stringify(this.$state));
@@ -98,16 +114,29 @@ export const useFilterStore = defineStore({
       nodeType: "alerts" | "events";
       filterName: alertFilterNameTypes | eventFilterNameTypes;
       filterValue: alertFilterValues | eventFilterValues;
+      isIncluded: boolean;
     }) {
+      let listToCheck = "included";
+      let listToNotCheck = "notIncluded";
+      if (!payload.isIncluded) {
+        listToCheck = "notIncluded";
+        listToNotCheck = "included";
+      }
+
       // Remove the given filterValue from the list of values for this filter type
-      this.$state[payload.nodeType][payload.filterName] = this.$state[
-        payload.nodeType
-      ][payload.filterName].filter(
-        (v: alertFilterValues | eventFilterValues) => v !== payload.filterValue,
-      );
+      this.$state[payload.nodeType][payload.filterName][listToCheck] =
+        this.$state[payload.nodeType][payload.filterName][listToCheck].filter(
+          (v: alertFilterValues | eventFilterValues) =>
+            v !== payload.filterValue,
+        );
 
       // If the list of values for this filter type is empty, remove the filter type entirely
-      if (this.$state[payload.nodeType][payload.filterName].length === 0) {
+      if (
+        this.$state[payload.nodeType][payload.filterName][listToCheck]
+          .length === 0 &&
+        this.$state[payload.nodeType][payload.filterName][listToNotCheck]
+          .length === 0
+      ) {
         delete this.$state[payload.nodeType][payload.filterName];
       }
 
