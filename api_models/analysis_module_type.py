@@ -64,7 +64,7 @@ class AnalysisModuleTypeCreate(AnalysisModuleTypeBase):
     )
 
 
-class AnalysisModuleTypeNodeTreeRead(BaseModel):
+class AnalysisModuleTypeSubmissionTreeRead(BaseModel):
     """Model used to control which information for an AnalysisModuleType is displayed when getting an alert tree"""
 
     value: type_str = Field(description="The value of the analysis module type")

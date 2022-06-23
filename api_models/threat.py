@@ -8,7 +8,7 @@ from api_models.queue import QueueRead
 
 
 class ThreatBase(BaseModel):
-    """Represents a threat that can be applied to a node to denote things like a family of malware or specific type
+    """Represents a threat that can be applied to an object to denote things like a family of malware or specific type
     of attack."""
 
     description: Optional[type_str] = Field(description="An optional human-readable description of the threat")
@@ -19,13 +19,13 @@ class ThreatBase(BaseModel):
 
 
 class ThreatCreate(ThreatBase):
-    queues: type_list_str = Field(description="The queues where this node threat is valid")
+    queues: type_list_str = Field(description="The queues where this threat is valid")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the threat")
 
 
 class ThreatRead(ThreatBase):
-    queues: list[QueueRead] = Field(description="The queues where this node threat is valid")
+    queues: list[QueueRead] = Field(description="The queues where this threat is valid")
 
     types: list[ThreatTypeRead] = Field(description="A list of types the threat represents")
 
@@ -36,7 +36,7 @@ class ThreatRead(ThreatBase):
 
 
 class ThreatUpdate(ThreatBase):
-    queues: Optional[type_list_str] = Field(description="The queues where this node threat is valid")
+    queues: Optional[type_list_str] = Field(description="The queues where this threat is valid")
 
     types: Optional[type_list_str] = Field(description="A list of types the threat represents")
 

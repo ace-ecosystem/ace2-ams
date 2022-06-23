@@ -72,7 +72,8 @@ class SubmissionRead(SubmissionBase):
     )
 
     child_detection_points: list[MetadataDetectionPointRead] = Field(
-        description="A list of detection points added to child Nodes in the submission's tree", default_factory=list
+        description="A list of detection points added to child observables in the submission's tree",
+        default_factory=list,
     )
 
     child_tags: list[MetadataTagRead] = Field(description="A list of tags added to observables", default_factory=list)
