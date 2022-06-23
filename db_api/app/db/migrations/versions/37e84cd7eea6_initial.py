@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 8aa7fb1a4392
+Revision ID: 37e84cd7eea6
 Revises: 
-Create Date: 2022-06-23 18:05:36.165875
+Create Date: 2022-06-23 20:18:46.297160
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '8aa7fb1a4392'
+revision = '37e84cd7eea6'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -298,6 +298,7 @@ def upgrade() -> None:
     sa.Column('for_detection', sa.Boolean(), nullable=False),
     sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('value', sa.String(), nullable=False),
+    sa.Column('version', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.ForeignKeyConstraint(['type_uuid'], ['observable_type.uuid'], ),
     sa.PrimaryKeyConstraint('uuid'),
     sa.UniqueConstraint('type_uuid', 'value', name='type_value_uc')
@@ -410,6 +411,7 @@ def upgrade() -> None:
     sa.Column('source_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('status_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('version', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.ForeignKeyConstraint(['owner_uuid'], ['user.uuid'], ),
     sa.ForeignKeyConstraint(['queue_uuid'], ['queue.uuid'], ),
     sa.ForeignKeyConstraint(['severity_uuid'], ['event_severity.uuid'], ),
@@ -606,6 +608,7 @@ def upgrade() -> None:
     sa.Column('tool_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('tool_instance_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('version', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.ForeignKeyConstraint(['disposition_user_uuid'], ['user.uuid'], ),
     sa.ForeignKeyConstraint(['disposition_uuid'], ['alert_disposition.uuid'], ),
     sa.ForeignKeyConstraint(['event_uuid'], ['event.uuid'], ),

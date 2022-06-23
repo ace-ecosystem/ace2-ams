@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from api_models import type_str, validators
 from api_models.alert_disposition import AlertDispositionRead
+from api_models.event_comment import EventCommentRead
 from api_models.event_prevention_tool import EventPreventionToolRead
 from api_models.event_remediation import EventRemediationRead
 from api_models.event_severity import EventSeverityRead
@@ -12,9 +13,8 @@ from api_models.event_source import EventSourceRead
 from api_models.event_status import EventStatusRead
 from api_models.event_type import EventTypeRead
 from api_models.event_vector import EventVectorRead
-from api_models.node_comment import NodeCommentRead
-from api_models.node_threat import NodeThreatRead
-from api_models.node_threat_actor import NodeThreatActorRead
+from api_models.threat import ThreatRead
+from api_models.threat_actor import ThreatActorRead
 from api_models.queue import QueueRead
 from api_models.metadata_tag import MetadataTagRead
 from api_models.user import UserRead
@@ -115,7 +115,7 @@ class EventRead(EventBase):
         description="The automatically calculated earliest time an analyst took ownership of one of the alerts"
     )
 
-    comments: list[NodeCommentRead] = Field(description="A list of comments added to the event", default_factory=list)
+    comments: list[EventCommentRead] = Field(description="A list of comments added to the event", default_factory=list)
 
     created_time: datetime = Field(description="The time the event was created")
 
@@ -146,9 +146,9 @@ class EventRead(EventBase):
 
     tags: list[MetadataTagRead] = Field(default_factory=list, description="A list of tags added to the event")
 
-    threat_actors: list[NodeThreatActorRead] = Field(description="A list of threat actors added to the event")
+    threat_actors: list[ThreatActorRead] = Field(description="A list of threat actors added to the event")
 
-    threats: list[NodeThreatRead] = Field(description="A list of threats added to the event")
+    threats: list[ThreatRead] = Field(description="A list of threats added to the event")
 
     type: Optional[EventTypeRead] = Field(description="The type assigned to the event")
 

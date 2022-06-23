@@ -6,7 +6,7 @@ from api_models import type_str, type_list_str, validators
 from api_models.queue import QueueRead
 
 
-class NodeThreatActorBase(BaseModel):
+class ThreatActorBase(BaseModel):
     """Represents a threat actor that can be applied to a node."""
 
     description: Optional[type_str] = Field(
@@ -16,13 +16,13 @@ class NodeThreatActorBase(BaseModel):
     value: type_str = Field(description="The value of the node threat actor")
 
 
-class NodeThreatActorCreate(NodeThreatActorBase):
+class ThreatActorCreate(ThreatActorBase):
     queues: type_list_str = Field(description="The queues where this node threat actor is valid")
 
     uuid: UUID4 = Field(default_factory=uuid4, escription="The UUID of the node threat actor")
 
 
-class NodeThreatActorRead(NodeThreatActorBase):
+class ThreatActorRead(ThreatActorBase):
     uuid: UUID4 = Field(description="The UUID of the node threat actor")
 
     queues: list[QueueRead] = Field(description="The queues where this node threat actor is valid")
@@ -31,7 +31,7 @@ class NodeThreatActorRead(NodeThreatActorBase):
         orm_mode = True
 
 
-class NodeThreatActorUpdate(NodeThreatActorBase):
+class ThreatActorUpdate(ThreatActorBase):
     queues: Optional[type_list_str] = Field(description="The queues where this node threat actor is valid")
 
     value: Optional[type_str] = Field(description="The value of the node threat actor")

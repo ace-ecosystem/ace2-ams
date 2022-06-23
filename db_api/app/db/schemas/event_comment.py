@@ -15,6 +15,8 @@ class EventComment(Base):
 
     event_uuid = Column(UUID(as_uuid=True), ForeignKey("event.uuid"), index=True)
 
+    event = relationship("Event", foreign_keys=[event_uuid], lazy="selectin")
+
     user_uuid = Column(UUID(as_uuid=True), ForeignKey("user.uuid"))
 
     user = relationship("User", foreign_keys=[user_uuid])

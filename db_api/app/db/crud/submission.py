@@ -25,8 +25,6 @@ from db.schemas.submission_analysis_mapping import submission_analysis_mapping
 from db.schemas.submission_tool import SubmissionTool
 from db.schemas.submission_tool_instance import SubmissionToolInstance
 from db.schemas.submission_type import SubmissionType
-from db.schemas.threat import Threat
-from db.schemas.threat_actor import ThreatActor
 from db.schemas.user import User
 from exceptions.db import VersionMismatch
 
@@ -148,8 +146,6 @@ def build_read_all_query(
     sort: Optional[str] = None,  # Example: event_time|desc
     submission_type: Optional[list[str]] = None,
     tags: Optional[list[str]] = None,
-    threat_actors: Optional[list[str]] = None,
-    threats: Optional[list[str]] = None,
     tool: Optional[list[str]] = None,
     tool_instance: Optional[list[str]] = None,
 ) -> Select:
@@ -587,44 +583,6 @@ def build_read_all_query(
 
         query = _join_as_subquery(query, tags_query)
 
-    if threat_actors:
-        threat_actor_filters = []
-        for t in threat_actors:
-            if t:
-                threat_actor_sub_filters = []
-                for threat_actor in t.split(","):
-                    threat_actor_sub_filters.append(
-                        or_(
-                            Submission.threat_actors.any(ThreatActor.value == threat_actor),
-                            Submission.child_threat_actors.any(ThreatActor.value == threat_actor),
-                        )
-                    )
-
-                threat_actor_filters.append(and_(*threat_actor_sub_filters))
-
-        threat_actor_query = select(Submission).where(or_(*threat_actor_filters))
-
-        query = _join_as_subquery(query, threat_actor_query)
-
-    if threats:
-        threat_filters = []
-        for t in threats:
-            if t:
-                threat_sub_filters = []
-                for threat in t.split(","):
-                    threat_sub_filters.append(
-                        or_(
-                            Submission.threats.any(Threat.value == threat),
-                            Submission.child_threats.any(Threat.value == threat),
-                        )
-                    )
-
-                threat_filters.append(and_(*threat_sub_filters))
-
-        threats_query = select(Submission).where(or_(*threat_filters))
-
-        query = _join_as_subquery(query, threats_query)
-
     if tool:
         tool_query = select(Submission)
         if _none_in_list(tool):
@@ -814,8 +772,6 @@ def read_all(
     sort: Optional[str] = None,  # Example: event_time|desc
     submission_type: Optional[list[str]] = None,
     tags: Optional[list[str]] = None,
-    threat_actors: Optional[list[str]] = None,
-    threats: Optional[list[str]] = None,
     tool: Optional[list[str]] = None,
     tool_instance: Optional[list[str]] = None,
 ) -> list[Submission]:
@@ -854,8 +810,6 @@ def read_all(
                 sort=sort,  # Example: event_time|desc
                 submission_type=submission_type,
                 tags=tags,
-                threat_actors=threat_actors,
-                threats=threats,
                 tool=tool,
                 tool_instance=tool_instance,
             )

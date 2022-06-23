@@ -6,7 +6,7 @@ from uuid import uuid4
 from api_models.submission import SubmissionUpdate
 from db import crud
 from exceptions.db import VersionMismatch
-from tests.db_tests.crud.node import VALID_LIST_STRING_VALUES
+from tests.db_tests.crud.helpers import VALID_LIST_STRING_VALUES
 from tests import factory
 
 

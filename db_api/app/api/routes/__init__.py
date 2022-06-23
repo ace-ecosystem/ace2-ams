@@ -5,6 +5,7 @@ from api.routes.analysis import router as analysis_router
 from api.routes.analysis_module_type import router as analysis_module_type_router
 from api.routes.auth import router as auth_router
 from api.routes.event import router as event_router
+from api.routes.event_comment import router as event_comment_router
 from api.routes.event_prevention_tool import router as event_prevention_tool_router
 from api.routes.event_remediation import router as event_remediation_router
 from api.routes.event_severity import router as event_severity_router
@@ -18,7 +19,6 @@ from api.routes.metadata_display_type import router as metadata_display_type_rou
 from api.routes.metadata_display_value import router as metadata_display_value_router
 from api.routes.metadata_tag import router as metadata_tag_router
 from api.routes.metadata_time import router as metadata_time_router
-from api.routes.event_comment import router as event_comment_router
 from api.routes.observable import router as observable_router
 from api.routes.observable_relationship import router as observable_relationship_router
 from api.routes.observable_relationship_type import router as observable_relationship_type_router
@@ -26,6 +26,7 @@ from api.routes.observable_type import router as observable_type_router
 from api.routes.ping import router as ping_router
 from api.routes.queue import router as queue_router
 from api.routes.submission import router as submission_router
+from api.routes.submission_comment import router as submission_comment_router
 from api.routes.submission_tool import router as submission_tool_router
 from api.routes.submission_tool_instance import router as submission_tool_instance_router
 from api.routes.submission_type import router as submission_type_router
@@ -44,6 +45,7 @@ router.include_router(analysis_router)
 router.include_router(analysis_module_type_router)
 router.include_router(auth_router)
 router.include_router(event_router)
+router.include_router(event_comment_router)
 router.include_router(event_prevention_tool_router)
 router.include_router(event_remediation_router)
 router.include_router(event_severity_router)
@@ -57,13 +59,13 @@ router.include_router(metadata_display_type_router)
 router.include_router(metadata_display_value_router)
 router.include_router(metadata_tag_router)
 router.include_router(metadata_time_router)
-router.include_router(event_comment_router)
 router.include_router(observable_router)
 router.include_router(observable_relationship_router)
 router.include_router(observable_relationship_type_router)
 router.include_router(observable_type_router)
 router.include_router(ping_router)
 router.include_router(queue_router)
+router.include_router(submission_comment_router)
 router.include_router(submission_router)
 router.include_router(submission_tool_router)
 router.include_router(submission_tool_instance_router)

@@ -7,7 +7,7 @@ from api_models.observable import ObservableUpdate
 from db import crud
 from exceptions.db import VersionMismatch
 from tests import factory
-from tests.db_tests.crud.node import VALID_LIST_STRING_VALUES
+from tests.db_tests.crud.helpers import VALID_LIST_STRING_VALUES
 
 
 #

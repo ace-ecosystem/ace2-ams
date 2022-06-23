@@ -418,13 +418,7 @@ def build_read_all_query(
             if threat:
                 threat_actor_sub_filters = []
                 for t in threat.split(","):
-                    threat_actor_sub_filters.append(
-                        and_(
-                            ~Event.threat_actors.any(ThreatActor.value == t),
-                            ~Event.alerts.any(Submission.threat_actors.any(ThreatActor.value == t)),
-                            ~Event.alerts.any(Submission.child_threat_actors.any(ThreatActor.value == t)),
-                        )
-                    )
+                    threat_actor_sub_filters.append(~Event.threat_actors.any(ThreatActor.value == t))
 
                 threat_actor_filters.append(or_(*threat_actor_sub_filters))
 
@@ -437,13 +431,7 @@ def build_read_all_query(
             if threat:
                 threat_sub_filters = []
                 for t in threat.split(","):
-                    threat_sub_filters.append(
-                        and_(
-                            ~Event.threats.any(Threat.value == t),
-                            ~Event.alerts.any(Submission.threats.any(Threat.value == t)),
-                            ~Event.alerts.any(Submission.child_threats.any(Threat.value == t)),
-                        )
-                    )
+                    threat_sub_filters.append(~Event.threats.any(Threat.value == t))
 
                 threat_filters.append(or_(*threat_sub_filters))
 
@@ -639,13 +627,7 @@ def build_read_all_query(
             if threat:
                 threat_actor_sub_filters = []
                 for t in threat.split(","):
-                    threat_actor_sub_filters.append(
-                        or_(
-                            Event.threat_actors.any(ThreatActor.value == t),
-                            Event.alerts.any(Submission.threat_actors.any(ThreatActor.value == t)),
-                            Event.alerts.any(Submission.child_threat_actors.any(ThreatActor.value == t)),
-                        )
-                    )
+                    threat_actor_sub_filters.append(Event.threat_actors.any(ThreatActor.value == t))
 
                 threat_actor_filters.append(and_(*threat_actor_sub_filters))
 
@@ -658,13 +640,7 @@ def build_read_all_query(
             if threat:
                 threat_sub_filters = []
                 for t in threat.split(","):
-                    threat_sub_filters.append(
-                        or_(
-                            Event.threats.any(Threat.value == t),
-                            Event.alerts.any(Submission.threats.any(Threat.value == t)),
-                            Event.alerts.any(Submission.child_threats.any(Threat.value == t)),
-                        )
-                    )
+                    threat_sub_filters.append(Event.threats.any(Threat.value == t))
 
                 threat_filters.append(and_(*threat_sub_filters))
 
@@ -996,12 +972,7 @@ def read_summary_detection_point(uuid: UUID, db: Session) -> list[DetectionSumma
                 AnalysisMetadata.analysis_uuid == submission_analysis_mapping.c.analysis_uuid,
             ),
         )
-        .join(
-            Submission,
-            onclause=and_(
-                Submission.uuid == submission_analysis_mapping.c.submission_uuid, Submission.event_uuid == uuid
-            ),
-        )
+        .where(Submission.event_uuid == uuid)
     )
 
     alert_uuid_and_analysis_metadata: list[tuple[UUID, AnalysisMetadata]] = db.execute(query).unique().all()
@@ -1309,7 +1280,7 @@ def update(uuid: UUID, model: EventUpdate, db: Session):
         diffs.append(
             crud.history.create_diff(
                 field="threat_actors",
-                old=[x.value for x in event.remediations],
+                old=[x.value for x in event.threat_actors],
                 new=update_data["threat_actors"],
             )
         )
@@ -1320,7 +1291,7 @@ def update(uuid: UUID, model: EventUpdate, db: Session):
         diffs.append(
             crud.history.create_diff(
                 field="threats",
-                old=[x.value for x in event.remediations],
+                old=[x.value for x in event.threats],
                 new=update_data["threats"],
             )
         )

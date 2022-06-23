@@ -3,11 +3,11 @@ from typing import Optional
 from uuid import uuid4
 
 from api_models import type_list_str, type_str, validators
-from api_models.node_threat_type import NodeThreatTypeRead
+from api_models.threat_type import ThreatTypeRead
 from api_models.queue import QueueRead
 
 
-class NodeThreatBase(BaseModel):
+class ThreatBase(BaseModel):
     """Represents a threat that can be applied to a node to denote things like a family of malware or specific type
     of attack."""
 
@@ -18,16 +18,16 @@ class NodeThreatBase(BaseModel):
     value: type_str = Field(description="The value of the threat")
 
 
-class NodeThreatCreate(NodeThreatBase):
+class ThreatCreate(ThreatBase):
     queues: type_list_str = Field(description="The queues where this node threat is valid")
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the threat")
 
 
-class NodeThreatRead(NodeThreatBase):
+class ThreatRead(ThreatBase):
     queues: list[QueueRead] = Field(description="The queues where this node threat is valid")
 
-    types: list[NodeThreatTypeRead] = Field(description="A list of types the threat represents")
+    types: list[ThreatTypeRead] = Field(description="A list of types the threat represents")
 
     uuid: UUID4 = Field(description="The UUID of the threat")
 
@@ -35,7 +35,7 @@ class NodeThreatRead(NodeThreatBase):
         orm_mode = True
 
 
-class NodeThreatUpdate(NodeThreatBase):
+class ThreatUpdate(ThreatBase):
     queues: Optional[type_list_str] = Field(description="The queues where this node threat is valid")
 
     types: Optional[type_list_str] = Field(description="A list of types the threat represents")

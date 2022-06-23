@@ -11,7 +11,7 @@ from api_models.submission import SubmissionCreate
 from api_models.alert_disposition import AlertDispositionCreate
 from db import crud
 from db.schemas.event import Event
-from db.schemas.submission import Submission
+from db.schemas.submission import Submission, SubmissionHistory
 from tests import factory
 
 
@@ -30,8 +30,6 @@ def create(
     observables: Optional[list[ObservableCreateInSubmission]] = None,
     owner: Optional[str] = None,
     tags: Optional[list[str]] = None,
-    threat_actors: Optional[list[str]] = None,
-    threats: Optional[list[str]] = None,
     tool: Optional[str] = None,
     tool_instance: Optional[str] = None,
     update_time: Optional[datetime] = None,
@@ -111,8 +109,6 @@ def create(
                     observable_relationships=observable.observable_relationships,
                     parent_analysis_uuid=submission.root_analysis_uuid,
                     tags=observable.tags,
-                    threat_actors=observable.threat_actors,
-                    threats=observable.threats,
                     type=observable.type,
                     value=observable.value,
                 ),
@@ -138,15 +134,10 @@ def create(
     if tags:
         submission.tags = [factory.metadata_tag.create_or_read(value=t, db=db) for t in tags]
 
-    if threat_actors:
-        submission.threat_actors = [factory.threat_actor.create_or_read(value=t, db=db) for t in threat_actors]
-
-    if threats:
-        submission.threats = [factory.threat.create_or_read(value=threat, db=db) for threat in threats]
-
     if history_username and diffs and updated_by_user:
-        crud.history.record_node_update_history(
-            record_node=submission,
+        crud.history.record_update_history(
+            history_table=SubmissionHistory,
+            record=submission,
             action_by=factory.user.create_or_read(username=updated_by_user, db=db),
             action_time=update_time,
             diffs=diffs,

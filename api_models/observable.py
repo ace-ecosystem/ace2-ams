@@ -6,9 +6,6 @@ from uuid import UUID, uuid4
 from api_models import type_str, validators
 from api_models.analysis_metadata import AnalysisMetadataCreate, AnalysisMetadataRead
 from api_models.metadata_tag import MetadataTagRead
-from api_models.node_comment import NodeCommentRead
-from api_models.node_threat import NodeThreatRead
-from api_models.node_threat_actor import NodeThreatActorRead
 from api_models.observable_type import ObservableTypeRead
 
 
@@ -69,12 +66,6 @@ class ObservableCreateBase(ObservableBase):
 
     tags: list[type_str] = Field(default_factory=list, description="A list of tags to add to the observable")
 
-    threat_actors: list[type_str] = Field(
-        default_factory=list, description="A list of threat actors to add to the observable"
-    )
-
-    threats: list[type_str] = Field(default_factory=list, description="A list of threats to add to the observable")
-
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the observable")
 
 
@@ -89,10 +80,6 @@ class ObservableCreateInSubmission(ObservableCreateBase):
 
 
 class ObservableRead(ObservableBase):
-    comments: list[NodeCommentRead] = Field(
-        description="A list of comments added to the observable", default_factory=list
-    )
-
     # Set a static string value so code displaying the tree structure knows which type of object this is.
     object_type: str = "observable"
 
@@ -101,10 +88,6 @@ class ObservableRead(ObservableBase):
     )
 
     tags: list[MetadataTagRead] = Field(description="A list of tags added to the observable")
-
-    threat_actors: list[NodeThreatActorRead] = Field(description="A list of threat actors added to the observable")
-
-    threats: list[NodeThreatRead] = Field(description="A list of threats added to the observable")
 
     type: ObservableTypeRead = Field(description="The type of the observable")
 
@@ -154,10 +137,6 @@ class ObservableUpdate(ObservableBase):
 
     tags: Optional[list[type_str]] = Field(description="A list of tags to add to the observable")
 
-    threat_actors: Optional[list[type_str]] = Field(description="A list of threat actors to add to the observable")
-
-    threats: Optional[list[type_str]] = Field(description="A list of threats to add to the observable")
-
     type: Optional[type_str] = Field(description="The type of the observable")
 
     value: Optional[type_str] = Field(description="The value of the observable")
@@ -169,9 +148,7 @@ class ObservableUpdate(ObservableBase):
         the version must match when updating.""",
     )
 
-    _prevent_none: classmethod = validators.prevent_none(
-        "for_detection", "tags", "threat_actors", "threats", "time", "type", "value"
-    )
+    _prevent_none: classmethod = validators.prevent_none("for_detection", "tags", "time", "type", "value")
 
 
 class ObservableRelationshipCreate(BaseModel):
