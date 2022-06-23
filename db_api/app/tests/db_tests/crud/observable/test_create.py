@@ -58,32 +58,6 @@ def test_create_nonexistent_tag(db):
         )
 
 
-def test_create_nonexistent_threat_actors(db):
-    submission = factory.submission.create(db=db)
-    factory.observable_type.create_or_read(value="test", db=db)
-
-    with pytest.raises(ValueNotFoundInDatabase):
-        crud.observable.create_or_read(
-            model=ObservableCreate(
-                type="test", value="test", parent_analysis_uuid=submission.root_analysis_uuid, threat_actors=["asdf"]
-            ),
-            db=db,
-        )
-
-
-def test_create_nonexistent_threats(db):
-    submission = factory.submission.create(db=db)
-    factory.observable_type.create_or_read(value="test", db=db)
-
-    with pytest.raises(ValueNotFoundInDatabase):
-        crud.observable.create_or_read(
-            model=ObservableCreate(
-                type="test", value="test", parent_analysis_uuid=submission.root_analysis_uuid, threats=["asdf"]
-            ),
-            db=db,
-        )
-
-
 def test_create_nonexistent_observable_type(db):
     submission = factory.submission.create(db=db)
 
@@ -153,8 +127,6 @@ def test_create(db):
     initial_submission_version = submission.version
     factory.observable_relationship_type.create_or_read(value="relationship_type", db=db)
     factory.metadata_tag.create_or_read(value="tag", db=db)
-    factory.threat_actor.create_or_read(value="threat_actor", db=db)
-    factory.threat.create_or_read(value="threat", db=db)
     factory.observable.create_or_read(type="type2", value="value2", parent_analysis=submission.root_analysis, db=db)
     factory.observable_type.create_or_read(value="type1", db=db)
     factory.observable_type.create_or_read(value="type3", db=db)
@@ -174,8 +146,6 @@ def test_create(db):
                 ObservableRelationshipCreate(relationship_type="relationship_type", type="type2", value="value2")
             ],
             tags=["tag"],
-            threat_actors=["threat_actor"],
-            threats=["threat"],
             type="type1",
             value="test",
             parent_analysis_uuid=submission.root_analysis_uuid,
@@ -189,14 +159,10 @@ def test_create(db):
     # There should be three history records: one for creating the observable and one for updating the observable relationships.
     assert len(observable.history) == 2
     assert len(observable.observable_relationships) == 1
-    assert observable.observable_relationships[0].related_node.type.value == "type2"
-    assert observable.observable_relationships[0].related_node.value == "value2"
+    assert observable.observable_relationships[0].related_observable.type.value == "type2"
+    assert observable.observable_relationships[0].related_observable.value == "value2"
     assert len(observable.tags) == 1
     assert observable.tags[0].value == "tag"
-    assert len(observable.threat_actors) == 1
-    assert observable.threat_actors[0].value == "threat_actor"
-    assert len(observable.threats) == 1
-    assert observable.threats[0].value == "threat"
     assert observable.type.value == "type1"
     assert observable.value == "test"
     assert submission.version != initial_submission_version

@@ -104,11 +104,9 @@ def test_update(db, key, initial_value, updated_value):
     "key,value_lists,helper_create_func",
     [
         ("tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
-        ("threat_actors", VALID_LIST_STRING_VALUES, factory.threat_actor.create_or_read),
-        ("threats", VALID_LIST_STRING_VALUES, factory.threat.create_or_read),
     ],
 )
-def test_update_node_fields(db, key, value_lists, helper_create_func):
+def test_update_list_fields(db, key, value_lists, helper_create_func):
     submission = factory.submission.create(db=db)
 
     for i in range(len(value_lists)):
@@ -118,8 +116,6 @@ def test_update_node_fields(db, key, value_lists, helper_create_func):
             type="test_type",
             value=f"test{i}",
             tags=["remove_me"],
-            threat_actors=["remove_me"],
-            threats=["remove_me"],
             parent_analysis=submission.root_analysis,
             db=db,
             history_username="analyst",
