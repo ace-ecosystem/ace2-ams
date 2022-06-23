@@ -55,6 +55,14 @@ def test_get_summary_nonexistent_event(client, path):
 #
 
 
+def test_get_version(client, db):
+    event = factory.event.create_or_read(name="test event", db=db)
+
+    get = client.get(f"/api/event/{event.uuid}/version")
+    assert get.status_code == status.HTTP_200_OK
+    assert get.json() == {"version": str(event.version)}
+
+
 def test_summary_detection_point(client, db):
     # Create an event
     event = factory.event.create_or_read(name="test event", db=db)

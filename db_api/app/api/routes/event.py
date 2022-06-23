@@ -6,7 +6,7 @@ from typing import Optional
 from uuid import UUID
 
 from api_models.create import Create
-from api_models.event import EventCreate, EventRead, EventUpdateMultiple
+from api_models.event import EventCreate, EventRead, EventUpdateMultiple, EventVersion
 from api_models.event_summaries import (
     DetectionSummary,
     EmailHeadersBody,
@@ -187,9 +187,17 @@ def get_event_history(uuid: UUID, db: Session = Depends(get_db)):
     return paginate(conn=db, query=crud.history.build_read_history_query(history_table=EventHistory, record_uuid=uuid))
 
 
+def get_event_version(uuid: UUID, db: Session = Depends(get_db)):
+    try:
+        return crud.event.read_by_uuid(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+
 helpers.api_route_read_all(router, get_all_events, EventRead)
 helpers.api_route_read(router, get_event, EventRead)
 helpers.api_route_read_all(router, get_event_history, EventHistoryRead, path="/{uuid}/history")
+helpers.api_route_read(router, get_event_version, EventVersion, path="/{uuid}/version")
 
 
 #

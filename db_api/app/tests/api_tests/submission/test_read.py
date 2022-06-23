@@ -40,6 +40,14 @@ def test_get_summary_nonexistent_submission(client, path):
 #
 
 
+def test_get_version(client, db):
+    submission = factory.submission.create(db=db)
+
+    get = client.get(f"/api/node/{submission.uuid}/version")
+    assert get.status_code == status.HTTP_200_OK
+    assert get.json() == {"version": str(submission.version)}
+
+
 def test_get_all_pagination(client, db):
     # Create 11 submissions
     for _ in range(11):

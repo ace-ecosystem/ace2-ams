@@ -18,7 +18,6 @@ from api.routes.metadata_display_type import router as metadata_display_type_rou
 from api.routes.metadata_display_value import router as metadata_display_value_router
 from api.routes.metadata_tag import router as metadata_tag_router
 from api.routes.metadata_time import router as metadata_time_router
-from api.routes.node import router as node_router
 from api.routes.node_comment import router as node_comment_router
 from api.routes.node_threat import router as node_threat_router
 from api.routes.node_threat_actor import router as node_threat_actor_router
@@ -58,7 +57,6 @@ router.include_router(metadata_display_type_router)
 router.include_router(metadata_display_value_router)
 router.include_router(metadata_tag_router)
 router.include_router(metadata_time_router)
-router.include_router(node_router)
 router.include_router(node_comment_router)
 router.include_router(node_threat_router)
 router.include_router(node_threat_actor_router)

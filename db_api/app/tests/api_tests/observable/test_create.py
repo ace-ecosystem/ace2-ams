@@ -140,6 +140,17 @@ def test_create_nonexistent_type(client, db):
 #
 
 
+def test_get_version(client, db):
+    submission = factory.submission.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test_value", parent_analysis=submission.root_analysis, db=db
+    )
+
+    get = client.get(f"/api/observable/{observable.uuid}/version")
+    assert get.status_code == status.HTTP_200_OK
+    assert get.json() == {"version": str(observable.version)}
+
+
 def test_create_verify_history(client, db):
     submission = factory.submission.create(db=db)
     factory.observable_type.create_or_read(value="test_type", db=db)
