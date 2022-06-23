@@ -1474,11 +1474,13 @@ describe("Email Analysis Details", () => {
   });
 });
 
-describe("Detection Summary Details", () => {
-  before(() => {
+describe.only("Detection Summary Details", () => {
+  beforeEach(() => {
     cy.resetDatabase();
     cy.login();
+  });
 
+  it("renders section correctly with detection points", () => {
     // Intercept the API call that loads the event data
     cy.intercept("GET", "/api/event/*").as("getEvent");
     cy.intercept(
@@ -1510,11 +1512,70 @@ describe("Detection Summary Details", () => {
     // Switch to detection summary view
     cy.get('[aria-haspopup="true"]').eq(1).click();
     cy.get("span").contains("Detection Summary").click();
-
     cy.wait("@getDetectionPoints").its("state").should("eq", "Complete");
+
+    // Check title
+    cy.get("#event-section-title").should("contain.text", "Detection Summary");
+    // table should be there
+    cy.get('[data-cy="detection-summary-table"]');
+    // Should be 2 rows, one header and one empty
+    cy.get("tr").should("have.length", 2);
+    // Check headers
+    cy.get(".p-column-title").eq(0).should("have.text", "Detection");
+    cy.get(".p-column-title").eq(1).should("have.text", "Count");
+
+    // Should be 2 rows, one header and one detection point
+    cy.get("tr").should("have.length", 2);
+
+    // Check values of first row
+    // If this row looks good, we can reliably say any other rows will load correctly
+    // AKA don't need to check or add any additional rows
+    cy.get('[data-cy="detection-value"]').should(
+      "contain.text",
+      "Malicious email address",
+    );
+    cy.get('[data-cy="detection-point-alert-link"]').should("be.visible");
+    cy.get("td").eq(1).should("have.text", "1");
+
+    // Check alert link
+    cy.get('[data-cy="detection-point-alert-link"]').click();
+    cy.url().should("include", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a");
   });
 
-  it("renders section correctly", () => {
+  it("renders section correctly without detection points", () => {
+    // Intercept the API call that loads the event data
+    cy.intercept("GET", "/api/event/*").as("getEvent");
+    cy.intercept(
+      "GET",
+      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
+    ).as("getEventsDefaultRows");
+    cy.intercept("GET", "/api/event/*/summary/detection_point").as(
+      "getDetectionPoints",
+    );
+
+    // Add the test event to the database
+    cy.request({
+      method: "POST",
+      url: "/api/test/add_event",
+      body: {
+        alert_template: "small_template.json",
+        alert_count: 1,
+        name: "Test Event",
+      },
+    });
+
+    visitUrl({
+      url: "/manage_events",
+      extraIntercepts: ["@getEventsDefaultRows"],
+    });
+    cy.get('[data-cy="eventName"] > a').click();
+    cy.wait("@getEvent").its("state").should("eq", "Complete");
+
+    // Switch to detection summary view
+    cy.get('[aria-haspopup="true"]').eq(1).click();
+    cy.get("span").contains("Detection Summary").click();
+    cy.wait("@getDetectionPoints").its("state").should("eq", "Complete");
+
     // Check title
     cy.get("#event-section-title").should("contain.text", "Detection Summary");
     // table should be there
@@ -1527,49 +1588,5 @@ describe("Detection Summary Details", () => {
 
     // First actual row should have empty message
     cy.get("td").should("have.text", "No detection points found.");
-
-    // Start by getting all of the observables inside of the test alert.
-    // Then use the UUID of the first returned observable to create the detection point.
-    cy.request({
-      method: "POST",
-      url: "/api/alert/observables",
-      body: ["02f8299b-2a24-400f-9751-7dd9164daf6a"],
-    }).then((response) => {
-      const firstObservableUuid = response.body[0].uuid;
-      cy.request({
-        method: "POST",
-        url: "/api/node/detection_point/",
-        body: [
-          {
-            node_uuid: firstObservableUuid,
-            value: "Test Detection Point",
-          },
-        ],
-      });
-    });
-
-    // Refresh and navigate back to detection summary
-    cy.reload();
-    cy.wait("@getEvent").its("state").should("eq", "Complete");
-    cy.get('[aria-haspopup="true"]').eq(1).click();
-    cy.get("span").contains("Detection Summary").click();
-    cy.wait("@getDetectionPoints").its("state").should("eq", "Complete");
-
-    // Should be 2 rows, one header and one detection point
-    cy.get("tr").should("have.length", 2);
-
-    // Check values of first row
-    // If this row looks good, we can reliably say any other rows will load correctly
-    // AKA don't need to check or add any additional rows
-    cy.get('[data-cy="detection-value"]').should(
-      "contain.text",
-      "Test Detection Point",
-    );
-    cy.get('[data-cy="detection-point-alert-link"]').should("be.visible");
-    cy.get("td").eq(1).should("have.text", "1");
-
-    // Check alert link
-    cy.get('[data-cy="detection-point-alert-link"]').click();
-    cy.url().should("include", "/alert/02f8299b-2a24-400f-9751-7dd9164daf6a");
   });
 });
