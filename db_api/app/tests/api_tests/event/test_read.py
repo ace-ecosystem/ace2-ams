@@ -75,20 +75,18 @@ def test_summary_detection_point(client, db):
         type="test_type",
         value="test_value",
         parent_analysis=alert1.root_analysis,
+        detection_points=["detection point 1", "detection point 2"],
         db=db,
     )
-    factory.node_detection_point.create_or_read(node=alert1_o1, value="detection point 1", db=db)
-    factory.node_detection_point.create_or_read(node=alert1_o1, value="detection point 2", db=db)
 
     alert2 = factory.submission.create(db=db, event=event)
     alert2_o1 = factory.observable.create_or_read(
         type="test_type",
         value="test_value2",
         parent_analysis=alert2.root_analysis,
+        detection_points=["detection point 2", "detection point 3"],
         db=db,
     )
-    factory.node_detection_point.create_or_read(node=alert2_o1, value="detection point 2", db=db)
-    factory.node_detection_point.create_or_read(node=alert2_o1, value="detection point 3", db=db)
 
     # The detection point summary should now have 3 entries (since one detection point was repeated).
     # They should be sorted by the detection point values

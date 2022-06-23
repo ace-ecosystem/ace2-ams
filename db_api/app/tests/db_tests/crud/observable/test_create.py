@@ -151,7 +151,6 @@ def test_create(db):
     now = crud.helpers.utcnow()
     submission = factory.submission.create(db=db)
     initial_submission_version = submission.version
-    factory.metadata_directive.create_or_read(value="directive", db=db)
     factory.node_relationship_type.create_or_read(value="relationship_type", db=db)
     factory.metadata_tag.create_or_read(value="tag", db=db)
     factory.node_threat_actor.create_or_read(value="threat_actor", db=db)
@@ -168,7 +167,6 @@ def test_create(db):
                 )
             ],
             context="context",
-            detection_points=["detection_point"],
             expires_on=now,
             for_detection=True,
             history_username="analyst",
@@ -186,13 +184,10 @@ def test_create(db):
     )
 
     assert observable.context == "context"
-    assert len(observable.detection_points) == 1
-    assert observable.detection_points[0].value == "detection_point"
     assert observable.expires_on == now
     assert observable.for_detection is True
-    # There should be three history records: one for creating the observable, one for updating the detection points,
-    # and one for updating the observable relationships.
-    assert len(observable.history) == 3
+    # There should be three history records: one for creating the observable and one for updating the observable relationships.
+    assert len(observable.history) == 2
     assert len(observable.observable_relationships) == 1
     assert observable.observable_relationships[0].related_node.type.value == "type2"
     assert observable.observable_relationships[0].related_node.value == "value2"

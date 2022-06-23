@@ -12,6 +12,7 @@ from db.database import Base
 from db.schemas.analysis import Analysis
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
+from db.schemas.metadata_detection_point import MetadataDetectionPoint
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
 from db.schemas.submission_analysis_mapping import submission_analysis_mapping
@@ -68,13 +69,17 @@ class Submission(Node, HasHistory):
         lazy="selectin",
     )
 
-    child_detection_points = relationship(
-        "NodeDetectionPoint",
-        secondary="join(NodeDetectionPoint, Observable, NodeDetectionPoint.node_uuid == Observable.uuid)."
-        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == Observable.uuid)."
-        "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
+    child_detection_points: list[MetadataDetectionPoint] = relationship(
+        "MetadataDetectionPoint",
+        secondary="join(AnalysisMetadata, MetadataDetectionPoint, MetadataDetectionPoint.uuid == AnalysisMetadata.metadata_uuid)."
+        "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == AnalysisMetadata.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
-        order_by="asc(NodeDetectionPoint.value)",
+        # NOTE: The secondaryjoin parameter is required specifically when using the
+        # crud.submission.read_all() function to filter submissions by their tags.
+        # Without it, the query that SQLAlchemy creates results in the returned submissions
+        # having every tag from every submission in their child_analysis_tags list.
+        secondaryjoin="Metadata.uuid == AnalysisMetadata.metadata_uuid",
+        order_by="asc(MetadataDetectionPoint.value)",
         viewonly=True,
         lazy="selectin",
     )

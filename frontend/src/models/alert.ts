@@ -4,9 +4,9 @@ import { alertDispositionRead } from "./alertDisposition";
 import { alertToolRead } from "./alertTool";
 import { alertToolInstanceRead } from "./alertToolInstance";
 import { alertTypeRead } from "./alertType";
+import { metadataDetectionPointRead } from "./metadataDetectionPoint";
 import { metadataTagRead } from "./metadataTag";
 import { nodeCommentRead } from "./nodeComment";
-import { nodeDetectionPointRead } from "./nodeDetectionPoint";
 import { observableCreate, observableTreeRead } from "./observable";
 import { observableTypeRead } from "./observableType";
 import { nodeThreatActorRead } from "./nodeThreatActor";
@@ -36,7 +36,7 @@ export interface alertCreate extends nodeCreate, historyUsername {
 export interface alertRead extends nodeRead {
   alert: boolean;
   childAnalysisTags: metadataTagRead[];
-  childDetectionPoints: nodeDetectionPointRead[];
+  childDetectionPoints: metadataDetectionPointRead[];
   childTags: metadataTagRead[];
   childThreatActors: nodeThreatActorRead[];
   childThreats: nodeThreatRead[];

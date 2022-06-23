@@ -4,6 +4,17 @@ import { metadataDisplayValueRead } from "@/models/metadataDisplayValue";
 import { metadataTagRead } from "@/models/metadataTag";
 import { metadataTimeRead } from "@/models/metadataTime";
 
+export const metadataDetectionPointReadFactory = ({
+  description = "A detection point object",
+  uuid = "testObject1",
+  value = "detectionPoint1",
+}: Partial<metadataDirectiveRead> = {}): metadataDirectiveRead => ({
+  description: description,
+  metadataType: "detection_point",
+  uuid: uuid,
+  value: value,
+});
+
 export const metadataDirectiveReadFactory = ({
   description = "A directive object",
   uuid = "testObject1",

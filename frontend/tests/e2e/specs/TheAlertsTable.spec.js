@@ -29,35 +29,6 @@ describe("TheAlertsTable.vue", () => {
     });
   });
 
-  it("renders", () => {
-    cy.get("#AlertsTable").should("be.visible");
-  });
-
-  it("shows alerts", () => {
-    // 1 row for header + 6 rows for alerts
-    cy.get("tr").should("have.length", 7);
-  });
-
-  it("has default columns visible", () => {
-    cy.get(".p-multiselect-label").should(
-      "have.text",
-      "Event Time (UTC), Name, Owner, Disposition",
-    );
-    cy.get("tr > .p-highlight").should("have.text", "Event Time (UTC)");
-    cy.get(".p-datatable-thead > tr > :nth-child(4)").should(
-      "have.text",
-      "Name",
-    );
-    cy.get(".p-datatable-thead > tr > :nth-child(5)").should(
-      "have.text",
-      "Owner",
-    );
-    cy.get(".p-datatable-thead > tr > :nth-child(6)").should(
-      "have.text",
-      "Disposition",
-    );
-  });
-
   it("resets selected columns when reset button clicked", () => {
     // Open selected columns multiselect
     cy.get(".p-multiselect-label").click();

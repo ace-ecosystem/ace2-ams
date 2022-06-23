@@ -12,12 +12,12 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
+from typing import Optional
 
 from api_models.observable import ObservableSubmissionTreeRead, ObservableRead, ObservableRelationshipRead
 from db.database import Base
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_metadata import AnalysisMetadata
-from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
@@ -81,8 +81,6 @@ class Observable(Node, HasHistory):
 
     tags: list[MetadataTag] = relationship("MetadataTag", secondary=observable_tag_mapping, lazy="selectin")
 
-    time = Column(DateTime(timezone=True), server_default=utcnow(), nullable=False)
-
     type = relationship("ObservableType", lazy="selectin")
 
     type_uuid = Column(UUID(as_uuid=True), ForeignKey("observable_type.uuid"), nullable=False)
@@ -105,13 +103,27 @@ class Observable(Node, HasHistory):
     def convert_to_pydantic(self) -> ObservableSubmissionTreeRead:
         return ObservableSubmissionTreeRead(**self.to_dict())
 
-    def to_dict(self):
-        ignore_keys = ["convert_to_pydantic", "history", "history_snapshot", "to_dict"]
+    def to_dict(self, extra_ignore_keys: Optional[list[str]] = None):
+        ignore_keys = [
+            "alerts",
+            "convert_to_pydantic",
+            "history",
+            "history_snapshot",
+            "to_dict",
+        ]
+
+        if extra_ignore_keys:
+            ignore_keys += extra_ignore_keys
+
         return {key: getattr(self, key) for key in self.__class__.__dict__ if key not in ignore_keys}
 
     @property
     def history_snapshot(self):
-        return json.loads(ObservableRead(**self.to_dict()).json())
+        return json.loads(
+            ObservableRead(
+                **self.to_dict(extra_ignore_keys=["alert_dispositions", "analysis_metadata", "disposition_history"])
+            ).json()
+        )
 
     @property
     def observable_relationships(self) -> list[ObservableRelationshipRead]:

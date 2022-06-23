@@ -46,6 +46,7 @@ def test_create(db):
                         )
                     ],
                     analysis_metadata=[
+                        AnalysisMetadataCreate(type="detection_point", value="o_detection_point"),
                         AnalysisMetadataCreate(type="directive", value="o_analysis_directive"),
                         AnalysisMetadataCreate(type="tag", value="o_analysis_tag"),
                     ],
@@ -73,7 +74,7 @@ def test_create(db):
     assert any(a.analysis_module_type_uuid is None for a in submission.analyses)
     assert any(a.analysis_module_type_uuid == analysis_module_type.uuid for a in submission.analyses)
     assert len(submission.child_detection_points) == 1
-    assert submission.child_detection_points[0].value == "detection_point"
+    assert submission.child_detection_points[0].value == "o_detection_point"
     assert len(submission.child_analysis_tags) == 1
     assert submission.child_analysis_tags[0].value == "o_analysis_tag"
     assert len(submission.child_tags) == 1

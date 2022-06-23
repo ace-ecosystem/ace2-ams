@@ -784,6 +784,10 @@ def test_read_submission_tree(db):
     assert submission.child_analysis_tags[1].value == "from_address"
     assert submission.child_analysis_tags[2].value == "recipient"
 
+    # The small.json has one detection point
+    assert len(submission.child_detection_points) == 1
+    assert submission.child_detection_points[0].value == "Malicious email address"
+
     # The small.json has one permanent tag applied to an observable.
     assert len(submission.child_tags) == 1
     assert submission.child_tags[0].value == "c2"

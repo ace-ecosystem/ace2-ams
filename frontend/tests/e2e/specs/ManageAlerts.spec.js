@@ -31,13 +31,6 @@ describe("Manage Alerts - No Database Changes", () => {
   });
 
   describe("Date Ranges", () => {
-    it("renders", () => {
-      cy.get(".p-menubar").should("be.visible");
-      cy.get("#AlertActionToolbar").should("be.visible");
-      cy.get("#FilterToolbar").should("be.visible");
-      cy.get("#AlertsTable").should("be.visible");
-    });
-
     it("will reload alerts table with 'after' filter applied when 'start' input changed by using date picker", () => {
       cy.intercept(
         "GET",

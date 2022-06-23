@@ -5,11 +5,9 @@ from uuid import UUID, uuid4
 
 from api_models import type_str, validators
 from api_models.analysis_metadata import AnalysisMetadataCreate, AnalysisMetadataRead
-from api_models.metadata_directive import MetadataDirectiveRead
 from api_models.metadata_tag import MetadataTagRead
 from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
-from api_models.node_detection_point import NodeDetectionPointRead
 from api_models.node_relationship import NodeRelationshipRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
@@ -58,10 +56,6 @@ class ObservableCreateBase(NodeCreate, ObservableBase):
         default_factory=list, description="A list of metadata objects to add to the observable by its parent analysis"
     )
 
-    detection_points: list[type_str] = Field(
-        default_factory=list, description="A list of detection points to add to the observable"
-    )
-
     history_username: Optional[type_str] = Field(
         description="If given, an observable history record will be created and associated with the user"
     )
@@ -94,10 +88,6 @@ class ObservableCreateInSubmission(ObservableCreateBase):
 class ObservableRead(NodeRead, ObservableBase):
     comments: list[NodeCommentRead] = Field(
         description="A list of comments added to the observable", default_factory=list
-    )
-
-    detection_points: list[NodeDetectionPointRead] = Field(
-        description="A list of detection points added to the observable", default_factory=list
     )
 
     observable_relationships: "list[ObservableRelationshipRead]" = Field(

@@ -31,10 +31,6 @@ describe("ViewAnalysis.vue", () => {
     cy.get('[data-cy="Test Analysis"]').contains("Test Analysis").click();
   });
 
-  it("View Analysis page renders", () => {
-    cy.get("#view-analysis").should("be.visible");
-  });
-
   it("Will display breadcrumbs back to alert and home", () => {
     // There should be 3 breadcrumbs
     cy.get(".p-menuitem-link").should("have.length", 3);

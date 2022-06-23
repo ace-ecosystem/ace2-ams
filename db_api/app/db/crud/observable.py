@@ -8,7 +8,6 @@ from typing import Optional
 from uuid import UUID
 
 from api_models.analysis import AnalysisCreate
-from api_models.node_detection_point import NodeDetectionPointCreate
 from api_models.node_relationship import NodeRelationshipCreate
 from api_models.observable import ObservableCreate, ObservableUpdate
 from db import crud
@@ -34,7 +33,6 @@ def create_or_read(
         db=db,
         exclude={
             "analyses",
-            "detection_points",
             "history_username",
             "observable_relationships",
             "parent_analysis_uuid",
@@ -61,15 +59,6 @@ def create_or_read(
             )
     else:
         obj = read_by_type_value(type=model.type, value=model.value, db=db)
-
-    # Create any detection points that were given
-    for detection_point in model.detection_points:
-        crud.node_detection_point.create_or_read(
-            model=NodeDetectionPointCreate(
-                node_uuid=obj.uuid, value=detection_point, history_username=model.history_username
-            ),
-            db=db,
-        )
 
     # Create any relationships that were given
     for relationship in model.observable_relationships:

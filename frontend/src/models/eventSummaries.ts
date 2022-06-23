@@ -1,5 +1,5 @@
 import { UUID } from "./base";
-import { nodeDetectionPointRead } from "./nodeDetectionPoint";
+import { metadataDetectionPointRead } from "./metadataDetectionPoint";
 import { observableInAlertRead } from "./observable";
 import {
   sandboxContactedHost,
@@ -9,7 +9,7 @@ import {
   sandboxProcess,
 } from "./sandbox";
 
-export interface detectionPointSummary extends nodeDetectionPointRead {
+export interface detectionPointSummary extends metadataDetectionPointRead {
   alertUuid: UUID;
   count: number;
 }

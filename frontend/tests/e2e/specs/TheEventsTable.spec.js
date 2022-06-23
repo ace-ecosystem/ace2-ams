@@ -43,45 +43,6 @@ describe("TheEventsTable.vue", () => {
     });
   });
 
-  it("renders", () => {
-    cy.get("#EventsTable").should("be.visible");
-  });
-
-  it("shows events", () => {
-    // 1 row for header + 6 rows for events
-    cy.get("tr").should("have.length", 7);
-  });
-
-  it("has default columns visible", () => {
-    cy.get(".p-multiselect-label").should(
-      "have.text",
-      "Created, Name, Threats, Severity, Status, Owner",
-    );
-    // Edit event button column
-    cy.get(".p-datatable-thead > tr > :nth-child(3)").should("have.text", "");
-    cy.get("tr > .p-highlight").should("have.text", "Created");
-    cy.get(".p-datatable-thead > tr > :nth-child(5)").should(
-      "have.text",
-      "Name",
-    );
-    cy.get(".p-datatable-thead > tr > :nth-child(6)").should(
-      "have.text",
-      "Threats",
-    );
-    cy.get(".p-datatable-thead > tr > :nth-child(7)").should(
-      "have.text",
-      "Severity",
-    );
-    cy.get(".p-datatable-thead > tr > :nth-child(8)").should(
-      "have.text",
-      "Status",
-    );
-    cy.get(".p-datatable-thead > tr > :nth-child(9)").should(
-      "have.text",
-      "Owner",
-    );
-  });
-
   it("resets selected columns when reset button clicked", () => {
     // Open selected columns multiselect
     cy.get(".p-multiselect-label").click();

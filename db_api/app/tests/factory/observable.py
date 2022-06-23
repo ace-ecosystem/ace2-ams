@@ -37,6 +37,11 @@ def create_or_read(
             factory.metadata_tag.create_or_read(value=tag, db=db)
             metadata.append(AnalysisMetadataCreate(type="tag", value=tag))
 
+    if detection_points is not None:
+        for detection_point in detection_points:
+            factory.metadata_detection_point.create_or_read(value=detection_point, db=db)
+            metadata.append(AnalysisMetadataCreate(type="detection_point", value=detection_point))
+
     if directives is not None:
         for directive in directives:
             factory.metadata_directive.create_or_read(value=directive, db=db)
@@ -70,7 +75,6 @@ def create_or_read(
         model=ObservableCreate(
             analysis_metadata=metadata,
             context=context,
-            detection_points=detection_points or [],
             expires_on=expires_on,
             for_detection=for_detection,
             history_username=history_username,

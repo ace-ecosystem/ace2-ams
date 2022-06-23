@@ -12,6 +12,7 @@ from api.routes.event_source import router as event_source_router
 from api.routes.event_status import router as event_status_router
 from api.routes.event_type import router as event_type_router
 from api.routes.event_vector import router as event_vector_router
+from api.routes.metadata_detection_point import router as metadata_detection_point_router
 from api.routes.metadata_directive import router as metadata_directive_router
 from api.routes.metadata_display_type import router as metadata_display_type_router
 from api.routes.metadata_display_value import router as metadata_display_value_router
@@ -19,7 +20,6 @@ from api.routes.metadata_tag import router as metadata_tag_router
 from api.routes.metadata_time import router as metadata_time_router
 from api.routes.node import router as node_router
 from api.routes.node_comment import router as node_comment_router
-from api.routes.node_detection_point import router as node_detection_point_router
 from api.routes.node_relationship import router as node_relationship_router
 from api.routes.node_relationship_type import router as node_relationship_type_router
 from api.routes.node_threat import router as node_threat_router
@@ -52,6 +52,7 @@ router.include_router(event_source_router)
 router.include_router(event_status_router)
 router.include_router(event_type_router)
 router.include_router(event_vector_router)
+router.include_router(metadata_detection_point_router)
 router.include_router(metadata_directive_router)
 router.include_router(metadata_display_type_router)
 router.include_router(metadata_display_value_router)
@@ -59,7 +60,6 @@ router.include_router(metadata_tag_router)
 router.include_router(metadata_time_router)
 router.include_router(node_router)
 router.include_router(node_comment_router)
-router.include_router(node_detection_point_router)
 router.include_router(node_relationship_router)
 router.include_router(node_relationship_type_router)
 router.include_router(node_threat_router)

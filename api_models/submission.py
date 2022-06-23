@@ -7,7 +7,7 @@ from api_models import type_str, validators
 from api_models.alert_disposition import AlertDispositionRead
 from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
-from api_models.node_detection_point import NodeDetectionPointRead
+from api_models.metadata_detection_point import MetadataDetectionPointRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
 from api_models.observable import ObservableCreateInSubmission, ObservableSubmissionTreeRead
@@ -75,7 +75,7 @@ class SubmissionRead(NodeRead, SubmissionBase):
         description="A list of tags added to observables by analysis modules", default_factory=list
     )
 
-    child_detection_points: list[NodeDetectionPointRead] = Field(
+    child_detection_points: list[MetadataDetectionPointRead] = Field(
         description="A list of detection points added to child Nodes in the submission's tree", default_factory=list
     )
 
