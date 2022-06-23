@@ -80,7 +80,8 @@ export function parseFilters(
   queryFilters: Record<string, string | string[]>,
   availableFilters: readonly propertyOption[],
 ): alertFilterParams | eventFilterParams {
-  const parsedFilters: Record<string, unknown[]> = {};
+  const parsedFilters: Record<string, { included: any[]; notIncluded: any[] }> =
+    {};
 
   // parse each filter
   for (const filterName in queryFilters) {
