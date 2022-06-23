@@ -96,7 +96,7 @@ def update(uuid: UUID, model: EventCommentUpdate, db: Session) -> bool:
     # Modifying the comment counts as modifying the event, so it should receive a new version
     comment.event.version = uuid4()
 
-    # Add an entry to the appropriate node history table for updating the comment
+    # Add an entry to the history table for updating the comment
     crud.history.record_update_history(
         history_table=EventHistory,
         record=comment.event,

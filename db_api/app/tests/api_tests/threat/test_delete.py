@@ -38,7 +38,7 @@ def test_delete_used(client, db):
 
 
 def test_delete(client, db):
-    # Create a node threat
+    # Create a threat
     obj = factory.threat.create_or_read(value="test", db=db)
 
     # Delete it

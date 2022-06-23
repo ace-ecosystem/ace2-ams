@@ -51,10 +51,10 @@ def create_or_read(model: ObservableRelationshipCreate, db: Session) -> Observab
 
 
 def delete(uuid: UUID, history_username: str, db: Session) -> bool:
-    # Read the relationship to get the impacted Node
+    # Read the relationship to get the impacted observable
     relationship = read_by_uuid(uuid=uuid, db=db)
 
-    # Removing the relationship counts as modifying the Node, so update its version
+    # Removing the relationship counts as modifying the observable, so update its version
     relationship.observable.version = uuid4()
 
     # Delete the relationship

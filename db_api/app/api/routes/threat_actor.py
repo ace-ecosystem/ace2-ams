@@ -79,9 +79,7 @@ def update_threat_actor(
 ):
     try:
         if not crud.helpers.update(uuid=uuid, update_model=threat_actor, db_table=ThreatActor, db=db):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update node threat_actor {uuid}"
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update threat_actor {uuid}")
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 
@@ -101,9 +99,7 @@ helpers.api_route_update(router, update_threat_actor)
 def delete_threat_actor(uuid: UUID, db: Session = Depends(get_db)):
     try:
         if not crud.helpers.delete(uuid=uuid, db_table=ThreatActor, db=db):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete node threat_actor {uuid}"
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete threat_actor {uuid}")
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
 

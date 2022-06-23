@@ -84,7 +84,7 @@ def test_update_valid_types(client, db, values):
     obj = factory.threat.create_or_read(value="test", types=initial_types, db=db)
     assert len(obj.types) == len(initial_types)
 
-    # Create the new node threat types
+    # Create the new threat types
     for value in values:
         factory.threat_type.create_or_read(value=value, db=db)
 

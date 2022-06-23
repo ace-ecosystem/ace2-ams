@@ -21,7 +21,7 @@ def test_update(db):
     assert obj.value == "new value"
 
 
-def test_update_duplicate_node_and_value(db):
+def test_update_duplicate_event_and_value(db):
     event = factory.event.create_or_read(name="test", db=db)
     obj1 = factory.event_comment.create_or_read(event=event, username="analyst", value="test", db=db)
     obj2 = factory.event_comment.create_or_read(event=event, username="analyst", value="test2", db=db)

@@ -145,17 +145,7 @@ def seed(db: Session):
     if "observable_relationship_type" in data:
         for value in data["observable_relationship_type"]:
             db.add(ObservableRelationshipType(value=value))
-            print(f"Adding node relationship type: {value}")
-
-    if "threat_type" in data:
-        add_queueable_values(
-            db=db,
-            db_table=ThreatType,
-            queues=queues,
-            data=data,
-            key="threat_type",
-            print_value="node threat type",
-        )
+            print(f"Adding observable relationship type: {value}")
 
     if "observable_type" in data:
         for value in data["observable_type"]:
@@ -166,6 +156,16 @@ def seed(db: Session):
         for value in data["submission_type"]:
             db.add(SubmissionType(value=value))
             print(f"Adding submission type: {value}")
+
+    if "threat_type" in data:
+        add_queueable_values(
+            db=db,
+            db_table=ThreatType,
+            queues=queues,
+            data=data,
+            key="threat_type",
+            print_value="threat type",
+        )
 
     user_roles = {}
     if "user_role" in data:

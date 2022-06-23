@@ -21,7 +21,7 @@ def test_update(db):
     assert obj.value == "new value"
 
 
-def test_update_duplicate_node_and_value(db):
+def test_update_duplicate_submission_and_value(db):
     submission = factory.submission.create(db=db)
     obj1 = factory.submission_comment.create_or_read(submission=submission, username="analyst", value="test", db=db)
     obj2 = factory.submission_comment.create_or_read(submission=submission, username="analyst", value="test2", db=db)

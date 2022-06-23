@@ -11,7 +11,7 @@ from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 router = APIRouter(
     prefix="/observable/relationship",
-    tags=["Node Relationship"],
+    tags=["Observable Relationship"],
 )
 
 

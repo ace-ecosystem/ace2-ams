@@ -100,7 +100,7 @@ def update(uuid: UUID, model: SubmissionCommentUpdate, db: Session) -> bool:
     # Modifying the comment counts as modifying the submission, so it should receive a new version
     comment.submission.version = uuid4()
 
-    # Add an entry to the appropriate node history table for updating the comment
+    # Add an entry to the history table for updating the comment
     crud.history.record_update_history(
         history_table=SubmissionHistory,
         record=comment.submission,
