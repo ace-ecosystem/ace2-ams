@@ -20,9 +20,25 @@ def test_get_nonexistent_uuid(client):
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_get_version_nonexistent_uuid(client):
+    get = client.get(f"/api/observable/{uuid.uuid4()}/version")
+    assert get.status_code == status.HTTP_404_NOT_FOUND
+
+
 #
 # VALID TESTS
 #
+
+
+def test_get_version(client, db):
+    submission = factory.submission.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test_value", parent_analysis=submission.root_analysis, db=db
+    )
+
+    get = client.get(f"/api/observable/{observable.uuid}/version")
+    assert get.status_code == status.HTTP_200_OK
+    assert get.json() == {"version": str(observable.version)}
 
 
 def test_get(client, db):

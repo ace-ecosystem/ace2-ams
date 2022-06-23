@@ -50,6 +50,11 @@ def test_get_summary_nonexistent_event(client, path):
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_get_version_nonexistent_uuid(client):
+    get = client.get(f"/api/event/{uuid.uuid4()}/version")
+    assert get.status_code == status.HTTP_404_NOT_FOUND
+
+
 #
 # VALID TESTS
 #
