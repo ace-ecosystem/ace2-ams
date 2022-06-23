@@ -7,6 +7,7 @@ import EventDetectionsSummary from "@/components/Events/EventDetectionsSummary.v
 import router from "@/router/index";
 import { Event } from "@/services/api/event";
 import { detectionPointSummary } from "@/models/eventSummaries";
+import { metadataDetectionPointReadFactory } from "@mocks/metadata";
 
 const props = {
   eventUuid: "uuid",
@@ -26,10 +27,7 @@ describe("EventDetectionsSummary", () => {
     const result: detectionPointSummary = {
       alertUuid: "alertUuid",
       count: 3,
-      insertTime: "2022-03-14T00:00:00.000000+00:00",
-      nodeUuid: "nodeUuid",
-      uuid: "detectionUuid",
-      value: "Test detection point",
+      ...metadataDetectionPointReadFactory({ value: "Test detection point" }),
     };
     const detectionSummaryCols = ["Detection", "Count"];
     const detectionSummaryVals = [result.value, result.count];

@@ -9,7 +9,10 @@ import { alertReadFactory } from "@mocks/alert";
 import { alertRead } from "@/models/alert";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { userReadFactory } from "@mocks/user";
-import { metadataTagReadFactory } from "@mocks/metadata";
+import {
+  metadataDetectionPointReadFactory,
+  metadataTagReadFactory,
+} from "@mocks/metadata";
 
 function factory(initialAlertStoreState: {
   open: null | alertRead;
@@ -110,24 +113,15 @@ describe("TheAlertDetails", () => {
       .should("have.text", "alert instructions example");
   });
   it("renders correctly when there is an open alert that does have observables with detection points", () => {
-    const detectionPointA = {
-      insertTime: "2020-05-04T12:00:00.000000+00:00",
-      nodeUuid: "nodeUuidB",
-      uuid: "uuidB",
+    const detectionPointA = metadataDetectionPointReadFactory({
       value: "detectionA",
-    };
-    const detectionPointB = {
-      insertTime: "2020-05-04T12:00:00.000000+00:00",
-      nodeUuid: "nodeUuidB",
-      uuid: "uuidB",
+    });
+    const detectionPointB = metadataDetectionPointReadFactory({
       value: "detectionB",
-    };
-    const detectionPointC = {
-      insertTime: "2020-05-04T12:00:00.000000+00:00",
-      nodeUuid: "nodeUuidC",
-      uuid: "uuidC",
+    });
+    const detectionPointC = metadataDetectionPointReadFactory({
       value: "detectionC",
-    };
+    });
 
     factory({
       open: alertReadFactory({

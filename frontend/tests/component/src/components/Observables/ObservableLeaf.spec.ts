@@ -16,6 +16,7 @@ import Tooltip from "primevue/tooltip";
 import TagModalVue from "@/components/Modals/TagModal.vue";
 import { analysisMetadataReadFactory } from "@mocks/analysisMetadata";
 import {
+  metadataDetectionPointReadFactory,
   metadataDisplayTypeReadFactory,
   metadataDisplayValueReadFactory,
   metadataTagReadFactory,
@@ -107,18 +108,16 @@ const observableWithDispositionHistory = observableTreeReadFactory({
 const observableWithDetectionPoints = observableTreeReadFactory({
   value: "Observable w/ Detection Points",
   firstAppearance: true,
-  detectionPoints: [
-    {
-      insertTime: "2022-02-24T00:00:00.000000+00:00",
-      nodeUuid: "1",
-      ...genericObjectReadFactory({ uuid: "1", value: "detection point A" }),
-    },
-    {
-      insertTime: "2022-02-24T00:00:00.000000+00:00",
-      nodeUuid: "1",
-      ...genericObjectReadFactory({ uuid: "2", value: "detection point B" }),
-    },
-  ],
+  analysisMetadata: analysisMetadataReadFactory({
+    detectionPoints: [
+      metadataDetectionPointReadFactory({
+        value: "test detection point1",
+      }),
+      metadataDetectionPointReadFactory({
+        value: "test detection point2",
+      }),
+    ],
+  }),
 });
 
 const observableWithForDetectionEnabled = observableTreeReadFactory({

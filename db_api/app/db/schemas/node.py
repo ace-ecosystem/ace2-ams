@@ -15,8 +15,6 @@ class Node(Base):
 
     comments = relationship("NodeComment", lazy="selectin")
 
-    detection_points = relationship("NodeDetectionPoint", lazy="selectin")
-
     node_type = Column(String)
 
     relationships = relationship(

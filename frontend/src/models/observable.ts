@@ -8,7 +8,6 @@ import { historyUsername, UUID } from "./base";
 import { metadataTagRead } from "./metadataTag";
 import { nodeCreate, nodeRead, nodeUpdate } from "./node";
 import { nodeCommentRead } from "./nodeComment";
-import { nodeDetectionPointRead } from "./nodeDetectionPoint";
 import { nodeRelationshipRead } from "./nodeRelationship";
 import { nodeThreatRead } from "./nodeThreat";
 import { nodeThreatActorRead } from "./nodeThreatActor";
@@ -39,7 +38,6 @@ export interface observableCreate extends nodeCreate, historyUsername {
 export interface observableRead extends nodeRead {
   comments: nodeCommentRead[];
   context: string | null;
-  detectionPoints: nodeDetectionPointRead[];
   expiresOn: string | null;
   forDetection: boolean;
   observableRelationships: observableRelationshipRead[];

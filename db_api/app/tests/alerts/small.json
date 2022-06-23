@@ -29,6 +29,10 @@
               "type": "email_address",
               "value": "badguy@evil.com",
               "metadata": [
+                {
+                  "type": "detection_point",
+                  "value": "Malicious email address"
+                },
                 { "type": "display_type", "value": "sender" },
                 { "type": "tag", "value": "from_address" }
               ],

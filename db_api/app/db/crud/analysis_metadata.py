@@ -4,6 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from api_models.analysis_metadata import AnalysisMetadataCreate
+from api_models.metadata_detection_point import MetadataDetectionPointCreate
 from api_models.metadata_directive import MetadataDirectiveCreate
 from api_models.metadata_display_type import MetadataDisplayTypeCreate
 from api_models.metadata_display_value import MetadataDisplayValueCreate
@@ -30,7 +31,12 @@ def create_or_read(
     # Create or read the metadata object based on its type
     metadata_object = None
 
-    if model.type == "directive":
+    if model.type == "detection_point":
+        metadata_object = crud.metadata_detection_point.create_or_read(
+            model=MetadataDetectionPointCreate(value=model.value), db=db
+        )
+
+    elif model.type == "directive":
         metadata_object = crud.metadata_directive.create_or_read(
             model=MetadataDirectiveCreate(value=model.value), db=db
         )

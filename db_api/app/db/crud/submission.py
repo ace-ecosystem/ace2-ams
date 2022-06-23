@@ -45,8 +45,12 @@ def _associate_metadata_with_observable(analysis_uuids: list[UUID], o: Observabl
         if m.analysis_uuid not in analysis_uuids:
             continue
 
+        # Add each detection point
+        if m.metadata_object.metadata_type == "detection_point":
+            o.analysis_metadata.detection_points.append(m.metadata_object)
+
         # Add each directive metadata
-        if m.metadata_object.metadata_type == "directive":
+        elif m.metadata_object.metadata_type == "directive":
             o.analysis_metadata.directives.append(m.metadata_object)
 
         # Only add the display_type metadata if one was not already set
@@ -66,6 +70,7 @@ def _associate_metadata_with_observable(analysis_uuids: list[UUID], o: Observabl
             o.analysis_metadata.time = m.metadata_object
 
     # Dedup and sort the analysis metadata on the observable that is a list
+    o.analysis_metadata.detection_points = sorted(set(o.analysis_metadata.detection_points), key=lambda x: x.value)
     o.analysis_metadata.directives = sorted(set(o.analysis_metadata.directives), key=lambda x: x.value)
     o.analysis_metadata.tags = sorted(set(o.analysis_metadata.tags), key=lambda m: m.value)
 
