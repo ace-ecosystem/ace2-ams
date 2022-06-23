@@ -201,9 +201,12 @@ export function parseFilters(
       // If filter value was successfully parsed add it to the new filter object
       if (filterValueParsed) {
         if (parsedFilters[filterName]) {
-          parsedFilters[filterName].push(filterValueParsed);
+          parsedFilters[filterName].included.push(filterValueParsed);
         } else {
-          parsedFilters[filterName] = [filterValueParsed];
+          parsedFilters[filterName] = {
+            included: [filterValueParsed],
+            notIncluded: [],
+          };
         }
       }
     }
