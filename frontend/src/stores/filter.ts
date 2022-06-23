@@ -58,7 +58,7 @@ export const useFilterStore = defineStore({
         }
       }
 
-      this.$state[payload.nodeType] = nonEmptyFilters;
+      this.$state[payload.nodeType] = nonEmptyFilters as any;
       localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
 
