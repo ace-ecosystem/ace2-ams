@@ -73,6 +73,7 @@ export interface eventRead extends nodeRead {
   dispositionTime: string | null;
   eventTime: string | null;
   name: string;
+  objectType: string;
   owner: userRead | null;
   ownershipTime: string | null;
   preventionTools: eventPreventionToolRead[];

@@ -92,11 +92,11 @@
 
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const filterStore = useFilterStore();
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
 
   const queue = computed(() => {
-    return currentUserSettingsStore.queues[nodeType] != null
-      ? currentUserSettingsStore.queues[nodeType]!.value
+    return currentUserSettingsStore.queues[objectType] != null
+      ? currentUserSettingsStore.queues[objectType]!.value
       : "unknown";
   });
 
@@ -128,8 +128,8 @@
     events: validEventFilters,
   };
 
-  const filterNameObject = validFilters[nodeType]
-    ? validFilters[nodeType].find((filter) => {
+  const filterNameObject = validFilters[objectType]
+    ? validFilters[objectType].find((filter) => {
         return filter.name === props.filterName;
       })
     : null;
@@ -157,12 +157,12 @@
 
   function updateFilter() {
     filterStore.unsetFilterValue({
-      nodeType: nodeType,
+      objectType: objectType,
       filterName: props.filterName,
       filterValue: filterModelOldValue.value,
     });
     filterStore.setFilter({
-      nodeType: nodeType,
+      objectType: objectType,
       filterName: props.filterName,
       filterValue: filterModel.value.propertyValue as
         | alertFilterValues
@@ -172,14 +172,14 @@
 
   function unsetFilter() {
     filterStore.unsetFilter({
-      nodeType: nodeType,
+      objectType: objectType,
       filterName: props.filterName,
     });
   }
 
   function unsetFilterValue(value: alertFilterValues | eventFilterValues) {
     filterStore.unsetFilterValue({
-      nodeType: nodeType,
+      objectType: objectType,
       filterName: props.filterName,
       filterValue: value,
     });

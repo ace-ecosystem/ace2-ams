@@ -67,7 +67,7 @@
   const filterStore = useFilterStore();
   const filterByObservable = (observable: observableInAlertRead) => {
     filterStore.bulkSetFilters({
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         observable: [
           {

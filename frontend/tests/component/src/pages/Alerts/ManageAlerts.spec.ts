@@ -32,7 +32,7 @@ describe("ManageAlerts", () => {
           }),
           router,
         ],
-        provide: { config: testConfiguration, nodeType: "alerts" },
+        provide: { config: testConfiguration, objectType: "alerts" },
       },
     });
   });

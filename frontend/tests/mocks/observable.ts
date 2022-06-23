@@ -30,7 +30,7 @@ export const observableReadFactory = ({
   threatActors: threatActors,
   threats: threats,
   type: type,
-  nodeType: "observable",
+  objectType: "observable",
   version: version,
   observableRelationships: observableRelationships,
 });
@@ -63,7 +63,7 @@ export const observableInAlertReadFactory = ({
   threatActors: threatActors,
   threats: threats,
   type: type,
-  nodeType: "observable",
+  objectType: "observable",
   version: version,
   observableRelationships: observableRelationships,
 });
@@ -101,6 +101,6 @@ export const observableTreeReadFactory = ({
   threatActors: threatActors,
   threats: threats,
   type: type,
-  nodeType: "observable",
+  objectType: "observable",
   observableRelationships: observableRelationships,
 });

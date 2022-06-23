@@ -59,7 +59,7 @@
   const config = inject("config") as Record<string, any>;
   const error = ref<string>();
 
-  provide("nodeType", "alerts");
+  provide("objectType", "alerts");
 
   onBeforeMount(async () => {
     await initPage();

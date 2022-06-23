@@ -27,7 +27,7 @@ function factory(args: { selected: string[] } = { selected: [] }) {
         }),
       ],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
       },
     },
     propsData: {

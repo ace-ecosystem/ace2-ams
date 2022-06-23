@@ -74,7 +74,7 @@
       </Toolbar>
     </template>
 
-    <template #empty> No {{ nodeType }} found. </template>
+    <template #empty> No {{ objectType }} found. </template>
 
     <!-- EXPANSION ARROW COLUMN-->
     <Column
@@ -180,14 +180,14 @@
 
   defineEmits(["rowExpand", "rowCollapse"]);
 
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
   const availableFilters = inject("availableFilters") as Record<
     string,
     propertyOption[]
   >;
 
-  const tableStore = nodeTableStores[nodeType]();
-  const selectedStore = nodeSelectedStores[nodeType]();
+  const tableStore = nodeTableStores[objectType]();
+  const selectedStore = nodeSelectedStores[objectType]();
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const filterStore = useFilterStore();
   const toast = useToast();
@@ -297,7 +297,7 @@
   const showError = (args: { detail: string }) => {
     toast.add({
       severity: "error",
-      summary: `Failed to fetch ${nodeType}`,
+      summary: `Failed to fetch ${objectType}`,
       detail: args.detail,
       life: 6000,
     });
@@ -309,7 +309,7 @@
       await tableStore.readPage({
         sort: tableStore.sortFilter!,
         ...pageOptions.value,
-        ...filterStore[nodeType],
+        ...filterStore[objectType],
       });
     } catch (e: unknown) {
       if (typeof e === "string") {
@@ -346,8 +346,8 @@
   };
 
   const currentQueue = ref(
-    currentUserSettingsStore.queues[nodeType]
-      ? currentUserSettingsStore.queues[nodeType]?.value
+    currentUserSettingsStore.queues[objectType]
+      ? currentUserSettingsStore.queues[objectType]?.value
       : undefined,
   );
 
@@ -372,7 +372,7 @@
     const node = tableStore.visibleQueriedItemById(data.uuid);
     if (isFilterable(field) && node && node[field]) {
       filterStore.setFilter({
-        nodeType: nodeType,
+        objectType: objectType,
         filterName: field,
         filterValue: node[field] as any,
       });

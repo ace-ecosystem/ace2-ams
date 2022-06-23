@@ -9,13 +9,13 @@ import { metadataTagReadFactory } from "@mocks/metadata";
 const testTag = metadataTagReadFactory({ value: "testTag" });
 
 function factory(
-  nodeType: "alerts" | "events" = "alerts",
+  objectType: "alerts" | "events" = "alerts",
   overrideNodeType?: "alerts" | "events",
 ) {
   return mount(MetadataTag, {
     global: {
       plugins: [PrimeVue, createCustomCypressPinia(), router],
-      provide: { nodeType: nodeType },
+      provide: { objectType: objectType },
     },
     propsData: {
       tag: testTag,
@@ -33,7 +33,7 @@ describe("MetadataTag", () => {
     factory();
     cy.contains("testTag").click();
     cy.get("@stub-1").should("have.been.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         tags: [["testTag"]],
       },
@@ -43,7 +43,7 @@ describe("MetadataTag", () => {
     factory("events");
     cy.contains("testTag").click();
     cy.get("@stub-1").should("have.been.calledOnceWith", {
-      nodeType: "events",
+      objectType: "events",
       filters: {
         tags: [["testTag"]],
       },
@@ -53,7 +53,7 @@ describe("MetadataTag", () => {
     factory("events", "alerts");
     cy.contains("testTag").click();
     cy.get("@stub-1").should("have.been.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         tags: [["testTag"]],
       },

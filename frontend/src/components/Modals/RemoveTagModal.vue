@@ -62,7 +62,7 @@
   const props = defineProps({
     name: { type: String, required: true },
     reloadObject: { type: String, required: true },
-    nodeType: {
+    objectType: {
       type: String as PropType<"alerts" | "events" | "observable">,
       required: true,
     },
@@ -76,10 +76,10 @@
   let nodeStore: any;
   let tableStore: any;
   let selectedStore: any;
-  if (!(props.nodeType === "observable")) {
-    nodeStore = nodeStores[props.nodeType]();
-    selectedStore = nodeSelectedStores[props.nodeType]();
-    tableStore = nodeTableStores[props.nodeType]();
+  if (!(props.objectType === "observable")) {
+    nodeStore = nodeStores[props.objectType]();
+    selectedStore = nodeSelectedStores[props.objectType]();
+    tableStore = nodeTableStores[props.objectType]();
   }
 
   const authStore = useAuthStore();
@@ -94,7 +94,7 @@
   const isLoading = ref(false);
 
   const initTagOptions = async () => {
-    if (props.nodeType === "observable" && props.observable) {
+    if (props.objectType === "observable" && props.observable) {
       tagOptions.value = props.observable.tags;
     } else if (props.reloadObject == "node") {
       tagOptions.value = nodeStore.open.tags;
@@ -115,7 +115,7 @@
   async function removeTags() {
     isLoading.value = true;
     try {
-      if (props.nodeType == "observable") {
+      if (props.objectType == "observable") {
         await removeObservableTags();
       } else {
         await removeTagsFromObservable();
@@ -182,7 +182,7 @@
   }
 
   const allowSubmit = computed(() => {
-    if (props.nodeType == "observable") {
+    if (props.objectType == "observable") {
       return formTagValues.value.length;
     }
     return selectedStore.selected.length && formTagValues.value.length;

@@ -41,7 +41,7 @@ describe("setUserDefaults", () => {
     expect(filterStore.alerts).toEqual({});
   });
 
-  it("will correctly set all user defaults when nodeType == 'all' and 'OPEN' event status is available", () => {
+  it("will correctly set all user defaults when objectType == 'all' and 'OPEN' event status is available", () => {
     authStore.user = userReadFactory({
       defaultAlertQueue: alertQueue,
       defaultEventQueue: eventQueue,
@@ -58,7 +58,7 @@ describe("setUserDefaults", () => {
       queue: [alertQueue],
     });
   });
-  it("will correctly set all user defaults when nodeType == 'all' and 'OPEN' event status is not available", () => {
+  it("will correctly set all user defaults when objectType == 'all' and 'OPEN' event status is not available", () => {
     authStore.user = userReadFactory({
       defaultAlertQueue: alertQueue,
       defaultEventQueue: eventQueue,
@@ -74,7 +74,7 @@ describe("setUserDefaults", () => {
       queue: [alertQueue],
     });
   });
-  it("will correctly set event user defaults when nodeType == 'events' and 'OPEN' event status is available", () => {
+  it("will correctly set event user defaults when objectType == 'events' and 'OPEN' event status is available", () => {
     authStore.user = userReadFactory({
       defaultAlertQueue: alertQueue,
       defaultEventQueue: eventQueue,
@@ -89,7 +89,7 @@ describe("setUserDefaults", () => {
     });
     expect(filterStore.alerts).toEqual({});
   });
-  it("will correctly set event user defaults when nodeType == 'events' and 'OPEN' event status is not available", () => {
+  it("will correctly set event user defaults when objectType == 'events' and 'OPEN' event status is not available", () => {
     authStore.user = userReadFactory({
       defaultAlertQueue: alertQueue,
       defaultEventQueue: eventQueue,
@@ -103,7 +103,7 @@ describe("setUserDefaults", () => {
     });
     expect(filterStore.alerts).toEqual({});
   });
-  it("will correctly set alert user defaults when nodeType == 'alerts'", () => {
+  it("will correctly set alert user defaults when objectType == 'alerts'", () => {
     authStore.user = userReadFactory({
       defaultAlertQueue: alertQueue,
       defaultEventQueue: eventQueue,
@@ -117,7 +117,7 @@ describe("setUserDefaults", () => {
     });
   });
 
-  it("will not set any user defaults when nodeType is unknown", () => {
+  it("will not set any user defaults when objectType is unknown", () => {
     setUserDefaults("unknown");
     expect(currentUserSettingsStore.queues.events).toStrictEqual(null);
     expect(currentUserSettingsStore.queues.alerts).toStrictEqual(null);

@@ -59,11 +59,11 @@
 
   const emit = defineEmits(["requestReload"]);
 
-  const nodeType = inject("nodeType") as "events" | "alerts";
+  const objectType = inject("objectType") as "events" | "alerts";
 
   const authStore = useAuthStore();
-  const selectedStore = nodeSelectedStores[nodeType]();
-  const nodeStore = nodeStores[nodeType]();
+  const selectedStore = nodeSelectedStores[objectType]();
+  const nodeStore = nodeStores[objectType]();
   const modalStore = useModalStore();
   const userStore = useUserStore();
 

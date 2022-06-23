@@ -271,7 +271,7 @@
 
   const filterByObservable = (obs: observableTreeRead) => {
     filterStore.bulkSetFilters({
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         observable: [
           {

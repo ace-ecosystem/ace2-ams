@@ -59,7 +59,7 @@ function factory(initialState: eventTableStoreState) {
         ToastService,
       ],
       provide: {
-        nodeType: "events",
+        objectType: "events",
         config: testConfiguration,
       },
     },

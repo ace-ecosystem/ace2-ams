@@ -62,9 +62,9 @@
     name: { type: String, required: true },
   });
 
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
   const authStore = useAuthStore();
-  const selectedStore = nodeSelectedStores[nodeType]();
+  const selectedStore = nodeSelectedStores[objectType]();
   const modalStore = useModalStore();
   const recentCommentsStore = useRecentCommentsStore();
 

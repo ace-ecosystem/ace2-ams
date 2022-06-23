@@ -56,7 +56,7 @@
         />
         <TagModal
           name="TagModal"
-          :node-type="nodeType"
+          :node-type="objectType"
           :reload-object="props.reloadObject"
           @request-reload="requestReload"
         />
@@ -74,7 +74,7 @@
         />
         <RemoveTagModal
           name="RemoveTagModal"
-          :node-type="nodeType"
+          :node-type="objectType"
           :reload-object="props.reloadObject"
           @request-reload="requestReload"
         />
@@ -126,11 +126,11 @@
     takeOwnership: { type: Boolean, default: true },
   });
 
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
 
-  const nodeStore = nodeStores[nodeType]();
-  const tableStore = nodeTableStores[nodeType]();
-  const selectedStore = nodeSelectedStores[nodeType]();
+  const nodeStore = nodeStores[objectType]();
+  const tableStore = nodeTableStores[objectType]();
+  const selectedStore = nodeSelectedStores[objectType]();
   const authStore = useAuthStore();
   const modalStore = useModalStore();
 

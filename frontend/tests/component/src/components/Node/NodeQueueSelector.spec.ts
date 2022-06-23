@@ -64,7 +64,7 @@ describe("NodeQueueSelector", () => {
     cy.get("#queue-dropdown").click();
     cy.contains("internal").click();
     cy.get("@spy-4").should("have.been.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "queue",
       filterValue: internalQueue,
     });
@@ -84,7 +84,7 @@ describe("NodeQueueSelector", () => {
     cy.get("#queue-dropdown").click();
     cy.contains("external").click();
     cy.get("@spy-4").should("have.been.calledOnceWith", {
-      nodeType: "events",
+      objectType: "events",
       filterName: "queue",
       filterValue: externalQueue,
     });

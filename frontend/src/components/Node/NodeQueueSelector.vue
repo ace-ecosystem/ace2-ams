@@ -45,17 +45,17 @@
   const updateUserSettings = () => {
     if (props.nodeQueue === "alerts") {
       currentUserSettingsStore.queues.alerts = preferredQueue.value;
-      filterStore.unsetFilter({ nodeType: "alerts", filterName: "queue" });
+      filterStore.unsetFilter({ objectType: "alerts", filterName: "queue" });
       filterStore.setFilter({
-        nodeType: "alerts",
+        objectType: "alerts",
         filterName: "queue",
         filterValue: preferredQueue.value,
       });
     } else if (props.nodeQueue === "events") {
       currentUserSettingsStore.queues.events = preferredQueue.value;
-      filterStore.unsetFilter({ nodeType: "events", filterName: "queue" });
+      filterStore.unsetFilter({ objectType: "events", filterName: "queue" });
       filterStore.setFilter({
-        nodeType: "events",
+        objectType: "events",
         filterName: "queue",
         filterValue: preferredQueue.value,
       });

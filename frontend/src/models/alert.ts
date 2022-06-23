@@ -50,6 +50,7 @@ export interface alertRead extends nodeRead {
   insertTime: string;
   instructions: string | null;
   name: string;
+  objectType: string;
   owner: userRead | null;
   ownershipTime: string | null;
   queue: queueRead;

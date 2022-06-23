@@ -28,7 +28,7 @@ function factory(
         }),
       ],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
       },
     },
     propsData: {

@@ -81,20 +81,20 @@
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const eventStatusStore = useEventStatusStore();
 
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
   const validFilterOptions = {
     alerts: validAlertFilters,
     events: validEventFilters,
   };
 
   const queue = computed(() => {
-    return currentUserSettingsStore.queues[nodeType] != null
-      ? currentUserSettingsStore.queues[nodeType]!.value
+    return currentUserSettingsStore.queues[objectType] != null
+      ? currentUserSettingsStore.queues[objectType]!.value
       : "unknown";
   });
 
   const clear = () => {
-    filterStore.clearAll({ nodeType: nodeType });
+    filterStore.clearAll({ objectType: objectType });
   };
 
   const openFilterModal = () => {
@@ -103,8 +103,8 @@
 
   const reset = () => {
     // reset all to start
-    filterStore.clearAll({ nodeType: nodeType });
-    if (nodeType === "alerts") {
+    filterStore.clearAll({ objectType: objectType });
+    if (objectType === "alerts") {
       const filters: { queue?: queueRead[] } = {};
       // look for owner == current user OR none
       // currently explicit "no owner" filter is unavailable so, skip this one for now
@@ -121,8 +121,8 @@
           : authStore.user.defaultAlertQueue,
       ];
 
-      filterStore.bulkSetFilters({ nodeType: nodeType, filters: filters });
-    } else if (nodeType === "events") {
+      filterStore.bulkSetFilters({ objectType: objectType, filters: filters });
+    } else if (objectType === "events") {
       const filters: { queue?: queueRead[]; status?: eventStatusRead[] } = {};
       // look for events with 'OPEN' or "INTERNAL COLLECTION" (?) status
       // can't do OR filters right now, look only for 'OPEN' events
@@ -140,7 +140,7 @@
           : authStore.user.defaultEventQueue,
       ];
 
-      filterStore.bulkSetFilters({ nodeType: nodeType, filters: filters });
+      filterStore.bulkSetFilters({ objectType: objectType, filters: filters });
     }
   };
 
@@ -168,13 +168,13 @@
   ];
 
   function generateLink() {
-    let link = `${window.location.origin}/manage_${nodeType}`;
+    let link = `${window.location.origin}/manage_${objectType}`;
     // If there are filters set, build the link for it
-    if (Object.keys(filterStore[nodeType]).length) {
+    if (Object.keys(filterStore[objectType]).length) {
       let urlParams = new URLSearchParams();
       const formattedParams = formatNodeFiltersForAPI(
-        validFilterOptions[nodeType],
-        filterStore[nodeType],
+        validFilterOptions[objectType],
+        filterStore[objectType],
       );
       for (const param in formattedParams) {
         // If the paramter is an array, then we need to append each element of the array to URLSearchParams
@@ -189,7 +189,7 @@
       }
       link = `${
         window.location.origin
-      }/manage_${nodeType}?${urlParams.toString()}`;
+      }/manage_${objectType}?${urlParams.toString()}`;
     }
     return link;
   }
@@ -207,7 +207,7 @@
   const addFilter = () => {
     if (filterModel.value.propertyType && filterModel.value.propertyValue) {
       filterStore.setFilter({
-        nodeType: nodeType,
+        objectType: objectType,
         filterName: filterModel.value.propertyType,
         filterValue: filterModel.value.propertyValue,
       });

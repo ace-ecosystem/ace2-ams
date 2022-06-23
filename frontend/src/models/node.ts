@@ -16,7 +16,6 @@ export interface nodeMetadata {
 }
 
 export interface nodeRead {
-  nodeType: string;
   uuid: UUID;
   version: UUID;
 }

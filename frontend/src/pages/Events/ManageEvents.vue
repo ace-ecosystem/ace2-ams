@@ -35,7 +35,7 @@
   provide("availableFilters", config.events.eventFilters);
   provide("availableEditFields", config.events.eventEditableProperties);
   provide("rangeFilters", config.events.eventRangeFilters);
-  provide("nodeType", "events");
+  provide("objectType", "events");
 
   const filterStore = useFilterStore();
   const eventTableStore = useEventTableStore();
@@ -58,7 +58,7 @@
   function loadRouteQuery() {
     // load filters given in route
     filterStore.bulkSetFilters({
-      nodeType: "events",
+      objectType: "events",
       filters: parseFilters(route.query, validEventFilters),
     });
     // Reload page to clear URL params

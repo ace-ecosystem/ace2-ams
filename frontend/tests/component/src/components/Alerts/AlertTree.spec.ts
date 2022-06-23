@@ -54,7 +54,7 @@ function factory(
   return mount(AlertTree, {
     global: {
       plugins: [createCustomCypressPinia(), PrimeVue, router, ToastService],
-      provide: { nodeType: "alerts", config: testConfiguration },
+      provide: { objectType: "alerts", config: testConfiguration },
     },
     propsData: args.props,
   });

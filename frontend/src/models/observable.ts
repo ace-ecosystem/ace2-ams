@@ -40,6 +40,7 @@ export interface observableRead extends nodeRead {
   context: string | null;
   expiresOn: string | null;
   forDetection: boolean;
+  objectType: string;
   observableRelationships: observableRelationshipRead[];
   tags: metadataTagRead[];
   threatActors: nodeThreatActorRead[];

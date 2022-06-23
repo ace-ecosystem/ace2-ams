@@ -20,13 +20,13 @@ function factory(
   args: {
     selected: string[];
     existingTags: metadataTagRead[];
-    nodeType: "alerts" | "events" | "observable";
+    objectType: "alerts" | "events" | "observable";
     reloadObject: "node" | "table";
     observable: undefined | observableTreeRead;
   } = {
     selected: [],
     existingTags: [],
-    nodeType: "alerts",
+    objectType: "alerts",
     reloadObject: "node",
     observable: undefined,
   },
@@ -71,7 +71,7 @@ function factory(
     propsData: {
       name: "TagModal",
       reloadObject: args.reloadObject,
-      nodeType: args.nodeType,
+      objectType: args.objectType,
       observable: args.observable,
     },
   }).then((wrapper) => {
@@ -98,7 +98,7 @@ describe("TagModal", () => {
     factory({
       selected: [],
       existingTags: [testTag],
-      nodeType: "alerts",
+      objectType: "alerts",
       reloadObject: "node",
 
       observable: undefined,
@@ -111,7 +111,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [],
-      nodeType: "alerts",
+      objectType: "alerts",
       reloadObject: "node",
 
       observable: undefined,
@@ -134,7 +134,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [],
-      nodeType: "alerts",
+      objectType: "alerts",
       reloadObject: "node",
 
       observable: undefined,
@@ -166,7 +166,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
-      nodeType: "alerts",
+      objectType: "alerts",
       reloadObject: "node",
 
       observable: undefined,
@@ -203,7 +203,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuidA", "uuidB"],
       existingTags: [testTag, existingTag],
-      nodeType: "alerts",
+      objectType: "alerts",
       reloadObject: "table",
       observable: undefined,
     });
@@ -246,7 +246,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
-      nodeType: "observable",
+      objectType: "observable",
       reloadObject: "node",
 
       observable: observableTreeReadFactory({
@@ -283,7 +283,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
-      nodeType: "alerts",
+      objectType: "alerts",
       reloadObject: "node",
 
       observable: undefined,
@@ -316,7 +316,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
-      nodeType: "alerts",
+      objectType: "alerts",
       reloadObject: "node",
 
       observable: undefined,
@@ -359,7 +359,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
-      nodeType: "alerts",
+      objectType: "alerts",
       reloadObject: "node",
 
       observable: undefined,

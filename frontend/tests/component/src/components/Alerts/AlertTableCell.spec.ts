@@ -36,7 +36,7 @@ function factory(
   return mount(AlertTableCell, {
     global: {
       plugins: [createPinia(), PrimeVue, router],
-      provide: { nodeType: "alerts", config: testConfiguration },
+      provide: { objectType: "alerts", config: testConfiguration },
     },
     propsData: args.props,
   });

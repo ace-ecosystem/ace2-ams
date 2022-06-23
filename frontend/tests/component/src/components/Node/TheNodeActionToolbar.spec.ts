@@ -34,7 +34,7 @@ function factory(
           initialState: args.initialState,
         }),
       ],
-      provide: { nodeType: "alerts" },
+      provide: { objectType: "alerts" },
     },
     propsData: args.props,
   });

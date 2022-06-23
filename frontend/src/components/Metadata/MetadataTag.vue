@@ -17,7 +17,7 @@
   import { metadataTagRead } from "@/models/metadataTag";
 
   const router = useRouter();
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
   const nodeRoutes = {
     alerts: "/manage_alerts",
     events: "/manage_events",
@@ -37,11 +37,11 @@
   function filterByTags() {
     const preferredNodeType = props.overrideNodeType
       ? props.overrideNodeType
-      : nodeType;
+      : objectType;
     const route = nodeRoutes[preferredNodeType];
     if (route) {
       filterStore.bulkSetFilters({
-        nodeType: preferredNodeType,
+        objectType: preferredNodeType,
         filters: {
           tags: [[props.tag.value]],
         },

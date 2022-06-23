@@ -21,7 +21,7 @@ function factory(props = defaultProps) {
     global: {
       plugins: [PrimeVue, createPinia(), router],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
       },
     },
     propsData: props,

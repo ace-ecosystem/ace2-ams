@@ -20,7 +20,7 @@ function factory(filters: alertFilterParams) {
         router,
       ],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
       },
     },
   });
@@ -42,7 +42,7 @@ describe("FilterChipContainer", () => {
   it("re-renders whena filter is added", () => {
     factory({}).then((wrapper) => {
       wrapper.vm.filterStore.setFilter({
-        nodeType: "alerts",
+        objectType: "alerts",
         filterName: "name",
         filterValue: "test name",
       });
@@ -54,7 +54,7 @@ describe("FilterChipContainer", () => {
   it("re-renders whena filter is added", () => {
     factory({ name: ["test name"], owner: [userReadFactory()] }).then(
       (wrapper) => {
-        wrapper.vm.filterStore.clearAll({ nodeType: "alerts" });
+        wrapper.vm.filterStore.clearAll({ objectType: "alerts" });
         cy.get("[data-cy=filter-chip]").should("not.exist");
       },
     );

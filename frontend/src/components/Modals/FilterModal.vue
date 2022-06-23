@@ -9,7 +9,7 @@
     @dialog-close="loadFormFilters"
   >
     <br />
-    <NodeQueueSelector :node-queue="nodeType" /> <br />
+    <NodeQueueSelector :node-queue="objectType" /> <br />
     <div class="flex flex-wrap">
       <NodePropertyInput
         v-for="(filter, index) in formFilters"
@@ -74,7 +74,7 @@
     name: { type: String, required: true },
   });
 
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
 
   filterStore.$subscribe(
     () => {
@@ -88,8 +88,8 @@
   >([]);
 
   const queue = computed(() => {
-    return currentUserSettingsStore.queues[nodeType] != null
-      ? currentUserSettingsStore.queues[nodeType]!.value
+    return currentUserSettingsStore.queues[objectType] != null
+      ? currentUserSettingsStore.queues[objectType]!.value
       : "unknown";
   });
 
@@ -110,10 +110,10 @@
 
   const submit = () => {
     if (!Object.keys(submitFilters.value).length) {
-      filterStore.clearAll({ nodeType: nodeType });
+      filterStore.clearAll({ objectType: objectType });
     } else {
       filterStore.bulkSetFilters({
-        nodeType: nodeType,
+        objectType: objectType,
         filters: submitFilters.value,
       });
     }
@@ -133,8 +133,8 @@
 
   const loadFormFilters = () => {
     formFilters.value = [];
-    for (const filterType in filterStore.$state[nodeType]) {
-      for (const filter of filterStore.$state[nodeType][filterType]) {
+    for (const filterType in filterStore.$state[objectType]) {
+      for (const filter of filterStore.$state[objectType][filterType]) {
         formFilters.value.push({
           propertyType: filterType,
           propertyValue: filter,

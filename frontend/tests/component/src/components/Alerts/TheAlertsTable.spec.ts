@@ -47,7 +47,7 @@ function factory(initialState: alertTableStoreState) {
         ToastService,
       ],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
         config: testConfiguration,
       },
     },

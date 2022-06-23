@@ -37,7 +37,7 @@ export const useFilterStore = defineStore({
 
   actions: {
     bulkSetFilters(payload: {
-      nodeType: "alerts" | "events";
+      objectType: "alerts" | "events";
       filters: alertFilterParams | eventFilterParams;
     }) {
       const nonEmptyFilters = {} as alertFilterParams | eventFilterParams;
@@ -52,32 +52,32 @@ export const useFilterStore = defineStore({
         }
       }
 
-      this.$state[payload.nodeType] = nonEmptyFilters;
+      this.$state[payload.objectType] = nonEmptyFilters;
       localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
 
     setFilter(payload: {
-      nodeType: "alerts" | "events";
+      objectType: "alerts" | "events";
       filterName: alertFilterNameTypes | eventFilterNameTypes;
       filterValue: alertFilterValues | eventFilterValues;
     }) {
       // If the filter value is 'empty' (empty string or list), don't add it
       if (!isEmpty(payload.filterValue)) {
         // If there is already a value for this filter type, add it to the list
-        if (this.$state[payload.nodeType][payload.filterName]) {
+        if (this.$state[payload.objectType][payload.filterName]) {
           // If the value is already in the list, don't add it again
           if (
-            !this.$state[payload.nodeType][payload.filterName].includes(
+            !this.$state[payload.objectType][payload.filterName].includes(
               payload.filterValue,
             )
           ) {
-            this.$state[payload.nodeType][payload.filterName].push(
+            this.$state[payload.objectType][payload.filterName].push(
               payload.filterValue,
             );
           }
         } else {
           // Otherwise, create a new list with the value
-          this.$state[payload.nodeType][payload.filterName] = [
+          this.$state[payload.objectType][payload.filterName] = [
             payload.filterValue,
           ];
         }
@@ -87,36 +87,36 @@ export const useFilterStore = defineStore({
     },
 
     unsetFilter(payload: {
-      nodeType: "alerts" | "events";
+      objectType: "alerts" | "events";
       filterName: alertFilterNameTypes | eventFilterNameTypes;
     }) {
-      delete this.$state[payload.nodeType][payload.filterName];
+      delete this.$state[payload.objectType][payload.filterName];
       localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
 
     unsetFilterValue(payload: {
-      nodeType: "alerts" | "events";
+      objectType: "alerts" | "events";
       filterName: alertFilterNameTypes | eventFilterNameTypes;
       filterValue: alertFilterValues | eventFilterValues;
     }) {
       // Remove the given filterValue from the list of values for this filter type
-      this.$state[payload.nodeType][payload.filterName] = this.$state[
-        payload.nodeType
+      this.$state[payload.objectType][payload.filterName] = this.$state[
+        payload.objectType
       ][payload.filterName].filter(
         (v: alertFilterValues | eventFilterValues) => v !== payload.filterValue,
       );
 
       // If the list of values for this filter type is empty, remove the filter type entirely
-      if (this.$state[payload.nodeType][payload.filterName].length === 0) {
-        delete this.$state[payload.nodeType][payload.filterName];
+      if (this.$state[payload.objectType][payload.filterName].length === 0) {
+        delete this.$state[payload.objectType][payload.filterName];
       }
 
       // Update the local storage with the updated filters
       localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
 
-    clearAll(payload: { nodeType: "alerts" | "events" }) {
-      this.$state[payload.nodeType] = {};
+    clearAll(payload: { objectType: "alerts" | "events" }) {
+      this.$state[payload.objectType] = {};
       localStorage.setItem("aceFilters", JSON.stringify(this.$state));
     },
   },

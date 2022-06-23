@@ -85,7 +85,7 @@ export async function populateEventStores(): Promise<void> {
 }
 
 // Sets default user filters and currentUserSettings
-export function setUserDefaults(nodeType = "all"): void {
+export function setUserDefaults(objectType = "all"): void {
   const authStore = useAuthStore();
   const filterStore = useFilterStore();
   const eventStatusStore = useEventStatusStore();
@@ -95,11 +95,11 @@ export function setUserDefaults(nodeType = "all"): void {
     return;
   }
 
-  if (nodeType === "all" || nodeType === "events") {
+  if (objectType === "all" || objectType === "events") {
     // Set default event queue
     currentUserSettingsStore.queues.events = authStore.user.defaultEventQueue;
     filterStore.setFilter({
-      nodeType: "events",
+      objectType: "events",
       filterName: "queue",
       filterValue: currentUserSettingsStore.queues.events,
     });
@@ -110,18 +110,18 @@ export function setUserDefaults(nodeType = "all"): void {
     });
     if (openStatus) {
       filterStore.setFilter({
-        nodeType: "events",
+        objectType: "events",
         filterName: "status",
         filterValue: openStatus,
       });
     }
   }
 
-  if (nodeType === "all" || nodeType === "alerts") {
+  if (objectType === "all" || objectType === "alerts") {
     // Set default alert queue
     currentUserSettingsStore.queues.alerts = authStore.user.defaultAlertQueue;
     filterStore.setFilter({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "queue",
       filterValue: currentUserSettingsStore.queues.alerts,
     });

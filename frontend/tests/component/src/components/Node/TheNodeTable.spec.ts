@@ -66,7 +66,7 @@ function factory(props: TheNodeTableProps = defaultProps) {
         }),
       ],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
         availableFilters: testConfiguration.alerts.alertFilters,
       },
     },
@@ -472,7 +472,7 @@ describe("TheNodeTable", () => {
     // Owner field is one of the available filters, so a filter should be added when an 'Owner' column cell is clicked
     cy.contains("Test Analyst").click();
     cy.get("@spy-12").should("have.been.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "owner",
       filterValue: userReadFactory(),
     });

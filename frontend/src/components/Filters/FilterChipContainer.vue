@@ -18,13 +18,13 @@
 
   import { useFilterStore } from "@/stores/filter";
   const filterStore = useFilterStore();
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
 
   const setFilters = computed(() => {
-    return Object.keys(filterStore[nodeType]);
+    return Object.keys(filterStore[objectType]);
   });
 
   function filterValue(filterName: string) {
-    return filterStore[nodeType][filterName];
+    return filterStore[objectType][filterName];
   }
 </script>

@@ -33,7 +33,7 @@ function factory(args: { selected: string[] } = { selected: [] }) {
           },
         }),
       ],
-      provide: { nodeType: "events", config: testConfiguration },
+      provide: { objectType: "events", config: testConfiguration },
     },
     propsData: {
       eventUuid: "uuid1",

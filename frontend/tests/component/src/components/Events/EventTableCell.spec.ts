@@ -38,7 +38,7 @@ function factory(
   return mount(EventTableCell, {
     global: {
       plugins: [createPinia(), PrimeVue, router],
-      provide: { nodeType: "events" },
+      provide: { objectType: "events" },
     },
     propsData: args.props,
   });

@@ -154,14 +154,14 @@
 
   const filterStore = useFilterStore();
 
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
   const rangeFilters = inject("rangeFilters") as Record<string, rangeFilter>;
 
   const currentRangeFilter = ref(Object.keys(rangeFilters)[0]);
   const op = ref();
 
   const filters = computed(() => {
-    return filterStore.$state[nodeType];
+    return filterStore.$state[objectType];
   });
 
   const startFilter = computed(() => {
@@ -214,11 +214,11 @@
 
     if (filterName) {
       filterStore.unsetFilter({
-        nodeType: nodeType,
+        objectType: objectType,
         filterName: filterName,
       });
       filterStore.setFilter({
-        nodeType: nodeType,
+        objectType: objectType,
         filterName: filterName,
         filterValue: date,
       });
@@ -227,7 +227,7 @@
 
   const clearDate = (filterName: string) => {
     filterStore.unsetFilter({
-      nodeType: nodeType,
+      objectType: objectType,
       filterName: filterName,
     });
   };

@@ -111,12 +111,12 @@
   function isAnalysis(
     item: analysisTreeRead | observableTreeRead,
   ): item is analysisTreeRead {
-    return item.nodeType === "analysis";
+    return item.objectType === "analysis";
   }
   function isObservable(
     item: analysisTreeRead | observableTreeRead,
   ): item is observableTreeRead {
-    return item.nodeType === "observable";
+    return item.objectType === "observable";
   }
 
   function containerClass(item: analysisTreeRead | observableTreeRead) {
