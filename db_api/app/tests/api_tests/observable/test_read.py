@@ -33,7 +33,7 @@ def test_get(client, db):
 
     get = client.get(f"/api/observable/{observable.uuid}")
     assert get.status_code == status.HTTP_200_OK
-    assert get.json()["node_type"] == "observable"
+    assert get.json()["object_type"] == "observable"
 
 
 def test_get_all(client, db):

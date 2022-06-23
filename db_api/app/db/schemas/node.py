@@ -15,7 +15,7 @@ class Node(Base):
 
     comments = relationship("NodeComment", lazy="selectin")
 
-    node_type = Column(String)
+    object_type = Column(String)
 
     relationships = relationship(
         "NodeRelationship",
@@ -30,7 +30,7 @@ class Node(Base):
 
     version = Column(UUID(as_uuid=True), server_default=func.gen_random_uuid(), nullable=False)
 
-    __mapper_args__ = {"polymorphic_identity": "node", "polymorphic_on": node_type, "with_polymorphic": "*"}
+    __mapper_args__ = {"polymorphic_identity": "node", "polymorphic_on": object_type, "with_polymorphic": "*"}
 
     def convert_to_pydantic(self):  # pragma: no cover
         raise NotImplementedError("A Node subclass must implement convert_to_pydantic")

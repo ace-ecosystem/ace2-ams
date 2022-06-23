@@ -21,8 +21,6 @@ class NodeCreate(NodeBase):
 
 class NodeRead(NodeBase):
 
-    node_type: type_str = Field(description="The type of the Node")
-
     uuid: UUID4 = Field(description="The UUID of the node")
 
     class Config:

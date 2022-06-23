@@ -7,11 +7,11 @@ from typing import Optional, Union
 from uuid import UUID
 
 from db import crud
-from db.schemas.event import EventHistory
+from db.schemas.event import Event, EventHistory
 from db.schemas.history import HasHistory
 from db.schemas.node import Node
-from db.schemas.observable import ObservableHistory
-from db.schemas.submission import SubmissionHistory
+from db.schemas.observable import Observable, ObservableHistory
+from db.schemas.submission import Submission, SubmissionHistory
 from db.schemas.user import User
 
 
@@ -81,21 +81,21 @@ def record_node_create_history(
     action_by: User,
     db: Session,
 ):
-    if record_node.node_type == "event":
+    if isinstance(record_node, Event):
         record_create_history(
             history_table=EventHistory,
             action_by=action_by,
             record=record_node,
             db=db,
         )
-    elif record_node.node_type == "observable":
+    elif isinstance(record_node, Observable):
         record_create_history(
             history_table=ObservableHistory,
             action_by=action_by,
             record=record_node,
             db=db,
         )
-    if record_node.node_type == "submission":
+    elif isinstance(record_node, Submission):
         record_create_history(
             history_table=SubmissionHistory,
             action_by=action_by,
@@ -111,7 +111,7 @@ def record_node_update_history(
     db: Session,
     action_time: Optional[datetime] = None,
 ):
-    if record_node.node_type == "event":
+    if isinstance(record_node, Event):
         record_update_history(
             history_table=EventHistory,
             action_by=action_by,
@@ -120,7 +120,7 @@ def record_node_update_history(
             diffs=diffs,
             db=db,
         )
-    elif record_node.node_type == "observable":
+    elif isinstance(record_node, Observable):
         record_update_history(
             history_table=ObservableHistory,
             action_by=action_by,
@@ -129,7 +129,7 @@ def record_node_update_history(
             diffs=diffs,
             db=db,
         )
-    elif record_node.node_type == "submission":
+    elif isinstance(record_node, Submission):
         record_update_history(
             history_table=SubmissionHistory,
             action_by=action_by,

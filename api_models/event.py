@@ -119,6 +119,9 @@ class EventRead(NodeRead, EventBase):
         description="The highest disposition used on the alerts in the event"
     )
 
+    # Set a static string value so code displaying the tree structure knows which type of object this is.
+    object_type: str = "event"
+
     owner: Optional[UserRead] = Field(description="The user who has taken ownership of this event")
 
     prevention_tools: list[EventPreventionToolRead] = Field(

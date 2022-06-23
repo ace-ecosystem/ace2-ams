@@ -61,8 +61,7 @@ class AnalysisRead(AnalysisBase):
     details: Optional[dict] = Field(description="A JSON representation of the details produced by the analysis")
 
     # Set a static string value so code displaying the tree structure knows which type of object this is.
-    # This is needed (for now) because the Analysis table no longer inherits from the Node table.
-    node_type: str = "analysis"
+    object_type: str = "analysis"
 
     run_time: datetime = Field(description="The time at which the analysis was performed")
 
@@ -88,7 +87,7 @@ class AnalysisSubmissionTreeRead(BaseModel):
     )
 
     # This is needed since Analysis no longer inherits from the Node table
-    node_type: str = "analysis"
+    object_type: str = "analysis"
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
 

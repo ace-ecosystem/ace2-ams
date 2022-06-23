@@ -29,7 +29,7 @@ def create_or_read(
     # Create the new observable Node using the data from the request
     obj: Observable = crud.node.create(
         model=model,
-        db_node_type=Observable,
+        db_table=Observable,
         db=db,
         exclude={
             "analyses",

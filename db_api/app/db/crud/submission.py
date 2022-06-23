@@ -734,7 +734,7 @@ def build_read_all_query(
 def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
     # Create the new submission Node using the data from the request
     obj: Submission = crud.node.create(
-        model=model, db_node_type=Submission, db=db, exclude={"history_username", "observables"}
+        model=model, db_table=Submission, db=db, exclude={"history_username", "observables"}
     )
 
     # Set the various submission properties

@@ -985,8 +985,8 @@ def test_get_all_pagination(client, db):
         for event in get.json()["items"]:
             unique_event_uuids.add(event["uuid"])
 
-            # Make sure the node_type field is "event"
-            assert event["node_type"] == "event"
+            # Make sure the object_type field is "event"
+            assert event["object_type"] == "event"
 
         # Check if there is another page to retrieve
         if len(unique_event_uuids) < get.json()["total"]:

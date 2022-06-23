@@ -10,11 +10,11 @@ from exceptions.db import VersionMismatch
 
 def create(
     model: NodeCreate,
-    db_node_type: DeclarativeMeta,
+    db_table: DeclarativeMeta,
     db: Session,
     exclude: dict = None,
 ) -> DeclarativeMeta:
-    obj: Node = db_node_type(**model.dict(exclude=exclude))
+    obj: Node = db_table(**model.dict(exclude=exclude))
 
     if hasattr(model, "threat_actors") and model.threat_actors:
         obj.threat_actors = crud.node_threat_actor.read_by_values(values=model.threat_actors, db=db)

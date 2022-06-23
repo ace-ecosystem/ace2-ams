@@ -57,8 +57,8 @@ def test_get_all_pagination(client, db):
         for submission in get.json()["items"]:
             unique_submission_uuids.add(submission["uuid"])
 
-            # Make sure the node_type field is "submission"
-            assert submission["node_type"] == "submission"
+            # Make sure the object_type field is "submission"
+            assert submission["object_type"] == "submission"
 
         # Check if there is another page to retrieve
         if len(unique_submission_uuids) < get.json()["total"]:

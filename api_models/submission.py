@@ -103,6 +103,9 @@ class SubmissionRead(NodeRead, SubmissionBase):
 
     name: type_str = Field(description="""The name of the submission""")
 
+    # Set a static string value so code displaying the tree structure knows which type of object this is.
+    object_type: str = "submission"
+
     owner: Optional[UserRead] = Field(description="The user who has taken ownership of this submission")
 
     ownership_time: Optional[datetime] = Field(

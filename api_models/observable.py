@@ -90,6 +90,9 @@ class ObservableRead(NodeRead, ObservableBase):
         description="A list of comments added to the observable", default_factory=list
     )
 
+    # Set a static string value so code displaying the tree structure knows which type of object this is.
+    object_type: str = "observable"
+
     observable_relationships: "list[ObservableRelationshipRead]" = Field(
         description="A list of observable relationships for this observable"
     )

@@ -747,7 +747,7 @@ def build_read_all_query(
 
 def create_or_read(model: EventCreate, db: Session) -> Event:
     # Create the new event Node using the data from the request
-    obj: Event = crud.node.create(model=model, db_node_type=Event, db=db, exclude={"alert_uuids", "history_username"})
+    obj: Event = crud.node.create(model=model, db_table=Event, db=db, exclude={"alert_uuids", "history_username"})
 
     # Set the various event properties
     obj.prevention_tools = crud.event_prevention_tool.read_by_values(values=model.prevention_tools, db=db)
