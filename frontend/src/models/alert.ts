@@ -138,13 +138,13 @@ export interface alertFilterParams extends pageOptionParams {
     included: nodeThreatActorRead[];
     notIncluded: nodeThreatActorRead[];
   };
-  threats?: { included: nodeThreatRead[]; notIncluded: nodeThreatRead[] };
+  threats?: { included: nodeThreatRead[][]; notIncluded: nodeThreatRead[][] };
   tool?: { included: alertToolRead[]; notIncluded: alertToolRead[] };
   toolInstance?: {
     included: alertToolInstanceRead[];
     notIncluded: alertToolInstanceRead[];
   };
-  tags?: { included: string[]; notIncluded: string[] };
+  tags?: { included: string[][]; notIncluded: string[][] };
   observable?: {
     included: { category: observableTypeRead; value: string }[];
     notIncluded: { category: observableTypeRead; value: string }[];
