@@ -221,6 +221,7 @@
         nodeType: nodeType,
         filterName: filterName,
         filterValue: date,
+        isIncluded: true,
       });
     }
   };

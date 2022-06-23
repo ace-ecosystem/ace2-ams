@@ -19,34 +19,58 @@ const MOCK_ALERT_UPDATE: alertUpdate = {
 const MOCK_PARAMS: alertFilterParams = {
   limit: 10,
   offset: 10,
-  name: ["Test Name"],
-  disposition: [
-    {
-      rank: 0,
-      description: null,
-      uuid: "1",
-      value: "FALSE_POSITIVE",
-    },
-  ],
-  observableTypes: [
-    [
-      { value: "testA", description: null, uuid: "1" },
-      { value: "testB", description: null, uuid: "2" },
+  name: { included: ["Test Name"], notIncluded: [] },
+  disposition: {
+    included: [
+      {
+        rank: 0,
+        description: null,
+        uuid: "1",
+        value: "FALSE_POSITIVE",
+      },
     ],
-  ],
-  tags: [["tagA", "tagB"]],
-  threats: [
-    [
-      { value: "threatA", description: null, queues: [], types: [], uuid: "1" },
-      { value: "threatB", description: null, queues: [], types: [], uuid: "2" },
+    notIncluded: [],
+  },
+  observableTypes: {
+    included: [
+      [
+        { value: "testA", description: null, uuid: "1" },
+        { value: "testB", description: null, uuid: "2" },
+      ],
     ],
-  ],
-  observable: [
-    {
-      category: { value: "test", description: null, uuid: "1" },
-      value: "example",
-    },
-  ],
+    notIncluded: [],
+  },
+  tags: { included: [["tagA", "tagB"]], notIncluded: [] },
+  threats: {
+    included: [
+      [
+        {
+          value: "threatA",
+          description: null,
+          queues: [],
+          types: [],
+          uuid: "1",
+        },
+        {
+          value: "threatB",
+          description: null,
+          queues: [],
+          types: [],
+          uuid: "2",
+        },
+      ],
+    ],
+    notIncluded: [],
+  },
+  observable: {
+    included: [
+      {
+        category: { value: "test", description: null, uuid: "1" },
+        value: "example",
+      },
+    ],
+    notIncluded: [],
+  },
 };
 
 describe("Alert calls", () => {

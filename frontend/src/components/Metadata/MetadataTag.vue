@@ -43,7 +43,7 @@
       filterStore.bulkSetFilters({
         nodeType: preferredNodeType,
         filters: {
-          tags: [[props.tag.value]],
+          tags: { included: [[props.tag.value]], notIncluded: [] },
         },
       });
       // Route to given page with query for filtering by this tag's value

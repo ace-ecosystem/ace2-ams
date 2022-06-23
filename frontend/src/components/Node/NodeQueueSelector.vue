@@ -50,6 +50,7 @@
         nodeType: "alerts",
         filterName: "queue",
         filterValue: preferredQueue.value,
+        isIncluded: true,
       });
     } else if (props.nodeQueue === "events") {
       currentUserSettingsStore.queues.events = preferredQueue.value;
@@ -58,6 +59,7 @@
         nodeType: "events",
         filterName: "queue",
         filterValue: preferredQueue.value,
+        isIncluded: true,
       });
     }
   };

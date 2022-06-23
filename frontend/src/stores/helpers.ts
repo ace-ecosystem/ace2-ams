@@ -102,6 +102,7 @@ export function setUserDefaults(nodeType = "all"): void {
       nodeType: "events",
       filterName: "queue",
       filterValue: currentUserSettingsStore.queues.events,
+      isIncluded: true,
     });
 
     // Set default event status filter
@@ -113,6 +114,7 @@ export function setUserDefaults(nodeType = "all"): void {
         nodeType: "events",
         filterName: "status",
         filterValue: openStatus,
+        isIncluded: true,
       });
     }
   }
@@ -124,6 +126,7 @@ export function setUserDefaults(nodeType = "all"): void {
       nodeType: "alerts",
       filterName: "queue",
       filterValue: currentUserSettingsStore.queues.alerts,
+      isIncluded: true,
     });
   }
 }

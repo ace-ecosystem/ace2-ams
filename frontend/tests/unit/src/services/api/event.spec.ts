@@ -101,7 +101,7 @@ describe("Event calls", () => {
   it("will make a get request to the /event/?offset={offset} endpoint as many times as needed to get all pages when 'readAllPages' is called with formatted params, if given", async () => {
     const eventParams: eventFilterParams = {
       limit: 10,
-      name: ["Test Name"],
+      name: { included: ["Test Name"], notIncluded: [] },
     };
     myNock
       .get("/event/?offset=0&limit=10&name=Test+Name")
@@ -114,7 +114,7 @@ describe("Event calls", () => {
     const eventParams: eventFilterParams = {
       limit: 10,
       offset: 10,
-      name: ["Test Name"],
+      name: { included: ["Test Name"], notIncluded: [] },
     };
     myNock
       .get("/event/?limit=10&offset=10&name=Test+Name")
