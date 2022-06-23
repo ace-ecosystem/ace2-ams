@@ -45,10 +45,6 @@ describe("AnalyzeAlert.vue", () => {
     visitUrl({ url: "/analyze" });
   });
 
-  it("Analyze page renders", () => {
-    cy.get("#alert-form").should("be.visible");
-  });
-
   it("Add observable button adds another row", () => {
     cy.get("div[name='observable-input']").should("have.length", 1);
     cy.get("#add-observable").click();

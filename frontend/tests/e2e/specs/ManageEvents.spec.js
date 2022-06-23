@@ -1,58 +1,5 @@
 import { visitUrl } from "./helpers";
 
-describe("ManageEvents.vue UI Elements", () => {
-  before(() => {
-    cy.resetDatabase();
-    cy.login();
-  });
-
-  beforeEach(() => {
-    // Intercept the API call that loads the default event table view
-    cy.intercept(
-      "GET",
-      "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
-    ).as("getEventsDefaultRowsExternalQueue");
-
-    visitUrl({
-      url: "/manage_events",
-      extraIntercepts: ["@getEventsDefaultRowsExternalQueue"],
-    });
-  });
-
-  it("renders page elments correctly", () => {
-    cy.get(".p-menubar").should("be.visible");
-    cy.get("#EventActionToolbar").should("be.visible");
-    cy.get("#FilterToolbar").should("be.visible");
-    cy.get("#EventsTable").should("be.visible");
-  });
-
-  it("renders action toolbar elements correctly", () => {
-    cy.get('[data-cy="comment-button"]').should("be.visible");
-    cy.get('[data-cy="take-ownership-button"]').should("be.visible");
-    cy.get('[data-cy="assign-button"]').should("be.visible");
-    cy.get('[data-cy="tag-button"]').should("be.visible");
-  });
-  it("renders filter toolbar elements correctly", () => {
-    cy.get('[data-cy="edit-filter-button"]').should("be.visible");
-    cy.get('[data-cy="date-range-picker-options-button"]').should("be.visible");
-    cy.get('[data-cy="date-range-picker-end-input"]')
-      .should("be.visible")
-      .should("be.empty");
-    cy.get('[data-cy="date-range-picker-end-input"]')
-      .should("be.visible")
-      .should("be.empty");
-  });
-  it("renders table elements correctly", () => {
-    cy.get('[data-cy="table-column-select"]').should("be.visible");
-    cy.get('[data-cy="table-keyword-search"]')
-      .should("be.visible")
-      .should("be.empty");
-    cy.get('[data-cy="reset-table-button"]').should("be.visible");
-    cy.get('[data-cy="export-table-button"]').should("be.visible");
-    cy.get('[data-cy="table-pagination-options"]').should("be.visible");
-  });
-});
-
 describe("ManageEvents.vue table functionality", () => {
   before(() => {
     cy.resetDatabase();
@@ -81,34 +28,6 @@ describe("ManageEvents.vue table functionality", () => {
       url: "/manage_events",
       extraIntercepts: ["@getEventsDefaultRowsExternalQueue"],
     });
-  });
-
-  it("sets up table columns elements correctly", () => {
-    // Check default columns in column select
-    cy.get('[data-cy="table-column-select"]').should(
-      "have.text",
-      "Created, Name, Threats, Severity, Status, Owner",
-    );
-    // Check columns in table
-    cy.get(".p-column-title").eq(0).should("have.text", "Created");
-    cy.get(".p-column-title").eq(1).should("have.text", "Name");
-    cy.get(".p-column-title").eq(2).should("have.text", "Threats");
-    cy.get(".p-column-title").eq(3).should("have.text", "Severity");
-    cy.get(".p-column-title").eq(4).should("have.text", "Status");
-    cy.get(".p-column-title").eq(5).should("have.text", "Owner");
-
-    // Check default sort column, 'Created' has the sort style applied
-    cy.get(".pi-sort-amount-down").should("have.length", 1);
-    cy.get(".p-sortable-column-icon")
-      .eq(0)
-      .should("have.class", "pi-sort-amount-down");
-  });
-
-  it("sets up keyword search element correctly", () => {
-    cy.get('[data-cy="table-keyword-search"]').should("be.empty");
-    cy.get('[data-cy="table-keyword-search"]')
-      .invoke("attr", "placeholder")
-      .should("contain", "Search in table");
   });
 
   it("will show columns selected in select dropdown", () => {

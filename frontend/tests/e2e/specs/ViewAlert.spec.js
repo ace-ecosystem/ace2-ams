@@ -29,27 +29,6 @@ describe("ViewAlert.vue", () => {
       });
     });
 
-    it("View Alert page renders", () => {
-      cy.get("#alert-tree").should("be.visible");
-    });
-
-    it("Renders the expected number of nodes", () => {
-      // Total number of nodes
-      cy.get(".p-treenode-content").should("have.length", 27);
-
-      // Number of expandable nodes
-      cy.get(".p-tree-toggler-icon").should("have.length", 18);
-
-      // Number of expanded nodes
-      cy.get(".p-treenode-content .pi-chevron-down").should("have.length", 17);
-      // Number of collapsed nodes
-      cy.get(".p-treenode-content .pi-chevron-right").should("have.length", 1);
-    });
-
-    it("Renders the expected number of tags", () => {
-      cy.get(".p-tag").should("have.length", 21);
-    });
-
     it("will reroute to the Manage Alerts page with observable filter applied when observable clicked", () => {
       // Intercept the API call that loads the alerts
       cy.intercept(
@@ -88,73 +67,6 @@ describe("ViewAlert.vue", () => {
 
       // Close the modal to finish
       cy.get(".p-dialog-header-icon").click();
-    });
-
-    it("Correctly displays alert details content", () => {
-      // Check details card title and elements
-      cy.get(".p-card-title").should("contain.text", "Small Alert");
-      cy.get(".p-card-title > .p-button").should("be.visible");
-      cy.get(":nth-child(1) > .p-card-body > .p-card-content").should(
-        "be.visible",
-      );
-      cy.get(".p-accordion-toggle-icon").should("be.visible");
-      cy.get(".p-accordion-header-text").should("contain.text", "Details");
-
-      // Check each details table row to contain correct text
-      cy.get(":nth-child(1) > .header-cell").should(
-        "contain.text",
-        "Insert Time",
-      );
-      cy.get(":nth-child(2) > .header-cell").should(
-        "contain.text",
-        "Event Time",
-      );
-      cy.get(":nth-child(3) > .header-cell").should("contain.text", "Tool");
-      cy.get(":nth-child(3) > .content-cell > span").should(
-        "contain.text",
-        "None",
-      );
-      cy.get(":nth-child(4) > .header-cell").should(
-        "contain.text",
-        "Tool Instance",
-      );
-      cy.get(":nth-child(4) > .content-cell > span").should(
-        "contain.text",
-        "None",
-      );
-      cy.get(":nth-child(5) > .header-cell").should("contain.text", "Type");
-      cy.get(":nth-child(5) > .content-cell > span").should(
-        "contain.text",
-        "test_type",
-      );
-      cy.get(":nth-child(6) > .header-cell").should(
-        "contain.text",
-        "Disposition",
-      );
-      cy.get(":nth-child(6) > .content-cell > span").should(
-        "contain.text",
-        "OPEN",
-      );
-      cy.get(":nth-child(7) > .header-cell").should("contain.text", "Event");
-      cy.get(":nth-child(7) > .content-cell > span").should(
-        "contain.text",
-        "None",
-      );
-      cy.get(":nth-child(8) > .header-cell").should("contain.text", "Queue");
-      cy.get(":nth-child(8) > .content-cell > span").should(
-        "contain.text",
-        "external",
-      );
-      cy.get(":nth-child(9) > .header-cell").should("contain.text", "Owner");
-      cy.get(":nth-child(9) > .content-cell > span").should(
-        "contain.text",
-        "Analyst Bob",
-      );
-      cy.get(":nth-child(10) > .header-cell").should(
-        "contain.text",
-        "Comments",
-      );
-      cy.get(":nth-child(10) > .content-cell").should("contain.text", "None");
     });
 
     it("collapses and expands the alert details when header is clicked", () => {
