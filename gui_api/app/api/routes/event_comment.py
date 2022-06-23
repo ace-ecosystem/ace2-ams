@@ -9,8 +9,8 @@ from api_models.event_comment import EventCommentCreate, EventCommentRead, Event
 
 
 router = APIRouter(
-    prefix="/node/comment",
-    tags=["Node Comment"],
+    prefix="/event/comment",
+    tags=["Event Comment"],
 )
 
 
@@ -25,7 +25,7 @@ def create_event_comments(
     response: Response,
 ):
     db_api.post(
-        path="/node/comment/",
+        path="/event/comment/",
         payload=[json.loads(c.json(exclude_unset=True)) for c in event_comments],
         expected_status=status.HTTP_201_CREATED,
     )
@@ -42,7 +42,7 @@ helpers.api_route_create(router, create_event_comments)
 
 
 def get_event_comment(uuid: UUID):
-    return db_api.get(path=f"/node/comment/{uuid}", expected_status=status.HTTP_200_OK)
+    return db_api.get(path=f"/event/comment/{uuid}", expected_status=status.HTTP_200_OK)
 
 
 helpers.api_route_read(router, get_event_comment, EventCommentRead)
@@ -60,7 +60,7 @@ def update_comment(
     response: Response,
 ):
     db_api.patch(
-        path=f"/node/comment/{uuid}",
+        path=f"/event/comment/{uuid}",
         payload=json.loads(event_comment.json()),
     )
 

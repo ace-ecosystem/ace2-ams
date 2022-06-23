@@ -2,12 +2,12 @@ from datetime import datetime
 from uuid import uuid4
 
 
-def test_get_event_comment(client_valid_access_token, requests_mock):
-    event_comment_uuid = uuid4()
+def test_get_alert_comment(client_valid_access_token, requests_mock):
+    alert_comment_uuid = uuid4()
     requests_mock.get(
-        f"http://db-api/api/event/comment/{event_comment_uuid}",
+        f"http://db-api/api/submission/comment/{alert_comment_uuid}",
         json={
-            "event_uuid": str(uuid4()),
+            "submission_uuid": str(uuid4()),
             "value": "value",
             "insert_time": str(datetime.now()),
             "user": {
@@ -23,8 +23,8 @@ def test_get_event_comment(client_valid_access_token, requests_mock):
         },
     )
 
-    client_valid_access_token.get(f"/api/event/comment/{event_comment_uuid}")
+    client_valid_access_token.get(f"/api/alert/comment/{alert_comment_uuid}")
 
     assert (len(requests_mock.request_history)) == 2
     assert requests_mock.request_history[1].method == "GET"
-    assert requests_mock.request_history[1].url == f"http://db-api/api/event/comment/{event_comment_uuid}"
+    assert requests_mock.request_history[1].url == f"http://db-api/api/submission/comment/{alert_comment_uuid}"
