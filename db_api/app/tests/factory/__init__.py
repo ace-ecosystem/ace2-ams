@@ -15,7 +15,7 @@ from tests.factory import metadata_display_type
 from tests.factory import metadata_display_value
 from tests.factory import metadata_tag
 from tests.factory import metadata_time
-from tests.factory import node_comment
+from tests.factory import event_comment
 from tests.factory import observable_relationship
 from tests.factory import observable_relationship_type
 from tests.factory import observable

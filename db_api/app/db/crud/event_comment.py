@@ -3,15 +3,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from api_models.node_comment import NodeCommentCreate, NodeCommentUpdate
+from api_models.event_comment import EventCommentCreate, EventCommentUpdate
 from db import crud
-from db.schemas.node_comment import NodeComment
+from db_api.app.db.schemas.event_comment import EventComment
 
 
-def create_or_read(model: NodeCommentCreate, db: Session) -> NodeComment:
+def create_or_read(model: EventCommentCreate, db: Session) -> EventComment:
     node = crud.node.read_by_uuid(uuid=model.node_uuid, db=db)
 
-    obj = NodeComment(
+    obj = EventComment(
         node=node,
         user=crud.user.read_by_username(username=model.username, db=db),
         value=model.value,
@@ -43,7 +43,7 @@ def delete(uuid: UUID, history_username: str, db: Session) -> bool:
     crud.node.update_version(node=comment.node, db=db)
 
     # Delete the comment
-    result = crud.helpers.delete(uuid=uuid, db_table=NodeComment, db=db)
+    result = crud.helpers.delete(uuid=uuid, db_table=EventComment, db=db)
 
     # Add an entry to the appropriate node history table for deleting the comment
     crud.history.record_node_update_history(
@@ -56,19 +56,19 @@ def delete(uuid: UUID, history_username: str, db: Session) -> bool:
     return result
 
 
-def read_by_node_value(node_uuid: UUID, value: str, db: Session) -> NodeComment:
+def read_by_node_value(node_uuid: UUID, value: str, db: Session) -> EventComment:
     return (
-        db.execute(select(NodeComment).where(NodeComment.node_uuid == node_uuid, NodeComment.value == value))
+        db.execute(select(EventComment).where(EventComment.node_uuid == node_uuid, EventComment.value == value))
         .scalars()
         .one()
     )
 
 
-def read_by_uuid(uuid: UUID, db: Session) -> NodeComment:
-    return crud.helpers.read_by_uuid(db_table=NodeComment, uuid=uuid, db=db)
+def read_by_uuid(uuid: UUID, db: Session) -> EventComment:
+    return crud.helpers.read_by_uuid(db_table=EventComment, uuid=uuid, db=db)
 
 
-def update(uuid: UUID, model: NodeCommentUpdate, db: Session) -> bool:
+def update(uuid: UUID, model: EventCommentUpdate, db: Session) -> bool:
     with db.begin_nested():
         # Read the comment from the database
         comment = read_by_uuid(uuid=uuid, db=db)

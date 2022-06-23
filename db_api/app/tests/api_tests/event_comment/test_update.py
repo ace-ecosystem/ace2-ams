@@ -34,8 +34,8 @@ def test_update_duplicate_node_uuid_value(client, db):
     alert = factory.submission.create(db=db)
 
     # Create some comments
-    comment1 = factory.node_comment.create_or_read(node=alert, username="johndoe", value="test", db=db)
-    comment2 = factory.node_comment.create_or_read(node=alert, username="johndoe", value="test2", db=db)
+    comment1 = factory.event_comment.create_or_read(node=alert, username="johndoe", value="test", db=db)
+    comment2 = factory.event_comment.create_or_read(node=alert, username="johndoe", value="test2", db=db)
 
     # Make sure you cannot update a comment on a node to one that already exists
     update = client.patch(f"/api/node/comment/{comment2.uuid}", json={"value": comment1.value, "username": "johndoe"})
@@ -55,7 +55,7 @@ def test_update_nonexistent_uuid(client):
 def test_update_alerts(client, db):
     # Create a comment
     alert = factory.submission.create(db=db, history_username="analyst")
-    comment = factory.node_comment.create_or_read(node=alert, username="johndoe", value="test", db=db)
+    comment = factory.event_comment.create_or_read(node=alert, username="johndoe", value="test", db=db)
     original_time = comment.insert_time
     assert alert.comments[0].value == "test"
     assert comment.user.username == "johndoe"
@@ -95,7 +95,7 @@ def test_update_alerts(client, db):
 def test_update_events(client, db):
     # Create a comment
     event = factory.event.create_or_read(name="Test Event", db=db, history_username="analyst")
-    comment = factory.node_comment.create_or_read(node=event, username="johndoe", value="test", db=db)
+    comment = factory.event_comment.create_or_read(node=event, username="johndoe", value="test", db=db)
     original_time = comment.insert_time
     assert event.comments[0].value == "test"
     assert comment.user.username == "johndoe"
@@ -138,7 +138,7 @@ def test_update_observables(client, db):
     observable = factory.observable.create_or_read(
         type="test_type", value="test_value", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )
-    comment = factory.node_comment.create_or_read(node=observable, username="johndoe", value="test", db=db)
+    comment = factory.event_comment.create_or_read(node=observable, username="johndoe", value="test", db=db)
     original_time = comment.insert_time
     assert observable.comments[0].value == "test"
     assert comment.user.username == "johndoe"

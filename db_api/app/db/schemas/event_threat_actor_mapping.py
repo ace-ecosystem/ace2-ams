@@ -4,13 +4,13 @@ from sqlalchemy.dialects.postgresql import UUID
 from db.database import Base
 
 
-threat_actor_mapping = Table(
-    "threat_actor_mapping",
+event_threat_actor_mapping = Table(
+    "event_threat_actor_mapping",
     Base.metadata,
     Column(
-        "node_uuid",
+        "event_uuid",
         UUID(as_uuid=True),
-        ForeignKey("node.uuid"),
+        ForeignKey("event.uuid"),
         index=True,
         primary_key=True,
     ),

@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 
-def test_create_node_comment(client_valid_access_token, requests_mock):
+def test_create_event_comment(client_valid_access_token, requests_mock):
     requests_mock.post("http://db-api/api/node/comment/", json=[{"uuid": "uuid1"}])
 
     client_valid_access_token.post(

@@ -1,7 +1,7 @@
 import json
 
 from datetime import datetime
-from sqlalchemy import Column, DateTime, ForeignKey, String
+from sqlalchemy import Column, DateTime, ForeignKey, func, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
@@ -13,11 +13,12 @@ from db.database import Base
 from db.schemas.event_prevention_tool_mapping import event_prevention_tool_mapping
 from db.schemas.event_remediation_mapping import event_remediation_mapping
 from db.schemas.event_tag_mapping import event_tag_mapping
+from db.schemas.event_threat_actor_mapping import event_threat_actor_mapping
+from db.schemas.event_threat_mapping import event_threat_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.metadata_tag import MetadataTag
-from db.schemas.node import Node
 
 
 class EventHistory(Base, HistoryMixin):
@@ -26,16 +27,18 @@ class EventHistory(Base, HistoryMixin):
     record_uuid = Column(UUID(as_uuid=True), ForeignKey("event.uuid"), index=True, nullable=False)
 
 
-class Event(Node, HasHistory):
+class Event(Base, HasHistory):
     __tablename__ = "event"
 
-    uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
+    uuid = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
 
     alert_time = Column(DateTime(timezone=True), index=True)
 
     alerts = relationship("Submission", primaryjoin="Submission.event_uuid == Event.uuid", lazy="selectin")
 
     alert_uuids = association_proxy("alerts", "uuid")
+
+    comments = relationship("EventComment", lazy="selectin")
 
     # There isn't currently a way to automatically calculate this time
     contain_time = Column(DateTime(timezone=True), index=True)
@@ -86,13 +89,15 @@ class Event(Node, HasHistory):
 
     tags: list[MetadataTag] = relationship("MetadataTag", secondary=event_tag_mapping, lazy="selectin")
 
+    threat_actors = relationship("ThreatActor", secondary=event_threat_actor_mapping, lazy="selectin")
+
+    threats = relationship("Threat", secondary=event_threat_mapping, lazy="selectin")
+
     type = relationship("EventType", lazy="selectin")
 
     type_uuid = Column(UUID(as_uuid=True), ForeignKey("event_type.uuid"))
 
     vectors = relationship("EventVector", secondary=event_vector_mapping, lazy="selectin")
-
-    __mapper_args__ = {"polymorphic_identity": "event", "polymorphic_load": "inline"}
 
     def convert_to_pydantic(self) -> EventRead:
         return EventRead(**self.__dict__)
