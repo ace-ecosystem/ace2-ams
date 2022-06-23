@@ -27,8 +27,8 @@ def test_get_nonexistent_uuid(client):
 
 def test_get_all(client, db):
     # Create some objects
-    factory.node_relationship_type.create_or_read(value="test", db=db)
-    factory.node_relationship_type.create_or_read(value="test2", db=db)
+    factory.observable_relationship_type.create_or_read(value="test", db=db)
+    factory.observable_relationship_type.create_or_read(value="test2", db=db)
 
     # Read them back
     get = client.get("/api/node/relationship/type/")

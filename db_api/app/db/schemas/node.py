@@ -17,13 +17,6 @@ class Node(Base):
 
     object_type = Column(String)
 
-    relationships = relationship(
-        "NodeRelationship",
-        primaryjoin="NodeRelationship.node_uuid == Node.uuid",
-        viewonly=True,
-        lazy="selectin",
-    )
-
     threat_actors = relationship("NodeThreatActor", secondary=node_threat_actor_mapping, lazy="selectin")
 
     threats = relationship("NodeThreat", secondary=node_threat_mapping, lazy="selectin")

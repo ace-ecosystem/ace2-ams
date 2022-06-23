@@ -20,12 +20,12 @@ from api.routes.metadata_tag import router as metadata_tag_router
 from api.routes.metadata_time import router as metadata_time_router
 from api.routes.node import router as node_router
 from api.routes.node_comment import router as node_comment_router
-from api.routes.node_relationship import router as node_relationship_router
-from api.routes.node_relationship_type import router as node_relationship_type_router
 from api.routes.node_threat import router as node_threat_router
 from api.routes.node_threat_actor import router as node_threat_actor_router
 from api.routes.node_threat_type import router as node_threat_type_router
 from api.routes.observable import router as observable_router
+from api.routes.observable_relationship import router as observable_relationship_router
+from api.routes.observable_relationship_type import router as observable_relationship_type_router
 from api.routes.observable_type import router as observable_type_router
 from api.routes.ping import router as ping_router
 from api.routes.queue import router as queue_router
@@ -60,12 +60,12 @@ router.include_router(metadata_tag_router)
 router.include_router(metadata_time_router)
 router.include_router(node_router)
 router.include_router(node_comment_router)
-router.include_router(node_relationship_router)
-router.include_router(node_relationship_type_router)
 router.include_router(node_threat_router)
 router.include_router(node_threat_actor_router)
 router.include_router(node_threat_type_router)
 router.include_router(observable_router)
+router.include_router(observable_relationship_router)
+router.include_router(observable_relationship_type_router)
 router.include_router(observable_type_router)
 router.include_router(ping_router)
 router.include_router(queue_router)

@@ -7,7 +7,6 @@ from api_models import type_str, validators
 from api_models.analysis_metadata import AnalysisMetadataCreate, AnalysisMetadataRead
 from api_models.metadata_tag import MetadataTagRead
 from api_models.node_comment import NodeCommentRead
-from api_models.node_relationship import NodeRelationshipRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
 from api_models.observable_type import ObservableTypeRead
@@ -183,10 +182,6 @@ class ObservableRelationshipCreate(BaseModel):
     value: type_str = Field(description="The related observable's value")
 
 
-class ObservableRelationshipRead(NodeRelationshipRead):
-    related_node: ObservableRead = Field(description="The related observable")
-
-
 class ObservableVersion(BaseModel):
     version: UUID4 = Field(description="The current version of the observable")
 
@@ -197,6 +192,7 @@ class ObservableVersion(BaseModel):
 # This is needed for the circular relationship between ObservableRead and ObservableRelationshipRead
 # and ObservableCreate <-> AnalysisCreateInObservable.
 from api_models.analysis import AnalysisCreateInObservable, AnalysisSubmissionTreeRead
+from api_models.observable_relationship import ObservableRelationshipRead
 
 ObservableCreate.update_forward_refs()
 ObservableCreateInSubmission.update_forward_refs()

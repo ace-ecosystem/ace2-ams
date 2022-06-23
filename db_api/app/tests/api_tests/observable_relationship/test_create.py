@@ -52,8 +52,8 @@ def test_create_missing_required_fields(client, db, key):
     alert2 = factory.submission.create(db=db)
 
     # Create some node relationship types
-    factory.node_relationship_type.create_or_read(value="test_rel", db=db)
-    factory.node_relationship_type.create_or_read(value="test_rel2", db=db)
+    factory.observable_relationship_type.create_or_read(value="test_rel", db=db)
+    factory.observable_relationship_type.create_or_read(value="test_rel2", db=db)
 
     # Create a node relationship
     create_json = {
@@ -82,7 +82,7 @@ def test_create_valid_optional_fields(client, db, key, value):
     alert2 = factory.submission.create(db=db)
 
     # Create a node relationship type
-    factory.node_relationship_type.create_or_read(value="test_rel", db=db)
+    factory.observable_relationship_type.create_or_read(value="test_rel", db=db)
 
     # Create a node relationship
     create_json = {"node_uuid": str(alert1.uuid), "related_node_uuid": str(alert2.uuid), "type": "test_rel", key: value}
@@ -102,7 +102,7 @@ def test_create_valid_required_fields(client, db):
     alert2 = factory.submission.create(db=db)
 
     # Create a node relationship type
-    factory.node_relationship_type.create_or_read(value="test_rel", db=db)
+    factory.observable_relationship_type.create_or_read(value="test_rel", db=db)
 
     # Create a node relationship
     create_json = {
@@ -135,7 +135,7 @@ def test_create_verify_observable(client, db):
         type="test_type", value="test_value2", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )
     initial_version = obs2.version
-    factory.node_relationship_type.create_or_read(value="IS_HASH_OF", db=db)
+    factory.observable_relationship_type.create_or_read(value="IS_HASH_OF", db=db)
 
     # Create the node relationship
     create_json = {

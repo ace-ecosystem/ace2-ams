@@ -18,8 +18,8 @@ from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
 from db.schemas.metadata_directive import MetadataDirective
-from db.schemas.node_relationship_type import NodeRelationshipType
 from db.schemas.node_threat_type import NodeThreatType
+from db.schemas.observable_relationship_type import ObservableRelationshipType
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.seed import Seed
@@ -142,9 +142,9 @@ def seed(db: Session):
             db=db, db_table=EventVector, queues=queues, data=data, key="event_vector", print_value="event vector"
         )
 
-    if "node_relationship_type" in data:
-        for value in data["node_relationship_type"]:
-            db.add(NodeRelationshipType(value=value))
+    if "observable_relationship_type" in data:
+        for value in data["observable_relationship_type"]:
+            db.add(ObservableRelationshipType(value=value))
             print(f"Adding node relationship type: {value}")
 
     if "node_threat_type" in data:

@@ -8,8 +8,8 @@ from typing import Optional
 from uuid import UUID
 
 from api_models.analysis import AnalysisCreate
-from api_models.node_relationship import NodeRelationshipCreate
 from api_models.observable import ObservableCreate, ObservableUpdate
+from api_models.observable_relationship import ObservableRelationshipCreate
 from db import crud
 from db.schemas.analysis import Analysis
 from db.schemas.observable import Observable, ObservableHistory
@@ -63,11 +63,11 @@ def create_or_read(
     # Create any relationships that were given
     for relationship in model.observable_relationships:
         related_observable = read_by_type_value(type=relationship.type, value=relationship.value, db=db)
-        crud.node_relationship.create_or_read(
-            model=NodeRelationshipCreate(
+        crud.observable_relationship.create_or_read(
+            model=ObservableRelationshipCreate(
                 history_username=model.history_username,
-                node_uuid=obj.uuid,
-                related_node_uuid=related_observable.uuid,
+                observable_uuid=obj.uuid,
+                related_observable_uuid=related_observable.uuid,
                 type=relationship.relationship_type,
             ),
             db=db,

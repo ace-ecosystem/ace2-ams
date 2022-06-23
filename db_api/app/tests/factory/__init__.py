@@ -16,8 +16,8 @@ from tests.factory import metadata_display_value
 from tests.factory import metadata_tag
 from tests.factory import metadata_time
 from tests.factory import node_comment
-from tests.factory import node_relationship
-from tests.factory import node_relationship_type
+from tests.factory import observable_relationship
+from tests.factory import observable_relationship_type
 from tests.factory import node_threat
 from tests.factory import node_threat_actor
 from tests.factory import node_threat_type

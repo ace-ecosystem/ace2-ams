@@ -2,21 +2,21 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from api_models.node_relationship import NodeRelationshipCreate
+from api_models.observable_relationship import ObservableRelationshipCreate
 from db import crud
-from db.schemas.node_relationship import NodeRelationship
-from db.schemas.node_relationship_type import NodeRelationshipType
+from db.schemas.observable_relationship import ObservableRelationship
+from db.schemas.observable_relationship_type import ObservableRelationshipType
 
 
-def create_or_read(model: NodeRelationshipCreate, db: Session) -> NodeRelationship:
+def create_or_read(model: ObservableRelationshipCreate, db: Session) -> ObservableRelationship:
     # Read the Nodes from the database
-    node = crud.node.read_by_uuid(uuid=model.node_uuid, db=db)
-    related_node = crud.node.read_by_uuid(uuid=model.related_node_uuid, db=db)
+    node = crud.node.read_by_uuid(uuid=model.observable_uuid, db=db)
+    related_node = crud.node.read_by_uuid(uuid=model.related_observable_uuid, db=db)
 
-    obj = NodeRelationship(
+    obj = ObservableRelationship(
         node=node,
         related_node=related_node,
-        type=crud.node_relationship_type.read_by_value(value=model.type, db=db),
+        type=crud.observable_relationship_type.read_by_value(value=model.type, db=db),
         uuid=model.uuid,
     )
 
@@ -41,7 +41,7 @@ def create_or_read(model: NodeRelationshipCreate, db: Session) -> NodeRelationsh
         return obj
 
     return read_by_nodes_type(
-        node_uuid=model.node_uuid, related_node_uuid=model.related_node_uuid, type=model.type, db=db
+        node_uuid=model.observable_uuid, related_node_uuid=model.related_observable_uuid, type=model.type, db=db
     )
 
 
@@ -50,18 +50,18 @@ def delete(uuid: UUID, history_username: str, db: Session) -> bool:
     relationship = read_by_uuid(uuid=uuid, db=db)
 
     # Removing the relationship counts as modifying the Node, so update its version
-    crud.node.update_version(node=relationship.node, db=db)
+    crud.node.update_version(node=relationship.observable, db=db)
 
     # Delete the relationship
-    result = crud.helpers.delete(uuid=uuid, db_table=NodeRelationship, db=db)
+    result = crud.helpers.delete(uuid=uuid, db_table=ObservableRelationship, db=db)
 
     # Add an entry to the appropriate node history table for deleting the detection point
     crud.history.record_node_update_history(
-        record_node=relationship.node,
+        record_node=relationship.observable,
         action_by=crud.user.read_by_username(username=history_username, db=db),
         diffs=[
             crud.history.Diff(
-                field="relationships", added_to_list=[], removed_from_list=[str(relationship.related_node_uuid)]
+                field="relationships", added_to_list=[], removed_from_list=[str(relationship.related_observable_uuid)]
             )
         ],
         db=db,
@@ -70,19 +70,19 @@ def delete(uuid: UUID, history_username: str, db: Session) -> bool:
     return result
 
 
-def read_by_uuid(uuid: UUID, db: Session) -> NodeRelationship:
-    return crud.helpers.read_by_uuid(db_table=NodeRelationship, uuid=uuid, db=db)
+def read_by_uuid(uuid: UUID, db: Session) -> ObservableRelationship:
+    return crud.helpers.read_by_uuid(db_table=ObservableRelationship, uuid=uuid, db=db)
 
 
-def read_by_nodes_type(node_uuid: UUID, related_node_uuid: UUID, type: str, db: Session) -> NodeRelationship:
+def read_by_nodes_type(node_uuid: UUID, related_node_uuid: UUID, type: str, db: Session) -> ObservableRelationship:
     return (
         db.execute(
-            select(NodeRelationship)
-            .join(NodeRelationshipType)
+            select(ObservableRelationship)
+            .join(ObservableRelationshipType)
             .where(
-                NodeRelationship.node_uuid == node_uuid,
-                NodeRelationship.related_node_uuid == related_node_uuid,
-                NodeRelationshipType.value == type,
+                ObservableRelationship.observable_uuid == node_uuid,
+                ObservableRelationship.related_observable_uuid == related_node_uuid,
+                ObservableRelationshipType.value == type,
             )
         )
         .scalars()

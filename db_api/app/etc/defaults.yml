@@ -160,7 +160,7 @@ node_threat_type:
     - rat
     - rootkit
     - some internal value
-node_relationship_type:
+observable_relationship_type:
   - DOWNLOADED_FROM
   - EXECUTED_ON
   - IS_HASH_OF

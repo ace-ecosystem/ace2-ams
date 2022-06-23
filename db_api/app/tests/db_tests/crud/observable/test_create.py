@@ -106,7 +106,7 @@ def test_create_nonexistent_parent_analysis_uuid(db):
 def test_create_nonexistent_relationship_observable(db):
     submission = factory.submission.create(db=db)
     factory.observable_type.create_or_read(value="test", db=db)
-    factory.node_relationship_type.create_or_read(value="asdf", db=db)
+    factory.observable_relationship_type.create_or_read(value="asdf", db=db)
 
     with pytest.raises(ValueNotFoundInDatabase):
         crud.observable.create_or_read(
@@ -151,7 +151,7 @@ def test_create(db):
     now = crud.helpers.utcnow()
     submission = factory.submission.create(db=db)
     initial_submission_version = submission.version
-    factory.node_relationship_type.create_or_read(value="relationship_type", db=db)
+    factory.observable_relationship_type.create_or_read(value="relationship_type", db=db)
     factory.metadata_tag.create_or_read(value="tag", db=db)
     factory.node_threat_actor.create_or_read(value="threat_actor", db=db)
     factory.node_threat.create_or_read(value="threat", db=db)

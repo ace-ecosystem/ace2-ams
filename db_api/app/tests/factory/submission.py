@@ -174,7 +174,7 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
         # Make sure that any relationships the observable has exist
         if "observable_relationships" in o:
             for relationship in o["observable_relationships"]:
-                factory.node_relationship_type.create_or_read(value=relationship["type"], db=db)
+                factory.observable_relationship_type.create_or_read(value=relationship["type"], db=db)
 
         # Make sure that any permanent tags the observable has exist
         if "tags" in o:

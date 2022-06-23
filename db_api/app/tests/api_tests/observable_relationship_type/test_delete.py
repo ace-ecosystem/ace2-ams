@@ -22,12 +22,12 @@ def test_delete_nonexistent_uuid(client):
 
 def test_delete_used(client, db):
     # Create an object
-    obj = factory.node_relationship_type.create_or_read(value="test", db=db)
+    obj = factory.observable_relationship_type.create_or_read(value="test", db=db)
 
     # Assign it to another object
     alert1 = factory.submission.create(db=db)
     alert2 = factory.submission.create(db=db)
-    factory.node_relationship.create_or_read(node=alert1, related_node=alert2, type="test", db=db)
+    factory.observable_relationship.create_or_read(node=alert1, related_node=alert2, type="test", db=db)
 
     # Ensure you cannot delete it now that it is in use
     delete = client.delete(f"/api/node/relationship/type/{obj.uuid}")
@@ -41,7 +41,7 @@ def test_delete_used(client, db):
 
 def test_delete(client, db):
     # Create the object
-    obj = factory.node_relationship_type.create_or_read(value="test", db=db)
+    obj = factory.observable_relationship_type.create_or_read(value="test", db=db)
 
     # Delete it
     delete = client.delete(f"/api/node/relationship/type/{obj.uuid}")

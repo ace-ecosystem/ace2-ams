@@ -21,7 +21,7 @@ from db.schemas.analysis_metadata import AnalysisMetadata
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
-from db.schemas.node_relationship import NodeRelationship
+from db.schemas.observable_relationship import ObservableRelationship
 from db.schemas.observable_tag_mapping import observable_tag_mapping
 
 
@@ -79,6 +79,13 @@ class Observable(Node, HasHistory):
         order_by="ObservableHistory.action_time",
     )
 
+    relationships = relationship(
+        "ObservableRelationship",
+        primaryjoin="ObservableRelationship.observable_uuid == Observable.uuid",
+        viewonly=True,
+        lazy="selectin",
+    )
+
     tags: list[MetadataTag] = relationship("MetadataTag", secondary=observable_tag_mapping, lazy="selectin")
 
     type = relationship("ObservableType", lazy="selectin")
@@ -130,6 +137,8 @@ class Observable(Node, HasHistory):
         """Returns the list of observable relationships for this observable sorted by the
         related observable's type then value"""
 
-        results: list[NodeRelationship] = [r for r in self.relationships if isinstance(r.related_node, Observable)]
+        results: list[ObservableRelationship] = [
+            r for r in self.relationships if isinstance(r.related_node, Observable)
+        ]
 
         return sorted(results, key=lambda x: (x.related_node.type.value, x.related_node.value))

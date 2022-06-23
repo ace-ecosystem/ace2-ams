@@ -31,7 +31,7 @@ def test_delete(client, db):
     alert2 = factory.submission.create(db=db)
 
     # Create the object
-    obj = factory.node_relationship.create_or_read(node=alert1, related_node=alert2, type="test_rel", db=db)
+    obj = factory.observable_relationship.create_or_read(node=alert1, related_node=alert2, type="test_rel", db=db)
 
     # Read it back
     get = client.get(f"/api/node/relationship/{obj.uuid}")
@@ -60,7 +60,7 @@ def test_delete_verify_observable(client, db):
         type="test_type", value="test_value2", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )
     initial_version = obs2.version
-    relationship = factory.node_relationship.create_or_read(node=obs2, related_node=obs1, type="IS_HASH_OF", db=db)
+    relationship = factory.observable_relationship.create_or_read(node=obs2, related_node=obs1, type="IS_HASH_OF", db=db)
 
     # Delete the relationship
     delete = client.delete(f"/api/node/relationship/{relationship.uuid}?history_username=analyst")

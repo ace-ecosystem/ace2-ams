@@ -4,8 +4,8 @@ from sqlalchemy.dialects.postgresql import UUID
 from db.database import Base
 
 
-class NodeRelationshipType(Base):
-    __tablename__ = "node_relationship_type"
+class ObservableRelationshipType(Base):
+    __tablename__ = "observable_relationship_type"
 
     uuid = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
 
