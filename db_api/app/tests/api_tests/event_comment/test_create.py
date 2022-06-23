@@ -70,7 +70,7 @@ def test_create_verify_history_events(client, db):
     assert history.json()["items"][1]["diff"]["new_value"] is None
     assert history.json()["items"][1]["diff"]["added_to_list"] == ["test"]
     assert history.json()["items"][1]["diff"]["removed_from_list"] == []
-    assert history.json()["items"][1]["snapshot"]["name"] == "Test Alert"
+    assert history.json()["items"][1]["snapshot"]["name"] == "test event"
 
 
 def test_create_multiple(client, db):

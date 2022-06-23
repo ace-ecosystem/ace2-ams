@@ -11,12 +11,12 @@ from tests import factory
 
 
 def test_delete_invalid_uuid(client):
-    delete = client.delete("/api/node/threat/type/1")
+    delete = client.delete("/api/threat/type/1")
     assert delete.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_delete_nonexistent_uuid(client):
-    delete = client.delete(f"/api/node/threat/type/{uuid.uuid4()}")
+    delete = client.delete(f"/api/threat/type/{uuid.uuid4()}")
     assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -28,7 +28,7 @@ def test_delete_used(client, db):
     factory.threat.create_or_read(value="test", types=["test"], db=db)
 
     # Ensure you cannot delete it now that it is in use
-    delete = client.delete(f"/api/node/threat/type/{obj.uuid}")
+    delete = client.delete(f"/api/threat/type/{obj.uuid}")
     assert delete.status_code == status.HTTP_400_BAD_REQUEST
 
 
@@ -42,5 +42,5 @@ def test_delete(client, db):
     obj = factory.threat_type.create_or_read(value="test", db=db)
 
     # Delete it
-    delete = client.delete(f"/api/node/threat/type/{obj.uuid}")
+    delete = client.delete(f"/api/threat/type/{obj.uuid}")
     assert delete.status_code == status.HTTP_204_NO_CONTENT

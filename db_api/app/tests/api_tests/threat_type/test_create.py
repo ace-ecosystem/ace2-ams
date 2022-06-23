@@ -34,7 +34,7 @@ from tests import factory
 def test_create_invalid_fields(client, db, key, value):
     factory.queue.create_or_read(value="default", db=db)
     create_json = {"value": "test", key: value}
-    create = client.post("/api/node/threat/type/", json=create_json)
+    create = client.post("/api/threat/type/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -47,12 +47,12 @@ def test_create_invalid_fields(client, db, key, value):
 def test_create_missing_required_fields(client, key):
     create_json = {"value": "test"}
     del create_json[key]
-    create = client.post("/api/node/threat/type/", json=create_json)
+    create = client.post("/api/threat/type/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_create_nonexistent_queue(client):
-    create = client.post("/api/node/threat/type/", json={"value": "test", "queues": ["nonexistent_queue"]})
+    create = client.post("/api/threat/type/", json={"value": "test", "queues": ["nonexistent_queue"]})
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -68,7 +68,7 @@ def test_create_nonexistent_queue(client):
 def test_create_valid_optional_fields(client, db, key, value):
     # Create the object
     factory.queue.create_or_read(value="test_queue", db=db)
-    create = client.post("/api/node/threat/type/", json={key: value, "value": "test", "queues": ["test_queue"]})
+    create = client.post("/api/threat/type/", json={key: value, "value": "test", "queues": ["test_queue"]})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
@@ -79,7 +79,7 @@ def test_create_valid_optional_fields(client, db, key, value):
 def test_create_valid_required_fields(client, db):
     # Create the object
     factory.queue.create_or_read(value="test_queue", db=db)
-    create = client.post("/api/node/threat/type/", json={"value": "test", "queues": ["test_queue"]})
+    create = client.post("/api/threat/type/", json={"value": "test", "queues": ["test_queue"]})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back

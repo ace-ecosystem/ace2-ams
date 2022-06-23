@@ -11,12 +11,12 @@ from tests import factory
 
 
 def test_delete_invalid_uuid(client):
-    delete = client.delete("/api/node/relationship/1?history_username=analyst")
+    delete = client.delete("/api/observable/relationship/1?history_username=analyst")
     assert delete.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_delete_nonexistent_uuid(client):
-    delete = client.delete(f"/api/node/relationship/{uuid.uuid4()}?history_username=analyst")
+    delete = client.delete(f"/api/observable/relationship/{uuid.uuid4()}?history_username=analyst")
     assert delete.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -26,28 +26,31 @@ def test_delete_nonexistent_uuid(client):
 
 
 def test_delete(client, db):
-    # Create some nodes
-    alert1 = factory.submission.create(db=db)
-    alert2 = factory.submission.create(db=db)
+    # Create some observables
+    alert = factory.submission.create(db=db)
+    obs1 = factory.observable.create_or_read(type="type1", value="value1", parent_analysis=alert.root_analysis, db=db)
+    obs2 = factory.observable.create_or_read(type="type2", value="value2", parent_analysis=alert.root_analysis, db=db)
 
     # Create the object
-    obj = factory.observable_relationship.create_or_read(node=alert1, related_node=alert2, type="test_rel", db=db)
+    obj = factory.observable_relationship.create_or_read(
+        observable=obs1, related_observable=obs2, type="test_rel", db=db
+    )
 
     # Read it back
-    get = client.get(f"/api/node/relationship/{obj.uuid}")
+    get = client.get(f"/api/observable/relationship/{obj.uuid}")
     assert get.status_code == status.HTTP_200_OK
 
     # Delete it
-    delete = client.delete(f"/api/node/relationship/{obj.uuid}?history_username=analyst")
+    delete = client.delete(f"/api/observable/relationship/{obj.uuid}?history_username=analyst")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
     # Make sure it is gone
-    get = client.get(f"/api/node/relationship/{obj.uuid}")
+    get = client.get(f"/api/observable/relationship/{obj.uuid}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_delete_verify_observable(client, db):
-    # Create some nodes with relationships
+    # Create some observables with relationships
     #
     # alert
     #   o1
@@ -60,17 +63,19 @@ def test_delete_verify_observable(client, db):
         type="test_type", value="test_value2", parent_analysis=alert.root_analysis, db=db, history_username="analyst"
     )
     initial_version = obs2.version
-    relationship = factory.observable_relationship.create_or_read(node=obs2, related_node=obs1, type="IS_HASH_OF", db=db)
+    relationship = factory.observable_relationship.create_or_read(
+        observable=obs2, related_observable=obs1, type="IS_HASH_OF", db=db
+    )
 
     # Delete the relationship
-    delete = client.delete(f"/api/node/relationship/{relationship.uuid}?history_username=analyst")
+    delete = client.delete(f"/api/observable/relationship/{relationship.uuid}?history_username=analyst")
     assert delete.status_code == status.HTTP_204_NO_CONTENT
 
-    # Removing a relationship counts as modifying the node, so it should have a new version
+    # Removing a relationship counts as modifying the observable, so it should have a new version
     assert obs2.version != initial_version
 
     # Verify the observable history. The first record is for creating the observable, and
-    # the second record is from removing the node relationship.
+    # the second record is from removing the observable relationship.
     history = client.get(f"/api/observable/{obs2.uuid}/history")
     assert len(history.json()["items"]) == 2
     assert history.json()["items"][1]["action"] == "UPDATE"

@@ -43,7 +43,7 @@ from tests import factory
 def test_create_invalid_fields(client, db, key, value):
     create_json = {"types": ["test_type"], "value": "test", "queues": ["external"], key: value}
 
-    create = client.post("/api/node/threat/", json=create_json)
+    create = client.post("/api/threat/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -58,20 +58,20 @@ def test_create_invalid_fields(client, db, key, value):
 def test_create_missing_required_fields(client, db, key):
     create_json = {"types": ["test_type"], "value": "test", "queues": ["external"]}
     del create_json[key]
-    create = client.post("/api/node/threat/", json=create_json)
+    create = client.post("/api/threat/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_create_nonexistent_queue(client, db):
     factory.threat_type.create_or_read(value="test_type", db=db)
     create = client.post(
-        "/api/node/threat/", json={"types": ["test_type"], "value": "test", "queues": ["nonexistent_queue"]}
+        "/api/threat/", json={"types": ["test_type"], "value": "test", "queues": ["nonexistent_queue"]}
     )
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
 def test_create_nonexistent_type(client, db):
-    create = client.post("/api/node/threat/", json={"types": ["test_type"], "value": "test", "queues": ["external"]})
+    create = client.post("/api/threat/", json={"types": ["test_type"], "value": "test", "queues": ["external"]})
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -93,7 +93,7 @@ def test_create_valid_optional_fields(client, db, key, value):
 
     # Create the object
     create = client.post(
-        "/api/node/threat/", json={key: value, "types": ["test_type"], "value": "test", "queues": ["external"]}
+        "/api/threat/", json={key: value, "types": ["test_type"], "value": "test", "queues": ["external"]}
     )
     assert create.status_code == status.HTTP_201_CREATED
 
@@ -115,7 +115,7 @@ def test_create_valid_types(client, db, values, list_length):
         factory.threat_type.create_or_read(value=value, db=db)
 
     # Create the object
-    create = client.post("/api/node/threat/", json={"types": values, "value": "test", "queues": ["external"]})
+    create = client.post("/api/threat/", json={"types": values, "value": "test", "queues": ["external"]})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
@@ -127,7 +127,7 @@ def test_create_valid_required_fields(client, db):
     factory.threat_type.create_or_read(value="test_type", db=db)
 
     # Create the object
-    create = client.post("/api/node/threat/", json={"types": ["test_type"], "value": "test", "queues": ["external"]})
+    create = client.post("/api/threat/", json={"types": ["test_type"], "value": "test", "queues": ["external"]})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back

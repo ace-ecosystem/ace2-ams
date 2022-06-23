@@ -11,12 +11,12 @@ from tests import factory
 
 
 def test_get_invalid_uuid(client):
-    get = client.get("/api/node/threat/1")
+    get = client.get("/api/threat/1")
     assert get.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_get_nonexistent_uuid(client):
-    get = client.get(f"/api/node/threat/{uuid.uuid4()}")
+    get = client.get(f"/api/threat/{uuid.uuid4()}")
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -32,7 +32,7 @@ def test_get_all(client, db):
     factory.threat.create_or_read(value="test3", queues=["internal", "external"], types=["test_type"], db=db)
 
     # Read them back
-    get = client.get("/api/node/threat/")
+    get = client.get("/api/threat/")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["total"] == 3
 
@@ -51,6 +51,6 @@ def test_get_all(client, db):
 
 
 def test_get_all_empty(client):
-    get = client.get("/api/node/threat/")
+    get = client.get("/api/threat/")
     assert get.status_code == status.HTTP_200_OK
     assert get.json()["total"] == 0

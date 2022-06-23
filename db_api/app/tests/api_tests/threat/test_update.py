@@ -36,12 +36,12 @@ from tests import factory
     ],
 )
 def test_update_invalid_fields(client, key, value):
-    update = client.patch(f"/api/node/threat/{uuid.uuid4()}", json={key: value})
+    update = client.patch(f"/api/threat/{uuid.uuid4()}", json={key: value})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 def test_update_invalid_uuid(client):
-    update = client.patch("/api/node/threat/1", json={"types": ["test_type"], "value": "test"})
+    update = client.patch("/api/threat/1", json={"types": ["test_type"], "value": "test"})
     assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -57,12 +57,12 @@ def test_update_duplicate_unique_fields(client, db, key):
     obj2 = factory.threat.create_or_read(value="test2", types=["test_type"], db=db)
 
     # Ensure you cannot update a unique field to a value that already exists
-    update = client.patch(f"/api/node/threat/{obj2.uuid}", json={key: getattr(obj1, key)})
+    update = client.patch(f"/api/threat/{obj2.uuid}", json={key: getattr(obj1, key)})
     assert update.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_update_nonexistent_uuid(client):
-    update = client.patch(f"/api/node/threat/{uuid.uuid4()}", json={"types": ["test_type"], "value": "test"})
+    update = client.patch(f"/api/threat/{uuid.uuid4()}", json={"types": ["test_type"], "value": "test"})
     assert update.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -89,7 +89,7 @@ def test_update_valid_types(client, db, values):
         factory.threat_type.create_or_read(value=value, db=db)
 
     # Update it
-    update = client.patch(f"/api/node/threat/{obj.uuid}", json={"types": values})
+    update = client.patch(f"/api/threat/{obj.uuid}", json={"types": values})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert len(obj.types) == len(values)
 
@@ -111,7 +111,7 @@ def test_update(client, db, key, initial_value, updated_value):
     setattr(obj, key, initial_value)
 
     # Update it
-    update = client.patch(f"/api/node/threat/{obj.uuid}", json={key: updated_value})
+    update = client.patch(f"/api/threat/{obj.uuid}", json={key: updated_value})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert getattr(obj, key) == updated_value
 
@@ -124,6 +124,6 @@ def test_update_queue(client, db):
     obj = factory.threat.create_or_read(value="test", queues=["default"], types=["test_type"], db=db)
 
     # Update it
-    update = client.patch(f"/api/node/threat/{obj.uuid}", json={"queues": ["updated"]})
+    update = client.patch(f"/api/threat/{obj.uuid}", json={"queues": ["updated"]})
     assert update.status_code == status.HTTP_204_NO_CONTENT
     assert obj.queues[0].value == "updated"

@@ -43,7 +43,7 @@ def test_get_summary_nonexistent_submission(client, path):
 def test_get_version(client, db):
     submission = factory.submission.create(db=db)
 
-    get = client.get(f"/api/node/{submission.uuid}/version")
+    get = client.get(f"/api/submission/{submission.uuid}/version")
     assert get.status_code == status.HTTP_200_OK
     assert get.json() == {"version": str(submission.version)}
 
@@ -662,73 +662,6 @@ def test_get_filter_tags(client, db):
 
     # There should be 2 submissions when we filter by multiple tags
     get = client.get("/api/submission/?tags=tag2,tag3&tags=obs1")
-    assert get.json()["total"] == 2
-    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
-    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
-
-
-def test_get_filter_threat_actors(client, db):
-    submission1 = factory.submission.create(db=db)
-    factory.observable.create_or_read(
-        type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, threat_actors=["bad_guys"]
-    )
-    submission2 = factory.submission.create(db=db, threat_actors=["test_actor", "threat_actor2"])
-
-    # There should be 2 total submissions
-    get = client.get("/api/submission/")
-    assert get.json()["total"] == 2
-
-    # There should be 1 submission when we filter test_actor
-    get = client.get("/api/submission/?threat_actors=test_actor")
-    assert get.json()["total"] == 1
-    assert get.json()["items"][0]["threat_actors"][0]["value"] == "test_actor"
-
-    # There should be 1 submission when we filter by the child observable threat_actor
-    get = client.get("/api/submission/?threat_actors=bad_guys")
-    assert get.json()["total"] == 1
-    assert len(get.json()["items"][0]["child_threat_actors"]) == 1
-    assert get.json()["items"][0]["child_threat_actors"][0]["value"] == "bad_guys"
-
-    # There should be 2 submissions when we filter by multiple threat actors
-    get = client.get("/api/submission/?threat_actors=test_actor,threat_actor2&threat_actors=bad_guys")
-    assert get.json()["total"] == 2
-    assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
-    assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])
-
-
-def test_get_filter_threats(client, db):
-    submission1 = factory.submission.create(db=db)
-    factory.observable.create_or_read(
-        type="fqdn", value="bad.com", parent_analysis=submission1.root_analysis, db=db, threats=["malz"]
-    )
-    submission2 = factory.submission.create(db=db, threats=["threat2", "threat3", "threat4"])
-    factory.submission.create(db=db, threats=["threat1"])
-
-    # There should be 3 total submissions
-    get = client.get("/api/submission/")
-    assert get.json()["total"] == 3
-
-    # There should be 1 submission when we filter by threat1
-    get = client.get("/api/submission/?threats=threat1")
-    assert get.json()["total"] == 1
-    assert len(get.json()["items"][0]["threats"]) == 1
-    assert get.json()["items"][0]["threats"][0]["value"] == "threat1"
-
-    # There should be 1 submission when we filter by threat2 AND threat3
-    get = client.get("/api/submission/?threats=threat2,threat3")
-    assert get.json()["total"] == 1
-    assert len(get.json()["items"][0]["threats"]) == 3
-    assert any(t["value"] == "threat2" for t in get.json()["items"][0]["threats"])
-    assert any(t["value"] == "threat3" for t in get.json()["items"][0]["threats"])
-
-    # There should be 1 submission when we filter by the child observable threat
-    get = client.get("/api/submission/?threats=malz")
-    assert get.json()["total"] == 1
-    assert len(get.json()["items"][0]["child_threats"]) == 1
-    assert get.json()["items"][0]["child_threats"][0]["value"] == "malz"
-
-    # There should be 2 submissions when we filter by multiple threats
-    get = client.get("/api/submission/?threats=threat2,threat3&threats=malz")
     assert get.json()["total"] == 2
     assert any(a["uuid"] == str(submission1.uuid) for a in get.json()["items"])
     assert any(a["uuid"] == str(submission2.uuid) for a in get.json()["items"])

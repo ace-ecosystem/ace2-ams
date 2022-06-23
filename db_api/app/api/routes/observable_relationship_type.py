@@ -16,7 +16,7 @@ from exceptions.db import UuidNotFoundInDatabase
 
 
 router = APIRouter(
-    prefix="/node/relationship/type",
+    prefix="/observable/relationship/type",
     tags=["Node Relationship Type"],
 )
 
@@ -74,9 +74,11 @@ def update_observable_relationship_type(
     db: Session = Depends(get_db),
 ):
     try:
-        if not crud.helpers.update(uuid=uuid, update_model=observable_relationship, db_table=ObservableRelationshipType, db=db):
+        if not crud.helpers.update(
+            uuid=uuid, update_model=observable_relationship, db_table=ObservableRelationshipType, db=db
+        ):
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update node relationship type {uuid}"
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to update observable relationship type {uuid}"
             )
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
@@ -98,7 +100,7 @@ def delete_observable_relationship_type(uuid: UUID, db: Session = Depends(get_db
     try:
         if not crud.helpers.delete(uuid=uuid, db_table=ObservableRelationshipType, db=db):
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete node relationship type {uuid}"
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unable to delete observable relationship type {uuid}"
             )
     except UuidNotFoundInDatabase as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e

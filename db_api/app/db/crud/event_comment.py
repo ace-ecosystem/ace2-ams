@@ -22,6 +22,7 @@ def create_or_read(model: EventCommentCreate, db: Session) -> EventComment:
     if crud.helpers.create(obj=obj, db=db):
         # Adding a comment counts as modifying the event, so update its version
         event.version = uuid4()
+        db.flush()
 
         # Add a history entry
         crud.history.record_update_history(

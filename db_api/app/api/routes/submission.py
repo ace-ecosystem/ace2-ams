@@ -106,8 +106,6 @@ def get_all_submissions(
     ),  # Example: event_time|desc,
     submission_type: Optional[list[str]] = Query(None),
     tags: Optional[list[str]] = Query(None),
-    threat_actors: Optional[list[str]] = Query(None),
-    threats: Optional[list[str]] = Query(None),
     tool: Optional[list[str]] = Query(None),
     tool_instance: Optional[list[str]] = Query(None),
 ):
@@ -146,8 +144,6 @@ def get_all_submissions(
             sort=sort,
             submission_type=submission_type,
             tags=tags,
-            threat_actors=threat_actors,
-            threats=threats,
             tool=tool,
             tool_instance=tool_instance,
         ),

@@ -16,8 +16,8 @@ from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 
 router = APIRouter(
-    prefix="/node/threat/type",
-    tags=["Node Threat Type"],
+    prefix="/threat/type",
+    tags=["Threat Type"],
 )
 
 

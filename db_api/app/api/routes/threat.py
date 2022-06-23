@@ -13,8 +13,8 @@ from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 
 router = APIRouter(
-    prefix="/node/threat",
-    tags=["Node Threat"],
+    prefix="/threat",
+    tags=["Threat"],
 )
 
 

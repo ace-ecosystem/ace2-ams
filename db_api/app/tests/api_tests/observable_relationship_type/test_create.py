@@ -25,7 +25,7 @@ from fastapi import status
 )
 def test_create_invalid_fields(client, key, value):
     create_json = {"value": "test", key: value}
-    create = client.post("/api/node/relationship/type/", json=create_json)
+    create = client.post("/api/observable/relationship/type/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -38,7 +38,7 @@ def test_create_invalid_fields(client, key, value):
 def test_create_missing_required_fields(client, key):
     create_json = {"value": "test"}
     del create_json[key]
-    create = client.post("/api/node/relationship/type/", json=create_json)
+    create = client.post("/api/observable/relationship/type/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -53,7 +53,7 @@ def test_create_missing_required_fields(client, key):
 )
 def test_create_valid_optional_fields(client, key, value):
     # Create the object
-    create = client.post("/api/node/relationship/type/", json={key: value, "value": "test"})
+    create = client.post("/api/observable/relationship/type/", json={key: value, "value": "test"})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
@@ -63,7 +63,7 @@ def test_create_valid_optional_fields(client, key, value):
 
 def test_create_valid_required_fields(client):
     # Create the object
-    create = client.post("/api/node/relationship/type/", json={"value": "test"})
+    create = client.post("/api/observable/relationship/type/", json={"value": "test"})
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back

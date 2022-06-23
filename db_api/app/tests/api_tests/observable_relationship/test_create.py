@@ -14,14 +14,14 @@ from tests import factory
 @pytest.mark.parametrize(
     "key,value",
     [
-        ("node_uuid", None),
-        ("node_uuid", 1),
-        ("node_uuid", "abc"),
-        ("node_uuid", ""),
-        ("related_node_uuid", None),
-        ("related_node_uuid", 1),
-        ("related_node_uuid", "abc"),
-        ("related_node_uuid", ""),
+        ("observable_uuid", None),
+        ("observable_uuid", 1),
+        ("observable_uuid", "abc"),
+        ("observable_uuid", ""),
+        ("related_observable_uuid", None),
+        ("related_observable_uuid", 1),
+        ("related_observable_uuid", "abc"),
+        ("related_observable_uuid", ""),
         ("type", 123),
         ("type", None),
         ("type", ""),
@@ -32,38 +32,38 @@ from tests import factory
     ],
 )
 def test_create_invalid_fields(client, key, value):
-    create_json = {"node_uuid": str(uuid.uuid4()), "related_node_uuid": str(uuid.uuid4()), "type": "test"}
+    create_json = {"observable_uuid": str(uuid.uuid4()), "related_observable_uuid": str(uuid.uuid4()), "type": "test"}
     create_json[key] = value
-    create = client.post("/api/node/relationship/type/", json=create_json)
+    create = client.post("/api/observable/relationship/type/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
 @pytest.mark.parametrize(
     "key",
     [
-        ("node_uuid"),
-        ("related_node_uuid"),
+        ("observable_uuid"),
+        ("related_observable_uuid"),
         ("type"),
     ],
 )
 def test_create_missing_required_fields(client, db, key):
-    # Create two nodes
-    alert1 = factory.submission.create(db=db)
-    alert2 = factory.submission.create(db=db)
+    alert = factory.submission.create(db=db)
+    obs1 = factory.observable.create_or_read(type="type1", value="value1", parent_analysis=alert.root_analysis, db=db)
+    obs2 = factory.observable.create_or_read(type="type2", value="value2", parent_analysis=alert.root_analysis, db=db)
 
-    # Create some node relationship types
+    # Create some observable relationship types
     factory.observable_relationship_type.create_or_read(value="test_rel", db=db)
     factory.observable_relationship_type.create_or_read(value="test_rel2", db=db)
 
-    # Create a node relationship
+    # Create a observable relationship
     create_json = {
-        "node_uuid": str(alert1.uuid),
-        "related_node_uuid": str(alert2.uuid),
+        "observable_uuid": str(obs1.uuid),
+        "related_observable_uuid": str(obs2.uuid),
         "type": "test_rel",
     }
 
     del create_json[key]
-    create = client.post("/api/node/relationship/", json=create_json)
+    create = client.post("/api/observable/relationship/", json=create_json)
     assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
@@ -77,18 +77,23 @@ def test_create_missing_required_fields(client, db, key):
     [("uuid", str(uuid.uuid4()))],
 )
 def test_create_valid_optional_fields(client, db, key, value):
-    # Create two nodes
-    alert1 = factory.submission.create(db=db)
-    alert2 = factory.submission.create(db=db)
+    alert = factory.submission.create(db=db)
+    obs1 = factory.observable.create_or_read(type="type1", value="value1", parent_analysis=alert.root_analysis, db=db)
+    obs2 = factory.observable.create_or_read(type="type2", value="value2", parent_analysis=alert.root_analysis, db=db)
 
-    # Create a node relationship type
+    # Create a observable relationship type
     factory.observable_relationship_type.create_or_read(value="test_rel", db=db)
 
-    # Create a node relationship
-    create_json = {"node_uuid": str(alert1.uuid), "related_node_uuid": str(alert2.uuid), "type": "test_rel", key: value}
+    # Create a observable relationship
+    create_json = {
+        "observable_uuid": str(obs1.uuid),
+        "related_observable_uuid": str(obs2.uuid),
+        "type": "test_rel",
+        key: value,
+    }
 
     # Create the object
-    create = client.post("/api/node/relationship/", json=create_json)
+    create = client.post("/api/observable/relationship/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
@@ -97,32 +102,32 @@ def test_create_valid_optional_fields(client, db, key, value):
 
 
 def test_create_valid_required_fields(client, db):
-    # Create two nodes
-    alert1 = factory.submission.create(db=db)
-    alert2 = factory.submission.create(db=db)
+    alert = factory.submission.create(db=db)
+    obs1 = factory.observable.create_or_read(type="type1", value="value1", parent_analysis=alert.root_analysis, db=db)
+    obs2 = factory.observable.create_or_read(type="type2", value="value2", parent_analysis=alert.root_analysis, db=db)
 
-    # Create a node relationship type
+    # Create a observable relationship type
     factory.observable_relationship_type.create_or_read(value="test_rel", db=db)
 
-    # Create a node relationship
+    # Create a observable relationship
     create_json = {
-        "node_uuid": str(alert1.uuid),
-        "related_node_uuid": str(alert2.uuid),
+        "observable_uuid": str(obs1.uuid),
+        "related_observable_uuid": str(obs2.uuid),
         "type": "test_rel",
     }
 
-    create = client.post("/api/node/relationship/", json=create_json)
+    create = client.post("/api/observable/relationship/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
     # Read it back
     get = client.get(create.headers["Content-Location"])
-    assert get.json()["node_uuid"] == str(alert1.uuid)
-    assert get.json()["related_node"]["uuid"] == str(alert2.uuid)
+    assert get.json()["observable_uuid"] == str(obs1.uuid)
+    assert get.json()["related_observable"]["uuid"] == str(obs2.uuid)
     assert get.json()["type"]["value"] == "test_rel"
 
 
 def test_create_verify_observable(client, db):
-    # Create some nodes with relationships
+    # Create some observables with relationships
     #
     # alert
     #   o1
@@ -137,22 +142,22 @@ def test_create_verify_observable(client, db):
     initial_version = obs2.version
     factory.observable_relationship_type.create_or_read(value="IS_HASH_OF", db=db)
 
-    # Create the node relationship
+    # Create the observable relationship
     create_json = {
-        "node_uuid": str(obs2.uuid),
-        "related_node_uuid": str(obs1.uuid),
+        "observable_uuid": str(obs2.uuid),
+        "related_observable_uuid": str(obs1.uuid),
         "type": "IS_HASH_OF",
         "history_username": "analyst",
     }
 
-    create = client.post("/api/node/relationship/", json=create_json)
+    create = client.post("/api/observable/relationship/", json=create_json)
     assert create.status_code == status.HTTP_201_CREATED
 
-    # Adding a relationship counts as modifying the node, so it should have a new version
+    # Adding a relationship counts as modifying the observable, so it should have a new version
     assert obs2.version != initial_version
 
     # Verify the observable history. The first record is for creating the observable, and
-    # the second record is from adding the node relationship.
+    # the second record is from adding the observable relationship.
     history = client.get(f"/api/observable/{obs2.uuid}/history")
     assert len(history.json()["items"]) == 2
     assert history.json()["items"][1]["action"] == "UPDATE"
@@ -163,6 +168,6 @@ def test_create_verify_observable(client, db):
     assert history.json()["items"][1]["diff"]["new_value"] is None
     assert history.json()["items"][1]["diff"]["added_to_list"] == [str(obs1.uuid)]
     assert history.json()["items"][1]["diff"]["removed_from_list"] == []
-    assert history.json()["items"][1]["snapshot"]["observable_relationships"][0]["related_node"]["uuid"] == str(
+    assert history.json()["items"][1]["snapshot"]["observable_relationships"][0]["related_observable"]["uuid"] == str(
         obs1.uuid
     )

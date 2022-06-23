@@ -86,8 +86,8 @@ def test_observable_relationships(client, db):
     obs3 = factory.observable.create_or_read(
         type="test_type", value="test_value3", parent_analysis=submission.root_analysis, db=db
     )
-    factory.observable_relationship.create_or_read(node=obs3, related_node=obs1, type="IS_HASH_OF", db=db)
-    factory.observable_relationship.create_or_read(node=obs3, related_node=obs2, type="IS_EQUAL_TO", db=db)
+    factory.observable_relationship.create_or_read(observable=obs3, related_observable=obs1, type="IS_HASH_OF", db=db)
+    factory.observable_relationship.create_or_read(observable=obs3, related_observable=obs2, type="IS_EQUAL_TO", db=db)
 
     # The observable relationships should be sorted by the related observable's type then value.
     get = client.get(f"/api/observable/{obs3.uuid}")
@@ -95,6 +95,6 @@ def test_observable_relationships(client, db):
     assert len(obs3.relationships) == 2
     assert len(get.json()["observable_relationships"]) == 2
     assert get.json()["observable_relationships"][0]["type"]["value"] == "IS_HASH_OF"
-    assert get.json()["observable_relationships"][0]["related_node"]["uuid"] == str(obs1.uuid)
+    assert get.json()["observable_relationships"][0]["related_observable"]["uuid"] == str(obs1.uuid)
     assert get.json()["observable_relationships"][1]["type"]["value"] == "IS_EQUAL_TO"
-    assert get.json()["observable_relationships"][1]["related_node"]["uuid"] == str(obs2.uuid)
+    assert get.json()["observable_relationships"][1]["related_observable"]["uuid"] == str(obs2.uuid)

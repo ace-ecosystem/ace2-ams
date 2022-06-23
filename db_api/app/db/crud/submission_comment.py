@@ -22,6 +22,7 @@ def create_or_read(model: SubmissionCommentCreate, db: Session) -> SubmissionCom
     if crud.helpers.create(obj=obj, db=db):
         # Adding a comment counts as modifying the submission, so update its version
         submission.version = uuid4()
+        db.flush()
 
         # Add a history entry
         crud.history.record_update_history(

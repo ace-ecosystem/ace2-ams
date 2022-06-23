@@ -69,11 +69,9 @@ def test_create_invalid_fields(client, key, value):
     "key,values",
     [
         ("tags", INVALID_LIST_STRING_VALUES),
-        ("threat_actors", INVALID_LIST_STRING_VALUES),
-        ("threats", INVALID_LIST_STRING_VALUES),
     ],
 )
-def test_create_invalid_node_fields(client, key, values):
+def test_create_invalid_list_fields(client, key, values):
     for value in values:
         create = client.post(
             "/api/submission/",
@@ -205,9 +203,9 @@ def test_create_nonexistent_type(client, db):
 
 @pytest.mark.parametrize(
     "key",
-    [("tags"), ("threat_actors"), ("threats")],
+    [("tags")],
 )
-def test_create_nonexistent_node_fields(client, db, key):
+def test_create_nonexistent_list_fields(client, db, key):
     factory.queue.create_or_read(value="test_queue", db=db)
     factory.submission_type.create_or_read(value="test_type", db=db)
     factory.observable_type.create_or_read(value="o_type", db=db)
@@ -415,26 +413,14 @@ def test_create_valid_required_fields(client, db):
     assert get.json()["queue"]["value"] == "test_queue"
     assert get.json()["type"]["value"] == "test_type"
 
-    # There should also be 1 observable plus the alert in the tree
-    # node_tree = db.query(NodeTree).all()
-    # assert len(node_tree) == 2
-    # node_tree_observable = next(n for n in node_tree if str(n.node_uuid) != get.json()["uuid"])
-    # assert str(node_tree_observable.root_node_uuid) == get.json()["uuid"]
-
-    # observable = db.query(Observable).where(Observable.uuid == node_tree_observable.node_uuid).one()
-    # assert observable.type.value == "o_type"
-    # assert observable.value == "o_value"
-
 
 @pytest.mark.parametrize(
     "key,value_lists,helper_create_func",
     [
         ("tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
-        ("threat_actors", VALID_LIST_STRING_VALUES, factory.threat_actor.create_or_read),
-        ("threats", VALID_LIST_STRING_VALUES, factory.threat.create_or_read),
     ],
 )
-def test_create_valid_node_fields(client, db, key, value_lists, helper_create_func):
+def test_create_valid_list_fields(client, db, key, value_lists, helper_create_func):
     for value_list in value_lists:
         for value in value_list:
             helper_create_func(value=value, db=db)

@@ -46,11 +46,9 @@ def test_update_invalid_fields(client, key, value):
     "key,values",
     [
         ("tags", INVALID_LIST_STRING_VALUES),
-        ("threat_actors", INVALID_LIST_STRING_VALUES),
-        ("threats", INVALID_LIST_STRING_VALUES),
     ],
 )
-def test_update_invalid_node_fields(client, key, values):
+def test_update_invalid_list_fields(client, key, values):
     for value in values:
         update = client.patch("/api/submission/", json=[{key: value, "uuid": str(uuid.uuid4())}])
         assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -92,12 +90,12 @@ def test_update_nonexistent_fields(client, db, key, value):
 
 @pytest.mark.parametrize(
     "key",
-    [("tags"), ("threat_actors"), ("threats")],
+    [("tags")],
 )
-def test_update_nonexistent_node_fields(client, db, key):
+def test_update_nonexistent_list_fields(client, db, key):
     submission = factory.submission.create(db=db)
 
-    # Make sure you cannot update it to use a nonexistent node field value
+    # Make sure you cannot update it to use a nonexistent list field value
     update = client.patch("/api/submission/", json=[{key: ["abc"], "uuid": str(submission.uuid)}])
     assert update.status_code == status.HTTP_404_NOT_FOUND
     assert "abc" in update.text
@@ -285,16 +283,12 @@ def test_update_queue(client, db):
     "key,value_lists,helper_create_func",
     [
         ("tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
-        ("threat_actors", VALID_LIST_STRING_VALUES, factory.threat_actor.create_or_read),
-        ("threats", VALID_LIST_STRING_VALUES, factory.threat.create_or_read),
     ],
 )
-def test_update_valid_node_fields(client, db, key, value_lists, helper_create_func):
+def test_update_valid_list_fields(client, db, key, value_lists, helper_create_func):
     for value_list in value_lists:
         submission = factory.submission.create(
             tags=["remove_me"],
-            threat_actors=["remove_me"],
-            threats=["remove_me"],
             db=db,
             history_username="analyst",
         )
