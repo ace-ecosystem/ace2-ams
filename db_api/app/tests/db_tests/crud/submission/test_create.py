@@ -14,10 +14,6 @@ def test_create(db):
     factory.metadata_tag.create_or_read(value="tag", db=db)
     factory.metadata_tag.create_or_read(value="o_analysis_tag", db=db)
     factory.metadata_tag.create_or_read(value="o_tag", db=db)
-    factory.threat.create_or_read(value="threat", db=db)
-    factory.threat.create_or_read(value="o_threat", db=db)
-    factory.threat_actor.create_or_read(value="threat_actor", db=db)
-    factory.threat_actor.create_or_read(value="o_threat_actor", db=db)
     factory.observable_type.create_or_read(value="type", db=db)
     factory.queue.create_or_read(value="queue", db=db)
     factory.submission_tool.create_or_read(value="tool", db=db)
@@ -52,15 +48,11 @@ def test_create(db):
                     ],
                     detection_points=["detection_point"],
                     tags=["o_tag"],
-                    threat_actors=["o_threat_actor"],
-                    threats=["o_threat"],
                 )
             ],
             owner="analyst",
             queue="queue",
             tags=["tag"],
-            threat_actors=["threat_actor"],
-            threats=["threat"],
             tool="tool",
             tool_instance="tool_instance",
             type="type",
@@ -79,10 +71,6 @@ def test_create(db):
     assert submission.child_analysis_tags[0].value == "o_analysis_tag"
     assert len(submission.child_tags) == 1
     assert submission.child_tags[0].value == "o_tag"
-    assert len(submission.child_threat_actors) == 1
-    assert submission.child_threat_actors[0].value == "o_threat_actor"
-    assert len(submission.child_threats) == 1
-    assert submission.child_threats[0].value == "o_threat"
     assert submission.description == "description"
     assert submission.event_time == now
     assert len(submission.history) == 1
@@ -94,10 +82,6 @@ def test_create(db):
     assert submission.queue.value == "queue"
     assert len(submission.tags) == 1
     assert submission.tags[0].value == "tag"
-    assert len(submission.threat_actors) == 1
-    assert submission.threat_actors[0].value == "threat_actor"
-    assert len(submission.threats) == 1
-    assert submission.threats[0].value == "threat"
     assert submission.tool.value == "tool"
     assert submission.tool_instance.value == "tool_instance"
     assert submission.type.value == "type"
