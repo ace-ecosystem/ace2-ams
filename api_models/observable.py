@@ -6,7 +6,6 @@ from uuid import UUID, uuid4
 from api_models import type_str, validators
 from api_models.analysis_metadata import AnalysisMetadataCreate, AnalysisMetadataRead
 from api_models.metadata_tag import MetadataTagRead
-from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
 from api_models.node_relationship import NodeRelationshipRead
 from api_models.node_threat import NodeThreatRead
@@ -24,7 +23,7 @@ class DispositionHistoryIndividual(BaseModel):
     percent: int = Field(description="The percent of times the disposition occurred")
 
 
-class ObservableBase(NodeBase):
+class ObservableBase(BaseModel):
     """Represents a unique observable (based on the type+value)."""
 
     context: Optional[type_str] = Field(
@@ -46,8 +45,13 @@ class ObservableBase(NodeBase):
 
     value: type_str = Field(description="The value of the observable")
 
+    version: UUID4 = Field(
+        default_factory=uuid4,
+        description="""A version string that automatically changes every time the observable is modified.""",
+    )
 
-class ObservableCreateBase(NodeCreate, ObservableBase):
+
+class ObservableCreateBase(ObservableBase):
     analyses: "list[AnalysisCreateInObservable]" = Field(
         default_factory=list, description="A list of analysis results to add as children to the observable"
     )
@@ -85,7 +89,7 @@ class ObservableCreateInSubmission(ObservableCreateBase):
     pass
 
 
-class ObservableRead(NodeRead, ObservableBase):
+class ObservableRead(ObservableBase):
     comments: list[NodeCommentRead] = Field(
         description="A list of comments added to the observable", default_factory=list
     )
@@ -140,7 +144,7 @@ class ObservableSubmissionTreeRead(ObservableSubmissionRead):
         orm_mode = True
 
 
-class ObservableUpdate(NodeUpdate, ObservableBase):
+class ObservableUpdate(ObservableBase):
     for_detection: Optional[StrictBool] = Field(
         description="Whether or not this observable should be included in the observable detection exports"
     )
@@ -159,6 +163,13 @@ class ObservableUpdate(NodeUpdate, ObservableBase):
 
     value: Optional[type_str] = Field(description="The value of the observable")
 
+    # The version is optional when updating an observable since certain actions in the GUI do not need to care
+    # about the version. However, if the version is given, the update will be rejected if it does not match.
+    version: Optional[UUID4] = Field(
+        description="""A version string that automatically changes every time the observable is modified. If supplied,
+        the version must match when updating.""",
+    )
+
     _prevent_none: classmethod = validators.prevent_none(
         "for_detection", "tags", "threat_actors", "threats", "time", "type", "value"
     )
@@ -174,6 +185,13 @@ class ObservableRelationshipCreate(BaseModel):
 
 class ObservableRelationshipRead(NodeRelationshipRead):
     related_node: ObservableRead = Field(description="The related observable")
+
+
+class ObservableVersion(BaseModel):
+    version: UUID4 = Field(description="The current version of the observable")
+
+    class Config:
+        orm_mode = True
 
 
 # This is needed for the circular relationship between ObservableRead and ObservableRelationshipRead

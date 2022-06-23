@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import Field, UUID4
+from pydantic import BaseModel, Field, UUID4
 from typing import Optional
 from uuid import uuid4
 
@@ -12,7 +12,6 @@ from api_models.event_source import EventSourceRead
 from api_models.event_status import EventStatusRead
 from api_models.event_type import EventTypeRead
 from api_models.event_vector import EventVectorRead
-from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
 from api_models.node_threat import NodeThreatRead
 from api_models.node_threat_actor import NodeThreatActorRead
@@ -21,7 +20,7 @@ from api_models.metadata_tag import MetadataTagRead
 from api_models.user import UserRead
 
 
-class EventBase(NodeBase):
+class EventBase(BaseModel):
     """Represents a collection of alerts that combine to form an attack."""
 
     alert_time: Optional[datetime] = Field(description="The time of the earliest alert in the event")
@@ -69,8 +68,13 @@ class EventBase(NodeBase):
 
     vectors: list[type_str] = Field(default_factory=list, description="A list of vectors assigned to the event")
 
+    version: UUID4 = Field(
+        default_factory=uuid4,
+        description="""A version string that automatically changes every time the event is modified.""",
+    )
 
-class EventCreate(NodeCreate, EventBase):
+
+class EventCreate(EventBase):
     created_time: datetime = Field(default_factory=datetime.utcnow, description="The time the event was created")
 
     history_username: Optional[type_str] = Field(
@@ -88,7 +92,7 @@ class EventCreate(NodeCreate, EventBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the event")
 
 
-class EventRead(NodeRead, EventBase):
+class EventRead(EventBase):
     alert_uuids: list[UUID4] = Field(default_factory=list, description="A list of alert UUIDs contained in the event")
 
     analysis_types: list[str] = Field(
@@ -158,7 +162,7 @@ class EventRead(NodeRead, EventBase):
         orm_mode = True
 
 
-class EventUpdate(NodeUpdate, EventBase):
+class EventUpdate(EventBase):
     history_username: Optional[type_str] = Field(
         description="If given, an event history record will be created and associated with the user"
     )
@@ -175,8 +179,22 @@ class EventUpdate(NodeUpdate, EventBase):
 
     threats: Optional[list[type_str]] = Field(description="A list of threats to add to the event")
 
+    # The version is optional when updating an event since certain actions in the GUI do not need to care
+    # about the version. However, if the version is given, the update will be rejected if it does not match.
+    version: Optional[UUID4] = Field(
+        description="""A version string that automatically changes every time the event is modified. If supplied,
+        the version must match when updating.""",
+    )
+
     _prevent_none: classmethod = validators.prevent_none("name", "queue", "status", "tags", "threat_actors", "threats")
 
 
 class EventUpdateMultiple(EventUpdate):
     uuid: UUID4 = Field(description="The UUID of the event")
+
+
+class EventVersion(BaseModel):
+    version: UUID4 = Field(description="The current version of the event")
+
+    class Config:
+        orm_mode = True

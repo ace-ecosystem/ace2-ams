@@ -1,11 +1,10 @@
 from datetime import datetime
-from pydantic import Field, UUID4
+from pydantic import BaseModel, Field, UUID4
 from typing import Optional
 from uuid import uuid4
 
 from api_models import type_str, validators
 from api_models.alert_disposition import AlertDispositionRead
-from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
 from api_models.node_comment import NodeCommentRead
 from api_models.metadata_detection_point import MetadataDetectionPointRead
 from api_models.node_threat import NodeThreatRead
@@ -19,7 +18,7 @@ from api_models.metadata_tag import MetadataTagRead
 from api_models.user import UserRead
 
 
-class SubmissionBase(NodeBase):
+class SubmissionBase(BaseModel):
     """Represents a submission, which is an analysis request from the ACE Core or one manually created by an analyst."""
 
     alert: bool = Field(description="Whether or not this submission is an alert", default=False)
@@ -41,8 +40,13 @@ class SubmissionBase(NodeBase):
 
     owner: Optional[type_str] = Field(description="The username of the user who has taken ownership of this submission")
 
+    version: UUID4 = Field(
+        default_factory=uuid4,
+        description="""A version string that automatically changes every time the submission is modified.""",
+    )
 
-class SubmissionCreate(NodeCreate, SubmissionBase):
+
+class SubmissionCreate(SubmissionBase):
     history_username: Optional[type_str] = Field(
         description="If given, a submission history record will be created and associated with the user"
     )
@@ -70,7 +74,7 @@ class SubmissionCreate(NodeCreate, SubmissionBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the submission")
 
 
-class SubmissionRead(NodeRead, SubmissionBase):
+class SubmissionRead(SubmissionBase):
     child_analysis_tags: list[MetadataTagRead] = Field(
         description="A list of tags added to observables by analysis modules", default_factory=list
     )
@@ -136,7 +140,7 @@ class SubmissionRead(NodeRead, SubmissionBase):
         orm_mode = True
 
 
-class SubmissionUpdate(NodeUpdate, SubmissionBase):
+class SubmissionUpdate(SubmissionBase):
     disposition: Optional[type_str] = Field(description="The disposition assigned to this submission")
 
     event_uuid: Optional[UUID4] = Field(description="The UUID of the event containing this submission")
@@ -155,6 +159,13 @@ class SubmissionUpdate(NodeUpdate, SubmissionBase):
 
     uuid: UUID4 = Field(description="The UUID of the submission to update")
 
+    # The version is optional when updating a submission since certain actions in the GUI do not need to care
+    # about the version. However, if the version is given, the update will be rejected if it does not match.
+    version: Optional[UUID4] = Field(
+        description="""A version string that automatically changes every time the submission is modified. If supplied,
+        the version must match when updating.""",
+    )
+
     _prevent_none: classmethod = validators.prevent_none("queue", "tags", "threat_actors", "threats")
 
 
@@ -164,6 +175,13 @@ class SubmissionTreeRead(SubmissionRead):
     children: list[ObservableSubmissionTreeRead] = Field(
         default_factory=list, description="A list of this submission's child observables"
     )
+
+    class Config:
+        orm_mode = True
+
+
+class SubmissionVersion(BaseModel):
+    version: UUID4 = Field(description="The current version of the submission")
 
     class Config:
         orm_mode = True
