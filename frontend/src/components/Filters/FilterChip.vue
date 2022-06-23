@@ -189,7 +189,7 @@
       nodeType: nodeType,
       filterName: props.filterName,
       filterValue: value,
-      isIncluded: false,
+      isIncluded: true,
     });
   }
 

@@ -88,6 +88,7 @@ describe("FilterChip", () => {
       nodeType: "alerts",
       filterName: "name",
       filterValue: "test name",
+      isIncluded: true,
     });
   });
   it("unsets filter if filter name is clicked is clicked", () => {

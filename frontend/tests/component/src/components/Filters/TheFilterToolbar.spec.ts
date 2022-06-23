@@ -95,6 +95,7 @@ describe("TheFilterToolbar", () => {
       nodeType: "alerts",
       filterName: "disposition",
       filterValue: { value: "None" },
+      isIncluded: true,
     }); // set filter
     cy.get('[data-cy="quick-add-filter-panel"]').should("not.exist");
   });
@@ -114,11 +115,14 @@ describe("TheFilterToolbar", () => {
     cy.get("@stub-1").should("have.been.calledOnceWith", {
       nodeType: "alerts",
       filters: {
-        queue: [
-          {
-            value: "external",
-          },
-        ],
+        queue: {
+          included: [
+            {
+              value: "external",
+            },
+          ],
+          notIncluded: [],
+        },
       },
     }); // set filters to defaults
   });

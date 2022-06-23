@@ -42,12 +42,13 @@ describe("FilterChipContainer", () => {
     cy.contains("Owner:").should("be.visible");
     cy.contains("Test Analyst").should("be.visible");
   });
-  it("re-renders whena filter is added", () => {
+  it("re-renders when a filter is added", () => {
     factory({}).then((wrapper) => {
       wrapper.vm.filterStore.setFilter({
         nodeType: "alerts",
         filterName: "name",
         filterValue: "test name",
+        isIncluded: true,
       });
       cy.get("[data-cy=filter-chip]").should("have.length", 1);
       cy.contains("Name:").should("be.visible");

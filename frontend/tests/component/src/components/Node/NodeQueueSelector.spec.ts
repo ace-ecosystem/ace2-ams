@@ -67,6 +67,7 @@ describe("NodeQueueSelector", () => {
       nodeType: "alerts",
       filterName: "queue",
       filterValue: internalQueue,
+      isIncluded: true,
     });
     cy.get("#queue-dropdown").should("have.text", "internal");
   });
@@ -87,6 +88,7 @@ describe("NodeQueueSelector", () => {
       nodeType: "events",
       filterName: "queue",
       filterValue: externalQueue,
+      isIncluded: true,
     });
     cy.get("#queue-dropdown").should("have.text", "external");
   });

@@ -135,7 +135,7 @@ describe("FilterModal", () => {
     cy.get("@spy-1").should("have.been.calledOnceWith", {
       nodeType: "alerts",
       filters: {
-        name: ["test name", "test value 2"],
+        name: { included: ["test name", "test value 2"], notIncluded: [] },
       },
     }); //bulkSetFilters
     cy.get("[data-cy=FilterModal]").should("not.exist");

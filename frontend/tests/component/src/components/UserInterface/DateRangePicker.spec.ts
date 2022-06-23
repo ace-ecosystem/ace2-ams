@@ -71,6 +71,7 @@ describe("DateRangePicker", () => {
       nodeType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 4, 25, 12, 0, 0, 0)),
+      isIncluded: true,
     });
   });
   it("correctly clears the 'start' date filter the clear button is clicked", () => {
@@ -111,6 +112,7 @@ describe("DateRangePicker", () => {
       nodeType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 4, 25, 12, 0, 0, 0)),
+      isIncluded: true,
     });
   });
   it("correctly clears the 'end' date filter the clear button is clicked", () => {
@@ -152,11 +154,13 @@ describe("DateRangePicker", () => {
       nodeType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 2, 29, 0, 0, 0)),
+      isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
       nodeType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 2, 29, 23, 59, 59)),
+      isIncluded: true,
     });
     cy.contains("Today").should("not.exist");
   });
@@ -171,11 +175,13 @@ describe("DateRangePicker", () => {
       nodeType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 2, 28, 0, 0, 0)),
+      isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
       nodeType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 2, 28, 23, 59, 59)),
+      isIncluded: true,
     });
     cy.contains("Yesterday").should("not.exist");
   });
@@ -190,11 +196,13 @@ describe("DateRangePicker", () => {
       nodeType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 2, 22, 0, 0, 0)),
+      isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
       nodeType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 2, 29, 23, 59, 59)),
+      isIncluded: true,
     });
     cy.contains("Last 7 Days").should("not.exist");
   });
@@ -209,11 +217,13 @@ describe("DateRangePicker", () => {
       nodeType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 1, 30, 0, 0, 0)),
+      isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
       nodeType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 2, 29, 23, 59, 59)),
+      isIncluded: true,
     });
     cy.contains("Last 30 Days").should("not.exist");
   });
@@ -228,11 +238,13 @@ describe("DateRangePicker", () => {
       nodeType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 0, 30, 0, 0, 0)),
+      isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
       nodeType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 2, 29, 23, 59, 59)),
+      isIncluded: true,
     });
     cy.contains("Last 60 Days").should("not.exist");
   });
@@ -247,11 +259,13 @@ describe("DateRangePicker", () => {
       nodeType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 2, 0, 0, 0, 0)),
+      isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
       nodeType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 2, 29, 23, 59, 59)),
+      isIncluded: true,
     });
     cy.contains("This Month").should("not.exist");
   });
@@ -266,11 +280,13 @@ describe("DateRangePicker", () => {
       nodeType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 1, 0, 0, 0, 0)),
+      isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
       nodeType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 1, 28, 23, 59, 59)),
+      isIncluded: true,
     });
     cy.contains("Last Month").should("not.exist");
   });
