@@ -18,7 +18,6 @@ from api_models.observable import ObservableSubmissionTreeRead, ObservableRead, 
 from db.database import Base
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_metadata import AnalysisMetadata
-from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.node import Node
@@ -81,8 +80,6 @@ class Observable(Node, HasHistory):
     )
 
     tags: list[MetadataTag] = relationship("MetadataTag", secondary=observable_tag_mapping, lazy="selectin")
-
-    time = Column(DateTime(timezone=True), server_default=utcnow(), nullable=False)
 
     type = relationship("ObservableType", lazy="selectin")
 
