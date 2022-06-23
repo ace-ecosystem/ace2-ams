@@ -10,8 +10,8 @@ from api_models.threat import ThreatCreate, ThreatRead, ThreatUpdate
 
 
 router = APIRouter(
-    prefix="/node/threat",
-    tags=["Node Threat"],
+    prefix="/threat",
+    tags=["Threat"],
 )
 
 
@@ -25,7 +25,7 @@ def create_threat(
     request: Request,
     response: Response,
 ):
-    result = db_api.post(path="/node/threat/", payload=json.loads(threat.json()))
+    result = db_api.post(path="/threat/", payload=json.loads(threat.json()))
 
     response.headers["Content-Location"] = request.url_for("get_threat", uuid=result["uuid"])
 
@@ -39,11 +39,11 @@ helpers.api_route_create(router, create_threat)
 
 
 def get_threat(uuid: UUID):
-    return db_api.get(path=f"/node/threat/{uuid}")
+    return db_api.get(path=f"/threat/{uuid}")
 
 
 def get_all_threats(limit: Optional[int] = Query(50, le=100), offset: Optional[int] = Query(0)):
-    return db_api.get(path=f"/node/threat/?limit={limit}&offset={offset}")
+    return db_api.get(path=f"/threat/?limit={limit}&offset={offset}")
 
 
 helpers.api_route_read(router, get_threat, ThreatRead)
@@ -62,7 +62,7 @@ def update_threat(
     response: Response,
 ):
     db_api.patch(
-        path=f"/node/threat/{uuid}",
+        path=f"/threat/{uuid}",
         payload=json.loads(threat.json(exclude_unset=True)),
     )
 

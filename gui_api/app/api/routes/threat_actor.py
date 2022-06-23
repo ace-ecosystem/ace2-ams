@@ -7,8 +7,8 @@ from api_models.threat_actor import ThreatActorRead
 
 
 router = APIRouter(
-    prefix="/node/threat_actor",
-    tags=["Node Threat Actor"],
+    prefix="/threat_actor",
+    tags=["Threat Actor"],
 )
 
 
@@ -18,7 +18,7 @@ router = APIRouter(
 
 
 def get_all_threat_actors(limit: Optional[int] = Query(50, le=100), offset: Optional[int] = Query(0)):
-    return db_api.get(path=f"/node/threat_actor/?limit={limit}&offset={offset}")
+    return db_api.get(path=f"/threat_actor/?limit={limit}&offset={offset}")
 
 
 helpers.api_route_read_all(router, get_all_threat_actors, ThreatActorRead)

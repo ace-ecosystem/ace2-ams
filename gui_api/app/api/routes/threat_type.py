@@ -7,8 +7,8 @@ from api_models.threat_type import ThreatTypeRead
 
 
 router = APIRouter(
-    prefix="/node/threat/type",
-    tags=["Node Threat Type"],
+    prefix="/threat/type",
+    tags=["Threat Type"],
 )
 
 
@@ -18,7 +18,7 @@ router = APIRouter(
 
 
 def get_all_threat_types(limit: Optional[int] = Query(50, le=100), offset: Optional[int] = Query(0)):
-    return db_api.get(path=f"/node/threat/type/?limit={limit}&offset={offset}")
+    return db_api.get(path=f"/threat/type/?limit={limit}&offset={offset}")
 
 
 helpers.api_route_read_all(router, get_all_threat_types, ThreatTypeRead)
