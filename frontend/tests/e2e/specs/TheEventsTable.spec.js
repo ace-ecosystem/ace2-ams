@@ -600,7 +600,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
   });
 
-  it("successfully updates a comment using NodeCommentEditor", () => {
+  it("successfully updates a comment using CommentEditor", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
@@ -658,7 +658,7 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       .eq(0)
       .should("have.text", "(Analyst) Updated comment");
   });
-  it("successfully creates a new threat or updates using NodeThreatSelector", () => {
+  it("successfully creates a new threat or updates using ThreatSelector", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",

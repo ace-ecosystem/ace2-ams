@@ -18,7 +18,7 @@
 
   const router = useRouter();
   const objectType = inject("objectType") as "alerts" | "events";
-  const nodeRoutes = {
+  const objectRoutes = {
     alerts: "/manage_alerts",
     events: "/manage_events",
   };
@@ -27,7 +27,7 @@
 
   const props = defineProps({
     tag: { type: Object as PropType<metadataTagRead>, required: true },
-    overrideNodeType: {
+    overrideObjectType: {
       type: String as PropType<"alerts" | "events">,
       required: false,
       default: null,
@@ -35,13 +35,13 @@
   });
 
   function filterByTags() {
-    const preferredNodeType = props.overrideNodeType
-      ? props.overrideNodeType
+    const preferredObjectType = props.overrideObjectType
+      ? props.overrideObjectType
       : objectType;
-    const route = nodeRoutes[preferredNodeType];
+    const route = objectRoutes[preferredObjectType];
     if (route) {
       filterStore.bulkSetFilters({
-        objectType: preferredNodeType,
+        objectType: preferredObjectType,
         filters: {
           tags: [[props.tag.value]],
         },

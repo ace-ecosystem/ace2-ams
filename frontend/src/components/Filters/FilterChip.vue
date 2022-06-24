@@ -51,14 +51,14 @@
         resetFilterModel();
       "
     >
-      <NodePropertyInput
+      <ObjectPropertyInput
         v-model="filterModel"
         :fixed-property-type="true"
         :allow-delete="false"
         form-type="filter"
         :queue="queue"
       >
-      </NodePropertyInput>
+      </ObjectPropertyInput>
       <Button
         data-cy="filter-chip-submit-button"
         name="update-filter"
@@ -86,7 +86,7 @@
   import Chip from "primevue/chip";
   import OverlayPanel from "primevue/overlaypanel";
 
-  import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
+  import ObjectPropertyInput from "@/components/Objects/ObjectPropertyInput.vue";
   import { alertFilterValues } from "@/models/alert";
   import { eventFilterValues } from "@/models/event";
 

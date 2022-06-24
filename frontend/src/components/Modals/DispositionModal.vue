@@ -32,9 +32,9 @@
           cols="30"
           placeholder="Add a comment..."
         />
-        <NodeCommentAutocomplete
+        <CommentAutocomplete
           @comment-clicked="recentCommentClicked($event)"
-        ></NodeCommentAutocomplete>
+        ></CommentAutocomplete>
       </div>
     </div>
 
@@ -70,8 +70,8 @@
   import SaveToEventModal from "@/components/Modals/SaveToEventModal.vue";
   import AlertDispositionTag from "@/components/Alerts/AlertDispositionTag.vue";
 
-  import { NodeComment } from "@/services/api/nodeComment";
-  import NodeCommentAutocomplete from "@/components/Node/NodeCommentAutocomplete.vue";
+  import { Comment } from "@/services/api/comment";
+  import CommentAutocomplete from "@/components/Comments/CommentAutocomplete.vue";
 
   import { useAlertDispositionStore } from "@/stores/alertDisposition";
   import { useAlertStore } from "@/stores/alert";
@@ -81,7 +81,7 @@
   import { useRecentCommentsStore } from "@/stores/recentComments";
 
   import { alertDispositionRead } from "@/models/alertDisposition";
-  import { nodeCommentCreate } from "@/models/nodeComment";
+  import { commentCreate } from "@/models/comment";
 
   const alertDispositionStore = useAlertDispositionStore();
   const alertStore = useAlertStore();
@@ -113,14 +113,14 @@
       await alertStore.update(updateData);
 
       if (dispositionComment.value) {
-        const commentCreateData: nodeCommentCreate[] =
+        const commentCreateData: commentCreate[] =
           selectedAlertStore.selected.map((uuid) => ({
             username: authStore.user.username,
-            nodeUuid: uuid,
+            objectUuid: uuid,
             value: dispositionComment.value!,
           }));
         if (commentCreateData) {
-          await NodeComment.create(commentCreateData);
+          await Comment.create(commentCreateData);
         }
       }
     } catch (e: unknown) {

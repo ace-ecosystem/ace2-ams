@@ -45,9 +45,9 @@
                   cols="30"
                 />
                 <label for="newEventComment">Event Comment</label>
-                <NodeCommentAutocomplete
+                <CommentAutocomplete
                   @comment-clicked="recentCommentClicked($event)"
-                ></NodeCommentAutocomplete>
+                ></CommentAutocomplete>
               </span>
             </div>
           </div>
@@ -101,10 +101,10 @@
   import Textarea from "primevue/textarea";
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
-  import NodeCommentAutocomplete from "@/components/Node/NodeCommentAutocomplete.vue";
+  import CommentAutocomplete from "@/components/Comments/CommentAutocomplete.vue";
 
   import { Event } from "@/services/api/event";
-  import { NodeComment } from "@/services/api/nodeComment";
+  import { Comment } from "@/services/api/comment";
   import { parseEventSummary } from "@/stores/eventTable";
 
   import { useAlertStore } from "@/stores/alert";
@@ -225,13 +225,13 @@
         const newCommentData = [
           {
             username: authStore.user.username,
-            nodeUuid: eventUuid,
+            objectUuid: eventUuid,
             ...commentData.value,
           },
         ];
 
         try {
-          await NodeComment.create(newCommentData);
+          await Comment.create(newCommentData);
         } catch (e: unknown) {
           if (typeof e === "string") {
             if (e.includes("409")) {

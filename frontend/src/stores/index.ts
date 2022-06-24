@@ -5,15 +5,15 @@ import { useEventTableStore } from "./eventTable";
 import { useSelectedAlertStore } from "./selectedAlert";
 import { useSelectedEventStore } from "./selectedEvent";
 
-export const nodeStores = {
+export const objectStores = {
   alerts: useAlertStore,
   events: useEventStore,
 };
-export const nodeTableStores = {
+export const objectTableStores = {
   alerts: useAlertTableStore,
   events: useEventTableStore,
 };
-export const nodeSelectedStores = {
+export const objectSelectedStores = {
   alerts: useSelectedAlertStore,
   events: useSelectedEventStore,
 };

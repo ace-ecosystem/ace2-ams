@@ -48,9 +48,9 @@
   import BaseModal from "@/components/Modals/BaseModal.vue";
 
   import {
-    nodeStores,
-    nodeSelectedStores,
-    nodeTableStores,
+    objectStores,
+    objectSelectedStores,
+    objectTableStores,
   } from "@/stores/index";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
@@ -73,13 +73,13 @@
     },
   });
 
-  let nodeStore: any;
+  let objectStore: any;
   let tableStore: any;
   let selectedStore: any;
   if (!(props.objectType === "observable")) {
-    nodeStore = nodeStores[props.objectType]();
-    selectedStore = nodeSelectedStores[props.objectType]();
-    tableStore = nodeTableStores[props.objectType]();
+    objectStore = objectStores[props.objectType]();
+    selectedStore = objectSelectedStores[props.objectType]();
+    tableStore = objectTableStores[props.objectType]();
   }
 
   const authStore = useAuthStore();
@@ -96,8 +96,8 @@
   const initTagOptions = async () => {
     if (props.objectType === "observable" && props.observable) {
       tagOptions.value = props.observable.tags;
-    } else if (props.reloadObject == "node") {
-      tagOptions.value = nodeStore.open.tags;
+    } else if (props.reloadObject == "object") {
+      tagOptions.value = objectStore.open.tags;
     } else {
       try {
         await metadataTagStore.readAll();
@@ -145,16 +145,16 @@
       historyUsername: authStore.user.username,
     }));
 
-    await nodeStore.update(updateData);
+    await objectStore.update(updateData);
   };
 
   const existingTagValues = (uuid: string) => {
     let tags: metadataTagRead[] = [];
     if (props.reloadObject == "table") {
-      const node = tableStore.visibleQueriedItemById(uuid);
-      tags = node ? node.tags : [];
-    } else if (props.reloadObject == "node") {
-      tags = nodeStore.open.tags;
+      const object = tableStore.visibleQueriedItemById(uuid);
+      tags = object ? object.tags : [];
+    } else if (props.reloadObject == "object") {
+      tags = objectStore.open.tags;
     }
     return tags.map((tag) => tag.value);
   };

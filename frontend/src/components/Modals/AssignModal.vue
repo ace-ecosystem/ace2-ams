@@ -49,7 +49,7 @@
   import BaseModal from "@/components/Modals/BaseModal.vue";
 
   import { useAuthStore } from "@/stores/auth";
-  import { nodeSelectedStores, nodeStores } from "@/stores/index";
+  import { objectSelectedStores, objectStores } from "@/stores/index";
   import { useModalStore } from "@/stores/modal";
   import { useUserStore } from "@/stores/user";
 
@@ -62,8 +62,8 @@
   const objectType = inject("objectType") as "events" | "alerts";
 
   const authStore = useAuthStore();
-  const selectedStore = nodeSelectedStores[objectType]();
-  const nodeStore = nodeStores[objectType]();
+  const selectedStore = objectSelectedStores[objectType]();
+  const objectStore = objectStores[objectType]();
   const modalStore = useModalStore();
   const userStore = useUserStore();
 
@@ -81,7 +81,7 @@
         historyUsername: authStore.user.username,
       }));
 
-      await nodeStore.update(updateData);
+      await objectStore.update(updateData);
     } catch (e: unknown) {
       if (typeof e === "string") {
         error.value = e;

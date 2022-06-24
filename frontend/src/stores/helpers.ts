@@ -14,9 +14,9 @@ import { useEventTypeStore } from "./eventType";
 import { useEventVectorStore } from "./eventVector";
 import { useFilterStore } from "./filter";
 import { useMetadataDirectiveStore } from "./metadataDirective";
-import { useNodeThreatStore } from "./nodeThreat";
-import { useNodeThreatActorStore } from "./nodeThreatActor";
-import { useNodeThreatTypeStore } from "./nodeThreatType";
+import { useThreatStore } from "./threat";
+import { useThreatActorStore } from "./threatActor";
+import { useThreatTypeStore } from "./threatType";
 import { useObservableTypeStore } from "./observableType";
 import { useQueueStore } from "./queue";
 import { useUserStore } from "./user";
@@ -62,9 +62,9 @@ export async function populateEventStores(): Promise<void> {
   const eventSeverityStore = useEventSeverityStore();
   const eventStatusStore = useEventStatusStore();
   const eventTypeStore = useEventTypeStore();
-  const nodeThreatActorStore = useNodeThreatActorStore();
-  const nodeThreatStore = useNodeThreatStore();
-  const nodeThreatTypeStore = useNodeThreatTypeStore();
+  const threatActorStore = useThreatActorStore();
+  const threatStore = useThreatStore();
+  const threatTypeStore = useThreatTypeStore();
   const userStore = useUserStore();
   const eventVectorStore = useEventVectorStore();
 
@@ -74,9 +74,9 @@ export async function populateEventStores(): Promise<void> {
     eventRemediationStore.readAll(),
     eventStatusStore.readAll(),
     eventTypeStore.readAll(),
-    nodeThreatActorStore.readAll(),
-    nodeThreatStore.readAll(),
-    nodeThreatTypeStore.readAll(),
+    threatActorStore.readAll(),
+    threatStore.readAll(),
+    threatTypeStore.readAll(),
     eventVectorStore.readAll(),
     userStore.readAll(),
   ]).catch((error) => {

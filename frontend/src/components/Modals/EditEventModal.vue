@@ -21,16 +21,16 @@
           ><span style="font-weight: bold">{{ field.label }}</span></label
         >
         <div class="col" :data-cy="`event-${field.name}-field`">
-          <NodeThreatSelector
+          <ThreatSelector
             v-if="field.name == 'threats'"
             v-model="formFields['threats'].propertyValue"
             :queue="event.queue.value"
-          ></NodeThreatSelector>
-          <NodeCommentEditor
+          ></ThreatSelector>
+          <CommentEditor
             v-else-if="field.name == 'comments'"
             v-model="formFields['comments'].propertyValue"
-          ></NodeCommentEditor>
-          <NodePropertyInput
+          ></CommentEditor>
+          <ObjectPropertyInput
             v-else
             id="field.name"
             v-model="formFields[field.name]"
@@ -67,19 +67,19 @@
   import Message from "primevue/message";
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
-  import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
-  import NodeThreatSelector from "@/components/Node/NodeThreatSelector.vue";
+  import ObjectPropertyInput from "@/components/Objects/ObjectPropertyInput.vue";
+  import ThreatSelector from "@/components/Threat/ThreatSelector.vue";
 
   import { Event } from "@/services/api/event";
   import { useEventStore } from "@/stores/event";
   import { useModalStore } from "@/stores/modal";
   import { isObject } from "@/etc/validators";
-  import NodeCommentEditor from "@/components/Node/NodeCommentEditor.vue";
-  import { NodeComment } from "@/services/api/nodeComment";
+  import CommentEditor from "@/components/Comments/CommentEditor.vue";
+  import { Comment } from "@/services/api/comment";
   import { useAuthStore } from "@/stores/auth";
   import { eventRead, eventUpdate } from "@/models/event";
   import { propertyOption } from "@/models/base";
-  import { nodeCommentRead } from "@/models/nodeComment";
+  import { commentRead } from "@/models/comment";
   import { populateEventStores } from "@/stores/helpers";
   import { useRecentCommentsStore } from "@/stores/recentComments";
 
@@ -164,7 +164,7 @@
       for (const option of availableEditFields[event.value.queue.value]) {
         // Create a lookup by field/option name of all the fieldOptionObjects
         fieldOptionObjects.value[option.name] = option;
-        // Set up all the form field objects (to be used in NodePropertyInput)
+        // Set up all the form field objects (to be used in ObjectPropertyInput)
         formFields.value[option.name] = {
           propertyType: option.name,
           propertyValue: null,
@@ -224,14 +224,14 @@
 
   const saveEventComments = async () => {
     for (const comment of formFields.value["comments"]
-      .propertyValue as nodeCommentRead[]) {
+      .propertyValue as commentRead[]) {
       const commentChanged = originalEvent.value?.comments.find(
         (originalComment) =>
           originalComment.uuid == comment.uuid &&
           originalComment.value != comment.value,
       );
       if (commentChanged) {
-        await NodeComment.update(comment.uuid, {
+        await Comment.update(comment.uuid, {
           username: authStore.user.username,
           value: comment.value,
         });

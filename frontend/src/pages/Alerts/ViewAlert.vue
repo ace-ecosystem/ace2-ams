@@ -8,7 +8,7 @@
   </div>
   <div style="position: sticky; top: 3.5em; z-index: 1">
     <TheAlertActionToolbar
-      reload-object="node"
+      reload-object="object"
       :show-false-positive-shortcut="true"
       :show-ignore-shortcut="true"
       @false-positive-clicked="dispositionAlert('falsePositive')"

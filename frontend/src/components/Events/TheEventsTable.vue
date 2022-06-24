@@ -3,9 +3,9 @@
 <!-- The table where all currently filtered events are displayed, selected to take action, or link to an individual event page -->
 
 <template>
-  <TheNodeTable v-if="columns.length" :key="key" :columns="columns">
+  <TheObjectTable v-if="columns.length" :key="key" :columns="columns">
     <template #tableHeaderStart
-      ><NodeQueueSelector node-queue="events"
+      ><QueueSelector object-queue="events"
     /></template>
 
     <template #rowCell="{ data, field }">
@@ -19,15 +19,15 @@
     <template #rowExpansion="{ data }">
       <EventAlertsTable :event-uuid="data.uuid"></EventAlertsTable>
     </template>
-  </TheNodeTable>
+  </TheObjectTable>
 </template>
 
 <script setup lang="ts">
   import { ref, onMounted, inject } from "vue";
 
   import EventAlertsTable from "./EventAlertsTable.vue";
-  import TheNodeTable from "@/components/Node/TheNodeTable.vue";
-  import NodeQueueSelector from "@/components/Node/NodeQueueSelector.vue";
+  import TheObjectTable from "@/components/Objects/TheObjectTable.vue";
+  import QueueSelector from "@/components/Queues/QueueSelector.vue";
   import EventTableCell from "@/components/Events/EventTableCell.vue";
 
   import { useCurrentUserSettingsStore } from "@/stores/currentUserSettings";

@@ -1,17 +1,17 @@
 // ** Base ** //
 
 import { propertyOption } from "@/models/base";
-import { nodeThreatRead } from "@/models/nodeThreat";
+import { threatRead } from "@/models/threat";
 import { observableTypeRead } from "@/models/observableType";
 import { useMetadataTagStore } from "@/stores/metadataTag";
-import { useNodeThreatStore } from "@/stores/nodeThreat";
-import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
+import { useThreatStore } from "@/stores/threat";
+import { useThreatActorStore } from "@/stores/threatActor";
 import { useObservableTypeStore } from "@/stores/observableType";
 import { useUserStore } from "@/stores/user";
 import { useQueueStore } from "@/stores/queue";
 import { inputTypes } from "./base";
 
-// Property types common between various resources or node types
+// Property types common between various resources or object types
 export const commonPropertyTypes: Record<string, string> = {
   NAME_PROPERTY: "name",
   OBSERVABLE_PROPERTY: "observable",
@@ -31,7 +31,7 @@ export const nameProperty: propertyOption = {
   type: inputTypes.INPUT_TEXT,
 };
 
-export const nodeCommentProperty: propertyOption = {
+export const commentProperty: propertyOption = {
   name: commonPropertyTypes.COMMENTS_PROPERTY,
   label: "Comment",
   type: inputTypes.INPUT_TEXT,
@@ -87,24 +87,24 @@ export const ownerProperty: propertyOption = {
   },
 };
 
-export const nodeThreatActorProperty: propertyOption = {
+export const threatActorProperty: propertyOption = {
   name: commonPropertyTypes.THREAT_ACTOR_PROPERTY,
   label: "Threat Actor",
   type: inputTypes.SELECT,
-  store: useNodeThreatActorStore,
+  store: useThreatActorStore,
   queueDependent: true,
 
   optionProperty: "value",
   valueProperty: "value",
 };
-export const nodeThreatsProperty: propertyOption = {
+export const threatsProperty: propertyOption = {
   name: commonPropertyTypes.THREATS_PROPERTY,
   label: "Threats",
   type: inputTypes.MULTISELECT,
-  store: useNodeThreatStore,
+  store: useThreatStore,
   queueDependent: true,
 
-  stringRepr: (filter: nodeThreatRead[]) => {
+  stringRepr: (filter: threatRead[]) => {
     return filter
       .map(function (elem) {
         return elem.value;

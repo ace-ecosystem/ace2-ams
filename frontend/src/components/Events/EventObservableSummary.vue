@@ -134,11 +134,11 @@
     </Column>
     <Column field="relationships" header="Relationships">
       <template #body="slotProps">
-        <NodeRelationshipVue
+        <ObservableRelationshipVue
           v-for="relationship of slotProps.data.observableRelationships"
           :key="relationship.uuid"
           :type="relationship.type.value"
-          :value="relationship.relatedNode.value"
+          :value="relationship.relatedObservable.value"
         />
       </template>
     </Column>
@@ -148,13 +148,13 @@
           v-for="tag of slotProps.data.tags"
           :key="tag.value"
           :tag="tag"
-          override-node-type="alerts"
+          override-object-type="alerts"
         />
         <MetadataTag
           v-for="tag of slotProps.data.analysisMetadata.tags"
           :key="tag.value"
           :tag="tag"
-          override-node-type="alerts"
+          override-object-type="alerts"
         />
       </template>
     </Column>
@@ -170,7 +170,7 @@
   import InputText from "primevue/inputtext";
   import Message from "primevue/message";
   import MultiSelect from "primevue/multiselect";
-  import NodeRelationshipVue from "@/components/Node/NodeRelationship.vue";
+  import ObservableRelationshipVue from "@/components/Observables/ObservableRelationship.vue";
   import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
   import { Event } from "@/services/api/event";

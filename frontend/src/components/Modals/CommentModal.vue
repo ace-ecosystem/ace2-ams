@@ -18,9 +18,9 @@
           placeholder="Add a comment..."
         />
       </div>
-      <NodeCommentAutocomplete
+      <CommentAutocomplete
         @comment-clicked="recentCommentClicked($event)"
-      ></NodeCommentAutocomplete>
+      ></CommentAutocomplete>
     </div>
     <template #footer>
       <Button
@@ -47,12 +47,12 @@
   import Textarea from "primevue/textarea";
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
-  import NodeCommentAutocomplete from "@/components/Node/NodeCommentAutocomplete.vue";
+  import CommentAutocomplete from "@/components/Comments/CommentAutocomplete.vue";
 
-  import { NodeComment } from "@/services/api/nodeComment";
+  import { Comment } from "@/services/api/comment";
 
   import { useAuthStore } from "@/stores/auth";
-  import { nodeSelectedStores } from "@/stores/index";
+  import { objectSelectedStores } from "@/stores/index";
   import { useModalStore } from "@/stores/modal";
   import { useRecentCommentsStore } from "@/stores/recentComments";
 
@@ -64,7 +64,7 @@
 
   const objectType = inject("objectType") as "alerts" | "events";
   const authStore = useAuthStore();
-  const selectedStore = nodeSelectedStores[objectType]();
+  const selectedStore = objectSelectedStores[objectType]();
   const modalStore = useModalStore();
   const recentCommentsStore = useRecentCommentsStore();
 
@@ -75,10 +75,10 @@
   async function addComment() {
     isLoading.value = true;
     try {
-      await NodeComment.create(
+      await Comment.create(
         selectedStore.selected.map((uuid) => ({
           username: authStore.user.username,
-          nodeUuid: uuid,
+          objectUuid: uuid,
           ...commentData.value,
         })),
       );

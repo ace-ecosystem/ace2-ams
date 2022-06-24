@@ -22,14 +22,14 @@
         style="padding: 1rem"
         @keypress.enter="addFilter"
       >
-        <NodePropertyInput
+        <ObjectPropertyInput
           v-model="filterModel"
           data-cy="filter-input"
           :allow-delete="false"
           form-type="filter"
           :queue="queue"
         >
-        </NodePropertyInput>
+        </ObjectPropertyInput>
         <Button
           data-cy="quick-add-filter-submit-button"
           name="update-filter"
@@ -61,7 +61,7 @@
   import Toolbar from "primevue/toolbar";
   import OverlayPanel from "primevue/overlaypanel";
   import SplitButton from "primevue/splitbutton";
-  import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
+  import ObjectPropertyInput from "@/components/Objects/ObjectPropertyInput.vue";
 
   import { useAuthStore } from "@/stores/auth";
   import { useEventStatusStore } from "@/stores/eventStatus";
@@ -71,7 +71,7 @@
   import { validAlertFilters } from "@/etc/constants/alerts";
   import { validEventFilters } from "@/etc/constants/events";
 
-  import { copyToClipboard, formatNodeFiltersForAPI } from "@/etc/helpers";
+  import { copyToClipboard, formatObjectFiltersForAPI } from "@/etc/helpers";
   import { queueRead } from "@/models/queue";
   import { eventStatusRead } from "@/models/eventStatus";
 
@@ -172,7 +172,7 @@
     // If there are filters set, build the link for it
     if (Object.keys(filterStore[objectType]).length) {
       let urlParams = new URLSearchParams();
-      const formattedParams = formatNodeFiltersForAPI(
+      const formattedParams = formatObjectFiltersForAPI(
         validFilterOptions[objectType],
         filterStore[objectType],
       );

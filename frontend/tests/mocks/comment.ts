@@ -1,4 +1,4 @@
-import { nodeCommentRead } from "@/models/nodeComment";
+import { commentRead } from "@/models/comment";
 import { userReadFactory } from "./user";
 
 export const commentReadFactory = ({
@@ -7,7 +7,7 @@ export const commentReadFactory = ({
   user = userReadFactory(),
   uuid = "commentUuid1",
   value = "A test comment",
-}: Partial<nodeCommentRead> = {}): nodeCommentRead => ({
+}: Partial<commentRead> = {}): commentRead => ({
   insertTime: insertTime,
   nodeUuid: nodeUuid,
   user: user,

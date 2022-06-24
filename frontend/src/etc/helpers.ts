@@ -211,7 +211,7 @@ export function parseFilters(
   return parsedFilters;
 }
 
-export function formatNodeFiltersForAPI(
+export function formatObjectFiltersForAPI(
   availableFilters: readonly propertyOption[],
   params: alertFilterParams | eventFilterParams,
 ): Record<string, string> | Record<string, number> {
@@ -219,7 +219,7 @@ export function formatNodeFiltersForAPI(
   for (const param in params) {
     let paramValue = params[param] as any;
 
-    //  check if the given param is specific to node and not pageOptionParams, i.e. disposition
+    //  check if the given param is specific to object and not pageOptionParams, i.e. disposition
     const filterType = availableFilters.find((filter) => {
       return filter.name === param;
     });

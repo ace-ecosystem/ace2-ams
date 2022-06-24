@@ -18,11 +18,11 @@ import ToastService from "primevue/toastservice";
 import Tooltip from "primevue/tooltip";
 import { userReadFactory } from "@mocks/user";
 
-import NodeCommentEditor from "@/components/Node/NodeCommentEditor.vue";
-import NodeThreatSelector from "@/components/Node/NodeThreatSelector.vue";
-import { NodeThreat } from "@/services/api/nodeThreat";
-import { NodeThreatActor } from "@/services/api/nodeThreatActor";
-import { NodeThreatType } from "@/services/api/nodeThreatType";
+import CommentEditor from "@/components/Node/CommentEditor.vue";
+import ThreatSelector from "@/components/Node/ThreatSelector.vue";
+import { Threat } from "@/services/api/threat";
+import { ThreatActor } from "@/services/api/threatActor";
+import { ThreatType } from "@/services/api/threatType";
 import { EventPreventionTool } from "@/services/api/eventPreventionTool";
 import { EventRemediation } from "@/services/api/eventRemediation";
 import { EventSeverity } from "@/services/api/eventSeverity";
@@ -79,9 +79,9 @@ describe("EditEventModal", () => {
     ]);
     cy.stub(EventStatus, "readAll").returns([]);
     cy.stub(EventType, "readAll").returns([]);
-    cy.stub(NodeThreatActor, "readAll").returns([]);
-    cy.stub(NodeThreat, "readAll").returns([]);
-    cy.stub(NodeThreatType, "readAll").returns([]);
+    cy.stub(ThreatActor, "readAll").returns([]);
+    cy.stub(Threat, "readAll").returns([]);
+    cy.stub(ThreatType, "readAll").returns([]);
     cy.stub(EventVector, "readAll").returns([]);
     cy.stub(User, "readAll").returns([userReadFactory()]);
   });
@@ -114,11 +114,11 @@ describe("EditEventModal", () => {
         .should("have.text", "Test Analyst");
       // cy.contains("Owner").siblings().eq(0).find('span').should("have.text", "None") // Needs to be fixed
       cy.contains("Comment").should("exist");
-      wrapper.findComponent(NodeCommentEditor);
+      wrapper.findComponent(CommentEditor);
       cy.contains("Prevention Tools").siblings().eq(0).contains("None");
       cy.contains("Remediation").siblings().eq(0).contains("None");
       cy.contains("Threats").should("exist");
-      wrapper.findComponent(NodeThreatSelector);
+      wrapper.findComponent(ThreatSelector);
       cy.contains("Event Time")
         .siblings()
         .eq(0)

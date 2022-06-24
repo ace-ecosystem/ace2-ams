@@ -15,7 +15,7 @@ function factory(props: {
 }) {
   return mount(FilterChip, {
     global: {
-      stubs: { NodePropertyInput: true },
+      stubs: { ObjectPropertyInput: true },
       plugins: [PrimeVue, createCustomCypressPinia(), router],
       provide: {
         objectType: "alerts",
@@ -89,7 +89,7 @@ describe("FilterChip", () => {
     cy.get("@stub-4").should("have.been.calledWith", {
       objectType: "alerts",
       filterName: "name",
-      filterValue: undefined, // This will be undefined because NodePropertyInput is stubbed
+      filterValue: undefined, // This will be undefined because ObjectPropertyInput is stubbed
     });
   });
 });

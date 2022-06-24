@@ -150,10 +150,10 @@ describe("ViewEvent.vue actions", () => {
     cy.intercept("GET", "/api/event/type/?offset=0").as("eventType");
     cy.intercept("GET", "/api/event/vector/?offset=0").as("eventVector");
     cy.intercept("GET", "/api/node/threat_actor/?offset=0").as(
-      "nodeThreatActor",
+      "threatActor",
     );
-    cy.intercept("GET", "/api/node/threat/?offset=0").as("nodeThreat");
-    cy.intercept("GET", "/api/node/threat/type/?offset=0").as("nodeThreatType");
+    cy.intercept("GET", "/api/node/threat/?offset=0").as("threat");
+    cy.intercept("GET", "/api/node/threat/type/?offset=0").as("threatType");
     cy.intercept("GET", "/api/user/?offset=0").as("user");
     cy.intercept("GET", "/api/event/*").as("event");
 
@@ -165,9 +165,9 @@ describe("ViewEvent.vue actions", () => {
       "@eventStatus",
       "@eventType",
       "@eventVector",
-      "@nodeThreatActor",
-      "@nodeThreat",
-      "@nodeThreatType",
+      "@threatActor",
+      "@threat",
+      "@threatType",
       "@user",
     ];
 

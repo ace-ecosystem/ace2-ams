@@ -48,9 +48,9 @@
 
   import { MetadataTag } from "@/services/api/metadataTag";
   import {
-    nodeStores,
-    nodeSelectedStores,
-    nodeTableStores,
+    objectStores,
+    objectSelectedStores,
+    objectTableStores,
   } from "@/stores/index";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
@@ -73,13 +73,13 @@
     },
   });
 
-  let nodeStore: any;
+  let objectStore: any;
   let tableStore: any;
   let selectedStore: any;
   if (!(props.objectType === "observable")) {
-    nodeStore = nodeStores[props.objectType]();
-    selectedStore = nodeSelectedStores[props.objectType]();
-    tableStore = nodeTableStores[props.objectType]();
+    objectStore = objectStores[props.objectType]();
+    selectedStore = objectSelectedStores[props.objectType]();
+    tableStore = objectTableStores[props.objectType]();
   }
 
   const authStore = useAuthStore();
@@ -105,7 +105,7 @@
       if (props.objectType == "observable") {
         await addObservableTags();
       } else {
-        await addNodeTags();
+        await addObjectTags();
       }
     } catch (e: unknown) {
       if (typeof e === "string") {
@@ -122,22 +122,22 @@
     }
   }
 
-  const addNodeTags = async () => {
+  const addObjectTags = async () => {
     const updateData = selectedStore.selected.map((uuid: any) => ({
       uuid: uuid,
       tags: deduped([...getExistingTagValues(uuid), ...formTagValues.value]),
     }));
 
-    await nodeStore.update(updateData);
+    await objectStore.update(updateData);
   };
 
   const getExistingTagValues = (uuid: string) => {
     let tags: metadataTagRead[] = [];
     if (props.reloadObject == "table") {
-      const node = tableStore.visibleQueriedItemById(uuid);
-      tags = node ? node.tags : [];
-    } else if (props.reloadObject == "node") {
-      tags = nodeStore.open.tags;
+      const object = tableStore.visibleQueriedItemById(uuid);
+      tags = object ? object.tags : [];
+    } else if (props.reloadObject == "object") {
+      tags = objectStore.open.tags;
     }
     return tags.map((tag) => tag.value);
   };

@@ -3,7 +3,7 @@ import PrimeVue from "primevue/config";
 
 import CommentModal from "@/components/Modals/CommentModal.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { NodeComment } from "@/services/api/nodeComment";
+import { Comment } from "@/services/api/comment";
 import { userReadFactory } from "@mocks/user";
 
 function factory(args: { selected: string[] } = { selected: [] }) {
@@ -59,8 +59,8 @@ describe("CommentModal", () => {
     factory({ selected: ["uuid"] });
     cy.findAllByText("Add").parent().should("be.disabled");
   });
-  it("correctly makes request to create comment upon adding comment text via NodeCommentAutocomplete and submit", () => {
-    cy.stub(NodeComment, "create")
+  it("correctly makes request to create comment upon adding comment text via CommentAutocomplete and submit", () => {
+    cy.stub(Comment, "create")
       .withArgs([
         {
           username: "analyst",
@@ -80,7 +80,7 @@ describe("CommentModal", () => {
     cy.get("[data-cy=CommentModal]").should("not.exist");
   });
   it("correctly makes request to create comment upon adding comment text and submit", () => {
-    cy.stub(NodeComment, "create")
+    cy.stub(Comment, "create")
       .withArgs([
         {
           username: "analyst",
@@ -98,7 +98,7 @@ describe("CommentModal", () => {
     cy.get("[data-cy=CommentModal]").should("not.exist");
   });
   it("correctly shows error if request to assign owner fails", () => {
-    cy.stub(NodeComment, "create")
+    cy.stub(Comment, "create")
       .withArgs([
         {
           username: "analyst",

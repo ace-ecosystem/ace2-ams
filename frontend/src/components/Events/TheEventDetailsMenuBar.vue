@@ -12,8 +12,8 @@
   <AssignModal name="AssignModal" @request-reload="requestReload" />
   <TagModal
     name="TagModal"
-    reload-object="node"
-    node-type="events"
+    reload-object="object"
+    object-type="events"
     @request-reload="requestReload"
   />
   <EditEventModal

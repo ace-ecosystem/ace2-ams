@@ -9,9 +9,9 @@
     @dialog-close="loadFormFilters"
   >
     <br />
-    <NodeQueueSelector :node-queue="objectType" /> <br />
+    <QueueSelector :object-queue="objectType" /> <br />
     <div class="flex flex-wrap">
-      <NodePropertyInput
+      <ObjectPropertyInput
         v-for="(filter, index) in formFilters"
         :key="index!"
         v-model="formFilters[index]"
@@ -21,7 +21,7 @@
         form-type="filter"
         data-cy="filter-input"
         @delete-form-field="deleteFormFilter(index)"
-      ></NodePropertyInput>
+      ></ObjectPropertyInput>
     </div>
     <template #footer>
       <Button
@@ -54,9 +54,9 @@
 
   import Button from "primevue/button";
 
-  import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
+  import ObjectPropertyInput from "@/components/Objects/ObjectPropertyInput.vue";
   import BaseModal from "@/components/Modals/BaseModal.vue";
-  import NodeQueueSelector from "@/components/Node/NodeQueueSelector.vue";
+  import QueueSelector from "@/components/Queues/QueueSelector.vue";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";

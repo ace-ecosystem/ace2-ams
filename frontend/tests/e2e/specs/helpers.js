@@ -76,9 +76,9 @@ export function openEditEventModal(eventNum = 0) {
   cy.intercept("GET", "/api/event/status/?offset=0").as("eventStatus");
   cy.intercept("GET", "/api/event/type/?offset=0").as("eventType");
   cy.intercept("GET", "/api/event/vector/?offset=0").as("eventVector");
-  cy.intercept("GET", "/api/node/threat_actor/?offset=0").as("nodeThreatActor");
-  cy.intercept("GET", "/api/node/threat/?offset=0").as("nodeThreat");
-  cy.intercept("GET", "/api/node/threat/type/?offset=0").as("nodeThreatType");
+  cy.intercept("GET", "/api/node/threat_actor/?offset=0").as("threatActor");
+  cy.intercept("GET", "/api/node/threat/?offset=0").as("threat");
+  cy.intercept("GET", "/api/node/threat/type/?offset=0").as("threatType");
   cy.intercept("GET", "/api/user/?offset=0").as("user");
   cy.intercept("GET", "/api/event/*").as("event");
 
@@ -93,9 +93,9 @@ export function openEditEventModal(eventNum = 0) {
     "@eventStatus",
     "@eventType",
     "@eventVector",
-    "@nodeThreatActor",
-    "@nodeThreat",
-    "@nodeThreatType",
+    "@threatActor",
+    "@threat",
+    "@threatType",
     "@user",
   ];
 

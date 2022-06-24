@@ -14,7 +14,7 @@ export interface analysisModuleTypeRead extends genericObjectRead {
   version: string;
 }
 
-export interface analysisModuleTypeNodeTreeRead {
+export interface analysisModuleTypeAlertTreeRead {
   uuid: UUID;
   value: string;
 }
