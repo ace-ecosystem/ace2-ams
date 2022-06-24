@@ -18,10 +18,10 @@ function factory(props: {
 }) {
   return mount(FilterChip, {
     global: {
-      stubs: { NodePropertyInput: true },
+      stubs: { ObjectPropertyInput: true },
       plugins: [PrimeVue, createCustomCypressPinia(), router],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
       },
     },
     propsData: props,
@@ -85,7 +85,7 @@ describe("FilterChip", () => {
     });
     cy.contains("test name").click();
     cy.get("@stub-6").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "name",
       filterValue: "test name",
       isIncluded: true,
@@ -98,7 +98,7 @@ describe("FilterChip", () => {
     });
     cy.contains("Name").click();
     cy.get("@stub-5").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "name",
     });
   });
@@ -110,15 +110,15 @@ describe("FilterChip", () => {
     cy.get('[data-cy="filter-chip-edit-button"]').first().click();
     cy.get('[data-cy="filter-chip-submit-button"]').click();
     cy.get("@stub-6").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "name",
       filterValue: "test name",
       isIncluded: true,
     });
     cy.get("@stub-4").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "name",
-      filterValue: undefined, // This will be undefined because NodePropertyInput is stubbed
+      filterValue: undefined, // This will be undefined because ObjectropertyInput is stubbed
       isIncluded: true,
     });
   });

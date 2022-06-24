@@ -5,7 +5,7 @@ from sqlalchemy import and_, func, not_, or_, select
 from sqlalchemy.orm import Load, Session
 from sqlalchemy.sql.selectable import Select
 from typing import Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 from api_models.analysis_details import FAQueueAnalysisDetails, SandboxProcess
 
 from api_models.event import EventCreate, EventUpdate
@@ -33,17 +33,16 @@ from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
 from db.schemas.metadata import Metadata
-from db.schemas.metadata_detection_point import MetadataDetectionPoint
 from db.schemas.metadata_tag import MetadataTag
-from db.schemas.node import Node
-from db.schemas.node_threat import NodeThreat
-from db.schemas.node_threat_actor import NodeThreatActor
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.submission import Submission, SubmissionHistory
 from db.schemas.submission_analysis_mapping import submission_analysis_mapping
+from db.schemas.threat import Threat
+from db.schemas.threat_actor import ThreatActor
 from db.schemas.user import User
+from exceptions.db import VersionMismatch
 
 
 def build_read_all_query(
@@ -95,7 +94,7 @@ def build_read_all_query(
 ):
     def _join_as_subquery(query: Select, subquery: Select):
         s = subquery.subquery()
-        return query.join(s, Event.uuid == s.c.uuid).group_by(Event.uuid, Node.uuid)
+        return query.join(s, Event.uuid == s.c.uuid).group_by(Event.uuid)
 
     def _none_in_list(values: list):
         return "none" in [v.lower() for v in values]
@@ -292,7 +291,7 @@ def build_read_all_query(
             .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
             .join(ObservableType)
             .having(not_(or_(and_(*sub_type_filters) for sub_type_filters in type_filters)))
-            .group_by(Event.uuid, Node.uuid)
+            .group_by(Event.uuid)
         )
 
         query = _join_as_subquery(query, observable_types_query)
@@ -419,13 +418,7 @@ def build_read_all_query(
             if threat:
                 threat_actor_sub_filters = []
                 for t in threat.split(","):
-                    threat_actor_sub_filters.append(
-                        and_(
-                            ~Event.threat_actors.any(NodeThreatActor.value == t),
-                            ~Event.alerts.any(Submission.threat_actors.any(NodeThreatActor.value == t)),
-                            ~Event.alerts.any(Submission.child_threat_actors.any(NodeThreatActor.value == t)),
-                        )
-                    )
+                    threat_actor_sub_filters.append(~Event.threat_actors.any(ThreatActor.value == t))
 
                 threat_actor_filters.append(or_(*threat_actor_sub_filters))
 
@@ -438,13 +431,7 @@ def build_read_all_query(
             if threat:
                 threat_sub_filters = []
                 for t in threat.split(","):
-                    threat_sub_filters.append(
-                        and_(
-                            ~Event.threats.any(NodeThreat.value == t),
-                            ~Event.alerts.any(Submission.threats.any(NodeThreat.value == t)),
-                            ~Event.alerts.any(Submission.child_threats.any(NodeThreat.value == t)),
-                        )
-                    )
+                    threat_sub_filters.append(~Event.threats.any(Threat.value == t))
 
                 threat_filters.append(or_(*threat_sub_filters))
 
@@ -503,7 +490,7 @@ def build_read_all_query(
             .join(Observable, onclause=Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)
             .join(ObservableType)
             .having(or_(and_(*sub_type_filters) for sub_type_filters in type_filters))
-            .group_by(Event.uuid, Node.uuid)
+            .group_by(Event.uuid)
         )
 
         query = _join_as_subquery(query, observable_types_query)
@@ -640,13 +627,7 @@ def build_read_all_query(
             if threat:
                 threat_actor_sub_filters = []
                 for t in threat.split(","):
-                    threat_actor_sub_filters.append(
-                        or_(
-                            Event.threat_actors.any(NodeThreatActor.value == t),
-                            Event.alerts.any(Submission.threat_actors.any(NodeThreatActor.value == t)),
-                            Event.alerts.any(Submission.child_threat_actors.any(NodeThreatActor.value == t)),
-                        )
-                    )
+                    threat_actor_sub_filters.append(Event.threat_actors.any(ThreatActor.value == t))
 
                 threat_actor_filters.append(and_(*threat_actor_sub_filters))
 
@@ -659,13 +640,7 @@ def build_read_all_query(
             if threat:
                 threat_sub_filters = []
                 for t in threat.split(","):
-                    threat_sub_filters.append(
-                        or_(
-                            Event.threats.any(NodeThreat.value == t),
-                            Event.alerts.any(Submission.threats.any(NodeThreat.value == t)),
-                            Event.alerts.any(Submission.child_threats.any(NodeThreat.value == t)),
-                        )
-                    )
+                    threat_sub_filters.append(Event.threats.any(Threat.value == t))
 
                 threat_filters.append(and_(*threat_sub_filters))
 
@@ -699,7 +674,7 @@ def build_read_all_query(
         # Only sort by event_type if we are not also filtering by event_type
         elif sort_by.lower() == "event_type" and not event_type:
             query = query.outerjoin(EventType, onclause=EventType.uuid == Event.type_uuid).group_by(
-                Event.uuid, Node.uuid, EventType.value
+                Event.uuid, EventType.value
             )
             if order == "asc":
                 query = query.order_by(EventType.value.asc())
@@ -714,9 +689,7 @@ def build_read_all_query(
 
         # Only sort by owner if we are not also filtering by owner
         elif sort_by.lower() == "owner" and not owner:
-            query = query.outerjoin(User, onclause=Event.owner_uuid == User.uuid).group_by(
-                Event.uuid, Node.uuid, User.username
-            )
+            query = query.outerjoin(User, onclause=Event.owner_uuid == User.uuid).group_by(Event.uuid, User.username)
             if order == "asc":
                 query = query.order_by(User.username.asc())
             elif order == "desc":
@@ -725,7 +698,7 @@ def build_read_all_query(
         # Only sort by severity if we are not also filtering by severity
         elif sort_by.lower() == "severity" and not severity:
             query = query.outerjoin(EventSeverity, onclause=EventSeverity.uuid == Event.severity_uuid).group_by(
-                Event.uuid, Node.uuid, EventSeverity.value
+                Event.uuid, EventSeverity.value
             )
             if order == "asc":
                 query = query.order_by(EventSeverity.value.asc())
@@ -735,7 +708,7 @@ def build_read_all_query(
         # Only sort by status if we are not also filtering by status
         elif sort_by.lower() == "status" and not status:
             query = query.join(EventStatus, onclause=EventStatus.uuid == Event.status_uuid).group_by(
-                Event.uuid, Node.uuid, EventStatus.value
+                Event.uuid, EventStatus.value
             )
             if order == "asc":
                 query = query.order_by(EventStatus.value.asc())
@@ -746,8 +719,8 @@ def build_read_all_query(
 
 
 def create_or_read(model: EventCreate, db: Session) -> Event:
-    # Create the new event Node using the data from the request
-    obj: Event = crud.node.create(model=model, db_node_type=Event, db=db, exclude={"alert_uuids", "history_username"})
+    # Create the new event using the data from the request
+    obj = Event(**model.dict(exclude={"alert_uuids", "history_username"}))
 
     # Set the various event properties
     obj.prevention_tools = crud.event_prevention_tool.read_by_values(values=model.prevention_tools, db=db)
@@ -760,6 +733,8 @@ def create_or_read(model: EventCreate, db: Session) -> Event:
     if model.source:
         obj.source = crud.event_source.read_by_value(value=model.source, db=db)
     obj.status = crud.event_status.read_by_value(value=model.status, db=db)
+    obj.threat_actors = crud.threat_actor.read_by_values(values=model.threat_actors, db=db)
+    obj.threats = crud.threat.read_by_values(values=model.threats, db=db)
     if model.type:
         obj.type = crud.event_type.read_by_value(value=model.type, db=db)
     obj.tags = crud.metadata_tag.read_by_values(values=model.tags, db=db)
@@ -773,9 +748,10 @@ def create_or_read(model: EventCreate, db: Session) -> Event:
 
     # Add an event history entry if the history username was given.
     if model.history_username:
-        crud.history.record_node_create_history(
-            record_node=obj,
+        crud.history.record_create_history(
+            history_table=EventHistory,
             action_by=crud.user.read_by_username(username=model.history_username, db=db),
+            record=obj,
             db=db,
         )
 
@@ -996,12 +972,7 @@ def read_summary_detection_point(uuid: UUID, db: Session) -> list[DetectionSumma
                 AnalysisMetadata.analysis_uuid == submission_analysis_mapping.c.analysis_uuid,
             ),
         )
-        .join(
-            Submission,
-            onclause=and_(
-                Submission.uuid == submission_analysis_mapping.c.submission_uuid, Submission.event_uuid == uuid
-            ),
-        )
+        .where(Submission.event_uuid == uuid)
     )
 
     alert_uuid_and_analysis_metadata: list[tuple[UUID, AnalysisMetadata]] = db.execute(query).unique().all()
@@ -1165,11 +1136,23 @@ def read_summary_user(uuid: UUID, db: Session) -> list[UserSummary]:
 
 
 def update(uuid: UUID, model: EventUpdate, db: Session):
-    # Update the Node attributes
-    event, diffs = crud.node.update(model=model, uuid=uuid, db_table=Event, db=db)
+    # Read the current event
+    event = read_by_uuid(uuid=uuid, db=db)
+
+    # Capture all of the diffs that were made (for adding to the history tables)
+    diffs: list[crud.history.Diff] = []
 
     # Get the data that was given in the request and use it to update the database object
     update_data = model.dict(exclude_unset=True)
+
+    # Return an exception if the passed in version does not match the event's current version
+    if "version" in update_data and update_data["version"] != event.version:
+        raise VersionMismatch(
+            f"Event version {update_data['version']} does not match the database version {event.version}"
+        )
+
+    # Update the current version
+    event.version = uuid4()
 
     if "alert_time" in update_data:
         diffs.append(crud.history.create_diff(field="alert_time", old=event.alert_time, new=update_data["alert_time"]))
@@ -1293,6 +1276,28 @@ def update(uuid: UUID, model: EventUpdate, db: Session):
         else:
             event.tags = []
 
+    if "threat_actors" in update_data:
+        diffs.append(
+            crud.history.create_diff(
+                field="threat_actors",
+                old=[x.value for x in event.threat_actors],
+                new=update_data["threat_actors"],
+            )
+        )
+
+        event.threat_actors = crud.threat_actor.read_by_values(values=model.threat_actors, db=db)
+
+    if "threats" in update_data:
+        diffs.append(
+            crud.history.create_diff(
+                field="threats",
+                old=[x.value for x in event.threats],
+                new=update_data["threats"],
+            )
+        )
+
+        event.threats = crud.threat.read_by_values(values=model.threats, db=db)
+
     if "type" in update_data:
         old = event.type.value if event.type else None
         diffs.append(crud.history.create_diff(field="type", old=old, new=update_data["type"]))
@@ -1321,9 +1326,10 @@ def update(uuid: UUID, model: EventUpdate, db: Session):
     # Add an event history entry if the history username was given. This would typically only be
     # supplied by the GUI when an analyst updates an event.
     if model.history_username is not None:
-        crud.history.record_node_update_history(
-            record_node=event,
+        crud.history.record_update_history(
+            history_table=EventHistory,
             action_by=crud.user.read_by_username(username=model.history_username, db=db),
+            record=event,
             diffs=diffs,
             db=db,
         )

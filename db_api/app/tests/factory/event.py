@@ -83,10 +83,10 @@ def create_or_read(
         factory.metadata_tag.create_or_read(value=t, db=db)
 
     for t in threat_actors:
-        factory.node_threat_actor.create_or_read(value=t, queues=[event_queue], db=db)
+        factory.threat_actor.create_or_read(value=t, queues=[event_queue], db=db)
 
     for t in threats:
-        factory.node_threat.create_or_read(value=t, queues=[event_queue], db=db)
+        factory.threat.create_or_read(value=t, queues=[event_queue], db=db)
 
     for v in vectors:
         factory.event_vector.create_or_read(value=v, queues=[event_queue], db=db)

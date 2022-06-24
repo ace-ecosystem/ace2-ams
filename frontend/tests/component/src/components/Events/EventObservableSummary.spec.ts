@@ -62,10 +62,10 @@ describe("EventObservableSummary", () => {
       value: "LowHits",
       observableRelationships: [
         {
-          relatedNode: observableInAlertReadFactory({
+          relatedObservable: observableInAlertReadFactory({
             value: "RelatedObservable",
           }),
-          nodeUuid: "nodeUuid",
+          observableUuid: "observableUuid",
           uuid: "uuid",
           type: genericObjectReadFactory({ value: "TestRelationship" }),
         },

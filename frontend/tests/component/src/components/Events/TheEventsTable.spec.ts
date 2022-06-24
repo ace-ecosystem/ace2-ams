@@ -13,8 +13,8 @@ import {
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { eventRead } from "@/models/event";
 import { eventReadFactory } from "@mocks/events";
-import NodeQueueSelectorVue from "@/components/Node/NodeQueueSelector.vue";
-import { nodeThreatRead } from "@/models/nodeThreat";
+import QueueSelectorVue from "@/components/Queues/QueueSelector.vue";
+import { threatRead } from "@/models/threat";
 import ToastService from "primevue/toastservice";
 
 interface eventTableStoreState {
@@ -59,7 +59,7 @@ function factory(initialState: eventTableStoreState) {
         ToastService,
       ],
       provide: {
-        nodeType: "events",
+        objectType: "events",
         config: testConfiguration,
       },
     },
@@ -70,7 +70,7 @@ describe("TheEventsTable", () => {
   it("renders basic elements correctly", () => {
     factory(initialStateDefault).then((wrapper) => {
       cy.findByRole("table");
-      expect(wrapper.findComponent(NodeQueueSelectorVue)).to.exist;
+      expect(wrapper.findComponent(QueueSelectorVue)).to.exist;
     });
   });
   it("renders when there are no events to show", () => {
@@ -118,7 +118,7 @@ describe("TheEventsTable", () => {
       "None",
     ];
 
-    const threats: nodeThreatRead[] = [
+    const threats: threatRead[] = [
       { ...queueableObjectReadFactory({ value: "ThreatA" }), types: [] },
       { ...queueableObjectReadFactory({ value: "ThreatB" }), types: [] },
     ];

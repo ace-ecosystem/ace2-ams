@@ -3,7 +3,10 @@
 
 <template>
   <div>
-    <TheNodeActionToolbarVue ref="toolbar" :reload-object="props.reloadObject">
+    <TheObjectActionToolbarVue
+      ref="toolbar"
+      :reload-object="props.reloadObject"
+    >
       <template #start-left>
         <!-- FALSE POSITIVE -->
         <Button
@@ -38,7 +41,7 @@
       </template>
       <template #start-right>
         <!-- ADD OBSERVABLES MODAL -->
-        <span v-if="props.reloadObject == 'node'">
+        <span v-if="props.reloadObject == 'object'">
           <Button
             data-cy="add-observable-button"
             class="p-m-1 p-button-sm p-button-secondary p-button-outlined"
@@ -63,7 +66,7 @@
         />
         <RemediationModal />
       </template>
-    </TheNodeActionToolbarVue>
+    </TheObjectActionToolbarVue>
   </div>
 </template>
 
@@ -72,7 +75,7 @@
 
   import Button from "primevue/button";
 
-  import TheNodeActionToolbarVue from "@/components/Node/TheNodeActionToolbar.vue";
+  import TheObjectActionToolbarVue from "@/components/Objects/TheObjectActionToolbar.vue";
   import RemediationModal from "@/components/Modals/RemediateModal.vue";
   import DispositionModal from "@/components/Modals/DispositionModal.vue";
   import AddObservablesModal from "@/components/Modals/AddObservablesModal.vue";
@@ -83,7 +86,7 @@
 
   const props = defineProps({
     reloadObject: {
-      type: String as PropType<"table" | "node">,
+      type: String as PropType<"table" | "object">,
       required: true,
     },
     showFalsePositiveShortcut: {
@@ -99,7 +102,7 @@
     modalStore.open(name);
   };
 
-  const toolbar = ref<InstanceType<typeof TheNodeActionToolbarVue>>();
+  const toolbar = ref<InstanceType<typeof TheObjectActionToolbarVue>>();
   const requestReload = () => {
     toolbar.value?.requestReload();
   };

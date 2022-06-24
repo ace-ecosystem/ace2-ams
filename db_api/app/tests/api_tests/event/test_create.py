@@ -3,7 +3,7 @@ import uuid
 
 from fastapi import status
 
-from tests.api_tests.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
+from tests.api_tests.helpers import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import factory
 
 
@@ -89,7 +89,7 @@ def test_create_invalid_fields(client, key, value):
         ("threats", INVALID_LIST_STRING_VALUES),
     ],
 )
-def test_create_invalid_node_fields(client, key, values):
+def test_create_invalid_list_fields(client, key, values):
     for value in values:
         create = client.post("/api/event/", json={key: value, "name": "test", "queue": "external", "status": "OPEN"})
         assert create.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -191,7 +191,7 @@ def test_create_nonexistent_vectors(client, db):
     "key",
     [("tags"), ("threat_actors"), ("threats")],
 )
-def test_create_nonexistent_node_fields(client, db, key):
+def test_create_nonexistent_list_fields(client, db, key):
     factory.event_status.create_or_read(value="OPEN", db=db)
 
     create = client.post("/api/event/", json={key: ["abc"], "name": "test", "queue": "external", "status": "OPEN"})
@@ -403,11 +403,11 @@ def test_create_valid_required_fields(client, db):
     "key,value_lists,helper_create_func",
     [
         ("tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
-        ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
-        ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
+        ("threat_actors", VALID_LIST_STRING_VALUES, factory.threat_actor.create_or_read),
+        ("threats", VALID_LIST_STRING_VALUES, factory.threat.create_or_read),
     ],
 )
-def test_create_valid_node_fields(client, db, key, value_lists, helper_create_func):
+def test_create_valid_list_fields(client, db, key, value_lists, helper_create_func):
     for value_list in value_lists:
         for value in value_list:
             helper_create_func(value=value, db=db)

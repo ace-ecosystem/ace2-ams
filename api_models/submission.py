@@ -1,17 +1,14 @@
 from datetime import datetime
-from pydantic import Field, UUID4
+from pydantic import BaseModel, Field, UUID4
 from typing import Optional
 from uuid import uuid4
 
 from api_models import type_str, validators
 from api_models.alert_disposition import AlertDispositionRead
-from api_models.node import NodeBase, NodeCreate, NodeRead, NodeUpdate
-from api_models.node_comment import NodeCommentRead
 from api_models.metadata_detection_point import MetadataDetectionPointRead
-from api_models.node_threat import NodeThreatRead
-from api_models.node_threat_actor import NodeThreatActorRead
 from api_models.observable import ObservableCreateInSubmission, ObservableSubmissionTreeRead
 from api_models.queue import QueueRead
+from api_models.submission_comment import SubmissionCommentRead
 from api_models.submission_tool import SubmissionToolRead
 from api_models.submission_tool_instance import SubmissionToolInstanceRead
 from api_models.submission_type import SubmissionTypeRead
@@ -19,7 +16,7 @@ from api_models.metadata_tag import MetadataTagRead
 from api_models.user import UserRead
 
 
-class SubmissionBase(NodeBase):
+class SubmissionBase(BaseModel):
     """Represents a submission, which is an analysis request from the ACE Core or one manually created by an analyst."""
 
     alert: bool = Field(description="Whether or not this submission is an alert", default=False)
@@ -41,8 +38,13 @@ class SubmissionBase(NodeBase):
 
     owner: Optional[type_str] = Field(description="The username of the user who has taken ownership of this submission")
 
+    version: UUID4 = Field(
+        default_factory=uuid4,
+        description="""A version string that automatically changes every time the submission is modified.""",
+    )
 
-class SubmissionCreate(NodeCreate, SubmissionBase):
+
+class SubmissionCreate(SubmissionBase):
     history_username: Optional[type_str] = Field(
         description="If given, a submission history record will be created and associated with the user"
     )
@@ -55,12 +57,6 @@ class SubmissionCreate(NodeCreate, SubmissionBase):
 
     tags: list[type_str] = Field(default_factory=list, description="A list of tags to add to the submission")
 
-    threat_actors: list[type_str] = Field(
-        default_factory=list, description="A list of threat actors to add to the submission"
-    )
-
-    threats: list[type_str] = Field(default_factory=list, description="A list of threats to add to the submission")
-
     tool: Optional[type_str] = Field(description="The tool that created this submission")
 
     tool_instance: Optional[type_str] = Field(description="The instance of the tool that created this submission")
@@ -70,26 +66,19 @@ class SubmissionCreate(NodeCreate, SubmissionBase):
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the submission")
 
 
-class SubmissionRead(NodeRead, SubmissionBase):
+class SubmissionRead(SubmissionBase):
     child_analysis_tags: list[MetadataTagRead] = Field(
         description="A list of tags added to observables by analysis modules", default_factory=list
     )
 
     child_detection_points: list[MetadataDetectionPointRead] = Field(
-        description="A list of detection points added to child Nodes in the submission's tree", default_factory=list
+        description="A list of detection points added to child observables in the submission's tree",
+        default_factory=list,
     )
 
     child_tags: list[MetadataTagRead] = Field(description="A list of tags added to observables", default_factory=list)
 
-    child_threat_actors: list[NodeThreatActorRead] = Field(
-        description="A list of threat actors added to child Nodes in the submission's tree", default_factory=list
-    )
-
-    child_threats: list[NodeThreatRead] = Field(
-        description="A list of threats added to child Nodes in the submission's tree", default_factory=list
-    )
-
-    comments: list[NodeCommentRead] = Field(
+    comments: list[SubmissionCommentRead] = Field(
         description="A list of comments added to the submission", default_factory=list
     )
 
@@ -103,6 +92,9 @@ class SubmissionRead(NodeRead, SubmissionBase):
 
     name: type_str = Field(description="""The name of the submission""")
 
+    # Set a static string value so code displaying the tree structure knows which type of object this is.
+    object_type: str = "submission"
+
     owner: Optional[UserRead] = Field(description="The user who has taken ownership of this submission")
 
     ownership_time: Optional[datetime] = Field(
@@ -112,12 +104,6 @@ class SubmissionRead(NodeRead, SubmissionBase):
     queue: QueueRead = Field(description="The queue containing this submission")
 
     tags: list[MetadataTagRead] = Field(description="A list of tags added to the submission", default_factory=list)
-
-    threat_actors: list[NodeThreatActorRead] = Field(
-        description="A list of threat actors added to the submission", default_factory=list
-    )
-
-    threats: list[NodeThreatRead] = Field(description="A list of threats added to the submission", default_factory=list)
 
     tool: Optional[SubmissionToolRead] = Field(description="The tool that created this submission")
 
@@ -133,7 +119,7 @@ class SubmissionRead(NodeRead, SubmissionBase):
         orm_mode = True
 
 
-class SubmissionUpdate(NodeUpdate, SubmissionBase):
+class SubmissionUpdate(SubmissionBase):
     disposition: Optional[type_str] = Field(description="The disposition assigned to this submission")
 
     event_uuid: Optional[UUID4] = Field(description="The UUID of the event containing this submission")
@@ -146,13 +132,16 @@ class SubmissionUpdate(NodeUpdate, SubmissionBase):
 
     tags: Optional[list[type_str]] = Field(description="A list of tags to add to the submission")
 
-    threat_actors: Optional[list[type_str]] = Field(description="A list of threat actors to add to the submission")
-
-    threats: Optional[list[type_str]] = Field(description="A list of threats to add to the submission")
-
     uuid: UUID4 = Field(description="The UUID of the submission to update")
 
-    _prevent_none: classmethod = validators.prevent_none("queue", "tags", "threat_actors", "threats")
+    # The version is optional when updating a submission since certain actions in the GUI do not need to care
+    # about the version. However, if the version is given, the update will be rejected if it does not match.
+    version: Optional[UUID4] = Field(
+        description="""A version string that automatically changes every time the submission is modified. If supplied,
+        the version must match when updating.""",
+    )
+
+    _prevent_none: classmethod = validators.prevent_none("queue", "tags")
 
 
 class SubmissionTreeRead(SubmissionRead):
@@ -161,6 +150,13 @@ class SubmissionTreeRead(SubmissionRead):
     children: list[ObservableSubmissionTreeRead] = Field(
         default_factory=list, description="A list of this submission's child observables"
     )
+
+    class Config:
+        orm_mode = True
+
+
+class SubmissionVersion(BaseModel):
+    version: UUID4 = Field(description="The current version of the submission")
 
     class Config:
         orm_mode = True

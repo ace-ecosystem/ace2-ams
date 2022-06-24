@@ -5,7 +5,7 @@ from uuid import UUID
 
 from api.routes import helpers
 from api_models.history import ObservableHistoryRead
-from api_models.observable import ObservableCreate, ObservableRead, ObservableUpdate
+from api_models.observable import ObservableCreate, ObservableRead, ObservableUpdate, ObservableVersion
 from db import crud
 from db.database import get_db
 from db.schemas.observable import Observable, ObservableHistory
@@ -66,9 +66,17 @@ def get_observable_history(uuid: UUID, db: Session = Depends(get_db)):
     )
 
 
+def get_observable_version(uuid: UUID, db: Session = Depends(get_db)):
+    try:
+        return crud.observable.read_by_uuid(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+
 helpers.api_route_read_all(router, get_all_observables, ObservableRead)
 helpers.api_route_read(router, get_observable, ObservableRead)
 helpers.api_route_read_all(router, get_observable_history, ObservableHistoryRead, path="/{uuid}/history")
+helpers.api_route_read(router, get_observable_version, ObservableVersion, path="/{uuid}/version")
 
 
 #

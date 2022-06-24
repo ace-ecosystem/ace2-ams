@@ -3,10 +3,21 @@ import PrimeVue from "primevue/config";
 
 import CommentModal from "@/components/Modals/CommentModal.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
-import { NodeComment } from "@/services/api/nodeComment";
+import { AlertComment } from "@/services/api/alertComment";
+import { EventComment } from "@/services/api/eventComment";
 import { userReadFactory } from "@mocks/user";
 
-function factory(args: { selected: string[] } = { selected: [] }) {
+function factory(
+  args: {
+    objectType: "alerts" | "events";
+    selectedAlertStore?: { selected: string[] };
+    selectedEventStore?: { selected: string[] };
+  } = {
+    objectType: "alerts",
+    selectedAlertStore: { selected: [] },
+    selectedEventStore: { selected: [] },
+  },
+) {
   return mount(CommentModal, {
     global: {
       plugins: [
@@ -17,9 +28,8 @@ function factory(args: { selected: string[] } = { selected: [] }) {
             authStore: {
               user: userReadFactory(),
             },
-            selectedAlertStore: {
-              selected: args.selected,
-            },
+            selectedAlertStore: args.selectedAlertStore,
+            selectedEventStore: args.selectedEventStore,
             recentCommentsStore: {
               recentComments: ["test"],
             },
@@ -27,7 +37,7 @@ function factory(args: { selected: string[] } = { selected: [] }) {
         }),
       ],
       provide: {
-        nodeType: "alerts",
+        objectType: args.objectType,
       },
     },
     propsData: {
@@ -44,33 +54,42 @@ function factory(args: { selected: string[] } = { selected: [] }) {
 }
 
 describe("CommentModal", () => {
-  it("allows submit if both at least one node and comment text is added", () => {
-    factory({ selected: ["uuid"] });
+  it("allows submit if both at least one object and comment text is added", () => {
+    factory({
+      objectType: "alerts",
+      selectedAlertStore: { selected: ["uuid"] },
+    });
     cy.findAllByPlaceholderText("Add a comment...").click().type("Testing");
     cy.findAllByText("Add").parent().should("not.be.disabled");
   });
-  it("does not allow submit if no node is selected", () => {
-    factory({ selected: [] });
+  it("does not allow submit if no object is selected", () => {
+    factory({ objectType: "alerts", selectedAlertStore: { selected: [] } });
     cy.findAllByPlaceholderText("Add a comment...").click().type("Testing");
 
     cy.findAllByText("Add").parent().should("be.disabled");
   });
   it("does not allow submit if no comment text is added", () => {
-    factory({ selected: ["uuid"] });
+    factory({
+      objectType: "alerts",
+      selectedAlertStore: { selected: ["uuid"] },
+    });
     cy.findAllByText("Add").parent().should("be.disabled");
   });
-  it("correctly makes request to create comment upon adding comment text via NodeCommentAutocomplete and submit", () => {
-    cy.stub(NodeComment, "create")
+  it("correctly makes request to create alert comment upon adding comment text via CommentAutocomplete and submit", () => {
+    cy.stub(AlertComment, "create")
       .withArgs([
         {
           username: "analyst",
-          nodeUuid: "uuid",
+          submissionUuid: "uuid",
           value: "test extra content",
         },
       ])
       .as("addComment")
       .resolves();
-    factory({ selected: ["uuid"] });
+    factory({
+      objectType: "alerts",
+      selectedAlertStore: { selected: ["uuid"] },
+    });
     cy.get(".p-autocomplete > .p-button").click();
     cy.contains("test").click();
     cy.get(".p-inputtextarea").click().type(" extra content");
@@ -79,18 +98,65 @@ describe("CommentModal", () => {
     cy.get("@spy-10").should("have.been.calledOnceWith", "test extra content"); // Add comment to recentCommentsStore
     cy.get("[data-cy=CommentModal]").should("not.exist");
   });
-  it("correctly makes request to create comment upon adding comment text and submit", () => {
-    cy.stub(NodeComment, "create")
+  it("correctly makes request to create event comment upon adding comment text via CommentAutocomplete and submit", () => {
+    cy.stub(EventComment, "create")
       .withArgs([
         {
           username: "analyst",
-          nodeUuid: "uuid",
+          eventUuid: "uuid",
+          value: "test extra content",
+        },
+      ])
+      .as("addComment")
+      .resolves();
+    factory({
+      objectType: "events",
+      selectedEventStore: { selected: ["uuid"] },
+    });
+    cy.get(".p-autocomplete > .p-button").click();
+    cy.contains("test").click();
+    cy.get(".p-inputtextarea").click().type(" extra content");
+    cy.findByText("Add").click();
+    cy.get("@addComment").should("have.been.calledOnce");
+    cy.get("@spy-10").should("have.been.calledOnceWith", "test extra content"); // Add comment to recentCommentsStore
+    cy.get("[data-cy=CommentModal]").should("not.exist");
+  });
+  it("correctly makes request to create alert comment upon adding comment text and submit", () => {
+    cy.stub(AlertComment, "create")
+      .withArgs([
+        {
+          username: "analyst",
+          submissionUuid: "uuid",
           value: "Testing",
         },
       ])
       .as("addComment")
       .resolves();
-    factory({ selected: ["uuid"] });
+    factory({
+      objectType: "alerts",
+      selectedAlertStore: { selected: ["uuid"] },
+    });
+    cy.findAllByPlaceholderText("Add a comment...").click().type("Testing");
+    cy.findByText("Add").click();
+    cy.get("@addComment").should("have.been.calledOnce");
+    cy.get("@spy-10").should("have.been.calledOnceWith", "Testing"); // Add comment to recentCommentsStore
+    cy.get("[data-cy=CommentModal]").should("not.exist");
+  });
+  it("correctly makes request to create event comment upon adding comment text and submit", () => {
+    cy.stub(EventComment, "create")
+      .withArgs([
+        {
+          username: "analyst",
+          eventUuid: "uuid",
+          value: "Testing",
+        },
+      ])
+      .as("addComment")
+      .resolves();
+    factory({
+      objectType: "events",
+      selectedEventStore: { selected: ["uuid"] },
+    });
     cy.findAllByPlaceholderText("Add a comment...").click().type("Testing");
     cy.findByText("Add").click();
     cy.get("@addComment").should("have.been.calledOnce");
@@ -98,17 +164,20 @@ describe("CommentModal", () => {
     cy.get("[data-cy=CommentModal]").should("not.exist");
   });
   it("correctly shows error if request to assign owner fails", () => {
-    cy.stub(NodeComment, "create")
+    cy.stub(AlertComment, "create")
       .withArgs([
         {
           username: "analyst",
-          nodeUuid: "uuid",
+          submissionUuid: "uuid",
           value: "Testing",
         },
       ])
       .as("addComment")
       .rejects(new Error("404 request failed"));
-    factory({ selected: ["uuid"] });
+    factory({
+      objectType: "alerts",
+      selectedAlertStore: { selected: ["uuid"] },
+    });
     cy.findAllByPlaceholderText("Add a comment...").click().type("Testing");
     cy.findByText("Add").click();
     cy.get("@addComment").should("have.been.calledOnce");

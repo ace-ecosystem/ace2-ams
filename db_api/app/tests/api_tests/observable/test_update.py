@@ -5,7 +5,7 @@ from datetime import datetime
 from dateutil.parser import parse
 from fastapi import status
 
-from tests.api_tests.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
+from tests.api_tests.helpers import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import factory
 
 
@@ -44,11 +44,9 @@ def test_update_invalid_fields(client, key, value):
     "key,values",
     [
         ("tags", INVALID_LIST_STRING_VALUES),
-        ("threat_actors", INVALID_LIST_STRING_VALUES),
-        ("threats", INVALID_LIST_STRING_VALUES),
     ],
 )
-def test_update_invalid_node_fields(client, key, values):
+def test_update_invalid_list_fields(client, key, values):
     for value in values:
         update = client.patch(
             f"/api/observable/{uuid.uuid4()}",
@@ -91,15 +89,15 @@ def test_update_duplicate_type_value(client, db):
 
 @pytest.mark.parametrize(
     "key",
-    [("tags"), ("threat_actors"), ("threats")],
+    [("tags")],
 )
-def test_update_nonexistent_node_fields(client, db, key):
+def test_update_nonexistent_list_fields(client, db, key):
     submission = factory.submission.create(db=db)
     observable = factory.observable.create_or_read(
         type="test_type", value="test", parent_analysis=submission.root_analysis, db=db
     )
 
-    # Make sure you cannot update it to use a nonexistent node field value
+    # Make sure you cannot update it to use a nonexistent list field value
     update = client.patch(f"/api/observable/{observable.uuid}", json={key: ["abc"]})
     assert update.status_code == status.HTTP_404_NOT_FOUND
     assert "abc" in update.text
@@ -147,11 +145,9 @@ def test_update_type(client, db):
     "key,value_lists,helper_create_func",
     [
         ("tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
-        ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
-        ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
     ],
 )
-def test_update_valid_node_fields(client, db, key, value_lists, helper_create_func):
+def test_update_valid_list_fields(client, db, key, value_lists, helper_create_func):
     submission = factory.submission.create(db=db)
 
     for i in range(len(value_lists)):
@@ -161,8 +157,6 @@ def test_update_valid_node_fields(client, db, key, value_lists, helper_create_fu
             type="test_type",
             value=f"test{i}",
             tags=["remove_me"],
-            threat_actors=["remove_me"],
-            threats=["remove_me"],
             parent_analysis=submission.root_analysis,
             db=db,
             history_username="analyst",

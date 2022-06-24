@@ -12,7 +12,7 @@ describe("DeleteModal", () => {
       global: {
         plugins: [PrimeVue, createPinia()],
         provide: {
-          nodeType: "alerts",
+          objectType: "alerts",
         },
       },
       propsData: {

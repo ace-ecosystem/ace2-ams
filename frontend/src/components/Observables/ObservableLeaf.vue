@@ -2,7 +2,7 @@
   <span>
     <Toast data-cy="observable-action-error" />
     <span
-      class="treenode-text leaf-element"
+      class="treeleaf-text leaf-element"
       :style="style"
       @click="filterByObservable(observable)"
       >{{ displayValue }}
@@ -59,8 +59,8 @@
         :is="component"
         :name="componentName"
         :observable="observable"
-        node-type="observable"
-        reload-object="node"
+        object-type="observable"
+        reload-object="object"
         @request-reload="reload"
       ></component>
     </span>
@@ -271,7 +271,7 @@
 
   const filterByObservable = (obs: observableTreeRead) => {
     filterStore.bulkSetFilters({
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         observable: {
           included: [
@@ -310,7 +310,7 @@
   };
 </script>
 <style scoped>
-  .treenode-text:hover {
+  .treeleaf-text:hover {
     cursor: pointer;
     text-decoration: underline;
     font-weight: bold;

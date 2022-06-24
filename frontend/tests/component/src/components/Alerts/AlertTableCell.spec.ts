@@ -6,7 +6,7 @@ import AlertTableCell from "@/components/Alerts/AlertTableCell.vue";
 
 import { alertSummary } from "@/models/alert";
 import { alertSummaryFactory } from "@mocks/alert";
-import { commentReadFactory } from "@mocks/comment";
+import { alertCommentReadFactory } from "@mocks/comment";
 import { testConfiguration } from "@/etc/configuration/test";
 
 import router from "@/router/index";
@@ -19,7 +19,7 @@ interface AlertTableCellProps {
 
 const mockAlert: alertSummary = alertSummaryFactory({
   name: "Test",
-  comments: [commentReadFactory({ value: "Test comment" })],
+  comments: [alertCommentReadFactory({ value: "Test comment" })],
   tags: [metadataTagReadFactory({ value: "testTag" })],
 });
 
@@ -36,7 +36,7 @@ function factory(
   return mount(AlertTableCell, {
     global: {
       plugins: [createPinia(), PrimeVue, router],
-      provide: { nodeType: "alerts", config: testConfiguration },
+      provide: { objectType: "alerts", config: testConfiguration },
     },
     propsData: args.props,
   });

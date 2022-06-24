@@ -26,11 +26,11 @@ describe("filters Actions", () => {
     localStorage.removeItem("aceFilters");
   });
 
-  it("will set the given nodeTypes filter object to the given filter object argument upon the bulkSetFilters action", () => {
+  it("will set the given objectTypes filter object to the given filter object argument upon the bulkSetFilters action", () => {
     expect(localStorage.getItem("aceFilters")).toEqual(null);
 
     store.bulkSetFilters({
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         testFilterName: {
           included: ["testFilterValue"],
@@ -57,7 +57,7 @@ describe("filters Actions", () => {
 
   it("will skip falsy/empty given filterValues upon the bulkSetFilters action", () => {
     store.bulkSetFilters({
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         testFilterName: { included: [""], notIncluded: [""] },
         testFilterName2: { included: [[]], notIncluded: [[]] },
@@ -85,7 +85,7 @@ describe("filters Actions", () => {
 
     // Adding a filter from empty
     store.setFilter({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "testFilterName",
       filterValue: "testFilterValue",
       isIncluded: true,
@@ -105,7 +105,7 @@ describe("filters Actions", () => {
 
     // Adding a filter from a non-empty list
     store.setFilter({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "testFilterName",
       filterValue: "testFilterValue2",
       isIncluded: true,
@@ -129,7 +129,7 @@ describe("filters Actions", () => {
     // Adding a duplicate filter should not change the list
     // Adding a filter from a non-empty list
     store.setFilter({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "testFilterName",
       filterValue: "testFilterValue2",
       isIncluded: true,
@@ -152,7 +152,7 @@ describe("filters Actions", () => {
 
     // Adding a filter to the notIncluded list
     store.setFilter({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "testFilterName",
       filterValue: "testFilterValue",
       isIncluded: false,
@@ -166,7 +166,7 @@ describe("filters Actions", () => {
 
   it("will not alter a given property for a given filter object upon the setFilter action if given filterValue falsy/empty ", () => {
     store.setFilter({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "testFilterName",
       filterValue: [],
       isIncluded: true,
@@ -178,7 +178,7 @@ describe("filters Actions", () => {
     });
 
     store.setFilter({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "testFilterName",
       filterValue: "",
       isIncluded: true,
@@ -218,7 +218,7 @@ describe("filters Actions", () => {
     );
 
     store.unsetFilterValue({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "name",
       filterValue: "test",
       isIncluded: true,
@@ -237,7 +237,7 @@ describe("filters Actions", () => {
     );
 
     store.unsetFilterValue({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "name",
       filterValue: "test",
       isIncluded: false,
@@ -257,7 +257,7 @@ describe("filters Actions", () => {
 
     // If there are no values left, the filter will be deleted
     store.unsetFilterValue({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "name",
       filterValue: "test2",
       isIncluded: true,
@@ -297,7 +297,7 @@ describe("filters Actions", () => {
     );
 
     store.unsetFilter({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "name",
     });
 
@@ -345,7 +345,7 @@ describe("filters Actions", () => {
     );
 
     store.clearAll({
-      nodeType: "alerts",
+      objectType: "alerts",
     });
 
     expect(store.$state).toEqual({

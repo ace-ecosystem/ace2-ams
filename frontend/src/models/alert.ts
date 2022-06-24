@@ -1,20 +1,18 @@
 import { historyUsername, pageOptionParams, UUID } from "./base";
-import { nodeCreate, nodeRead, nodeReadPage, nodeUpdate } from "./node";
 import { alertDispositionRead } from "./alertDisposition";
 import { alertToolRead } from "./alertTool";
 import { alertToolInstanceRead } from "./alertToolInstance";
 import { alertTypeRead } from "./alertType";
 import { metadataDetectionPointRead } from "./metadataDetectionPoint";
 import { metadataTagRead } from "./metadataTag";
-import { nodeCommentRead } from "./nodeComment";
+import { alertCommentRead } from "./alertComment";
 import { observableCreate, observableTreeRead } from "./observable";
 import { observableTypeRead } from "./observableType";
-import { nodeThreatActorRead } from "./nodeThreatActor";
-import { nodeThreatRead } from "./nodeThreat";
 import { queueRead } from "./queue";
 import { userRead } from "./user";
+import { readPage } from "./page";
 
-export interface alertCreate extends nodeCreate, historyUsername {
+export interface alertCreate extends historyUsername {
   alert: boolean;
   description?: string;
   eventTime?: Date;
@@ -25,22 +23,18 @@ export interface alertCreate extends nodeCreate, historyUsername {
   owner?: string;
   queue: string;
   tags?: string[];
-  threatActors?: string[];
-  threats?: string[];
   tool?: string;
   toolInstance?: string;
   type: string;
   [key: string]: unknown;
 }
 
-export interface alertRead extends nodeRead {
+export interface alertRead {
   alert: boolean;
   childAnalysisTags: metadataTagRead[];
   childDetectionPoints: metadataDetectionPointRead[];
   childTags: metadataTagRead[];
-  childThreatActors: nodeThreatActorRead[];
-  childThreats: nodeThreatRead[];
-  comments: nodeCommentRead[];
+  comments: alertCommentRead[];
   description: string | null;
   disposition: alertDispositionRead | null;
   dispositionTime: string | null;
@@ -50,15 +44,16 @@ export interface alertRead extends nodeRead {
   insertTime: string;
   instructions: string | null;
   name: string;
+  objectType: string;
   owner: userRead | null;
   ownershipTime: string | null;
   queue: queueRead;
   tags: metadataTagRead[];
-  threatActors: nodeThreatActorRead[];
-  threats: nodeThreatRead[];
   tool: alertToolRead | null;
   toolInstance: alertToolInstanceRead | null;
   type: alertTypeRead;
+  uuid: UUID;
+  version: UUID;
   [key: string]: unknown;
 }
 
@@ -66,7 +61,7 @@ export interface alertRead extends nodeRead {
 export interface alertSummary {
   childAnalysisTags: metadataTagRead[];
   childTags: metadataTagRead[];
-  comments: nodeCommentRead[];
+  comments: alertCommentRead[];
   description: string;
   disposition: string;
   dispositionTime: string | null;
@@ -92,11 +87,11 @@ export interface alertTreeRead extends alertRead {
   rootAnalysisUuid: UUID;
 }
 
-export interface alertReadPage extends nodeReadPage {
+export interface alertReadPage extends readPage {
   items: alertRead[];
 }
 
-export interface alertUpdate extends nodeUpdate, historyUsername {
+export interface alertUpdate extends historyUsername {
   description?: string | null;
   disposition?: string;
   eventTime?: Date;
@@ -106,9 +101,8 @@ export interface alertUpdate extends nodeUpdate, historyUsername {
   owner?: string;
   queue?: string;
   tags?: string[];
-  threatActors?: string[];
-  threats?: string[];
   uuid: UUID;
+  version?: UUID;
   [key: string]: unknown;
 }
 
@@ -134,11 +128,6 @@ export interface alertFilterParams extends pageOptionParams {
   };
   queue?: { included: queueRead[]; notIncluded: queueRead[] };
   observableValue?: { included: string[]; notIncluded: string[] };
-  threatActor?: {
-    included: nodeThreatActorRead[];
-    notIncluded: nodeThreatActorRead[];
-  };
-  threats?: { included: nodeThreatRead[][]; notIncluded: nodeThreatRead[][] };
   tool?: { included: alertToolRead[]; notIncluded: alertToolRead[] };
   toolInstance?: {
     included: alertToolInstanceRead[];
@@ -158,7 +147,6 @@ export type alertFilterValues =
   | (
       | string
       | observableTypeRead[]
-      | nodeThreatRead[]
       | metadataTagRead[]
       | Date
       | {
@@ -168,7 +156,6 @@ export type alertFilterValues =
       | alertDispositionRead
       | userRead
       | queueRead
-      | nodeThreatActorRead
       | alertToolRead
       | alertToolInstanceRead
       | alertTypeRead

@@ -41,7 +41,7 @@ function factory(
         router,
       ],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
         rangeFilters: testConfiguration.alerts.alertRangeFilters,
         availableFilters: testConfiguration.alerts.alertFilters,
       },
@@ -92,7 +92,7 @@ describe("TheFilterToolbar", () => {
     cy.get('[data-cy="quick-add-filter-panel"]').should("be.visible");
     cy.get('[data-cy="quick-add-filter-submit-button"]').click();
     cy.get("@stub-2").should("have.been.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "disposition",
       filterValue: { value: "None" },
       isIncluded: true,
@@ -110,10 +110,10 @@ describe("TheFilterToolbar", () => {
     cy.get('[data-cy="edit-filter-button"]').siblings().click();
     cy.contains("Reset").click();
     cy.get("@stub-5").should("have.been.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
     }); // clear all
     cy.get("@stub-1").should("have.been.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         queue: {
           included: [
@@ -131,7 +131,7 @@ describe("TheFilterToolbar", () => {
     cy.get('[data-cy="edit-filter-button"]').siblings().click();
     cy.contains("Clear All").click();
     cy.get("@stub-5").should("have.been.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
     }); // clear all
   });
 });

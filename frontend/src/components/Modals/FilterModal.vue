@@ -9,9 +9,9 @@
     @dialog-close="loadFormFilters"
   >
     <br />
-    <NodeQueueSelector :node-queue="nodeType" /> <br />
+    <QueueSelector :object-queue="objectType" /> <br />
     <div class="flex flex-wrap">
-      <NodePropertyInput
+      <ObjectPropertyInput
         v-for="(filter, index) in formFilters"
         :key="index!"
         v-model="formFilters[index]"
@@ -21,7 +21,7 @@
         form-type="filter"
         data-cy="filter-input"
         @delete-form-field="deleteFormFilter(index)"
-      ></NodePropertyInput>
+      ></ObjectPropertyInput>
     </div>
     <template #footer>
       <Button
@@ -54,9 +54,9 @@
 
   import Button from "primevue/button";
 
-  import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
+  import ObjectPropertyInput from "@/components/Objects/ObjectPropertyInput.vue";
   import BaseModal from "@/components/Modals/BaseModal.vue";
-  import NodeQueueSelector from "@/components/Node/NodeQueueSelector.vue";
+  import QueueSelector from "@/components/Queues/QueueSelector.vue";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
@@ -74,7 +74,7 @@
     name: { type: String, required: true },
   });
 
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
 
   filterStore.$subscribe(
     () => {
@@ -88,8 +88,8 @@
   >([]);
 
   const queue = computed(() => {
-    return currentUserSettingsStore.queues[nodeType] != null
-      ? currentUserSettingsStore.queues[nodeType]!.value
+    return currentUserSettingsStore.queues[objectType] != null
+      ? currentUserSettingsStore.queues[objectType]!.value
       : "unknown";
   });
 
@@ -117,10 +117,10 @@
 
   const submit = () => {
     if (!Object.keys(submitFilters.value).length) {
-      filterStore.clearAll({ nodeType: nodeType });
+      filterStore.clearAll({ objectType: objectType });
     } else {
       filterStore.bulkSetFilters({
-        nodeType: nodeType,
+        objectType: objectType,
         filters: submitFilters.value,
       });
     }
@@ -140,8 +140,9 @@
 
   const loadFormFilters = () => {
     formFilters.value = [];
-    for (const filterType in filterStore.$state[nodeType]) {
-      for (const filter of filterStore.$state[nodeType][filterType].included) {
+    for (const filterType in filterStore.$state[objectType]) {
+      for (const filter of filterStore.$state[objectType][filterType]
+        .included) {
         formFilters.value.push({
           propertyType: filterType,
           propertyValue: filter,

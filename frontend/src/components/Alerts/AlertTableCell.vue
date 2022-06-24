@@ -26,7 +26,7 @@
     </span>
     <!-- Alert comments -->
     <span v-if="props.data.comments">
-      <pre class="p-mr-2 comment"><NodeComment
+      <pre class="p-mr-2 comment"><Comment
       v-for="comment in props.data.comments"
       :key="comment.uuid"
       :comment="comment"
@@ -42,7 +42,7 @@
   <!-- Alert Comments -->
   <div v-else-if="props.field === 'comments'">
     <span v-if="!props.data.comments.length">None</span>
-    <NodeComment
+    <Comment
       v-for="comment in props.data.comments"
       v-else
       :key="comment.uuid"
@@ -67,7 +67,7 @@
 
   import AlertDispositionTag from "@/components/Alerts/AlertDispositionTag.vue";
   import MetadataTag from "@/components/Metadata/MetadataTag.vue";
-  import NodeComment from "@/components/Node/NodeComment.vue";
+  import Comment from "@/components/Comments/Comment.vue";
 
   import { alertSummary } from "@/models/alert";
   import {

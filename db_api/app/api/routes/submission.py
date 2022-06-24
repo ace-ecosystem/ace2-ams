@@ -10,7 +10,7 @@ from api.routes import helpers
 from api_models.create import Create
 from api_models.history import SubmissionHistoryRead
 from api_models.observable import ObservableSubmissionRead
-from api_models.submission import SubmissionCreate, SubmissionRead, SubmissionUpdate
+from api_models.submission import SubmissionCreate, SubmissionRead, SubmissionUpdate, SubmissionVersion
 from db import crud
 from db.database import get_db
 from db.schemas.submission import SubmissionHistory
@@ -106,8 +106,6 @@ def get_all_submissions(
     ),  # Example: event_time|desc,
     submission_type: Optional[list[str]] = Query(None),
     tags: Optional[list[str]] = Query(None),
-    threat_actors: Optional[list[str]] = Query(None),
-    threats: Optional[list[str]] = Query(None),
     tool: Optional[list[str]] = Query(None),
     tool_instance: Optional[list[str]] = Query(None),
 ):
@@ -146,8 +144,6 @@ def get_all_submissions(
             sort=sort,
             submission_type=submission_type,
             tags=tags,
-            threat_actors=threat_actors,
-            threats=threats,
             tool=tool,
             tool_instance=tool_instance,
         ),
@@ -167,6 +163,13 @@ def get_submission_history(uuid: UUID, db: Session = Depends(get_db)):
     )
 
 
+def get_submission_version(uuid: UUID, db: Session = Depends(get_db)):
+    try:
+        return crud.submission.read_by_uuid(uuid=uuid, db=db)
+    except UuidNotFoundInDatabase as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) from e
+
+
 def get_submissions_observables(uuids: list[UUID], db: Session = Depends(get_db)):
     return crud.submission.read_observables(uuids=uuids, db=db)
 
@@ -181,6 +184,7 @@ def get_url_domain_summary(uuid: UUID, db: Session = Depends(get_db)):
 helpers.api_route_read_all(router, get_all_submissions, SubmissionRead)
 helpers.api_route_read(router, get_submission, dict)
 helpers.api_route_read_all(router, get_submission_history, SubmissionHistoryRead, path="/{uuid}/history")
+helpers.api_route_read(router, get_submission_version, SubmissionVersion, path="/{uuid}/version")
 helpers.api_route_read(
     router, get_submissions_observables, list[ObservableSubmissionRead], methods=["POST"], path="/observables"
 )

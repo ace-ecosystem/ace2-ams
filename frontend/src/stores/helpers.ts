@@ -14,9 +14,9 @@ import { useEventTypeStore } from "./eventType";
 import { useEventVectorStore } from "./eventVector";
 import { useFilterStore } from "./filter";
 import { useMetadataDirectiveStore } from "./metadataDirective";
-import { useNodeThreatStore } from "./nodeThreat";
-import { useNodeThreatActorStore } from "./nodeThreatActor";
-import { useNodeThreatTypeStore } from "./nodeThreatType";
+import { useThreatStore } from "./threat";
+import { useThreatActorStore } from "./threatActor";
+import { useThreatTypeStore } from "./threatType";
 import { useObservableTypeStore } from "./observableType";
 import { useQueueStore } from "./queue";
 import { useUserStore } from "./user";
@@ -62,9 +62,9 @@ export async function populateEventStores(): Promise<void> {
   const eventSeverityStore = useEventSeverityStore();
   const eventStatusStore = useEventStatusStore();
   const eventTypeStore = useEventTypeStore();
-  const nodeThreatActorStore = useNodeThreatActorStore();
-  const nodeThreatStore = useNodeThreatStore();
-  const nodeThreatTypeStore = useNodeThreatTypeStore();
+  const threatActorStore = useThreatActorStore();
+  const threatStore = useThreatStore();
+  const threatTypeStore = useThreatTypeStore();
   const userStore = useUserStore();
   const eventVectorStore = useEventVectorStore();
 
@@ -74,9 +74,9 @@ export async function populateEventStores(): Promise<void> {
     eventRemediationStore.readAll(),
     eventStatusStore.readAll(),
     eventTypeStore.readAll(),
-    nodeThreatActorStore.readAll(),
-    nodeThreatStore.readAll(),
-    nodeThreatTypeStore.readAll(),
+    threatActorStore.readAll(),
+    threatStore.readAll(),
+    threatTypeStore.readAll(),
     eventVectorStore.readAll(),
     userStore.readAll(),
   ]).catch((error) => {
@@ -85,7 +85,7 @@ export async function populateEventStores(): Promise<void> {
 }
 
 // Sets default user filters and currentUserSettings
-export function setUserDefaults(nodeType = "all"): void {
+export function setUserDefaults(objectType = "all"): void {
   const authStore = useAuthStore();
   const filterStore = useFilterStore();
   const eventStatusStore = useEventStatusStore();
@@ -95,11 +95,11 @@ export function setUserDefaults(nodeType = "all"): void {
     return;
   }
 
-  if (nodeType === "all" || nodeType === "events") {
+  if (objectType === "all" || objectType === "events") {
     // Set default event queue
     currentUserSettingsStore.queues.events = authStore.user.defaultEventQueue;
     filterStore.setFilter({
-      nodeType: "events",
+      objectType: "events",
       filterName: "queue",
       filterValue: currentUserSettingsStore.queues.events,
       isIncluded: true,
@@ -111,7 +111,7 @@ export function setUserDefaults(nodeType = "all"): void {
     });
     if (openStatus) {
       filterStore.setFilter({
-        nodeType: "events",
+        objectType: "events",
         filterName: "status",
         filterValue: openStatus,
         isIncluded: true,
@@ -119,11 +119,11 @@ export function setUserDefaults(nodeType = "all"): void {
     }
   }
 
-  if (nodeType === "all" || nodeType === "alerts") {
+  if (objectType === "all" || objectType === "alerts") {
     // Set default alert queue
     currentUserSettingsStore.queues.alerts = authStore.user.defaultAlertQueue;
     filterStore.setFilter({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "queue",
       filterValue: currentUserSettingsStore.queues.alerts,
       isIncluded: true,

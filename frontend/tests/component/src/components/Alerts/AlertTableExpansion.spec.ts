@@ -27,7 +27,7 @@ function factory(
   return mount(AlertTableExpansion, {
     global: {
       plugins: [createCustomCypressPinia(), PrimeVue, router],
-      provide: { nodeType: "alerts", config: testConfiguration },
+      provide: { objectType: "alerts", config: testConfiguration },
     },
     propsData: args.props,
   });
@@ -74,7 +74,7 @@ describe("AlertTableExpansion", () => {
     });
     cy.contains("testObservableType : TestObservable").click();
     cy.get("@stub-1").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         observable: {
           included: [{ category: observable.type, value: observable.value }],

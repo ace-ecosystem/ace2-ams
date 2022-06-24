@@ -18,12 +18,12 @@ from db.schemas.event_status import EventStatus
 from db.schemas.event_type import EventType
 from db.schemas.event_vector import EventVector
 from db.schemas.metadata_directive import MetadataDirective
-from db.schemas.node_relationship_type import NodeRelationshipType
-from db.schemas.node_threat_type import NodeThreatType
+from db.schemas.observable_relationship_type import ObservableRelationshipType
 from db.schemas.observable_type import ObservableType
 from db.schemas.queue import Queue
 from db.schemas.seed import Seed
 from db.schemas.submission_type import SubmissionType
+from db.schemas.threat_type import ThreatType
 from db.schemas.user import User
 from db.schemas.user_role import UserRole
 
@@ -142,20 +142,10 @@ def seed(db: Session):
             db=db, db_table=EventVector, queues=queues, data=data, key="event_vector", print_value="event vector"
         )
 
-    if "node_relationship_type" in data:
-        for value in data["node_relationship_type"]:
-            db.add(NodeRelationshipType(value=value))
-            print(f"Adding node relationship type: {value}")
-
-    if "node_threat_type" in data:
-        add_queueable_values(
-            db=db,
-            db_table=NodeThreatType,
-            queues=queues,
-            data=data,
-            key="node_threat_type",
-            print_value="node threat type",
-        )
+    if "observable_relationship_type" in data:
+        for value in data["observable_relationship_type"]:
+            db.add(ObservableRelationshipType(value=value))
+            print(f"Adding observable relationship type: {value}")
 
     if "observable_type" in data:
         for value in data["observable_type"]:
@@ -166,6 +156,16 @@ def seed(db: Session):
         for value in data["submission_type"]:
             db.add(SubmissionType(value=value))
             print(f"Adding submission type: {value}")
+
+    if "threat_type" in data:
+        add_queueable_values(
+            db=db,
+            db_table=ThreatType,
+            queues=queues,
+            data=data,
+            key="threat_type",
+            print_value="threat type",
+        )
 
     user_roles = {}
     if "user_role" in data:

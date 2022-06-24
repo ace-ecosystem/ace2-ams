@@ -4,7 +4,7 @@ from typing import Optional
 from uuid import uuid4
 
 from api_models import type_str
-from api_models.analysis_module_type import AnalysisModuleTypeRead, AnalysisModuleTypeNodeTreeRead
+from api_models.analysis_module_type import AnalysisModuleTypeRead, AnalysisModuleTypeSubmissionTreeRead
 
 
 class AnalysisBase(BaseModel):
@@ -61,8 +61,7 @@ class AnalysisRead(AnalysisBase):
     details: Optional[dict] = Field(description="A JSON representation of the details produced by the analysis")
 
     # Set a static string value so code displaying the tree structure knows which type of object this is.
-    # This is needed (for now) because the Analysis table no longer inherits from the Node table.
-    node_type: str = "analysis"
+    object_type: str = "analysis"
 
     run_time: datetime = Field(description="The time at which the analysis was performed")
 
@@ -75,7 +74,7 @@ class AnalysisRead(AnalysisBase):
 class AnalysisSubmissionTreeRead(BaseModel):
     """Model used to control which information for an Analysis is displayed when getting a submission tree"""
 
-    analysis_module_type: Optional[AnalysisModuleTypeNodeTreeRead] = Field(
+    analysis_module_type: Optional[AnalysisModuleTypeSubmissionTreeRead] = Field(
         description="The analysis module type that was used to perform this analysis"
     )
 
@@ -87,8 +86,8 @@ class AnalysisSubmissionTreeRead(BaseModel):
         default=True, description="Whether or not this is the first time the object appears in the tree"
     )
 
-    # This is needed since Analysis no longer inherits from the Node table
-    node_type: str = "analysis"
+    # Set a static string value so code displaying the tree structure knows which type of object this is.
+    object_type: str = "analysis"
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
 

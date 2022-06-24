@@ -6,7 +6,7 @@ from uuid import uuid4
 from api_models.event import EventUpdate
 from db import crud
 from exceptions.db import VersionMismatch
-from tests.db_tests.crud.node import VALID_LIST_STRING_VALUES
+from tests.db_tests.crud.helpers import VALID_LIST_STRING_VALUES
 from tests import factory
 
 
@@ -347,11 +347,11 @@ def test_update_vectors(db):
     "key,value_lists,helper_create_func",
     [
         ("tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
-        ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
-        ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
+        ("threat_actors", VALID_LIST_STRING_VALUES, factory.threat_actor.create_or_read),
+        ("threats", VALID_LIST_STRING_VALUES, factory.threat.create_or_read),
     ],
 )
-def test_update_valid_node_fields(db, key, value_lists, helper_create_func):
+def test_update_valid_list_fields(db, key, value_lists, helper_create_func):
     for value_list in value_lists:
         # Create an event
         event = factory.event.create_or_read(
