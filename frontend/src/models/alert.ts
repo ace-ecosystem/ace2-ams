@@ -8,8 +8,6 @@ import { metadataTagRead } from "./metadataTag";
 import { alertCommentRead } from "./alertComment";
 import { observableCreate, observableTreeRead } from "./observable";
 import { observableTypeRead } from "./observableType";
-import { threatActorRead } from "./threatActor";
-import { threatRead } from "./threat";
 import { queueRead } from "./queue";
 import { userRead } from "./user";
 import { readPage } from "./page";
@@ -25,8 +23,6 @@ export interface alertCreate extends historyUsername {
   owner?: string;
   queue: string;
   tags?: string[];
-  threatActors?: string[];
-  threats?: string[];
   tool?: string;
   toolInstance?: string;
   type: string;
@@ -38,8 +34,6 @@ export interface alertRead {
   childAnalysisTags: metadataTagRead[];
   childDetectionPoints: metadataDetectionPointRead[];
   childTags: metadataTagRead[];
-  childThreatActors: threatActorRead[];
-  childThreats: threatRead[];
   comments: alertCommentRead[];
   description: string | null;
   disposition: alertDispositionRead | null;
@@ -55,8 +49,6 @@ export interface alertRead {
   ownershipTime: string | null;
   queue: queueRead;
   tags: metadataTagRead[];
-  threatActors: threatActorRead[];
-  threats: threatRead[];
   tool: alertToolRead | null;
   toolInstance: alertToolInstanceRead | null;
   type: alertTypeRead;
@@ -109,8 +101,6 @@ export interface alertUpdate extends historyUsername {
   owner?: string;
   queue?: string;
   tags?: string[];
-  threatActors?: string[];
-  threats?: string[];
   uuid: UUID;
   version?: UUID;
   [key: string]: unknown;
@@ -157,7 +147,6 @@ export type alertFilterValues =
   | (
       | string
       | observableTypeRead[]
-      | threatRead[]
       | metadataTagRead[]
       | Date
       | {
@@ -167,7 +156,6 @@ export type alertFilterValues =
       | alertDispositionRead
       | userRead
       | queueRead
-      | threatActorRead
       | alertToolRead
       | alertToolInstanceRead
       | alertTypeRead

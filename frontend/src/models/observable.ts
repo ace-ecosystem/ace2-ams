@@ -7,8 +7,6 @@ import {
 import { historyUsername, UUID } from "./base";
 import { metadataTagRead } from "./metadataTag";
 import { observableRelationshipRead } from "./observableRelationship";
-import { threatRead } from "./threat";
-import { threatActorRead } from "./threatActor";
 import { observableTypeRead } from "./observableType";
 
 export interface dispositionHistoryIndividual {
@@ -26,8 +24,6 @@ export interface observableCreate extends historyUsername {
   forDetection?: boolean;
   parentAnalysisUuid: UUID;
   tags?: string[];
-  threatActors?: string[];
-  threats?: string[];
   type: string;
   value: string;
   [key: string]: unknown;
@@ -40,8 +36,6 @@ export interface observableRead {
   objectType: string;
   observableRelationships: observableRelationshipRead[];
   tags: metadataTagRead[];
-  threatActors: threatActorRead[];
-  threats: threatRead[];
   type: observableTypeRead;
   uuid: UUID;
   value: string;
@@ -70,8 +64,6 @@ export interface observableUpdate extends historyUsername {
   expiresOn?: Date | null;
   forDetection?: boolean;
   tags?: string[];
-  threatActors?: string[];
-  threats?: string[];
   type?: string;
   value?: string;
   version?: UUID;
