@@ -94,6 +94,7 @@ describe("ObservableDispositionHistoryGroup", () => {
       objectType: "alerts",
       filterName: "disposition",
       filterValue: { value: "None" },
+      isIncluded: true,
     });
     cy.get("@stub-4").should("have.been.calledWith", {
       objectType: "alerts",
@@ -102,6 +103,7 @@ describe("ObservableDispositionHistoryGroup", () => {
         category: observable.type,
         value: observable.value,
       },
+      isIncluded: true,
     });
   });
   it("sets filters as expected on click of non-'OPEN' disposition", () => {
@@ -121,6 +123,7 @@ describe("ObservableDispositionHistoryGroup", () => {
       objectType: "alerts",
       filterName: "disposition",
       filterValue: genericObjectReadFactory({ value: "UNKNOWN" }),
+      isIncluded: true,
     });
     cy.get("@stub-4").should("have.been.calledWith", {
       objectType: "alerts",
@@ -129,6 +132,7 @@ describe("ObservableDispositionHistoryGroup", () => {
         category: observable.type,
         value: observable.value,
       },
+      isIncluded: true,
     });
   });
 });

@@ -475,6 +475,7 @@ describe("TheObjectTable", () => {
       objectType: "alerts",
       filterName: "owner",
       filterValue: userReadFactory(),
+      isIncluded: true,
     });
   });
 });

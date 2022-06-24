@@ -10,7 +10,7 @@
         >{{ filterLabel }}:</span
       >
       <span
-        v-for="(value, index) in filterValue"
+        v-for="(value, index) in filterValue.included"
         :key="(formatValue(value) as string)"
         data-cy="filter-chip-content"
         class="link-text p-chip-text chip-content"
@@ -30,7 +30,7 @@
             resetFilterModel();
           "
         />
-        <span v-if="!(index == filterValue!.length - 1)">|</span></span
+        <span v-if="!(index == filterValue!.included.length - 1)">|</span></span
       >
       <i
         data-cy="filter-chip-add-button"
@@ -115,10 +115,15 @@
     }
   };
 
+  interface filterValueProp {
+    included: alertFilterValues[] | eventFilterValues[];
+    notIncluded: alertFilterValues[] | eventFilterValues[];
+  }
+
   const props = defineProps({
     filterName: { type: String, required: true },
     filterValue: {
-      type: Array as PropType<alertFilterValues[] | eventFilterValues[]>,
+      type: Object as PropType<filterValueProp>,
       required: true,
     },
   });
@@ -160,6 +165,7 @@
       objectType: objectType,
       filterName: props.filterName,
       filterValue: filterModelOldValue.value,
+      isIncluded: true,
     });
     filterStore.setFilter({
       objectType: objectType,
@@ -167,6 +173,7 @@
       filterValue: filterModel.value.propertyValue as
         | alertFilterValues
         | eventFilterValues,
+      isIncluded: true,
     });
   }
 
@@ -182,6 +189,7 @@
       objectType: objectType,
       filterName: props.filterName,
       filterValue: value,
+      isIncluded: true,
     });
   }
 

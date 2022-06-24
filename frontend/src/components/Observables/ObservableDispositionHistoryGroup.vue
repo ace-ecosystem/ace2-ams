@@ -49,6 +49,7 @@
         objectType: "alerts",
         filterName: "disposition",
         filterValue: dispositionObject,
+        isIncluded: true,
       });
     }
 
@@ -59,6 +60,7 @@
         category: props.observable.type,
         value: props.observable.value,
       },
+      isIncluded: true,
     });
     if (props.rerouteToManageAlerts) {
       router.replace({

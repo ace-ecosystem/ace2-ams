@@ -69,12 +69,15 @@
     filterStore.bulkSetFilters({
       objectType: "alerts",
       filters: {
-        observable: [
-          {
-            category: observable.type,
-            value: observable.value,
-          },
-        ],
+        observable: {
+          included: [
+            {
+              category: observable.type,
+              value: observable.value,
+            },
+          ],
+          notIncluded: [],
+        },
       },
     });
   };

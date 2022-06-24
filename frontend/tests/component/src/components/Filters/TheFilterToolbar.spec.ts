@@ -60,9 +60,15 @@ describe("TheFilterToolbar", () => {
   it("renders as expected when there are filters applied", () => {
     factory({
       alerts: {
-        name: ["test name"],
-        eventTimeAfter: [new Date(2022, 4, 22, 12, 0, 0)],
-        eventTimeBefore: [new Date(2022, 4, 23, 12, 0, 0)],
+        name: { included: ["test name"], notIncluded: [] },
+        eventTimeAfter: {
+          included: [new Date(2022, 4, 22, 12, 0, 0)],
+          notIncluded: [],
+        },
+        eventTimeBefore: {
+          included: [new Date(2022, 4, 23, 12, 0, 0)],
+          notIncluded: [],
+        },
       },
       events: {},
     });
@@ -89,6 +95,7 @@ describe("TheFilterToolbar", () => {
       objectType: "alerts",
       filterName: "disposition",
       filterValue: { value: "None" },
+      isIncluded: true,
     }); // set filter
     cy.get('[data-cy="quick-add-filter-panel"]').should("not.exist");
   });
@@ -108,11 +115,14 @@ describe("TheFilterToolbar", () => {
     cy.get("@stub-1").should("have.been.calledOnceWith", {
       objectType: "alerts",
       filters: {
-        queue: [
-          {
-            value: "external",
-          },
-        ],
+        queue: {
+          included: [
+            {
+              value: "external",
+            },
+          ],
+          notIncluded: [],
+        },
       },
     }); // set filters to defaults
   });

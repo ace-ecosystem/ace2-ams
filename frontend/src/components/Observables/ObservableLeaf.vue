@@ -273,12 +273,15 @@
     filterStore.bulkSetFilters({
       objectType: "alerts",
       filters: {
-        observable: [
-          {
-            category: obs.type,
-            value: obs.value,
-          },
-        ],
+        observable: {
+          included: [
+            {
+              category: obs.type,
+              value: obs.value,
+            },
+          ],
+          notIncluded: [],
+        },
       },
     });
     router.replace({

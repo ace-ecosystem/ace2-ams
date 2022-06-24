@@ -51,11 +51,11 @@ describe("setUserDefaults", () => {
     expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
     expect(currentUserSettingsStore.queues.alerts).toEqual(alertQueue);
     expect(filterStore.events).toEqual({
-      queue: [eventQueue],
-      status: [openStatus],
+      queue: { included: [eventQueue], notIncluded: [] },
+      status: { included: [openStatus], notIncluded: [] },
     });
     expect(filterStore.alerts).toEqual({
-      queue: [alertQueue],
+      queue: { included: [alertQueue], notIncluded: [] },
     });
   });
   it("will correctly set all user defaults when objectType == 'all' and 'OPEN' event status is not available", () => {
@@ -68,10 +68,10 @@ describe("setUserDefaults", () => {
     expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
     expect(currentUserSettingsStore.queues.alerts).toEqual(alertQueue);
     expect(filterStore.events).toEqual({
-      queue: [eventQueue],
+      queue: { included: [eventQueue], notIncluded: [] },
     });
     expect(filterStore.alerts).toEqual({
-      queue: [alertQueue],
+      queue: { included: [alertQueue], notIncluded: [] },
     });
   });
   it("will correctly set event user defaults when objectType == 'events' and 'OPEN' event status is available", () => {
@@ -84,8 +84,8 @@ describe("setUserDefaults", () => {
     expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
     expect(currentUserSettingsStore.queues.alerts).toStrictEqual(null);
     expect(filterStore.events).toEqual({
-      queue: [eventQueue],
-      status: [openStatus],
+      queue: { included: [eventQueue], notIncluded: [] },
+      status: { included: [openStatus], notIncluded: [] },
     });
     expect(filterStore.alerts).toEqual({});
   });
@@ -99,7 +99,7 @@ describe("setUserDefaults", () => {
     expect(currentUserSettingsStore.queues.events).toEqual(eventQueue);
     expect(currentUserSettingsStore.queues.alerts).toStrictEqual(null);
     expect(filterStore.events).toEqual({
-      queue: [eventQueue],
+      queue: { included: [eventQueue], notIncluded: [] },
     });
     expect(filterStore.alerts).toEqual({});
   });
@@ -113,7 +113,7 @@ describe("setUserDefaults", () => {
     expect(currentUserSettingsStore.queues.alerts).toEqual(alertQueue);
     expect(filterStore.events).toEqual({});
     expect(filterStore.alerts).toEqual({
-      queue: [alertQueue],
+      queue: { included: [alertQueue], notIncluded: [] },
     });
   });
 
@@ -138,7 +138,10 @@ describe("loadFiltersFromStorage", () => {
       JSON.stringify({
         alerts: {},
         events: {
-          queue: [{ description: null, value: "external", uuid: "uuid1" }],
+          queue: {
+            included: [{ description: null, value: "external", uuid: "uuid1" }],
+            notIncluded: [],
+          },
         },
       }),
     );
@@ -148,7 +151,10 @@ describe("loadFiltersFromStorage", () => {
     expect(filterStore.$state).toEqual({
       alerts: {},
       events: {
-        queue: [{ description: null, value: "external", uuid: "uuid1" }],
+        queue: {
+          included: [{ description: null, value: "external", uuid: "uuid1" }],
+          notIncluded: [],
+        },
       },
     });
     expect(alertTableStore.stateFiltersLoaded).toStrictEqual(true);

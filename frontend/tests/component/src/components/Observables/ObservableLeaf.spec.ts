@@ -317,12 +317,15 @@ describe("ObservableLeaf", () => {
     cy.get("@stub-5").should("have.been.calledWith", {
       objectType: "alerts",
       filters: {
-        observable: [
-          {
-            category: observableWithTags.type,
-            value: observableWithTags.value,
-          },
-        ],
+        observable: {
+          included: [
+            {
+              category: observableWithTags.type,
+              value: observableWithTags.value,
+            },
+          ],
+          notIncluded: [],
+        },
       },
     });
   });
@@ -336,12 +339,15 @@ describe("ObservableLeaf", () => {
     cy.get("@stub-5").should("have.been.calledWith", {
       objectType: "alerts",
       filters: {
-        observable: [
-          {
-            category: observableWithDisplayType.type,
-            value: observableWithDisplayType.value,
-          },
-        ],
+        observable: {
+          included: [
+            {
+              category: observableWithDisplayType.type,
+              value: observableWithDisplayType.value,
+            },
+          ],
+          notIncluded: [],
+        },
       },
     });
   });
@@ -355,12 +361,15 @@ describe("ObservableLeaf", () => {
     cy.get("@stub-5").should("have.been.calledWith", {
       objectType: "alerts",
       filters: {
-        observable: [
-          {
-            category: observableWithDisplayValue.type,
-            value: observableWithDisplayValue.value,
-          },
-        ],
+        observable: {
+          included: [
+            {
+              category: observableWithDisplayValue.type,
+              value: observableWithDisplayValue.value,
+            },
+          ],
+          notIncluded: [],
+        },
       },
     });
   });

@@ -174,15 +174,15 @@
 
   const startDate = computed(() => {
     return filters.value[startFilter.value] &&
-      filters.value[startFilter.value].length
-      ? filters.value[startFilter.value][0]
+      filters.value[startFilter.value].included.length
+      ? filters.value[startFilter.value].included[0]
       : null;
   });
 
   const endDate = computed(() => {
     return filters.value[endFilter.value] &&
-      filters.value[endFilter.value].length
-      ? filters.value[endFilter.value][0]
+      filters.value[endFilter.value].included.length
+      ? filters.value[endFilter.value].included[0]
       : null;
   });
 
@@ -221,6 +221,7 @@
         objectType: objectType,
         filterName: filterName,
         filterValue: date,
+        isIncluded: true,
       });
     }
   };
