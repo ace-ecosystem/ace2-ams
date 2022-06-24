@@ -138,7 +138,7 @@ describe("FilterModal", () => {
     }); //clearAll
     cy.get("[data-cy=FilterModal]").should("not.exist");
   });
-  it.only("updates filter store with filters in form when 'Submit' button is clicked", () => {
+  it("updates filter store with filters in form when 'Submit' button is clicked", () => {
     factory({
       filters: {
         alerts: { name: { included: ["test name"], notIncluded: [] } },
