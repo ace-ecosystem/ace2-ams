@@ -142,7 +142,7 @@
 
     try {
       allAlerts = await Alert.readAllPages({
-        eventUuid: [uuid],
+        eventUuid: { included: [uuid], notIncluded: [] },
         sort: "event_time|asc",
       });
     } catch (e: unknown) {

@@ -32,19 +32,23 @@ describe("FilterChipContainer", () => {
     cy.get("[data-cy=filter-chip]").should("not.exist");
   });
   it("renders when there are filters set", () => {
-    factory({ name: ["test name"], owner: [userReadFactory()] });
+    factory({
+      name: { included: ["test name"], notIncluded: [] },
+      owner: { included: [userReadFactory()], notIncluded: [] },
+    });
     cy.get("[data-cy=filter-chip]").should("have.length", 2);
     cy.contains("Name:").should("be.visible");
     cy.contains("test name").should("be.visible");
     cy.contains("Owner:").should("be.visible");
     cy.contains("Test Analyst").should("be.visible");
   });
-  it("re-renders whena filter is added", () => {
+  it("re-renders when a filter is added", () => {
     factory({}).then((wrapper) => {
       wrapper.vm.filterStore.setFilter({
         nodeType: "alerts",
         filterName: "name",
         filterValue: "test name",
+        isIncluded: true,
       });
       cy.get("[data-cy=filter-chip]").should("have.length", 1);
       cy.contains("Name:").should("be.visible");
@@ -52,11 +56,12 @@ describe("FilterChipContainer", () => {
     });
   });
   it("re-renders whena filter is added", () => {
-    factory({ name: ["test name"], owner: [userReadFactory()] }).then(
-      (wrapper) => {
-        wrapper.vm.filterStore.clearAll({ nodeType: "alerts" });
-        cy.get("[data-cy=filter-chip]").should("not.exist");
-      },
-    );
+    factory({
+      name: { included: ["test name"], notIncluded: [] },
+      owner: { included: [userReadFactory()], notIncluded: [] },
+    }).then((wrapper) => {
+      wrapper.vm.filterStore.clearAll({ nodeType: "alerts" });
+      cy.get("[data-cy=filter-chip]").should("not.exist");
+    });
   });
 });

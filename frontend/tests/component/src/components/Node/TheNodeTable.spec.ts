@@ -475,6 +475,7 @@ describe("TheNodeTable", () => {
       nodeType: "alerts",
       filterName: "owner",
       filterValue: userReadFactory(),
+      isIncluded: true,
     });
   });
 });

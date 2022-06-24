@@ -94,14 +94,21 @@
   });
 
   const submitFilters = computed(() => {
-    let submitFilters: { [index: string]: unknown[] } = {};
+    let submitFilters: {
+      [index: string]: { included: unknown[]; notIncluded: [] };
+    } = {};
     for (const index in formFilters.value) {
       const filter = formFilters.value[index];
       if (filter.propertyType) {
         if (!submitFilters[filter.propertyType]) {
-          submitFilters[filter.propertyType] = [filter.propertyValue];
+          submitFilters[filter.propertyType] = {
+            included: [filter.propertyValue],
+            notIncluded: [],
+          };
         } else {
-          submitFilters[filter.propertyType].push(filter.propertyValue);
+          submitFilters[filter.propertyType].included.push(
+            filter.propertyValue,
+          );
         }
       }
     }
@@ -134,7 +141,7 @@
   const loadFormFilters = () => {
     formFilters.value = [];
     for (const filterType in filterStore.$state[nodeType]) {
-      for (const filter of filterStore.$state[nodeType][filterType]) {
+      for (const filter of filterStore.$state[nodeType][filterType].included) {
         formFilters.value.push({
           propertyType: filterType,
           propertyValue: filter,

@@ -118,23 +118,41 @@ export interface eventUpdate extends nodeUpdate, historyUsername {
 }
 
 export interface eventFilterParams extends pageOptionParams {
-  createdAfter?: Date[];
-  createdBefore?: Date[];
-  disposition?: alertDispositionRead[];
-  eventType?: eventTypeRead[];
-  name?: string[];
-  observable?: { category: observableTypeRead; value: string }[];
-  observableTypes?: observableTypeRead[][];
-  observableValue?: string[];
-  owner?: userRead[];
-  preventionTool?: eventPreventionToolRead[];
-  queue?: queueRead[];
-  severity?: eventSeverityRead[];
-  status?: eventStatusRead[];
-  tags?: string[][];
-  threatActor?: nodeThreatActorRead[];
-  threats?: nodeThreatRead[][];
-  vector?: eventVectorRead[];
+  createdAfter?: { included: Date[]; notIncluded: Date[] };
+  createdBefore?: { included: Date[]; notIncluded: Date[] };
+  disposition?: {
+    included: alertDispositionRead[];
+    notIncluded: alertDispositionRead[];
+  };
+  name?: { included: string[]; notIncluded: string[] };
+  eventType?: { included: eventTypeRead[]; notIncluded: eventTypeRead[] };
+  observable?: {
+    included: { category: observableTypeRead; value: string }[];
+    notIncluded: { category: observableTypeRead; value: string }[];
+  };
+  observableTypes?: {
+    included: observableTypeRead[][];
+    notIncluded: observableTypeRead[][];
+  };
+  observableValue?: { included: string[]; notIncluded: string[] };
+  owner?: { included: userRead[]; notIncluded: userRead[] };
+  preventionTools?: {
+    included: eventPreventionToolRead[];
+    notIncluded: eventPreventionToolRead[];
+  };
+  queue?: { included: queueRead[]; notIncluded: queueRead[] };
+  severity?: {
+    included: eventSeverityRead[];
+    notIncluded: eventSeverityRead[];
+  };
+  status?: { included: eventStatusRead[]; notIncluded: eventStatusRead[] };
+  threatActors?: {
+    included: nodeThreatActorRead[];
+    notIncluded: nodeThreatActorRead[];
+  };
+  threats?: { included: nodeThreatRead[][]; notIncluded: nodeThreatRead[][] };
+  vectors?: { included: eventVectorRead[]; notIncluded: eventVectorRead[] };
+  tags?: { included: string[][]; notIncluded: string[][] };
   [key: string]: any;
 }
 

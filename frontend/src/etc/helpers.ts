@@ -80,7 +80,8 @@ export function parseFilters(
   queryFilters: Record<string, string | string[]>,
   availableFilters: readonly propertyOption[],
 ): alertFilterParams | eventFilterParams {
-  const parsedFilters: Record<string, unknown[]> = {};
+  const parsedFilters: Record<string, { included: any[]; notIncluded: any[] }> =
+    {};
 
   // parse each filter
   for (const filterName in queryFilters) {
@@ -201,9 +202,12 @@ export function parseFilters(
       // If filter value was successfully parsed add it to the new filter object
       if (filterValueParsed) {
         if (parsedFilters[filterName]) {
-          parsedFilters[filterName].push(filterValueParsed);
+          parsedFilters[filterName].included.push(filterValueParsed);
         } else {
-          parsedFilters[filterName] = [filterValueParsed];
+          parsedFilters[filterName] = {
+            included: [filterValueParsed],
+            notIncluded: [],
+          };
         }
       }
     }
@@ -217,7 +221,11 @@ export function formatNodeFiltersForAPI(
 ): Record<string, string> | Record<string, number> {
   const formattedParams = {} as alertFilterParams;
   for (const param in params) {
-    let paramValue = params[param] as any;
+    const paramValue = params[param] as {
+      included: any[];
+      notIncluded: any[];
+      [key: string]: any[];
+    };
 
     //  check if the given param is specific to node and not pageOptionParams, i.e. disposition
     const filterType = availableFilters.find((filter) => {
@@ -226,22 +234,38 @@ export function formatNodeFiltersForAPI(
 
     // if so, check if the params values need to be formatted, and replace with the newly formatted values
     if (filterType) {
-      // First check if there is a method provided to get string representation
-      if (filterType.stringRepr) {
-        paramValue = paramValue.map(filterType.stringRepr) as never;
-        // Otherwise check if the param's value is a specific property
-      } else if (
-        filterType.valueProperty &&
-        Array.isArray(paramValue) &&
-        paramValue.every(isObject)
-      ) {
-        paramValue = paramValue.map(
-          (v: any) => v[filterType.valueProperty as string],
-        );
-      }
-    }
+      for (const listType of ["included", "notIncluded"]) {
+        let formattedParamValue = paramValue[listType];
 
-    formattedParams[param] = paramValue;
+        // First check if there is a method provided to get string representation
+        if (filterType.stringRepr) {
+          formattedParamValue = formattedParamValue.map(
+            filterType.stringRepr,
+          ) as never;
+          // Otherwise check if the param's value is a specific property
+        } else if (
+          filterType.valueProperty &&
+          Array.isArray(formattedParamValue) &&
+          formattedParamValue.every(isObject)
+        ) {
+          formattedParamValue = formattedParamValue.map(
+            (v: any) => v[filterType.valueProperty as string],
+          );
+        }
+
+        if (formattedParamValue.length) {
+          if (listType === "included") {
+            formattedParams[param] = formattedParamValue;
+          } else {
+            formattedParams[
+              `not${param.charAt(0).toUpperCase()}${param.slice(1)}`
+            ] = formattedParamValue;
+          }
+        }
+      }
+    } else {
+      formattedParams[param] = paramValue;
+    }
   }
   return formattedParams;
 }

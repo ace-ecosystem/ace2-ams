@@ -241,6 +241,12 @@ export const alertTypeProperty: propertyOption = {
   valueProperty: "value",
 };
 
+export const eventUuidProperty: propertyOption = {
+  name: alertPropertyTypes.EVENT_UUID_PROPERTY,
+  label: "Event UUID",
+  type: inputTypes.INPUT_TEXT,
+};
+
 export const validAlertFilters: propertyOption[] = [
   alertDispositionProperty,
   alertDispositionUserProperty,
@@ -262,4 +268,5 @@ export const validAlertFilters: propertyOption[] = [
   alertToolProperty,
   alertToolInstanceProperty,
   alertTypeProperty,
+  eventUuidProperty,
 ];

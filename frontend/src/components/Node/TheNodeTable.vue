@@ -375,6 +375,7 @@
         nodeType: nodeType,
         filterName: field,
         filterValue: node[field] as any,
+        isIncluded: true,
       });
     }
   };
