@@ -1,4 +1,4 @@
-import { formatNodeFiltersForAPI } from "@/etc/helpers";
+import { formatObjectFiltersForAPI } from "@/etc/helpers";
 import {
   eventCreate,
   eventFilterParams,
@@ -63,7 +63,7 @@ export const Event = {
   readPage: (params?: eventFilterParams): Promise<eventReadPage> => {
     let formattedParams = {} as eventFilterParams;
     if (params) {
-      formattedParams = formatNodeFiltersForAPI(validEventFilters, params);
+      formattedParams = formatObjectFiltersForAPI(validEventFilters, params);
     }
 
     return api.read(endpoint, formattedParams);
@@ -72,7 +72,7 @@ export const Event = {
   readAllPages: (params?: eventFilterParams): Promise<eventRead[]> => {
     let formattedParams = {} as eventFilterParams;
     if (params) {
-      formattedParams = formatNodeFiltersForAPI(validEventFilters, params);
+      formattedParams = formatObjectFiltersForAPI(validEventFilters, params);
     }
 
     return api.readAll(endpoint, formattedParams);

@@ -88,16 +88,16 @@ describe("ObservableDispositionHistoryGroup", () => {
     factory({ observable: observable, rerouteToManageAlerts: false });
     cy.contains("OPEN").click();
     cy.get("@stub-7").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
     });
     cy.get("@stub-4").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "disposition",
       filterValue: { value: "None" },
       isIncluded: true,
     });
     cy.get("@stub-4").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "observable",
       filterValue: {
         category: observable.type,
@@ -117,16 +117,16 @@ describe("ObservableDispositionHistoryGroup", () => {
     factory({ observable: observable, rerouteToManageAlerts: false });
     cy.contains("UNKNOWN").click();
     cy.get("@stub-7").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
     });
     cy.get("@stub-4").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "disposition",
       filterValue: genericObjectReadFactory({ value: "UNKNOWN" }),
       isIncluded: true,
     });
     cy.get("@stub-4").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "observable",
       filterValue: {
         category: observable.type,

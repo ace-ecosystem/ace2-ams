@@ -12,7 +12,7 @@ import {
   observableProperty,
   observableTypesProperty,
   tagsProperty,
-  nodeThreatsProperty,
+  threatsProperty,
   queueProperty,
   ownerProperty,
   BLUE,
@@ -30,7 +30,7 @@ const defaultAlertFilters = [
   ownerProperty,
   queueProperty,
   tagsProperty,
-  nodeThreatsProperty,
+  threatsProperty,
 ];
 
 export const alertFilters: Record<string, readonly propertyOption[]> = {

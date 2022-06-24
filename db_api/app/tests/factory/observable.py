@@ -25,8 +25,6 @@ def create_or_read(
     for_detection: bool = False,
     history_username: Optional[str] = None,
     tags: Optional[list[str]] = None,
-    threat_actors: Optional[list[str]] = None,
-    threats: Optional[list[str]] = None,
     time: Optional[datetime] = None,
 ) -> Observable:
     factory.observable_type.create_or_read(value=type, db=db)
@@ -59,14 +57,6 @@ def create_or_read(
         for tag in tags:
             factory.metadata_tag.create_or_read(value=tag, db=db)
 
-    if threat_actors:
-        for threat_actor in threat_actors:
-            factory.node_threat_actor.create_or_read(value=threat_actor, db=db)
-
-    if threats:
-        for threat in threats:
-            factory.node_threat.create_or_read(value=threat, db=db)
-
     if time is not None:
         factory.metadata_time.create_or_read(value=time, db=db)
         metadata.append(AnalysisMetadataCreate(type="time", value=time))
@@ -79,8 +69,6 @@ def create_or_read(
             for_detection=for_detection,
             history_username=history_username,
             tags=tags or [],
-            threat_actors=threat_actors or [],
-            threats=threats or [],
             type=type,
             value=value,
         ),

@@ -21,7 +21,7 @@ function factory(args: { filters: alertFilterParams } = { filters: {} }) {
         }),
       ],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
         rangeFilters: testConfiguration.alerts.alertRangeFilters,
       },
     },
@@ -68,7 +68,7 @@ describe("DateRangePicker", () => {
       .type("05/25/2022 12:00")
       .type("{enter}");
     cy.get("@spy-2").should("be.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 4, 25, 12, 0, 0, 0)),
       isIncluded: true,
@@ -97,7 +97,7 @@ describe("DateRangePicker", () => {
     });
     cy.get('[data-cy="date-range-picker-start-clear"]').click();
     cy.get("@spy-3").should("be.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeAfter",
     });
     cy.findAllByPlaceholderText("The beginning of time").should("be.visible");
@@ -109,7 +109,7 @@ describe("DateRangePicker", () => {
       .type("05/25/2022 12:00")
       .type("{enter}");
     cy.get("@spy-2").should("be.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 4, 25, 12, 0, 0, 0)),
       isIncluded: true,
@@ -138,7 +138,7 @@ describe("DateRangePicker", () => {
     });
     cy.get('[data-cy="date-range-picker-end-clear"]').click();
     cy.get("@spy-3").should("be.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeBefore",
     });
     cy.findAllByPlaceholderText("Now").should("be.visible");
@@ -151,13 +151,13 @@ describe("DateRangePicker", () => {
     cy.findByDisplayValue("03/29/2022 00:00").should("be.visible");
     cy.findByDisplayValue("03/29/2022 23:59").should("be.visible");
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 2, 29, 0, 0, 0)),
       isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 2, 29, 23, 59, 59)),
       isIncluded: true,
@@ -172,13 +172,13 @@ describe("DateRangePicker", () => {
     cy.findByDisplayValue("03/28/2022 00:00").should("be.visible");
     cy.findByDisplayValue("03/28/2022 23:59").should("be.visible");
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 2, 28, 0, 0, 0)),
       isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 2, 28, 23, 59, 59)),
       isIncluded: true,
@@ -193,13 +193,13 @@ describe("DateRangePicker", () => {
     cy.findByDisplayValue("03/22/2022 00:00").should("be.visible");
     cy.findByDisplayValue("03/29/2022 23:59").should("be.visible");
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 2, 22, 0, 0, 0)),
       isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 2, 29, 23, 59, 59)),
       isIncluded: true,
@@ -214,13 +214,13 @@ describe("DateRangePicker", () => {
     cy.findByDisplayValue("02/27/2022 00:00").should("be.visible");
     cy.findByDisplayValue("03/29/2022 23:59").should("be.visible");
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 1, 30, 0, 0, 0)),
       isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 2, 29, 23, 59, 59)),
       isIncluded: true,
@@ -235,13 +235,13 @@ describe("DateRangePicker", () => {
     cy.findByDisplayValue("01/28/2022 00:00").should("be.visible");
     cy.findByDisplayValue("03/29/2022 23:59").should("be.visible");
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 0, 30, 0, 0, 0)),
       isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 2, 29, 23, 59, 59)),
       isIncluded: true,
@@ -256,13 +256,13 @@ describe("DateRangePicker", () => {
     cy.findByDisplayValue("03/01/2022 00:00").should("be.visible");
     cy.findByDisplayValue("03/29/2022 23:59").should("be.visible");
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 2, 0, 0, 0, 0)),
       isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 2, 29, 23, 59, 59)),
       isIncluded: true,
@@ -277,13 +277,13 @@ describe("DateRangePicker", () => {
     cy.findByDisplayValue("02/01/2022 00:00").should("be.visible");
     cy.findByDisplayValue("02/28/2022 23:59").should("be.visible");
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeAfter",
       filterValue: new Date(Date.UTC(2022, 1, 0, 0, 0, 0)),
       isIncluded: true,
     });
     cy.get("@spy-2").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeBefore",
       filterValue: new Date(Date.UTC(2022, 1, 28, 23, 59, 59)),
       isIncluded: true,
@@ -317,11 +317,11 @@ describe("DateRangePicker", () => {
     cy.contains("Insert Time").should("not.exist");
 
     cy.get("@spy-3").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeAfter",
     });
     cy.get("@spy-3").should("be.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "eventTimeBefore",
     });
 

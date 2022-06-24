@@ -87,14 +87,14 @@
           data-cy="filter-not-included-switch"
         ></InputSwitch>
       </div>
-      <NodePropertyInput
+      <ObjectPropertyInput
         v-model="filterModel"
         :fixed-property-type="true"
         :allow-delete="false"
         form-type="filter"
         :queue="queue"
       >
-      </NodePropertyInput>
+      </ObjectPropertyInput>
       <Button
         data-cy="filter-chip-submit-button"
         name="update-filter"
@@ -124,17 +124,17 @@
   import OverlayPanel from "primevue/overlaypanel";
   import InputSwitch from "primevue/inputswitch";
 
-  import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
+  import ObjectPropertyInput from "@/components/Objects/ObjectPropertyInput.vue";
   import { alertFilterValues } from "@/models/alert";
   import { eventFilterValues } from "@/models/event";
 
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const filterStore = useFilterStore();
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
 
   const queue = computed(() => {
-    return currentUserSettingsStore.queues[nodeType] != null
-      ? currentUserSettingsStore.queues[nodeType]!.value
+    return currentUserSettingsStore.queues[objectType] != null
+      ? currentUserSettingsStore.queues[objectType]!.value
       : "unknown";
   });
 
@@ -174,8 +174,8 @@
     events: validEventFilters,
   };
 
-  const filterNameObject = validFilters[nodeType]
-    ? validFilters[nodeType].find((filter) => {
+  const filterNameObject = validFilters[objectType]
+    ? validFilters[objectType].find((filter) => {
         return filter.name === props.filterName;
       })
     : null;
@@ -212,14 +212,14 @@
   function updateFilter() {
     if (filterModelOldValue.value) {
       filterStore.unsetFilterValue({
-        nodeType: nodeType,
+        objectType: objectType,
         filterName: props.filterName,
         filterValue: filterModelOldValue.value.filterValue,
         isIncluded: !filterModelOldValue.value.notIncluded,
       });
     }
     filterStore.setFilter({
-      nodeType: nodeType,
+      objectType: objectType,
       filterName: props.filterName,
       filterValue: filterModel.value.propertyValue as
         | alertFilterValues
@@ -230,7 +230,7 @@
 
   function unsetFilter() {
     filterStore.unsetFilter({
-      nodeType: nodeType,
+      objectType: objectType,
       filterName: props.filterName,
     });
   }
@@ -240,7 +240,7 @@
     notIncluded: boolean;
   }) {
     filterStore.unsetFilterValue({
-      nodeType: nodeType,
+      objectType: objectType,
       filterName: props.filterName,
       filterValue: args.value,
       isIncluded: !args.notIncluded,

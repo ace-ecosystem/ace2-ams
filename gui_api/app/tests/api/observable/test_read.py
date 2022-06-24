@@ -8,7 +8,7 @@ def test_get_observable(client_valid_access_token, requests_mock):
         json={
             "type": {"uuid": str(uuid4()), "value": "test_type"},
             "value": "value",
-            "node_type": "observable",
+            "object_type": "observable",
             "uuid": str(uuid4()),
             "directives": [],
             "observable_relationships": [],

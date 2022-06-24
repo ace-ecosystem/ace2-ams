@@ -526,58 +526,6 @@ def test_filter_by_tags(db):
     assert submission4 in result
 
 
-def test_filter_by_threat_actors(db):
-    submission1 = factory.submission.create(db=db)
-    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission1.root_analysis, db=db)
-
-    submission2 = factory.submission.create(threat_actors=["submission2_actor"], db=db)
-    factory.observable.create_or_read(type="type2", value="value2", parent_analysis=submission2.root_analysis, db=db)
-
-    submission3 = factory.submission.create(db=db)
-    factory.observable.create_or_read(
-        type="type3",
-        value="value3",
-        parent_analysis=submission3.root_analysis,
-        threat_actors=["observable3_actor"],
-        db=db,
-    )
-
-    result = crud.submission.read_all(threat_actors=["submission2_actor"], db=db)
-    assert result == [submission2]
-
-    result = crud.submission.read_all(threat_actors=["observable3_actor"], db=db)
-    assert result == [submission3]
-
-    result = crud.submission.read_all(threat_actors=["observable3_actor", "submission2_actor"], db=db)
-    assert len(result) == 2
-    assert submission3 in result
-    assert submission2 in result
-
-
-def test_filter_by_threats(db):
-    submission1 = factory.submission.create(db=db)
-    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission1.root_analysis, db=db)
-
-    submission2 = factory.submission.create(threats=["submission2_actor"], db=db)
-    factory.observable.create_or_read(type="type2", value="value2", parent_analysis=submission2.root_analysis, db=db)
-
-    submission3 = factory.submission.create(db=db)
-    factory.observable.create_or_read(
-        type="type3", value="value3", parent_analysis=submission3.root_analysis, threats=["observable3_actor"], db=db
-    )
-
-    result = crud.submission.read_all(threats=["submission2_actor"], db=db)
-    assert result == [submission2]
-
-    result = crud.submission.read_all(threats=["observable3_actor"], db=db)
-    assert result == [submission3]
-
-    result = crud.submission.read_all(threats=["observable3_actor", "submission2_actor"], db=db)
-    assert len(result) == 2
-    assert submission3 in result
-    assert submission2 in result
-
-
 def test_filter_by_tool(db):
     submission1 = factory.submission.create(tool="tool1", db=db)
     submission2 = factory.submission.create(tool="tool2", db=db)

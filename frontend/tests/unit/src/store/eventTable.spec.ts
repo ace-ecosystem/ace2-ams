@@ -5,7 +5,7 @@ import { eventFilterParams } from "@/models/event";
 import { parseEventSummary, useEventTableStore } from "@/stores/eventTable";
 import { eventReadFactory, eventSummaryFactory } from "@mocks/events";
 import { queueableObjectReadFactory } from "@mocks/genericObject";
-import { nodeThreatReadFactory } from "@mocks/nodeThreat";
+import { threatReadFactory } from "@mocks/threat";
 import { userReadFactory } from "@mocks/user";
 import { createCustomPinia } from "@tests/unitHelpers";
 
@@ -29,7 +29,7 @@ const mockPreventionTool = queueableObjectReadFactory({
 });
 const mockSeverity = queueableObjectReadFactory({ value: "severity" });
 const mockStatus = queueableObjectReadFactory({ value: "status" });
-const mockThreat = nodeThreatReadFactory();
+const mockThreat = threatReadFactory();
 const mockThreatActor = queueableObjectReadFactory({ value: "threatActor" });
 const mockType = queueableObjectReadFactory({ value: "type" });
 const mockVector = queueableObjectReadFactory({ value: "vector" });
@@ -51,7 +51,7 @@ const mockEventReadCSummary = eventSummaryFactory({
   severity: "severity",
   status: "status",
   threatActors: ["threatActor"],
-  threats: ["nodeThreat"],
+  threats: ["threat"],
   type: "type",
   vectors: ["vector"],
   queue: "testObject",

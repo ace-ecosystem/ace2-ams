@@ -8,7 +8,7 @@ import { observableTreeRead } from "@/models/observable";
 import { analysisTreeRead } from "@/models/analysis";
 import { observableTreeReadFactory } from "@mocks/observable";
 import {
-  analysisModuleTypeNodeTreeReadFactory,
+  analysisModuleTypeAlertTreeReadFactory,
   analysisTreeReadFactory,
 } from "@mocks/analysis";
 import { testConfiguration } from "@/etc/configuration/test";
@@ -20,7 +20,7 @@ const childObservable = observableTreeReadFactory({
   firstAppearance: true,
 });
 const childAnalysis = analysisTreeReadFactory({
-  analysisModuleType: analysisModuleTypeNodeTreeReadFactory({
+  analysisModuleType: analysisModuleTypeAlertTreeReadFactory({
     value: "Child Analysis",
   }),
 });
@@ -30,7 +30,7 @@ const parentObservable = observableTreeReadFactory({
   tags: [metadataTagReadFactory({ value: "testTag" })],
 });
 const parentAnalysis = analysisTreeReadFactory({
-  analysisModuleType: analysisModuleTypeNodeTreeReadFactory({
+  analysisModuleType: analysisModuleTypeAlertTreeReadFactory({
     value: "Parent Analysis",
   }),
   children: [childObservable],
@@ -54,7 +54,7 @@ function factory(
   return mount(AlertTree, {
     global: {
       plugins: [createCustomCypressPinia(), PrimeVue, router, ToastService],
-      provide: { nodeType: "alerts", config: testConfiguration },
+      provide: { objectType: "alerts", config: testConfiguration },
     },
     propsData: args.props,
   });
@@ -90,7 +90,7 @@ describe("AlertTree", () => {
       .should("contain.text", "testObservableType")
       .get(".pi-chevron-right");
   });
-  it("toggles showing child nodes (analysis or observables) when toggle clicked", () => {
+  it("toggles showing child objects (analysis or observables) when toggle clicked", () => {
     factory({
       props: { items: [parentObservable, parentAnalysis], alertId: "test" },
     });

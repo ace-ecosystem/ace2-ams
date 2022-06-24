@@ -1,6 +1,6 @@
 import { UUID } from "./base";
 import {
-  analysisModuleTypeNodeTreeRead,
+  analysisModuleTypeAlertTreeRead,
   analysisModuleTypeRead,
 } from "./analysisModuleType";
 import { observableRead, observableTreeRead } from "./observable";
@@ -11,7 +11,7 @@ export interface analysisRead {
   childObservables: observableRead[];
   details: Record<string, unknown> | null;
   errorMessage: string | null;
-  nodeType: string;
+  objectType: string;
   runTime: string;
   stackTrace: string | null;
   summary: string | null;
@@ -19,11 +19,11 @@ export interface analysisRead {
 }
 
 export interface analysisTreeRead {
-  analysisModuleType: analysisModuleTypeNodeTreeRead;
+  analysisModuleType: analysisModuleTypeAlertTreeRead;
   children: observableTreeRead[];
   errorMessage: string | null;
   firstAppearance?: boolean;
-  nodeType: string;
+  objectType: string;
   stackTrace: string | null;
   summary: string | null;
   uuid: UUID;

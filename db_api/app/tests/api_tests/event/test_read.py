@@ -50,9 +50,22 @@ def test_get_summary_nonexistent_event(client, path):
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_get_version_nonexistent_uuid(client):
+    get = client.get(f"/api/event/{uuid.uuid4()}/version")
+    assert get.status_code == status.HTTP_404_NOT_FOUND
+
+
 #
 # VALID TESTS
 #
+
+
+def test_get_version(client, db):
+    event = factory.event.create_or_read(name="test event", db=db)
+
+    get = client.get(f"/api/event/{event.uuid}/version")
+    assert get.status_code == status.HTTP_200_OK
+    assert get.json() == {"version": str(event.version)}
 
 
 def test_summary_detection_point(client, db):
@@ -985,8 +998,8 @@ def test_get_all_pagination(client, db):
         for event in get.json()["items"]:
             unique_event_uuids.add(event["uuid"])
 
-            # Make sure the node_type field is "event"
-            assert event["node_type"] == "event"
+            # Make sure the object_type field is "event"
+            assert event["object_type"] == "event"
 
         # Check if there is another page to retrieve
         if len(unique_event_uuids) < get.json()["total"]:
@@ -1723,17 +1736,9 @@ def test_get_filter_tags(client, db):
 
 
 def test_get_filter_threat_actors(client, db):
-    event1 = factory.event.create_or_read(name="event1", db=db)
-    alert1 = factory.submission.create(event=event1, db=db)
-    factory.observable.create_or_read(
-        type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, threat_actors=["bad_guys"]
-    )
-
-    event2 = factory.event.create_or_read(name="event2", db=db)
-    factory.submission.create(event=event2, db=db, threat_actors=["test_actor"])
-
+    factory.event.create_or_read(name="event1", threat_actors=["bad_guys"], db=db)
+    event2 = factory.event.create_or_read(name="event2", threat_actors=["test_actor"], db=db)
     event3 = factory.event.create_or_read(name="event3", db=db, threat_actors=["test_actor2"])
-    factory.submission.create(event=event3, db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1743,11 +1748,6 @@ def test_get_filter_threat_actors(client, db):
     get = client.get("/api/event/?threat_actors=test_actor")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event2"
-
-    # There should be 1 event when we filter by the child observable threat_actor
-    get = client.get("/api/event/?threat_actors=bad_guys")
-    assert get.json()["total"] == 1
-    assert get.json()["items"][0]["name"] == "event1"
 
     # There should be 1 event when we filter test_actor2
     get = client.get("/api/event/?threat_actors=test_actor2")
@@ -1762,17 +1762,9 @@ def test_get_filter_threat_actors(client, db):
 
 
 def test_get_filter_threats(client, db):
-    event1 = factory.event.create_or_read(name="event1", db=db)
-    alert1 = factory.submission.create(event=event1, db=db)
-    factory.observable.create_or_read(
-        type="fqdn", value="bad.com", parent_analysis=alert1.root_analysis, db=db, threats=["malz"]
-    )
-
-    event2 = factory.event.create_or_read(name="event2", db=db)
-    factory.submission.create(event=event2, db=db, threats=["threat1"])
-
+    factory.event.create_or_read(name="event1", threats=["malz"], db=db)
+    event2 = factory.event.create_or_read(name="event2", threats=["threat1"], db=db)
     event3 = factory.event.create_or_read(name="event3", db=db, threats=["threat2", "threat3"])
-    factory.submission.create(event=event3, db=db)
 
     # There should be 3 total events
     get = client.get("/api/event/")
@@ -1782,11 +1774,6 @@ def test_get_filter_threats(client, db):
     get = client.get("/api/event/?threats=threat1")
     assert get.json()["total"] == 1
     assert get.json()["items"][0]["name"] == "event2"
-
-    # There should be 1 event when we filter by the child observable threat
-    get = client.get("/api/event/?threats=malz")
-    assert get.json()["total"] == 1
-    assert get.json()["items"][0]["name"] == "event1"
 
     # There should be 1 event when we filter by threat2 AND threat3
     get = client.get("/api/event/?threats=threat2,threat3")

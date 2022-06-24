@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { alertFilters } from "@/etc/configuration/alerts";
 import {
-  formatNodeFiltersForAPI,
+  formatObjectFiltersForAPI,
   parseFilters,
   getAlertLink,
   getAllAlertTags,
@@ -397,7 +397,7 @@ describe("parseFilters", () => {
   });
 });
 
-describe("formatNodeFiltersForAPI", () => {
+describe("formatObjectFiltersForAPI", () => {
   const MOCK_PARAMS: alertFilterParams = {
     limit: 10,
     offset: 10,
@@ -545,7 +545,7 @@ describe("formatNodeFiltersForAPI", () => {
     },
   };
   it("will correctly format filters for each given input type (select, text, multiselect, chips, categorizedValue, date)", async () => {
-    const formattedFilters = formatNodeFiltersForAPI(
+    const formattedFilters = formatObjectFiltersForAPI(
       alertFilters.external,
       MOCK_PARAMS,
     );

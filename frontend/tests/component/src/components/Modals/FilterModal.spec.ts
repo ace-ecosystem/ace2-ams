@@ -40,7 +40,7 @@ function factory(
         }),
       ],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
         rangeFilters: testConfiguration.alerts.alertRangeFilters,
         availableFilters: testConfiguration.alerts.alertFilters,
       },
@@ -134,7 +134,7 @@ describe("FilterModal", () => {
     cy.contains("Clear").click();
     cy.contains("Submit").click();
     cy.get("@spy-5").should("have.been.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
     }); //clearAll
     cy.get("[data-cy=FilterModal]").should("not.exist");
   });
@@ -160,7 +160,7 @@ describe("FilterModal", () => {
       .click();
     cy.contains("Submit").click();
     cy.get("@spy-1").should("have.been.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         name: { included: ["test name"], notIncluded: ["test value 2"] },
       },

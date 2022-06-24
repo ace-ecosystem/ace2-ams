@@ -8,17 +8,17 @@ import { eventStatusRead } from "./eventStatus";
 import { eventTypeRead } from "./eventType";
 import { eventVectorRead } from "./eventVector";
 import { metadataTagRead } from "./metadataTag";
-import { nodeCreate, nodeRead, nodeReadPage, nodeUpdate } from "./node";
-import { nodeCommentRead } from "./nodeComment";
-import { nodeThreatRead } from "./nodeThreat";
-import { nodeThreatActorRead } from "./nodeThreatActor";
+import { eventCommentRead } from "./eventComment";
+import { threatRead } from "./threat";
+import { threatActorRead } from "./threatActor";
 import { observableTypeRead } from "./observableType";
 import { queueRead } from "./queue";
 import { userRead } from "./user";
+import { readPage } from "./page";
 
 // High-level event data that will be displayed in Manage Events
 export interface eventSummary {
-  comments: nodeCommentRead[];
+  comments: eventCommentRead[];
   createdTime: Date;
   // disposition: string;
   name: string;
@@ -37,7 +37,7 @@ export interface eventSummary {
   [key: string]: unknown;
 }
 
-export interface eventCreate extends nodeCreate, historyUsername {
+export interface eventCreate extends historyUsername {
   alertTime?: Date;
   containTime?: Date;
   dispositionTime?: Date;
@@ -59,7 +59,7 @@ export interface eventCreate extends nodeCreate, historyUsername {
   [key: string]: unknown;
 }
 
-export interface eventRead extends nodeRead {
+export interface eventRead {
   alertTime: string | null;
   alertUuids: UUID[];
   analysisTypes: string[];
@@ -67,12 +67,13 @@ export interface eventRead extends nodeRead {
   autoDispositionTime: string | null;
   autoEventTime: string | null;
   autoOwnershipTime: string | null;
-  comments: nodeCommentRead[];
+  comments: eventCommentRead[];
   containTime: string | null;
   createdTime: string;
   dispositionTime: string | null;
   eventTime: string | null;
   name: string;
+  objectType: string;
   owner: userRead | null;
   ownershipTime: string | null;
   preventionTools: eventPreventionToolRead[];
@@ -83,18 +84,20 @@ export interface eventRead extends nodeRead {
   source: eventSourceRead | null;
   status: eventStatusRead | null;
   tags: metadataTagRead[];
-  threatActors: nodeThreatActorRead[];
-  threats: nodeThreatRead[];
+  threatActors: threatActorRead[];
+  threats: threatRead[];
   type: eventTypeRead | null;
+  uuid: UUID;
   vectors: eventVectorRead[];
+  version: UUID;
   [key: string]: unknown;
 }
 
-export interface eventReadPage extends nodeReadPage {
+export interface eventReadPage extends readPage {
   items: eventRead[];
 }
 
-export interface eventUpdate extends nodeUpdate, historyUsername {
+export interface eventUpdate extends historyUsername {
   alertTime?: Date | null;
   containTime?: Date | null;
   dispositionTime?: Date | null;
@@ -114,6 +117,7 @@ export interface eventUpdate extends nodeUpdate, historyUsername {
   type?: string | null;
   uuid: UUID;
   vectors?: string[];
+  version?: UUID;
   [key: string]: unknown;
 }
 
@@ -147,10 +151,10 @@ export interface eventFilterParams extends pageOptionParams {
   };
   status?: { included: eventStatusRead[]; notIncluded: eventStatusRead[] };
   threatActors?: {
-    included: nodeThreatActorRead[];
-    notIncluded: nodeThreatActorRead[];
+    included: threatActorRead[];
+    notIncluded: threatActorRead[];
   };
-  threats?: { included: nodeThreatRead[][]; notIncluded: nodeThreatRead[][] };
+  threats?: { included: threatRead[][]; notIncluded: threatRead[][] };
   vectors?: { included: eventVectorRead[]; notIncluded: eventVectorRead[] };
   tags?: { included: string[][]; notIncluded: string[][] };
   [key: string]: any;
@@ -168,8 +172,8 @@ export type eventFilterValues =
       | eventStatusRead
       | eventTypeRead
       | eventVectorRead
-      | nodeThreatActorRead
-      | nodeThreatRead
+      | threatActorRead
+      | threatRead
       | observableTypeRead
       | string
       | userRead

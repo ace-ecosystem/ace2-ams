@@ -6,7 +6,7 @@ from uuid import uuid4
 from api_models.submission import SubmissionUpdate
 from db import crud
 from exceptions.db import VersionMismatch
-from tests.db_tests.crud.node import VALID_LIST_STRING_VALUES
+from tests.db_tests.crud.helpers import VALID_LIST_STRING_VALUES
 from tests import factory
 
 
@@ -182,16 +182,12 @@ def test_update_queue(db):
     "key,value_lists,helper_create_func",
     [
         ("tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
-        ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
-        ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
     ],
 )
-def test_update_valid_node_fields(db, key, value_lists, helper_create_func):
+def test_update_valid_list_fields(db, key, value_lists, helper_create_func):
     for value_list in value_lists:
         submission = factory.submission.create(
             tags=["remove_me"],
-            threat_actors=["remove_me"],
-            threats=["remove_me"],
             db=db,
             history_username="analyst",
         )

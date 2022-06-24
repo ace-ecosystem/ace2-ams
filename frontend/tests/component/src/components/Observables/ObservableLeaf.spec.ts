@@ -60,7 +60,7 @@ function factory(
       ],
       provide: {
         config: args.config,
-        nodeType: "alerts",
+        objectType: "alerts",
       },
     },
     propsData: args.props,
@@ -315,7 +315,7 @@ describe("ObservableLeaf", () => {
     });
     cy.contains("Observable w/ Tags").click();
     cy.get("@stub-5").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         observable: {
           included: [
@@ -337,7 +337,7 @@ describe("ObservableLeaf", () => {
     });
     cy.contains("Observable with display type").click();
     cy.get("@stub-5").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         observable: {
           included: [
@@ -359,7 +359,7 @@ describe("ObservableLeaf", () => {
     });
     cy.contains("displayValue").click();
     cy.get("@stub-5").should("have.been.calledWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: {
         observable: {
           included: [

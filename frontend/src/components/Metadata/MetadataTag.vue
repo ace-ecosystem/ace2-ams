@@ -17,8 +17,8 @@
   import { metadataTagRead } from "@/models/metadataTag";
 
   const router = useRouter();
-  const nodeType = inject("nodeType") as "alerts" | "events";
-  const nodeRoutes = {
+  const objectType = inject("objectType") as "alerts" | "events";
+  const objectRoutes = {
     alerts: "/manage_alerts",
     events: "/manage_events",
   };
@@ -27,7 +27,7 @@
 
   const props = defineProps({
     tag: { type: Object as PropType<metadataTagRead>, required: true },
-    overrideNodeType: {
+    overrideObjectType: {
       type: String as PropType<"alerts" | "events">,
       required: false,
       default: null,
@@ -35,13 +35,13 @@
   });
 
   function filterByTags() {
-    const preferredNodeType = props.overrideNodeType
-      ? props.overrideNodeType
-      : nodeType;
-    const route = nodeRoutes[preferredNodeType];
+    const preferredObjectType = props.overrideObjectType
+      ? props.overrideObjectType
+      : objectType;
+    const route = objectRoutes[preferredObjectType];
     if (route) {
       filterStore.bulkSetFilters({
-        nodeType: preferredNodeType,
+        objectType: preferredObjectType,
         filters: {
           tags: { included: [[props.tag.value]], notIncluded: [] },
         },

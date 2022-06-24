@@ -6,11 +6,7 @@ import {
 } from "./analysisMetadata";
 import { historyUsername, UUID } from "./base";
 import { metadataTagRead } from "./metadataTag";
-import { nodeCreate, nodeRead, nodeUpdate } from "./node";
-import { nodeCommentRead } from "./nodeComment";
-import { nodeRelationshipRead } from "./nodeRelationship";
-import { nodeThreatRead } from "./nodeThreat";
-import { nodeThreatActorRead } from "./nodeThreatActor";
+import { observableRelationshipRead } from "./observableRelationship";
 import { observableTypeRead } from "./observableType";
 
 export interface dispositionHistoryIndividual {
@@ -19,7 +15,7 @@ export interface dispositionHistoryIndividual {
   percent: number;
 }
 
-export interface observableCreate extends nodeCreate, historyUsername {
+export interface observableCreate extends historyUsername {
   // The backend API actually allows you to specify a list of AnalysisCreate objects
   // when creating an observable, but we have not exposed that functionality in the GUI (yet).
   analysisMetadata?: analysisMetadataCreate[];
@@ -28,24 +24,22 @@ export interface observableCreate extends nodeCreate, historyUsername {
   forDetection?: boolean;
   parentAnalysisUuid: UUID;
   tags?: string[];
-  threatActors?: string[];
-  threats?: string[];
   type: string;
   value: string;
   [key: string]: unknown;
 }
 
-export interface observableRead extends nodeRead {
-  comments: nodeCommentRead[];
+export interface observableRead {
   context: string | null;
   expiresOn: string | null;
   forDetection: boolean;
+  objectType: string;
   observableRelationships: observableRelationshipRead[];
   tags: metadataTagRead[];
-  threatActors: nodeThreatActorRead[];
-  threats: nodeThreatRead[];
   type: observableTypeRead;
+  uuid: UUID;
   value: string;
+  version: UUID;
 }
 
 export interface observableInAlertRead extends observableRead {
@@ -65,20 +59,15 @@ export interface observableTreeRead extends observableInAlertRead {
   firstAppearance?: boolean;
 }
 
-export interface observableUpdate extends nodeUpdate, historyUsername {
+export interface observableUpdate extends historyUsername {
   context?: string;
   expiresOn?: Date | null;
   forDetection?: boolean;
   tags?: string[];
-  threatActors?: string[];
-  threats?: string[];
   type?: string;
   value?: string;
+  version?: UUID;
   [key: string]: unknown;
-}
-
-export interface observableRelationshipRead extends nodeRelationshipRead {
-  relatedNode: observableRead;
 }
 
 export type observableAction = {

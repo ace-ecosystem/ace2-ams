@@ -2,7 +2,7 @@
 <!-- The table where all currently filtered alerts are displayed, selected to take action, or link to an individual alert page -->
 
 <template>
-  <TheNodeTable
+  <TheObjectTable
     :columns="columns"
     @row-expand="onRowExpand"
     @row-collapse="onRowCollapse"
@@ -22,7 +22,7 @@
         ></AlertTableExpansion>
       </div>
     </template>
-  </TheNodeTable>
+  </TheObjectTable>
 </template>
 
 <script setup lang="ts">
@@ -30,7 +30,7 @@
 
   import AlertTableCell from "@/components/Alerts/AlertTableCell.vue";
   import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
-  import TheNodeTable from "@/components/Node/TheNodeTable.vue";
+  import TheObjectTable from "@/components/Objects/TheObjectTable.vue";
 
   import { observableInAlertRead } from "@/models/observable";
 

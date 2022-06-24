@@ -8,7 +8,7 @@ import { Event } from "@/services/api/event";
 import { eventReadFactory } from "@mocks/events";
 import { eventRead } from "@/models/event";
 import { Alert } from "@/services/api/alert";
-import { NodeComment } from "@/services/api/nodeComment";
+import { EventComment } from "@/services/api/eventComment";
 import { userReadFactory } from "@mocks/user";
 
 const openStatus = queueableObjectReadFactory({ value: "OPEN" });
@@ -66,7 +66,7 @@ function factory(
         }),
       ],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
       },
     },
     propsData: {
@@ -112,7 +112,7 @@ describe("SaveToEventModal", () => {
   it("closes the modal without doing anything when back button is clicked", () => {
     cy.stub(Alert, "update").as("updateAlert");
     cy.stub(Event, "create").as("createEvent");
-    cy.stub(NodeComment, "create").as("createComment");
+    cy.stub(EventComment, "create").as("createComment");
     factory();
     cy.contains("Back").click();
     cy.get("[data-cy='save-to-event-modal']").should("not.exist");
@@ -291,11 +291,11 @@ describe("SaveToEventModal", () => {
       )
       .as("createEvent")
       .returns(eventReadFactory());
-    cy.stub(NodeComment, "create")
+    cy.stub(EventComment, "create")
       .withArgs([
         {
           username: "analyst",
-          nodeUuid: "testEvent1",
+          eventUuid: "testEvent1",
           user: "analyst",
           value: "Test Comment",
         },
@@ -330,7 +330,7 @@ describe("SaveToEventModal", () => {
     cy.get("@updateAlert").should("have.been.calledOnce");
     cy.get("[data-cy='save-to-event-modal']").should("not.exist");
   });
-  it("attempts to create and save to new event when new event, and disposition comment when is selected, comment is given using NodeCommentAutocomplete, and the 'Save' button is clicked", () => {
+  it("attempts to create and save to new event when new event, and disposition comment when is selected, comment is given using CommentAutocomplete, and the 'Save' button is clicked", () => {
     cy.stub(Event, "create")
       .withArgs(
         {
@@ -344,11 +344,11 @@ describe("SaveToEventModal", () => {
       )
       .as("createEvent")
       .returns(eventReadFactory());
-    cy.stub(NodeComment, "create")
+    cy.stub(EventComment, "create")
       .withArgs([
         {
           username: "analyst",
-          nodeUuid: "testEvent1",
+          eventUuid: "testEvent1",
           user: "analyst",
           value: "test extra content",
         },
@@ -455,11 +455,11 @@ describe("SaveToEventModal", () => {
       )
       .as("createEvent")
       .returns(eventReadFactory());
-    cy.stub(NodeComment, "create")
+    cy.stub(EventComment, "create")
       .withArgs([
         {
           username: "analyst",
-          nodeUuid: "testEvent1",
+          eventUuid: "testEvent1",
           user: "analyst",
           value: "Test Comment",
         },
@@ -507,11 +507,11 @@ describe("SaveToEventModal", () => {
       )
       .as("createEvent")
       .returns(eventReadFactory());
-    cy.stub(NodeComment, "create")
+    cy.stub(EventComment, "create")
       .withArgs([
         {
           username: "analyst",
-          nodeUuid: "testEvent1",
+          eventUuid: "testEvent1",
           user: "analyst",
           value: "Test Comment",
         },

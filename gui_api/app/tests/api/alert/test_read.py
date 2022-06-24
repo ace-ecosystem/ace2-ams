@@ -129,7 +129,7 @@ def test_get_alerts_observables(client_valid_access_token, requests_mock):
             {
                 "type": {"uuid": str(uuid4()), "value": "test_type"},
                 "value": "value",
-                "node_type": "observable",
+                "object_type": "observable",
                 "uuid": str(uuid4()),
                 "analysis_metadata": {"display_type": None, "display_value": None, "tags": []},
                 "directives": [],

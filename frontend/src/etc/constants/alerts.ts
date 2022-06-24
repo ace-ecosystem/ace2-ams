@@ -1,18 +1,18 @@
 import { propertyOption } from "@/models/base";
-import { nodeThreatRead } from "@/models/nodeThreat";
+import { threatRead } from "@/models/threat";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
 import { useAlertToolStore } from "@/stores/alertTool";
 import { useAlertToolInstanceStore } from "@/stores/alertToolInstance";
 import { useAlertTypeStore } from "@/stores/alertType";
 import { useMetadataTagStore } from "@/stores/metadataTag";
-import { useNodeThreatStore } from "@/stores/nodeThreat";
-import { useNodeThreatActorStore } from "@/stores/nodeThreatActor";
+import { useThreatStore } from "@/stores/threat";
+import { useThreatActorStore } from "@/stores/threatActor";
 import { useUserStore } from "@/stores/user";
 import {
   nameProperty,
   tagsProperty,
-  nodeThreatActorProperty,
-  nodeThreatsProperty,
+  threatActorProperty,
+  threatsProperty,
   observableProperty,
   observableTypesProperty,
   observableValueProperty,
@@ -25,7 +25,7 @@ import { inputTypes } from "./base";
 
 // NOTE: If alerts and events share a property name (like how they both originally had the "type" property),
 // care must be taken... The event type field is queueable, whereas the alert type field is not. This will
-// cause issues in the "formatNodeFiltersForAPI" function when you have properties that share a name but
+// cause issues in the "formatObjectFiltersForAPI" function when you have properties that share a name but
 // one is queueable and the other not. The fix for this is to rename the fields. So now there is the "alertType"
 // property and the "eventType" property.
 
@@ -193,7 +193,7 @@ export const alertThreatActorProperty: propertyOption = {
   name: alertPropertyTypes.THREAT_ACTOR_PROPERTY,
   label: "Threat Actor",
   type: inputTypes.SELECT,
-  store: useNodeThreatActorStore,
+  store: useThreatActorStore,
   optionProperty: "value",
   valueProperty: "value",
 };
@@ -201,8 +201,8 @@ export const alertThreatsProperty: propertyOption = {
   name: alertPropertyTypes.THREATS_PROPERTY,
   label: "Threats",
   type: inputTypes.MULTISELECT,
-  store: useNodeThreatStore,
-  stringRepr: (filter: nodeThreatRead[]) => {
+  store: useThreatStore,
+  stringRepr: (filter: threatRead[]) => {
     return filter
       .map(function (elem) {
         return elem.value;
@@ -263,8 +263,8 @@ export const validAlertFilters: propertyOption[] = [
   ownerProperty,
   queueProperty,
   tagsProperty,
-  nodeThreatActorProperty,
-  nodeThreatsProperty,
+  threatActorProperty,
+  threatsProperty,
   alertToolProperty,
   alertToolInstanceProperty,
   alertTypeProperty,

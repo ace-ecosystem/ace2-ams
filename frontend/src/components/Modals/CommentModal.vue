@@ -18,9 +18,9 @@
           placeholder="Add a comment..."
         />
       </div>
-      <NodeCommentAutocomplete
+      <CommentAutocomplete
         @comment-clicked="recentCommentClicked($event)"
-      ></NodeCommentAutocomplete>
+      ></CommentAutocomplete>
     </div>
     <template #footer>
       <Button
@@ -47,12 +47,13 @@
   import Textarea from "primevue/textarea";
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
-  import NodeCommentAutocomplete from "@/components/Node/NodeCommentAutocomplete.vue";
+  import CommentAutocomplete from "@/components/Comments/CommentAutocomplete.vue";
 
-  import { NodeComment } from "@/services/api/nodeComment";
+  import { AlertComment } from "@/services/api/alertComment";
+  import { EventComment } from "@/services/api/eventComment";
 
   import { useAuthStore } from "@/stores/auth";
-  import { nodeSelectedStores } from "@/stores/index";
+  import { objectSelectedStores } from "@/stores/index";
   import { useModalStore } from "@/stores/modal";
   import { useRecentCommentsStore } from "@/stores/recentComments";
 
@@ -62,9 +63,9 @@
     name: { type: String, required: true },
   });
 
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
   const authStore = useAuthStore();
-  const selectedStore = nodeSelectedStores[nodeType]();
+  const selectedStore = objectSelectedStores[objectType]();
   const modalStore = useModalStore();
   const recentCommentsStore = useRecentCommentsStore();
 
@@ -75,13 +76,23 @@
   async function addComment() {
     isLoading.value = true;
     try {
-      await NodeComment.create(
-        selectedStore.selected.map((uuid) => ({
-          username: authStore.user.username,
-          nodeUuid: uuid,
-          ...commentData.value,
-        })),
-      );
+      if (objectType === "alerts") {
+        await AlertComment.create(
+          selectedStore.selected.map((uuid) => ({
+            username: authStore.user.username,
+            submissionUuid: uuid,
+            ...commentData.value,
+          })),
+        );
+      } else if (objectType === "events") {
+        await EventComment.create(
+          selectedStore.selected.map((uuid) => ({
+            username: authStore.user.username,
+            eventUuid: uuid,
+            ...commentData.value,
+          })),
+        );
+      }
     } catch (e: unknown) {
       if (typeof e === "string") {
         error.value = e;

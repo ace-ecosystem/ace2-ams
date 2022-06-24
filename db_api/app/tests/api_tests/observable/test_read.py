@@ -20,9 +20,25 @@ def test_get_nonexistent_uuid(client):
     assert get.status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_get_version_nonexistent_uuid(client):
+    get = client.get(f"/api/observable/{uuid.uuid4()}/version")
+    assert get.status_code == status.HTTP_404_NOT_FOUND
+
+
 #
 # VALID TESTS
 #
+
+
+def test_get_version(client, db):
+    submission = factory.submission.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test_type", value="test_value", parent_analysis=submission.root_analysis, db=db
+    )
+
+    get = client.get(f"/api/observable/{observable.uuid}/version")
+    assert get.status_code == status.HTTP_200_OK
+    assert get.json() == {"version": str(observable.version)}
 
 
 def test_get(client, db):
@@ -33,7 +49,7 @@ def test_get(client, db):
 
     get = client.get(f"/api/observable/{observable.uuid}")
     assert get.status_code == status.HTTP_200_OK
-    assert get.json()["node_type"] == "observable"
+    assert get.json()["object_type"] == "observable"
 
 
 def test_get_all(client, db):
@@ -86,8 +102,8 @@ def test_observable_relationships(client, db):
     obs3 = factory.observable.create_or_read(
         type="test_type", value="test_value3", parent_analysis=submission.root_analysis, db=db
     )
-    factory.node_relationship.create_or_read(node=obs3, related_node=obs1, type="IS_HASH_OF", db=db)
-    factory.node_relationship.create_or_read(node=obs3, related_node=obs2, type="IS_EQUAL_TO", db=db)
+    factory.observable_relationship.create_or_read(observable=obs3, related_observable=obs1, type="IS_HASH_OF", db=db)
+    factory.observable_relationship.create_or_read(observable=obs3, related_observable=obs2, type="IS_EQUAL_TO", db=db)
 
     # The observable relationships should be sorted by the related observable's type then value.
     get = client.get(f"/api/observable/{obs3.uuid}")
@@ -95,6 +111,6 @@ def test_observable_relationships(client, db):
     assert len(obs3.relationships) == 2
     assert len(get.json()["observable_relationships"]) == 2
     assert get.json()["observable_relationships"][0]["type"]["value"] == "IS_HASH_OF"
-    assert get.json()["observable_relationships"][0]["related_node"]["uuid"] == str(obs1.uuid)
+    assert get.json()["observable_relationships"][0]["related_observable"]["uuid"] == str(obs1.uuid)
     assert get.json()["observable_relationships"][1]["type"]["value"] == "IS_EQUAL_TO"
-    assert get.json()["observable_relationships"][1]["related_node"]["uuid"] == str(obs2.uuid)
+    assert get.json()["observable_relationships"][1]["related_observable"]["uuid"] == str(obs2.uuid)

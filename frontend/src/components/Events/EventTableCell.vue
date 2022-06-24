@@ -20,7 +20,7 @@
     <br />
     <!-- Event Comments -->
     <span v-if="props.data.comments" data-cy="comments">
-      <pre class="p-mr-2 comment"><NodeComment
+      <pre class="p-mr-2 comment"><Comment
       v-for="comment in props.data.comments"
       :key="comment.uuid"
       :comment="comment"
@@ -64,7 +64,7 @@
   import Button from "primevue/button";
 
   import MetadataTag from "@/components/Metadata/MetadataTag.vue";
-  import NodeComment from "@/components/Node/NodeComment.vue";
+  import Comment from "@/components/Comments/Comment.vue";
   import EditEventModal from "@/components/Modals/EditEventModal.vue";
 
   import { useModalStore } from "@/stores/modal";

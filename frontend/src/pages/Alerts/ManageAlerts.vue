@@ -33,7 +33,7 @@
 
   provide("availableFilters", config.alerts.alertFilters);
   provide("availableEditFields", {});
-  provide("nodeType", "alerts");
+  provide("objectType", "alerts");
   provide("rangeFilters", config.alerts.alertRangeFilters);
 
   const filterStore = useFilterStore();
@@ -57,7 +57,7 @@
   function loadRouteQuery() {
     // load filters given in route
     filterStore.bulkSetFilters({
-      nodeType: "alerts",
+      objectType: "alerts",
       filters: parseFilters(route.query, validAlertFilters),
     });
     // Reload page to clear URL params

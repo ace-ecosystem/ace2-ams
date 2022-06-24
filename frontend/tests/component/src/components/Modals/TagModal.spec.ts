@@ -20,14 +20,14 @@ function factory(
   args: {
     selected: string[];
     existingTags: metadataTagRead[];
-    nodeType: "alerts" | "events" | "observable";
-    reloadObject: "node" | "table";
+    objectType: "alerts" | "events" | "observable";
+    reloadObject: "object" | "table";
     observable: undefined | observableTreeRead;
   } = {
     selected: [],
     existingTags: [],
-    nodeType: "alerts",
-    reloadObject: "node",
+    objectType: "alerts",
+    reloadObject: "object",
     observable: undefined,
   },
 ) {
@@ -71,7 +71,7 @@ function factory(
     propsData: {
       name: "TagModal",
       reloadObject: args.reloadObject,
-      nodeType: args.nodeType,
+      objectType: args.objectType,
       observable: args.observable,
     },
   }).then((wrapper) => {
@@ -98,8 +98,8 @@ describe("TagModal", () => {
     factory({
       selected: [],
       existingTags: [testTag],
-      nodeType: "alerts",
-      reloadObject: "node",
+      objectType: "alerts",
+      reloadObject: "object",
 
       observable: undefined,
     });
@@ -107,12 +107,12 @@ describe("TagModal", () => {
     cy.contains("testTag").click();
     cy.findByText("testTag").should("be.visible");
   });
-  it("enables 'Add' button when there is a node selected and 1 or more tags added", () => {
+  it("enables 'Add' button when there is a object selected and 1 or more tags added", () => {
     factory({
       selected: ["uuid"],
       existingTags: [],
-      nodeType: "alerts",
-      reloadObject: "node",
+      objectType: "alerts",
+      reloadObject: "object",
 
       observable: undefined,
     });
@@ -122,7 +122,7 @@ describe("TagModal", () => {
       .type("{enter}");
     cy.findByText("Add").parent().should("not.be.disabled");
   });
-  it("disables 'Add' button when there is not a node selected and 1 or more tags added", () => {
+  it("disables 'Add' button when there is not a object selected and 1 or more tags added", () => {
     factory();
     cy.get('[data-cy="chips-container"]')
       .click()
@@ -130,18 +130,18 @@ describe("TagModal", () => {
       .type("{enter}");
     cy.findByText("Add").parent().should("be.disabled");
   });
-  it("disables 'Add' button when there is a node selected and no tags added", () => {
+  it("disables 'Add' button when there is a object selected and no tags added", () => {
     factory({
       selected: ["uuid"],
       existingTags: [],
-      nodeType: "alerts",
-      reloadObject: "node",
+      objectType: "alerts",
+      reloadObject: "object",
 
       observable: undefined,
     });
     cy.findByText("Add").parent().should("be.disabled");
   });
-  it("attempts to create new tags and update selected nodes with new and existing tags and 'Add' clicked", () => {
+  it("attempts to create new tags and update selected objects with new and existing tags and 'Add' clicked", () => {
     cy.stub(MetadataTag, "create")
       .withArgs({
         value: "newTag",
@@ -166,8 +166,8 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
-      nodeType: "alerts",
-      reloadObject: "node",
+      objectType: "alerts",
+      reloadObject: "object",
 
       observable: undefined,
     });
@@ -203,7 +203,7 @@ describe("TagModal", () => {
     factory({
       selected: ["uuidA", "uuidB"],
       existingTags: [testTag, existingTag],
-      nodeType: "alerts",
+      objectType: "alerts",
       reloadObject: "table",
       observable: undefined,
     });
@@ -246,8 +246,8 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
-      nodeType: "observable",
-      reloadObject: "node",
+      objectType: "observable",
+      reloadObject: "object",
 
       observable: observableTreeReadFactory({
         tags: [testTag, existingTag],
@@ -283,8 +283,8 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
-      nodeType: "alerts",
-      reloadObject: "node",
+      objectType: "alerts",
+      reloadObject: "object",
 
       observable: undefined,
     });
@@ -316,8 +316,8 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
-      nodeType: "alerts",
-      reloadObject: "node",
+      objectType: "alerts",
+      reloadObject: "object",
 
       observable: undefined,
     });
@@ -334,7 +334,7 @@ describe("TagModal", () => {
     cy.get("@updateAlert").should("not.have.been");
     cy.contains("404 request failed !").should("be.visible");
   });
-  it("shows error if request to update node tags fails", () => {
+  it("shows error if request to update object tags fails", () => {
     cy.stub(MetadataTag, "create")
       .withArgs({
         value: "newTag",
@@ -359,8 +359,8 @@ describe("TagModal", () => {
     factory({
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
-      nodeType: "alerts",
-      reloadObject: "node",
+      objectType: "alerts",
+      reloadObject: "object",
 
       observable: undefined,
     });

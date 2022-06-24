@@ -4,7 +4,7 @@ import uuid
 from dateutil.parser import parse
 from fastapi import status
 
-from tests.api_tests.node import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
+from tests.api_tests.helpers import INVALID_LIST_STRING_VALUES, VALID_LIST_STRING_VALUES
 from tests import factory
 
 
@@ -85,7 +85,7 @@ def test_update_invalid_fields(client, key, value):
         ("threats", INVALID_LIST_STRING_VALUES),
     ],
 )
-def test_update_invalid_node_fields(client, key, values):
+def test_update_invalid_list_fields(client, key, values):
     for value in values:
         update = client.patch("/api/event/", json=[{key: value, "uuid": str(uuid.uuid4())}])
         assert update.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -134,11 +134,11 @@ def test_update_nonexistent_fields(client, db, key, value):
     "key",
     [("tags"), ("threat_actors"), ("threats")],
 )
-def test_update_nonexistent_node_fields(client, db, key):
+def test_update_nonexistent_list_fields(client, db, key):
     # Create an event
     event = factory.event.create_or_read(name="test", db=db)
 
-    # Make sure you cannot update it to use a nonexistent node field value
+    # Make sure you cannot update it to use a nonexistent list field value
     update = client.patch("/api/event/", json=[{key: ["abc"], "uuid": str(event.uuid)}])
     assert update.status_code == status.HTTP_404_NOT_FOUND
     assert "abc" in update.text
@@ -533,11 +533,11 @@ def test_update_vectors(client, db):
     "key,value_lists,helper_create_func",
     [
         ("tags", VALID_LIST_STRING_VALUES, factory.metadata_tag.create_or_read),
-        ("threat_actors", VALID_LIST_STRING_VALUES, factory.node_threat_actor.create_or_read),
-        ("threats", VALID_LIST_STRING_VALUES, factory.node_threat.create_or_read),
+        ("threat_actors", VALID_LIST_STRING_VALUES, factory.threat_actor.create_or_read),
+        ("threats", VALID_LIST_STRING_VALUES, factory.threat.create_or_read),
     ],
 )
-def test_update_valid_node_fields(client, db, key, value_lists, helper_create_func):
+def test_update_valid_list_fields(client, db, key, value_lists, helper_create_func):
     for value_list in value_lists:
         # Create an event
         event = factory.event.create_or_read(

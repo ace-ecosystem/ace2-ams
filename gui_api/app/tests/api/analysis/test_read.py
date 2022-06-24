@@ -7,7 +7,7 @@ def test_get_analysis(client_valid_access_token, requests_mock):
     requests_mock.get(
         f"http://db-api/api/analysis/{analysis_uuid}",
         json={
-            "node_type": "analysis",
+            "object_type": "analysis",
             "uuid": analysis_uuid,
             "detection_points": [],
             "child_observables": [],

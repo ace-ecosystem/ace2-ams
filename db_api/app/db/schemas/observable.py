@@ -5,6 +5,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    func,
     Index,
     String,
     UniqueConstraint,
@@ -20,8 +21,7 @@ from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_metadata import AnalysisMetadata
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.metadata_tag import MetadataTag
-from db.schemas.node import Node
-from db.schemas.node_relationship import NodeRelationship
+from db.schemas.observable_relationship import ObservableRelationship
 from db.schemas.observable_tag_mapping import observable_tag_mapping
 
 
@@ -31,10 +31,10 @@ class ObservableHistory(Base, HistoryMixin):
     record_uuid = Column(UUID(as_uuid=True), ForeignKey("observable.uuid"), index=True, nullable=False)
 
 
-class Observable(Node, HasHistory):
+class Observable(Base, HasHistory):
     __tablename__ = "observable"
 
-    uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
+    uuid = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
 
     # NOTE: You could alter this relationship to directly return a list of AlertDisposition objects. However,
     # a SQLAlchemy relationship only returns unique/distinct objects. So if an observable appears in multiple alerts
@@ -47,7 +47,6 @@ class Observable(Node, HasHistory):
         secondary="join(Submission, submission_analysis_mapping, and_(Submission.alert == True, submission_analysis_mapping.c.submission_uuid == Submission.uuid))."
         "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.analysis_uuid == submission_analysis_mapping.c.analysis_uuid)",
         primaryjoin="Observable.uuid == analysis_child_observable_mapping.c.observable_uuid",
-        foreign_keys="[Submission.uuid, Observable.uuid]",
         viewonly=True,
         lazy="selectin",
     )
@@ -79,6 +78,13 @@ class Observable(Node, HasHistory):
         order_by="ObservableHistory.action_time",
     )
 
+    relationships = relationship(
+        "ObservableRelationship",
+        primaryjoin="ObservableRelationship.observable_uuid == Observable.uuid",
+        viewonly=True,
+        lazy="selectin",
+    )
+
     tags: list[MetadataTag] = relationship("MetadataTag", secondary=observable_tag_mapping, lazy="selectin")
 
     type = relationship("ObservableType", lazy="selectin")
@@ -87,7 +93,7 @@ class Observable(Node, HasHistory):
 
     value = Column(String, nullable=False)
 
-    __mapper_args__ = {"polymorphic_identity": "observable", "polymorphic_load": "inline"}
+    version = Column(UUID(as_uuid=True), server_default=func.gen_random_uuid(), nullable=False)
 
     __table_args__ = (
         Index(
@@ -125,11 +131,10 @@ class Observable(Node, HasHistory):
             ).json()
         )
 
+    # TODO: Figure out how to sort this within the relationship itself
     @property
     def observable_relationships(self) -> list[ObservableRelationshipRead]:
         """Returns the list of observable relationships for this observable sorted by the
         related observable's type then value"""
 
-        results: list[NodeRelationship] = [r for r in self.relationships if isinstance(r.related_node, Observable)]
-
-        return sorted(results, key=lambda x: (x.related_node.type.value, x.related_node.value))
+        return sorted(self.relationships, key=lambda x: (x.related_observable.type.value, x.related_observable.value))

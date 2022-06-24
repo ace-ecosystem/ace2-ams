@@ -7,11 +7,7 @@ from typing import Optional, Union
 from uuid import UUID
 
 from db import crud
-from db.schemas.event import EventHistory
 from db.schemas.history import HasHistory
-from db.schemas.node import Node
-from db.schemas.observable import ObservableHistory
-from db.schemas.submission import SubmissionHistory
 from db.schemas.user import User
 
 
@@ -58,7 +54,7 @@ def create_diff(
 def record_create_history(
     history_table: DeclarativeMeta,
     action_by: User,
-    record: Union[Node, User, HasHistory],
+    record: Union[User, HasHistory],
     db: Session,
 ):
     # Refresh the database object so that its history snapshot is up to date
@@ -76,74 +72,10 @@ def record_create_history(
     db.flush()
 
 
-def record_node_create_history(
-    record_node: Union[Node, HasHistory],
-    action_by: User,
-    db: Session,
-):
-    if record_node.node_type == "event":
-        record_create_history(
-            history_table=EventHistory,
-            action_by=action_by,
-            record=record_node,
-            db=db,
-        )
-    elif record_node.node_type == "observable":
-        record_create_history(
-            history_table=ObservableHistory,
-            action_by=action_by,
-            record=record_node,
-            db=db,
-        )
-    if record_node.node_type == "submission":
-        record_create_history(
-            history_table=SubmissionHistory,
-            action_by=action_by,
-            record=record_node,
-            db=db,
-        )
-
-
-def record_node_update_history(
-    record_node: Union[Node, HasHistory],
-    action_by: User,
-    diffs: list[Diff],
-    db: Session,
-    action_time: Optional[datetime] = None,
-):
-    if record_node.node_type == "event":
-        record_update_history(
-            history_table=EventHistory,
-            action_by=action_by,
-            action_time=action_time,
-            record=record_node,
-            diffs=diffs,
-            db=db,
-        )
-    elif record_node.node_type == "observable":
-        record_update_history(
-            history_table=ObservableHistory,
-            action_by=action_by,
-            action_time=action_time,
-            record=record_node,
-            diffs=diffs,
-            db=db,
-        )
-    elif record_node.node_type == "submission":
-        record_update_history(
-            history_table=SubmissionHistory,
-            action_by=action_by,
-            action_time=action_time,
-            record=record_node,
-            diffs=diffs,
-            db=db,
-        )
-
-
 def record_update_history(
     history_table: DeclarativeMeta,
     action_by: User,
-    record: Union[Node, User, HasHistory],
+    record: Union[User, HasHistory],
     diffs: list[Diff],
     db: Session,
     action_time: Optional[datetime] = None,

@@ -48,9 +48,9 @@
   import BaseModal from "@/components/Modals/BaseModal.vue";
 
   import {
-    nodeStores,
-    nodeSelectedStores,
-    nodeTableStores,
+    objectStores,
+    objectSelectedStores,
+    objectTableStores,
   } from "@/stores/index";
   import { useAuthStore } from "@/stores/auth";
   import { useModalStore } from "@/stores/modal";
@@ -62,7 +62,7 @@
   const props = defineProps({
     name: { type: String, required: true },
     reloadObject: { type: String, required: true },
-    nodeType: {
+    objectType: {
       type: String as PropType<"alerts" | "events" | "observable">,
       required: true,
     },
@@ -73,13 +73,13 @@
     },
   });
 
-  let nodeStore: any;
+  let objectStore: any;
   let tableStore: any;
   let selectedStore: any;
-  if (!(props.nodeType === "observable")) {
-    nodeStore = nodeStores[props.nodeType]();
-    selectedStore = nodeSelectedStores[props.nodeType]();
-    tableStore = nodeTableStores[props.nodeType]();
+  if (!(props.objectType === "observable")) {
+    objectStore = objectStores[props.objectType]();
+    selectedStore = objectSelectedStores[props.objectType]();
+    tableStore = objectTableStores[props.objectType]();
   }
 
   const authStore = useAuthStore();
@@ -94,10 +94,10 @@
   const isLoading = ref(false);
 
   const initTagOptions = async () => {
-    if (props.nodeType === "observable" && props.observable) {
+    if (props.objectType === "observable" && props.observable) {
       tagOptions.value = props.observable.tags;
-    } else if (props.reloadObject == "node") {
-      tagOptions.value = nodeStore.open.tags;
+    } else if (props.reloadObject == "object") {
+      tagOptions.value = objectStore.open.tags;
     } else {
       try {
         await metadataTagStore.readAll();
@@ -115,7 +115,7 @@
   async function removeTags() {
     isLoading.value = true;
     try {
-      if (props.nodeType == "observable") {
+      if (props.objectType == "observable") {
         await removeObservableTags();
       } else {
         await removeTagsFromObservable();
@@ -145,16 +145,16 @@
       historyUsername: authStore.user.username,
     }));
 
-    await nodeStore.update(updateData);
+    await objectStore.update(updateData);
   };
 
   const existingTagValues = (uuid: string) => {
     let tags: metadataTagRead[] = [];
     if (props.reloadObject == "table") {
-      const node = tableStore.visibleQueriedItemById(uuid);
-      tags = node ? node.tags : [];
-    } else if (props.reloadObject == "node") {
-      tags = nodeStore.open.tags;
+      const object = tableStore.visibleQueriedItemById(uuid);
+      tags = object ? object.tags : [];
+    } else if (props.reloadObject == "object") {
+      tags = objectStore.open.tags;
     }
     return tags.map((tag) => tag.value);
   };
@@ -182,7 +182,7 @@
   }
 
   const allowSubmit = computed(() => {
-    if (props.nodeType == "observable") {
+    if (props.objectType == "observable") {
       return formTagValues.value.length;
     }
     return selectedStore.selected.length && formTagValues.value.length;

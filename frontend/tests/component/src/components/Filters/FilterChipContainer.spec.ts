@@ -20,7 +20,7 @@ function factory(filters: alertFilterParams) {
         router,
       ],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
       },
     },
   });
@@ -45,7 +45,7 @@ describe("FilterChipContainer", () => {
   it("re-renders when a filter is added", () => {
     factory({}).then((wrapper) => {
       wrapper.vm.filterStore.setFilter({
-        nodeType: "alerts",
+        objectType: "alerts",
         filterName: "name",
         filterValue: "test name",
         isIncluded: true,
@@ -55,12 +55,12 @@ describe("FilterChipContainer", () => {
       cy.contains("test name").should("be.visible");
     });
   });
-  it("re-renders whena filter is added", () => {
+  it("re-renders when a filter is added", () => {
     factory({
       name: { included: ["test name"], notIncluded: [] },
       owner: { included: [userReadFactory()], notIncluded: [] },
     }).then((wrapper) => {
-      wrapper.vm.filterStore.clearAll({ nodeType: "alerts" });
+      wrapper.vm.filterStore.clearAll({ objectType: "alerts" });
       cy.get("[data-cy=filter-chip]").should("not.exist");
     });
   });

@@ -600,15 +600,15 @@ describe("TheEventsTable.vue - EditEventModal", () => {
     cy.wait("@getEventsDefaultRows").its("state").should("eq", "Complete");
   });
 
-  it("successfully updates a comment using NodeCommentEditor", () => {
+  it("successfully updates a comment using CommentEditor", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
     cy.intercept("PATCH", "/api/event/").as("updateEvent");
     cy.intercept("GET", "/api/event/*").as("getEvent");
-    cy.intercept("POST", "/api/node/comment/").as("createComment");
-    cy.intercept("PATCH", "/api/node/comment/*").as("updateComment");
+    cy.intercept("POST", "/api/event/comment/").as("createComment");
+    cy.intercept("PATCH", "/api/event/comment/*").as("updateComment");
 
     // First add an initial comment
     cy.get(".p-column-header-content > .p-checkbox > .p-checkbox-box").click();
@@ -658,15 +658,15 @@ describe("TheEventsTable.vue - EditEventModal", () => {
       .eq(0)
       .should("have.text", "(Analyst) Updated comment");
   });
-  it("successfully creates a new threat or updates using NodeThreatSelector", () => {
+  it("successfully creates a new threat or updates using ThreatSelector", () => {
     cy.intercept(
       "GET",
       "/api/event/?sort=created_time%7Cdesc&limit=10&offset=0",
     ).as("getEventsDefaultRows");
     cy.intercept("PATCH", "/api/event/").as("updateEvent");
-    cy.intercept("POST", "/api/node/threat/").as("createThreat");
-    cy.intercept("PATCH", "/api/node/threat/*").as("updateThreat");
-    cy.intercept("GET", "/api/node/threat/*").as("getThreats");
+    cy.intercept("POST", "/api/threat/").as("createThreat");
+    cy.intercept("PATCH", "/api/threat/*").as("updateThreat");
+    cy.intercept("GET", "/api/threat/*").as("getThreats");
 
     openEditEventModal();
 

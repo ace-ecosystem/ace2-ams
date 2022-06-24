@@ -8,7 +8,7 @@
         :class="containerClass(i)"
         :data-cy="treeItemName(i)"
       >
-        <span class="p-treenode-content">
+        <span class="p-treeleaf-content">
           <span v-if="!i.children.length">
             <i class="pi pi-fw pi-minus"></i>
           </span>
@@ -17,7 +17,7 @@
               type="button"
               class="p-link"
               tabindex="-1"
-              @click="toggleNodeExpanded(index)"
+              @click="toggleLeafExpanded(index)"
             >
               <span :class="toggleIcon(index)"></span>
             </button>
@@ -28,15 +28,15 @@
           ></ObservableLeafVue>
 
           <router-link v-else-if="isAnalysis(i)" :to="viewAnalysisRoute(i)"
-            ><span class="treenode-text">{{
+            ><span class="treeleaf-text">{{
               treeItemName(i)
             }}</span></router-link
           >
         </span>
 
         <div
-          v-if="nodeExpanded(index) && i.children.length"
-          class="p-treenode-children"
+          v-if="leafExpanded(index) && i.children.length"
+          class="p-treeleaf-children"
         >
           <AlertTree :items="i.children" :alert-id="alertId" />
         </div>
@@ -79,18 +79,18 @@
     });
     return expandedStatus;
   }
-  function nodeExpanded(index: number) {
+  function leafExpanded(index: number) {
     return itemsExpandedStatus.value[index];
   }
-  function toggleNodeExpanded(index: number) {
+  function toggleLeafExpanded(index: number) {
     itemsExpandedStatus.value[index] = !itemsExpandedStatus.value[index];
   }
   function toggleIcon(index: number) {
     return [
       "p-tree-toggler-icon pi pi-fw",
       {
-        "pi-chevron-down": nodeExpanded(index),
-        "pi-chevron-right": !nodeExpanded(index),
+        "pi-chevron-down": leafExpanded(index),
+        "pi-chevron-right": !leafExpanded(index),
       },
     ];
   }
@@ -111,21 +111,21 @@
   function isAnalysis(
     item: analysisTreeRead | observableTreeRead,
   ): item is analysisTreeRead {
-    return item.nodeType === "analysis";
+    return item.objectType === "analysis";
   }
   function isObservable(
     item: analysisTreeRead | observableTreeRead,
   ): item is observableTreeRead {
-    return item.nodeType === "observable";
+    return item.objectType === "observable";
   }
 
   function containerClass(item: analysisTreeRead | observableTreeRead) {
-    return ["p-treenode", { "p-treenode-leaf": !item.children.length }];
+    return ["p-treeleaf", { "p-treeleaf-leaf": !item.children.length }];
   }
 </script>
 
 <style>
-  .p-treenode-children {
+  .p-treeleaf-children {
     margin: 0;
     padding: 0;
     list-style-type: none;
@@ -139,14 +139,14 @@
     overflow: hidden;
     position: relative;
   }
-  .p-treenode-leaf > .p-treenode-content .p-tree-toggler {
+  .p-treeleaf-leaf > .p-treeleaf-content .p-tree-toggler {
     visibility: hidden;
   }
-  .p-treenode-content {
+  .p-treeleaf-content {
     display: flex;
     align-items: center;
   }
-  .treenode-text:hover {
+  .treeleaf-text:hover {
     cursor: pointer;
     text-decoration: underline;
     font-weight: bold;

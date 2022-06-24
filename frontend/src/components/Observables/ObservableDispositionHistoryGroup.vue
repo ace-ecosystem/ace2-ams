@@ -42,11 +42,11 @@
   const filterByObservableAndDisposition = (disposition: string) => {
     const dispositionObject = getDispositionObject(disposition);
 
-    filterStore.clearAll({ nodeType: "alerts" });
+    filterStore.clearAll({ objectType: "alerts" });
 
     if (dispositionObject) {
       filterStore.setFilter({
-        nodeType: "alerts",
+        objectType: "alerts",
         filterName: "disposition",
         filterValue: dispositionObject,
         isIncluded: true,
@@ -54,7 +54,7 @@
     }
 
     filterStore.setFilter({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "observable",
       filterValue: {
         category: props.observable.type,

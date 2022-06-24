@@ -3,7 +3,7 @@
 <template>
   <br />
   <div id="EventActionToolbar" style="position: sticky; top: 3.5em; z-index: 1">
-    <TheNodeActionToolbarVue reload-object="table" />
+    <TheObjectActionToolbarVue reload-object="table" />
   </div>
   <br />
   <div id="FilterToolbar"><TheFilterToolbar /></div>
@@ -16,7 +16,7 @@
 <script setup>
   import { onMounted, provide, inject, watch } from "vue";
 
-  import TheNodeActionToolbarVue from "@/components/Node/TheNodeActionToolbar.vue";
+  import TheObjectActionToolbarVue from "@/components/Objects/TheObjectActionToolbar.vue";
   import TheFilterToolbar from "@/components/Filters/TheFilterToolbar.vue";
   import TheEventsTable from "@/components/Events/TheEventsTable.vue";
   import { useRoute, useRouter } from "vue-router";
@@ -35,7 +35,7 @@
   provide("availableFilters", config.events.eventFilters);
   provide("availableEditFields", config.events.eventEditableProperties);
   provide("rangeFilters", config.events.eventRangeFilters);
-  provide("nodeType", "events");
+  provide("objectType", "events");
 
   const filterStore = useFilterStore();
   const eventTableStore = useEventTableStore();
@@ -58,7 +58,7 @@
   function loadRouteQuery() {
     // load filters given in route
     filterStore.bulkSetFilters({
-      nodeType: "events",
+      objectType: "events",
       filters: parseFilters(route.query, validEventFilters),
     });
     // Reload page to clear URL params

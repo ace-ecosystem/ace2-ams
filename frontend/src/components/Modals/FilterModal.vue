@@ -9,7 +9,7 @@
     @dialog-close="loadFormFilters"
   >
     <br />
-    <NodeQueueSelector :node-queue="nodeType" /> <br />
+    <QueueSelector :object-queue="objectType" /> <br />
     <b v-if="formFilters.length">NOT</b> <br />
     <div class="flex flex-wrap">
       <span
@@ -23,7 +23,7 @@
             class="flex align-items-center"
             data-cy="filter-not-included-switch"
           ></InputSwitch>
-          <NodePropertyInput
+          <ObjectPropertyInput
             v-model="formFilters[index]"
             class="flex align-items-center"
             :allow-delete="true"
@@ -31,7 +31,7 @@
             form-type="filter"
             data-cy="filter-input"
             @delete-form-field="deleteFormFilter(index)"
-          ></NodePropertyInput>
+          ></ObjectPropertyInput>
         </div>
       </span>
     </div>
@@ -67,9 +67,9 @@
   import Button from "primevue/button";
   import InputSwitch from "primevue/inputswitch";
 
-  import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
+  import ObjectPropertyInput from "@/components/Objects/ObjectPropertyInput.vue";
   import BaseModal from "@/components/Modals/BaseModal.vue";
-  import NodeQueueSelector from "@/components/Node/NodeQueueSelector.vue";
+  import QueueSelector from "@/components/Queues/QueueSelector.vue";
 
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
@@ -87,7 +87,7 @@
     name: { type: String, required: true },
   });
 
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
 
   filterStore.$subscribe(
     () => {
@@ -105,8 +105,8 @@
   >([]);
 
   const queue = computed(() => {
-    return currentUserSettingsStore.queues[nodeType] != null
-      ? currentUserSettingsStore.queues[nodeType]!.value
+    return currentUserSettingsStore.queues[objectType] != null
+      ? currentUserSettingsStore.queues[objectType]!.value
       : "unknown";
   });
 
@@ -150,10 +150,10 @@
   const submit = () => {
     const filters = submitFilters();
     if (!Object.keys(filters).length) {
-      filterStore.clearAll({ nodeType: nodeType });
+      filterStore.clearAll({ objectType: objectType });
     } else {
       filterStore.bulkSetFilters({
-        nodeType: nodeType,
+        objectType: objectType,
         filters: filters,
       });
     }
@@ -177,15 +177,16 @@
 
   const loadFormFilters = () => {
     formFilters.value = [];
-    for (const filterType in filterStore.$state[nodeType]) {
-      for (const filter of filterStore.$state[nodeType][filterType].included) {
+    for (const filterType in filterStore.$state[objectType]) {
+      for (const filter of filterStore.$state[objectType][filterType]
+        .included) {
         formFilters.value.push({
           propertyType: filterType,
           propertyValue: filter,
           notIncluded: false,
         });
       }
-      for (const filter of filterStore.$state[nodeType][filterType]
+      for (const filter of filterStore.$state[objectType][filterType]
         .notIncluded) {
         formFilters.value.push({
           propertyType: filterType,

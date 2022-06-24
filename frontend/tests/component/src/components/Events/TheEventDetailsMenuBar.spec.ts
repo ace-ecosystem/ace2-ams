@@ -19,7 +19,7 @@ function factory(event: eventRead = eventReadFactory()) {
   return mount(TheEventDetailsMenuBar, {
     global: {
       provide: {
-        nodeType: "events",
+        objectType: "events",
         availableEditFields: testConfiguration.events.eventEditableProperties,
         analysisModuleComponents:
           testConfiguration.analysis.analysisModuleComponents,

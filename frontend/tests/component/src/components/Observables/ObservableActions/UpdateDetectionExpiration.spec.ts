@@ -23,7 +23,7 @@ function factory(args: { observable: observableTreeRead }) {
         }),
       ],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
       },
     },
     propsData: {

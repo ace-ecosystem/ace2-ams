@@ -9,7 +9,7 @@ function factory(props = {}) {
     global: {
       plugins: [PrimeVue, createPinia()],
       provide: {
-        nodeType: "alerts",
+        objectType: "alerts",
       },
     },
     propsData: {

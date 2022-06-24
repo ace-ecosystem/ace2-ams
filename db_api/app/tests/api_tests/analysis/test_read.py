@@ -37,4 +37,4 @@ def test_get(client, db):
 
     get = client.get(f"/api/analysis/{analysis.uuid}")
     assert get.status_code == status.HTTP_200_OK
-    assert get.json()["node_type"] == "analysis"
+    assert get.json()["object_type"] == "analysis"

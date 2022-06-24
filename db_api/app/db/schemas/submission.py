@@ -1,7 +1,7 @@
 import json
 
 from datetime import datetime
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, func, Index, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import relationship
@@ -14,7 +14,6 @@ from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.metadata_detection_point import MetadataDetectionPoint
 from db.schemas.metadata_tag import MetadataTag
-from db.schemas.node import Node
 from db.schemas.submission_analysis_mapping import submission_analysis_mapping
 from db.schemas.submission_tag_mapping import submission_tag_mapping
 
@@ -25,10 +24,10 @@ class SubmissionHistory(Base, HistoryMixin):
     record_uuid = Column(UUID(as_uuid=True), ForeignKey("submission.uuid"), index=True, nullable=False)
 
 
-class Submission(Node, HasHistory):
+class Submission(Base, HasHistory):
     __tablename__ = "submission"
 
-    uuid = Column(UUID(as_uuid=True), ForeignKey("node.uuid"), primary_key=True)
+    uuid = Column(UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid())
 
     alert = Column(Boolean, default=False, nullable=False, index=True)
 
@@ -101,27 +100,7 @@ class Submission(Node, HasHistory):
         lazy="selectin",
     )
 
-    child_threat_actors = relationship(
-        "NodeThreatActor",
-        secondary="join(NodeThreatActor, node_threat_actor_mapping, NodeThreatActor.uuid == node_threat_actor_mapping.c.threat_actor_uuid)."
-        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == node_threat_actor_mapping.c.node_uuid)."
-        "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
-        primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
-        order_by="asc(NodeThreatActor.value)",
-        viewonly=True,
-        lazy="selectin",
-    )
-
-    child_threats = relationship(
-        "NodeThreat",
-        secondary="join(NodeThreat, node_threat_mapping, NodeThreat.uuid == node_threat_mapping.c.threat_uuid)."
-        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == node_threat_mapping.c.node_uuid)."
-        "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
-        primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
-        order_by="asc(NodeThreat.value)",
-        viewonly=True,
-        lazy="selectin",
-    )
+    comments = relationship("SubmissionComment", lazy="selectin")
 
     description = Column(String)
 
@@ -187,7 +166,7 @@ class Submission(Node, HasHistory):
 
     type_uuid = Column(UUID(as_uuid=True), ForeignKey("submission_type.uuid"), nullable=False, index=True)
 
-    __mapper_args__ = {"polymorphic_identity": "submission", "polymorphic_load": "inline"}
+    version = Column(UUID(as_uuid=True), server_default=func.gen_random_uuid(), nullable=False)
 
     __table_args__ = (
         Index(

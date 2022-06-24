@@ -30,14 +30,14 @@
             data-cy="filter-not-included-switch"
           ></InputSwitch>
         </div>
-        <NodePropertyInput
+        <ObjectPropertyInput
           v-model="filterModel"
           data-cy="filter-input"
           :allow-delete="false"
           form-type="filter"
           :queue="queue"
         >
-        </NodePropertyInput>
+        </ObjectPropertyInput>
         <Button
           data-cy="quick-add-filter-submit-button"
           name="update-filter"
@@ -70,7 +70,7 @@
   import OverlayPanel from "primevue/overlaypanel";
   import SplitButton from "primevue/splitbutton";
   import InputSwitch from "primevue/inputswitch";
-  import NodePropertyInput from "@/components/Node/NodePropertyInput.vue";
+  import ObjectPropertyInput from "@/components/Objects/ObjectPropertyInput.vue";
 
   import { useAuthStore } from "@/stores/auth";
   import { useEventStatusStore } from "@/stores/eventStatus";
@@ -80,7 +80,7 @@
   import { validAlertFilters } from "@/etc/constants/alerts";
   import { validEventFilters } from "@/etc/constants/events";
 
-  import { copyToClipboard, formatNodeFiltersForAPI } from "@/etc/helpers";
+  import { copyToClipboard, formatObjectFiltersForAPI } from "@/etc/helpers";
   import { queueRead } from "@/models/queue";
   import { eventStatusRead } from "@/models/eventStatus";
 
@@ -90,20 +90,20 @@
   const currentUserSettingsStore = useCurrentUserSettingsStore();
   const eventStatusStore = useEventStatusStore();
 
-  const nodeType = inject("nodeType") as "alerts" | "events";
+  const objectType = inject("objectType") as "alerts" | "events";
   const validFilterOptions = {
     alerts: validAlertFilters,
     events: validEventFilters,
   };
 
   const queue = computed(() => {
-    return currentUserSettingsStore.queues[nodeType] != null
-      ? currentUserSettingsStore.queues[nodeType]!.value
+    return currentUserSettingsStore.queues[objectType] != null
+      ? currentUserSettingsStore.queues[objectType]!.value
       : "unknown";
   });
 
   const clear = () => {
-    filterStore.clearAll({ nodeType: nodeType });
+    filterStore.clearAll({ objectType: objectType });
   };
 
   const openFilterModal = () => {
@@ -112,8 +112,8 @@
 
   const reset = () => {
     // reset all to start
-    filterStore.clearAll({ nodeType: nodeType });
-    if (nodeType === "alerts") {
+    filterStore.clearAll({ objectType: objectType });
+    if (objectType === "alerts") {
       const filters: { queue?: { included: queueRead[]; notIncluded: [] } } =
         {};
       // look for owner == current user OR none
@@ -130,8 +130,8 @@
         : authStore.user.defaultAlertQueue;
       filters.queue = { included: [queue], notIncluded: [] };
 
-      filterStore.bulkSetFilters({ nodeType: nodeType, filters: filters });
-    } else if (nodeType === "events") {
+      filterStore.bulkSetFilters({ objectType: objectType, filters: filters });
+    } else if (objectType === "events") {
       const filters: {
         queue?: { included: queueRead[]; notIncluded: [] };
         status?: { included: eventStatusRead[]; notIncluded: [] };
@@ -151,7 +151,7 @@
         : authStore.user.defaultEventQueue;
       filters.queue = { included: [queue], notIncluded: [] };
 
-      filterStore.bulkSetFilters({ nodeType: nodeType, filters: filters });
+      filterStore.bulkSetFilters({ objectType: objectType, filters: filters });
     }
   };
 
@@ -179,13 +179,13 @@
   ];
 
   function generateLink() {
-    let link = `${window.location.origin}/manage_${nodeType}`;
+    let link = `${window.location.origin}/manage_${objectType}`;
     // If there are filters set, build the link for it
-    if (Object.keys(filterStore[nodeType]).length) {
+    if (Object.keys(filterStore[objectType]).length) {
       let urlParams = new URLSearchParams();
-      const formattedParams = formatNodeFiltersForAPI(
-        validFilterOptions[nodeType],
-        filterStore[nodeType],
+      const formattedParams = formatObjectFiltersForAPI(
+        validFilterOptions[objectType],
+        filterStore[objectType],
       );
       for (const param in formattedParams) {
         // If the paramter is an array, then we need to append each element of the array to URLSearchParams
@@ -200,7 +200,7 @@
       }
       link = `${
         window.location.origin
-      }/manage_${nodeType}?${urlParams.toString()}`;
+      }/manage_${objectType}?${urlParams.toString()}`;
     }
     return link;
   }
@@ -219,7 +219,7 @@
   const addFilter = () => {
     if (filterModel.value.propertyType && filterModel.value.propertyValue) {
       filterStore.setFilter({
-        nodeType: nodeType,
+        objectType: objectType,
         filterName: filterModel.value.propertyType,
         filterValue: filterModel.value.propertyValue,
         isIncluded: !filterModel.value.notIncluded,

@@ -32,7 +32,7 @@ describe("ManageEvents", () => {
           router,
           ToastService,
         ],
-        provide: { config: testConfiguration, nodeType: "events" },
+        provide: { config: testConfiguration, objectType: "events" },
       },
     });
   });
