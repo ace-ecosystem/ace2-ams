@@ -29,7 +29,7 @@ function factory(args: { props: commentProps } = { props: defaultProps }) {
 describe("Comment", () => {
   it("renders as expected with default props", () => {
     factory();
-    cy.contains("(Test Analyst) A test comment").should("be.visible");
+    cy.contains("(Test Analyst) A test alert comment").should("be.visible");
     cy.get("br").should("exist");
   });
   it("renders as expected with includeTime set to true", () => {
@@ -42,14 +42,14 @@ describe("Comment", () => {
       },
     });
     cy.contains(
-      "3/25/2022, 12:00:00 PM UTC (Test Analyst) A test comment",
+      "3/25/2022, 12:00:00 PM UTC (Test Analyst) A test alert comment",
     ).should("be.visible");
   });
   it("renders as expected with includeLineBreak set to false", () => {
     factory({
       props: { comment: alertCommentReadFactory(), includeLineBreak: false },
     });
-    cy.contains("(Test Analyst) A test comment").should("be.visible");
+    cy.contains("(Test Analyst) A test alert comment").should("be.visible");
     cy.get("br").should("not.exist");
   });
 });

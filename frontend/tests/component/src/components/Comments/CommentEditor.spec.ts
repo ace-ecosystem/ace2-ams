@@ -56,7 +56,7 @@ describe("CommentEditor", () => {
     cy.findAllByRole("listitem").should("have.length", 2);
     cy.get('[data-cy="edit-comment-button"]').should("have.length", 2);
     cy.contains(
-      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test comment",
+      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test alert comment",
     ).should("be.visible");
     cy.contains(
       "4/25/2022, 1:00:00 AM UTC (Test Analyst) Other comment",
@@ -66,14 +66,14 @@ describe("CommentEditor", () => {
     factory();
     cy.get('[data-cy="edit-comment-button"]').first().click();
     cy.contains(
-      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test comment",
+      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test alert comment",
     ).should("be.visible"); // list item should be visible still
     cy.get('[data-cy="edit-comment-panel"]').should("be.visible");
-    cy.findAllByDisplayValue("A test comment").click().type("Updated"); // input should have current value filled in
+    cy.findAllByDisplayValue("A test alert comment").click().type("Updated"); // input should have current value filled in
     cy.get('[data-cy="close-edit-comment-panel"]').click(); // close without saving
     cy.get('[data-cy="edit-comment-panel"]').should("not.exist");
     cy.contains(
-      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test comment",
+      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test alert comment",
     ).should("be.visible");
   });
   it("does update comment value if edit panel opened, comment edited, and saved", () => {
@@ -84,10 +84,10 @@ describe("CommentEditor", () => {
     ]);
     cy.get('[data-cy="edit-comment-button"]').first().click();
     cy.contains(
-      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test comment",
+      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test alert comment",
     ).should("be.visible"); // list item should be visible still
     cy.get('[data-cy="edit-comment-panel"]').should("be.visible");
-    cy.findAllByDisplayValue("A test comment")
+    cy.findAllByDisplayValue("A test alert comment")
       .clear()
       .type("New comment value");
     cy.get('[data-cy="save-comment-button"]').click();
@@ -100,14 +100,14 @@ describe("CommentEditor", () => {
     factory();
     cy.get('[data-cy="edit-comment-button"]').first().click();
     cy.contains(
-      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test comment",
+      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test alert comment",
     ).should("be.visible"); // list item should be visible still
     cy.get('[data-cy="edit-comment-panel"]').should("be.visible");
-    cy.findAllByDisplayValue("A test comment").clear();
+    cy.findAllByDisplayValue("A test alert comment").clear();
     cy.get('[data-cy="save-comment-button"]').click();
     cy.get('[data-cy="edit-comment-panel"]').should("be.visible");
     cy.contains(
-      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test comment",
+      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test alert comment",
     ).should("be.visible");
   });
   it("correctly updates comment data when selecting from recent comments", () => {
@@ -118,7 +118,7 @@ describe("CommentEditor", () => {
     ]);
     cy.get('[data-cy="edit-comment-button"]').first().click();
     cy.contains(
-      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test comment",
+      "4/25/2022, 12:00:00 PM UTC (Test Analyst) A test alert comment",
     ).should("be.visible");
     cy.get('[data-cy="edit-comment-panel"]').should("be.visible");
     cy.get(".p-autocomplete > .p-button").click();
