@@ -148,7 +148,7 @@ describe("FilterChip", () => {
     cy.get("@stub-4").should("have.been.calledWith", {
       nodeType: "alerts",
       filterName: "name",
-      filterValue: undefined, // This will be undefined because NodePropertyInput is stubbed
+      filterValue: "test name", // should be the 'new value' which hasn't changed since loading the old value
       isIncluded: true,
     });
   });
@@ -166,6 +166,37 @@ describe("FilterChip", () => {
       filterValue: "test name",
       isIncluded: true,
     });
+    cy.get("@stub-4").should("have.been.calledWith", {
+      nodeType: "alerts",
+      filterName: "name",
+      filterValue: "test name", // should be the 'new value' which hasn't changed since loading the old value
+      isIncluded: false,
+    });
+  });
+  it("correctly adds new included filter via add filter button", () => {
+    factory({
+      filterName: "name",
+      filterValue: { included: ["test name"], notIncluded: [] },
+    });
+    cy.get('[data-cy="filter-chip-add-button"]').click();
+    cy.get('[data-cy="filter-chip-submit-button"]').click();
+    cy.get("@stub-6").should("not.have.been.called");
+    cy.get("@stub-4").should("have.been.calledWith", {
+      nodeType: "alerts",
+      filterName: "name",
+      filterValue: undefined, // This will be undefined because NodePropertyInput is stubbed
+      isIncluded: true,
+    });
+  });
+  it("correctly adds new notIncluded filter via add filter button", () => {
+    factory({
+      filterName: "name",
+      filterValue: { included: ["test name"], notIncluded: [] },
+    });
+    cy.get('[data-cy="filter-chip-add-button"]').click();
+    cy.get('[data-cy="filter-not-included-switch"]').parent().parent().click();
+    cy.get('[data-cy="filter-chip-submit-button"]').click();
+    cy.get("@stub-6").should("not.have.been.called");
     cy.get("@stub-4").should("have.been.calledWith", {
       nodeType: "alerts",
       filterName: "name",

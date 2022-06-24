@@ -17,7 +17,7 @@
       >
         <span
           style="padding-left: 2px; padding-right: 2px; font-weight: bold"
-          @click="unsetFilterValue(value, false)"
+          @click="unsetFilterValue({ value: value, notIncluded: false })"
           >{{ formatValue(value as any) }}</span
         >
         <i
@@ -27,7 +27,7 @@
           @click="
             toggleQuickEditMenu($event);
             setFilterModelOldValue(value);
-            resetFilterModel(false);
+            resetFilterModel({ notIncluded: false, value: value });
           "
         />
         <span
@@ -43,7 +43,7 @@
       >
         <span
           style="padding-left: 2px; padding-right: 2px; font-weight: bold"
-          @click="unsetFilterValue(value, true)"
+          @click="unsetFilterValue({ value: value, notIncluded: true })"
           ><b>!</b> {{ formatValue(value as any) }}</span
         >
         <i
@@ -53,7 +53,7 @@
           @click="
             toggleQuickEditMenu($event);
             setFilterModelOldValue(value);
-            resetFilterModel(true);
+            resetFilterModel({ notIncluded: true, value: value });
           "
         />
         <span v-if="!(index == filterValue!.notIncluded.length - 1)"
@@ -66,7 +66,7 @@
         style="cursor: pointer"
         @click="
           toggleQuickEditMenu($event);
-          resetFilterModel(false);
+          resetFilterModel({ notIncluded: false, value: undefined });
         "
       />
     </Chip>
@@ -76,17 +76,17 @@
       style="padding: 1rem"
       @keypress.enter="
         updateFilter();
-        resetFilterModel(false);
+        resetFilterModel({ notIncluded: false, value: undefined });
       "
     >
-      <span class="p-float-label">
-        <b>NOT</b>
+      <div class="flex justify-content-start pb-2">
+        <b class="flex align-items-center justify-content-center pr-2">NOT</b>
         <InputSwitch
           v-model="filterModel.notIncluded"
-          class="field col-fixed"
+          class="flex align-items-center justify-content-center"
           data-cy="filter-not-included-switch"
         ></InputSwitch>
-      </span>
+      </div>
       <NodePropertyInput
         v-model="filterModel"
         :fixed-property-type="true"
@@ -101,6 +101,7 @@
         icon="pi pi-check"
         @click="
           updateFilter();
+          resetFilterModel({ notIncluded: false, value: undefined });
           toggleQuickEditMenu($event);
           setFilterModelOldValue();
         "
@@ -197,21 +198,26 @@
     return "";
   });
 
-  function resetFilterModel(notIncluded: boolean) {
+  function resetFilterModel(args: {
+    value: alertFilterValues | eventFilterValues | undefined;
+    notIncluded: boolean;
+  }) {
     filterModel.value = {
       propertyType: props.filterName,
-      propertyValue: undefined as alertFilterValues | eventFilterValues,
-      notIncluded: notIncluded,
+      propertyValue: args.value,
+      notIncluded: args.notIncluded,
     };
   }
 
   function updateFilter() {
-    filterStore.unsetFilterValue({
-      nodeType: nodeType,
-      filterName: props.filterName,
-      filterValue: filterModelOldValue.value!.filterValue,
-      isIncluded: !filterModelOldValue.value!.notIncluded,
-    });
+    if (filterModelOldValue.value) {
+      filterStore.unsetFilterValue({
+        nodeType: nodeType,
+        filterName: props.filterName,
+        filterValue: filterModelOldValue.value.filterValue,
+        isIncluded: !filterModelOldValue.value.notIncluded,
+      });
+    }
     filterStore.setFilter({
       nodeType: nodeType,
       filterName: props.filterName,
@@ -229,15 +235,15 @@
     });
   }
 
-  function unsetFilterValue(
-    value: alertFilterValues | eventFilterValues,
-    notIncluded: boolean,
-  ) {
+  function unsetFilterValue(args: {
+    value: alertFilterValues | eventFilterValues;
+    notIncluded: boolean;
+  }) {
     filterStore.unsetFilterValue({
       nodeType: nodeType,
       filterName: props.filterName,
-      filterValue: value,
-      isIncluded: !notIncluded,
+      filterValue: args.value,
+      isIncluded: !args.notIncluded,
     });
   }
 
