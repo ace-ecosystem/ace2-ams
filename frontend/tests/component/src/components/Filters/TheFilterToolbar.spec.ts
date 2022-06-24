@@ -106,7 +106,7 @@ describe("TheFilterToolbar", () => {
     cy.get('[data-cy="filter-not-included-switch"]').parent().parent().click();
     cy.get('[data-cy="quick-add-filter-submit-button"]').click();
     cy.get("@stub-2").should("have.been.calledOnceWith", {
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "disposition",
       filterValue: { value: "None" },
       isIncluded: false,
