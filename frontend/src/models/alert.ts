@@ -5,7 +5,7 @@ import { alertToolInstanceRead } from "./alertToolInstance";
 import { alertTypeRead } from "./alertType";
 import { metadataDetectionPointRead } from "./metadataDetectionPoint";
 import { metadataTagRead } from "./metadataTag";
-import { commentRead } from "./comment";
+import { alertCommentRead } from "./alertComment";
 import { observableCreate, observableTreeRead } from "./observable";
 import { observableTypeRead } from "./observableType";
 import { threatActorRead } from "./threatActor";
@@ -40,7 +40,7 @@ export interface alertRead {
   childTags: metadataTagRead[];
   childThreatActors: threatActorRead[];
   childThreats: threatRead[];
-  comments: commentRead[];
+  comments: alertCommentRead[];
   description: string | null;
   disposition: alertDispositionRead | null;
   dispositionTime: string | null;
@@ -69,7 +69,7 @@ export interface alertRead {
 export interface alertSummary {
   childAnalysisTags: metadataTagRead[];
   childTags: metadataTagRead[];
-  comments: commentRead[];
+  comments: alertCommentRead[];
   description: string;
   disposition: string;
   dispositionTime: string | null;

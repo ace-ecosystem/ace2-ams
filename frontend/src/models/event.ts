@@ -8,7 +8,7 @@ import { eventStatusRead } from "./eventStatus";
 import { eventTypeRead } from "./eventType";
 import { eventVectorRead } from "./eventVector";
 import { metadataTagRead } from "./metadataTag";
-import { commentRead } from "./comment";
+import { eventCommentRead } from "./eventComment";
 import { threatRead } from "./threat";
 import { threatActorRead } from "./threatActor";
 import { observableTypeRead } from "./observableType";
@@ -18,7 +18,7 @@ import { readPage } from "./page";
 
 // High-level event data that will be displayed in Manage Events
 export interface eventSummary {
-  comments: commentRead[];
+  comments: eventCommentRead[];
   createdTime: Date;
   // disposition: string;
   name: string;
@@ -67,7 +67,7 @@ export interface eventRead {
   autoDispositionTime: string | null;
   autoEventTime: string | null;
   autoOwnershipTime: string | null;
-  comments: commentRead[];
+  comments: eventCommentRead[];
   containTime: string | null;
   createdTime: string;
   dispositionTime: string | null;

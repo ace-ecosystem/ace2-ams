@@ -75,11 +75,11 @@
   import { useModalStore } from "@/stores/modal";
   import { isObject } from "@/etc/validators";
   import CommentEditor from "@/components/Comments/CommentEditor.vue";
-  import { Comment } from "@/services/api/comment";
+  import { EventComment } from "@/services/api/eventComment";
   import { useAuthStore } from "@/stores/auth";
   import { eventRead, eventUpdate } from "@/models/event";
   import { propertyOption } from "@/models/base";
-  import { commentRead } from "@/models/comment";
+  import { eventCommentRead } from "@/models/eventComment";
   import { populateEventStores } from "@/stores/helpers";
   import { useRecentCommentsStore } from "@/stores/recentComments";
 
@@ -224,14 +224,14 @@
 
   const saveEventComments = async () => {
     for (const comment of formFields.value["comments"]
-      .propertyValue as commentRead[]) {
+      .propertyValue as eventCommentRead[]) {
       const commentChanged = originalEvent.value?.comments.find(
         (originalComment) =>
           originalComment.uuid == comment.uuid &&
           originalComment.value != comment.value,
       );
       if (commentChanged) {
-        await Comment.update(comment.uuid, {
+        await EventComment.update(comment.uuid, {
           username: authStore.user.username,
           value: comment.value,
         });

@@ -1,14 +1,14 @@
 import { mount } from "@cypress/vue";
 import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
-import { commentRead } from "@/models/comment";
+import { alertCommentRead } from "@/models/alertComment";
 
 import { alertCommentReadFactory } from "@mocks/comment";
 
 import Comment from "@/components/Comments/Comment.vue";
 
 interface commentProps {
-  comment: commentRead;
+  comment: alertCommentRead;
   includeTime?: boolean;
   includeLineBreak?: boolean;
 }

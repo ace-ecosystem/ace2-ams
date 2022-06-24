@@ -69,20 +69,28 @@
   import InputText from "primevue/inputtext";
   import Comment from "@/components/Comments/Comment.vue";
   import CommentAutocomplete from "@/components/Comments/CommentAutocomplete.vue";
-  import { commentRead } from "@/models/comment";
+  import { alertCommentRead } from "@/models/alertComment";
+  import { eventCommentRead } from "@/models/eventComment";
 
   const props = defineProps({
-    modelValue: { type: Array as PropType<commentRead[]>, required: true },
+    modelValue: {
+      type: Array as PropType<alertCommentRead[] | eventCommentRead[]>,
+      required: true,
+    },
   });
 
   const emit = defineEmits(["update:modelValue"]);
 
-  const comments = ref<commentRead[]>(props.modelValue);
+  const comments = ref<alertCommentRead[] | eventCommentRead[]>(
+    props.modelValue,
+  );
   const editingCommentValue = ref<string>();
   const editingCommentUuid = ref<string>();
   const editCommentPanelOpen = ref(false);
 
-  const openEditCommentPanel = (comment: commentRead) => {
+  const openEditCommentPanel = (
+    comment: alertCommentRead | eventCommentRead,
+  ) => {
     editingCommentValue.value = comment.value;
     editingCommentUuid.value = comment.uuid;
     editCommentPanelOpen.value = true;
