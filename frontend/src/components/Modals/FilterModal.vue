@@ -2,31 +2,30 @@
 <!-- 'Filter' editing modal, agnostic to what data types are being filtered -->
 
 <template>
-  <BaseModal :name="name" header="Edit Filters" @dialog-close="loadFormFilters">
+  <BaseModal
+    :name="name"
+    header="Edit Filters"
+    style="max-width: 625px"
+    @dialog-close="loadFormFilters"
+  >
     <br />
     <NodeQueueSelector :node-queue="nodeType" /> <br />
-    <table>
-      <thead>
-        <tr>
-          <th>NOT</th>
-        </tr>
-      </thead>
-    </table>
+    <b v-if="formFilters.length">NOT</b> <br />
     <div class="flex flex-wrap">
       <span
         v-for="(filter, index) in formFilters"
         :key="index!"
         style="width: 100%"
       >
-        <div class="formgrid grid">
+        <div class="flex">
           <InputSwitch
             v-model="formFilters[index].notIncluded"
-            class="field col-fixed"
+            class="flex align-items-center"
             data-cy="filter-not-included-switch"
           ></InputSwitch>
           <NodePropertyInput
             v-model="formFilters[index]"
-            class="field col-fixed"
+            class="flex align-items-center"
             :allow-delete="true"
             :queue="queue"
             form-type="filter"
