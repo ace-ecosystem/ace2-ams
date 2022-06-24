@@ -147,15 +147,17 @@
     readonly propertyOption[]
   >;
 
+  interface modelValueProp {
+    propertyType: any;
+    propertyValue: any;
+    notIncluded?: boolean;
+  }
+
   const emit = defineEmits(["update:modelValue", "deleteFormField"]);
   const props = defineProps({
     queue: { type: String, required: true },
     modelValue: {
-      type: Object as PropType<{
-        propertyType: any;
-        propertyValue: any;
-        notIncluded: boolean;
-      }>,
+      type: Object as PropType<modelValueProp>,
       required: true,
     },
     formType: {
@@ -328,22 +330,39 @@
         val = newValue.target.value;
       }
     }
-    emit("update:modelValue", {
+
+    const updatedModelValue = {
       propertyType: propertyType.value
         ? propertyType.value.name
         : propertyType.value,
       propertyValue: val,
-      notIncluded: props.modelValue.notIncluded,
-    });
+    };
+
+    if (props.modelValue.notIncluded) {
+      emit("update:modelValue", {
+        ...updatedModelValue,
+        notIncluded: props.modelValue.notIncluded,
+      });
+    } else {
+      emit("update:modelValue", updatedModelValue);
+    }
   };
 
   const updatePropertyType = (newValue: { value: propertyOption }) => {
-    emit("update:modelValue", {
+    const updatedModelValue = {
       propertyType: newValue.value.name
         ? newValue.value.name
         : propertyType.value,
       propertyValue: propertyValue.value,
-      notIncluded: props.modelValue.notIncluded,
-    });
+    };
+
+    if (props.modelValue.notIncluded) {
+      emit("update:modelValue", {
+        ...updatedModelValue,
+        notIncluded: props.modelValue.notIncluded,
+      });
+    } else {
+      emit("update:modelValue", updatedModelValue);
+    }
   };
 </script>
