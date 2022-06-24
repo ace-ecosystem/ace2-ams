@@ -8,21 +8,21 @@ def test_service(mock_queue):
 
         def execute_via_arg(self):
             # test sending from service with callback as positional argument
-            Instruction.send(self.callback, self.end)
+            Command.send(self.callback, self.end)
 
         def execute_via_kwarg(self):
             # test sending from service with callback as keyword argument
-            Instruction.send(self.callback, callback=self.end)
+            Command.send(self.callback, callback=self.end)
 
-        def callback(self, callback:Instruction):
+        def callback(self, callback):
             # test sending from instruction
-            Instruction.send(callback, self.settings.foo)
+            Command.send(callback, self.settings.foo)
 
         def end(self, message:str):
             pass
 
     # send instruction to MyService
-    Instruction.send(MyService().execute_via_arg)
+    Command.send(MyService().execute_via_arg)
     message = mock_queue.get('my_service')
     assert message['delaySeconds'] == 0
     assert json.loads(message['body']) == {
@@ -52,7 +52,7 @@ def test_service(mock_queue):
     }
 
     # dispatch instruction to MyService in non default way
-    Instruction.send(MyService(instance='my_instance').execute_via_kwarg, delay=5)
+    Command.send(MyService(instance='my_instance').execute_via_kwarg, delay=5)
     message = mock_queue.get('my_service')
     assert message['delaySeconds'] == 5
     assert json.loads(message['body']) == {

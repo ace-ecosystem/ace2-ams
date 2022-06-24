@@ -3,7 +3,7 @@ from inspect import ismethod
 import json
 import os
 from pydantic import Field
-from typing import Dict, List, Optional, Union, get_type_hints
+from typing import Optional, Union
 import sys
 
 from . import queue
@@ -43,69 +43,71 @@ class Service(TypedModel):
 
     @classmethod
     def run(cls, event:dict, context:dict):
-        ''' AWS lambda function handler that runs an instruction
+        ''' AWS lambda function handler that runs a command
 
         Args:
-            event: the aws event message containing the instruction dict state
+            event: the aws event message containing the command dict state
             context: aws runtime context (we do not use this)
         '''
 
         # get the message
         message = event['Records'][0]
 
-        # run the instruction
-        Instruction(**json.loads(message['body'])).invoke()
+        # run the command
+        Command(**json.loads(message['body'])).invoke()
 
         # delete the message
         queue.remove(cls.type, message['receiptHandle'])
 
 
-class Instruction(PrivateModel):
+class Command(PrivateModel):
     ''' message for telling service what to do '''
 
     service: Service = Field(description='dict state of the service which will run the method')
     method: str = Field(description='the name of the method to run')
-    args: Optional[List] = Field(default_factory=list, description='list of args to pass to method')
-    kwargs: Optional[Dict] = Field(default_factory=dict, description='list of kwargs to pass to method')
+    args: Optional[list] = Field(default_factory=list, description='list of args to pass to method')
+    kwargs: Optional[dict] = Field(default_factory=dict, description='list of kwargs to pass to method')
 
     @classmethod
-    def from_method(cls, method) -> Instruction:
-        return Instruction(
-            service = method.__self__.dict(),
+    def from_method(cls, method) -> Command:
+        return cls(
+            service = method.__self__,
             method = method.__name__,
         )
 
     @classmethod
-    def send(cls, instruction:Union[callable,dict], *args, delay:int=0, **kwargs):
-        ''' sends the instruction to the service
+    def send(cls, command:Union[callable,dict], *args, delay:int=0, **kwargs):
+        ''' sends the command to the service
 
         Args:
-            instruction: the service method or instruction diction to send
-            *args: positional arguments to pass to the instruction
-            delay: seconds to wait before executing the instruction
-            **kwargs: key word arguments to pass to the instruction
+            command: the service method or command dictionary to send
+            *args: positional arguments to pass to the command
+            delay: seconds to wait before executing the command
+            **kwargs: key word arguments to pass to the command
         '''
 
-        # turn instruction into an Instruciton object
-        instruction = cls.from_method(instruction) if ismethod(instruction) else cls(**instruction)
+        # turn command into a Command object
+        if ismethod(command):
+            command = cls.from_method(command)
+        else:
+            command = cls(**command)
 
-        # method for converting arguments
+        # convert method args/kwargs into commands
         def serialize(value):
-            # convert methods into instructions
             if ismethod(value):
                 return cls.from_method(value)
-
-            # use other values as is
             return value
 
-        # convert all arguments
+        # add args
         for arg in args:
-            instruction.args.append(serialize(arg))
-        for key, value in kwargs.items():
-            instruction.kwargs[key] = serialize(value)
+            command.args.append(serialize(arg))
 
-        # queue the instruction
-        queue.add(instruction.service.type, instruction.dict(), delay=delay)
+        # add kwargs
+        for key, value in kwargs.items():
+            command.kwargs[key] = serialize(value)
+
+        # queue the command
+        queue.add(command.service.type, command.dict(), delay=delay)
 
     def invoke(self):
         ''' runs the instruction '''

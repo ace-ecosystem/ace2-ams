@@ -10,9 +10,6 @@ FROM $base AS ace2
     # install ace2 source
     COPY ace2 ace2
 
-    # pretty much everything will need the database service
-    COPY services/database/service.py ace2/services/database.py
-
     # run tests
     # remove test files
     RUN mv ace2/tests tests &&\

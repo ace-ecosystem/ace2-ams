@@ -4,7 +4,8 @@ from typing import List, Optional, Type
 
 from .models import PrivateModel
 from .observables import Observable
-from .service import Instruction, Service
+from .service import Service
+from .database import Database
 
 class Analysis(Service):
     ''' Base Analysis class for building ICE2 analysis '''
@@ -43,13 +44,10 @@ class Analysis(Service):
     def start(self):
         ''' This is the entry point for running analysis '''
 
-        # import database service here to prevent circular import issue
-        from .services import Database
-
         # stop and mark analysis as ignored if it should not run
         if not self.should_run():
             self.status = 'ignored'
-            Instruction.send(Database().submit_analysis, self.dict(exclude={'state'}))
+            Database().submit_analysis(self)
             return
 
         # execute the analysis
@@ -95,9 +93,6 @@ class Analysis(Service):
     def submit(self):
         ''' submits the analysis to the database service '''
 
-        # import database service here to prevent circular import issue
-        from .services import Database
-
         # mark analysis complete and submit to the database
         self.status = 'complete'
-        Instruction.send(Database().submit_analysis, self.dict(exclude={'state'}))
+        Database().submit_analysis(self)
