@@ -9,7 +9,8 @@ export type observableRelationshipTypeCreate = genericObjectCreate;
 
 export type observableRelationshipTypeRead = genericObjectRead;
 
-export interface observableRelationshipTypeReadPage extends genericObjectReadPage {
+export interface observableRelationshipTypeReadPage
+  extends genericObjectReadPage {
   items: observableRelationshipTypeRead[];
 }
 

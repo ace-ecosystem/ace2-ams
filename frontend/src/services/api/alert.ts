@@ -39,7 +39,10 @@ export const Alert = {
   readAllPages: async (
     params: alertFilterParams,
   ): Promise<Array<alertRead>> => {
-    const formattedParams = formatObjectFiltersForAPI(validAlertFilters, params);
+    const formattedParams = formatObjectFiltersForAPI(
+      validAlertFilters,
+      params,
+    );
     return api.readAll(endpoint, formattedParams);
   },
 
