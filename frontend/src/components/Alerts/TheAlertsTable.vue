@@ -30,7 +30,7 @@
 
   import AlertTableCell from "@/components/Alerts/AlertTableCell.vue";
   import AlertTableExpansion from "@/components/Alerts/AlertTableExpansion.vue";
-  import TheObjectTable from "@/components/Object/TheObjectTable.vue";
+  import TheObjectTable from "@/components/Objects/TheObjectTable.vue";
 
   import { observableInAlertRead } from "@/models/observable";
 
