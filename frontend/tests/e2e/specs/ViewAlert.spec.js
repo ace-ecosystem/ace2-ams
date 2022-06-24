@@ -116,7 +116,7 @@ describe("ViewAlert.vue", () => {
     // Disposition
     it("should make a request to update and get updated alert when disposition is set", () => {
       cy.intercept("PATCH", "/api/alert/").as("updateAlert");
-      cy.intercept("POST", "/api/node/comment").as("createComment");
+      cy.intercept("POST", "/api/alert/comment").as("createComment");
       cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
         "getAlert",
       );
@@ -143,7 +143,7 @@ describe("ViewAlert.vue", () => {
     // Comment
     it("should make a request to add comment and get updated alert when comment is added", () => {
       cy.intercept({
-        path: "/api/node/comment/",
+        path: "/api/alert/comment/",
         method: "POST",
       }).as("createComment");
       cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
@@ -205,13 +205,13 @@ describe("ViewAlert.vue", () => {
       cy.intercept("GET", "/api/alert/02f8299b-2a24-400f-9751-7dd9164daf6a").as(
         "getAlert",
       );
-      cy.intercept("GET", "/api/metadata/tag/?offset=0").as("getNodeTags");
+      cy.intercept("GET", "/api/metadata/tag/?offset=0").as("getObjectTags");
 
       // Open tag modal
       cy.get("[data-cy=tag-button]").click();
 
       cy.get(".p-dialog-content").should("be.visible");
-      cy.wait("@getNodeTags").its("state").should("eq", "Complete");
+      cy.wait("@getObjectTags").its("state").should("eq", "Complete");
       // Type a tag
       cy.get(".p-chips > .p-inputtext").click().type("TestTag").type("{enter}");
       // Select a tag from the dropdown
@@ -230,7 +230,7 @@ describe("ViewAlert.vue", () => {
       cy.get("[data-cy=tag-button]").click();
 
       cy.get(".p-dialog-content").should("be.visible");
-      cy.wait("@getNodeTags").its("state").should("eq", "Complete");
+      cy.wait("@getObjectTags").its("state").should("eq", "Complete");
       // Type a tag
       cy.get(".p-chips > .p-inputtext").click().type("TestTag").type("{enter}");
       // Select a tag from the dropdown

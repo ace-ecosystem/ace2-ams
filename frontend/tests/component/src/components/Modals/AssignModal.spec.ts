@@ -60,13 +60,13 @@ describe("AssignModal", () => {
     cy.contains("Analyst A").should("be.visible");
     cy.contains("Analyst B").should("be.visible");
   });
-  it("allows submit if both at least one node and a user are selected", () => {
+  it("allows submit if both at least one object and a user are selected", () => {
     factory({ users: users, selected: ["uuid"] });
     cy.contains("Select a user").click();
     cy.contains("Analyst B").click();
     cy.findAllByText("Assign").parent().should("not.be.disabled");
   });
-  it("does not allow submit if no node is selected", () => {
+  it("does not allow submit if no object is selected", () => {
     factory({ users: users, selected: [] });
     cy.contains("Select a user").click();
     cy.contains("Analyst B").click();

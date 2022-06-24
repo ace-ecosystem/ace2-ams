@@ -7,13 +7,13 @@ import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue
 import router from "@/router/index";
 
 interface TheAlertActionToolbarProps {
-  reloadObject: "node" | "table";
+  reloadObject: "object" | "table";
   showFalsePositiveShortcut?: boolean;
   showIgnoreShortcut?: boolean;
 }
 
 const defaultProps: TheAlertActionToolbarProps = {
-  reloadObject: "node",
+  reloadObject: "object",
 };
 
 function factory(props = defaultProps) {
@@ -41,7 +41,7 @@ describe("TheAlertActionToolbar", () => {
   });
   it("renders as expected when optional button props are enabled", () => {
     factory({
-      reloadObject: "node",
+      reloadObject: "object",
       showFalsePositiveShortcut: true,
       showIgnoreShortcut: true,
     });
@@ -52,7 +52,7 @@ describe("TheAlertActionToolbar", () => {
   });
   it("should emit 'falsePositiveClicked' when FP button clicked", () => {
     factory({
-      reloadObject: "node",
+      reloadObject: "object",
       showFalsePositiveShortcut: true,
     });
     cy.contains("FP")
@@ -66,7 +66,7 @@ describe("TheAlertActionToolbar", () => {
   });
   it("should emit 'ignoreClicked' when ignore button clicked", () => {
     factory({
-      reloadObject: "node",
+      reloadObject: "object",
       showIgnoreShortcut: true,
     });
     cy.contains("Ignore")
@@ -78,13 +78,13 @@ describe("TheAlertActionToolbar", () => {
         );
       });
   });
-  it("should show Add Observables button when reload object is 'node'", () => {
+  it("should show Add Observables button when reload object is 'object'", () => {
     factory({
-      reloadObject: "node",
+      reloadObject: "object",
     });
     cy.contains("Add Observable(s)").should("be.visible");
   });
-  it("should not show Add Observables button when reload object is not 'node'", () => {
+  it("should not show Add Observables button when reload object is not 'object'", () => {
     factory({
       reloadObject: "table",
     });

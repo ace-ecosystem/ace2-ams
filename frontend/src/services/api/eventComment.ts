@@ -1,4 +1,8 @@
-import { commentCreate, commentRead, commentUpdate } from "@/models/comment";
+import {
+  eventCommentCreate,
+  eventCommentRead,
+  eventCommentUpdate,
+} from "@/models/eventComment";
 import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
 
@@ -6,11 +10,12 @@ const api = new BaseApi();
 const endpoint = "/event/comment/";
 
 export const EventComment = {
-  create: (data: commentCreate[], getAfterCreate = false): Promise<void> =>
+  create: (data: eventCommentCreate[], getAfterCreate = false): Promise<void> =>
     api.create(endpoint, data, getAfterCreate),
 
-  read: (uuid: UUID): Promise<commentRead> => api.read(`${endpoint}${uuid}`),
+  read: (uuid: UUID): Promise<eventCommentRead> =>
+    api.read(`${endpoint}${uuid}`),
 
-  update: (uuid: UUID, data: commentUpdate): Promise<void> =>
+  update: (uuid: UUID, data: eventCommentUpdate): Promise<void> =>
     api.update(`${endpoint}${uuid}`, data),
 };

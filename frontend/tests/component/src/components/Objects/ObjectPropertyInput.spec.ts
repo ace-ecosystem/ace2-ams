@@ -3,7 +3,7 @@ import PrimeVue from "primevue/config";
 
 import { testConfiguration } from "@/etc/configuration/test/index";
 
-import ObjectPropertyInput from "@/components/Node/ObjectPropertyInput.vue";
+import ObjectPropertyInput from "@/components/Objects/ObjectPropertyInput.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { userReadFactory } from "@mocks/user";
 import { genericObjectReadFactory } from "@mocks/genericObject";

@@ -1,14 +1,14 @@
 import { mount } from "@cypress/vue";
 import PrimeVue from "primevue/config";
 
-import TheObjectActionToolbar from "@/components/Node/TheObjectActionToolbar.vue";
+import TheObjectActionToolbar from "@/components/Objects/TheObjectActionToolbar.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { alertTreeReadFactory } from "@mocks/alert";
 import { userReadFactory } from "@mocks/user";
 import CommentModalVue from "@/components/Modals/CommentModal.vue";
 
 interface TheObjectActionToolbarProps {
-  reloadObject: "node" | "table";
+  reloadObject: "object" | "table";
   assign?: boolean;
   comment?: boolean;
   tag?: boolean;
@@ -17,7 +17,7 @@ interface TheObjectActionToolbarProps {
 }
 
 const defaultProps: TheObjectActionToolbarProps = {
-  reloadObject: "node",
+  reloadObject: "object",
 };
 
 function factory(
@@ -73,9 +73,9 @@ describe("TheObjectActionToolbar", () => {
       },
     ]);
   });
-  it("displays correct alternate text if reloadObject is node, and the open node's owner is the current user", () => {
+  it("displays correct alternate text if reloadObject is object, and the open object's owner is the current user", () => {
     factory({
-      props: { reloadObject: "node" },
+      props: { reloadObject: "object" },
       initialState: {
         authStore: { user: userReadFactory() },
         alertStore: {
@@ -85,9 +85,9 @@ describe("TheObjectActionToolbar", () => {
     });
     cy.contains("Assigned to you!").should("be.visible");
   });
-  it("attempts to reload the node if the given 'reloadObject' is 'node'", () => {
+  it("attempts to reload the object if the given 'reloadObject' is 'object'", () => {
     factory({
-      props: { reloadObject: "node" },
+      props: { reloadObject: "object" },
       initialState: {},
     }).then((wrapper) => {
       wrapper.findComponent(CommentModalVue).vm.$emit("requestReload");
@@ -95,7 +95,7 @@ describe("TheObjectActionToolbar", () => {
       cy.wrap(wrapper.vm.tableStore.requestReload).should("be.false");
     });
   });
-  it("attempts to reload the node table if the given 'reloadObject' is 'table'", () => {
+  it("attempts to reload the object table if the given 'reloadObject' is 'table'", () => {
     factory({
       props: { reloadObject: "table" },
       initialState: {},
@@ -108,7 +108,7 @@ describe("TheObjectActionToolbar", () => {
   it("renders correctly with all optional buttons disabled", () => {
     factory({
       props: {
-        reloadObject: "node",
+        reloadObject: "object",
         assign: false,
         tag: false,
         removeTag: false,

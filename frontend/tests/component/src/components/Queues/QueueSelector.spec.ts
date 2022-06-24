@@ -1,13 +1,13 @@
 import { mount } from "@cypress/vue";
 import PrimeVue from "primevue/config";
 
-import QueueSelector from "@/components/Node/QueueSelector.vue";
+import QueueSelector from "@/components/Queues/QueueSelector.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 
 function factory(
-  args: { props: { nodeQueue: "alerts" | "events" }; initialState: any } = {
-    props: { nodeQueue: "alerts" },
+  args: { props: { objectQueue: "alerts" | "events" }; initialState: any } = {
+    props: { objectQueue: "alerts" },
     initialState: {},
   },
 ) {
@@ -37,7 +37,7 @@ describe("QueueSelector", () => {
   });
   it("renders correctly when there a queue currently set", () => {
     factory({
-      props: { nodeQueue: "alerts" },
+      props: { objectQueue: "alerts" },
       initialState: {
         currentUserSettingsStore: {
           queues: { alerts: externalQueue, events: internalQueue },
@@ -52,7 +52,7 @@ describe("QueueSelector", () => {
   });
   it("will update alert filter for given queue when a different is selected", () => {
     factory({
-      props: { nodeQueue: "alerts" },
+      props: { objectQueue: "alerts" },
       initialState: {
         currentUserSettingsStore: {
           queues: { alerts: externalQueue, events: internalQueue },
@@ -72,7 +72,7 @@ describe("QueueSelector", () => {
   });
   it("will update event filter for given queue when a different is selected", () => {
     factory({
-      props: { nodeQueue: "events" },
+      props: { objectQueue: "events" },
       initialState: {
         currentUserSettingsStore: {
           queues: { alerts: externalQueue, events: internalQueue },

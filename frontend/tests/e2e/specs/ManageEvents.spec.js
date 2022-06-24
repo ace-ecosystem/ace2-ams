@@ -617,7 +617,7 @@ describe("ManageEvents.vue Actions", () => {
       .should("have.not.class", "p-disabled");
   });
   it("will submit and show an event comment when comment is created via comment action", () => {
-    cy.intercept("POST", "/api/node/comment/").as("createComment");
+    cy.intercept("POST", "/api/event/comment/").as("createComment");
 
     // Select an event
     cy.get(".p-selection-column > .p-checkbox ").click();

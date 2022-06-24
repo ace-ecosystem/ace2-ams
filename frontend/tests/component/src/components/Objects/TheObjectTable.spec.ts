@@ -2,7 +2,7 @@ import { mount } from "@cypress/vue";
 import PrimeVue from "primevue/config";
 import { testConfiguration } from "@/etc/configuration/test/index";
 
-import TheObjectTable from "@/components/Node/TheObjectTable.vue";
+import TheObjectTable from "@/components/Objects/TheObjectTable.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { Alert } from "@/services/api/alert";
 import { alertReadFactory } from "@mocks/alert";
@@ -147,7 +147,7 @@ describe("TheObjectTable", () => {
     cy.contains("Failed to fetch alerts").should("be.visible");
     cy.contains("404 Request failed").should("be.visible");
   });
-  it("renders when there is node data available", () => {
+  it("renders when there is object data available", () => {
     const columnHeaders = ["", "", "Name", "Owner"];
     const rows = [
       "",

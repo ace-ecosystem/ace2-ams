@@ -104,7 +104,7 @@
   import CommentAutocomplete from "@/components/Comments/CommentAutocomplete.vue";
 
   import { Event } from "@/services/api/event";
-  import { Comment } from "@/services/api/comment";
+  import { EventComment } from "@/services/api/eventComment";
   import { parseEventSummary } from "@/stores/eventTable";
 
   import { useAlertStore } from "@/stores/alert";
@@ -225,13 +225,13 @@
         const newCommentData = [
           {
             username: authStore.user.username,
-            objectUuid: eventUuid,
+            eventUuid: eventUuid,
             ...commentData.value,
           },
         ];
 
         try {
-          await Comment.create(newCommentData);
+          await EventComment.create(newCommentData);
         } catch (e: unknown) {
           if (typeof e === "string") {
             if (e.includes("409")) {

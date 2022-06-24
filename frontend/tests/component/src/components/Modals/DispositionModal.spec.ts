@@ -6,7 +6,7 @@ import { alertDispositionRead } from "@/models/alertDisposition";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { Alert } from "@/services/api/alert";
-import { Comment } from "@/services/api/comment";
+import { AlertComment } from "@/services/api/alertComment";
 import { userReadFactory } from "@mocks/user";
 import { testConfiguration } from "@/etc/configuration/test";
 
@@ -118,7 +118,7 @@ describe("DispositionModal", () => {
       ])
       .as("setDisposition")
       .resolves();
-    cy.stub(Comment, "create").as("createComment");
+    cy.stub(AlertComment, "create").as("createComment");
     factory({
       dipsositions: [falsePositive, badDisposition],
       selected: ["uuid"],
@@ -136,11 +136,11 @@ describe("DispositionModal", () => {
       ])
       .as("setDisposition")
       .resolves();
-    cy.stub(Comment, "create")
+    cy.stub(AlertComment, "create")
       .withArgs([
         {
           username: "analyst",
-          nodeUuid: "uuid",
+          submissionUuid: "uuid",
           value: "Test comment",
         },
       ])
@@ -166,11 +166,11 @@ describe("DispositionModal", () => {
       ])
       .as("setDisposition")
       .resolves();
-    cy.stub(Comment, "create")
+    cy.stub(AlertComment, "create")
       .withArgs([
         {
           username: "analyst",
-          nodeUuid: "uuid",
+          submissionUuid: "uuid",
           value: "test extra content",
         },
       ])
@@ -196,7 +196,7 @@ describe("DispositionModal", () => {
       ])
       .as("setDisposition")
       .rejects(new Error("404 request failed"));
-    cy.stub(Comment, "create").as("createComment");
+    cy.stub(AlertComment, "create").as("createComment");
 
     factory({
       dipsositions: [falsePositive, badDisposition],
@@ -218,11 +218,11 @@ describe("DispositionModal", () => {
       ])
       .as("setDisposition")
       .resolves();
-    cy.stub(Comment, "create")
+    cy.stub(AlertComment, "create")
       .withArgs([
         {
           username: "analyst",
-          nodeUuid: "uuid",
+          submissionUuid: "uuid",
           value: "Test comment",
         },
       ])
@@ -248,11 +248,11 @@ describe("DispositionModal", () => {
       ])
       .as("setDisposition")
       .resolves();
-    cy.stub(Comment, "create")
+    cy.stub(AlertComment, "create")
       .withArgs([
         {
           username: "analyst",
-          nodeUuid: "uuid",
+          submissionUuid: "uuid",
           value: "Test comment",
         },
       ])

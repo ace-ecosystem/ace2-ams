@@ -21,13 +21,13 @@ function factory(
     selected: string[];
     existingTags: metadataTagRead[];
     objectType: "alerts" | "events" | "observable";
-    reloadObject: "node" | "table";
+    reloadObject: "object" | "table";
     observable: undefined | observableTreeRead;
   } = {
     selected: [],
     existingTags: [],
     objectType: "alerts",
-    reloadObject: "node",
+    reloadObject: "object",
     observable: undefined,
   },
 ) {
@@ -99,7 +99,7 @@ describe("TagModal", () => {
       selected: [],
       existingTags: [testTag],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
 
       observable: undefined,
     });
@@ -107,12 +107,12 @@ describe("TagModal", () => {
     cy.contains("testTag").click();
     cy.findByText("testTag").should("be.visible");
   });
-  it("enables 'Add' button when there is a node selected and 1 or more tags added", () => {
+  it("enables 'Add' button when there is a object selected and 1 or more tags added", () => {
     factory({
       selected: ["uuid"],
       existingTags: [],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
 
       observable: undefined,
     });
@@ -122,7 +122,7 @@ describe("TagModal", () => {
       .type("{enter}");
     cy.findByText("Add").parent().should("not.be.disabled");
   });
-  it("disables 'Add' button when there is not a node selected and 1 or more tags added", () => {
+  it("disables 'Add' button when there is not a object selected and 1 or more tags added", () => {
     factory();
     cy.get('[data-cy="chips-container"]')
       .click()
@@ -130,18 +130,18 @@ describe("TagModal", () => {
       .type("{enter}");
     cy.findByText("Add").parent().should("be.disabled");
   });
-  it("disables 'Add' button when there is a node selected and no tags added", () => {
+  it("disables 'Add' button when there is a object selected and no tags added", () => {
     factory({
       selected: ["uuid"],
       existingTags: [],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
 
       observable: undefined,
     });
     cy.findByText("Add").parent().should("be.disabled");
   });
-  it("attempts to create new tags and update selected nodes with new and existing tags and 'Add' clicked", () => {
+  it("attempts to create new tags and update selected objects with new and existing tags and 'Add' clicked", () => {
     cy.stub(MetadataTag, "create")
       .withArgs({
         value: "newTag",
@@ -167,7 +167,7 @@ describe("TagModal", () => {
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
 
       observable: undefined,
     });
@@ -247,7 +247,7 @@ describe("TagModal", () => {
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
       objectType: "observable",
-      reloadObject: "node",
+      reloadObject: "object",
 
       observable: observableTreeReadFactory({
         tags: [testTag, existingTag],
@@ -284,7 +284,7 @@ describe("TagModal", () => {
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
 
       observable: undefined,
     });
@@ -317,7 +317,7 @@ describe("TagModal", () => {
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
 
       observable: undefined,
     });
@@ -334,7 +334,7 @@ describe("TagModal", () => {
     cy.get("@updateAlert").should("not.have.been");
     cy.contains("404 request failed !").should("be.visible");
   });
-  it("shows error if request to update node tags fails", () => {
+  it("shows error if request to update object tags fails", () => {
     cy.stub(MetadataTag, "create")
       .withArgs({
         value: "newTag",
@@ -360,7 +360,7 @@ describe("TagModal", () => {
       selected: ["uuid"],
       existingTags: [testTag, existingTag],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
 
       observable: undefined,
     });

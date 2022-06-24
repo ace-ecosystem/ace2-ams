@@ -1,7 +1,7 @@
 import { mount } from "@cypress/vue";
 import PrimeVue from "primevue/config";
 
-import ThreatSelector from "@/components/Node/ThreatSelector.vue";
+import ThreatSelector from "@/components/Threat/ThreatSelector.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { threatRead } from "@/models/threat";
 import { queueableObjectReadFactory } from "@mocks/genericObject";

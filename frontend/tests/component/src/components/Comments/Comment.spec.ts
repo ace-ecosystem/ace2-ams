@@ -3,9 +3,9 @@ import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 import { commentRead } from "@/models/comment";
 
-import { commentReadFactory } from "@mocks/comment";
+import { alertCommentReadFactory } from "@mocks/comment";
 
-import Comment from "@/components/Node/Comment.vue";
+import Comment from "@/components/Comments/Comment.vue";
 
 interface commentProps {
   comment: commentRead;
@@ -14,7 +14,7 @@ interface commentProps {
 }
 
 const defaultProps = {
-  comment: commentReadFactory(),
+  comment: alertCommentReadFactory(),
 };
 
 function factory(args: { props: commentProps } = { props: defaultProps }) {
@@ -35,7 +35,7 @@ describe("Comment", () => {
   it("renders as expected with includeTime set to true", () => {
     factory({
       props: {
-        comment: commentReadFactory({
+        comment: alertCommentReadFactory({
           insertTime: "2022-03-25T12:00:00.000000+00:00",
         }),
         includeTime: true,
@@ -47,7 +47,7 @@ describe("Comment", () => {
   });
   it("renders as expected with includeLineBreak set to false", () => {
     factory({
-      props: { comment: commentReadFactory(), includeLineBreak: false },
+      props: { comment: alertCommentReadFactory(), includeLineBreak: false },
     });
     cy.contains("(Test Analyst) A test comment").should("be.visible");
     cy.get("br").should("not.exist");

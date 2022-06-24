@@ -49,7 +49,8 @@
   import BaseModal from "@/components/Modals/BaseModal.vue";
   import CommentAutocomplete from "@/components/Comments/CommentAutocomplete.vue";
 
-  import { Comment } from "@/services/api/comment";
+  import { AlertComment } from "@/services/api/alertComment";
+  import { EventComment } from "@/services/api/eventComment";
 
   import { useAuthStore } from "@/stores/auth";
   import { objectSelectedStores } from "@/stores/index";
@@ -75,13 +76,23 @@
   async function addComment() {
     isLoading.value = true;
     try {
-      await Comment.create(
-        selectedStore.selected.map((uuid) => ({
-          username: authStore.user.username,
-          objectUuid: uuid,
-          ...commentData.value,
-        })),
-      );
+      if (objectType === "alerts") {
+        await AlertComment.create(
+          selectedStore.selected.map((uuid) => ({
+            username: authStore.user.username,
+            submissionUuid: uuid,
+            ...commentData.value,
+          })),
+        );
+      } else if (objectType === "events") {
+        await EventComment.create(
+          selectedStore.selected.map((uuid) => ({
+            username: authStore.user.username,
+            eventUuid: uuid,
+            ...commentData.value,
+          })),
+        );
+      }
     } catch (e: unknown) {
       if (typeof e === "string") {
         error.value = e;

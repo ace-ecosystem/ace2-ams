@@ -18,8 +18,8 @@ import ToastService from "primevue/toastservice";
 import Tooltip from "primevue/tooltip";
 import { userReadFactory } from "@mocks/user";
 
-import CommentEditor from "@/components/Node/CommentEditor.vue";
-import ThreatSelector from "@/components/Node/ThreatSelector.vue";
+import CommentEditor from "@/components/Comments/CommentEditor.vue";
+import ThreatSelector from "@/components/Threat/ThreatSelector.vue";
 import { Threat } from "@/services/api/threat";
 import { ThreatActor } from "@/services/api/threatActor";
 import { ThreatType } from "@/services/api/threatType";

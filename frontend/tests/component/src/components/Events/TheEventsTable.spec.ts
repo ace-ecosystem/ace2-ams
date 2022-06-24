@@ -13,7 +13,7 @@ import {
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { eventRead } from "@/models/event";
 import { eventReadFactory } from "@mocks/events";
-import QueueSelectorVue from "@/components/Node/QueueSelector.vue";
+import QueueSelectorVue from "@/components/Queues/QueueSelector.vue";
 import { threatRead } from "@/models/threat";
 import ToastService from "primevue/toastservice";
 

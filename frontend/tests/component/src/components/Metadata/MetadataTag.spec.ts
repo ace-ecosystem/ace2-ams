@@ -10,7 +10,7 @@ const testTag = metadataTagReadFactory({ value: "testTag" });
 
 function factory(
   objectType: "alerts" | "events" = "alerts",
-  overrideNodeType?: "alerts" | "events",
+  overrideObjectType?: "alerts" | "events",
 ) {
   return mount(MetadataTag, {
     global: {
@@ -19,7 +19,7 @@ function factory(
     },
     propsData: {
       tag: testTag,
-      overrideNodeType: overrideNodeType,
+      overrideObjectType: overrideObjectType,
     },
   });
 }
@@ -29,7 +29,7 @@ describe("MetadataTag", () => {
     factory();
     cy.contains("testTag").should("be.visible");
   });
-  it("adds a filter for provided node type as expected on click (alert)", () => {
+  it("adds a filter for provided object type as expected on click (alert)", () => {
     factory();
     cy.contains("testTag").click();
     cy.get("@stub-1").should("have.been.calledOnceWith", {
@@ -39,7 +39,7 @@ describe("MetadataTag", () => {
       },
     });
   });
-  it("adds a filter for provided node type as expected on click (event)", () => {
+  it("adds a filter for provided object type as expected on click (event)", () => {
     factory("events");
     cy.contains("testTag").click();
     cy.get("@stub-1").should("have.been.calledOnceWith", {
@@ -49,7 +49,7 @@ describe("MetadataTag", () => {
       },
     });
   });
-  it("if set, 'overrideNodeType' is used for filtering as expected on click", () => {
+  it("if set, 'overrideObjectType' is used for filtering as expected on click", () => {
     factory("events", "alerts");
     cy.contains("testTag").click();
     cy.get("@stub-1").should("have.been.calledOnceWith", {

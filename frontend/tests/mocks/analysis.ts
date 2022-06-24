@@ -1,6 +1,6 @@
 import { analysisRead, analysisTreeRead } from "@/models/analysis";
 import {
-  analysisModuleTypeNodeTreeRead,
+  analysisModuleTypeAlertTreeRead,
   analysisModuleTypeRead,
 } from "@/models/analysisModuleType";
 
@@ -51,16 +51,16 @@ export const analysisReadFactory = ({
   uuid: uuid,
 });
 
-export const analysisModuleTypeNodeTreeReadFactory = ({
+export const analysisModuleTypeAlertTreeReadFactory = ({
   value = "TestAnalysis",
   uuid = "testUuid",
-}: Partial<analysisModuleTypeNodeTreeRead> = {}): analysisModuleTypeNodeTreeRead => ({
+}: Partial<analysisModuleTypeAlertTreeRead> = {}): analysisModuleTypeAlertTreeRead => ({
   value: value,
   uuid: uuid,
 });
 
 export const analysisTreeReadFactory = ({
-  analysisModuleType = analysisModuleTypeNodeTreeReadFactory(),
+  analysisModuleType = analysisModuleTypeAlertTreeReadFactory(),
   children = [],
   errorMessage = null,
   firstAppearance = undefined,

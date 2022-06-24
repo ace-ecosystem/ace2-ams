@@ -1,7 +1,7 @@
 import { threatRead } from "@/models/threat";
 
 export const threatReadFactory = ({
-  description = "A test node threat",
+  description = "A test threat",
   uuid = "threat1",
   value = "threat",
   types = [],

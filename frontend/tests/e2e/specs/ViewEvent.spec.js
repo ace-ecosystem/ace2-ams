@@ -90,7 +90,7 @@ describe("ViewEvent.vue actions", () => {
   });
 
   it("Correctly adds comment via comment modal and reloads page", () => {
-    cy.intercept("POST", "/api/node/comment/").as("addComment");
+    cy.intercept("POST", "/api/event/comment/").as("addComment");
 
     // Click on the Actions dropdown
     cy.get('[aria-haspopup="true"]').eq(0).click();
@@ -149,11 +149,9 @@ describe("ViewEvent.vue actions", () => {
     cy.intercept("GET", "/api/event/status/?offset=0").as("eventStatus");
     cy.intercept("GET", "/api/event/type/?offset=0").as("eventType");
     cy.intercept("GET", "/api/event/vector/?offset=0").as("eventVector");
-    cy.intercept("GET", "/api/node/threat_actor/?offset=0").as(
-      "threatActor",
-    );
-    cy.intercept("GET", "/api/node/threat/?offset=0").as("threat");
-    cy.intercept("GET", "/api/node/threat/type/?offset=0").as("threatType");
+    cy.intercept("GET", "/api/threat_actor/?offset=0").as("threatActor");
+    cy.intercept("GET", "/api/threat/?offset=0").as("threat");
+    cy.intercept("GET", "/api/threat/type/?offset=0").as("threatType");
     cy.intercept("GET", "/api/user/?offset=0").as("user");
     cy.intercept("GET", "/api/event/*").as("event");
 

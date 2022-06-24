@@ -24,14 +24,14 @@ function factory(
     openAlertTags: metadataTagRead[];
     existingTags: metadataTagRead[];
     objectType: "alerts" | "events" | "observable";
-    reloadObject: "node" | "table";
+    reloadObject: "object" | "table";
     observable: undefined | observableTreeRead;
   } = {
     selected: [],
     openAlertTags: [],
     existingTags: [],
     objectType: "alerts",
-    reloadObject: "node",
+    reloadObject: "object",
     observable: undefined,
   },
 ) {
@@ -69,7 +69,7 @@ function factory(
             selectedAlertStore: {
               selected: args.selected,
             },
-            nodeTagStore: {
+            objectTagStore: {
               items: args.existingTags,
             },
           },
@@ -104,7 +104,7 @@ describe("RemoveTagModal", () => {
       existingTags: [existingTag, testTag, otherTag],
       openAlertTags: [],
       objectType: "observable",
-      reloadObject: "node",
+      reloadObject: "object",
       observable: observableTreeReadFactory({
         tags: [existingTag, testTag],
       }),
@@ -115,13 +115,13 @@ describe("RemoveTagModal", () => {
     cy.contains("testTag").should("be.visible");
     cy.contains("otherTag").should("not.exist");
   });
-  it("will use selected node's current tags as existing tag options if the given objectType is not 'observable' and reloadObject is 'node'", () => {
+  it("will use selected object's current tags as existing tag options if the given objectType is not 'observable' and reloadObject is 'object'", () => {
     factory({
       selected: ["uuid"],
       openAlertTags: [testTag, otherTag],
       existingTags: [existingTag, testTag, otherTag],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
       observable: undefined,
     });
 
@@ -136,7 +136,7 @@ describe("RemoveTagModal", () => {
       openAlertTags: [],
       existingTags: [existingTag, testTag, otherTag],
       objectType: "observable",
-      reloadObject: "node",
+      reloadObject: "object",
       observable: observableTreeReadFactory({
         tags: [existingTag, testTag],
       }),
@@ -147,13 +147,13 @@ describe("RemoveTagModal", () => {
       .type("{enter}");
     cy.get("[data-cy='remove-button']").should("not.be.disabled");
   });
-  it("enables 'Add' button when given objectType is not 'observable', selectedStore has 1 or more nodes selected, and 1 or more tags added", () => {
+  it("enables 'Add' button when given objectType is not 'observable', selectedStore has 1 or more objects selected, and 1 or more tags added", () => {
     factory({
       selected: ["uuid"],
       openAlertTags: [testTag, otherTag],
       existingTags: [existingTag, testTag, otherTag],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
       observable: undefined,
     });
     cy.get('[data-cy="chips-container"]')
@@ -168,31 +168,31 @@ describe("RemoveTagModal", () => {
       openAlertTags: [],
       existingTags: [existingTag, testTag, otherTag],
       objectType: "observable",
-      reloadObject: "node",
+      reloadObject: "object",
       observable: observableTreeReadFactory({
         tags: [existingTag, testTag],
       }),
     });
     cy.get("[data-cy='remove-button']").should("be.disabled");
   });
-  it("disables 'Add' button when given objectType is not 'observable', selectedStore has 1 or more nodes selected, and no tags added", () => {
+  it("disables 'Add' button when given objectType is not 'observable', selectedStore has 1 or more objects selected, and no tags added", () => {
     factory({
       selected: ["uuid"],
       openAlertTags: [],
       existingTags: [],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
       observable: undefined,
     });
     cy.get("[data-cy='remove-button']").should("be.disabled");
   });
-  it("disables 'Add' button when given objectType is not 'observable', selectedStore has no nodes selected, and 1 or more tags added", () => {
+  it("disables 'Add' button when given objectType is not 'observable', selectedStore has no objects selected, and 1 or more tags added", () => {
     factory({
       selected: [],
       openAlertTags: [],
       existingTags: [],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
       observable: undefined,
     });
     cy.get('[data-cy="chips-container"]')
@@ -201,7 +201,7 @@ describe("RemoveTagModal", () => {
       .type("{enter}");
     cy.get("[data-cy='remove-button']").should("be.disabled");
   });
-  it("will fetch and use all available tags in nodeTagStore as as existing tag options if the given objectType is not 'observable' and reloadObject is not 'node'", () => {
+  it("will fetch and use all available tags in objectTagStore as as existing tag options if the given objectType is not 'observable' and reloadObject is not 'object'", () => {
     cy.stub(MetadataTag, "readAll")
       .as("readAllTags")
       .resolves([existingTag, testTag, otherTag]);
@@ -235,7 +235,7 @@ describe("RemoveTagModal", () => {
       existingTags: [existingTag, testTag, otherTag],
       openAlertTags: [],
       objectType: "observable",
-      reloadObject: "node",
+      reloadObject: "object",
       observable: observableTreeReadFactory({
         tags: [existingTag, testTag],
       }),
@@ -246,7 +246,7 @@ describe("RemoveTagModal", () => {
     cy.get("[data-cy='remove-button']").click();
     cy.get("@updateObservable").should("have.been.calledOnce");
   });
-  it("will make the expected call to update a single node's tags w/o tags in form when 'Remove' is clicked and the given objectType is not 'observable' and reloadObject is 'node'", () => {
+  it("will make the expected call to update a single object's tags w/o tags in form when 'Remove' is clicked and the given objectType is not 'observable' and reloadObject is 'object'", () => {
     cy.stub(Alert, "update")
       .withArgs([
         {
@@ -263,7 +263,7 @@ describe("RemoveTagModal", () => {
       openAlertTags: [testTag, otherTag],
       existingTags: [existingTag, testTag, otherTag],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
       observable: undefined,
     });
 
@@ -272,7 +272,7 @@ describe("RemoveTagModal", () => {
     cy.get("[data-cy='remove-button']").click();
     cy.get("@updateAlert").should("have.been.calledOnce");
   });
-  it("will make the expected call to update multiple node's tags w/o tags in form when 'Remove' is clicked and the given objectType is not 'observable' and reloadObject is not 'node'", () => {
+  it("will make the expected call to update multiple object's tags w/o tags in form when 'Remove' is clicked and the given objectType is not 'observable' and reloadObject is not 'object'", () => {
     cy.stub(MetadataTag, "readAll")
       .as("readAllTags")
       .resolves([existingTag, testTag, otherTag]);
@@ -314,7 +314,7 @@ describe("RemoveTagModal", () => {
     cy.get("[data-cy='remove-button']").click();
     cy.get("@updateAlerts").should("have.been.calledOnce");
   });
-  it("will show an error if attempt to fetch all node tags fails", () => {
+  it("will show an error if attempt to fetch all object tags fails", () => {
     cy.stub(MetadataTag, "readAll")
       .as("readAllTags")
       .rejects(new Error("404 request failed !"));
@@ -345,7 +345,7 @@ describe("RemoveTagModal", () => {
       openAlertTags: [],
       existingTags: [existingTag, testTag, otherTag],
       objectType: "observable",
-      reloadObject: "node",
+      reloadObject: "object",
       observable: observableTreeReadFactory({
         tags: [existingTag, testTag],
       }),
@@ -357,7 +357,7 @@ describe("RemoveTagModal", () => {
     cy.get("@updateObservable").should("have.been.calledOnce");
     cy.contains("404 request failed !").should("be.visible");
   });
-  it("will show an error if attempt to update one or more node's tags fails", () => {
+  it("will show an error if attempt to update one or more object's tags fails", () => {
     cy.stub(Alert, "update")
       .withArgs([
         {
@@ -374,7 +374,7 @@ describe("RemoveTagModal", () => {
       openAlertTags: [testTag, otherTag],
       existingTags: [existingTag, testTag, otherTag],
       objectType: "alerts",
-      reloadObject: "node",
+      reloadObject: "object",
       observable: undefined,
     });
 

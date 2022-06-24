@@ -2,20 +2,20 @@ import { mount } from "@cypress/vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import PrimeVue from "primevue/config";
 
-import { commentReadFactory } from "@mocks/comment";
+import { alertCommentReadFactory } from "@mocks/comment";
 
-import CommentEditor from "@/components/Node/CommentEditor.vue";
-import { commentRead } from "@/models/comment";
+import CommentEditor from "@/components/Comments/CommentEditor.vue";
+import { alertCommentRead } from "@/models/alertComment";
 
 let comments = [
-  commentReadFactory({ insertTime: "2022-04-25T12:00:00.000000+00:00" }),
-  commentReadFactory({
+  alertCommentReadFactory({ insertTime: "2022-04-25T12:00:00.000000+00:00" }),
+  alertCommentReadFactory({
     value: "Other comment",
     insertTime: "2022-04-25T01:00:00.000000+00:00",
   }),
 ];
 
-function factory(props: commentRead[] = comments) {
+function factory(props: alertCommentRead[] = comments) {
   mount(CommentEditor, {
     global: {
       plugins: [
@@ -37,8 +37,10 @@ describe("CommentEditor", () => {
   // these props get updated in some tests, need to reset value here
   beforeEach(() => {
     comments = [
-      commentReadFactory({ insertTime: "2022-04-25T12:00:00.000000+00:00" }),
-      commentReadFactory({
+      alertCommentReadFactory({
+        insertTime: "2022-04-25T12:00:00.000000+00:00",
+      }),
+      alertCommentReadFactory({
         value: "Other comment",
         insertTime: "2022-04-25T01:00:00.000000+00:00",
       }),
@@ -76,7 +78,9 @@ describe("CommentEditor", () => {
   });
   it("does update comment value if edit panel opened, comment edited, and saved", () => {
     factory([
-      commentReadFactory({ insertTime: "2022-04-25T12:00:00.000000+00:00" }),
+      alertCommentReadFactory({
+        insertTime: "2022-04-25T12:00:00.000000+00:00",
+      }),
     ]);
     cy.get('[data-cy="edit-comment-button"]').first().click();
     cy.contains(
@@ -108,7 +112,9 @@ describe("CommentEditor", () => {
   });
   it("correctly updates comment data when selecting from recent comments", () => {
     factory([
-      commentReadFactory({ insertTime: "2022-04-25T12:00:00.000000+00:00" }),
+      alertCommentReadFactory({
+        insertTime: "2022-04-25T12:00:00.000000+00:00",
+      }),
     ]);
     cy.get('[data-cy="edit-comment-button"]').first().click();
     cy.contains(

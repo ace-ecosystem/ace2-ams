@@ -70,7 +70,7 @@
   import SaveToEventModal from "@/components/Modals/SaveToEventModal.vue";
   import AlertDispositionTag from "@/components/Alerts/AlertDispositionTag.vue";
 
-  import { Comment } from "@/services/api/comment";
+  import { AlertComment } from "@/services/api/alertComment";
   import CommentAutocomplete from "@/components/Comments/CommentAutocomplete.vue";
 
   import { useAlertDispositionStore } from "@/stores/alertDisposition";
@@ -81,7 +81,7 @@
   import { useRecentCommentsStore } from "@/stores/recentComments";
 
   import { alertDispositionRead } from "@/models/alertDisposition";
-  import { commentCreate } from "@/models/comment";
+  import { alertCommentCreate } from "@/models/alertComment";
 
   const alertDispositionStore = useAlertDispositionStore();
   const alertStore = useAlertStore();
@@ -113,14 +113,14 @@
       await alertStore.update(updateData);
 
       if (dispositionComment.value) {
-        const commentCreateData: commentCreate[] =
+        const commentCreateData: alertCommentCreate[] =
           selectedAlertStore.selected.map((uuid) => ({
             username: authStore.user.username,
-            objectUuid: uuid,
+            submissionUuid: uuid,
             value: dispositionComment.value!,
           }));
         if (commentCreateData) {
-          await Comment.create(commentCreateData);
+          await AlertComment.create(commentCreateData);
         }
       }
     } catch (e: unknown) {

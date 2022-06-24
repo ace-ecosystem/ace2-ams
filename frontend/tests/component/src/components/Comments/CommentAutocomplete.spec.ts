@@ -2,7 +2,7 @@ import { mount } from "@cypress/vue";
 import PrimeVue from "primevue/config";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 
-import CommentAutocomplete from "@/components/Node/CommentAutocomplete.vue";
+import CommentAutocomplete from "@/components/Comments/CommentAutocomplete.vue";
 
 function factory(recentComments: string[] = []) {
   return mount(CommentAutocomplete, {

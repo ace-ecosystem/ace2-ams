@@ -2,7 +2,7 @@ import { mount } from "@cypress/vue";
 import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 
-import ObservableRelationship from "@/components/Node/ObservableRelationship.vue";
+import ObservableRelationship from "@/components/Observables/ObservableRelationship.vue";
 
 const props = {
   type: "IS_HASH_OF",

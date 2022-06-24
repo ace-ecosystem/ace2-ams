@@ -718,7 +718,7 @@ describe("Manage Alerts - Single Alert Tests", () => {
 
   describe("Comments", () => {
     it("will add a given comment to an alert via the comment modal", () => {
-      cy.intercept("POST", "/api/node/comment/").as("addComment");
+      cy.intercept("POST", "/api/alert/comment/").as("addComment");
 
       // Get first visible alert checkbox
       cy.get(".p-checkbox-box").eq(1).click();
@@ -858,7 +858,7 @@ describe("Manage Alerts - Single Alert Tests", () => {
   describe("Disposition", () => {
     it("will set the disposition and disposition comment via disposition modal", () => {
       cy.intercept("PATCH", "/api/alert/").as("updateAlert");
-      cy.intercept("POST", "/api/node/comment/").as("addComment");
+      cy.intercept("POST", "/api/alert/comment/").as("addComment");
 
       // Check first visible alert current disposition, should be "OPEN"
       cy.get(".p-datatable-tbody > :nth-child(1) > :nth-child(6) > div").should(
@@ -1125,7 +1125,7 @@ describe("Manage Alerts - Save to Event", () => {
         "/api/event/?status=CLOSED&sort=created_time%7Casc&offset=0",
       ).as("getClosedEvents");
       cy.intercept("PATCH", "/api/alert/").as("updateAlerts");
-      cy.intercept("POST", "/api/node/comment").as("addComment");
+      cy.intercept("POST", "/api/alert/comment").as("addComment");
 
       //  Select all alerts
       cy.get(
@@ -1175,7 +1175,7 @@ describe("Manage Alerts - Save to Event", () => {
       ).as("getClosedEvents");
       cy.intercept("PATCH", "/api/alert/").as("updateAlerts");
       cy.intercept("POST", "/api/event/").as("createEvent");
-      cy.intercept("POST", "/api/node/comment").as("addComment");
+      cy.intercept("POST", "/api/alert/comment").as("addComment");
 
       //  Select all alerts
       cy.get(
