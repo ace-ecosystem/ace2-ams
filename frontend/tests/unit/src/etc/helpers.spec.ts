@@ -55,12 +55,15 @@ describe("parseFilters", () => {
     );
 
     expect(results).toEqual({
-      observableTypes: [
-        [
-          { value: "ipv4", description: null, uuid: "1" },
-          { value: "file", description: null, uuid: "2" },
+      observableTypes: {
+        included: [
+          [
+            { value: "ipv4", description: null, uuid: "1" },
+            { value: "file", description: null, uuid: "2" },
+          ],
         ],
-      ],
+        notIncluded: [],
+      },
     });
   });
 
@@ -68,7 +71,7 @@ describe("parseFilters", () => {
     const results = parseFilters({ tags: "tagA,tagB" }, alertFilters.external);
 
     expect(results).toEqual({
-      tags: [["tagA", "tagB"]],
+      tags: { included: [["tagA", "tagB"]], notIncluded: [] },
     });
   });
 
@@ -105,7 +108,7 @@ describe("parseFilters", () => {
     const results = parseFilters({ owner: "analystB" }, alertFilters.external);
 
     expect(results).toEqual({
-      owner: [mockUserB],
+      owner: { included: [mockUserB], notIncluded: [] },
     });
   });
 
@@ -142,7 +145,10 @@ describe("parseFilters", () => {
     const results = parseFilters({ owner: "none" }, alertFilters.external);
 
     expect(results).toEqual({
-      owner: [{ displayName: "None", username: "none" }],
+      owner: {
+        included: [{ displayName: "None", username: "none" }],
+        notIncluded: [],
+      },
     });
   });
 
@@ -156,7 +162,7 @@ describe("parseFilters", () => {
     );
 
     expect(results).toEqual({
-      disposition: [{ value: "None" }],
+      disposition: { included: [{ value: "None" }], notIncluded: [] },
     });
   });
 
@@ -170,7 +176,10 @@ describe("parseFilters", () => {
     );
 
     expect(results).toEqual({
-      eventTimeBefore: [new Date("2022-01-08T16:31:51.000Z")],
+      eventTimeBefore: {
+        included: [new Date("2022-01-08T16:31:51.000Z")],
+        notIncluded: [],
+      },
     });
   });
 
@@ -187,7 +196,7 @@ describe("parseFilters", () => {
     const results = parseFilters({ name: "test name" }, alertFilters.external);
 
     expect(results).toEqual({
-      name: ["test name"],
+      name: { included: ["test name"], notIncluded: [] },
     });
   });
   it("will correctly parse and add any catetgorized value filters", async () => {
@@ -203,12 +212,15 @@ describe("parseFilters", () => {
     );
 
     expect(results).toEqual({
-      observable: [
-        {
-          category: { value: "ipv4", description: null, uuid: "1" },
-          value: "1.2.3.4",
-        },
-      ],
+      observable: {
+        included: [
+          {
+            category: { value: "ipv4", description: null, uuid: "1" },
+            value: "1.2.3.4",
+          },
+        ],
+        notIncluded: [],
+      },
     });
   });
   it("will correctly parse and add any combined filters", async () => {
@@ -262,22 +274,31 @@ describe("parseFilters", () => {
     );
 
     expect(results).toEqual({
-      tags: [["tagA", "tagB"]],
-      owner: [mockUserB],
-      observableTypes: [
-        [
-          { value: "ipv4", description: null, uuid: "1" },
-          { value: "file", description: null, uuid: "2" },
+      tags: { included: [["tagA", "tagB"]], notIncluded: [] },
+      owner: { included: [mockUserB], notIncluded: [] },
+      observableTypes: {
+        included: [
+          [
+            { value: "ipv4", description: null, uuid: "1" },
+            { value: "file", description: null, uuid: "2" },
+          ],
         ],
-      ],
-      eventTimeBefore: [new Date("2022-01-08T16:31:51.000Z")],
-      name: ["test name"],
-      observable: [
-        {
-          category: { value: "ipv4", description: null, uuid: "1" },
-          value: "1.2.3.4",
-        },
-      ],
+        notIncluded: [],
+      },
+      eventTimeBefore: {
+        included: [new Date("2022-01-08T16:31:51.000Z")],
+        notIncluded: [],
+      },
+      name: { included: ["test name"], notIncluded: [] },
+      observable: {
+        included: [
+          {
+            category: { value: "ipv4", description: null, uuid: "1" },
+            value: "1.2.3.4",
+          },
+        ],
+        notIncluded: [],
+      },
     });
   });
   it("will correctly parse and add any combined filters with multiple filter values", async () => {
@@ -333,33 +354,45 @@ describe("parseFilters", () => {
     );
 
     expect(results).toEqual({
-      tags: [
-        ["tagA", "tagB"],
-        ["tagC", "tagD"],
-      ],
-      owner: [mockUserB, mockUserA],
-      observableTypes: [
-        [
-          { value: "ipv4", description: null, uuid: "1" },
-          { value: "file", description: null, uuid: "2" },
+      tags: {
+        included: [
+          ["tagA", "tagB"],
+          ["tagC", "tagD"],
         ],
-        [{ value: "ipv4", description: null, uuid: "1" }],
-      ],
-      eventTimeBefore: [
-        new Date("2022-01-08T16:31:51.000Z"),
-        new Date("2022-01-10T16:31:51.000Z"),
-      ],
-      name: ["test name", "test name 2"],
-      observable: [
-        {
-          category: { value: "ipv4", description: null, uuid: "1" },
-          value: "1.2.3.4",
-        },
-        {
-          category: { value: "ipv4", description: null, uuid: "1" },
-          value: "5.6.7.8",
-        },
-      ],
+        notIncluded: [],
+      },
+      owner: { included: [mockUserB, mockUserA], notIncluded: [] },
+      observableTypes: {
+        included: [
+          [
+            { value: "ipv4", description: null, uuid: "1" },
+            { value: "file", description: null, uuid: "2" },
+          ],
+          [{ value: "ipv4", description: null, uuid: "1" }],
+        ],
+        notIncluded: [],
+      },
+      eventTimeBefore: {
+        included: [
+          new Date("2022-01-08T16:31:51.000Z"),
+          new Date("2022-01-10T16:31:51.000Z"),
+        ],
+        notIncluded: [],
+      },
+      name: { included: ["test name", "test name 2"], notIncluded: [] },
+      observable: {
+        included: [
+          {
+            category: { value: "ipv4", description: null, uuid: "1" },
+            value: "1.2.3.4",
+          },
+          {
+            category: { value: "ipv4", description: null, uuid: "1" },
+            value: "5.6.7.8",
+          },
+        ],
+        notIncluded: [],
+      },
     });
   });
 });
