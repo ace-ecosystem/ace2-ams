@@ -539,7 +539,7 @@ describe("Manage Alerts - No Database Changes", () => {
     });
   });
 
-  describe("URL Param Filters", () => {
+  describe.only("URL Param Filters", () => {
     // Can't test at the moment, no way to check clipboard data in insecure context
     // Tried using clipboardy package, but Cypress throws a fit when importing ES6 modules
     it.skip("will generate and copy a link of currently applied filters when link button clicked", () => {
@@ -591,17 +591,18 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.get(".p-splitbutton-menubutton").click();
       cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
       cy.get(".p-dialog-header").should("be.visible");
-      cy.get(
-        ":nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-label",
-      ).should("have.text", "Name");
-      cy.get(".field > .p-inputtext").should("have.value", "Small Alert");
-      cy.get(
-        ".flex > :nth-child(2) > :nth-child(1) > .p-dropdown > .p-dropdown-label",
-      ).should("have.text", "Owner");
-      cy.get(".col > .field > .p-dropdown > .p-dropdown-label").should(
-        "have.text",
-        "Analyst Bob",
-      );
+      cy.get("[data-cy='property-input-type']")
+        .eq(0)
+        .should("have.text", "Name");
+      cy.get("[data-cy='property-input-value']")
+        .eq(0)
+        .should("have.value", "Small Alert");
+      cy.get("[data-cy='property-input-type']")
+        .eq(1)
+        .should("have.text", "Owner");
+      cy.get("[data-cy='property-input-value']")
+        .eq(1)
+        .should("have.text", "Analyst Bob");
       cy.get(".p-dialog-header-icon").click();
     });
   });
