@@ -152,7 +152,7 @@ describe("filters Actions", () => {
 
     // Adding a filter to the notIncluded list
     store.setFilter({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "testFilterName",
       filterValue: "testFilterValue",
       isIncluded: false,
@@ -237,7 +237,7 @@ describe("filters Actions", () => {
     );
 
     store.unsetFilterValue({
-      nodeType: "alerts",
+      objectType: "alerts",
       filterName: "name",
       filterValue: "test",
       isIncluded: false,

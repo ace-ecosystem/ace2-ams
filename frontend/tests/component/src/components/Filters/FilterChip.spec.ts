@@ -118,7 +118,7 @@ describe("FilterChip", () => {
     cy.get("@stub-4").should("have.been.calledWith", {
       objectType: "alerts",
       filterName: "name",
-      filterValue: undefined, // This will be undefined because NodePropertyInput is stubbed
+      filterValue: undefined, // This will be undefined because ObjectropertyInput is stubbed
       isIncluded: true,
     });
   });

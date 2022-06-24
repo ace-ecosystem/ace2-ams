@@ -60,7 +60,7 @@ describe("FilterChipContainer", () => {
       name: { included: ["test name"], notIncluded: [] },
       owner: { included: [userReadFactory()], notIncluded: [] },
     }).then((wrapper) => {
-      wrapper.vm.filterStore.clearAll({ nodeType: "alerts" });
+      wrapper.vm.filterStore.clearAll({ objectType: "alerts" });
       cy.get("[data-cy=filter-chip]").should("not.exist");
     });
   });
