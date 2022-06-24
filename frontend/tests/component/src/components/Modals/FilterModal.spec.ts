@@ -69,15 +69,37 @@ describe("FilterModal", () => {
     factory({
       filters: {
         alerts: {
-          name: { included: ["test name", "test name 2"], notIncluded: [] },
+          name: {
+            included: ["test name", "test name 2"],
+            notIncluded: ["test name 3"],
+          },
         },
         events: {},
       },
     });
-    cy.get('[data-cy="filter-input"]').should("have.length", 2);
-    cy.findAllByText("Name").should("have.length", 2);
+    cy.get('[data-cy="filter-input"]').should("have.length", 3);
+    cy.findAllByText("Name").should("have.length", 3);
     cy.findByDisplayValue("test name").should("be.visible");
+    cy.get('[data-cy="filter-not-included-switch"]')
+      .eq(0)
+      .should("not.be.checked")
+      .parent()
+      .parent()
+      .should("be.visible");
     cy.findByDisplayValue("test name 2").should("be.visible");
+    cy.get('[data-cy="filter-not-included-switch"]')
+      .eq(1)
+      .should("not.be.checked")
+      .parent()
+      .parent()
+      .should("be.visible");
+    cy.findByDisplayValue("test name 3").should("be.visible");
+    cy.get('[data-cy="filter-not-included-switch"]')
+      .eq(2)
+      .should("be.checked")
+      .parent()
+      .parent()
+      .should("be.visible");
   });
   it("clears filters in filter form when 'Clear' button clicked", () => {
     factory({
@@ -116,7 +138,7 @@ describe("FilterModal", () => {
     }); //clearAll
     cy.get("[data-cy=FilterModal]").should("not.exist");
   });
-  it("updates filter store with filters in form when 'Submit' button is clicked", () => {
+  it.only("updates filter store with filters in form when 'Submit' button is clicked", () => {
     factory({
       filters: {
         alerts: { name: { included: ["test name"], notIncluded: [] } },
@@ -131,11 +153,16 @@ describe("FilterModal", () => {
       .last()
       .click()
       .type("test value 2");
+    cy.get('[data-cy="filter-not-included-switch"]')
+      .eq(1)
+      .parent()
+      .parent()
+      .click();
     cy.contains("Submit").click();
     cy.get("@spy-1").should("have.been.calledOnceWith", {
       nodeType: "alerts",
       filters: {
-        name: { included: ["test name", "test value 2"], notIncluded: [] },
+        name: { included: ["test name"], notIncluded: ["test value 2"] },
       },
     }); //bulkSetFilters
     cy.get("[data-cy=FilterModal]").should("not.exist");

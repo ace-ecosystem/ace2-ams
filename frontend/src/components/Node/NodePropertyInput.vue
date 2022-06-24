@@ -154,6 +154,7 @@
       type: Object as PropType<{
         propertyType: any;
         propertyValue: any;
+        notIncluded: boolean;
       }>,
       required: true,
     },
@@ -332,6 +333,7 @@
         ? propertyType.value.name
         : propertyType.value,
       propertyValue: val,
+      notIncluded: props.modelValue.notIncluded,
     });
   };
 
@@ -341,6 +343,7 @@
         ? newValue.value.name
         : propertyType.value,
       propertyValue: propertyValue.value,
+      notIncluded: props.modelValue.notIncluded,
     });
   };
 </script>
