@@ -86,7 +86,7 @@ describe("TheFilterToolbar", () => {
     cy.get('[data-cy="filter-input"]').should("be.visible");
     cy.get('[data-cy="quick-add-filter-submit-button"]').should("be.visible");
   });
-  it("attempts to add a filter when submit button clicked in quick add panel ", () => {
+  it("correctly attempts to add an included filter when submit button clicked in quick add panel ", () => {
     factory();
     cy.contains("Quick Add").click();
     cy.get('[data-cy="quick-add-filter-panel"]').should("be.visible");
@@ -96,6 +96,20 @@ describe("TheFilterToolbar", () => {
       filterName: "disposition",
       filterValue: { value: "None" },
       isIncluded: true,
+    }); // set filter
+    cy.get('[data-cy="quick-add-filter-panel"]').should("not.exist");
+  });
+  it("correctly attempts to add a not included filter when submit button clicked in quick add panel ", () => {
+    factory();
+    cy.contains("Quick Add").click();
+    cy.get('[data-cy="quick-add-filter-panel"]').should("be.visible");
+    cy.get('[data-cy="filter-not-included-switch"]').parent().parent().click();
+    cy.get('[data-cy="quick-add-filter-submit-button"]').click();
+    cy.get("@stub-2").should("have.been.calledOnceWith", {
+      objectType: "alerts",
+      filterName: "disposition",
+      filterValue: { value: "None" },
+      isIncluded: false,
     }); // set filter
     cy.get('[data-cy="quick-add-filter-panel"]').should("not.exist");
   });

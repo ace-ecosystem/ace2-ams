@@ -5,23 +5,35 @@
   <BaseModal
     :name="name"
     header="Edit Filters"
-    class="xl: w-5 lg:w-5 md:w-8"
+    style="max-width: 625px"
     @dialog-close="loadFormFilters"
   >
     <br />
     <QueueSelector :object-queue="objectType" /> <br />
+    <b v-if="formFilters.length">NOT</b> <br />
     <div class="flex flex-wrap">
-      <ObjectPropertyInput
+      <span
         v-for="(filter, index) in formFilters"
         :key="index!"
-        v-model="formFilters[index]"
-        class="w-12"
-        :allow-delete="true"
-        :queue="queue"
-        form-type="filter"
-        data-cy="filter-input"
-        @delete-form-field="deleteFormFilter(index)"
-      ></ObjectPropertyInput>
+        style="width: 100%"
+      >
+        <div class="flex">
+          <InputSwitch
+            v-model="formFilters[index].notIncluded"
+            class="flex align-items-center"
+            data-cy="filter-not-included-switch"
+          ></InputSwitch>
+          <ObjectPropertyInput
+            v-model="formFilters[index]"
+            class="flex align-items-center"
+            :allow-delete="true"
+            :queue="queue"
+            form-type="filter"
+            data-cy="filter-input"
+            @delete-form-field="deleteFormFilter(index)"
+          ></ObjectPropertyInput>
+        </div>
+      </span>
     </div>
     <template #footer>
       <Button
@@ -53,6 +65,7 @@
   import { computed, defineProps, inject, onMounted, ref } from "vue";
 
   import Button from "primevue/button";
+  import InputSwitch from "primevue/inputswitch";
 
   import ObjectPropertyInput from "@/components/Objects/ObjectPropertyInput.vue";
   import BaseModal from "@/components/Modals/BaseModal.vue";
@@ -84,7 +97,11 @@
   );
 
   const formFilters = ref<
-    { propertyType: string | null; propertyValue: unknown }[]
+    {
+      propertyType: string | null;
+      propertyValue: unknown;
+      notIncluded: boolean;
+    }[]
   >([]);
 
   const queue = computed(() => {
@@ -93,35 +110,51 @@
       : "unknown";
   });
 
-  const submitFilters = computed(() => {
+  function submitFilters() {
     let submitFilters: {
-      [index: string]: { included: unknown[]; notIncluded: [] };
+      [index: string]: { included: unknown[]; notIncluded: unknown[] };
     } = {};
     for (const index in formFilters.value) {
       const filter = formFilters.value[index];
       if (filter.propertyType) {
+        //  If there is not an entry for this filter type yet
         if (!submitFilters[filter.propertyType]) {
-          submitFilters[filter.propertyType] = {
-            included: [filter.propertyValue],
-            notIncluded: [],
-          };
+          if (filter.notIncluded) {
+            submitFilters[filter.propertyType] = {
+              included: [],
+              notIncluded: [filter.propertyValue],
+            };
+          } else {
+            submitFilters[filter.propertyType] = {
+              included: [filter.propertyValue],
+              notIncluded: [],
+            };
+          }
         } else {
-          submitFilters[filter.propertyType].included.push(
-            filter.propertyValue,
-          );
+          // If there is an entry for this filter type
+          if (filter.notIncluded) {
+            submitFilters[filter.propertyType].notIncluded.push(
+              filter.propertyValue,
+            );
+          } else {
+            submitFilters[filter.propertyType].included.push(
+              filter.propertyValue,
+            );
+          }
         }
       }
     }
     return submitFilters;
-  });
+  }
 
   const submit = () => {
-    if (!Object.keys(submitFilters.value).length) {
+    const filters = submitFilters();
+    if (!Object.keys(filters).length) {
       filterStore.clearAll({ objectType: objectType });
     } else {
       filterStore.bulkSetFilters({
         objectType: objectType,
-        filters: submitFilters.value,
+        filters: filters,
       });
     }
   };
@@ -135,7 +168,11 @@
   };
 
   const addNewFilter = () => {
-    formFilters.value.push({ propertyType: null, propertyValue: null });
+    formFilters.value.push({
+      propertyType: null,
+      propertyValue: null,
+      notIncluded: false,
+    });
   };
 
   const loadFormFilters = () => {
@@ -146,6 +183,15 @@
         formFilters.value.push({
           propertyType: filterType,
           propertyValue: filter,
+          notIncluded: false,
+        });
+      }
+      for (const filter of filterStore.$state[objectType][filterType]
+        .notIncluded) {
+        formFilters.value.push({
+          propertyType: filterType,
+          propertyValue: filter,
+          notIncluded: true,
         });
       }
     }

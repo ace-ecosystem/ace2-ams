@@ -295,15 +295,15 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.get(".p-dialog-footer > :nth-child(2)").click();
       cy.get(".p-dialog-footer > :nth-child(2)").click();
       cy.get(".p-dialog-footer > :nth-child(2)").click();
-      cy.get(".flex ").children().should("have.length", 4);
+      cy.get('[data-cy="filter-input"]').should("have.length", 4);
 
       // Delete one
       cy.get("[data-cy='property-input-delete']").last().click();
-      cy.get(".flex ").children().should("have.length", 3);
+      cy.get('[data-cy="filter-input"]').should("have.length", 3);
 
       // Clear all of them
       cy.get(".p-dialog-footer > :nth-child(1)").click();
-      cy.get(".flex").children().should("have.length", 0);
+      cy.get('[data-cy="filter-input"]').should("have.length", 0);
     });
 
     it("will change the input box depending on the selected filter", () => {
@@ -442,7 +442,7 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
 
       // Verify the form data
-      cy.get(".flex").children().should("have.length", 1);
+      cy.get('[data-cy="filter-input"]').should("have.length", 1);
       cy.get(":nth-child(1) > .p-dropdown").eq(1).should("have.text", "Name");
       cy.get(".inputfield").should("have.value", "hello world");
 
@@ -491,7 +491,7 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
 
       // Verify the form data
-      cy.get(".flex").children().should("have.length", 1);
+      cy.get('[data-cy="filter-input"]').should("have.length", 1);
       cy.get(":nth-child(1) > .p-dropdown").eq(1).should("have.text", "Name");
       cy.get(".inputfield").should("have.value", "hello world");
       // Exit modal for end of test
@@ -591,17 +591,18 @@ describe("Manage Alerts - No Database Changes", () => {
       cy.get(".p-splitbutton-menubutton").click();
       cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
       cy.get(".p-dialog-header").should("be.visible");
-      cy.get(
-        ":nth-child(1) > :nth-child(1) > .p-dropdown > .p-dropdown-label",
-      ).should("have.text", "Name");
-      cy.get(".field > .p-inputtext").should("have.value", "Small Alert");
-      cy.get(
-        ".flex > :nth-child(2) > :nth-child(1) > .p-dropdown > .p-dropdown-label",
-      ).should("have.text", "Owner");
-      cy.get(".col > .field > .p-dropdown > .p-dropdown-label").should(
-        "have.text",
-        "Analyst Bob",
-      );
+      cy.get("[data-cy='property-input-type']")
+        .eq(0)
+        .should("have.text", "Name");
+      cy.get("[data-cy='property-input-value']")
+        .eq(0)
+        .should("have.value", "Small Alert");
+      cy.get("[data-cy='property-input-type']")
+        .eq(1)
+        .should("have.text", "Owner");
+      cy.get("[data-cy='property-input-value']")
+        .eq(1)
+        .should("have.text", "Analyst Bob");
       cy.get(".p-dialog-header-icon").click();
     });
   });

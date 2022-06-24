@@ -22,6 +22,14 @@
         style="padding: 1rem"
         @keypress.enter="addFilter"
       >
+        <div class="flex justify-content-start pb-2">
+          <b class="flex align-items-center justify-content-center pr-2">NOT</b>
+          <InputSwitch
+            v-model="filterModel.notIncluded"
+            class="flex align-items-center justify-content-center"
+            data-cy="filter-not-included-switch"
+          ></InputSwitch>
+        </div>
         <ObjectPropertyInput
           v-model="filterModel"
           data-cy="filter-input"
@@ -61,6 +69,7 @@
   import Toolbar from "primevue/toolbar";
   import OverlayPanel from "primevue/overlaypanel";
   import SplitButton from "primevue/splitbutton";
+  import InputSwitch from "primevue/inputswitch";
   import ObjectPropertyInput from "@/components/Objects/ObjectPropertyInput.vue";
 
   import { useAuthStore } from "@/stores/auth";
@@ -204,6 +213,7 @@
   const filterModel = ref({
     propertyType: null,
     propertyValue: null,
+    notIncluded: false,
   });
 
   const addFilter = () => {
@@ -212,12 +222,13 @@
         objectType: objectType,
         filterName: filterModel.value.propertyType,
         filterValue: filterModel.value.propertyValue,
-        isIncluded: true,
+        isIncluded: !filterModel.value.notIncluded,
       });
     }
     filterModel.value = {
       propertyType: null,
       propertyValue: null,
+      notIncluded: false,
     };
   };
 

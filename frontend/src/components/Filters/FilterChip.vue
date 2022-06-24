@@ -17,7 +17,7 @@
       >
         <span
           style="padding-left: 2px; padding-right: 2px; font-weight: bold"
-          @click="unsetFilterValue(value)"
+          @click="unsetFilterValue({ value: value, notIncluded: false })"
           >{{ formatValue(value as any) }}</span
         >
         <i
@@ -27,10 +27,38 @@
           @click="
             toggleQuickEditMenu($event);
             setFilterModelOldValue(value);
-            resetFilterModel();
+            resetFilterModel({ notIncluded: false, value: value });
           "
         />
-        <span v-if="!(index == filterValue!.included.length - 1)">|</span></span
+        <span
+          v-if="!(index == filterValue!.included.length - 1)||(filterValue!.notIncluded.length)"
+          >|</span
+        ></span
+      >
+      <span
+        v-for="(value, index) in filterValue.notIncluded"
+        :key="(formatValue(value) as string)"
+        data-cy="filter-chip-content"
+        class="link-text p-chip-text chip-content"
+      >
+        <span
+          style="padding-left: 2px; padding-right: 2px; font-weight: bold"
+          @click="unsetFilterValue({ value: value, notIncluded: true })"
+          ><b>!</b> {{ formatValue(value as any) }}</span
+        >
+        <i
+          data-cy="filter-chip-edit-button"
+          class="pi pi-pencil icon-button chip-content"
+          style="cursor: pointer"
+          @click="
+            toggleQuickEditMenu($event);
+            setFilterModelOldValue(value);
+            resetFilterModel({ notIncluded: true, value: value });
+          "
+        />
+        <span v-if="!(index == filterValue!.notIncluded.length - 1)"
+          >|</span
+        ></span
       >
       <i
         data-cy="filter-chip-add-button"
@@ -38,7 +66,7 @@
         style="cursor: pointer"
         @click="
           toggleQuickEditMenu($event);
-          resetFilterModel();
+          resetFilterModel({ notIncluded: false, value: undefined });
         "
       />
     </Chip>
@@ -48,9 +76,17 @@
       style="padding: 1rem"
       @keypress.enter="
         updateFilter();
-        resetFilterModel();
+        resetFilterModel({ notIncluded: false, value: undefined });
       "
     >
+      <div class="flex justify-content-start pb-2">
+        <b class="flex align-items-center justify-content-center pr-2">NOT</b>
+        <InputSwitch
+          v-model="filterModel.notIncluded"
+          class="flex align-items-center justify-content-center"
+          data-cy="filter-not-included-switch"
+        ></InputSwitch>
+      </div>
       <ObjectPropertyInput
         v-model="filterModel"
         :fixed-property-type="true"
@@ -65,6 +101,7 @@
         icon="pi pi-check"
         @click="
           updateFilter();
+          resetFilterModel({ notIncluded: false, value: undefined });
           toggleQuickEditMenu($event);
           setFilterModelOldValue();
         "
@@ -85,6 +122,7 @@
   import Button from "primevue/button";
   import Chip from "primevue/chip";
   import OverlayPanel from "primevue/overlaypanel";
+  import InputSwitch from "primevue/inputswitch";
 
   import ObjectPropertyInput from "@/components/Objects/ObjectPropertyInput.vue";
   import { alertFilterValues } from "@/models/alert";
@@ -109,7 +147,10 @@
     value?: alertFilterValues | eventFilterValues,
   ) => {
     if (value) {
-      filterModelOldValue.value = value;
+      filterModelOldValue.value = {
+        filterValue: value,
+        notIncluded: filterModel.value.notIncluded,
+      };
     } else {
       filterModelOldValue.value = undefined;
     }
@@ -139,11 +180,15 @@
       })
     : null;
 
-  const filterModelOldValue = ref<alertFilterValues | eventFilterValues>();
+  const filterModelOldValue = ref<{
+    filterValue: alertFilterValues | eventFilterValues;
+    notIncluded: boolean;
+  }>();
 
   const filterModel = ref({
     propertyType: props.filterName,
     propertyValue: undefined as alertFilterValues | eventFilterValues,
+    notIncluded: false,
   });
 
   const filterLabel = computed(() => {
@@ -153,27 +198,33 @@
     return "";
   });
 
-  function resetFilterModel() {
+  function resetFilterModel(args: {
+    value: alertFilterValues | eventFilterValues | undefined;
+    notIncluded: boolean;
+  }) {
     filterModel.value = {
       propertyType: props.filterName,
-      propertyValue: undefined as alertFilterValues | eventFilterValues,
+      propertyValue: args.value,
+      notIncluded: args.notIncluded,
     };
   }
 
   function updateFilter() {
-    filterStore.unsetFilterValue({
-      objectType: objectType,
-      filterName: props.filterName,
-      filterValue: filterModelOldValue.value,
-      isIncluded: true,
-    });
+    if (filterModelOldValue.value) {
+      filterStore.unsetFilterValue({
+        objectType: objectType,
+        filterName: props.filterName,
+        filterValue: filterModelOldValue.value.filterValue,
+        isIncluded: !filterModelOldValue.value.notIncluded,
+      });
+    }
     filterStore.setFilter({
       objectType: objectType,
       filterName: props.filterName,
       filterValue: filterModel.value.propertyValue as
         | alertFilterValues
         | eventFilterValues,
-      isIncluded: true,
+      isIncluded: !filterModel.value.notIncluded,
     });
   }
 
@@ -184,12 +235,15 @@
     });
   }
 
-  function unsetFilterValue(value: alertFilterValues | eventFilterValues) {
+  function unsetFilterValue(args: {
+    value: alertFilterValues | eventFilterValues;
+    notIncluded: boolean;
+  }) {
     filterStore.unsetFilterValue({
       objectType: objectType,
       filterName: props.filterName,
-      filterValue: value,
-      isIncluded: true,
+      filterValue: args.value,
+      isIncluded: !args.notIncluded,
     });
   }
 
