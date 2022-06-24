@@ -275,7 +275,7 @@ describe("Manage Alerts - No Database Changes", () => {
     });
   });
 
-  describe.only("Filter Actions", () => {
+  describe("Filter Actions", () => {
     it("will open the filter modal when the 'Edit Filter' button is clicked", () => {
       cy.get(".p-splitbutton-menubutton").click();
       cy.get(".p-menuitem:nth-child(1) > .p-menuitem-link").click();
