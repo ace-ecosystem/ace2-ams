@@ -1,0 +1,10 @@
+batch:
+    build-matrix:
+        static:
+            ignore-failure: false
+        dynamic:
+            buildspec:
+                - whatever.yml
+            env:
+                variables:
+                    PATH: []
