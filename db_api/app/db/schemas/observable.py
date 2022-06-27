@@ -19,9 +19,9 @@ from api_models.observable import ObservableSubmissionTreeRead, ObservableRead, 
 from db.database import Base
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_metadata import AnalysisMetadata
+from db.schemas.event_status import EventStatus
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.metadata_tag import MetadataTag
-from db.schemas.observable_relationship import ObservableRelationship
 from db.schemas.observable_tag_mapping import observable_tag_mapping
 
 
@@ -65,6 +65,24 @@ class Observable(Base, HasHistory):
     # This gets populated by certain submission-related queries.
     disposition_history = None
 
+    # NOTE: You could alter this relationship to directly return a list of EventStatus objects. However,
+    # a SQLAlchemy relationship only returns unique/distinct objects. So if an observable appears in multiple events
+    # that have the same status, you will only receive a single instance of that status in the relationship.
+    #
+    # Instead, the relationship is set up to return a list of events, and then an association proxy is used
+    # to get a list of the events' statuses.
+    events = relationship(
+        "Event",
+        secondary="join(Event, Submission, Event.uuid == Submission.event_uuid)."
+        "join(submission_analysis_mapping, submission_analysis_mapping.c.submission_uuid == Submission.uuid)."
+        "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.analysis_uuid == submission_analysis_mapping.c.analysis_uuid)",
+        primaryjoin="Observable.uuid == analysis_child_observable_mapping.c.observable_uuid",
+        viewonly=True,
+        lazy="selectin",
+    )
+
+    event_statuses: list[EventStatus] = association_proxy("events", "status")
+
     # Using timezone=True causes PostgreSQL to store the datetime as UTC. Datetimes without timezone
     # information will be assumed to be UTC, whereas datetimes with timezone data will be converted to UTC.
     expires_on = Column(DateTime(timezone=True))
@@ -77,6 +95,9 @@ class Observable(Base, HasHistory):
         primaryjoin="ObservableHistory.record_uuid == Observable.uuid",
         order_by="ObservableHistory.action_time",
     )
+
+    # This gets populated by certain submission-related queries.
+    matching_events = None
 
     relationships = relationship(
         "ObservableRelationship",
