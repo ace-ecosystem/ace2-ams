@@ -47,10 +47,15 @@ describe("parseFilters", () => {
     observableTypeStore.items = [
       { value: "ipv4", description: null, uuid: "1" },
       { value: "file", description: null, uuid: "2" },
+      { value: "url", description: null, uuid: "3" },
+      { value: "fqdn", description: null, uuid: "4" },
     ];
 
     const results = parseFilters(
-      { observableTypes: "ipv4,file,fake" },
+      {
+        observableTypes: "ipv4,file,fake",
+        notObservableTypes: "url,fqdn,fake",
+      },
       alertFilters.external,
     );
 
@@ -62,16 +67,24 @@ describe("parseFilters", () => {
             { value: "file", description: null, uuid: "2" },
           ],
         ],
-        notIncluded: [],
+        notIncluded: [
+          [
+            { value: "url", description: null, uuid: "3" },
+            { value: "fqdn", description: null, uuid: "4" },
+          ],
+        ],
       },
     });
   });
 
   it("will correctly parse and add any chips filters", async () => {
-    const results = parseFilters({ tags: "tagA,tagB" }, alertFilters.external);
+    const results = parseFilters(
+      { tags: "tagA,tagB", notTags: "tagC,tagD" },
+      alertFilters.external,
+    );
 
     expect(results).toEqual({
-      tags: { included: [["tagA", "tagB"]], notIncluded: [] },
+      tags: { included: [["tagA", "tagB"]], notIncluded: [["tagC", "tagD"]] },
     });
   });
 
@@ -105,10 +118,13 @@ describe("parseFilters", () => {
     const userStore = useUserStore();
     userStore.items = [mockUserA, mockUserB];
 
-    const results = parseFilters({ owner: "analystB" }, alertFilters.external);
+    const results = parseFilters(
+      { owner: "analystB", notOwner: "analystA" },
+      alertFilters.external,
+    );
 
     expect(results).toEqual({
-      owner: { included: [mockUserB], notIncluded: [] },
+      owner: { included: [mockUserB], notIncluded: [mockUserA] },
     });
   });
 
@@ -142,12 +158,15 @@ describe("parseFilters", () => {
     const userStore = useUserStore();
     userStore.items = [mockUserA, mockUserB];
 
-    const results = parseFilters({ owner: "none" }, alertFilters.external);
+    const results = parseFilters(
+      { owner: "none", notOwner: "none" },
+      alertFilters.external,
+    );
 
     expect(results).toEqual({
       owner: {
         included: [{ displayName: "None", username: "none" }],
-        notIncluded: [],
+        notIncluded: [{ displayName: "None", username: "none" }],
       },
     });
   });
@@ -157,12 +176,15 @@ describe("parseFilters", () => {
     dispositionStore.items = [];
 
     const results = parseFilters(
-      { disposition: "None" },
+      { disposition: "None", notDisposition: "None" },
       alertFilters.external,
     );
 
     expect(results).toEqual({
-      disposition: { included: [{ value: "None" }], notIncluded: [] },
+      disposition: {
+        included: [{ value: "None" }],
+        notIncluded: [{ value: "None" }],
+      },
     });
   });
 
@@ -171,6 +193,8 @@ describe("parseFilters", () => {
       {
         eventTimeBefore:
           "Sat Jan 08 2022 11:31:51 GMT-0500 (Eastern Standard Time)",
+        notEventTimeBefore:
+          "Sun Jan 09 2022 11:31:51 GMT-0500 (Eastern Standard Time)",
       },
       alertFilters.external,
     );
@@ -178,14 +202,14 @@ describe("parseFilters", () => {
     expect(results).toEqual({
       eventTimeBefore: {
         included: [new Date("2022-01-08T16:31:51.000Z")],
-        notIncluded: [],
+        notIncluded: [new Date("2022-01-09T16:31:51.000Z")],
       },
     });
   });
 
   it("will skip any date filters that fail to parse", async () => {
     const results = parseFilters(
-      { eventTimeBefore: ["Bad Date"] },
+      { eventTimeBefore: ["Bad Date"], notEventTimeBefore: ["Other Bad Date"] },
       alertFilters.external,
     );
 
@@ -193,10 +217,13 @@ describe("parseFilters", () => {
   });
 
   it("will correctly parse and add any input text filters", async () => {
-    const results = parseFilters({ name: "test name" }, alertFilters.external);
+    const results = parseFilters(
+      { name: "test name", notName: "test name 2" },
+      alertFilters.external,
+    );
 
     expect(results).toEqual({
-      name: { included: ["test name"], notIncluded: [] },
+      name: { included: ["test name"], notIncluded: ["test name 2"] },
     });
   });
   it("will correctly parse and add any catetgorized value filters", async () => {
@@ -207,7 +234,7 @@ describe("parseFilters", () => {
     ];
 
     const results = parseFilters(
-      { observable: "ipv4|1.2.3.4" },
+      { observable: "ipv4|1.2.3.4", notObservable: "file|blah.jpg" },
       alertFilters.external,
     );
 
@@ -219,7 +246,12 @@ describe("parseFilters", () => {
             value: "1.2.3.4",
           },
         ],
-        notIncluded: [],
+        notIncluded: [
+          {
+            category: { value: "file", description: null, uuid: "2" },
+            value: "blah.jpg",
+          },
+        ],
       },
     });
   });
@@ -228,6 +260,8 @@ describe("parseFilters", () => {
     observableTypeStore.items = [
       { value: "ipv4", description: null, uuid: "1" },
       { value: "file", description: null, uuid: "2" },
+      { value: "url", description: null, uuid: "3" },
+      { value: "fqdn", description: null, uuid: "4" },
     ];
 
     const mockUserA: userRead = {
@@ -269,13 +303,21 @@ describe("parseFilters", () => {
         fake: "blah",
         owner: "analystB",
         tags: "tagA,tagB",
+        notObservable: "file|blah.jpg",
+        notEventTimeBefore:
+          "Sun Jan 09 2022 11:31:51 GMT-0500 (Eastern Standard Time)",
+        notName: "test name 2",
+        notObservableTypes: "url,fqdn,fake",
+        notFake: "blah",
+        notOwner: "analystA",
+        notTags: "tagC,tagD",
       },
       alertFilters.external,
     );
 
     expect(results).toEqual({
-      tags: { included: [["tagA", "tagB"]], notIncluded: [] },
-      owner: { included: [mockUserB], notIncluded: [] },
+      tags: { included: [["tagA", "tagB"]], notIncluded: [["tagC", "tagD"]] },
+      owner: { included: [mockUserB], notIncluded: [mockUserA] },
       observableTypes: {
         included: [
           [
@@ -283,13 +325,18 @@ describe("parseFilters", () => {
             { value: "file", description: null, uuid: "2" },
           ],
         ],
-        notIncluded: [],
+        notIncluded: [
+          [
+            { value: "url", description: null, uuid: "3" },
+            { value: "fqdn", description: null, uuid: "4" },
+          ],
+        ],
       },
       eventTimeBefore: {
         included: [new Date("2022-01-08T16:31:51.000Z")],
-        notIncluded: [],
+        notIncluded: [new Date("2022-01-09T16:31:51.000Z")],
       },
-      name: { included: ["test name"], notIncluded: [] },
+      name: { included: ["test name"], notIncluded: ["test name 2"] },
       observable: {
         included: [
           {
@@ -297,7 +344,12 @@ describe("parseFilters", () => {
             value: "1.2.3.4",
           },
         ],
-        notIncluded: [],
+        notIncluded: [
+          {
+            category: { value: "file", description: null, uuid: "2" },
+            value: "blah.jpg",
+          },
+        ],
       },
     });
   });
@@ -306,6 +358,8 @@ describe("parseFilters", () => {
     observableTypeStore.items = [
       { value: "ipv4", description: null, uuid: "1" },
       { value: "file", description: null, uuid: "2" },
+      { value: "url", description: null, uuid: "3" },
+      { value: "fqdn", description: null, uuid: "4" },
     ];
 
     const mockUserA: userRead = {
@@ -334,8 +388,34 @@ describe("parseFilters", () => {
       uuid: "1",
     };
 
+    const mockUserC: userRead = {
+      defaultAlertQueue: { description: null, uuid: "1", value: "default" },
+      defaultEventQueue: { description: null, uuid: "1", value: "default" },
+      displayName: "Test Analyst",
+      email: "analyst@test.com",
+      enabled: true,
+      roles: [],
+      timezone: "UTC",
+      training: false,
+      username: "analystC",
+      uuid: "1",
+    };
+
+    const mockUserD: userRead = {
+      defaultAlertQueue: { description: null, uuid: "1", value: "default" },
+      defaultEventQueue: { description: null, uuid: "1", value: "default" },
+      displayName: "Test Analyst",
+      email: "analyst@test.com",
+      enabled: true,
+      roles: [],
+      timezone: "UTC",
+      training: false,
+      username: "analystD",
+      uuid: "1",
+    };
+
     const userStore = useUserStore();
-    userStore.items = [mockUserA, mockUserB];
+    userStore.items = [mockUserA, mockUserB, mockUserC, mockUserD];
 
     const results = parseFilters(
       {
@@ -349,6 +429,16 @@ describe("parseFilters", () => {
         fake: ["blah"],
         owner: ["analystB", "analystA"],
         tags: ["tagA,tagB", "tagC,tagD"],
+        notObservable: ["file|blah.jpg", "file|blah.png"],
+        notEventTimeBefore: [
+          "Sat Jan 09 2022 11:31:51 GMT-0500 (Eastern Standard Time)",
+          "Sat Jan 11 2022 11:31:51 GMT-0500 (Eastern Standard Time)",
+        ],
+        notName: ["test name 3", "test name 4"],
+        notObservableTypes: ["url,fqdn,fake", "url"],
+        notFake: ["blah"],
+        notOwner: ["analystC", "analystD"],
+        notTags: ["tagE,tagF", "tagG,tagH"],
       },
       alertFilters.external,
     );
@@ -359,9 +449,15 @@ describe("parseFilters", () => {
           ["tagA", "tagB"],
           ["tagC", "tagD"],
         ],
-        notIncluded: [],
+        notIncluded: [
+          ["tagE", "tagF"],
+          ["tagG", "tagH"],
+        ],
       },
-      owner: { included: [mockUserB, mockUserA], notIncluded: [] },
+      owner: {
+        included: [mockUserB, mockUserA],
+        notIncluded: [mockUserC, mockUserD],
+      },
       observableTypes: {
         included: [
           [
@@ -370,16 +466,28 @@ describe("parseFilters", () => {
           ],
           [{ value: "ipv4", description: null, uuid: "1" }],
         ],
-        notIncluded: [],
+        notIncluded: [
+          [
+            { value: "url", description: null, uuid: "3" },
+            { value: "fqdn", description: null, uuid: "4" },
+          ],
+          [{ value: "url", description: null, uuid: "3" }],
+        ],
       },
       eventTimeBefore: {
         included: [
           new Date("2022-01-08T16:31:51.000Z"),
           new Date("2022-01-10T16:31:51.000Z"),
         ],
-        notIncluded: [],
+        notIncluded: [
+          new Date("2022-01-09T16:31:51.000Z"),
+          new Date("2022-01-11T16:31:51.000Z"),
+        ],
       },
-      name: { included: ["test name", "test name 2"], notIncluded: [] },
+      name: {
+        included: ["test name", "test name 2"],
+        notIncluded: ["test name 3", "test name 4"],
+      },
       observable: {
         included: [
           {
@@ -391,7 +499,16 @@ describe("parseFilters", () => {
             value: "5.6.7.8",
           },
         ],
-        notIncluded: [],
+        notIncluded: [
+          {
+            category: { value: "file", description: null, uuid: "2" },
+            value: "blah.jpg",
+          },
+          {
+            category: { value: "file", description: null, uuid: "2" },
+            value: "blah.png",
+          },
+        ],
       },
     });
   });
