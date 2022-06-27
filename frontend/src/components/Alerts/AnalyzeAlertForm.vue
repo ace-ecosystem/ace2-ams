@@ -118,10 +118,10 @@
   >
   <Message
     v-for="(error, index) of errors"
-    :key="error.content"
+    :key="error"
     severity="error"
     @close="handleError(index)"
-    >{{ error.content }}</Message
+    >{{ error }}</Message
   >
   <div class="pl-3">
     <Button
@@ -133,9 +133,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { computed, onMounted, ref } from "vue";
   import { useRouter } from "vue-router";
+
+  import { alertCreate } from "@/models/alert";
+  import { observableCreate } from "@/models/observable";
 
   import Button from "primevue/button";
   import Card from "primevue/card";
@@ -154,6 +157,15 @@
   import { useAlertTypeStore } from "@/stores/alertType";
   import { useAuthStore } from "@/stores/auth";
 
+  interface formObservable {
+    time?: Date;
+    type: string;
+    multiAdd: boolean;
+    invalid: boolean;
+    value: any;
+    directives: string[];
+  }
+
   const router = useRouter();
 
   const alertStore = useAlertStore();
@@ -168,8 +180,8 @@
   const alertDescriptionAppendString = ref("");
   const alertType = ref("manual");
   const queue = ref();
-  const errors = ref([]);
-  const observables = ref([]);
+  const errors = ref<string[]>([]);
+  const observables = ref<formObservable[]>([]);
   const showContinueButton = ref(false);
 
   const alertDescriptionFormatted = computed(() => {
@@ -178,7 +190,7 @@
 
   const anyObservablesInvalid = computed(() => {
     const invalid = observables.value.filter((obs) => obs.invalid);
-    return invalid.length;
+    return Boolean(invalid.length);
   });
 
   const formContainsMultipleObservables = computed(() => {
@@ -192,19 +204,9 @@
     initData();
   });
 
-  const addError = (object, error) => {
-    let responseError = null;
-    if (error.response) {
-      responseError = JSON.stringify(error.response.data);
-    }
-    errors.value.push({
-      content: `Could not create ${object}: ${error} ${responseError}`,
-    });
-  };
-
   // Generate a list of all observables (single observables plus expanded multi-observables)
-  const expandObservablesList = () => {
-    let _observables = [];
+  const expandObservablesList = (): formObservable[] => {
+    let _observables: formObservable[] = [];
     for (const obs_index in observables.value) {
       let current_observable = observables.value[obs_index];
       if (current_observable.multiAdd) {
@@ -218,22 +220,25 @@
   };
 
   // Given an observable object, return a formatted observable instance 'create' object
-  const generateSubmissionObservable = (observable) => {
-    const submissionObservable = {
+  const generateSubmissionObservable = (
+    observable: formObservable,
+  ): observableCreate => {
+    const submissionObservable: observableCreate = {
       type: observable.type,
       value: observable.value,
       analysisMetadata: [],
+      historyUsername: authStore.user.username,
     };
 
     if (observable.time) {
-      submissionObservable.analysisMetadata.push({
+      submissionObservable.analysisMetadata!.push({
         type: "time",
-        value: observable.time,
+        value: observable.time as unknown as string,
       });
     }
 
     for (const directive of observable.directives) {
-      submissionObservable.analysisMetadata.push({
+      submissionObservable.analysisMetadata!.push({
         type: "directive",
         value: directive,
       });
@@ -242,7 +247,7 @@
     return submissionObservable;
   };
 
-  const handleError = (index) => {
+  const handleError = (index: number) => {
     errors.value.splice(index, 1);
   };
 
@@ -264,7 +269,7 @@
   };
 
   // Given a multi-observable object, expand into a list of single observable objects for each sub-value
-  const splitMultiObservable = (multiObservable) => {
+  const splitMultiObservable = (multiObservable: formObservable) => {
     // Determine split character -- can be newline or comma
     let splitValues = [];
     var containsNewline = /\r?\n/.exec(multiObservable.value);
@@ -290,8 +295,8 @@
   };
 
   // Submit alert create object to API to create an alert
-  const submitAlert = async (observables) => {
-    const alert = {
+  const submitAlert = async (observables: observableCreate[]) => {
+    const alert: alertCreate = {
       alert: true,
       alertDescription: alertDescriptionFormatted.value,
       eventTime: alertDate.value,
@@ -300,11 +305,16 @@
       owner: authStore.user.username,
       queue: queue.value,
       type: alertType.value,
+      historyUsername: authStore.user.username,
     };
     try {
       await alertStore.create(alert);
-    } catch (error) {
-      addError(`alert ${alert.name}`, error);
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        errors.value.push(e);
+      } else if (e instanceof Error) {
+        errors.value.push(e.message);
+      }
     }
   };
 

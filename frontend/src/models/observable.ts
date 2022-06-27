@@ -22,7 +22,7 @@ export interface observableCreate extends historyUsername {
   context?: string;
   expiresOn?: Date;
   forDetection?: boolean;
-  parentAnalysisUuid: UUID;
+  parentAnalysisUuid?: UUID;
   tags?: string[];
   type: string;
   value: string;
