@@ -2,7 +2,7 @@ from ace2 import *
 
 def test_observable():
     # create an observable from constructor
-    observable = Observable('foo', 'bar')
+    observable = Observable('bar', type='foo')
 
     # verify attributes
     assert observable.type == 'foo'
@@ -53,7 +53,7 @@ def test_observable():
     class Hello(Observable):
         def __init__(self, value, **kwargs):
             super().__init__(self.type, value, **kwargs)
-    observable = Observable('hello', 'world')
+    observable = Observable('world', type='hello')
     assert isinstance(observable, Hello)
     assert observable.type == 'hello'
     assert observable.value == 'world'

@@ -10,17 +10,16 @@ class Observable(TypedModel):
     value: str = Field(description='the string value of the observable')
     metadata: Optional[List[Metadata]] = Field(default_factory=list, description="the observables's metadata")
 
-    def __init__(self, type:str, value:str, **kwargs):
+    def __init__(self, value:str, **kwargs):
         ''' Initializes an observable object.
 
         Args:
-            type: the type of observable to init
             value: the value of the observable
             **kwargs: key word arguments to pass through
         '''
 
         # pass type and value to super class as kwargs
-        super().__init__(type=type, value=value, **kwargs)
+        super().__init__(value=value, **kwargs)
 
     def __eq__(self, other:Observable) -> bool:
         ''' Checks to see if two observables are the same

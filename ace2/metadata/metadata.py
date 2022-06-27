@@ -7,17 +7,16 @@ class Metadata(TypedModel):
 
     value: str = Field(description='the value of the metadata')
 
-    def __init__(self, type:str, value:str, **kwargs):
+    def __init__(self, value:str, **kwargs):
         ''' Initializes a metadata object
 
         Args:
-            type: the type of the metadata
             value: the value of the metadata
             **kwargs: key word arguments to pass through
         '''
 
         # pass type and value to super class as kwargs
-        super().__init__(type=type, value=value, **kwargs)
+        super().__init__(value=value, **kwargs)
 
     def __eq__(self, other:Metadata) -> bool:
         ''' determines if two instances of metadata are equal
