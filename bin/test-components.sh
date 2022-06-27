@@ -11,7 +11,7 @@ export TESTING=yes
 set +a
 
 # Bring up the containers (if they aren't already) in testing mode
-docker-compose up -d
+docker compose up -d
 
 # Run Cypress
 
