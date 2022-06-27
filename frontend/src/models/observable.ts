@@ -15,6 +15,11 @@ export interface dispositionHistoryIndividual {
   percent: number;
 }
 
+export interface matchingEventIndividual {
+  status: string;
+  count: number;
+}
+
 export interface observableCreate extends historyUsername {
   // The backend API actually allows you to specify a list of AnalysisCreate objects
   // when creating an observable, but we have not exposed that functionality in the GUI (yet).
@@ -45,6 +50,7 @@ export interface observableRead {
 export interface observableInAlertRead extends observableRead {
   analysisMetadata: analysisMetadataRead;
   dispositionHistory: dispositionHistoryIndividual[];
+  matchingEvents: matchingEventIndividual[];
 }
 
 export interface observableReadPage {
