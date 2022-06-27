@@ -76,18 +76,44 @@ export function prettyPrintDateTime(
   })} ${tz}`;
 }
 
+//https://stackoverflow.com/a/62447533
+const snakeCase = (s: string) => {
+  return s
+    .replace(/\d+/g, " ")
+    .split(/ |\B(?=[A-Z])/)
+    .map((word: string) => word.toLowerCase())
+    .join("_");
+};
+
 export function parseFilters(
   queryFilters: Record<string, string | string[]>,
   availableFilters: readonly propertyOption[],
 ): alertFilterParams | eventFilterParams {
-  const parsedFilters: Record<string, { included: any[]; notIncluded: any[] }> =
-    {};
+  const parsedFilters: Record<
+    string,
+    {
+      included: any[];
+      notIncluded: any[];
+      [key: string]: any[];
+    }
+  > = {};
 
   // parse each filter
   for (const filterName in queryFilters) {
+    let list = "included";
+    let parsedFilterName = filterName;
+    // Convert to snakeCase so we can check for 'not' without accidentally matching filters that may start with 'not', ex. 'notableFeatures' :P
+    if (snakeCase(filterName).startsWith("not_")) {
+      list = "notIncluded"; // If the filter is a 'not' filter, we need to add it to the notIncluded array
+      parsedFilterName = filterName.replace("not", ""); // Remove the 'not' from the filter name so we can use it as a key in the parsedFilters object
+      parsedFilterName = `${parsedFilterName[0].toLowerCase()}${parsedFilterName.slice(
+        1,
+      )}`; // Then lowercase the first letter of the filter name
+    }
+
     // first get the filter object so you can validate the filter exists and use its metadata
     let filterNameObject = availableFilters.find((filter) => {
-      return filter.name === filterName;
+      return filter.name === parsedFilterName;
     });
     filterNameObject = filterNameObject ? filterNameObject : undefined;
 
@@ -201,14 +227,13 @@ export function parseFilters(
 
       // If filter value was successfully parsed add it to the new filter object
       if (filterValueParsed) {
-        if (parsedFilters[filterName]) {
-          parsedFilters[filterName].included.push(filterValueParsed);
-        } else {
-          parsedFilters[filterName] = {
-            included: [filterValueParsed],
+        if (!parsedFilters[parsedFilterName]) {
+          parsedFilters[parsedFilterName] = {
+            included: [],
             notIncluded: [],
           };
         }
+        parsedFilters[parsedFilterName][list].push(filterValueParsed);
       }
     }
   }

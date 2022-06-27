@@ -11,11 +11,12 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from api_models.analysis import AnalysisSubmissionTreeRead
-from api_models.observable import DispositionHistoryIndividual, ObservableSubmissionTreeRead
+from api_models.observable import DispositionHistoryIndividual, MatchingEventIndividual, ObservableSubmissionTreeRead
 from api_models.submission import SubmissionCreate, SubmissionUpdate
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
+from db.schemas.event_status import EventStatus
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.observable import Observable
 from db.schemas.observable_type import ObservableType
@@ -96,6 +97,29 @@ def _build_disposition_history(o: Observable):
                 percent=int(counts[disposition] / len(o.alert_dispositions) * 100),
             )
         )
+
+
+def _build_matching_events(o: Observable):
+    """Counts the event statuses and adds the matching event information to the given observable."""
+
+    counts: dict[Optional[EventStatus], int] = {}
+    for status in o.event_statuses:
+        if status not in counts:
+            counts[status] = 0
+
+        counts[status] += 1
+
+    # Sort the statuses by their value
+    sorted_statuses: list[EventStatus] = sorted(counts.keys(), key=lambda x: x.value)
+
+    # Loop through the sorted statuses and build the matching event objects to add to the observable
+    o.matching_events = [
+        MatchingEventIndividual(
+            status=status.value,
+            count=counts[status],
+        )
+        for status in sorted_statuses
+    ]
 
 
 def _read_analysis_uuids(submission_uuids: list[UUID], db: Session) -> list[UUID]:
@@ -858,6 +882,7 @@ def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
     for observable in observables:
         _associate_metadata_with_observable(analysis_uuids=analysis_uuids, o=observable)
         _build_disposition_history(o=observable)
+        _build_matching_events(o=observable)
 
     return observables
 
@@ -890,6 +915,7 @@ def read_tree(uuid: UUID, db: Session) -> dict:
             # Add the analysis metadata to the observable
             _associate_metadata_with_observable(analysis_uuids=db_submission.analysis_uuids, o=db_child_observable)
             _build_disposition_history(o=db_child_observable)
+            _build_matching_events(o=db_child_observable)
 
             # Add the observable model to the dictionary if it has not been seen yet.
             if db_child_observable.uuid not in child_observables:

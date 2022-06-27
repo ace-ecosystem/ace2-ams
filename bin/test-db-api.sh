@@ -10,7 +10,7 @@ set +a
 # Remove the leading db_api/app/ from the command line argument so the path works inside of the container.
 new_path=${1#db_api/app/}
 
-docker-compose up -d
+docker compose up -d
 docker exec -e SQL_ECHO=no ace2-ams-db-api pytest "$new_path" -vv
 
 bin/disable-test-mode.sh

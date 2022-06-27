@@ -11,7 +11,7 @@ export TESTING=yes
 set +a
 
 # Bring up the containers (if they aren't already) in testing mode
-docker-compose -f docker-compose.yml up -d
+docker compose -f docker-compose.yml up -d
 
 # Wait for things to be ready
 docker exec ace2-ams-gui bin/wait-for-gui.sh

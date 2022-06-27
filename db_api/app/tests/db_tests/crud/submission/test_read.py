@@ -1052,7 +1052,7 @@ def test_disposition_history(db):
     factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission4.root_analysis, db=db)
 
     # Read one of the alert trees
-    tree = crud.submission.read_tree(submission1.uuid, db=db)
+    tree = crud.submission.read_tree(uuid=submission1.uuid, db=db)
 
     # The disposition history for the observable should be sorted by the dispositions' ranks.
     assert len(tree["children"][0]["disposition_history"]) == 3
@@ -1067,3 +1067,42 @@ def test_disposition_history(db):
     assert observables[0].disposition_history[0] == {"disposition": "FALSE_POSITIVE", "count": 2, "percent": 50}
     assert observables[0].disposition_history[1] == {"disposition": "DELIVERY", "count": 1, "percent": 25}
     assert observables[0].disposition_history[2] == {"disposition": "OPEN", "count": 1, "percent": 25}
+
+
+def test_matching_events(db):
+    # Create some event statuses
+    factory.event_status.create_or_read(value="OPEN", db=db)
+    factory.event_status.create_or_read(value="CLOSED", db=db)
+
+    # Create some events that all contain the same observable but have different statuses
+    event1 = factory.event.create_or_read(name="event1", status="OPEN", db=db)
+    submission1 = factory.submission.create(event=event1, db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission1.root_analysis, db=db)
+
+    event2 = factory.event.create_or_read(name="event2", status="OPEN", db=db)
+    submission2 = factory.submission.create(event=event2, db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission2.root_analysis, db=db)
+
+    event3 = factory.event.create_or_read(name="event3", status="CLOSED", db=db)
+    submission3 = factory.submission.create(event=event3, db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission3.root_analysis, db=db)
+
+    # Create another event that does not contain the same observable - this should not appear in the results.
+    event4 = factory.event.create_or_read(name="event4", status="CLOSED", db=db)
+    submission4 = factory.submission.create(event=event4, db=db)
+    factory.observable.create_or_read(type="type4", value="value4", parent_analysis=submission4.root_analysis, db=db)
+
+    # Read one of the alert trees
+    tree = crud.submission.read_tree(uuid=submission1.uuid, db=db)
+
+    # The matching event information for the observable should be sorted by the status' values.
+    assert len(tree["children"][0]["matching_events"]) == 2
+    assert tree["children"][0]["matching_events"][0] == {"status": "CLOSED", "count": 1}
+    assert tree["children"][0]["matching_events"][1] == {"status": "OPEN", "count": 2}
+
+    # Similarly, if you read the observables from a set of alerts instead, you should get the same matching event information.
+    observables = crud.submission.read_observables(uuids=[submission1.uuid], db=db)
+    assert len(observables) == 1
+    assert len(observables[0].matching_events) == 2
+    assert observables[0].matching_events[0] == {"status": "CLOSED", "count": 1}
+    assert observables[0].matching_events[1] == {"status": "OPEN", "count": 2}
