@@ -8,4 +8,4 @@ source "$ACE2_ENV_PATH"
 export TESTING=no
 set +a
 
-docker-compose -f docker-compose.yml up -d
+docker compose -f docker-compose.yml up -d
