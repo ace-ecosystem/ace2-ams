@@ -19,6 +19,14 @@ class DispositionHistoryIndividual(BaseModel):
     percent: int = Field(description="The percent of times the disposition occurred")
 
 
+class MatchingEventIndividual(BaseModel):
+    """Represents an individual matching event that contains this observable."""
+
+    status: type_str = Field(description="The status of the matching event")
+
+    count: int = Field(description="The number of events with this status that contain the observable")
+
+
 class ObservableBase(BaseModel):
     """Represents a unique observable (based on the type+value)."""
 
@@ -105,6 +113,11 @@ class ObservableSubmissionRead(ObservableRead):
     disposition_history: list[DispositionHistoryIndividual] = Field(
         default_factory=list,
         description="A list of the dispositions and their counts of alerts that contain this observable",
+    )
+
+    matching_events: list[MatchingEventIndividual] = Field(
+        default_factory=list,
+        description="A list of the event statuses and their counts of events that contain this observable",
     )
 
     class Config:
