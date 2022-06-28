@@ -121,8 +121,6 @@
   import MenuItem from "primevue/menu";
   import Toast from "primevue/toast";
 
-  import type CSS from "csstype";
-
   import ObservableEventStatusGroup from "@/components/Observables/ObservableEventStatusGroup.vue";
   import ObservableDispositionHistoryGroup from "@/components/Observables/ObservableDispositionHistoryGroup.vue";
   import MetadataTag from "@/components/Metadata/MetadataTag.vue";
@@ -165,7 +163,7 @@
   const component = shallowRef();
   const menu = ref();
   const items = ref<observableActionSubTypes[]>([]); // todo fix
-  const style = ref<CSS.Properties>();
+  const style = ref<any>();
   const observableType = ref<string>(props.observable.type.value);
   const componentName = ref<string>();
 
