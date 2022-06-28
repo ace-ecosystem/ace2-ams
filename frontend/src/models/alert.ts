@@ -6,7 +6,7 @@ import { alertTypeRead } from "./alertType";
 import { metadataDetectionPointRead } from "./metadataDetectionPoint";
 import { metadataTagRead } from "./metadataTag";
 import { alertCommentRead } from "./alertComment";
-import { observableCreate, observableTreeRead } from "./observable";
+import { observableCreateInAlert, observableTreeRead } from "./observable";
 import { observableTypeRead } from "./observableType";
 import { queueRead } from "./queue";
 import { userRead } from "./user";
@@ -19,7 +19,7 @@ export interface alertCreate extends historyUsername {
   insertTime?: Date;
   instructions?: string;
   name: string;
-  observables: observableCreate[];
+  observables: observableCreateInAlert[];
   owner?: string;
   queue: string;
   tags?: string[];
