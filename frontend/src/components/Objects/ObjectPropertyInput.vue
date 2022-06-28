@@ -12,7 +12,7 @@
         placeholder="Select a property"
         @change="
           clearPropertyValue();
-          updatePropertyType($event as any);
+          updatePropertyType($event);
         "
       />
     </div>
@@ -182,7 +182,7 @@
         ? propertyTypeOptions.value[0]
         : undefined;
     }
-    let property: propertyOption | undefined = propertyTypeOptions.value.find(
+    const property: propertyOption | undefined = propertyTypeOptions.value.find(
       (option) => {
         return option.name === propertyType;
       },
@@ -348,7 +348,9 @@
     }
   };
 
-  const updatePropertyType = (newValue: { value: propertyOption }) => {
+  // updatePropertyType will be called from the PrimeVue Dropdown 'change' event or onMounted
+  // And so we can guarantee that the type of 'newValue' will be { value: propertyOption }, even though it must be typed as any
+  const updatePropertyType = (newValue: any) => {
     const updatedModelValue = {
       propertyType: newValue.value.name
         ? newValue.value.name
