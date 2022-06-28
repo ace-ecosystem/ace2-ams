@@ -132,6 +132,7 @@ const expectedCreateAlert = {
   queue: "testQueueA",
   type: "testAlertTypeA",
   eventTime: new Date("2022-03-29T12:00:00"),
+  historyUsername: "analyst",
 };
 
 describe("AnalyzeAlertForm - Form submission", () => {
@@ -146,8 +147,18 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alertDescription: "Manual Alert",
         name: "Manual Alert",
         observables: [
-          { type: "ipv4", value: testObservableValueA, analysisMetadata: [] },
-          { type: "ipv4", value: testObservableValueB, analysisMetadata: [] },
+          {
+            type: "ipv4",
+            value: testObservableValueA,
+            analysisMetadata: [],
+            historyUsername: "analyst",
+          },
+          {
+            type: "ipv4",
+            value: testObservableValueB,
+            analysisMetadata: [],
+            historyUsername: "analyst",
+          },
         ],
       })
       .as("CreateAlertA")
@@ -188,6 +199,7 @@ describe("AnalyzeAlertForm - Form submission", () => {
             type: "ipv4",
             value: testObservableValueA,
             analysisMetadata: [{ type: "directive", value: "testDirective" }],
+            historyUsername: "analyst",
           },
         ],
       })
@@ -221,8 +233,18 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alertDescription: "Manual Alert",
         name: "Manual Alert",
         observables: [
-          { type: "ipv4", value: "4.3.2.1", analysisMetadata: [] },
-          { type: "ipv4", value: "8.7.6.5", analysisMetadata: [] },
+          {
+            type: "ipv4",
+            value: "4.3.2.1",
+            analysisMetadata: [],
+            historyUsername: "analyst",
+          },
+          {
+            type: "ipv4",
+            value: "8.7.6.5",
+            analysisMetadata: [],
+            historyUsername: "analyst",
+          },
         ],
       })
       .as("CreateAlertA")
@@ -257,7 +279,12 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alertDescription: "Manual Alert 1.2.3.4",
         name: "Manual Alert 1.2.3.4",
         observables: [
-          { type: "ipv4", value: testObservableValueA, analysisMetadata: [] },
+          {
+            type: "ipv4",
+            value: testObservableValueA,
+            analysisMetadata: [],
+            historyUsername: "analyst",
+          },
         ],
       })
       .as("CreateAlertA")
@@ -269,7 +296,12 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alertDescription: "Manual Alert 5.6.7.8",
         name: "Manual Alert 5.6.7.8",
         observables: [
-          { type: "ipv4", value: testObservableValueB, analysisMetadata: [] },
+          {
+            type: "ipv4",
+            value: testObservableValueB,
+            analysisMetadata: [],
+            historyUsername: "analyst",
+          },
         ],
       })
       .as("CreateAlertB")
@@ -308,7 +340,12 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alertDescription: "Manual Alert 1.2.3.4",
         name: "Manual Alert 1.2.3.4",
         observables: [
-          { type: "ipv4", value: testObservableValueA, analysisMetadata: [] },
+          {
+            type: "ipv4",
+            value: testObservableValueA,
+            analysisMetadata: [],
+            historyUsername: "analyst",
+          },
         ],
       })
       .as("CreateAlertA")
@@ -319,7 +356,14 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alert: true,
         alertDescription: "Manual Alert 4.3.2.1",
         name: "Manual Alert 4.3.2.1",
-        observables: [{ type: "ipv4", value: "4.3.2.1", analysisMetadata: [] }],
+        observables: [
+          {
+            type: "ipv4",
+            value: "4.3.2.1",
+            analysisMetadata: [],
+            historyUsername: "analyst",
+          },
+        ],
       })
       .as("CreateAlertB")
       .resolves(alertReadFactory({ uuid: "alertB" }));
@@ -329,7 +373,14 @@ describe("AnalyzeAlertForm - Form submission", () => {
         alert: true,
         alertDescription: "Manual Alert 8.7.6.5",
         name: "Manual Alert 8.7.6.5",
-        observables: [{ type: "ipv4", value: "8.7.6.5", analysisMetadata: [] }],
+        observables: [
+          {
+            type: "ipv4",
+            value: "8.7.6.5",
+            analysisMetadata: [],
+            historyUsername: "analyst",
+          },
+        ],
       })
       .as("CreateAlertC")
       .resolves(alertReadFactory({ uuid: "alertC" }));
@@ -358,8 +409,5 @@ describe("AnalyzeAlertForm - Form submission", () => {
 
     // Should route to last created alert, which will end up being B
     cy.url().should("contain", "alertC");
-  });
-  it("correctly displays errors if alert creation fails", () => {
-    factory();
   });
 });

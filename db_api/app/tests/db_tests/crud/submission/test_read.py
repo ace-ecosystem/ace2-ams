@@ -716,46 +716,29 @@ def test_read_observables(db):
 
 
 def test_read_submission_tree(db):
-    expected_structure = """
-file: email.rfc822
-    Email Analysis
-        email_address: badguy@evil.com
-            FA Queue Analysis
-            Email Address Analysis
-                fqdn: evil.com
-                    FA Queue Analysis
-                    Test Analysis
-                        test_type: test_value
-        email_address: goodguy@company.com
-            Email Address Analysis
-                fqdn: company.com
-        email_subject: Hello
-            FA Queue Analysis
-        file: email.rfc822.unknown_plain_text_000
-            URL Extraction Analysis
-                url: http://evil.com/malware.exe
-                    FA Queue Analysis
-                    URL Parse Analysis
-                        fqdn: evil.com (Duplicate)
-                            FA Queue Analysis (Duplicate)
-                            Test Analysis (Duplicate)
-                                test_type: test_value (Duplicate)
-                        uri_path: /malware.exe
-                            FA Queue Analysis
-    File Analysis
-        md5: 912ec803b2ce49e4a541068d495ab570
-            FA Queue Analysis
-ipv4: 127.0.0.1
-    FA Queue Analysis
-"""
-
     submission = factory.submission.create_from_json_file(
         db=db, json_path="/app/tests/alerts/small.json", submission_name="Test Alert"
     )
 
-    # Verify the structure of the tree
-    tree = crud.submission.read_tree(uuid=submission.uuid, db=db)
-    assert factory.submission.stringify_submission_tree(tree).strip() == expected_structure.strip()
+    # The small.json submission has 14 observables and 16 analyses (the Root Analysis is not included in the tree).
+    result = crud.submission.read_tree(uuid=submission.uuid, db=db)
+    assert str(result["children"]).count("'observable'") == 14
+    assert str(result["children"]).count("'analysis'") == 16
+    assert len(result["children"]) == 2
+
+    # The small.json has three different analysis tags applied to observables, and they should be in alphabetical order.
+    assert len(submission.child_analysis_tags) == 3
+    assert submission.child_analysis_tags[0].value == "contacted_host"
+    assert submission.child_analysis_tags[1].value == "from_address"
+    assert submission.child_analysis_tags[2].value == "recipient"
+
+    # The small.json has one detection point
+    assert len(submission.child_detection_points) == 1
+    assert submission.child_detection_points[0].value == "Malicious email address"
+
+    # The small.json has one permanent tag applied to an observable.
+    assert len(submission.child_tags) == 1
+    assert submission.child_tags[0].value == "c2"
 
 
 def test_sort_by_disposition(db):

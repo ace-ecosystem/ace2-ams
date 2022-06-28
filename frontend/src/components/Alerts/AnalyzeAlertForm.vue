@@ -86,7 +86,7 @@
       <br />
     </TabPanel>
   </TabView>
-  <small v-if="anyObservablesInvalid" class="p-error"
+  <small v-if="formContainsInvalidObservables" class="p-error"
     >Please check observable input</small
   >
   <div class="pl-3">
@@ -94,7 +94,9 @@
       v-tooltip="'Create a new alert for each observable'"
       label="Submit Multiple Alerts"
       :loading="alertCreateLoading"
-      :disabled="anyObservablesInvalid || !formContainsMultipleObservables"
+      :disabled="
+        formContainsInvalidObservables || !formContainsMultipleObservables
+      "
       class="p-button-lg p-button-outlined m-1"
       icon="pi pi-question-circle"
       icon-pos="right"
@@ -103,39 +105,26 @@
     <Button
       label="Submit Alert"
       :loading="alertCreateLoading"
-      :disabled="anyObservablesInvalid"
+      :disabled="formContainsInvalidObservables"
       class="p-button-lg m-1"
       @click="submitSingleAlert"
     />
   </div>
-  <Message v-if="addingObservables" severity="info"
-    >Alert created, now adding Observables...</Message
-  >
-  <Message v-if="showContinueButton" severity="info"
-    >Oh dear, it looks like some observables couldn't be created... The errors
-    below might help explain what went wrong. You can try adding the observables
-    again on the next page!</Message
-  >
   <Message
     v-for="(error, index) of errors"
-    :key="error.content"
+    :key="error"
     severity="error"
     @close="handleError(index)"
-    >{{ error.content }}</Message
+    >{{ error }}</Message
   >
-  <div class="pl-3">
-    <Button
-      v-if="showContinueButton"
-      label="On with it then..."
-      class="p-button-lg"
-      @click="routeToNewAlert"
-    />
-  </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
   import { computed, onMounted, ref } from "vue";
   import { useRouter } from "vue-router";
+
+  import { alertCreate } from "@/models/alert";
+  import { observableCreateInAlert } from "@/models/observable";
 
   import Button from "primevue/button";
   import Card from "primevue/card";
@@ -154,6 +143,15 @@
   import { useAlertTypeStore } from "@/stores/alertType";
   import { useAuthStore } from "@/stores/auth";
 
+  interface formObservable {
+    time?: Date;
+    type: string;
+    multiAdd: boolean;
+    invalid: boolean;
+    value: any;
+    directives: string[];
+  }
+
   const router = useRouter();
 
   const alertStore = useAlertStore();
@@ -161,26 +159,31 @@
   const authStore = useAuthStore();
   const queueStore = useQueueStore();
 
-  const addingObservables = ref(false);
   const alertCreateLoading = ref(false);
   const alertDate = ref(new Date());
   const alertDescription = ref("Manual Alert");
   const alertDescriptionAppendString = ref("");
-  const alertType = ref("manual");
-  const queue = ref();
-  const errors = ref([]);
-  const observables = ref([]);
-  const showContinueButton = ref(false);
+  const errors = ref<string[]>([]);
+  const observables = ref<formObservable[]>([]);
+  const alertType = ref<string>("manual");
+  const queue = ref<string>("default");
 
-  const alertDescriptionFormatted = computed(() => {
-    return `${alertDescription.value}${alertDescriptionAppendString.value}`;
+  // Initialize form data with store data or default values
+  onMounted(() => {
+    if (alertTypeStore.items.length) {
+      alertType.value = alertTypeStore.items[0].value;
+    }
+    if (authStore.user) {
+      queue.value = authStore.user.defaultAlertQueue.value;
+    }
   });
 
-  const anyObservablesInvalid = computed(() => {
-    const invalid = observables.value.filter((obs) => obs.invalid);
-    return invalid.length;
+  // Return true if any observables are invalid
+  const formContainsInvalidObservables = computed(() => {
+    return observables.value.some((obs) => obs.invalid);
   });
 
+  // Return true if there are multiple observables (more than one in list OR one in list and multiAdd is true)
   const formContainsMultipleObservables = computed(() => {
     if (observables.value.length > 1) {
       return true;
@@ -188,83 +191,54 @@
     return observables.value.some((obs) => obs.multiAdd);
   });
 
-  onMounted(() => {
-    initData();
-  });
-
-  const addError = (object, error) => {
-    let responseError = null;
-    if (error.response) {
-      responseError = JSON.stringify(error.response.data);
-    }
-    errors.value.push({
-      content: `Could not create ${object}: ${error} ${responseError}`,
-    });
-  };
-
   // Generate a list of all observables (single observables plus expanded multi-observables)
-  const expandObservablesList = () => {
-    let _observables = [];
-    for (const obs_index in observables.value) {
-      let current_observable = observables.value[obs_index];
-      if (current_observable.multiAdd) {
-        const splitObservables = splitMultiObservable(current_observable);
+  const expandObservablesList = (): formObservable[] => {
+    let _observables: formObservable[] = [];
+    for (const observable of observables.value) {
+      if (observable.multiAdd) {
+        const splitObservables = splitMultiObservable(observable);
         _observables = [..._observables, ...splitObservables];
       } else {
-        _observables.push(current_observable);
+        _observables.push(observable);
       }
     }
     return _observables;
   };
 
   // Given an observable object, return a formatted observable instance 'create' object
-  const generateSubmissionObservable = (observable) => {
-    const submissionObservable = {
+  const generateSubmissionObservable = (
+    observable: formObservable,
+  ): observableCreateInAlert => {
+    const submissionObservable: observableCreateInAlert = {
       type: observable.type,
       value: observable.value,
       analysisMetadata: [],
+      historyUsername: authStore.user.username,
     };
 
-    if (observable.time) {
-      submissionObservable.analysisMetadata.push({
-        type: "time",
-        value: observable.time,
-      });
-    }
+    if (submissionObservable.analysisMetadata) {
+      if (observable.time) {
+        submissionObservable.analysisMetadata.push({
+          type: "time",
+          value: observable.time as unknown as string,
+        });
+      }
 
-    for (const directive of observable.directives) {
-      submissionObservable.analysisMetadata.push({
-        type: "directive",
-        value: directive,
-      });
+      if (observable.directives) {
+        for (const directive of observable.directives) {
+          submissionObservable.analysisMetadata.push({
+            type: "directive",
+            value: directive,
+          });
+        }
+      }
     }
 
     return submissionObservable;
   };
 
-  const handleError = (index) => {
-    errors.value.splice(index, 1);
-  };
-
-  const initData = () => {
-    alertDate.value = new Date();
-    alertDescription.value = "Manual Alert";
-    alertDescriptionAppendString.value = "";
-    alertType.value = alertTypeStore.items.length
-      ? alertTypeStore.items[0].value
-      : "manual";
-    queue.value = authStore.user
-      ? authStore.user.defaultAlertQueue.value
-      : "default";
-    errors.value = [];
-  };
-
-  const routeToNewAlert = () => {
-    router.push({ path: `/alert/${alertStore.open.uuid}` });
-  };
-
   // Given a multi-observable object, expand into a list of single observable objects for each sub-value
-  const splitMultiObservable = (multiObservable) => {
+  const splitMultiObservable = (multiObservable: formObservable) => {
     // Determine split character -- can be newline or comma
     let splitValues = [];
     var containsNewline = /\r?\n/.exec(multiObservable.value);
@@ -290,38 +264,41 @@
   };
 
   // Submit alert create object to API to create an alert
-  const submitAlert = async (observables) => {
-    const alert = {
+  const submitAlert = async (observables: observableCreateInAlert[]) => {
+    const alertName = `${alertDescription.value}${alertDescriptionAppendString.value}`;
+
+    const alert: alertCreate = {
       alert: true,
-      alertDescription: alertDescriptionFormatted.value,
+      alertDescription: alertName,
       eventTime: alertDate.value,
-      name: alertDescriptionFormatted.value,
+      name: alertName,
       observables: observables,
       owner: authStore.user.username,
       queue: queue.value,
       type: alertType.value,
+      historyUsername: authStore.user.username,
     };
     try {
       await alertStore.create(alert);
-    } catch (error) {
-      addError(`alert ${alert.name}`, error);
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        errors.value.push(e);
+      } else if (e instanceof Error) {
+        errors.value.push(e.message);
+      }
     }
   };
 
   // create a single alert that contains all observables currently in the form
   const submitSingleAlert = async () => {
     if (!errors.value.length && observables.value.length) {
-      addingObservables.value = true;
       let _observables = expandObservablesList();
 
       alertCreateLoading.value = true;
       await submitAlert(_observables.map(generateSubmissionObservable));
       alertCreateLoading.value = false;
-      addingObservables.value = false;
 
-      if (errors.value.length) {
-        showContinueButton.value = true;
-      } else {
+      if (!errors.value.length) {
         routeToNewAlert();
       }
     }
@@ -347,7 +324,16 @@
     }
 
     alertCreateLoading.value = false;
-    // Routes you to latest alert
     routeToNewAlert();
+  };
+
+  // Reroute to new alert page
+  const routeToNewAlert = () => {
+    router.push({ path: `/alert/${alertStore.open.uuid}` });
+  };
+
+  // Remove error at given position from errors array
+  const handleError = (index: number) => {
+    errors.value.splice(index, 1);
   };
 </script>

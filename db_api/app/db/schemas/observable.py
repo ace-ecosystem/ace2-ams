@@ -148,7 +148,17 @@ class Observable(Base, HasHistory):
     def history_snapshot(self):
         return json.loads(
             ObservableRead(
-                **self.to_dict(extra_ignore_keys=["alert_dispositions", "analysis_metadata", "disposition_history"])
+                **self.to_dict(
+                    extra_ignore_keys=[
+                        "alert_dispositions",
+                        "alerts",
+                        "analysis_metadata",
+                        "disposition_history",
+                        "event_statuses",
+                        "events",
+                        "matching_events",
+                    ]
+                )
             ).json()
         )
 
