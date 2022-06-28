@@ -18,7 +18,7 @@ import { metadataTagReadFactory } from "@mocks/metadata";
 import { genericQueueableObjectRead } from "@/models/base";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
 
-createTestingPinia({ createSpy: vi.fn });
+createTestingPinia({ createSpy: vi.fn, stubActions: false });
 
 const mockAlertTreeRead = alertTreeReadFactory({
   tags: [

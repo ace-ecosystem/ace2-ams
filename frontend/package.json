@@ -31,7 +31,7 @@
   "devDependencies": {
     "@cypress/vite-dev-server": "^3.0.0",
     "@cypress/vue": "^4.0.0",
-    "@pinia/testing": "^0.0.11",
+    "@pinia/testing": "^0.0.12",
     "@testing-library/cypress": "^8.0.3",
     "@types/js-cookie": "^3.0.2",
     "@types/node": "^18.0.0",
