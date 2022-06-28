@@ -8,7 +8,7 @@
         :class="containerClass(i)"
         :data-cy="treeItemName(i)"
       >
-        <span class="p-treeleaf-content">
+        <span class="p-treenode-content">
           <span v-if="!i.children.length">
             <i class="pi pi-fw pi-minus"></i>
           </span>
@@ -28,7 +28,7 @@
           ></ObservableLeafVue>
 
           <router-link v-else-if="isAnalysis(i)" :to="viewAnalysisRoute(i)"
-            ><span class="treeleaf-text">{{
+            ><span class="treenode-text">{{
               treeItemName(i)
             }}</span></router-link
           >
@@ -36,7 +36,7 @@
 
         <div
           v-if="leafExpanded(index) && i.children.length"
-          class="p-treeleaf-children"
+          class="p-treenode-children"
         >
           <AlertTree :items="i.children" :alert-id="alertId" />
         </div>
@@ -120,12 +120,12 @@
   }
 
   function containerClass(item: analysisTreeRead | observableTreeRead) {
-    return ["p-treeleaf", { "p-treeleaf-leaf": !item.children.length }];
+    return ["p-treenode", { "p-treenode-leaf": !item.children.length }];
   }
 </script>
 
 <style>
-  .p-treeleaf-children {
+  .p-treenode-children {
     margin: 0;
     padding: 0;
     list-style-type: none;
@@ -139,14 +139,14 @@
     overflow: hidden;
     position: relative;
   }
-  .p-treeleaf-leaf > .p-treeleaf-content .p-tree-toggler {
+  .p-treenode-leaf > .p-treenode-content .p-tree-toggler {
     visibility: hidden;
   }
-  .p-treeleaf-content {
+  .p-treenode-content {
     display: flex;
     align-items: center;
   }
-  .treeleaf-text:hover {
+  .treenode-text:hover {
     cursor: pointer;
     text-decoration: underline;
     font-weight: bold;

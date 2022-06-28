@@ -258,11 +258,11 @@ def stringify_submission_tree(submission_tree: dict):
         for child in children:
             duplicate = "" if child["first_appearance"] else " (Duplicate)"
             if child["object_type"] == "observable":
-                string += f"{' '*depth}{child['type']['value']}: {child['value']}{duplicate}\n"
+                string += f"{'  '*depth}{child['type']['value']}: {child['value']}{duplicate}\n"
                 if child["children"]:
                     string = _stringify_children(children=child["children"], depth=depth + 2, string=string)
             if child["object_type"] == "analysis":
-                string += f"{' '*depth}{child['analysis_module_type']['value']}{duplicate}\n"
+                string += f"{'  '*depth}{child['analysis_module_type']['value']}{duplicate}\n"
                 if child["children"]:
                     string = _stringify_children(children=child["children"], depth=depth + 2, string=string)
 
