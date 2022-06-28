@@ -20,19 +20,25 @@ export interface matchingEventIndividual {
   count: number;
 }
 
-export interface observableCreate extends historyUsername {
+export interface observableCreateBase extends historyUsername {
   // The backend API actually allows you to specify a list of AnalysisCreate objects
   // when creating an observable, but we have not exposed that functionality in the GUI (yet).
   analysisMetadata?: analysisMetadataCreate[];
   context?: string;
   expiresOn?: Date;
   forDetection?: boolean;
-  parentAnalysisUuid?: UUID;
   tags?: string[];
   type: string;
   value: string;
   [key: string]: unknown;
 }
+
+export interface observableCreate extends observableCreateBase {
+  parentAnalysisUuid: UUID;
+  [key: string]: unknown;
+}
+
+export type observableCreateInAlert = observableCreateBase;
 
 export interface observableRead {
   context: string | null;

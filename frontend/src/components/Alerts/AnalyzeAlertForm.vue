@@ -124,7 +124,7 @@
   import { useRouter } from "vue-router";
 
   import { alertCreate } from "@/models/alert";
-  import { observableCreate } from "@/models/observable";
+  import { observableCreateInAlert } from "@/models/observable";
 
   import Button from "primevue/button";
   import Card from "primevue/card";
@@ -208,12 +208,12 @@
   // Given an observable object, return a formatted observable instance 'create' object
   const generateSubmissionObservable = (
     observable: formObservable,
-  ): observableCreate => {
-    const submissionObservable: observableCreate = {
+  ): observableCreateInAlert => {
+    const submissionObservable: observableCreateInAlert = {
       type: observable.type,
       value: observable.value,
       analysisMetadata: [],
-      // historyUsername: authStore.user.username,
+      historyUsername: authStore.user.username,
     };
 
     if (submissionObservable.analysisMetadata) {
@@ -264,7 +264,7 @@
   };
 
   // Submit alert create object to API to create an alert
-  const submitAlert = async (observables: observableCreate[]) => {
+  const submitAlert = async (observables: observableCreateInAlert[]) => {
     const alertName = `${alertDescription.value}${alertDescriptionAppendString.value}`;
 
     const alert: alertCreate = {
@@ -276,7 +276,7 @@
       owner: authStore.user.username,
       queue: queue.value,
       type: alertType.value,
-      // historyUsername: authStore.user.username,
+      historyUsername: authStore.user.username,
     };
     try {
       await alertStore.create(alert);
