@@ -83,6 +83,15 @@
       ></MetadataTag
     ></span>
     <span
+      v-if="showEventStatusTags && observable.matchingEvents.length"
+      class="leaf-element"
+    >
+      <ObservableEventStatusGroup
+        :observable="observable"
+        :reroute-to-manage-events="true"
+      ></ObservableEventStatusGroup>
+    </span>
+    <span
       v-if="showDispositionTags && observable.dispositionHistory.length"
       class="leaf-element"
     >
@@ -114,6 +123,7 @@
 
   import type CSS from "csstype";
 
+  import ObservableEventStatusGroup from "@/components/Observables/ObservableEventStatusGroup.vue";
   import ObservableDispositionHistoryGroup from "@/components/Observables/ObservableDispositionHistoryGroup.vue";
   import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
@@ -143,6 +153,7 @@
     showActionsMenu: { type: Boolean, required: false, default: true },
     showTags: { type: Boolean, required: false, default: true },
     showDispositionTags: { type: Boolean, required: false, default: true },
+    showEventStatusTags: { type: Boolean, required: false, default: true },
   });
 
   const alertStore = useAlertStore();
