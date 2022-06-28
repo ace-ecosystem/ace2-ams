@@ -10,6 +10,8 @@ import {
   threatsProperty,
   commentProperty,
   queueProperty,
+  GREEN,
+  RED,
 } from "@/etc/constants/common";
 import {
   eventPropertyTypes,
@@ -295,3 +297,8 @@ export const defaultEventDetailsSections = {
 };
 
 export const closedEventStatus = "CLOSED";
+
+export const eventStatusMetadata: Record<string, string> = {
+  open: RED,
+  closed: GREEN,
+};
