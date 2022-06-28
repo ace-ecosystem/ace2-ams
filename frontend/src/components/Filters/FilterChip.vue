@@ -24,7 +24,7 @@
           data-cy="filter-chip-edit-button"
           class="pi pi-pencil icon-button chip-content"
           style="cursor: pointer"
-          @click="multiAction3($event, value)"
+          @click="openEditFilterValuePanel(value)"
         />
         <span
           v-if="!(index == filterValue!.included.length - 1)||(filterValue!.notIncluded.length)"
@@ -46,7 +46,7 @@
           data-cy="filter-chip-edit-button"
           class="pi pi-pencil icon-button chip-content"
           style="cursor: pointer"
-          @click="multiAction4($event, value)"
+          @click="openEditFilterValuePanel(value)"
         />
         <span v-if="!(index == filterValue!.notIncluded.length - 1)"
           >|</span
@@ -56,14 +56,13 @@
         data-cy="filter-chip-add-button"
         class="pi pi-plus-circle icon-button chip-content"
         style="cursor: pointer"
-        @click="multiAction5($event)"
+        @click="openNewFilterValuePanel()"
       />
     </Chip>
     <OverlayPanel
       ref="op"
       data-cy="filter-chip-edit-panel"
       style="padding: 1rem"
-      @keypress.enter="multiAction()"
     >
       <div class="flex justify-content-start pb-2">
         <b class="flex align-items-center justify-content-center pr-2">NOT</b>
@@ -85,7 +84,7 @@
         data-cy="filter-chip-submit-button"
         name="update-filter"
         icon="pi pi-check"
-        @click="multiAction2($event)"
+        @click="submitFilterValue()"
       />
     </OverlayPanel>
   </span>
@@ -120,8 +119,8 @@
   });
 
   const op = ref();
-  const toggleQuickEditMenu = (event: unknown) => {
-    op.value.toggle(event);
+  const toggleQuickEditMenu = () => {
+    op.value.toggle();
   };
 
   const setFilterModelOldValue = (
@@ -179,29 +178,21 @@
     return "";
   });
 
-  function multiAction() {
+  function submitFilterValue() {
     updateFilter();
+    toggleQuickEditMenu();
     resetFilterModel({ notIncluded: false, value: undefined });
-  }
-
-  function multiAction2(event: any) {
-    updateFilter();
-    resetFilterModel({ notIncluded: false, value: undefined });
-    toggleQuickEditMenu(event);
     setFilterModelOldValue();
   }
-  function multiAction3(event: any, value: any) {
-    toggleQuickEditMenu(event);
-    setFilterModelOldValue(value);
+
+  function openEditFilterValuePanel(value: any) {
+    toggleQuickEditMenu();
     resetFilterModel({ notIncluded: false, value: value });
-  }
-  function multiAction4(event: any, value: any) {
-    toggleQuickEditMenu(event);
     setFilterModelOldValue(value);
-    resetFilterModel({ notIncluded: true, value: value });
   }
-  function multiAction5(event: any) {
-    toggleQuickEditMenu(event);
+
+  function openNewFilterValuePanel() {
+    toggleQuickEditMenu();
     resetFilterModel({ notIncluded: false, value: undefined });
   }
 
