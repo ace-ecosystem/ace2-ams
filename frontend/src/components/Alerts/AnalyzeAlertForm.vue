@@ -22,26 +22,14 @@
             <div class="formgrid grid">
               <div class="field col-4">
                 <label for="alert-date">Alert Datetime (UTC)</label>
-                <DatePicker
+                <Calendar
+                  id="alert-date"
                   v-model="alertDate"
-                  mode="dateTime"
+                  :show-time="true"
+                  :show-seconds="true"
+                  data-cy="alert-date"
                   class="inputfield w-16rem"
-                  is24hr
-                  timezone="UTC"
-                >
-                  <template #default="{ inputValue, inputEvents }">
-                    <div class="p-inputgroup">
-                      <InputText
-                        data-cy="alert-date"
-                        class="inputfield w-16rem"
-                        type="text"
-                        :value="inputValue"
-                        placeholder="Enter a date!"
-                        v-on="inputEvents"
-                      />
-                    </div>
-                  </template>
-                </DatePicker>
+                />
               </div>
             </div>
             <div class="formgrid grid">
@@ -126,6 +114,7 @@
   import { alertCreate } from "@/models/alert";
   import { observableCreateInAlert } from "@/models/observable";
 
+  import Calendar from "primevue/calendar";
   import Button from "primevue/button";
   import Card from "primevue/card";
   import Dropdown from "primevue/dropdown";
@@ -134,7 +123,6 @@
   import Message from "primevue/message";
   import TabPanel from "primevue/tabpanel";
   import TabView from "primevue/tabview";
-  import { DatePicker } from "v-calendar";
 
   import NewObservableForm from "@/components/Observables/NewObservableForm.vue";
 
@@ -241,7 +229,7 @@
   const splitMultiObservable = (multiObservable: formObservable) => {
     // Determine split character -- can be newline or comma
     let splitValues = [];
-    var containsNewline = /\r?\n/.exec(multiObservable.value);
+    const containsNewline = /\r?\n/.exec(multiObservable.value);
     if (containsNewline) {
       splitValues = multiObservable.value.split(/\r?\n/);
     } else {
@@ -292,7 +280,7 @@
   // create a single alert that contains all observables currently in the form
   const submitSingleAlert = async () => {
     if (!errors.value.length && observables.value.length) {
-      let _observables = expandObservablesList();
+      const _observables = expandObservablesList();
 
       alertCreateLoading.value = true;
       await submitAlert(_observables.map(generateSubmissionObservable));

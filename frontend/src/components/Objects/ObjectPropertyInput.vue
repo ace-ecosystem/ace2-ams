@@ -59,27 +59,13 @@
         ></Chips>
       </div>
       <div v-else-if="isDate" class="field">
-        <DatePicker
+        <Calendar
           v-model="propertyValue"
-          mode="dateTime"
+          :show-time="true"
+          :show-seconds="true"
+          data-cy="alert-date"
           class="inputfield w-16rem"
-          is24hr
-          timezone="UTC"
-          @update:model-value="updatePropertyValue"
-        >
-          <template #default="{ inputValue, inputEvents }">
-            <div class="p-inputgroup">
-              <InputText
-                data-cy="property-input-value"
-                class="inputfield w-16rem"
-                type="text"
-                :value="inputValue"
-                placeholder="Enter a date!"
-                v-on="inputEvents"
-              />
-            </div>
-          </template>
-        </DatePicker>
+        />
       </div>
       <div v-else-if="isCategorizedValue">
         <div class="field">
@@ -134,7 +120,7 @@
   import InputText from "primevue/inputtext";
   import Multiselect from "primevue/multiselect";
 
-  import { DatePicker } from "v-calendar";
+  import Calendar from "primevue/calendar";
   import { propertyOption } from "@/models/base";
   import { isObject } from "@/etc/validators";
 

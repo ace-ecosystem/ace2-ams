@@ -24,7 +24,7 @@
           data-cy="filter-chip-edit-button"
           class="pi pi-pencil icon-button chip-content"
           style="cursor: pointer"
-          @click="openEditFilterValuePanel(value)"
+          @click="openEditFilterValuePanel(value, $event)"
         />
         <span
           v-if="!(index == filterValue!.included.length - 1)||(filterValue!.notIncluded.length)"
@@ -46,7 +46,7 @@
           data-cy="filter-chip-edit-button"
           class="pi pi-pencil icon-button chip-content"
           style="cursor: pointer"
-          @click="openEditFilterValuePanel(value)"
+          @click="openEditFilterValuePanel(value, $event)"
         />
         <span v-if="!(index == filterValue!.notIncluded.length - 1)"
           >|</span
@@ -84,7 +84,7 @@
         data-cy="filter-chip-submit-button"
         name="update-filter"
         icon="pi pi-check"
-        @click="submitFilterValue()"
+        @click="submitFilterValue($event)"
       />
     </OverlayPanel>
   </span>
@@ -119,8 +119,8 @@
   });
 
   const op = ref();
-  const toggleQuickEditMenu = () => {
-    op.value.toggle();
+  const toggleQuickEditMenu = (event: unknown) => {
+    op.value.toggle(event);
   };
 
   const setFilterModelOldValue = (
@@ -178,21 +178,21 @@
     return "";
   });
 
-  function submitFilterValue() {
+  function submitFilterValue(event: unknown) {
     updateFilter();
-    toggleQuickEditMenu();
+    toggleQuickEditMenu(event);
     resetFilterModel({ notIncluded: false, value: undefined });
     setFilterModelOldValue();
   }
 
-  function openEditFilterValuePanel(value: any) {
-    toggleQuickEditMenu();
+  function openEditFilterValuePanel(value: any, event: unknown) {
+    toggleQuickEditMenu(event);
     resetFilterModel({ notIncluded: false, value: value });
     setFilterModelOldValue(value);
   }
 
   function openNewFilterValuePanel() {
-    toggleQuickEditMenu();
+    toggleQuickEditMenu(event);
     resetFilterModel({ notIncluded: false, value: undefined });
   }
 
