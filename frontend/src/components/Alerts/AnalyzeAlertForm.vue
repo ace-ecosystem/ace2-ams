@@ -213,7 +213,7 @@
       type: observable.type,
       value: observable.value,
       analysisMetadata: [],
-      historyUsername: authStore.user.username,
+      // historyUsername: authStore.user.username,
     };
 
     if (submissionObservable.analysisMetadata) {
@@ -276,7 +276,7 @@
       owner: authStore.user.username,
       queue: queue.value,
       type: alertType.value,
-      historyUsername: authStore.user.username,
+      // historyUsername: authStore.user.username,
     };
     try {
       await alertStore.create(alert);

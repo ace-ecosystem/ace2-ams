@@ -30,7 +30,7 @@ export interface genericObjectUpdate {
 }
 
 export interface historyUsername {
-  historyUsername: string;
+  historyUsername?: string;
 }
 
 export interface queueableObjectCreate {
