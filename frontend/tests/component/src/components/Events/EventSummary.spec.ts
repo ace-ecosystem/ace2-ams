@@ -26,7 +26,6 @@ function factory(initialState = {}) {
       ],
       provide: { config: testConfiguration },
     },
-    propsData: props,
   });
 }
 
