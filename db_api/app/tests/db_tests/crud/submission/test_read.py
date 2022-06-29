@@ -1033,6 +1033,68 @@ def test_tag_functionality(db):
     assert submission2_tree["children"][1]["tags"] == []
 
 
+def test_child_observables(db):
+    """
+    Submission1
+        O1
+            A1
+                O2
+        O3
+            A2
+                O2
+
+    Submission2
+        O1
+        O4
+    """
+
+    # Create the submission1 tree structure
+    submission1 = factory.submission.create(db=db)
+
+    sub1_o1 = factory.observable.create_or_read(
+        type="type1",
+        value="value1",
+        parent_analysis=submission1.root_analysis,
+        db=db,
+    )
+
+    amt1 = factory.analysis_module_type.create_or_read(value="amt1", db=db)
+    o1_a1 = factory.analysis.create_or_read(analysis_module_type=amt1, submission=submission1, target=sub1_o1, db=db)
+
+    a1_o2 = factory.observable.create_or_read(type="type2", value="value2", parent_analysis=o1_a1, db=db)
+
+    sub1_o3 = factory.observable.create_or_read(
+        type="type3", value="value3", parent_analysis=submission1.root_analysis, db=db
+    )
+
+    amt2 = factory.analysis_module_type.create_or_read(value="amt2", db=db)
+    o3_a2 = factory.analysis.create_or_read(analysis_module_type=amt2, submission=submission1, target=sub1_o3, db=db)
+
+    factory.observable.create_or_read(type="type2", value="value2", parent_analysis=o3_a2, db=db)
+
+    # Create the submission2 tree structure
+    submission2 = factory.submission.create(db=db)
+
+    sub2_o1 = factory.observable.create_or_read(
+        type="type1", value="value1", parent_analysis=submission2.root_analysis, db=db
+    )
+
+    sub2_o4 = factory.observable.create_or_read(
+        type="type4", value="value4", parent_analysis=submission2.root_analysis, db=db
+    )
+
+    # Verify the child_observables on submission1 - there should be 3 - O1, O2, O3
+    assert len(submission1.child_observables) == 3
+    assert sub1_o1 in submission1.child_observables
+    assert a1_o2 in submission1.child_observables
+    assert sub1_o3 in submission1.child_observables
+
+    # Verify the child_observables on submission2 - there should be 2 - O1, O4
+    assert len(submission2.child_observables) == 2
+    assert sub2_o1 in submission2.child_observables
+    assert sub2_o4 in submission2.child_observables
+
+
 def test_disposition_history(db):
     # Create some alert dispositions
     factory.alert_disposition.create_or_read(value="FALSE_POSITIVE", rank=1, db=db)
@@ -1069,7 +1131,7 @@ def test_disposition_history(db):
     assert observables[0].disposition_history[2] == {"disposition": "OPEN", "count": 1, "percent": 25}
 
 
-def test_matching_events(db):
+def test_observable_matching_events(db):
     # Create some event statuses
     factory.event_status.create_or_read(value="OPEN", db=db)
     factory.event_status.create_or_read(value="CLOSED", db=db)
@@ -1106,3 +1168,84 @@ def test_matching_events(db):
     assert len(observables[0].matching_events) == 2
     assert observables[0].matching_events[0] == {"status": "CLOSED", "count": 1}
     assert observables[0].matching_events[1] == {"status": "OPEN", "count": 2}
+
+
+def test_submission_matching_events(db):
+    """
+    Submission1
+        O1
+        O2
+        O3
+    """
+
+    # Create a submission with a few observables
+    submission1 = factory.submission.create(db=db)
+    factory.observable.create_or_read(
+        type="type1", value="value1", parent_analysis=submission1.root_analysis, tags=["o1_tag"], db=db
+    )
+    factory.observable.create_or_read(type="type2", value="value2", parent_analysis=submission1.root_analysis, db=db)
+    factory.observable.create_or_read(type="type3", value="value3", parent_analysis=submission1.root_analysis, db=db)
+
+    """
+    Event1
+        O1
+        O2
+        O3
+
+    Event2
+        O2
+        O3
+
+    Event3
+        O3
+
+    Event4 - This event should not appear in the results
+        O4
+    """
+    # Create some events that all contain the same observable
+    event1 = factory.event.create_or_read(name="event1", db=db)
+    submission2 = factory.submission.create(event=event1, tags=["submission2_tag"], db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission2.root_analysis, db=db)
+    factory.observable.create_or_read(
+        type="type2",
+        value="value2",
+        parent_analysis=submission2.root_analysis,
+        analysis_tags=["o2_analysis_tag"],
+        db=db,
+    )
+    factory.observable.create_or_read(type="type3", value="value3", parent_analysis=submission2.root_analysis, db=db)
+
+    event2 = factory.event.create_or_read(name="event2", db=db)
+    submission3 = factory.submission.create(event=event2, db=db)
+    factory.observable.create_or_read(type="type2", value="value2", parent_analysis=submission3.root_analysis, db=db)
+    factory.observable.create_or_read(type="type3", value="value3", parent_analysis=submission3.root_analysis, db=db)
+
+    event3 = factory.event.create_or_read(name="event3", db=db)
+    submission4 = factory.submission.create(event=event3, db=db)
+    factory.observable.create_or_read(type="type3", value="value3", parent_analysis=submission4.root_analysis, db=db)
+
+    # Create another event that does not contain any of the same observables - this should not appear in the results.
+    event4 = factory.event.create_or_read(name="event4", db=db)
+    submission5 = factory.submission.create(event=event4, db=db)
+    factory.observable.create_or_read(type="type4", value="value4", parent_analysis=submission5.root_analysis, db=db)
+
+    # Read one of the alert trees
+    tree = crud.submission.read_tree(uuid=submission1.uuid, db=db)
+
+    # Verify the matching events
+    assert len(tree["matching_events"]) == 3
+
+    assert tree["matching_events"][0]["count"] == 3
+    assert tree["matching_events"][0]["percent"] == 100
+    assert tree["matching_events"][0]["event"]["name"] == "event1"
+    assert len(tree["matching_events"][0]["event"]["all_tags"]) == 3
+
+    assert tree["matching_events"][1]["count"] == 2
+    assert tree["matching_events"][1]["percent"] == 66
+    assert tree["matching_events"][1]["event"]["name"] == "event2"
+    assert len(tree["matching_events"][1]["event"]["all_tags"]) == 0
+
+    assert tree["matching_events"][2]["count"] == 1
+    assert tree["matching_events"][2]["percent"] == 33
+    assert tree["matching_events"][2]["event"]["name"] == "event3"
+    assert len(tree["matching_events"][2]["event"]["all_tags"]) == 0

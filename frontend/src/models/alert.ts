@@ -6,11 +6,18 @@ import { alertTypeRead } from "./alertType";
 import { metadataDetectionPointRead } from "./metadataDetectionPoint";
 import { metadataTagRead } from "./metadataTag";
 import { alertCommentRead } from "./alertComment";
+import { eventRead } from "./event";
 import { observableCreateInAlert, observableTreeRead } from "./observable";
 import { observableTypeRead } from "./observableType";
 import { queueRead } from "./queue";
 import { userRead } from "./user";
 import { readPage } from "./page";
+
+export interface submissionMatchingEventIndividual {
+  event: eventRead;
+  count: number;
+  percent: number;
+}
 
 export interface alertCreate extends historyUsername {
   alert: boolean;
@@ -84,6 +91,7 @@ export interface alertSummary {
 
 export interface alertTreeRead extends alertRead {
   children: observableTreeRead[];
+  matchingEvents: submissionMatchingEventIndividual[];
   rootAnalysisUuid: UUID;
 }
 
