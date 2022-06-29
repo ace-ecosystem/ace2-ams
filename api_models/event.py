@@ -95,6 +95,10 @@ class EventCreate(EventBase):
 class EventRead(EventBase):
     alert_uuids: list[UUID4] = Field(default_factory=list, description="A list of alert UUIDs contained in the event")
 
+    all_tags: list[MetadataTagRead] = Field(
+        default_factory=list, description="A list of every tag contained within the event"
+    )
+
     analysis_types: list[str] = Field(
         description="A deduplicated list of analysis module types that exist within the event", default_factory=list
     )

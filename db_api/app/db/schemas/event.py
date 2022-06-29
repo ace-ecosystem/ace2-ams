@@ -19,6 +19,7 @@ from db.schemas.event_vector_mapping import event_vector_mapping
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.metadata_tag import MetadataTag
+from db.schemas.submission import Submission
 
 
 class EventHistory(Base, HistoryMixin):
@@ -34,7 +35,9 @@ class Event(Base, HasHistory):
 
     alert_time = Column(DateTime(timezone=True), index=True)
 
-    alerts = relationship("Submission", primaryjoin="Submission.event_uuid == Event.uuid", lazy="selectin")
+    alerts: list[Submission] = relationship(
+        "Submission", primaryjoin="Submission.event_uuid == Event.uuid", lazy="selectin"
+    )
 
     alert_uuids = association_proxy("alerts", "uuid")
 
@@ -107,6 +110,19 @@ class Event(Base, HasHistory):
     @property
     def history_snapshot(self):
         return json.loads(self.convert_to_pydantic().json())
+
+    @property
+    def all_tags(self) -> list[MetadataTag]:
+        """Returns a list of every tag contained within the event sorted by their values"""
+
+        # Start by creating a copy of the event's tags so that we are not using the same reference.
+        results = list(self.tags)
+        for alert in self.alerts:
+            results += alert.tags
+            results += alert.child_analysis_tags
+            results += alert.child_tags
+
+        return sorted(set(results), key=lambda x: x.value)
 
     @property
     def auto_alert_time(self) -> Optional[datetime]:

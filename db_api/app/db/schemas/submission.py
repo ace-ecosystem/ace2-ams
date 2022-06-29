@@ -14,6 +14,7 @@ from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.metadata_detection_point import MetadataDetectionPoint
 from db.schemas.metadata_tag import MetadataTag
+from db.schemas.observable import Observable
 from db.schemas.submission_analysis_mapping import submission_analysis_mapping
 from db.schemas.submission_tag_mapping import submission_tag_mapping
 
@@ -73,14 +74,19 @@ class Submission(Base, HasHistory):
         secondary="join(AnalysisMetadata, MetadataDetectionPoint, MetadataDetectionPoint.uuid == AnalysisMetadata.metadata_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == AnalysisMetadata.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
-        # NOTE: The secondaryjoin parameter is required specifically when using the
-        # crud.submission.read_all() function to filter submissions by their tags.
-        # Without it, the query that SQLAlchemy creates results in the returned submissions
-        # having every tag from every submission in their child_analysis_tags list.
         secondaryjoin="Metadata.uuid == AnalysisMetadata.metadata_uuid",
         order_by="asc(MetadataDetectionPoint.value)",
         viewonly=True,
         lazy="selectin",
+    )
+
+    # The relationship is lazy loaded since not everything requires it.
+    child_observables: list[Observable] = relationship(
+        "Observable",
+        secondary="join(Observable, analysis_child_observable_mapping, Observable.uuid == analysis_child_observable_mapping.c.observable_uuid)."
+        "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
+        primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
+        viewonly=True,
     )
 
     child_tags: list[MetadataTag] = relationship(
@@ -89,10 +95,6 @@ class Submission(Base, HasHistory):
         "join(analysis_child_observable_mapping, analysis_child_observable_mapping.c.observable_uuid == observable_tag_mapping.c.observable_uuid)."
         "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == analysis_child_observable_mapping.c.analysis_uuid)",
         primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
-        # NOTE: The secondaryjoin parameter is required specifically when using the
-        # crud.submission.read_all() function to filter submissions by their tags.
-        # Without it, the query that SQLAlchemy creates results in the returned submissions
-        # having every tag from every submission in their child_tags list.
         secondaryjoin="MetadataTag.uuid == observable_tag_mapping.c.tag_uuid",
         foreign_keys="[Submission.uuid, MetadataTag.uuid]",
         order_by="asc(MetadataTag.value)",
@@ -134,6 +136,9 @@ class Submission(Base, HasHistory):
     insert_time = Column(DateTime(timezone=True), server_default=utcnow(), nullable=False, index=True)
 
     instructions = Column(String)
+
+    # This gets populated by certain submission-related queries.
+    matching_events = None
 
     name = Column(String, nullable=False)
 
@@ -178,11 +183,37 @@ class Submission(Base, HasHistory):
     )
 
     def convert_to_pydantic(self) -> SubmissionTreeRead:
-        return SubmissionTreeRead(**self.__dict__)
+        return SubmissionTreeRead(**self.to_dict())
+
+    def to_dict(self, extra_ignore_keys: Optional[list[str]] = None):
+        ignore_keys = [
+            "analyses",
+            "analysis_uuids",
+            "child_observables",
+            "event",
+            "history",
+            "history_snapshot",
+            "to_dict",
+        ]
+
+        if extra_ignore_keys:
+            ignore_keys += extra_ignore_keys
+
+        return {key: getattr(self, key) for key in self.__class__.__dict__ if key not in ignore_keys}
 
     @property
     def history_snapshot(self):
-        return json.loads(SubmissionRead(**self.__dict__).json())
+        return json.loads(
+            SubmissionRead(
+                **self.to_dict(
+                    extra_ignore_keys=[
+                        "child_analysis_tags",
+                        "child_detection_points",
+                        "child_tags",
+                    ]
+                )
+            ).json()
+        )
 
     @property
     def disposition_time_earliest(self) -> Optional[datetime]:
