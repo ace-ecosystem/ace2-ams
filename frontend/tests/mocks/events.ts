@@ -52,6 +52,7 @@ export const eventCreateFactory = ({
 });
 
 export const eventReadFactory = ({
+  allTags = [],
   analysisTypes = [],
   autoAlertTime = null,
   autoDispositionTime = null,
@@ -83,6 +84,7 @@ export const eventReadFactory = ({
   vectors = [],
   version = "testEventVersion1",
 }: Partial<eventRead> = {}): eventRead => ({
+  allTags: allTags,
   analysisTypes: analysisTypes,
   autoAlertTime: autoAlertTime,
   autoDispositionTime: autoDispositionTime,

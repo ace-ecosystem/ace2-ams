@@ -14,3 +14,6 @@ class MetadataTag(Metadata):
     value = Column(String, nullable=False, unique=True, index=True)
 
     __mapper_args__ = {"polymorphic_identity": "tag", "polymorphic_load": "inline"}
+
+    def __hash__(self):
+        return hash(self.uuid)

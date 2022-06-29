@@ -11,11 +11,21 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from api_models.analysis import AnalysisSubmissionTreeRead
-from api_models.observable import DispositionHistoryIndividual, MatchingEventIndividual, ObservableSubmissionTreeRead
-from api_models.submission import SubmissionCreate, SubmissionUpdate
+from api_models.observable import (
+    ObservableDispositionHistoryIndividual,
+    ObservableMatchingEventIndividual,
+    ObservableSubmissionTreeRead,
+)
+from api_models.submission import (
+    SubmissionCreate,
+    SubmissionMatchingEventByStatus,
+    SubmissionMatchingEventIndividual,
+    SubmissionUpdate,
+)
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
+from db.schemas.event import Event
 from db.schemas.event_status import EventStatus
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.observable import Observable
@@ -91,7 +101,7 @@ def _build_disposition_history(o: Observable):
     for disposition in sorted_dispositions:
         disposition_value = disposition.value if disposition else "OPEN"
         o.disposition_history.append(
-            DispositionHistoryIndividual(
+            ObservableDispositionHistoryIndividual(
                 disposition=disposition_value,
                 count=counts[disposition],
                 percent=int(counts[disposition] / len(o.alert_dispositions) * 100),
@@ -99,7 +109,7 @@ def _build_disposition_history(o: Observable):
         )
 
 
-def _build_matching_events(o: Observable):
+def _build_matching_observable_events(o: Observable):
     """Counts the event statuses and adds the matching event information to the given observable."""
 
     counts: dict[Optional[EventStatus], int] = {}
@@ -114,12 +124,52 @@ def _build_matching_events(o: Observable):
 
     # Loop through the sorted statuses and build the matching event objects to add to the observable
     o.matching_events = [
-        MatchingEventIndividual(
+        ObservableMatchingEventIndividual(
             status=status.value,
             count=counts[status],
         )
         for status in sorted_statuses
     ]
+
+
+def _build_matching_submission_events(s: Submission):
+    """Figures out which events match the given submission based on how many observables they share."""
+
+    # Build a dictionary of the events that contain observables in this submission as well as how
+    # many observables are shared between the submission and events.
+    counts: dict[Event, int] = {}
+    for observable in s.child_observables:
+        for event in observable.events:
+            if event not in counts:
+                counts[event] = 0
+
+            counts[event] += 1
+
+    # Sort the events by their counts (with the highest count first)
+    # NOTE: As of Python 3.7, dictionaries will maintain their insertion order:
+    # https://mail.python.org/pipermail/python-dev/2017-December/151283.html
+    sorted_counts: dict[Event, int] = dict(sorted(counts.items(), key=lambda item: item[1], reverse=True))
+
+    # Build a dictionary to group the matching events by their status
+    matching_events_by_status: dict[str, SubmissionMatchingEventByStatus] = {}
+    num_submission_observables = len(s.child_observables)
+    for item in sorted_counts.items():
+        # Create the SubmissionMatchingEventByStatus object if the status hasn't been seen yet
+        if item[0].status.value not in matching_events_by_status:
+            matching_events_by_status[item[0].status.value] = SubmissionMatchingEventByStatus(
+                status=item[0].status.value
+            )
+
+        # Add the matching event to its appropriate status group
+        matching_events_by_status[item[0].status.value].events.append(
+            SubmissionMatchingEventIndividual(
+                event=item[0], count=item[1], percent=int(item[1] / num_submission_observables * 100)
+            )
+        )
+
+    # Set the matching_events property on the submission
+    # NOTE: Pydantic does not support list-like elements, so it must explicitly be a list.
+    s.matching_events = list(matching_events_by_status.values())
 
 
 def _read_analysis_uuids(submission_uuids: list[UUID], db: Session) -> list[UUID]:
@@ -882,16 +932,21 @@ def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
     for observable in observables:
         _associate_metadata_with_observable(analysis_uuids=analysis_uuids, o=observable)
         _build_disposition_history(o=observable)
-        _build_matching_events(o=observable)
+        _build_matching_observable_events(o=observable)
 
     return observables
 
 
 def read_tree(uuid: UUID, db: Session) -> dict:
-    # The Submission db object has an "analyses" list that contains every analysis object regardless
-    # of where it appears in the tree structure.
+    # Read the submission from the database
     db_submission = read_by_uuid(uuid=uuid, db=db)
 
+    # Build the matching events information
+    _build_matching_submission_events(s=db_submission)
+
+    # The Submission db object has an "analyses" list that contains every analysis object reglardless
+    # of where it appears in the tree structure.
+    #
     # The analyses and observables need to be organized in a few dictionaries so that the tree
     # structure can be easily built:
     #
@@ -915,7 +970,7 @@ def read_tree(uuid: UUID, db: Session) -> dict:
             # Add the analysis metadata to the observable
             _associate_metadata_with_observable(analysis_uuids=db_submission.analysis_uuids, o=db_child_observable)
             _build_disposition_history(o=db_child_observable)
-            _build_matching_events(o=db_child_observable)
+            _build_matching_observable_events(o=db_child_observable)
 
             # Add the observable model to the dictionary if it has not been seen yet.
             if db_child_observable.uuid not in child_observables:

@@ -60,7 +60,7 @@ def record_create_history(
     # Refresh the database object so that its history snapshot is up to date
     db.refresh(instance=record)
 
-    db.add(
+    record.history.append(
         history_table(
             action="CREATE",
             action_by=action_by,
@@ -88,7 +88,7 @@ def record_update_history(
 
     for diff in diffs:
         if diff:
-            db.add(
+            record.history.append(
                 history_table(
                     action="UPDATE",
                     action_by=action_by,

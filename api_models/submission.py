@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from api_models import type_str, validators
 from api_models.alert_disposition import AlertDispositionRead
+from api_models.event import EventRead
 from api_models.metadata_detection_point import MetadataDetectionPointRead
 from api_models.observable import ObservableCreateInSubmission, ObservableSubmissionTreeRead
 from api_models.queue import QueueRead
@@ -14,6 +15,26 @@ from api_models.submission_tool_instance import SubmissionToolInstanceRead
 from api_models.submission_type import SubmissionTypeRead
 from api_models.metadata_tag import MetadataTagRead
 from api_models.user import UserRead
+
+
+class SubmissionMatchingEventIndividual(BaseModel):
+    """Represents an individual matched event that contains observables found in this submission."""
+
+    event: EventRead = Field(description="The matched event")
+
+    count: int = Field(description="The number of observables from this submission that are in the event")
+
+    percent: int = Field(description="The percent of observables from this submission that are in the event")
+
+
+class SubmissionMatchingEventByStatus(BaseModel):
+    """Groups matching events by their status."""
+
+    status: type_str = Field(description="The status of the matching events")
+
+    events: list[SubmissionMatchingEventIndividual] = Field(
+        default_factory=list, description="A list of matching events that have the same status"
+    )
 
 
 class SubmissionBase(BaseModel):
@@ -145,6 +166,11 @@ class SubmissionUpdate(SubmissionBase):
 
 
 class SubmissionTreeRead(SubmissionRead):
+    matching_events: list[SubmissionMatchingEventByStatus] = Field(
+        default_factory=list,
+        description="A list of the events grouped by their status that contain observables found in this submission",
+    )
+
     root_analysis_uuid: UUID4 = Field(description="The UUID the submission's root analysis")
 
     children: list[ObservableSubmissionTreeRead] = Field(
