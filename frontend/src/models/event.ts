@@ -62,6 +62,7 @@ export interface eventCreate extends historyUsername {
 export interface eventRead {
   alertTime: string | null;
   alertUuids: UUID[];
+  allTags: metadataTagRead[];
   analysisTypes: string[];
   autoAlertTime: string | null;
   autoDispositionTime: string | null;
