@@ -114,12 +114,13 @@ class Event(Base, HasHistory):
     @property
     def all_tags(self) -> list[MetadataTag]:
         """Returns a list of every tag contained within the event sorted by their values"""
-        results = self.tags
+
+        # Start by creating a copy of the event's tags so that we are not using the same reference.
+        results = list(self.tags)
         for alert in self.alerts:
             results += alert.tags
             results += alert.child_analysis_tags
             results += alert.child_tags
-            print(f"alert.child_tags = {alert.child_tags}")
 
         return sorted(set(results), key=lambda x: x.value)
 
