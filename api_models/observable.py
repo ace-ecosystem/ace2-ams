@@ -9,7 +9,7 @@ from api_models.metadata_tag import MetadataTagRead
 from api_models.observable_type import ObservableTypeRead
 
 
-class DispositionHistoryIndividual(BaseModel):
+class ObservableDispositionHistoryIndividual(BaseModel):
     """Represents an individual disposition history."""
 
     disposition: type_str = Field(description="The disposition value")
@@ -19,7 +19,7 @@ class DispositionHistoryIndividual(BaseModel):
     percent: int = Field(description="The percent of times the disposition occurred")
 
 
-class MatchingEventIndividual(BaseModel):
+class ObservableMatchingEventIndividual(BaseModel):
     """Represents an individual matching event that contains this observable."""
 
     status: type_str = Field(description="The status of the matching event")
@@ -110,12 +110,12 @@ class ObservableSubmissionRead(ObservableRead):
 
     analysis_metadata: AnalysisMetadataRead = Field(description="The analysis metadata for the observable")
 
-    disposition_history: list[DispositionHistoryIndividual] = Field(
+    disposition_history: list[ObservableDispositionHistoryIndividual] = Field(
         default_factory=list,
         description="A list of the dispositions and their counts of alerts that contain this observable",
     )
 
-    matching_events: list[MatchingEventIndividual] = Field(
+    matching_events: list[ObservableMatchingEventIndividual] = Field(
         default_factory=list,
         description="A list of the event statuses and their counts of events that contain this observable",
     )

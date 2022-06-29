@@ -9,13 +9,13 @@ import { metadataTagRead } from "./metadataTag";
 import { observableRelationshipRead } from "./observableRelationship";
 import { observableTypeRead } from "./observableType";
 
-export interface dispositionHistoryIndividual {
+export interface observableDispositionHistoryIndividual {
   disposition: string;
   count: number;
   percent: number;
 }
 
-export interface matchingEventIndividual {
+export interface observableMatchingEventIndividual {
   status: string;
   count: number;
 }
@@ -55,8 +55,8 @@ export interface observableRead {
 
 export interface observableInAlertRead extends observableRead {
   analysisMetadata: analysisMetadataRead;
-  dispositionHistory: dispositionHistoryIndividual[];
-  matchingEvents: matchingEventIndividual[];
+  dispositionHistory: observableDispositionHistoryIndividual[];
+  matchingEvents: observableMatchingEventIndividual[];
 }
 
 export interface observableReadPage {
