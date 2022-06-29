@@ -21,6 +21,8 @@ import { useObservableTypeStore } from "./observableType";
 import { useQueueStore } from "./queue";
 import { useUserStore } from "./user";
 import { dateParser } from "@/etc/helpers";
+import { userRead } from "@/models/user";
+import { alertDispositionRead } from "@/models/alertDisposition";
 
 export async function populateCommonStores(): Promise<void> {
   const alertDispositionStore = useAlertDispositionStore();
@@ -126,6 +128,24 @@ export function setUserDefaults(objectType = "all"): void {
       objectType: "alerts",
       filterName: "queue",
       filterValue: currentUserSettingsStore.queues.alerts,
+      isIncluded: true,
+    });
+    filterStore.setFilter({
+      objectType: "alerts",
+      filterName: "owner",
+      filterValue: authStore.user,
+      isIncluded: true,
+    });
+    filterStore.setFilter({
+      objectType: "alerts",
+      filterName: "owner",
+      filterValue: { displayName: "None", username: "none" } as userRead,
+      isIncluded: true,
+    });
+    filterStore.setFilter({
+      objectType: "alerts",
+      filterName: "disposition",
+      filterValue: { value: "None" } as alertDispositionRead,
       isIncluded: true,
     });
   }
