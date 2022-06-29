@@ -15,6 +15,10 @@ describe("Manage Alerts - No Database Changes", () => {
         count: 1,
       },
     });
+
+    visitUrl({
+      url: "/manage_alerts",
+    });
   });
 
   beforeEach(() => {
