@@ -82,6 +82,8 @@
 
   import { copyToClipboard, formatObjectFiltersForAPI } from "@/etc/helpers";
   import { queueRead } from "@/models/queue";
+  import { userRead } from "@/models/user";
+  import { alertDispositionRead } from "@/models/alertDisposition";
   import { eventStatusRead } from "@/models/eventStatus";
 
   const filterStore = useFilterStore();
@@ -114,21 +116,29 @@
     // reset all to start
     filterStore.clearAll({ objectType: objectType });
     if (objectType === "alerts") {
-      const filters: { queue?: { included: queueRead[]; notIncluded: [] } } =
-        {};
-      // look for owner == current user OR none
-      // currently explicit "no owner" filter is unavailable so, skip this one for now
-      // filters.owner = authStore.user;
-
-      // look for alerts with open disposition
-      // currently explicit "no disposition" filter is unavailable so, skip this one for now
-      // filters.disposition = null;
+      const filters: {
+        queue?: { included: queueRead[]; notIncluded: [] };
+        owner?: { included: userRead[]; notIncluded: [] };
+        dipsosition?: { included: alertDispositionRead[]; notIncluded: [] };
+      } = {};
 
       // look for alerts in current user's preferred queue
       const queue = currentUserSettingsStore.queues.alerts
         ? currentUserSettingsStore.queues.alerts
         : authStore.user.defaultAlertQueue;
+
       filters.queue = { included: [queue], notIncluded: [] };
+      filters.owner = {
+        included: [
+          authStore.user,
+          { displayName: "None", username: "none" } as userRead,
+        ],
+        notIncluded: [],
+      };
+      filters.disposition = {
+        included: [{ value: "None" } as alertDispositionRead],
+        notIncluded: [],
+      };
 
       filterStore.bulkSetFilters({ objectType: objectType, filters: filters });
     } else if (objectType === "events") {
@@ -182,7 +192,7 @@
     let link = `${window.location.origin}/manage_${objectType}`;
     // If there are filters set, build the link for it
     if (Object.keys(filterStore[objectType]).length) {
-      let urlParams = new URLSearchParams();
+      const urlParams = new URLSearchParams();
       const formattedParams = formatObjectFiltersForAPI(
         validFilterOptions[objectType],
         filterStore[objectType],

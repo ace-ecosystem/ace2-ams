@@ -128,6 +128,24 @@ export function setUserDefaults(objectType = "all"): void {
       filterValue: currentUserSettingsStore.queues.alerts,
       isIncluded: true,
     });
+    filterStore.setFilter({
+      objectType: "alerts",
+      filterName: "owner",
+      filterValue: authStore.user,
+      isIncluded: true,
+    });
+    filterStore.setFilter({
+      objectType: "alerts",
+      filterName: "owner",
+      filterValue: "none",
+      isIncluded: true,
+    });
+    filterStore.setFilter({
+      objectType: "alerts",
+      filterName: "disposition",
+      filterValue: "None",
+      isIncluded: true,
+    });
   }
 }
 
