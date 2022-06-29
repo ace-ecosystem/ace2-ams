@@ -1,4 +1,4 @@
-FROM cypress/included:10.0.2
+FROM cypress/included:10.3.0
 
 RUN apt-get install -y curl
 
