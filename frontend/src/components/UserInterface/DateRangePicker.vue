@@ -64,16 +64,16 @@
 
   <!--      DATE PICKERS -->
   <Calendar
+    v-model="startDate"
     v-tooltip.top="{
       value: startDateLocal,
       disabled: !startDateLocal,
     }"
-    id="alert-date"
-    v-model="startDate"
     :show-time="true"
     :show-seconds="true"
     data-cy="date-range-picker-start-input"
     class="inputfield w-16rem"
+    placeholder="The beginning of time"
     @update:model-value="dateSelect($event, startFilter)"
     @update:model-value.delete="dateSelect(null)"
   />
@@ -87,16 +87,16 @@
   <span> to </span>
 
   <Calendar
+    v-model="endDate"
     v-tooltip.top="{
       value: endDateLocal,
       disabled: !endDateLocal,
     }"
-    id="alert-date"
-    v-model="endDate"
     :show-time="true"
     :show-seconds="true"
     data-cy="date-range-picker-end-input"
     class="inputfield w-16rem"
+    placeholder="Now"
     @update:model-value="dateSelect($event, endFilter)"
     @update:model-value.delete="dateSelect(null)"
   />

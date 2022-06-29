@@ -65,6 +65,9 @@
           :show-seconds="true"
           data-cy="alert-date"
           class="inputfield w-16rem"
+          placeholder="Enter a date!"
+          :manual-input="true"
+          @update:model-value="updatePropertyValue"
         />
       </div>
       <div v-else-if="isCategorizedValue">

@@ -23,7 +23,6 @@
               <div class="field col-4">
                 <label for="alert-date">Alert Datetime (UTC)</label>
                 <Calendar
-                  id="alert-date"
                   v-model="alertDate"
                   :show-time="true"
                   :show-seconds="true"

@@ -116,7 +116,10 @@ describe("AnalyzeAlertForm - Advanced Panel", () => {
     // Click to open advanced panel
     cy.get("div").contains("Advanced").click();
     // Should have additional visible inputs
-    cy.get('[data-cy="alert-date"]').should("have.value", "03/29/2022 12:00");
+    cy.get('[data-cy="alert-date"]').should(
+      "have.value",
+      "03/29/2022 08:00:00",
+    );
     cy.get("#timezone").should("not.be.empty");
     cy.get("#type").should("have.text", "testAlertTypeA");
     cy.get("#queue").should("have.text", "testQueueA");

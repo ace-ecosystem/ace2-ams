@@ -169,7 +169,7 @@ describe("EditEventModal", () => {
         .eq(0)
         .find("input")
         .click()
-        .type("04/12/2022 12:00");
+        .type("04/12/2022 12:00:00");
 
       cy.contains("Save").click();
 
@@ -273,7 +273,7 @@ describe("EditEventModal", () => {
         .eq(0)
         .find("input")
         .click()
-        .type("04/12/2022 12:00");
+        .type("04/12/2022 12:00:00");
 
       cy.contains("Save").click();
 

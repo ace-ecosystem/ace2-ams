@@ -32,12 +32,13 @@
       <div class="formgrid grid">
         <div class="field col-2 px-1">
           <Calendar
-            id="alert-date"
             v-model="observablesCopy[index].time"
             :show-time="true"
             :show-seconds="true"
             data-cy="alert-date"
+            name="observable-time"
             class="inputfield w-16rem"
+            placeholder="No time selected"
           />
         </div>
         <div class="field col-2 px-1">
