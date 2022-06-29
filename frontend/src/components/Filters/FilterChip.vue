@@ -24,11 +24,7 @@
           data-cy="filter-chip-edit-button"
           class="pi pi-pencil icon-button chip-content"
           style="cursor: pointer"
-          @click="
-            toggleQuickEditMenu($event);
-            setFilterModelOldValue(value);
-            resetFilterModel({ notIncluded: false, value: value });
-          "
+          @click="openEditFilterValuePanel(value, $event)"
         />
         <span
           v-if="!(index == filterValue!.included.length - 1)||(filterValue!.notIncluded.length)"
@@ -50,11 +46,7 @@
           data-cy="filter-chip-edit-button"
           class="pi pi-pencil icon-button chip-content"
           style="cursor: pointer"
-          @click="
-            toggleQuickEditMenu($event);
-            setFilterModelOldValue(value);
-            resetFilterModel({ notIncluded: true, value: value });
-          "
+          @click="openEditFilterValuePanel(value, $event)"
         />
         <span v-if="!(index == filterValue!.notIncluded.length - 1)"
           >|</span
@@ -64,20 +56,13 @@
         data-cy="filter-chip-add-button"
         class="pi pi-plus-circle icon-button chip-content"
         style="cursor: pointer"
-        @click="
-          toggleQuickEditMenu($event);
-          resetFilterModel({ notIncluded: false, value: undefined });
-        "
+        @click="openNewFilterValuePanel()"
       />
     </Chip>
     <OverlayPanel
       ref="op"
       data-cy="filter-chip-edit-panel"
       style="padding: 1rem"
-      @keypress.enter="
-        updateFilter();
-        resetFilterModel({ notIncluded: false, value: undefined });
-      "
     >
       <div class="flex justify-content-start pb-2">
         <b class="flex align-items-center justify-content-center pr-2">NOT</b>
@@ -99,12 +84,7 @@
         data-cy="filter-chip-submit-button"
         name="update-filter"
         icon="pi pi-check"
-        @click="
-          updateFilter();
-          resetFilterModel({ notIncluded: false, value: undefined });
-          toggleQuickEditMenu($event);
-          setFilterModelOldValue();
-        "
+        @click="submitFilterValue($event)"
       />
     </OverlayPanel>
   </span>
@@ -197,6 +177,24 @@
     }
     return "";
   });
+
+  function submitFilterValue(event: unknown) {
+    updateFilter();
+    toggleQuickEditMenu(event);
+    resetFilterModel({ notIncluded: false, value: undefined });
+    setFilterModelOldValue();
+  }
+
+  function openEditFilterValuePanel(value: any, event: unknown) {
+    toggleQuickEditMenu(event);
+    resetFilterModel({ notIncluded: false, value: value });
+    setFilterModelOldValue(value);
+  }
+
+  function openNewFilterValuePanel() {
+    toggleQuickEditMenu(event);
+    resetFilterModel({ notIncluded: false, value: undefined });
+  }
 
   function resetFilterModel(args: {
     value: alertFilterValues | eventFilterValues | undefined;

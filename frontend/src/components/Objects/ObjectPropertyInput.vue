@@ -12,7 +12,7 @@
         placeholder="Select a property"
         @change="
           clearPropertyValue();
-          updatePropertyType($event as any);
+          updatePropertyType($event);
         "
       />
     </div>
@@ -59,27 +59,16 @@
         ></Chips>
       </div>
       <div v-else-if="isDate" class="field">
-        <DatePicker
+        <Calendar
           v-model="propertyValue"
-          mode="dateTime"
+          :show-time="true"
+          :show-seconds="true"
+          data-cy="alert-date"
           class="inputfield w-16rem"
-          is24hr
-          timezone="UTC"
+          placeholder="Enter a date!"
+          :manual-input="true"
           @update:model-value="updatePropertyValue"
-        >
-          <template #default="{ inputValue, inputEvents }">
-            <div class="p-inputgroup">
-              <InputText
-                data-cy="property-input-value"
-                class="inputfield w-16rem"
-                type="text"
-                :value="inputValue"
-                placeholder="Enter a date!"
-                v-on="inputEvents"
-              />
-            </div>
-          </template>
-        </DatePicker>
+        />
       </div>
       <div v-else-if="isCategorizedValue">
         <div class="field">
@@ -134,7 +123,7 @@
   import InputText from "primevue/inputtext";
   import Multiselect from "primevue/multiselect";
 
-  import { DatePicker } from "v-calendar";
+  import Calendar from "primevue/calendar";
   import { propertyOption } from "@/models/base";
   import { isObject } from "@/etc/validators";
 
@@ -182,7 +171,7 @@
         ? propertyTypeOptions.value[0]
         : undefined;
     }
-    let property: propertyOption | undefined = propertyTypeOptions.value.find(
+    const property: propertyOption | undefined = propertyTypeOptions.value.find(
       (option) => {
         return option.name === propertyType;
       },
@@ -348,7 +337,9 @@
     }
   };
 
-  const updatePropertyType = (newValue: { value: propertyOption }) => {
+  // updatePropertyType will be called from the PrimeVue Dropdown 'change' event or onMounted
+  // And so we can guarantee that the type of 'newValue' will be { value: propertyOption }, even though it must be typed as any
+  const updatePropertyType = (newValue: any) => {
     const updatedModelValue = {
       propertyType: newValue.value.name
         ? newValue.value.name

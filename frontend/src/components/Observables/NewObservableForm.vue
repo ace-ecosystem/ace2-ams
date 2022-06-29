@@ -31,26 +31,15 @@
     >
       <div class="formgrid grid">
         <div class="field col-2 px-1">
-          <DatePicker
+          <Calendar
             v-model="observablesCopy[index].time"
-            mode="dateTime"
+            :show-time="true"
+            :show-seconds="true"
+            data-cy="alert-date"
+            name="observable-time"
             class="inputfield w-16rem"
-            is24hr
-            timezone="UTC"
-          >
-            <template #default="{ inputValue, inputEvents }">
-              <div class="p-inputgroup">
-                <InputText
-                  name="observable-time"
-                  class="inputfield w-16rem"
-                  type="text"
-                  :value="inputValue"
-                  placeholder="No time selected"
-                  v-on="inputEvents"
-                />
-              </div>
-            </template>
-          </DatePicker>
+            placeholder="No time selected"
+          />
         </div>
         <div class="field col-2 px-1">
           <Dropdown
@@ -127,11 +116,10 @@
 
   import Button from "primevue/button";
   import Dropdown from "primevue/dropdown";
-  import InputText from "primevue/inputtext";
   import MultiSelect from "primevue/multiselect";
 
   import ObservableInput from "@/components/Observables/ObservableInput.vue";
-  import { DatePicker } from "v-calendar";
+  import Calendar from "primevue/calendar";
 
   import { useObservableTypeStore } from "@/stores/observableType";
   import { useMetadataDirectiveStore } from "@/stores/metadataDirective";

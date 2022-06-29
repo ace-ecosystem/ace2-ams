@@ -13,7 +13,7 @@ import { userReadFactory } from "@mocks/user";
 import { createTestingPinia } from "@pinia/testing";
 import { useEventStatusStore } from "@/stores/eventStatus";
 
-createTestingPinia({ createSpy: vi.fn });
+createTestingPinia({ createSpy: vi.fn, stubActions: false });
 
 describe("setUserDefaults", () => {
   const authStore = useAuthStore();

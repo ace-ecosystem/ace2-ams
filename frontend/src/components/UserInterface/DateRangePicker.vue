@@ -63,69 +63,49 @@
   </OverlayPanel>
 
   <!--      DATE PICKERS -->
-  <DatePicker
+  <Calendar
     v-model="startDate"
-    mode="dateTime"
-    is24hr
-    data-cy="date-range-picker-start"
-    :timezone="'UTC'"
+    v-tooltip.top="{
+      value: startDateLocal,
+      disabled: !startDateLocal,
+    }"
+    :show-time="true"
+    :show-seconds="true"
+    data-cy="date-range-picker-start-input"
+    class="inputfield w-16rem"
+    placeholder="The beginning of time"
     @update:model-value="dateSelect($event, startFilter)"
     @update:model-value.delete="dateSelect(null)"
-  >
-    <template #default="{ inputValue, inputEvents }">
-      <div class="p-inputgroup">
-        <InputText
-          v-tooltip.top="{
-            value: startDateLocal,
-            disabled: !startDateLocal,
-          }"
-          data-cy="date-range-picker-start-input"
-          type="text"
-          :value="inputValue"
-          placeholder="The beginning of time"
-          v-on="inputEvents"
-        />
-        <Button
-          data-cy="date-range-picker-start-clear"
-          icon="pi pi-times"
-          class="p-button-outlined p-button-secondary"
-          @click="clearDate(startFilter)"
-        />
-      </div>
-    </template>
-  </DatePicker>
+  />
+  <Button
+    data-cy="date-range-picker-start-clear"
+    icon="pi pi-times"
+    class="p-button-outlined p-button-secondary"
+    @click="clearDate(startFilter)"
+  />
+
   <span> to </span>
-  <DatePicker
+
+  <Calendar
     v-model="endDate"
-    mode="dateTime"
-    is24hr
-    data-cy="date-range-picker-end"
-    :timezone="'UTC'"
+    v-tooltip.top="{
+      value: endDateLocal,
+      disabled: !endDateLocal,
+    }"
+    :show-time="true"
+    :show-seconds="true"
+    data-cy="date-range-picker-end-input"
+    class="inputfield w-16rem"
+    placeholder="Now"
     @update:model-value="dateSelect($event, endFilter)"
     @update:model-value.delete="dateSelect(null)"
-  >
-    <template #default="{ inputValue, inputEvents }">
-      <div class="p-inputgroup">
-        <InputText
-          v-tooltip.top="{
-            value: endDateLocal,
-            disabled: !endDateLocal,
-          }"
-          data-cy="date-range-picker-end-input"
-          type="text"
-          :value="inputValue"
-          placeholder="Now"
-          v-on="inputEvents"
-        />
-        <Button
-          data-cy="date-range-picker-end-clear"
-          icon="pi pi-times"
-          class="p-button-outlined p-button-secondary"
-          @click="clearDate(endFilter)"
-        />
-      </div>
-    </template>
-  </DatePicker>
+  />
+  <Button
+    data-cy="date-range-picker-end-clear"
+    icon="pi pi-times"
+    class="p-button-outlined p-button-secondary"
+    @click="clearDate(endFilter)"
+  />
 </template>
 
 <script setup lang="ts">
@@ -135,7 +115,7 @@
   import Button from "primevue/button";
   import OverlayPanel from "primevue/overlaypanel";
   import InputText from "primevue/inputtext";
-  import { DatePicker } from "v-calendar";
+  import Calendar from "primevue/calendar";
 
   import { useFilterStore } from "@/stores/filter";
 

@@ -20,7 +20,6 @@ import "primeflex/primeflex.css";
 import "primeicons/primeicons.css";
 import "primevue/resources/primevue.min.css";
 import "primevue/resources/themes/saga-blue/theme.css";
-import "v-calendar/dist/style.css";
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

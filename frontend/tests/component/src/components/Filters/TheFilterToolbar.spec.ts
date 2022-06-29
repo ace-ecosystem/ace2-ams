@@ -76,8 +76,8 @@ describe("TheFilterToolbar", () => {
     cy.contains("test name").should("be.visible");
     cy.contains("2022-05-22T16:00:00").should("be.visible"); // filter chip
     cy.contains("2022-05-23T16:00:00").should("be.visible"); // filter chip
-    cy.findByDisplayValue("05/22/2022 16:00").should("be.visible"); // date range picker
-    cy.findByDisplayValue("05/23/2022 16:00").should("be.visible"); // date range picker
+    cy.findByDisplayValue("05/22/2022 12:00:00").should("be.visible"); // date range picker
+    cy.findByDisplayValue("05/23/2022 12:00:00").should("be.visible"); // date range picker
   });
   it("opens quick add panel when quick add filter button clicked", () => {
     factory();
