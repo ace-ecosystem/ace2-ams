@@ -12,6 +12,10 @@ import { eventFilterParams } from "@/models/event";
 import FilterChipContainerVue from "@/components/Filters/FilterChipContainer.vue";
 import DateRangePickerVue from "@/components/UserInterface/DateRangePicker.vue";
 import { genericObjectReadFactory } from "@mocks/genericObject";
+import { userReadFactory } from "@mocks/user";
+
+const user = userReadFactory();
+const externalQueue = genericObjectReadFactory({ value: "external" });
 
 function factory(
   filters: { alerts: alertFilterParams; events: eventFilterParams } = {
@@ -26,10 +30,11 @@ function factory(
         PrimeVue,
         createCustomCypressPinia({
           initialState: {
+            authStore: { user: user },
             currentUserSettingsStore: {
               queues: {
-                alerts: { value: "external" },
-                events: { value: "external" },
+                alerts: externalQueue,
+                events: externalQueue,
               },
             },
             filterStore: filters,
@@ -129,12 +134,26 @@ describe("TheFilterToolbar", () => {
     cy.get("@stub-1").should("have.been.calledOnceWith", {
       objectType: "alerts",
       filters: {
-        queue: {
+        disposition: {
           included: [
             {
-              value: "external",
+              value: "None",
             },
           ],
+          notIncluded: [],
+        },
+        owner: {
+          included: [
+            user,
+            {
+              username: "none",
+              displayName: "None",
+            },
+          ],
+          notIncluded: [],
+        },
+        queue: {
+          included: [externalQueue],
           notIncluded: [],
         },
       },

@@ -56,6 +56,11 @@ describe("setUserDefaults", () => {
     });
     expect(filterStore.alerts).toEqual({
       queue: { included: [alertQueue], notIncluded: [] },
+      owner: {
+        included: [authStore.user, { displayName: "None", username: "none" }],
+        notIncluded: [],
+      },
+      disposition: { included: [{ value: "None" }], notIncluded: [] },
     });
   });
   it("will correctly set all user defaults when objectType == 'all' and 'OPEN' event status is not available", () => {
@@ -72,6 +77,11 @@ describe("setUserDefaults", () => {
     });
     expect(filterStore.alerts).toEqual({
       queue: { included: [alertQueue], notIncluded: [] },
+      owner: {
+        included: [authStore.user, { displayName: "None", username: "none" }],
+        notIncluded: [],
+      },
+      disposition: { included: [{ value: "None" }], notIncluded: [] },
     });
   });
   it("will correctly set event user defaults when objectType == 'events' and 'OPEN' event status is available", () => {
@@ -114,6 +124,11 @@ describe("setUserDefaults", () => {
     expect(filterStore.events).toEqual({});
     expect(filterStore.alerts).toEqual({
       queue: { included: [alertQueue], notIncluded: [] },
+      owner: {
+        included: [authStore.user, { displayName: "None", username: "none" }],
+        notIncluded: [],
+      },
+      disposition: { included: [{ value: "None" }], notIncluded: [] },
     });
   });
 

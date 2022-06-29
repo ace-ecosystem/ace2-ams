@@ -119,7 +119,7 @@
       const filters: {
         queue?: { included: queueRead[]; notIncluded: [] };
         owner?: { included: userRead[]; notIncluded: [] };
-        dipsosition?: { included: alertDispositionRead[]; notIncluded: [] };
+        disposition?: { included: alertDispositionRead[]; notIncluded: [] };
       } = {};
 
       // look for alerts in current user's preferred queue
