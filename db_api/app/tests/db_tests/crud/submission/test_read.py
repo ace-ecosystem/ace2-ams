@@ -1187,23 +1187,23 @@ def test_submission_matching_events(db):
     factory.observable.create_or_read(type="type3", value="value3", parent_analysis=submission1.root_analysis, db=db)
 
     """
-    Event1
+    Event1 - OPEN
         O1
         O2
         O3
 
-    Event2
+    Event2 - CLOSED
         O2
         O3
 
-    Event3
+    Event3 - IGNORE
         O3
 
     Event4 - This event should not appear in the results
         O4
     """
     # Create some events that all contain the same observable
-    event1 = factory.event.create_or_read(name="event1", db=db)
+    event1 = factory.event.create_or_read(name="event1", status="OPEN", db=db)
     submission2 = factory.submission.create(event=event1, tags=["submission2_tag"], db=db)
     factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission2.root_analysis, db=db)
     factory.observable.create_or_read(
@@ -1215,12 +1215,12 @@ def test_submission_matching_events(db):
     )
     factory.observable.create_or_read(type="type3", value="value3", parent_analysis=submission2.root_analysis, db=db)
 
-    event2 = factory.event.create_or_read(name="event2", db=db)
+    event2 = factory.event.create_or_read(name="event2", status="CLOSED", db=db)
     submission3 = factory.submission.create(event=event2, db=db)
     factory.observable.create_or_read(type="type2", value="value2", parent_analysis=submission3.root_analysis, db=db)
     factory.observable.create_or_read(type="type3", value="value3", parent_analysis=submission3.root_analysis, db=db)
 
-    event3 = factory.event.create_or_read(name="event3", db=db)
+    event3 = factory.event.create_or_read(name="event3", status="IGNORE", db=db)
     submission4 = factory.submission.create(event=event3, db=db)
     factory.observable.create_or_read(type="type3", value="value3", parent_analysis=submission4.root_analysis, db=db)
 
@@ -1235,17 +1235,23 @@ def test_submission_matching_events(db):
     # Verify the matching events
     assert len(tree["matching_events"]) == 3
 
-    assert tree["matching_events"][0]["count"] == 3
-    assert tree["matching_events"][0]["percent"] == 100
-    assert tree["matching_events"][0]["event"]["name"] == "event1"
-    assert len(tree["matching_events"][0]["event"]["all_tags"]) == 3
+    assert tree["matching_events"][0]["status"] == "OPEN"
+    assert len(tree["matching_events"][0]["events"]) == 1
+    assert tree["matching_events"][0]["events"][0]["count"] == 3
+    assert tree["matching_events"][0]["events"][0]["percent"] == 100
+    assert tree["matching_events"][0]["events"][0]["event"]["name"] == "event1"
+    assert len(tree["matching_events"][0]["events"][0]["event"]["all_tags"]) == 3
 
-    assert tree["matching_events"][1]["count"] == 2
-    assert tree["matching_events"][1]["percent"] == 66
-    assert tree["matching_events"][1]["event"]["name"] == "event2"
-    assert len(tree["matching_events"][1]["event"]["all_tags"]) == 0
+    assert tree["matching_events"][1]["status"] == "CLOSED"
+    assert len(tree["matching_events"][1]["events"]) == 1
+    assert tree["matching_events"][1]["events"][0]["count"] == 2
+    assert tree["matching_events"][1]["events"][0]["percent"] == 66
+    assert tree["matching_events"][1]["events"][0]["event"]["name"] == "event2"
+    assert len(tree["matching_events"][1]["events"][0]["event"]["all_tags"]) == 0
 
-    assert tree["matching_events"][2]["count"] == 1
-    assert tree["matching_events"][2]["percent"] == 33
-    assert tree["matching_events"][2]["event"]["name"] == "event3"
-    assert len(tree["matching_events"][2]["event"]["all_tags"]) == 0
+    assert tree["matching_events"][2]["status"] == "IGNORE"
+    assert len(tree["matching_events"][2]["events"]) == 1
+    assert tree["matching_events"][2]["events"][0]["count"] == 1
+    assert tree["matching_events"][2]["events"][0]["percent"] == 33
+    assert tree["matching_events"][2]["events"][0]["event"]["name"] == "event3"
+    assert len(tree["matching_events"][2]["events"][0]["event"]["all_tags"]) == 0

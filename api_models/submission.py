@@ -27,6 +27,16 @@ class SubmissionMatchingEventIndividual(BaseModel):
     percent: int = Field(description="The percent of observables from this submission that are in the event")
 
 
+class SubmissionMatchingEventByStatus(BaseModel):
+    """Groups matching events by their status."""
+
+    status: type_str = Field(description="The status of the matching events")
+
+    events: list[SubmissionMatchingEventIndividual] = Field(
+        default_factory=list, description="A list of matching events that have the same status"
+    )
+
+
 class SubmissionBase(BaseModel):
     """Represents a submission, which is an analysis request from the ACE Core or one manually created by an analyst."""
 
@@ -156,8 +166,9 @@ class SubmissionUpdate(SubmissionBase):
 
 
 class SubmissionTreeRead(SubmissionRead):
-    matching_events: list[SubmissionMatchingEventIndividual] = Field(
-        default_factory=list, description="A list of the events that contain observables found in this submission"
+    matching_events: list[SubmissionMatchingEventByStatus] = Field(
+        default_factory=list,
+        description="A list of the events grouped by their status that contain observables found in this submission",
     )
 
     root_analysis_uuid: UUID4 = Field(description="The UUID the submission's root analysis")

@@ -19,6 +19,11 @@ export interface submissionMatchingEventIndividual {
   percent: number;
 }
 
+export interface submissionMatchingEventByStatus {
+  status: string;
+  events: submissionMatchingEventIndividual[];
+}
+
 export interface alertCreate extends historyUsername {
   alert: boolean;
   description?: string;
@@ -91,7 +96,7 @@ export interface alertSummary {
 
 export interface alertTreeRead extends alertRead {
   children: observableTreeRead[];
-  matchingEvents: submissionMatchingEventIndividual[];
+  matchingEvents: submissionMatchingEventByStatus[];
   rootAnalysisUuid: UUID;
 }
 

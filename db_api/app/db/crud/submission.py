@@ -16,7 +16,12 @@ from api_models.observable import (
     ObservableMatchingEventIndividual,
     ObservableSubmissionTreeRead,
 )
-from api_models.submission import SubmissionCreate, SubmissionMatchingEventIndividual, SubmissionUpdate
+from api_models.submission import (
+    SubmissionCreate,
+    SubmissionMatchingEventByStatus,
+    SubmissionMatchingEventIndividual,
+    SubmissionUpdate,
+)
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
@@ -145,15 +150,26 @@ def _build_matching_submission_events(s: Submission):
     # https://mail.python.org/pipermail/python-dev/2017-December/151283.html
     sorted_counts: dict[Event, int] = dict(sorted(counts.items(), key=lambda item: item[1], reverse=True))
 
-    # Loop through the sorted events and build the matching event objects to add to the submission
-    s.matching_events = [
-        SubmissionMatchingEventIndividual(
-            event=item[0],
-            count=item[1],
-            percent=int(item[1] / len(s.child_observables) * 100),
+    # Build a dictionary to group the matching events by their status
+    matching_events_by_status: dict[str, SubmissionMatchingEventByStatus] = {}
+    num_submission_observables = len(s.child_observables)
+    for item in sorted_counts.items():
+        # Create the SubmissionMatchingEventByStatus object if the status hasn't been seen yet
+        if item[0].status.value not in matching_events_by_status:
+            matching_events_by_status[item[0].status.value] = SubmissionMatchingEventByStatus(
+                status=item[0].status.value
+            )
+
+        # Add the matching event to its appropriate status group
+        matching_events_by_status[item[0].status.value].events.append(
+            SubmissionMatchingEventIndividual(
+                event=item[0], count=item[1], percent=int(item[1] / num_submission_observables * 100)
+            )
         )
-        for item in sorted_counts.items()
-    ]
+
+    # Set the matching_events property on the submission
+    # NOTE: Pydantic does not support list-like elements, so it must explicitly be a list.
+    s.matching_events = list(matching_events_by_status.values())
 
 
 def _read_analysis_uuids(submission_uuids: list[UUID], db: Session) -> list[UUID]:
