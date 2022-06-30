@@ -25,10 +25,10 @@ bin/reset-dev-container.sh
 After the containers are built and running, you can access the components using the following URLs:
 
 - Frontend: [http://ace2-ams:8080](http://ace2-ams:8080)
-- Database API Swagger documentation: [http://localhost:8888/docs](http://localhost:8888/docs)
-- Database API ReDoc documentation: [http://localhost:8888/redoc](http://localhost:8888/redoc)
-- GUI API Swagger documentation: [http://localhost:7777/docs](http://localhost:7777/docs)
-- GUI API ReDoc documentation: [http://localhost:7777/redoc](http://localhost:7777/redoc)
+- Database API Swagger documentation: [http://ace2-ams:8888/docs](http://ace2-ams:8888/docs)
+- Database API ReDoc documentation: [http://ace2-ams:8888/redoc](http://ace2-ams:8888/redoc)
+- GUI API Swagger documentation: [http://ace2-ams:7777/docs](http://ace2-ams:7777/docs)
+- GUI API ReDoc documentation: [http://ace2-ams:7777/redoc](http://ace2-ams:7777/redoc)
 
 ## Philosophy
 

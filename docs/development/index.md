@@ -2,15 +2,29 @@
 
 ## Initial setup
 
-This project has VSCode devcontainer support to ensure that anyone working on the project does so in a consistent environment as well as follows the same formatting/styling guidelines.
+This project requires the use of Docker, Python (3.9.x), and Node.js (16.x). Install those as normal for your operating system. However, if you are on Windows, see the Windows section below.
 
-### Using WSL2
+### Windows
 
-TODO (instructions on how we set up our WSL2 environments for local development)
+If you want to run the Cypress component or end-to-end tests using the graphical test runner (instead of just from the command line), you will need to either:
+
+- Ensure you have Node.js 16.x installed within Windows.
+
+OR
+
+- If you are using WSL2 (see below), install an X-server in Windows so that when you run `npx cypress open` within WSL2 it is able to connect to the X-server to display the Cypress GUI. To do this, you can follow the instructions as described in [this Stack Overflow answer](https://stackoverflow.com/a/61110604).
+
+#### Using WSL2 (Optional)
+
+If you have access to WSL2, a better development experience (to not have to deal with Docker Desktop's performance issues) in Windows is to set up WSL2 with Ubuntu.
+
+Then within Ubuntu, you would install Docker, Python, and Node.js and do all of your work from there.
+
+VSCode can also be configured using the `Remote - WSL` extension to connect to a folder within your WSL2 instance.
 
 ## Updating your hosts file
 
-Your local system will need an entry in the hosts file to properly work with the AMS development environment.
+Until we figure out a better way to deal with this, your local system will need an entry in the hosts file to properly work with the AMS development environment. This is because of the combination of how the Docker containers interact with one another, CORS, and the fact that the dev environment does not use HTTPS, which carries implications for the HttpOnly cookies that are used with the frontend's authentication.
 
 For Mac/Linux, this file is located at `/etc/hosts`.
 
@@ -35,10 +49,10 @@ This script will generate random passwords for the database user and the secret 
 Once the both the frontend and API development environments are built and started, you can access the components:
 
 - Frontend: [http://ace2-ams:8080](http://ace2-ams:8080)
-- Database API Swagger documentation: [http://localhost:8888/docs](http://localhost:8888/docs)
-- Database API ReDoc documentation: [http://localhost:8888/redoc](http://localhost:8888/redoc)
-- GUI API Swagger documentation: [http://localhost:7777/docs](http://localhost:7777/docs)
-- GUI API ReDoc documentation: [http://localhost:7777/redoc](http://localhost:7777/redoc)
+- Database API Swagger documentation: [http://ace2-ams:8888/docs](http://ace2-ams:8888/docs)
+- Database API ReDoc documentation: [http://ace2-ams:8888/redoc](http://ace2-ams:8888/redoc)
+- GUI API Swagger documentation: [http://ace2-ams:7777/docs](http://ace2-ams:7777/docs)
+- GUI API ReDoc documentation: [http://ace2-ams:7777/redoc](http://ace2-ams:7777/redoc)
 
 ## Managing NPM packages
 
@@ -130,26 +144,26 @@ bin/test-e2e.sh
 
 Cypress also comes with an amazing [Test Runner](https://docs.cypress.io/guides/core-concepts/test-runner) that lets you see and interact with the tests in your local web browser. This can be helpful when writing component and end-to-end tests to ensure they are working properly as well as any debugging you might need to do.
 
-However, this will need to be performed on your local system ouside of the containers. To do this, you will need to have [Node.js 16](https://nodejs.org/en/download/current/) installed.
+However, this will need to be performed on your local system ouside of the containers (see the [Windows](./index.md#windows) setup section in case you are using WSL2). To do this, you will need to have [Node.js 16](https://nodejs.org/en/download/current/) installed.
 
-**Step 1:** Install Cypress on your host system (this only needs to be done one time):
-
-```
-npm install -g cypress@10.0.2
-```
-
-**Step 2:** Prep the application to run the tests in interactive mode:
+**Step 1:** Prep the application to run the tests in interactive mode (this tells the containers to use the test database):
 
 ```
 bin/test-interactive-e2e.sh
 ```
 
+**Step 2:** Install the Node.js packages on your host system (this only needs to be done one time or when `package.json` is updated):
+
+```
+cd frontend/
+npm install
+```
+
 **Step 3:** Open the Test Runner on your host system:
 
 ```
-cd cypress/
-cypress open // End-to-End tests
-cypress open-ct // Component tests
+cd frontend/
+npx cypress open
 ```
 
 ![Test Runner](gui/test-runner.png)
