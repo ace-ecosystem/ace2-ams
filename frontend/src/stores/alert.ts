@@ -17,8 +17,6 @@ export const useAlertStore = defineStore({
   state: () => ({
     open: null as unknown as alertTreeRead,
 
-    openObservables: [] as observableInAlertRead[],
-
     // whether the alert should be reloaded
     requestReload: false,
   }),
@@ -47,13 +45,6 @@ export const useAlertStore = defineStore({
       await Alert.read(uuid)
         .then((alert) => {
           this.open = alert;
-        })
-        .catch((error) => {
-          throw error;
-        });
-      await Alert.readObservables([uuid])
-        .then((observables) => {
-          this.openObservables = observables;
         })
         .catch((error) => {
           throw error;

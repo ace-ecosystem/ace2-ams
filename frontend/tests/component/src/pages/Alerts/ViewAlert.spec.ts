@@ -39,7 +39,6 @@ function factory(stubActions = true) {
 describe("ViewAlert", () => {
   it("renders correctly when alert can be fetched", () => {
     cy.stub(Alert, "read").resolves(alertTreeReadFactory());
-    cy.stub(Alert, "readObservables").resolves([]);
     factory(false).then((wrapper) => {
       cy.get("@spy-9").should("have.been.calledOnce"); // unselectAll
       cy.get("@spy-6").should("have.been.calledOnce"); // select alert
@@ -52,7 +51,6 @@ describe("ViewAlert", () => {
   });
   it("attempts to disposition alert as 'false positive' on ignoreClicked event", () => {
     cy.stub(Alert, "read").resolves(alertTreeReadFactory());
-    cy.stub(Alert, "readObservables").resolves([]);
     cy.stub(Alert, "update")
       .withArgs([
         {
@@ -74,7 +72,6 @@ describe("ViewAlert", () => {
   });
   it("attempts to disposition alert as 'ignore' on ignoreClicked event", () => {
     cy.stub(Alert, "read").resolves(alertTreeReadFactory());
-    cy.stub(Alert, "readObservables").resolves([]);
     cy.stub(Alert, "update")
       .withArgs([
         {
@@ -96,7 +93,6 @@ describe("ViewAlert", () => {
   });
   it("will display error message if attempt to use FP disposition shortcut fails", () => {
     cy.stub(Alert, "read").resolves(alertTreeReadFactory());
-    cy.stub(Alert, "readObservables").resolves([]);
     cy.stub(Alert, "update")
       .withArgs([
         {
@@ -121,7 +117,6 @@ describe("ViewAlert", () => {
   });
   it("will display error message if attempt to use ignore disposition shortcut fails", () => {
     cy.stub(Alert, "read").resolves(alertTreeReadFactory());
-    cy.stub(Alert, "readObservables").resolves([]);
     cy.stub(Alert, "update")
       .withArgs([
         {

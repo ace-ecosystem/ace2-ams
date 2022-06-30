@@ -9,7 +9,6 @@ import { testConfiguration } from "@/etc/configuration/test/index";
 
 import AlertMatchingOpenEventsPanel from "@/components/Alerts/AlertMatchingOpenEventsPanel.vue";
 import { alertTreeRead, submissionMatchingEventByStatus } from "@/models/alert";
-import { observableReadFactory } from "@mocks/observable";
 
 function factory(openAlert?: alertTreeRead) {
   mount(AlertMatchingOpenEventsPanel, {
@@ -20,10 +19,6 @@ function factory(openAlert?: alertTreeRead) {
           initialState: {
             alertStore: {
               open: openAlert,
-              openObservables: [
-                observableReadFactory(),
-                observableReadFactory(),
-              ],
             },
           },
         }),
@@ -96,7 +91,10 @@ describe("AlertMatchingOpenEventsPanel", () => {
         ],
       },
     ];
-    const openAlert = alertTreeReadFactory({ matchingEvents: matchingEvents });
+    const openAlert = alertTreeReadFactory({
+      matchingEvents: matchingEvents,
+      numberOfObservables: 2,
+    });
     factory(openAlert);
     cy.get("[data-cy=matching-open-events-panel]").should("be.visible");
     cy.get("[data-cy=matching-open-events-table]").should("not.be.visible");

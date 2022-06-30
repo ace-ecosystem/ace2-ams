@@ -79,7 +79,7 @@
       return "";
     }
 
-    return `Matching Open Events: ${openEvents.value.length} Event(s) | ${openEvents.value[0].count}/${alertStore.openObservables.length} matching observables | ${openEvents.value[0].event.name}`;
+    return `Matching Open Events: ${openEvents.value.length} Event(s) | ${openEvents.value[0].count}/${alertStore.open.numberOfObservables} matching observables | ${openEvents.value[0].event.name}`;
   });
 
   const getEventLink = (uuid: string) => {
