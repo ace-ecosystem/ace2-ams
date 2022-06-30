@@ -8,8 +8,9 @@ import PrimeVue from "primevue/config";
 import { testConfiguration } from "@/etc/configuration/test/index";
 
 import AlertMatchingOpenEventsPanel from "@/components/Alerts/AlertMatchingOpenEventsPanel.vue";
+import { alertTreeRead, submissionMatchingEventByStatus } from "@/models/alert";
 
-function factory(openAlert: alertTreeRead | undefined) {
+function factory(openAlert?: alertTreeRead) {
   mount(AlertMatchingOpenEventsPanel, {
     global: {
       plugins: [
@@ -65,10 +66,22 @@ describe("AlertMatchingOpenEventsPanel", () => {
               name: "Test Event B",
               uuid: "uuidB",
               allTags: [
-                genericObjectReadFactory({ value: "Test Tag A" }),
-                genericObjectReadFactory({ value: "Test Tag B" }),
+                {
+                  ...genericObjectReadFactory({ value: "Test Tag A" }),
+                  metadataType: "tag",
+                },
+                {
+                  ...genericObjectReadFactory({ value: "Test Tag B" }),
+                  metadataType: "tag",
+                },
               ],
-              threats: [genericObjectReadFactory({ value: "Threat A" })],
+              threats: [
+                {
+                  ...genericObjectReadFactory({ value: "Threat A" }),
+                  types: [],
+                  queues: [],
+                },
+              ],
             }),
           },
         ],
