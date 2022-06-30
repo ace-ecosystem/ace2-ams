@@ -54,6 +54,21 @@ Once the both the frontend and API development environments are built and starte
 - GUI API Swagger documentation: [http://ace2-ams:7777/docs](http://ace2-ams:7777/docs)
 - GUI API ReDoc documentation: [http://ace2-ams:7777/redoc](http://ace2-ams:7777/redoc)
 
+## VSCode extensions
+
+If you use VSCode, the following extensions are useful for working with the project:
+
+- ESLint
+- Prettier - Code formatter
+- Pylance
+- Python
+- Vue Language Features (Volar)
+
+Once you install Volar, you will want to enable its "takeover" mode. To do that, you need to disable VSCode's built-in TypeScript extension:
+
+1. In the extensions panel, search for `@builtin typescript`.
+2. Right-click on the `TypeScript and JavaScript Language Features` extension and select `Disable (Workspace)`. This will allow Volar to provide TypeScript support as well as proper support for working with Vue's single file components.
+
 ## Managing NPM packages
 
 You should not directly edit the dependencies or devDependencies inside of `package.json` or anything in `package-lock.json`. **Any changes to packages should be performed via the `npm` command**:
