@@ -142,6 +142,9 @@ class Submission(Base, HasHistory):
 
     name = Column(String, nullable=False)
 
+    # This gets populated by certain submission-related queries.
+    number_of_observables = 0
+
     owner_uuid = Column(UUID(as_uuid=True), ForeignKey("user.uuid"), index=True)
 
     owner = relationship("User", foreign_keys=[owner_uuid], lazy="selectin")

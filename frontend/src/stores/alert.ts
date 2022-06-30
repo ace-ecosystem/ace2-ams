@@ -6,6 +6,7 @@ import {
   alertTreeRead,
   alertUpdate,
 } from "@/models/alert";
+import { observableInAlertRead } from "@/models/observable";
 import { UUID } from "@/models/base";
 import { Alert } from "@/services/api/alert";
 import { parseAlertSummary } from "@/etc/helpers";
