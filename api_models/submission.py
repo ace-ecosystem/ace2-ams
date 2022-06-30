@@ -171,6 +171,8 @@ class SubmissionTreeRead(SubmissionRead):
         description="A list of the events grouped by their status that contain observables found in this submission",
     )
 
+    number_of_observables: int = Field(description="The total number of unique observables in the submission")
+
     root_analysis_uuid: UUID4 = Field(description="The UUID the submission's root analysis")
 
     children: list[ObservableSubmissionTreeRead] = Field(

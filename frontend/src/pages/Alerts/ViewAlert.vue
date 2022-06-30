@@ -18,6 +18,8 @@
   <div v-if="alertStore.open">
     <TheAlertDetails />
     <br />
+    <AlertMatchingOpenEventsPanel />
+    <br />
     <AlertUrlDomainSummary :alert-uuid="alertID" />
     <br />
     <Card style="overflow-x: scroll">
@@ -45,6 +47,7 @@
 
   import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
   import AlertUrlDomainSummary from "@/components/Alerts/AlertUrlDomainSummary.vue";
+  import AlertMatchingOpenEventsPanel from "@/components/Alerts/AlertMatchingOpenEventsPanel.vue";
   import AlertTree from "@/components/Alerts/AlertTree.vue";
   import TheAlertDetails from "@/components/Alerts/TheAlertDetails.vue";
   import { useAlertStore } from "@/stores/alert";
