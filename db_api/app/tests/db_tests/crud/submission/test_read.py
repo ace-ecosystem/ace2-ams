@@ -720,11 +720,12 @@ def test_read_submission_tree(db):
         db=db, json_path="/app/tests/alerts/small.json", submission_name="Test Alert"
     )
 
-    # The small.json submission has 14 observables and 16 analyses (the Root Analysis is not included in the tree).
+    # The small.json submission has 14 observables (12 unique) and 16 analyses (the Root Analysis is not included in the tree).
     result = crud.submission.read_tree(uuid=submission.uuid, db=db)
     assert str(result["children"]).count("'observable'") == 14
     assert str(result["children"]).count("'analysis'") == 16
     assert len(result["children"]) == 2
+    assert result["number_of_observables"] == 12
 
     # The small.json has three different analysis tags applied to observables, and they should be in alphabetical order.
     assert len(submission.child_analysis_tags) == 3
