@@ -9,6 +9,7 @@ import { testConfiguration } from "@/etc/configuration/test/index";
 
 import AlertMatchingOpenEventsPanel from "@/components/Alerts/AlertMatchingOpenEventsPanel.vue";
 import { alertTreeRead, submissionMatchingEventByStatus } from "@/models/alert";
+import { observableReadFactory } from "@mocks/observable";
 
 function factory(openAlert?: alertTreeRead) {
   mount(AlertMatchingOpenEventsPanel, {
@@ -16,7 +17,15 @@ function factory(openAlert?: alertTreeRead) {
       plugins: [
         PrimeVue,
         createCustomCypressPinia({
-          initialState: { alertStore: { open: openAlert } },
+          initialState: {
+            alertStore: {
+              open: openAlert,
+              openObservables: [
+                observableReadFactory(),
+                observableReadFactory(),
+              ],
+            },
+          },
         }),
       ],
       provide: {
@@ -92,7 +101,7 @@ describe("AlertMatchingOpenEventsPanel", () => {
     cy.get("[data-cy=matching-open-events-panel]").should("be.visible");
     cy.get("[data-cy=matching-open-events-table]").should("not.be.visible");
     cy.contains(
-      "Matching Open Events: 2 Event(s) | 1/0 matching observables | Test Event",
+      "Matching Open Events: 2 Event(s) | 1/2 matching observables | Test Event",
     ).should("be.visible");
     cy.get(".pi").click(); // expand the panel
     cy.get("[data-cy=matching-open-events-table]").should("be.visible");
