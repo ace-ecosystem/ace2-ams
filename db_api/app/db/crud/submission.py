@@ -944,6 +944,9 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     # Build the matching events information
     _build_matching_submission_events(s=db_submission)
 
+    # Set the number of observables
+    db_submission.number_of_observables = len(db_submission.child_observables)
+
     # The Submission db object has an "analyses" list that contains every analysis object reglardless
     # of where it appears in the tree structure.
     #

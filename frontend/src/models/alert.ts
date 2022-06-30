@@ -97,6 +97,7 @@ export interface alertSummary {
 export interface alertTreeRead extends alertRead {
   children: observableTreeRead[];
   matchingEvents: submissionMatchingEventByStatus[];
+  numberOfObservables: number;
   rootAnalysisUuid: UUID;
 }
 
