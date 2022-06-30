@@ -2,7 +2,7 @@
 
 The API provides several ways to query for and filter alerts. Any of the filters can be combined with one another to produce complex queries.
 
-> **NOTE:** If you combine multiple filters or use one of the filters that allows you to specify a comma-separated list of items, they are all queried for using `AND` logic. There is currently no way to perform `OR` or `NOT` logic with the filters, although that is planned for the future.
+> **NOTE:** If you combine multiple filters or use one of the filters that allows you to specify a comma-separated list of items, they are all queried for using `AND` logic.
 
 ## Disposition
 
