@@ -3,6 +3,7 @@ import myNock from "@unit/services/api/nock";
 import snakecaseKeys from "snakecase-keys";
 import { useAlertStore } from "@/stores/alert";
 import { createCustomPinia } from "@tests/unitHelpers";
+import { observableReadFactory } from "@mocks/observable";
 
 import {
   alertCreateFactory,
@@ -17,6 +18,7 @@ const mockAlertTree = alertTreeReadFactory();
 const mockAlert = alertReadFactory();
 const mockAlertCreate = alertCreateFactory();
 const mockAlertSummary = alertSummaryFactory();
+const mockObservable = observableReadFactory();
 
 const store = useAlertStore();
 
@@ -42,13 +44,20 @@ describe("alert Actions", () => {
     expect(store.open).toEqual(JSON.parse(JSON.stringify(mockAlert)));
   });
 
-  it("will fetch alert data given an alert ID", async () => {
+  it("will fetch alert and observable data given an alert ID", async () => {
     const mockRequest = myNock.get("/alert/uuid1").reply(200, mockAlert);
+    const mockRequest2 = myNock
+      .post("/alert/observables", ["uuid1"])
+      .reply(200, [mockObservable]);
     await store.read("uuid1");
 
     expect(mockRequest.isDone()).toEqual(true);
+    expect(mockRequest2.isDone()).toEqual(true);
 
     expect(store.open).toEqual(JSON.parse(JSON.stringify(mockAlert)));
+    expect(store.openObservables).toEqual(
+      JSON.parse(JSON.stringify([mockObservable])),
+    );
   });
 
   it("will make a request to update an alert given the UUID and update data upon the updateAlert action", async () => {
