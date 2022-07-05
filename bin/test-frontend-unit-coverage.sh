@@ -7,8 +7,6 @@ source "$ACE2_ENV_PATH"
 export TESTING=yes
 set +a
 
-# Remove the leading frontend/ from the command line argument so the path works inside of the container.
-TEST_FILE=${1#frontend/}
 
 docker compose up -d
 docker exec -e VITE_TESTING=yes ace2-ams-gui npm run test:coverage
