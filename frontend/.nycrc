@@ -1,0 +1,12 @@
+{
+  "include": ["src/**/*.{vue}", "src/*.{vue}"],
+  "extension": [".vue"],
+  "reporter": ["lcov", "text-summary", "json-summary"],
+  "report-dir": "coverage/component",
+  "check-coverage": true,
+  "branches": 100,
+  "lines": 100,
+  "functions": 100,
+  "statements": 100,
+  "excludeAfterRemap": false
+}

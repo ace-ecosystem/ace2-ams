@@ -6,6 +6,7 @@ ACE2_ENV_PATH="$HOME/.ace2.env"
 set -a
 source "$ACE2_ENV_PATH"
 export TESTING=no
+export CYPRESS_COVERAGE=false
 set +a
 
 docker compose -f docker-compose.yml up -d

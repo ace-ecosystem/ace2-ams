@@ -173,6 +173,7 @@ jobs:
       DATABASE_API_URL: http://db-api/api
       TESTING: yes
       TZ: America/New_York
+      CYPRESS_COVERAGE: true
 
     steps:
       - name: Checkout code
@@ -185,7 +186,10 @@ jobs:
         run: docker exec ace2-ams-gui bin/wait-for-gui.sh
 
       - name: Component Tests
-        run: docker exec -e TZ=America/New_York ace2-ams-gui xvfb-run cypress run --component --headless --browser chrome --config-file "cypress.config.ts" --config video=false,screenshotOnRunFailure=false
+        run: docker exec -e TZ=America/New_York -e CYPRESS_COVERAGE=true ace2-ams-gui xvfb-run cypress run --component --headless --browser chrome --config-file "cypress.config.ts" --config video=false,screenshotOnRunFailure=false
+
+      - name: Check coverage
+        run: docker exec ace2-ams-gui npx nyc report --reporter=text-summary
 
   production-build:
     name: Production Build
