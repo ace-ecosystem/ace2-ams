@@ -99,7 +99,7 @@ jobs:
         run: cd frontend && npx madge --ts-config tsconfig.json  --extensions ts,vue --circular --exclude models/* src/*
 
       - name: Unit tests
-        run: cd frontend && npm run test:unit
+        run: cd frontend && npm run test:coverage
 
   e2e:
     name: End-to-End

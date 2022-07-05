@@ -20,6 +20,9 @@ export default defineConfig({
     environment: "jsdom",
     include: ["**/unit/**/*.spec.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     reporters: ["verbose"],
+    coverage: {
+      // 100: true, // Require 100% coverage
+    },
   },
   server: {
     host: "0.0.0.0",
