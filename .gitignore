@@ -33,3 +33,10 @@ pnpm-debug.log*
 frontend/tests/*/screenshots
 frontend/tests/*/videos
 frontend/tests/*/downloads
+frontend/cypress/screenshots
+frontend/cypress/videos
+frontend/cypress/downloads
+
+# Frontend test coverage files
+instrumented/
+.nyc_output

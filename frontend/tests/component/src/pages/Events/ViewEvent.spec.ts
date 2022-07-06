@@ -7,9 +7,13 @@ import PrimeVue from "primevue/config";
 import router from "@/router/index";
 import { testConfiguration } from "@/etc/configuration/test/index";
 import ViewEvent from "@/pages/Events/ViewEvent.vue";
+import { Event } from "@/services/api/event";
 
 describe("ViewEvent", () => {
   it("renders", () => {
+    const getStub = cy.stub(Event, "read");
+    getStub.as("readEvent").resolves();
+
     mount(ViewEvent, {
       global: {
         plugins: [PrimeVue, createPinia(), router],

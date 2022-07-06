@@ -3,6 +3,7 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
+import istanbul from "vite-plugin-istanbul";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -14,12 +15,26 @@ export default defineConfig({
       "@tests": resolve(__dirname, "./tests"),
     },
   },
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    istanbul({
+      include: "src/*",
+      exclude: ["node_modules", "test/"],
+      extension: [".vue"],
+      cypress: true,
+      requireEnv: true,
+    }),
+  ],
   test: {
     globals: false,
     environment: "jsdom",
     include: ["**/unit/**/*.spec.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
-    reporters: ["verbose"],
+    reporters: ["verbose", "json"],
+    outputFile: "./coverage/unit/coverage.json",
+    coverage: {
+      // 100: true, // Require 100% coverage
+      reportsDirectory: "./coverage/unit",
+    },
   },
   server: {
     host: "0.0.0.0",
@@ -34,6 +49,7 @@ export default defineConfig({
     },
     watch: {
       usePolling: true,
+      ignored: ["**/coverage/**"],
     },
     hmr: {
       // Internal port
@@ -41,5 +57,8 @@ export default defineConfig({
       // External port (Docker host)
       clientPort: 8080,
     },
+  },
+  build: {
+    sourcemap: true,
   },
 });
