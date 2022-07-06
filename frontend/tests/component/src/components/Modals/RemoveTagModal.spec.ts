@@ -222,7 +222,7 @@ describe("RemoveTagModal", () => {
     cy.contains("testTag").should("be.visible");
     cy.contains("otherTag").should("be.visible");
   });
-  it.only("will make the expected call to update an observable's tags w/o tags in form when 'Remove' is clicked and the given objectType is 'observable'", () => {
+  it("will make the expected call to update an observable's tags w/o tags in form when 'Remove' is clicked and the given objectType is 'observable'", () => {
     cy.stub(ObservableInstance, "update")
       .withArgs("observableUuid1", {
         tags: ["testTag"],
