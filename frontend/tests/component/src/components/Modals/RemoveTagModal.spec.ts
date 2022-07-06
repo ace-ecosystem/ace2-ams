@@ -226,7 +226,7 @@ describe("RemoveTagModal", () => {
     cy.stub(ObservableInstance, "update")
       .withArgs("observableUuid1", {
         tags: ["testTag"],
-        historyUsername: "analyst"
+        historyUsername: "analyst",
       })
       .as("updateObservable")
       .resolves();
