@@ -30,6 +30,7 @@ export interface observableCreateBase extends historyUsername {
   tags?: string[];
   type: string;
   value: string;
+  whitelisted?: boolean;
   [key: string]: unknown;
 }
 
@@ -51,6 +52,7 @@ export interface observableRead {
   uuid: UUID;
   value: string;
   version: UUID;
+  whitelisted: boolean;
 }
 
 export interface observableInAlertRead extends observableRead {
@@ -79,6 +81,7 @@ export interface observableUpdate extends historyUsername {
   type?: string;
   value?: string;
   version?: UUID;
+  whitelisted?: boolean;
   [key: string]: unknown;
 }
 

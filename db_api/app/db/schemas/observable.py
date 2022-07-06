@@ -112,6 +112,8 @@ class Observable(Base, HasHistory):
 
     type_uuid = Column(UUID(as_uuid=True), ForeignKey("observable_type.uuid"), nullable=False)
 
+    whitelisted = Column(Boolean, default=False, nullable=False, index=True)
+
     value = Column(String, nullable=False)
 
     version = Column(UUID(as_uuid=True), server_default=func.gen_random_uuid(), nullable=False)

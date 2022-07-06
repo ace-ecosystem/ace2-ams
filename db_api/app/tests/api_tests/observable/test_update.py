@@ -31,6 +31,9 @@ from tests import factory
         ("value", 123),
         ("value", None),
         ("value", ""),
+        ("whitelisted", 123),
+        ("whitelisted", None),
+        ("whitelisted", "True"),
     ],
 )
 def test_update_invalid_fields(client, key, value):
@@ -205,6 +208,8 @@ def test_update_valid_list_fields(client, db, key, value_lists, helper_create_fu
         ("for_detection", True, True),
         ("value", "test", "test2"),
         ("value", "test", "test"),
+        ("whitelisted", True, False),
+        ("whitelisted", True, True),
     ],
 )
 def test_update(client, db, key, initial_value, updated_value):

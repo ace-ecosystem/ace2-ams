@@ -46,6 +46,7 @@ def create_or_read(
     obj.tags = crud.metadata_tag.read_by_values(values=model.tags, db=db)
     obj.type = crud.observable_type.read_by_value(value=model.type, db=db)
     obj.value = model.value
+    obj.whitelisted = model.whitelisted
 
     if crud.helpers.create(obj=obj, db=db):
         # Add an observable history entry if the history username was given. This would typically only be
@@ -195,6 +196,14 @@ def update(uuid: UUID, model: ObservableUpdate, db: Session) -> bool:
         if "value" in update_data:
             diffs.append(crud.history.create_diff(field="value", old=observable.value, new=update_data["value"]))
             observable.value = update_data["value"]
+
+        if "whitelisted" in update_data:
+            diffs.append(
+                crud.history.create_diff(
+                    field="whitelisted", old=observable.whitelisted, new=update_data["whitelisted"]
+                )
+            )
+            observable.whitelisted = update_data["whitelisted"]
 
         # Try to flush the changes to the database
         try:

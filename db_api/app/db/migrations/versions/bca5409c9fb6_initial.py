@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 37e84cd7eea6
+Revision ID: bca5409c9fb6
 Revises: 
-Create Date: 2022-06-23 20:18:46.297160
+Create Date: 2022-07-06 15:17:53.118942
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '37e84cd7eea6'
+revision = 'bca5409c9fb6'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -297,6 +297,7 @@ def upgrade() -> None:
     sa.Column('expires_on', sa.DateTime(timezone=True), nullable=True),
     sa.Column('for_detection', sa.Boolean(), nullable=False),
     sa.Column('type_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('whitelisted', sa.Boolean(), nullable=False),
     sa.Column('value', sa.String(), nullable=False),
     sa.Column('version', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.ForeignKeyConstraint(['type_uuid'], ['observable_type.uuid'], ),
@@ -304,6 +305,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('type_uuid', 'value', name='type_value_uc')
     )
     op.create_index(op.f('ix_observable_for_detection'), 'observable', ['for_detection'], unique=False)
+    op.create_index(op.f('ix_observable_whitelisted'), 'observable', ['whitelisted'], unique=False)
     op.create_index('observable_value_trgm', 'observable', ['value'], unique=False, postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.create_index('type_value', 'observable', ['type_uuid', 'value'], unique=False)
     op.create_table('threat_actor_queue_mapping',
@@ -789,6 +791,7 @@ def downgrade() -> None:
     op.drop_table('threat_actor_queue_mapping')
     op.drop_index('type_value', table_name='observable')
     op.drop_index('observable_value_trgm', table_name='observable', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
+    op.drop_index(op.f('ix_observable_whitelisted'), table_name='observable')
     op.drop_index(op.f('ix_observable_for_detection'), table_name='observable')
     op.drop_table('observable')
     op.drop_index(op.f('ix_metadata_time_value'), table_name='metadata_time')

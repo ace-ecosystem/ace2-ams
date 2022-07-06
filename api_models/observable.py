@@ -54,6 +54,11 @@ class ObservableBase(BaseModel):
         description="""A version string that automatically changes every time the observable is modified.""",
     )
 
+    whitelisted: StrictBool = Field(
+        default=False,
+        description="Whether or not this observable is whitelisted. Whitelisted means no analysis will be performed on it.",
+    )
+
 
 class ObservableCreateBase(ObservableBase):
     analyses: "list[AnalysisCreateInObservable]" = Field(

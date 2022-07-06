@@ -63,6 +63,8 @@ UPDATED_TIME = NOW + timedelta(days=1)
         ("for_detection", True, True),
         ("value", "test", "test2"),
         ("value", "test", "test"),
+        ("whitelisted", True, False),
+        ("whitelisted", True, True),
     ],
 )
 def test_update(db, key, initial_value, updated_value):

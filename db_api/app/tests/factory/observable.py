@@ -26,6 +26,7 @@ def create_or_read(
     history_username: Optional[str] = None,
     tags: Optional[list[str]] = None,
     time: Optional[datetime] = None,
+    whitelisted: bool = False,
 ) -> Observable:
     factory.observable_type.create_or_read(value=type, db=db)
 
@@ -71,6 +72,7 @@ def create_or_read(
             tags=tags or [],
             type=type,
             value=value,
+            whitelisted=whitelisted,
         ),
         parent_analysis=parent_analysis,
         db=db,
