@@ -148,6 +148,7 @@ def test_create(db):
             tags=["tag"],
             type="type1",
             value="test",
+            whitelisted=True,
             parent_analysis_uuid=submission.root_analysis_uuid,
         ),
         db=db,
@@ -166,6 +167,7 @@ def test_create(db):
     assert observable.type.value == "type1"
     assert observable.value == "test"
     assert submission.version != initial_submission_version
+    assert observable.whitelisted is True
 
 
 def test_create_duplicate(db):

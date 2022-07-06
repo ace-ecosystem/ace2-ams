@@ -38,6 +38,9 @@ from tests import factory
         ("value", 123),
         ("value", None),
         ("value", ""),
+        ("whitelisted", 123),
+        ("whitelisted", None),
+        ("whitelisted", "True"),
     ],
 )
 def test_create_invalid_fields(client, key, value):
@@ -218,6 +221,8 @@ def test_create_bulk(client, db):
         ("for_detection", False),
         ("for_detection", True),
         ("uuid", str(uuid.uuid4())),
+        ("whitelisted", False),
+        ("whitelisted", True),
     ],
 )
 def test_create_valid_optional_fields(client, db, key, value):
