@@ -3,7 +3,7 @@ import { createCustomCypressPinia } from "@tests/cypressHelpers";
 
 import PrimeVue from "primevue/config";
 
-import TheAlertDetails from "@/components/Alerts/TheAlertDetails.vue";
+import TheAlertSummary from "@/components/Alerts/TheAlertSummary.vue";
 import router from "@/router/index";
 import { alertReadFactory } from "@mocks/alert";
 import { alertRead } from "@/models/alert";
@@ -18,7 +18,7 @@ function factory(initialAlertStoreState: {
   open: null | alertRead;
   requestReload: boolean;
 }) {
-  return mount(TheAlertDetails, {
+  return mount(TheAlertSummary, {
     global: {
       plugins: [
         PrimeVue,
@@ -31,7 +31,7 @@ function factory(initialAlertStoreState: {
   });
 }
 
-describe("TheAlertDetails", () => {
+describe("TheAlertSummary", () => {
   it("renders correctly when there is not an open alert", () => {
     factory({
       open: null,

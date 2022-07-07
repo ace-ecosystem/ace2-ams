@@ -1,4 +1,4 @@
-<!-- TheAlertDetails.vue -->
+<!-- TheAlertSummary.vue -->
 
 <template>
   <Card v-if="alertStore.openAlertSummary">
