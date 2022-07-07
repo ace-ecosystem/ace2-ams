@@ -2,11 +2,12 @@ from datetime import datetime
 from pydantic import BaseModel, Field, UUID4
 from typing import Optional, Union
 
-from api_models import type_str
+from api_models import TypeInt, type_str
 from api_models.metadata_detection_point import MetadataDetectionPointRead
 from api_models.metadata_directive import MetadataDirectiveRead
 from api_models.metadata_display_type import MetadataDisplayTypeRead
 from api_models.metadata_display_value import MetadataDisplayValueRead
+from api_models.metadata_sort import MetadataSortRead
 from api_models.metadata_tag import MetadataTagRead
 from api_models.metadata_time import MetadataTimeRead
 
@@ -24,7 +25,7 @@ class AnalysisMetadataCreate(BaseModel):
 
     type: type_str = Field(description="The type of the metadata")
 
-    value: Union[type_str, datetime] = Field(description="The value of the metadata")
+    value: Union[TypeInt, type_str, datetime] = Field(description="The value of the metadata")
 
 
 class AnalysisMetadataRead(BaseModel):
@@ -41,6 +42,8 @@ class AnalysisMetadataRead(BaseModel):
     display_type: Optional[MetadataDisplayTypeRead] = Field(description="The display type of the observable")
 
     display_value: Optional[MetadataDisplayValueRead] = Field(description="The display value of the observable")
+
+    sort: Optional[MetadataSortRead] = Field(description="The sort order for the observable")
 
     tags: list[MetadataTagRead] = Field(default_factory=list, description="A list of tags added to the observable")
 

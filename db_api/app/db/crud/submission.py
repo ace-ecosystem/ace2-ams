@@ -69,6 +69,10 @@ def _associate_metadata_with_observable(analysis_uuids: list[UUID], o: Observabl
         elif m.metadata_object.metadata_type == "display_value" and not o.analysis_metadata.display_value:
             o.analysis_metadata.display_value = m.metadata_object
 
+        # Only add the sort metadata if one was not already set
+        elif m.metadata_object.metadata_type == "sort" and not o.analysis_metadata.sort:
+            o.analysis_metadata.sort = m.metadata_object
+
         # Add each tag metadata
         elif m.metadata_object.metadata_type == "tag":
             o.analysis_metadata.tags.append(m.metadata_object)
@@ -982,6 +986,12 @@ def read_tree(uuid: UUID, db: Session) -> dict:
             # Add the observable as a child to the analysis model.
             analyses_by_uuid[db_analysis.uuid].children.append(child_observables[db_child_observable.uuid])
 
+        # Sort the child observables for each analysis based on metadata sort objects. If the observable has sort
+        # metadata applied to it, that value will be used. Otherwise, "infinity" will be used.
+        analyses_by_uuid[db_analysis.uuid].children.sort(
+            key=lambda x: x.analysis_metadata.sort.value if x.analysis_metadata.sort else float("inf")
+        )
+
     # Loop over each overvable in the submission and add its analysis as children to the observable model
     for observable_uuid, observable in child_observables.items():
         if observable_uuid in analyses_by_target:
@@ -1025,7 +1035,7 @@ def read_summary_url_domain(uuid: UUID, db: Session) -> URLDomainSummary:
     observables = read_observables(uuids=[uuid], db=db)
     urls = [observable for observable in observables if observable.type.value == "url"]
 
-    return crud.helpers.read_summary_url_domain(url_observables=urls, db=db)
+    return crud.helpers.read_summary_url_domain(url_observables=urls)
 
 
 def update(model: SubmissionUpdate, db: Session):

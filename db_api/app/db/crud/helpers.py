@@ -7,13 +7,12 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session, undefer
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.sql.selectable import Select
-from typing import Any
+from typing import Any, Union
 from urllib.parse import urlparse
 from uuid import UUID
+
 from api_models.summaries import URLDomainSummary, URLDomainSummaryIndividual
 from db.schemas.observable import Observable
-
-
 from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 
 
@@ -61,7 +60,7 @@ def read_by_uuid(db_table: DeclarativeMeta, uuid: UUID, db: Session, undefer_col
         raise UuidNotFoundInDatabase(f"UUID {uuid} was not found in the {db_table.__tablename__} table.") from e
 
 
-def read_by_value(db_table: DeclarativeMeta, value: str, db: Session) -> Any:
+def read_by_value(db_table: DeclarativeMeta, value: Union[int, str], db: Session) -> Any:
     """Returns the object with the specific value (if it exists) from the given database table."""
 
     try:
@@ -73,7 +72,7 @@ def read_by_value(db_table: DeclarativeMeta, value: str, db: Session) -> Any:
 
 
 def read_by_values(
-    db_table: DeclarativeMeta, values: list[str], db: Session, error_on_not_found: bool = True
+    db_table: DeclarativeMeta, values: Union[list[int], list[str]], db: Session, error_on_not_found: bool = True
 ) -> list[Any]:
     """Returns a list of objects with the specific values from the given database table. Raise an
     exception if the number of objects returned from the database does not match the number of
@@ -126,7 +125,7 @@ def utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def read_summary_url_domain(url_observables: list[Observable], db: Session) -> URLDomainSummary:
+def read_summary_url_domain(url_observables: list[Observable]) -> URLDomainSummary:
     domain_count: dict[str, URLDomainSummaryIndividual] = {}
     for url in url_observables:
         parsed_url = urlparse(url.value)
