@@ -1256,3 +1256,79 @@ def test_submission_matching_events(db):
     assert tree["matching_events"][2]["events"][0]["percent"] == 33
     assert tree["matching_events"][2]["events"][0]["event"]["name"] == "event3"
     assert len(tree["matching_events"][2]["events"][0]["event"]["all_tags"]) == 0
+
+
+def test_observable_sort_order(db):
+    """
+    Create a submission with the following structure:
+
+    Submission
+        O1 - no sort
+        O2 - no sort
+            A1
+                O3 - no sort
+                O4 - no sort
+    """
+
+    submission = factory.submission.create(db=db)
+    factory.observable.create_or_read(type="type1", value="value1", parent_analysis=submission.root_analysis, db=db)
+    o2 = factory.observable.create_or_read(
+        type="type2", value="value2", parent_analysis=submission.root_analysis, db=db
+    )
+    a1 = factory.analysis.create_or_read(
+        analysis_module_type=factory.analysis_module_type.create_or_read(value="test_module", db=db),
+        submission=submission,
+        target=o2,
+        db=db,
+    )
+    factory.observable.create_or_read(type="type3", value="value3", parent_analysis=a1, db=db)
+    factory.observable.create_or_read(type="type4", value="value4", parent_analysis=a1, db=db)
+
+    # Verify the order of the observables in the tree. They will appear in the order in which they were added.
+    tree = crud.submission.read_tree(uuid=submission.uuid, db=db)
+    assert tree["children"][0]["type"]["value"] == "type1" and tree["children"][0]["value"] == "value1"
+    assert tree["children"][1]["type"]["value"] == "type2" and tree["children"][1]["value"] == "value2"
+    assert (
+        tree["children"][1]["children"][0]["children"][0]["type"]["value"] == "type3"
+        and tree["children"][1]["children"][0]["children"][0]["value"] == "value3"
+    )
+    assert (
+        tree["children"][1]["children"][0]["children"][1]["type"]["value"] == "type4"
+        and tree["children"][1]["children"][0]["children"][1]["value"] == "value4"
+    )
+
+    """
+    Then add two observables to it that specify a sort order:
+
+    Submission
+        O5 - sort 1
+        O1 - no sort
+        O2 - no sort
+            A1
+                O6 - sort 1
+                O3 - no sort
+                O4 - no sort
+    """
+
+    factory.observable.create_or_read(
+        type="type5", value="value5", parent_analysis=submission.root_analysis, sort=1, db=db
+    )
+    factory.observable.create_or_read(type="type6", value="value6", parent_analysis=a1, sort=1, db=db)
+
+    # Verify the order of the observables in the tree now that it has some observables with a sort applied.
+    tree = crud.submission.read_tree(uuid=submission.uuid, db=db)
+    assert tree["children"][0]["type"]["value"] == "type5" and tree["children"][0]["value"] == "value5"
+    assert tree["children"][1]["type"]["value"] == "type1" and tree["children"][1]["value"] == "value1"
+    assert tree["children"][2]["type"]["value"] == "type2" and tree["children"][2]["value"] == "value2"
+    assert (
+        tree["children"][2]["children"][0]["children"][0]["type"]["value"] == "type6"
+        and tree["children"][2]["children"][0]["children"][0]["value"] == "value6"
+    )
+    assert (
+        tree["children"][2]["children"][0]["children"][1]["type"]["value"] == "type3"
+        and tree["children"][2]["children"][0]["children"][1]["value"] == "value3"
+    )
+    assert (
+        tree["children"][2]["children"][0]["children"][2]["type"]["value"] == "type4"
+        and tree["children"][2]["children"][0]["children"][2]["value"] == "value4"
+    )

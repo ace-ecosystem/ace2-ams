@@ -1112,7 +1112,7 @@ def read_summary_url_domain(uuid: UUID, db: Session) -> URLDomainSummary:
     # NOTE: This assumes the URL values are validated as they are added to the database.
     urls = read_observable_type_from_event(observable_type="url", uuid=uuid, db=db)
 
-    return crud.helpers.read_summary_url_domain(url_observables=urls, db=db)
+    return crud.helpers.read_summary_url_domain(url_observables=urls)
 
 
 def read_summary_user(uuid: UUID, db: Session) -> list[UserSummary]:

@@ -17,12 +17,13 @@ from db.crud import metadata_detection_point
 from db.crud import metadata_directive
 from db.crud import metadata_display_type
 from db.crud import metadata_display_value
+from db.crud import metadata_sort
 from db.crud import metadata_tag
 from db.crud import metadata_time
-from db.crud import observable_type
 from db.crud import observable
 from db.crud import observable_relationship
 from db.crud import observable_relationship_type
+from db.crud import observable_type
 from db.crud import queue
 from db.crud import submission
 from db.crud import submission_analysis_mapping
@@ -33,5 +34,5 @@ from db.crud import submission_type
 from db.crud import threat
 from db.crud import threat_actor
 from db.crud import threat_type
-from db.crud import user_role
 from db.crud import user
+from db.crud import user_role
