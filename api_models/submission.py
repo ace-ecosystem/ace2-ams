@@ -1,13 +1,14 @@
 from datetime import datetime
-from pydantic import BaseModel, Field, UUID4
+from pydantic import BaseModel, Field, Json, UUID4
 from typing import Optional
 from uuid import uuid4
 
 from api_models import type_str, validators
 from api_models.alert_disposition import AlertDispositionRead
+from api_models.analysis import RootAnalysisSubmissionTreeRead
 from api_models.event import EventRead
 from api_models.metadata_detection_point import MetadataDetectionPointRead
-from api_models.observable import ObservableCreateInSubmission, ObservableSubmissionTreeRead
+from api_models.observable import ObservableCreateInSubmission
 from api_models.queue import QueueRead
 from api_models.submission_comment import SubmissionCommentRead
 from api_models.submission_tool import SubmissionToolRead
@@ -66,6 +67,8 @@ class SubmissionBase(BaseModel):
 
 
 class SubmissionCreate(SubmissionBase):
+    details: Optional[Json] = Field(description="A JSON representation of the root analysis details")
+
     history_username: Optional[type_str] = Field(
         description="If given, a submission history record will be created and associated with the user"
     )
@@ -173,11 +176,7 @@ class SubmissionTreeRead(SubmissionRead):
 
     number_of_observables: int = Field(description="The total number of unique observables in the submission")
 
-    root_analysis_uuid: UUID4 = Field(description="The UUID the submission's root analysis")
-
-    children: list[ObservableSubmissionTreeRead] = Field(
-        default_factory=list, description="A list of this submission's child observables"
-    )
+    root_analysis: RootAnalysisSubmissionTreeRead = Field(description="The submission's root analysis")
 
     class Config:
         orm_mode = True

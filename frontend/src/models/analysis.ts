@@ -28,3 +28,7 @@ export interface analysisTreeRead {
   summary: string | null;
   uuid: UUID;
 }
+
+export interface rootAnalysisTreeRead extends analysisTreeRead {
+  details: Record<string, unknown> | null;
+}
