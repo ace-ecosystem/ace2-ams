@@ -1,14 +1,23 @@
 # BUILD STAGE
 FROM node:16-alpine as builder
 
+ARG http_proxy
+ARG https_proxy
+ARG no_proxy
+ENV http_proxy=$http_proxy
+ENV https_proxy=$https_proxy
+ENV no_proxy=$no_proxy
+
 WORKDIR /app
 
 COPY package*.json .
 
 RUN apk --no-cache add --virtual native-deps \
   g++ gcc libgcc libstdc++ linux-headers make python && \
-  npm install --quiet node-gyp -g && \
-  npm install --quiet && \
+  npm config set strict-ssl false && \
+  npm config set registry "http://registry.npmjs.org/"
+  npm install --proxy "$http_proxy" node-gyp -g && \
+  npm install --proxy "$http_proxy" && \
   apk del native-deps
 
 COPY . .

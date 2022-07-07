@@ -1,12 +1,22 @@
 FROM cypress/included:10.3.0
 
+ARG http_proxy
+ARG https_proxy
+ARG no_proxy
+ENV http_proxy=$http_proxy
+ENV https_proxy=$https_proxy
+ENV no_proxy=$no_proxy
+
 RUN apt-get install -y curl
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+RUN \
+  npm config set strict-ssl && \
+  npm config set registry "http://registry.npmjs.org/" && \
+  npm install --proxy "$http_proxy"
 
 COPY . .
 
