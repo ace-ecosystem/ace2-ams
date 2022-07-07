@@ -768,7 +768,7 @@ def build_read_all_query(
 
 def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
     # Create the new submission using the data from the request
-    obj = Submission(**model.dict(exclude={"history_username", "observables"}))
+    obj = Submission(**model.dict(exclude={"details", "history_username", "observables"}))
 
     # Set the various submission properties
     obj.alert = model.alert
@@ -1012,7 +1012,7 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     # Adapted from: https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
     tree_json: dict = json.loads(tree.json(encoder=jsonable_encoder))
     unique_uuids: set[UUID] = set()
-    unvisited = [tree_json]
+    unvisited = [tree_json["root_analysis"]]
     while unvisited:
         current = unvisited.pop(0)
 
