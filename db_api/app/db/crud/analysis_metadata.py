@@ -8,6 +8,7 @@ from api_models.metadata_detection_point import MetadataDetectionPointCreate
 from api_models.metadata_directive import MetadataDirectiveCreate
 from api_models.metadata_display_type import MetadataDisplayTypeCreate
 from api_models.metadata_display_value import MetadataDisplayValueCreate
+from api_models.metadata_sort import MetadataSortCreate
 from api_models.metadata_tag import MetadataTagCreate
 from api_models.metadata_time import MetadataTimeCreate
 from db import crud
@@ -50,6 +51,9 @@ def create_or_read(
         metadata_object = crud.metadata_display_value.create_or_read(
             model=MetadataDisplayValueCreate(value=model.value), db=db
         )
+
+    elif model.type == "sort":
+        metadata_object = crud.metadata_sort.create_or_read(model=MetadataSortCreate(value=model.value), db=db)
 
     elif model.type == "tag":
         metadata_object = crud.metadata_tag.create_or_read(model=MetadataTagCreate(value=model.value), db=db)

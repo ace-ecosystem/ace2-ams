@@ -14,11 +14,12 @@ from tests.factory import metadata_detection_point
 from tests.factory import metadata_directive
 from tests.factory import metadata_display_type
 from tests.factory import metadata_display_value
+from tests.factory import metadata_sort
 from tests.factory import metadata_tag
 from tests.factory import metadata_time
+from tests.factory import observable
 from tests.factory import observable_relationship
 from tests.factory import observable_relationship_type
-from tests.factory import observable
 from tests.factory import observable_type
 from tests.factory import queue
 from tests.factory import submission
