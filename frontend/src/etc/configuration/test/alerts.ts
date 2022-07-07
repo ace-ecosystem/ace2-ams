@@ -1,3 +1,7 @@
+import TestComponentVue from "@/components/test/TestComponent.vue";
+import TestComponentBVue from "@/components/test/TestComponentB.vue";
+import TestComponentCVue from "@/components/test/TestComponentC.vue";
+
 import { propertyOption } from "@/models/base";
 import {
   alertPropertyTypes,
@@ -60,4 +64,10 @@ export const alertIconTypeMapping = {
 
 export const alertDispositionMetadata: Record<string, string> = {
   test: BLUE,
+};
+
+export const alertDetailsComponents: Record<string, unknown> = {
+  "test type - a": TestComponentVue,
+  "test type - b": TestComponentBVue,
+  "test type": TestComponentCVue,
 };

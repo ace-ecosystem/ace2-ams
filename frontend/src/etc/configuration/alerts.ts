@@ -95,3 +95,5 @@ export const alertDispositionMetadata: Record<string, string> = {
   exfil: RED,
   damage: RED,
 };
+
+export const alertDetailsComponents: Record<string, unknown> = {};

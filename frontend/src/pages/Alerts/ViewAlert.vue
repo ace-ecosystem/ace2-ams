@@ -20,6 +20,8 @@
     <br />
     <AlertMatchingOpenEventsPanel />
     <br />
+    <TheAlertDetails />
+    <br />
     <AlertUrlDomainSummary :alert-uuid="alertID" />
     <br />
     <Card style="overflow-x: scroll">
@@ -50,6 +52,7 @@
   import AlertMatchingOpenEventsPanel from "@/components/Alerts/AlertMatchingOpenEventsPanel.vue";
   import AlertTree from "@/components/Alerts/AlertTree.vue";
   import TheAlertSummary from "@/components/Alerts/TheAlertSummary.vue";
+  import TheAlertDetails from "@/components/Alerts/TheAlertDetails.vue";
   import { useAlertStore } from "@/stores/alert";
   import { useAuthStore } from "@/stores/auth";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
