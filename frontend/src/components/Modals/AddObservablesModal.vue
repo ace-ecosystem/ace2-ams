@@ -118,7 +118,7 @@
     const submissionObservable: observableCreate = {
       type: observable.type,
       value: observable.value,
-      parentAnalysisUuid: alertStore.open.rootAnalysisUuid,
+      parentAnalysisUuid: alertStore.open.rootAnalysis.uuid,
       historyUsername: authStore.user.username,
     };
     if (observable.time) {

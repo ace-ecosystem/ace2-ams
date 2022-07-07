@@ -19,7 +19,8 @@ export interface analysisRead {
 }
 
 export interface analysisTreeRead {
-  analysisModuleType: analysisModuleTypeAlertTreeRead;
+  // analysisModuleType will be null in the case of the rootAnalysis object
+  analysisModuleType: analysisModuleTypeAlertTreeRead | null;
   children: observableTreeRead[];
   errorMessage: string | null;
   firstAppearance?: boolean;
