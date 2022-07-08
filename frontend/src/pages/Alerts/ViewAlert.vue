@@ -16,9 +16,11 @@
     />
   </div>
   <div v-if="alertStore.open">
-    <TheAlertDetails />
+    <TheAlertSummary />
     <br />
     <AlertMatchingOpenEventsPanel />
+    <br />
+    <TheAlertDetails />
     <br />
     <AlertUrlDomainSummary :alert-uuid="alertID" />
     <br />
@@ -27,7 +29,7 @@
         <div class="p-tree p-component p-tree-wrapper" style="border: none">
           <AlertTree
             id="alert-tree"
-            :items="alertStore.open.children"
+            :items="alertStore.open.rootAnalysis.children"
             :alert-id="alertID"
           />
           <ScrollTop />
@@ -49,6 +51,7 @@
   import AlertUrlDomainSummary from "@/components/Alerts/AlertUrlDomainSummary.vue";
   import AlertMatchingOpenEventsPanel from "@/components/Alerts/AlertMatchingOpenEventsPanel.vue";
   import AlertTree from "@/components/Alerts/AlertTree.vue";
+  import TheAlertSummary from "@/components/Alerts/TheAlertSummary.vue";
   import TheAlertDetails from "@/components/Alerts/TheAlertDetails.vue";
   import { useAlertStore } from "@/stores/alert";
   import { useAuthStore } from "@/stores/auth";

@@ -768,7 +768,7 @@ def build_read_all_query(
 
 def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
     # Create the new submission using the data from the request
-    obj = Submission(**model.dict(exclude={"history_username", "observables"}))
+    obj = Submission(**model.dict(exclude={"details", "history_username", "observables"}))
 
     # Set the various submission properties
     obj.alert = model.alert
@@ -781,7 +781,7 @@ def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
         obj.owner = crud.user.read_by_username(username=model.owner, db=db)
         obj.ownership_time = crud.helpers.utcnow()
     obj.queue = crud.queue.read_by_value(value=model.queue, db=db)
-    obj.root_analysis = crud.analysis.create_root(db=db)
+    obj.root_analysis = crud.analysis.create_root(details=model.details, db=db)
     obj.tags = crud.metadata_tag.read_by_values(values=model.tags, db=db)
     if model.tool:
         obj.tool = crud.submission_tool.read_by_value(value=model.tool, db=db)
@@ -997,10 +997,9 @@ def read_tree(uuid: UUID, db: Session) -> dict:
         if observable_uuid in analyses_by_target:
             observable.children = analyses_by_target[observable_uuid]
 
-    # Create the Submission object to SubmissionTree and set its children to be the root analysis children.
-    # The actual root analysis is not included in the tree structure.
+    # Create the SubmissionTree object and set its root analysis.
     tree = db_submission.convert_to_pydantic()
-    tree.children = analyses_by_uuid[db_submission.root_analysis_uuid].children
+    tree.root_analysis = analyses_by_uuid[db_submission.root_analysis_uuid]
 
     # Now that the tree structure is built, we need to walk it to mark which of the leaves have
     # already appeared in the tree. This is useful for when you might not want to display or
@@ -1013,7 +1012,7 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     # Adapted from: https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
     tree_json: dict = json.loads(tree.json(encoder=jsonable_encoder))
     unique_uuids: set[UUID] = set()
-    unvisited = [tree_json]
+    unvisited = [tree_json["root_analysis"]]
     while unvisited:
         current = unvisited.pop(0)
 

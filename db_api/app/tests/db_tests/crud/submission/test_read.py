@@ -722,9 +722,9 @@ def test_read_submission_tree(db):
 
     # The small.json submission has 14 observables (12 unique) and 16 analyses (the Root Analysis is not included in the tree).
     result = crud.submission.read_tree(uuid=submission.uuid, db=db)
-    assert str(result["children"]).count("'observable'") == 14
-    assert str(result["children"]).count("'analysis'") == 16
-    assert len(result["children"]) == 2
+    assert str(result["root_analysis"]["children"]).count("'observable'") == 14
+    assert str(result["root_analysis"]["children"]).count("'analysis'") == 16
+    assert len(result["root_analysis"]["children"]) == 2
     assert result["number_of_observables"] == 12
 
     # The small.json has three different analysis tags applied to observables, and they should be in alphabetical order.
@@ -983,55 +983,69 @@ def test_tag_functionality(db):
 
     # The first submission should have two child observables, and they should be in the order
     # in which they were added to the tree (they are not sorted).
-    assert len(submission1_tree["children"]) == 2
-    assert submission1_tree["children"][0]["uuid"] == str(sub1_o1.uuid)
-    assert submission1_tree["children"][1]["uuid"] == str(sub1_o3.uuid)
+    assert len(submission1_tree["root_analysis"]["children"]) == 2
+    assert submission1_tree["root_analysis"]["children"][0]["uuid"] == str(sub1_o1.uuid)
+    assert submission1_tree["root_analysis"]["children"][1]["uuid"] == str(sub1_o3.uuid)
 
     # Verify the tags for O1 in the first submission
-    assert len(submission1_tree["children"][0]["tags"]) == 1
-    assert submission1_tree["children"][0]["tags"][0]["value"] == "tag1"
+    assert len(submission1_tree["root_analysis"]["children"][0]["tags"]) == 1
+    assert submission1_tree["root_analysis"]["children"][0]["tags"][0]["value"] == "tag1"
 
     # Verify the tags for O2 in the first submission under A1. It should have two tags, even though
     # its parent analysis A1 only added one tag. The tags should be in alphabetical order, not the
     # order in which they were added by the analyses.
-    assert len(submission1_tree["children"][0]["children"][0]["children"][0]["analysis_metadata"]["tags"]) == 2
     assert (
-        submission1_tree["children"][0]["children"][0]["children"][0]["analysis_metadata"]["tags"][0]["value"]
+        len(submission1_tree["root_analysis"]["children"][0]["children"][0]["children"][0]["analysis_metadata"]["tags"])
+        == 2
+    )
+    assert (
+        submission1_tree["root_analysis"]["children"][0]["children"][0]["children"][0]["analysis_metadata"]["tags"][0][
+            "value"
+        ]
         == "analysis2_tag"
     )
     assert (
-        submission1_tree["children"][0]["children"][0]["children"][0]["analysis_metadata"]["tags"][1]["value"]
+        submission1_tree["root_analysis"]["children"][0]["children"][0]["children"][0]["analysis_metadata"]["tags"][1][
+            "value"
+        ]
         == "z_analysis1_tag"
     )
 
     # Verify the tags for O2 in the first submission under A2. It should have two tags, even though
     # its parent analysis A2 only added one tag. The tags should be in alphabetical order, not the
     # order in which they were added by the analyses.
-    assert len(submission1_tree["children"][1]["children"][0]["children"][0]["analysis_metadata"]["tags"]) == 2
     assert (
-        submission1_tree["children"][1]["children"][0]["children"][0]["analysis_metadata"]["tags"][0]["value"]
+        len(submission1_tree["root_analysis"]["children"][1]["children"][0]["children"][0]["analysis_metadata"]["tags"])
+        == 2
+    )
+    assert (
+        submission1_tree["root_analysis"]["children"][1]["children"][0]["children"][0]["analysis_metadata"]["tags"][0][
+            "value"
+        ]
         == "analysis2_tag"
     )
     assert (
-        submission1_tree["children"][1]["children"][0]["children"][0]["analysis_metadata"]["tags"][1]["value"]
+        submission1_tree["root_analysis"]["children"][1]["children"][0]["children"][0]["analysis_metadata"]["tags"][1][
+            "value"
+        ]
         == "z_analysis1_tag"
     )
 
     # The second submission should have two child observables, and they should be in the order
     # in which they were added to the tree (they are not sorted).
-    assert len(submission2_tree["children"]) == 2
-    assert submission2_tree["children"][0]["uuid"] == str(sub2_o1.uuid)
-    assert submission2_tree["children"][1]["uuid"] == str(sub2_o2.uuid)
+    assert len(submission2_tree["root_analysis"]["children"]) == 2
+    assert submission2_tree["root_analysis"]["children"][0]["uuid"] == str(sub2_o1.uuid)
+    assert submission2_tree["root_analysis"]["children"][1]["uuid"] == str(sub2_o2.uuid)
 
     # Verify the tags for O1 in the second submission
-    assert len(submission2_tree["children"][0]["tags"]) == 1
-    assert submission2_tree["children"][0]["tags"][0]["value"] == "tag1"
+    assert len(submission2_tree["root_analysis"]["children"][0]["tags"]) == 1
+    assert submission2_tree["root_analysis"]["children"][0]["tags"][0]["value"] == "tag1"
 
     # Verify the tags for O2 in the second submission. Even though it is the exact same observable
     # object as in the first submission, it shouldn't have any tags because the submission does not
     # contain any analysis that added tags to it.
-    assert submission2_tree["children"][1]["analysis_metadata"]["tags"] == []
-    assert submission2_tree["children"][1]["tags"] == []
+    assert submission2_tree["root_analysis"]["children"][1]["analysis_metadata"]["tags"] == []
+    assert submission2_tree["root_analysis"]["children"][1]["tags"] == []
 
 
 def test_child_observables(db):
@@ -1118,10 +1132,22 @@ def test_disposition_history(db):
     tree = crud.submission.read_tree(uuid=submission1.uuid, db=db)
 
     # The disposition history for the observable should be sorted by the dispositions' ranks.
-    assert len(tree["children"][0]["disposition_history"]) == 3
-    assert tree["children"][0]["disposition_history"][0] == {"disposition": "FALSE_POSITIVE", "count": 2, "percent": 50}
-    assert tree["children"][0]["disposition_history"][1] == {"disposition": "DELIVERY", "count": 1, "percent": 25}
-    assert tree["children"][0]["disposition_history"][2] == {"disposition": "OPEN", "count": 1, "percent": 25}
+    assert len(tree["root_analysis"]["children"][0]["disposition_history"]) == 3
+    assert tree["root_analysis"]["children"][0]["disposition_history"][0] == {
+        "disposition": "FALSE_POSITIVE",
+        "count": 2,
+        "percent": 50,
+    }
+    assert tree["root_analysis"]["children"][0]["disposition_history"][1] == {
+        "disposition": "DELIVERY",
+        "count": 1,
+        "percent": 25,
+    }
+    assert tree["root_analysis"]["children"][0]["disposition_history"][2] == {
+        "disposition": "OPEN",
+        "count": 1,
+        "percent": 25,
+    }
 
     # Similarly, if you read the observables from a set of alerts instead, you should get the same disposition history.
     observables = crud.submission.read_observables(uuids=[submission1.uuid], db=db)
@@ -1159,9 +1185,9 @@ def test_observable_matching_events(db):
     tree = crud.submission.read_tree(uuid=submission1.uuid, db=db)
 
     # The matching event information for the observable should be sorted by the status' values.
-    assert len(tree["children"][0]["matching_events"]) == 2
-    assert tree["children"][0]["matching_events"][0] == {"status": "CLOSED", "count": 1}
-    assert tree["children"][0]["matching_events"][1] == {"status": "OPEN", "count": 2}
+    assert len(tree["root_analysis"]["children"][0]["matching_events"]) == 2
+    assert tree["root_analysis"]["children"][0]["matching_events"][0] == {"status": "CLOSED", "count": 1}
+    assert tree["root_analysis"]["children"][0]["matching_events"][1] == {"status": "OPEN", "count": 2}
 
     # Similarly, if you read the observables from a set of alerts instead, you should get the same matching event information.
     observables = crud.submission.read_observables(uuids=[submission1.uuid], db=db)
@@ -1286,15 +1312,21 @@ def test_observable_sort_order(db):
 
     # Verify the order of the observables in the tree. They will appear in the order in which they were added.
     tree = crud.submission.read_tree(uuid=submission.uuid, db=db)
-    assert tree["children"][0]["type"]["value"] == "type1" and tree["children"][0]["value"] == "value1"
-    assert tree["children"][1]["type"]["value"] == "type2" and tree["children"][1]["value"] == "value2"
     assert (
-        tree["children"][1]["children"][0]["children"][0]["type"]["value"] == "type3"
-        and tree["children"][1]["children"][0]["children"][0]["value"] == "value3"
+        tree["root_analysis"]["children"][0]["type"]["value"] == "type1"
+        and tree["root_analysis"]["children"][0]["value"] == "value1"
     )
     assert (
-        tree["children"][1]["children"][0]["children"][1]["type"]["value"] == "type4"
-        and tree["children"][1]["children"][0]["children"][1]["value"] == "value4"
+        tree["root_analysis"]["children"][1]["type"]["value"] == "type2"
+        and tree["root_analysis"]["children"][1]["value"] == "value2"
+    )
+    assert (
+        tree["root_analysis"]["children"][1]["children"][0]["children"][0]["type"]["value"] == "type3"
+        and tree["root_analysis"]["children"][1]["children"][0]["children"][0]["value"] == "value3"
+    )
+    assert (
+        tree["root_analysis"]["children"][1]["children"][0]["children"][1]["type"]["value"] == "type4"
+        and tree["root_analysis"]["children"][1]["children"][0]["children"][1]["value"] == "value4"
     )
 
     """
@@ -1317,18 +1349,27 @@ def test_observable_sort_order(db):
 
     # Verify the order of the observables in the tree now that it has some observables with a sort applied.
     tree = crud.submission.read_tree(uuid=submission.uuid, db=db)
-    assert tree["children"][0]["type"]["value"] == "type5" and tree["children"][0]["value"] == "value5"
-    assert tree["children"][1]["type"]["value"] == "type1" and tree["children"][1]["value"] == "value1"
-    assert tree["children"][2]["type"]["value"] == "type2" and tree["children"][2]["value"] == "value2"
     assert (
-        tree["children"][2]["children"][0]["children"][0]["type"]["value"] == "type6"
-        and tree["children"][2]["children"][0]["children"][0]["value"] == "value6"
+        tree["root_analysis"]["children"][0]["type"]["value"] == "type5"
+        and tree["root_analysis"]["children"][0]["value"] == "value5"
     )
     assert (
-        tree["children"][2]["children"][0]["children"][1]["type"]["value"] == "type3"
-        and tree["children"][2]["children"][0]["children"][1]["value"] == "value3"
+        tree["root_analysis"]["children"][1]["type"]["value"] == "type1"
+        and tree["root_analysis"]["children"][1]["value"] == "value1"
     )
     assert (
-        tree["children"][2]["children"][0]["children"][2]["type"]["value"] == "type4"
-        and tree["children"][2]["children"][0]["children"][2]["value"] == "value4"
+        tree["root_analysis"]["children"][2]["type"]["value"] == "type2"
+        and tree["root_analysis"]["children"][2]["value"] == "value2"
+    )
+    assert (
+        tree["root_analysis"]["children"][2]["children"][0]["children"][0]["type"]["value"] == "type6"
+        and tree["root_analysis"]["children"][2]["children"][0]["children"][0]["value"] == "value6"
+    )
+    assert (
+        tree["root_analysis"]["children"][2]["children"][0]["children"][1]["type"]["value"] == "type3"
+        and tree["root_analysis"]["children"][2]["children"][0]["children"][1]["value"] == "value3"
+    )
+    assert (
+        tree["root_analysis"]["children"][2]["children"][0]["children"][2]["type"]["value"] == "type4"
+        and tree["root_analysis"]["children"][2]["children"][0]["children"][2]["value"] == "value4"
     )

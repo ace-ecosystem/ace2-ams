@@ -71,14 +71,14 @@ describe("AssignModal", () => {
           type: "ipv4",
           value: testObservableValueA,
           historyUsername: "analyst",
-          parentAnalysisUuid: "testRootAnalysisUuid",
+          parentAnalysisUuid: "testUuid",
           directives: [],
         },
         {
           type: "ipv4",
           value: testObservableValueB,
           historyUsername: "analyst",
-          parentAnalysisUuid: "testRootAnalysisUuid",
+          parentAnalysisUuid: "testUuid",
           directives: [],
         },
       ])
@@ -118,7 +118,7 @@ describe("AssignModal", () => {
           value: testObservableValueA,
           directives: ["testDirective"],
           historyUsername: "analyst",
-          parentAnalysisUuid: "testRootAnalysisUuid",
+          parentAnalysisUuid: "testUuid",
         },
       ])
       .as("CreateObservables")
@@ -152,14 +152,14 @@ describe("AssignModal", () => {
           type: "ipv4",
           value: "4.3.2.1",
           historyUsername: "analyst",
-          parentAnalysisUuid: "testRootAnalysisUuid",
+          parentAnalysisUuid: "testUuid",
           directives: [],
         },
         {
           type: "ipv4",
           value: "8.7.6.5",
           historyUsername: "analyst",
-          parentAnalysisUuid: "testRootAnalysisUuid",
+          parentAnalysisUuid: "testUuid",
           directives: [],
         },
       ])
@@ -196,7 +196,7 @@ describe("AssignModal", () => {
           type: "ipv4",
           value: testObservableValueA,
           historyUsername: "analyst",
-          parentAnalysisUuid: "testRootAnalysisUuid",
+          parentAnalysisUuid: "testUuid",
           directives: [],
         },
       ])
