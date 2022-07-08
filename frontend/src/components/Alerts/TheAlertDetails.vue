@@ -40,7 +40,7 @@
   function initPage() {
     if (alertStore.open) {
       const matchingKey = findClosestMatchingString(
-        componentMapping.keys(),
+        Object.keys(componentMapping),
         alertStore.open.type.value,
       );
       if (matchingKey) {
@@ -52,8 +52,8 @@
   }
 
   const prettyAlertDetails = computed(() => {
-    if (alertStore.open) {
-      return JSON.stringify(alertStore.open.details, null, 4);
+    if (alertStore.open && alertStore.open.rootAnalysis.details) {
+      return JSON.stringify(alertStore.open.rootAnalysis.details, null, 4);
     }
     return "No alert details available.";
   });
