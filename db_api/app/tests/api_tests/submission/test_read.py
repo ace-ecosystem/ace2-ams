@@ -900,9 +900,9 @@ def test_get_submission_tree(client, db):
 
     # The small.json submission has 14 observables and 16 analyses (the Root Analysis is not included in the tree).
     get = client.get(f"/api/submission/{submission.uuid}")
-    assert str(get.json()["children"]).count("'observable'") == 14
-    assert str(get.json()["children"]).count("'analysis'") == 16
-    assert len(get.json()["children"]) == 2
+    assert str(get.json()["root_analysis"]["children"]).count("'observable'") == 14
+    assert str(get.json()["root_analysis"]["children"]).count("'analysis'") == 16
+    assert len(get.json()["root_analysis"]["children"]) == 2
 
 
 def test_get_submissions_observables(client, db):

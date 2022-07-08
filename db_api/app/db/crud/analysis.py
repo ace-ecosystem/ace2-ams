@@ -1,4 +1,5 @@
 from datetime import timedelta
+from pydantic import Json
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -62,8 +63,8 @@ def create_or_read(model: AnalysisCreate, db: Session) -> Analysis:
     return obj
 
 
-def create_root(db: Session) -> Analysis:
-    obj = Analysis()
+def create_root(db: Session, details: Optional[Json] = None) -> Analysis:
+    obj = Analysis(details=details)
 
     db.add(obj)
     db.flush()

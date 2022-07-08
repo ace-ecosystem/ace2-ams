@@ -371,3 +371,26 @@ export function groupItemsByQueue<T extends genericQueueableObjectRead>(
   }
   return itemsByQueue;
 }
+
+export function findClosestMatchingString(
+  strings: string[],
+  searchString: string,
+): string | null {
+  // Check if the searchString itself is in the list
+  if (strings.includes(searchString)) {
+    return searchString;
+  }
+  // Check if a substring of the searchString is in the list
+  while (searchString.includes(" - ")) {
+    if (strings.includes(searchString)) {
+      return searchString;
+    }
+    const spliceIndex = searchString.lastIndexOf(" - ");
+    searchString = searchString.slice(0, spliceIndex);
+  }
+  // Check if the 'smallest' substring of the searchString is in the list
+  if (strings.includes(searchString)) {
+    return searchString;
+  }
+  return null;
+}

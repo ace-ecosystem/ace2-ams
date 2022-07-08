@@ -95,6 +95,12 @@ class AnalysisSubmissionTreeRead(BaseModel):
         orm_mode = True
 
 
+class RootAnalysisSubmissionTreeRead(AnalysisSubmissionTreeRead):
+    """Model used to represent a submission's root analysis."""
+
+    details: Optional[dict] = Field(description="A JSON representation of the root analysis details")
+
+
 class AnalysisUpdate(AnalysisBase):
     details: Optional[Json] = Field(description="A JSON representation of the details produced by the analysis")
 

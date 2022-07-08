@@ -5,6 +5,7 @@ export const analysisMetadataReadFactory = ({
   directives = [],
   displayType = null,
   displayValue = null,
+  sort = null,
   tags = [],
   time = null,
 }: Partial<analysisMetadataRead> = {}): analysisMetadataRead => ({
@@ -12,6 +13,7 @@ export const analysisMetadataReadFactory = ({
   directives: directives,
   displayType: displayType,
   displayValue: displayValue,
+  sort: sort,
   tags: tags,
   time: time,
 });
