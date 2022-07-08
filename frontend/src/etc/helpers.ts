@@ -371,3 +371,18 @@ export function groupItemsByQueue<T extends genericQueueableObjectRead>(
   }
   return itemsByQueue;
 }
+
+
+export function findClosestMatchingString(
+  keys: string[],
+  searchString: string,
+): string | null {
+  while (searchString.includes(" - ")) {
+    if (searchString in keys) {
+      return searchString;
+    }
+    const spliceIndex = searchString.lastIndexOf(" - ");
+    searchString = searchString.slice(0, spliceIndex);
+  }
+  return null;
+}

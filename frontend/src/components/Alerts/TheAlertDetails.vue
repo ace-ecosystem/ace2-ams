@@ -18,6 +18,7 @@
   import Panel from "primevue/panel";
   import Message from "primevue/message";
   import { useAlertStore } from "@/stores/alert";
+  import { findClosestMatchingString } from "@/etc/helpers";
 
   import { ref, inject, computed, shallowRef, onMounted } from "vue";
 
@@ -38,8 +39,12 @@
 
   function initPage() {
     if (alertStore.open) {
-      if (alertStore.open.type.value in componentMapping) {
-        currentComponent.value = componentMapping[alertStore.open.type.value];
+      const matchingKey = findClosestMatchingString(
+        componentMapping.keys(),
+        alertStore.open.type.value,
+      );
+      if (matchingKey) {
+        currentComponent.value = componentMapping[matchingKey];
       } else {
         currentComponent.value = undefined;
       }
