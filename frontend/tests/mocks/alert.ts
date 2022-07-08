@@ -5,6 +5,7 @@ import {
   alertSummary,
   alertTreeRead,
 } from "@/models/alert";
+import { rootAnalysisTreeReadFactory } from "./analysis";
 import { genericObjectReadFactory } from "./genericObject";
 
 export const alertCreateFactory = ({
@@ -23,7 +24,6 @@ export const alertCreateFactory = ({
 });
 
 export const alertTreeReadFactory = ({
-  children = [],
   childAnalysisTags = [],
   childDetectionPoints = [],
   childTags = [],
@@ -44,6 +44,7 @@ export const alertTreeReadFactory = ({
   owner = null,
   ownershipTime = null,
   queue = genericObjectReadFactory({ value: "testAlertQueue" }),
+  rootAnalysis = rootAnalysisTreeReadFactory(),
   tags = [],
   tool = genericObjectReadFactory({ value: "testAlertTool" }),
   toolInstance = genericObjectReadFactory({ value: "testAlertToolInstance" }),
@@ -54,7 +55,6 @@ export const alertTreeReadFactory = ({
   rootAnalysisUuid = "testRootAnalysisUuid",
 }: Partial<alertTreeRead> = {}): alertTreeRead => ({
   alert: true,
-  children: children,
   childAnalysisTags: childAnalysisTags,
   childDetectionPoints: childDetectionPoints,
   childTags: childTags,
@@ -75,6 +75,7 @@ export const alertTreeReadFactory = ({
   owner: owner,
   ownershipTime: ownershipTime,
   queue: queue,
+  rootAnalysis: rootAnalysis,
   tags: tags,
   tool: tool,
   toolInstance: toolInstance,

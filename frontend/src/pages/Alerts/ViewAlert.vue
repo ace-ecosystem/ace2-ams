@@ -29,7 +29,7 @@
         <div class="p-tree p-component p-tree-wrapper" style="border: none">
           <AlertTree
             id="alert-tree"
-            :items="alertStore.open.children"
+            :items="alertStore.open.rootAnalysis.children"
             :alert-id="alertID"
           />
           <ScrollTop />

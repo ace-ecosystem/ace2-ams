@@ -7,11 +7,12 @@ import { metadataDetectionPointRead } from "./metadataDetectionPoint";
 import { metadataTagRead } from "./metadataTag";
 import { alertCommentRead } from "./alertComment";
 import { eventRead } from "./event";
-import { observableCreateInAlert, observableTreeRead } from "./observable";
+import { observableCreateInAlert } from "./observable";
 import { observableTypeRead } from "./observableType";
 import { queueRead } from "./queue";
 import { userRead } from "./user";
 import { readPage } from "./page";
+import { rootAnalysisTreeRead } from "./analysis";
 
 export interface submissionMatchingEventIndividual {
   event: eventRead;
@@ -95,10 +96,9 @@ export interface alertSummary {
 }
 
 export interface alertTreeRead extends alertRead {
-  children: observableTreeRead[];
   matchingEvents: submissionMatchingEventByStatus[];
   numberOfObservables: number;
-  rootAnalysisUuid: UUID;
+  rootAnalysis: rootAnalysisTreeRead;
 }
 
 export interface alertReadPage extends readPage {

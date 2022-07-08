@@ -24,6 +24,7 @@ def create_or_read(
     expires_on: Optional[datetime] = None,
     for_detection: bool = False,
     history_username: Optional[str] = None,
+    sort: Optional[int] = None,
     tags: Optional[list[str]] = None,
     time: Optional[datetime] = None,
     whitelisted: bool = False,
@@ -53,6 +54,10 @@ def create_or_read(
     if display_value is not None:
         factory.metadata_display_value.create_or_read(value=display_value, db=db)
         metadata.append(AnalysisMetadataCreate(type="display_value", value=display_value))
+
+    if sort is not None:
+        factory.metadata_sort.create_or_read(value=sort, db=db)
+        metadata.append(AnalysisMetadataCreate(type="sort", value=sort))
 
     if tags is not None:
         for tag in tags:
