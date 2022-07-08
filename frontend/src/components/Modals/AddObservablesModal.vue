@@ -100,7 +100,7 @@
   const expandObservablesList = () => {
     let _observables: formObservable[] = [];
     for (const obs_index in observables.value) {
-      let current_observable = observables.value[obs_index];
+      const current_observable = observables.value[obs_index];
       if (current_observable.multiAdd) {
         const splitObservables = splitMultiObservable(current_observable);
         _observables = [..._observables, ...splitObservables];
@@ -134,7 +134,7 @@
   const splitMultiObservable = (multiObservable: formObservable) => {
     // Determine split character -- can be newline or comma
     let splitValues = [];
-    var containsNewline = /\r?\n/.exec(multiObservable.value);
+    const containsNewline = /\r?\n/.exec(multiObservable.value);
     if (containsNewline) {
       splitValues = multiObservable.value.split(/\r?\n/);
     } else {
