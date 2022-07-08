@@ -2,7 +2,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field, UUID4
 from typing import Optional, Union
 
-from api_models import TypeInt, type_str
+from api_models import type_int, type_str
 from api_models.metadata_detection_point import MetadataDetectionPointRead
 from api_models.metadata_directive import MetadataDirectiveRead
 from api_models.metadata_display_type import MetadataDisplayTypeRead
@@ -25,7 +25,7 @@ class AnalysisMetadataCreate(BaseModel):
 
     type: type_str = Field(description="The type of the metadata")
 
-    value: Union[TypeInt, type_str, datetime] = Field(description="The value of the metadata")
+    value: Union[type_int, type_str, datetime] = Field(description="The value of the metadata")
 
 
 class AnalysisMetadataRead(BaseModel):
