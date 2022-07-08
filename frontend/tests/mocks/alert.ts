@@ -52,7 +52,6 @@ export const alertTreeReadFactory = ({
   objectType = "alert",
   uuid = "testAlertUuid",
   version = "testAlertVersion",
-  rootAnalysisUuid = "testRootAnalysisUuid",
 }: Partial<alertTreeRead> = {}): alertTreeRead => ({
   alert: true,
   childAnalysisTags: childAnalysisTags,
@@ -83,7 +82,6 @@ export const alertTreeReadFactory = ({
   objectType: objectType,
   uuid: uuid,
   version: version,
-  rootAnalysisUuid: rootAnalysisUuid,
 });
 
 export const alertReadFactory = ({
