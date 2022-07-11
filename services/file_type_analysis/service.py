@@ -5,10 +5,10 @@ from zipfile import ZipFile
 
 from ace2 import *
 
-class FileTypeAnalysis(Analysis):
+class FileTypeAnalysis(Module):
     ''' Determines the type of a file '''
 
-    class Details(Analysis.Details):
+    class Details(Module.Details):
         file_type: Optional[str] = Field(default=None, description='human readable file type of the target')
         mime_type: Optional[str] = Field(default=None, description='mime type of the target')
 
