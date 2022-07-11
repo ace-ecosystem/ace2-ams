@@ -36,14 +36,9 @@ FROM $base AS service
     ARG name
     COPY services/$name ./
 
-    # rename desired settings file
-    # remove unused settings files
     # run tests
     # remove test files and dependencies
-    ARG settings
-    RUN mv $settings settings.yml || true &&\
-        rm settings-*.yml || true &&\
-        pytest -vv &&\
+    RUN pytest -vv &&\
         rm -rf tests &&\
         rm -rf /tmp/pytest* &&\
         find / \( -name "*.pyc" -or -name ".pytest_cache" -or -name "__pycache__" \) -exec rm -rf {} + &&\

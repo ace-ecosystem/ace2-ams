@@ -8,9 +8,6 @@ usage() {
     echo ""
     echo "Usage: $0 [<options>] dir ..."
     echo ""
-    echo "Options:"
-    echo "    -d           use dev settings"
-    echo ""
     echo "Args:"
     echo "    dir          list of service directories to build images for"
     echo "                 if no directories are given then build all images"
@@ -19,10 +16,8 @@ usage() {
 }
 
 # get optional args
-settings="settings.yml"
-while getopts hd: flag; do
+while getopts h: flag; do
 case "$flag" in
-    d) settings="settings-dev.yml";;
     h) usage;;
     ?) usage;;
 esac
@@ -62,7 +57,7 @@ for path in $services ; do
         else
             echo "$line"
         fi
-    done < Dockerfile | docker build --build-arg name=$name --build-arg settings=$settings -t $name -f - .
+    done < Dockerfile | docker build --build-arg name=$name -t $name -f - .
 done
 
 # remove dangling images

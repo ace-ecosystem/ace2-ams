@@ -1,12 +1,13 @@
 import ace2
 import pytest
 
-# mock secret to prevent needing to connect to aws secret manager
+# get secrets from test data file instead of connecting to Secrets Manager
 @pytest.fixture(autouse=True)
-def mock_secret(monkeypatch):
+def mock_secrets(monkeypatch, datadir):
     class MockClient():
-        def get_secret_value(self, SecretId=None):
-            return { 'SecretString': SecretId.upper() }
+        def get_secret_value(self, SecretId):
+            with open(str(datadir / f'{SecretId}.json')) as f:
+                return {'SecretString': f.read().strip()}
 
     class MockSession():
         @property
@@ -18,5 +19,4 @@ def mock_secret(monkeypatch):
             assert region_name == 'the universe'
             return MockClient()
 
-    # mock Session
-    monkeypatch.setattr('ace2.secret.Session', MockSession)
+    monkeypatch.setattr('ace2.secrets.Session', MockSession)
