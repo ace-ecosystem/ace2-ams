@@ -1,5 +1,6 @@
 from ace2 import *
 import json
+import pytest
 
 def test_service(mock_queue):
     class MyService(Service):
@@ -80,3 +81,9 @@ def test_service(mock_queue):
         'args': [ 'rab' ],
         'kwargs': {},
     }
+
+    with pytest.raises(Exception):
+        MyService(instance='no_settings').settings.foo
+
+    with pytest.raises(Exception):
+        MyService(instance='bad_settings').settings.foo

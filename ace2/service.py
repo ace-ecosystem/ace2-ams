@@ -1,4 +1,5 @@
 from __future__ import annotations
+from boto3.session import Session
 from inspect import ismethod
 import json
 import os
@@ -8,7 +9,7 @@ import sys
 
 from . import queue
 from .models import PrivateModel, TypedModel
-from .settings import Settings
+from .secrets import get_secret
 
 
 class Service(TypedModel):
@@ -25,9 +26,24 @@ class Service(TypedModel):
         # init base subclasses
         super().__init_subclass__()
 
-    class Settings(Settings):
+    class Settings(PrivateModel):
         ''' base service settings class. Subclasses can override this to define their settings fields '''
-        pass
+        
+        @classmethod
+        def load(cls, service:str, instance:Optional[str]) -> Service.Settings:
+            ''' loads the settings for a given service instance
+
+            Args:
+                service: the name of the service to load settings for
+                instance: the instance of the service to load settings for
+
+            Returns:
+                the loaded settings
+            '''
+
+            # load settings from service instance secret
+            secret_id = service + '_' + instance if instance else service
+            return cls(**json.loads(get_secret(secret_id)))
 
     @property
     def settings(self) -> Service.Settings:
@@ -35,8 +51,7 @@ class Service(TypedModel):
 
         # load settings into cache if we need to
         if self.private.settings == None:
-            path = os.path.join('services', self.type)
-            self.private.settings = self.Settings.load(path, section=self.instance)
+            self.private.settings = self.Settings.load(self.type, self.instance)
 
         # returned loaded settings
         return self.private.settings
