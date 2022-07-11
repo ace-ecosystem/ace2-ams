@@ -14,6 +14,6 @@ class Submission(Analysis):
     mode: str = Field(default='detect', description='the current analyis mode')
     detect_mode: str = Field(description='determines which modules to run in detect mode')
     alert_mode: str = Field(description='determines which modules to run in alert mode')
-    response_mode: str = Field
+    response_mode: str = Field(desctiption='determines which modules to run in response mode')
 
     queue: str = Field(description='the alert queue to display the submission in')
