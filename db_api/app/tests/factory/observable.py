@@ -17,6 +17,7 @@ def create_or_read(
     db: Session,
     analysis_tags: Optional[list[str]] = None,
     context: Optional[str] = None,
+    critical_points: Optional[str] = None,
     detection_points: Optional[str] = None,
     directives: Optional[list[str]] = None,
     display_type: Optional[str] = None,
@@ -35,6 +36,11 @@ def create_or_read(
         for tag in analysis_tags:
             factory.metadata_tag.create_or_read(value=tag, db=db)
             metadata.append(AnalysisMetadataCreate(type="tag", value=tag))
+
+    if critical_points is not None:
+        for critical_point in critical_points:
+            factory.metadata_critical_point.create_or_read(value=critical_point, db=db)
+            metadata.append(AnalysisMetadataCreate(type="critical_point", value=critical_point))
 
     if detection_points is not None:
         for detection_point in detection_points:

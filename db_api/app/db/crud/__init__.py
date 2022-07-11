@@ -13,6 +13,7 @@ from db.crud import event_type
 from db.crud import event_vector
 from db.crud import helpers
 from db.crud import history
+from db.crud import metadata_critical_point
 from db.crud import metadata_detection_point
 from db.crud import metadata_directive
 from db.crud import metadata_display_type

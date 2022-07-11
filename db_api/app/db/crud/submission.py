@@ -53,6 +53,10 @@ def _associate_metadata_with_observable(analysis_uuids: list[UUID], o: Observabl
         if m.analysis_uuid not in analysis_uuids:
             continue
 
+        # Add each critical point
+        if m.metadata_object.metadata_type == "critical_point":
+            o.analysis_metadata.critical_points.append(m.metadata_object)
+
         # Add each detection point
         if m.metadata_object.metadata_type == "detection_point":
             o.analysis_metadata.detection_points.append(m.metadata_object)
@@ -78,6 +82,7 @@ def _associate_metadata_with_observable(analysis_uuids: list[UUID], o: Observabl
             o.analysis_metadata.time = m.metadata_object
 
     # Dedup and sort the analysis metadata on the observable that is a list
+    o.analysis_metadata.critical_points = sorted(set(o.analysis_metadata.critical_points), key=lambda x: x.value)
     o.analysis_metadata.detection_points = sorted(set(o.analysis_metadata.detection_points), key=lambda x: x.value)
     o.analysis_metadata.directives = sorted(set(o.analysis_metadata.directives), key=lambda x: x.value)
     o.analysis_metadata.tags = sorted(set(o.analysis_metadata.tags), key=lambda m: m.value)

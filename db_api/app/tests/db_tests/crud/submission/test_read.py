@@ -628,6 +628,7 @@ def test_read_observables(db):
         value="bad.com",
         parent_analysis=submission.root_analysis,
         analysis_tags=["analysis_tag1"],
+        critical_points=["critical_point1"],
         directives=["directive1"],
         display_type="display_type1",
         time=time1,
@@ -699,6 +700,7 @@ def test_read_observables(db):
     assert result[0].tags == []
 
     assert result[1].type.value == "fqdn" and result[1].value == "bad.com"
+    assert [c.value for c in result[1].analysis_metadata.critical_points] == ["critical_point1"]
     assert [d.value for d in result[1].analysis_metadata.directives] == ["directive1"]
     assert [t.value for t in result[1].analysis_metadata.tags] == ["analysis_tag1", "analysis_tag2"]
     assert result[1].analysis_metadata.display_type.value == "display_type1"

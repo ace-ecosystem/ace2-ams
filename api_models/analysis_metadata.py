@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, UUID4
 from typing import Optional, Union
 
 from api_models import type_str
+from api_models.metadata_critical_point import MetadataCriticalPointRead
 from api_models.metadata_detection_point import MetadataDetectionPointRead
 from api_models.metadata_directive import MetadataDirectiveRead
 from api_models.metadata_display_type import MetadataDisplayTypeRead
@@ -29,6 +30,10 @@ class AnalysisMetadataCreate(BaseModel):
 
 class AnalysisMetadataRead(BaseModel):
     """Represents the collection of analysis metadata that was added to an observable."""
+
+    critical_points: list[MetadataCriticalPointRead] = Field(
+        default_factory=list, description="A list of critical points added to the observable"
+    )
 
     detection_points: list[MetadataDetectionPointRead] = Field(
         default_factory=list, description="A list of detection points added to the observable"
