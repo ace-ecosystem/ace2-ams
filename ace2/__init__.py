@@ -9,3 +9,4 @@ from .module import Module
 from .observables import *
 from .service import Command, Service
 from .submission import Submission
+from .timestamp import eastern, now, strptime, Timestamp

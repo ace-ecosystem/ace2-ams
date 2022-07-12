@@ -46,6 +46,7 @@ def test_collector(mock_queue):
                 'type': 'my_submission',
                 'status': 'complete',
                 'target': None,
+                'event_time': '2020-01-02T03:04:05.000006+00:00',
                 'details': {},
                 'observables': [],
                 'summary': None,

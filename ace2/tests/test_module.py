@@ -57,6 +57,7 @@ def test_module(mock_queue):
                 'id': 1,
                 'type': 'my_module',
                 'instance': None,
+                'state': {},
                 'status': 'ignore',
                 'target': {
                     'type': 'fqdn',
@@ -100,6 +101,7 @@ def test_module(mock_queue):
                 'id': 1,
                 'type': 'my_module',
                 'instance': None,
+                'state': {},
                 'status': 'complete',
                 'target': {
                     'type': 'ipv4',

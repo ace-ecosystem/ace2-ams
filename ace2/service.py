@@ -123,7 +123,7 @@ class Command(PrivateModel):
             command.kwargs[key] = serialize(value)
 
         # queue the command
-        queue.add(command.service.type, command.dict(), delay=delay)
+        queue.add(command.service.type, command.json(), delay=delay)
 
     def invoke(self):
         ''' runs the instruction '''

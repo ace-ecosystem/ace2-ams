@@ -8,7 +8,6 @@ def test_database(mock_queue):
         type = 'analysis',
         id = 123,
         target = Observable('bar', type='foo'),
-        state = { 'hello': 'world' },
     )
     Database().submit_analysis(analysis)
 
@@ -34,6 +33,7 @@ def test_database(mock_queue):
             'observables': [],
             'details': {},
             'status': 'running',
+            'state': {},
         }],
         'kwargs': {},
     }

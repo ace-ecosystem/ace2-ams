@@ -1,9 +1,8 @@
 from boto3 import client
-import json
 from os import environ
 from typing import Optional
 
-def add(queue:str, message:dict, delay:Optional[int]=0):
+def add(queue:str, message:str, delay:Optional[int]=0):
     ''' adds message to specified queue with optional delay
 
     Args:
@@ -15,7 +14,7 @@ def add(queue:str, message:dict, delay:Optional[int]=0):
     # add the message to the queue
     client('sqs').send_message(
         QueueUrl = f'{environ["QUEUE_BASE_URL"]}/{queue}',
-        MessageBody = json.dumps(message),
+        MessageBody = message,
         DelaySeconds = delay,
     )
 

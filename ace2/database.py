@@ -11,4 +11,4 @@ class Database(Service):
         '''
 
         # create and send a command to submit the analysis to the database
-        Command.send(self.submit_analysis, analysis.dict(exclude={'state'}))
+        Command.send(self.submit_analysis, analysis)

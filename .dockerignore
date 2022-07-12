@@ -5,9 +5,13 @@
 **.pyc
 **/__pycache__
 
+# pytest files
+**/.pytest_cache
+
 # setup files
 setup
 build.sh
+publish.sh
 **/Dockerfile
 **/.dockerignore
 **.tf
