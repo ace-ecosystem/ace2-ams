@@ -122,10 +122,6 @@ class Timestamp(datetime):
         if isinstance(value, cls):
             return value
 
-        # convert datetime objects to Timestamp objects
-        if isinstance(value, datetime):
-            return cls.from_datetime(value)
-
         # convert strings to Timestamp objects
         if isinstance(value, str):
             # TODO: support other common string formats

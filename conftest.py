@@ -1,6 +1,7 @@
 import ace2
+from ace2.timestamp import Timestamp
 from ace2.storage import get_storage_id
-from datetime import datetime
+from datetime import datetime, timezone
 import os
 import pytest
 from shutil import copyfile
@@ -18,7 +19,7 @@ def mock_now(monkeypatch):
     monkeypatch.setattr('ace2.timestamp.datetime', mock_datetime)
 
     # return mock now so tests can make assertions with it
-    return _mock_now
+    return Timestamp.from_datetime(_mock_now)
 
 
 # monkeypatch queue with mock queue to avoid needing to connect to sqs
