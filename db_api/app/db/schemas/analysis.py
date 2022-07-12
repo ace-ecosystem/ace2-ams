@@ -40,6 +40,8 @@ class Analysis(Base):
 
     summary = Column(String)
 
+    summary_details: "list[AnalysisSummaryDetail]" = relationship("AnalysisSummaryDetail", lazy="selectin")
+
     # An analysis with NULL for analysis_module_type_uuid and target_uuid signifies it is a Root Analysis
     target_uuid = Column(UUID(as_uuid=True), ForeignKey("observable.uuid"), nullable=True)
 
@@ -71,3 +73,6 @@ class Analysis(Base):
 
     def convert_to_pydantic(self) -> AnalysisSubmissionTreeRead:
         return AnalysisSubmissionTreeRead(**self.__dict__)
+
+
+from db.schemas.analysis_summary_detail import AnalysisSummaryDetail

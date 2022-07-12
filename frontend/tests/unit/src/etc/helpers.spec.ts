@@ -6,6 +6,7 @@ import {
   getAlertLink,
   getAllAlertTags,
   groupItemsByQueue,
+  findClosestMatchingString,
 } from "@/etc/helpers";
 import { alertTreeReadFactory } from "@mocks/alert";
 import { alertFilterParams } from "@/models/alert";
@@ -761,4 +762,21 @@ describe("groupItemsByQueue", () => {
     const result = groupItemsByQueue(testData);
     expect(result).toEqual(expected);
   });
+});
+
+describe("findClosestMatchingString", () => {
+  const stringArr = ["a - b", "a - b - c", "a", "b - c", "b", "c"];
+
+  it.each([
+    [stringArr, "a - b - c", "a - b - c"],
+    [stringArr, "a - b - d", "a - b"],
+    [stringArr, "a - d", "a"],
+    [stringArr, "d", null],
+  ])(
+    "correctly returns closest matching string",
+    (strings, searchString, result) => {
+      const res = findClosestMatchingString(strings, searchString);
+      expect(res).toEqual(result);
+    },
+  );
 });
