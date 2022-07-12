@@ -23,7 +23,7 @@ data "aws_region" "current" {}
 
 module "filetype-idr-analysis-module" {
   source  = "app.terraform.io/FifthThird/idr-analysis-module/aws"
-  version = "1.0.11"
+  version = "1.0.12"
   #Vars
   environment              = var.environment
   analysis_module_name     = var.analysis_module_name
