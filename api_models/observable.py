@@ -136,6 +136,10 @@ class ObservableSubmissionTreeRead(ObservableSubmissionRead):
         default_factory=list, description="A list of this observable's child analysis"
     )
 
+    critical_path: bool = Field(
+        default=False, description="Whether or not this object is part of a 'critical' path in the tree"
+    )
+
     first_appearance: bool = Field(
         default=True, description="Whether or not this is the first time the object appears in the tree"
     )

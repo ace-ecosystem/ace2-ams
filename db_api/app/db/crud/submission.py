@@ -1021,6 +1021,58 @@ def read_tree(uuid: UUID, db: Session) -> dict:
         for idx in range(len(current["children"]) - 1, -1, -1):
             unvisited.insert(0, current["children"][idx])
 
+    # Now we need to walk it again to mark which of the leaves are a part of a 'critical' path,
+    # the criteria for that right now being that the leaf either has non-empty analysis_metadata.critical_points,
+    # or one of its children is part of a critical path.
+    #
+    # Adapted from: https://www.geeksforgeeks.org/iterative-postorder-traversal-of-n-ary-tree/
+    def _is_critical_path(o):
+        contains_critical_points = bool(current[0]["object_type"] ==
+                                        "observable" and o[0]["analysis_metadata"]["critical_points"])
+        if contains_critical_points:
+            return True
+
+        child_uuids = [child["uuid"] for child in o[0]["children"]]
+        children_on_critical_path = any(uuid in critical_point_path_uuids for uuid in child_uuids)
+        return children_on_critical_path
+
+    critical_point_path_uuids: set[UUID] = set()
+    current_root_index = 0
+    stack = []
+    root = tree_json
+    
+    while root != None or len(stack) > 0:
+        if root != None:
+            stack.append((root, current_root_index))
+            current_root_index = 0
+
+            if len(root["children"]) >= 1:
+                root = root["children"][0]
+            else:
+                root = None
+            continue
+
+        current = stack.pop()
+        if _is_critical_path(current):
+            critical_point_path_uuids.add(current[0]["uuid"])
+            current[0]["critical_path"] = True
+        else:
+            current[0]["critical_path"] = False
+
+        while len(stack) > 0 and current[1] == len(stack[-1][0]["children"]) - 1:
+            current = stack[-1]
+            stack.pop()
+
+            if _is_critical_path(current):
+                critical_point_path_uuids.add(current[0]["uuid"])
+                current[0]["critical_path"] = True
+            else:
+                current[0]["critical_path"] = False
+
+        if len(stack) > 0:
+            root = stack[-1][0]["children"][current[1] + 1]
+            current_root_index = current[1] + 1
+
     return tree_json
 
 
