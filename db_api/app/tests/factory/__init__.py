@@ -1,6 +1,7 @@
 from tests.factory import alert_disposition
 from tests.factory import analysis
 from tests.factory import analysis_module_type
+from tests.factory import analysis_summary_detail
 from tests.factory import event
 from tests.factory import event_comment
 from tests.factory import event_prevention_tool
@@ -10,6 +11,7 @@ from tests.factory import event_source
 from tests.factory import event_status
 from tests.factory import event_type
 from tests.factory import event_vector
+from tests.factory import format
 from tests.factory import metadata_detection_point
 from tests.factory import metadata_directive
 from tests.factory import metadata_display_type
