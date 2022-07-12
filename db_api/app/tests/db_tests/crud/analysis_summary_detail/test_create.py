@@ -41,7 +41,7 @@ def test_create_duplicate_value(db):
     # Ensure that you get the same object back if you try to create a duplicate value
     obj2 = crud.analysis_summary_detail.create_or_read(
         model=AnalysisSummaryDetailCreate(
-            analysis_uuid=obj1.analysis_uuid,
+            analysis_uuid=submission.root_analysis_uuid,
             content=obj1.content,
             format="PRE",
             header=obj1.header,

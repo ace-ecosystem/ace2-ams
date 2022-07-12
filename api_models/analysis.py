@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from api_models import type_str
 from api_models.analysis_module_type import AnalysisModuleTypeRead, AnalysisModuleTypeSubmissionTreeRead
+from api_models.analysis_summary_detail import AnalysisSummaryDetailCreateInAnalysis, AnalysisSummaryDetailRead
 
 
 class AnalysisBase(BaseModel):
@@ -33,6 +34,10 @@ class AnalysisCreateBase(AnalysisBase):
     )
 
     submission_uuid: UUID4 = Field(description="The UUID of the submission that will contain this analysis")
+
+    summary_details: list[AnalysisSummaryDetailCreateInAnalysis] = Field(
+        default_factory=list, description="A list of summary details to add to the analysis"
+    )
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
 
@@ -65,6 +70,10 @@ class AnalysisRead(AnalysisBase):
 
     run_time: datetime = Field(description="The time at which the analysis was performed")
 
+    summary_details: list[AnalysisSummaryDetailRead] = Field(
+        default_factory=list, description="A list of summary details added to the analysis"
+    )
+
     uuid: UUID4 = Field(description="The UUID of the analysis")
 
     class Config:
@@ -88,6 +97,10 @@ class AnalysisSubmissionTreeRead(BaseModel):
 
     # Set a static string value so code displaying the tree structure knows which type of object this is.
     object_type: str = "analysis"
+
+    summary_details: list[AnalysisSummaryDetailRead] = Field(
+        default_factory=list, description="A list of summary details added to the analysis"
+    )
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
 

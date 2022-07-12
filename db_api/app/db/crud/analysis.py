@@ -12,6 +12,7 @@ from api_models.analysis_details import (
     SandboxAnalysisDetails,
     UserAnalysisDetails,
 )
+from api_models.analysis_summary_detail import AnalysisSummaryDetailCreate
 from db import crud
 from db.schemas.analysis import Analysis
 from db.schemas.analysis_module_type import AnalysisModuleType
@@ -56,6 +57,12 @@ def create_or_read(model: AnalysisCreate, db: Session) -> Analysis:
     obj.child_observables = [
         crud.observable.create_or_read(model=co, parent_analysis=obj, db=db) for co in model.child_observables
     ]
+
+    # Add any summary details that were given
+    for summary_detail in model.summary_details:
+        crud.analysis_summary_detail.create_or_read(
+            model=AnalysisSummaryDetailCreate(analysis_uuid=obj.uuid, **summary_detail.dict()), db=db
+        )
 
     # Associate the analysis with its submission
     crud.submission_analysis_mapping.create(analysis_uuid=obj.uuid, submission_uuid=model.submission_uuid, db=db)

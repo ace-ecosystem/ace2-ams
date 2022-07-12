@@ -3,17 +3,18 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 from uuid import UUID
 
-from api_models.analysis_summary_detail import AnalysisSummaryDetailCreate, AnalysisSummaryDetailUpdate
+from api_models.analysis_summary_detail import (
+    AnalysisSummaryDetailCreate,
+    AnalysisSummaryDetailUpdate,
+)
 from db import crud
-from db.schemas.analysis import Analysis
 from db.schemas.analysis_summary_detail import AnalysisSummaryDetail
 from exceptions.db import ValueNotFoundInDatabase
 
 
-def create_or_read(model: AnalysisSummaryDetailCreate, db: Session, analysis: Analysis = None) -> AnalysisSummaryDetail:
-    # Make sure the analysis exists if one was not passed in
-    if analysis is None:
-        analysis = crud.analysis.read_by_uuid(uuid=model.analysis_uuid, db=db)
+def create_or_read(model: AnalysisSummaryDetailCreate, db: Session) -> AnalysisSummaryDetail:
+    # Make sure the analysis exists
+    analysis = crud.analysis.read_by_uuid(uuid=model.analysis_uuid, db=db)
 
     obj = AnalysisSummaryDetail(
         analysis_uuid=analysis.uuid,
@@ -24,7 +25,7 @@ def create_or_read(model: AnalysisSummaryDetailCreate, db: Session, analysis: An
     )
 
     if crud.helpers.create(obj=obj, db=db):
-        # Refresh the analysis object so that its summary_details relationship is updated
+        # Refresh the analysis object so its summary_details relationship is updated
         db.refresh(analysis)
 
         return obj
