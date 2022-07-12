@@ -7,8 +7,11 @@ ARG no_proxy
 ARG npm_strict_ssl=true
 
 ENV http_proxy=$http_proxy
+ENV HTTP_PROXY=$http_proxy
 ENV https_proxy=$https_proxy
+ENV HTTPS_PROXY=$https_proxy
 ENV no_proxy=$no_proxy
+ENV NO_PROXY=$no_proxy
 
 WORKDIR /app
 
@@ -21,6 +24,14 @@ RUN npm config set strict-ssl ${npm_strict_ssl} && \
   npm install node-gyp -g && \
   npm install && \
   apk del native-deps
+
+# clear proxy settings after we're done using them
+ENV http_proxy=
+ENV HTTP_PROXY=
+ENV https_proxy=
+ENV HTTPS_PROXY=
+ENV no_proxy=
+ENV NO_PROXY=
 
 COPY . .
 
