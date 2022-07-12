@@ -23,6 +23,7 @@ export interface analysisTreeRead {
   children: observableTreeRead[];
   errorMessage: string | null;
   firstAppearance?: boolean;
+  criticalPath?: boolean;
   objectType: string;
   stackTrace: string | null;
   summary: string | null;
