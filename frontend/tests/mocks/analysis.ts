@@ -40,6 +40,7 @@ export const analysisReadFactory = ({
   runTime = "2020-01-01T00:00:00.000000+00:00",
   stackTrace = null,
   summary = null,
+  summaryDetails = [],
   objectType = "analysis",
   uuid = "uuid2",
 }: Partial<analysisRead> = {}): analysisRead => ({
@@ -51,6 +52,7 @@ export const analysisReadFactory = ({
   runTime: runTime,
   stackTrace: stackTrace,
   summary: summary,
+  summaryDetails: summaryDetails,
   objectType: objectType,
   uuid: uuid,
 });
@@ -70,6 +72,7 @@ export const analysisTreeReadFactory = ({
   firstAppearance = undefined,
   stackTrace = null,
   summary = null,
+  summaryDetails = [],
   uuid = "testUuid",
 }: Partial<analysisTreeRead> = {}): analysisTreeRead => ({
   analysisModuleType: analysisModuleType,
@@ -79,12 +82,14 @@ export const analysisTreeReadFactory = ({
   objectType: "analysis",
   stackTrace: stackTrace,
   summary: summary,
+  summaryDetails: summaryDetails,
   uuid: uuid,
 });
 
 export const rootAnalysisTreeReadFactory = ({
   children = [],
   details = null,
+  summaryDetails = [],
   uuid = "testUuid",
 }: Partial<rootAnalysisTreeRead> = {}): rootAnalysisTreeRead => ({
   analysisModuleType: null,
@@ -94,5 +99,6 @@ export const rootAnalysisTreeReadFactory = ({
   objectType: "analysis",
   stackTrace: null,
   summary: null,
+  summaryDetails: summaryDetails,
   uuid: uuid,
 });
