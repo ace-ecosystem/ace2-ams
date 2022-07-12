@@ -73,6 +73,10 @@ def _associate_metadata_with_observable(analysis_uuids: list[UUID], o: Observabl
         elif m.metadata_object.metadata_type == "display_value" and not o.analysis_metadata.display_value:
             o.analysis_metadata.display_value = m.metadata_object
 
+        # Only add the sort metadata if one was not already set
+        elif m.metadata_object.metadata_type == "sort" and not o.analysis_metadata.sort:
+            o.analysis_metadata.sort = m.metadata_object
+
         # Add each tag metadata
         elif m.metadata_object.metadata_type == "tag":
             o.analysis_metadata.tags.append(m.metadata_object)
@@ -769,7 +773,7 @@ def build_read_all_query(
 
 def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
     # Create the new submission using the data from the request
-    obj = Submission(**model.dict(exclude={"history_username", "observables"}))
+    obj = Submission(**model.dict(exclude={"details", "history_username", "observables"}))
 
     # Set the various submission properties
     obj.alert = model.alert
@@ -782,7 +786,7 @@ def create_or_read(model: SubmissionCreate, db: Session) -> Submission:
         obj.owner = crud.user.read_by_username(username=model.owner, db=db)
         obj.ownership_time = crud.helpers.utcnow()
     obj.queue = crud.queue.read_by_value(value=model.queue, db=db)
-    obj.root_analysis = crud.analysis.create_root(db=db)
+    obj.root_analysis = crud.analysis.create_root(details=model.details, db=db)
     obj.tags = crud.metadata_tag.read_by_values(values=model.tags, db=db)
     if model.tool:
         obj.tool = crud.submission_tool.read_by_value(value=model.tool, db=db)
@@ -987,15 +991,20 @@ def read_tree(uuid: UUID, db: Session) -> dict:
             # Add the observable as a child to the analysis model.
             analyses_by_uuid[db_analysis.uuid].children.append(child_observables[db_child_observable.uuid])
 
+        # Sort the child observables for each analysis based on metadata sort objects. If the observable has sort
+        # metadata applied to it, that value will be used. Otherwise, "infinity" will be used.
+        analyses_by_uuid[db_analysis.uuid].children.sort(
+            key=lambda x: x.analysis_metadata.sort.value if x.analysis_metadata.sort else float("inf")
+        )
+
     # Loop over each overvable in the submission and add its analysis as children to the observable model
     for observable_uuid, observable in child_observables.items():
         if observable_uuid in analyses_by_target:
             observable.children = analyses_by_target[observable_uuid]
 
-    # Create the Submission object to SubmissionTree and set its children to be the root analysis children.
-    # The actual root analysis is not included in the tree structure.
+    # Create the SubmissionTree object and set its root analysis.
     tree = db_submission.convert_to_pydantic()
-    tree.children = analyses_by_uuid[db_submission.root_analysis_uuid].children
+    tree.root_analysis = analyses_by_uuid[db_submission.root_analysis_uuid]
 
     # Now that the tree structure is built, we need to walk it to mark which of the leaves have
     # already appeared in the tree. This is useful for when you might not want to display or
@@ -1008,7 +1017,7 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     # Adapted from: https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
     tree_json: dict = json.loads(tree.json(encoder=jsonable_encoder))
     unique_uuids: set[UUID] = set()
-    unvisited = [tree_json]
+    unvisited = [tree_json["root_analysis"]]
     while unvisited:
         current = unvisited.pop(0)
 
@@ -1039,7 +1048,7 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     critical_point_path_uuids: set[UUID] = set()
     current_root_index = 0
     stack = []
-    root = tree_json
+    root = tree_json["root_analysis"]
     
     while root != None or len(stack) > 0:
         if root != None:
@@ -1083,7 +1092,7 @@ def read_summary_url_domain(uuid: UUID, db: Session) -> URLDomainSummary:
     observables = read_observables(uuids=[uuid], db=db)
     urls = [observable for observable in observables if observable.type.value == "url"]
 
-    return crud.helpers.read_summary_url_domain(url_observables=urls, db=db)
+    return crud.helpers.read_summary_url_domain(url_observables=urls)
 
 
 def update(model: SubmissionUpdate, db: Session):

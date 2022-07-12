@@ -1,3 +1,5 @@
+import json
+
 from uuid import uuid4
 from api_models.analysis import AnalysisCreateInObservable
 from api_models.observable import ObservableCreate
@@ -27,6 +29,7 @@ def test_create(db):
         model=SubmissionCreate(
             alert=True,
             description="description",
+            details=json.dumps({"foo": "bar"}),
             event_time=now,
             history_username="analyst",
             insert_time=now,
@@ -81,6 +84,7 @@ def test_create(db):
     assert submission.name == "name"
     assert submission.owner.username == "analyst"
     assert submission.queue.value == "queue"
+    assert submission.root_analysis.details == {"foo": "bar"}
     assert len(submission.tags) == 1
     assert submission.tags[0].value == "tag"
     assert submission.tool.value == "tool"

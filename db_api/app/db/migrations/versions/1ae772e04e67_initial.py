@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 21505eb8791a
+Revision ID: 1ae772e04e67
 Revises: 
-Create Date: 2022-07-11 17:40:44.468694
+Create Date: 2022-07-12 19:16:55.474860
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '21505eb8791a'
+revision = '1ae772e04e67'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -283,6 +283,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_metadata_display_value_value'), 'metadata_display_value', ['value'], unique=True)
+    op.create_table('metadata_sort',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['uuid'], ['metadata.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_metadata_sort_value'), 'metadata_sort', ['value'], unique=True)
     op.create_table('metadata_tag',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -806,6 +814,8 @@ def downgrade() -> None:
     op.drop_table('metadata_time')
     op.drop_index(op.f('ix_metadata_tag_value'), table_name='metadata_tag')
     op.drop_table('metadata_tag')
+    op.drop_index(op.f('ix_metadata_sort_value'), table_name='metadata_sort')
+    op.drop_table('metadata_sort')
     op.drop_index(op.f('ix_metadata_display_value_value'), table_name='metadata_display_value')
     op.drop_table('metadata_display_value')
     op.drop_index(op.f('ix_metadata_display_type_value'), table_name='metadata_display_type')

@@ -1,4 +1,8 @@
-import { analysisRead, analysisTreeRead } from "@/models/analysis";
+import {
+  analysisRead,
+  analysisTreeRead,
+  rootAnalysisTreeRead,
+} from "@/models/analysis";
 import {
   analysisModuleTypeAlertTreeRead,
   analysisModuleTypeRead,
@@ -77,5 +81,20 @@ export const analysisTreeReadFactory = ({
   objectType: "analysis",
   stackTrace: stackTrace,
   summary: summary,
+  uuid: uuid,
+});
+
+export const rootAnalysisTreeReadFactory = ({
+  children = [],
+  details = null,
+  uuid = "testUuid",
+}: Partial<rootAnalysisTreeRead> = {}): rootAnalysisTreeRead => ({
+  analysisModuleType: null,
+  children: children,
+  details: details,
+  errorMessage: null,
+  objectType: "analysis",
+  stackTrace: null,
+  summary: null,
   uuid: uuid,
 });

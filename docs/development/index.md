@@ -36,6 +36,24 @@ Add the following entry to the file:
 127.0.0.1 ace2-ams
 ```
 
+## Building behind a proxy
+
+If you are in an environment where a proxy is enforced then you will need to create a file in the root project directory called `.env` with the following contents.
+
+```
+http_proxy=http://your.proxy:port
+https_proxy=http://your.proxy:port
+```
+
+If your proxy breaks SSL (if you are getting some kind of an SSL error) then you will also need to ignore SSL warnings.
+
+```
+http_proxy=http://your.proxy:port
+https_proxy=http://your.proxy:port
+pip_install_options=--trusted-host pypi.org --trusted-host files.pythonhosted.org
+npm_strict_ssl=false
+```
+
 ## Starting the application
 
 You can start the application using Docker containers so that it uses hot-reloading anytime you change a file:
