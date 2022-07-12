@@ -33,12 +33,13 @@ FROM $base AS service
 
     # install source
     ARG name
-    CMD [ "services.$name.service.run" ]
     COPY services/$name services/$name
 
+    # create link to service file so aws can find it
     # run tests
     # remove test files and dependencies
-    RUN pytest -vv &&\
+    RUN ln -s services/$name/service.py service.py &&\
+        pytest -vv &&\
         rm -rf conftest.py &&\
         rm -rf services/$name/tests &&\
         rm -rf /tmp/pytest* &&\
@@ -49,3 +50,4 @@ FROM $base AS service
 # squash layers into final image
 FROM $base AS final
     COPY --from=service / /
+    CMD [ "service.run" ]
