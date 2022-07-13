@@ -32,7 +32,7 @@ export default defineConfig({
     reporters: ["verbose", "json"],
     outputFile: "./coverage/unit/coverage.json",
     coverage: {
-      // 100: true, // Require 100% coverage
+      100: true, // Require 100% coverage
       reportsDirectory: "./coverage/unit",
     },
   },
