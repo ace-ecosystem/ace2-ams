@@ -5,16 +5,15 @@ ARG base=public.ecr.aws/lambda/python:3.9
 # install and test ace2 core code 
 FROM $base AS ace2
     # install ace2 deps
-    RUN pip3 install boto3 pydantic pytest pytest-datadir pyyaml
+    RUN pip3 install boto3 pydantic pytest pytest-datadir pytz pyyaml
 
     # install ace2 source
     COPY ace2 ace2
 
     # run tests
-    # remove test files
-    RUN mv ace2/tests tests &&\
-        pytest -vv &&\
-        rm -rf tests/ace2 &&\
+    COPY conftest.py conftest.py
+    RUN pytest -vv &&\
+        rm -rf ace2/tests &&\
         rm -rf /tmp/pytest* &&\
         find / \( -name "*.pyc" -or -name ".pytest_cache" -or -name "__pycache__" \) -exec rm -rf {} +
 
@@ -34,12 +33,15 @@ FROM $base AS service
 
     # install source
     ARG name
-    COPY services/$name ./
+    COPY services/$name services/$name
 
+    # create link to service file so aws can find it
     # run tests
     # remove test files and dependencies
-    RUN pytest -vv &&\
-        rm -rf tests &&\
+    RUN ln -s services/$name/service.py service.py &&\
+        pytest -vv &&\
+        rm -rf conftest.py &&\
+        rm -rf services/$name/tests &&\
         rm -rf /tmp/pytest* &&\
         find / \( -name "*.pyc" -or -name ".pytest_cache" -or -name "__pycache__" \) -exec rm -rf {} + &&\
         pip3 uninstall -y pytest-datadir pytest

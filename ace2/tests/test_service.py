@@ -8,6 +8,9 @@ def test_service(mock_queue):
             foo: str
 
         def execute_via_arg(self):
+            # test adding something to the state info
+            self.state['hello'] = 'world'
+
             # test sending from service with callback as positional argument
             Command.send(self.callback, self.end)
 
@@ -30,6 +33,7 @@ def test_service(mock_queue):
         'service': {
             'type': 'my_service',
             'instance': None,
+            'state': {},
         },
         'method': 'execute_via_arg',
         'args': [],
@@ -46,6 +50,9 @@ def test_service(mock_queue):
         'service': {
             'type': 'my_service',
             'instance': None,
+            'state': {
+                'hello': 'world',
+            },
         },
         'method': 'end',
         'args': [ 'bar' ],
@@ -60,6 +67,7 @@ def test_service(mock_queue):
         'service': {
             'type': 'my_service',
             'instance': 'my_instance',
+            'state': {},
         },
         'method': 'execute_via_kwarg',
         'args': [],
@@ -76,6 +84,7 @@ def test_service(mock_queue):
         'service': {
             'type': 'my_service',
             'instance': 'my_instance',
+            'state': {},
         },
         'method': 'end',
         'args': [ 'rab' ],

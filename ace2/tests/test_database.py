@@ -4,11 +4,10 @@ import json
 
 def test_database(mock_queue):
     # submit some analysis to the database
-    analysis = Analysis(
+    analysis = Module(
         type = 'analysis',
         id = 123,
         target = Observable('bar', type='foo'),
-        state = { 'hello': 'world' },
     )
     Database().submit_analysis(analysis)
 
@@ -18,6 +17,7 @@ def test_database(mock_queue):
         'service': {
             'type': 'database',
             'instance': None,
+            'state': {},
         },
         'method': 'submit_analysis',
         'args': [{
@@ -33,6 +33,7 @@ def test_database(mock_queue):
             'observables': [],
             'details': {},
             'status': 'running',
+            'state': {},
         }],
         'kwargs': {},
     }

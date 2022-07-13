@@ -1,12 +1,12 @@
 from ace2 import *
 import json
 
-def test_analysis(mock_queue):
-    class MyAnalysis(Analysis):
-        class Settings(Analysis.Settings):
+def test_module(mock_queue):
+    class MyModule(Module):
+        class Settings(Module.Settings):
             foo: str
 
-        class Details(Analysis.Details):
+        class Details(Module.Details):
             result: str = Field(default=None, description='some details field')
 
         def should_run(self):
@@ -33,13 +33,13 @@ def test_analysis(mock_queue):
     # test analysis that should not run
     analysis = {
         'id': 1,
-        'type': 'my_analysis',
+        'type': 'my_module',
         'target': {
             'type': 'fqdn',
             'value': '127.0.0.1',
         },
     }
-    analysis = Analysis(**analysis)
+    analysis = Module(**analysis)
     analysis.start()
 
     # verify database message
@@ -49,14 +49,16 @@ def test_analysis(mock_queue):
         'service': {
             'type': 'database',
             'instance': None,
+            'state': {},
         },
         'method': 'submit_analysis',
         'args': [
             {
                 'id': 1,
-                'type': 'my_analysis',
+                'type': 'my_module',
                 'instance': None,
-                'status': 'ignored',
+                'state': {},
+                'status': 'ignore',
                 'target': {
                     'type': 'fqdn',
                     'value': '127.0.0.1',
@@ -75,13 +77,13 @@ def test_analysis(mock_queue):
     # test analysis that should run
     analysis = {
         'id': 1,
-        'type': 'my_analysis',
+        'type': 'my_module',
         'target': {
             'type': 'ipv4',
             'value': '127.0.0.1',
         },
     }
-    analysis = Analysis(**analysis)
+    analysis = Module(**analysis)
     analysis.start()
 
     # verify database message
@@ -91,13 +93,15 @@ def test_analysis(mock_queue):
         'service': {
             'type': 'database',
             'instance': None,
+            'state': {},
         },
         'method': 'submit_analysis',
         'args': [
             {
                 'id': 1,
-                'type': 'my_analysis',
+                'type': 'my_module',
                 'instance': None,
+                'state': {},
                 'status': 'complete',
                 'target': {
                     'type': 'ipv4',

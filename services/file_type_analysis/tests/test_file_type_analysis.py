@@ -1,6 +1,7 @@
 from ace2 import *
-from service import FileTypeAnalysis
+from services.file_type_analysis.service import FileTypeAnalysis
 import pytest
+from sys import platform
 
 
 def test_file_type_run_condition():
@@ -13,7 +14,7 @@ def test_file_type_run_condition():
             'value': 'blah',
         },
     }
-    assert Analysis(**analysis).should_run()
+    assert Module(**analysis).should_run()
 
     # test run condition False
     analysis = {
@@ -24,7 +25,7 @@ def test_file_type_run_condition():
             'value': 'blah',
         },
     }
-    assert not Analysis(**analysis).should_run()
+    assert not Module(**analysis).should_run()
 
 
 @pytest.mark.parametrize('path,extension,tags,file_type,mime_type', [
@@ -116,7 +117,7 @@ def test_file_type(path, extension, tags, file_type, mime_type, mock_queue):
     }
 
     # run the module
-    analysis = Analysis(**analysis)
+    analysis = Module(**analysis)
     analysis.execute()
 
     # verify analysis

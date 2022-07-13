@@ -2,25 +2,18 @@ from pydantic import Field
 from pydantic.fields import ModelField
 from typing import List, Optional, Type
 
-from .models import PrivateModel
+from .models import PrivateModel, TypedModel
 from .observables import Observable
-from .service import Service
 from .database import Database
 
-class Analysis(Service):
+class Analysis(TypedModel):
     ''' Base Analysis class for building ICE2 analysis '''
 
-    id: int = Field(description='the id of the analysis in the database')
-    target: Observable = Field(description='the observable that the analysis is performed on')
+    id: Optional[int] = Field(default=None, description='the id of the analysis in the database')
+    target: Optional[Observable] = Field(default=None, description='the observable that the analysis is performed on')
     status: Optional[str] = Field(default='running', description='the status of the analysis')
     summary: Optional[str] = Field(default=None, description='the analysis summary to display in the GUI')
     observables: Optional[List[Observable]] = Field(default_factory=list, description='the child observables')
-    state: Optional[dict] = Field(default_factory=dict, description='non analysis data storage space')
-
-    class Settings(Service.Settings):
-        ''' Base analysis settings class '''
-        
-        cache_seconds: Optional[int] = Field(default=None, description='number of seconds until analysis expires')
 
     class Details(PrivateModel):
         ''' Base analysis details class '''
@@ -40,32 +33,6 @@ class Analysis(Service):
 
         # init base subclasses
         super().__init_subclass__()
-
-    def start(self):
-        ''' This is the entry point for running analysis '''
-
-        # stop and mark analysis as ignored if it should not run
-        if not self.should_run():
-            self.status = 'ignored'
-            Database().submit_analysis(self)
-            return
-
-        # execute the analysis
-        self.execute()
-
-    def should_run(self) -> bool:
-        ''' Subclasses must override this function to determine when analysis will run
-
-        Returns:
-            True if analysis should run
-        '''
-
-        raise NotImplementedError()
-
-    def execute(self):
-        ''' Subclasses must override this function to perform their analysis '''
-
-        raise NotImplementedError()
 
     def add(self, observable_type:Type[Observable], *args, **kwargs) -> Observable:
         ''' Adds an observable to the analysis
@@ -89,6 +56,13 @@ class Analysis(Service):
 
         # otherwise return the exiting observable
         return self.observables[self.observables.index(observable)]
+
+    def ignore(self):
+        ''' submits the analysis to the database service with status=ignore '''
+
+        # mark analysis ignored and submit to the database
+        self.status = 'ignore'
+        Database().submit_analysis(self)
 
     def submit(self):
         ''' submits the analysis to the database service '''

@@ -1,12 +1,11 @@
 from ace2 import queue
-import json
 
 def test_queue(mock_queue):
     # test adding to a queue
-    queue.add('my_queue', {'hello': 'world'}, delay=5)
+    queue.add('my_queue', 'hello', delay=5)
     assert mock_queue.get('my_queue') == {
         'receiptHandle': 0,
-        'body': json.dumps({'hello': 'world'}),
+        'body': 'hello',
         'delaySeconds': 5,
     }
 

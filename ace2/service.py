@@ -16,6 +16,7 @@ class Service(TypedModel):
     ''' Base class for making services '''
 
     instance: Optional[str] = Field(default=None, description='the instance name to load from settings')
+    state: Optional[dict] = Field(default_factory=dict, description='service state info')
 
     def __init_subclass__(cls):
         ''' Modify all Service subclasses '''
@@ -122,7 +123,7 @@ class Command(PrivateModel):
             command.kwargs[key] = serialize(value)
 
         # queue the command
-        queue.add(command.service.type, command.dict(), delay=delay)
+        queue.add(command.service.type, command.json(), delay=delay)
 
     def invoke(self):
         ''' runs the instruction '''

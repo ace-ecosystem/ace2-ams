@@ -5,10 +5,22 @@ from zipfile import ZipFile
 
 from ace2 import *
 
-class FileTypeAnalysis(Analysis):
+# maps non linux platform mime type to linux mime type
+mime_type_conversion_map = {
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'application/vnd.ms-powerpoint',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'application/msword',
+}
+
+# maps non linux platform file type to linux file type
+file_type_conversion_map = {
+    'OLE 2 Compound Document': 'Microsoft Office Document',
+}
+
+class FileTypeAnalysis(Module):
     ''' Determines the type of a file '''
 
-    class Details(Analysis.Details):
+    class Details(Module.Details):
         file_type: Optional[str] = Field(default=None, description='human readable file type of the target')
         mime_type: Optional[str] = Field(default=None, description='mime type of the target')
 
@@ -22,11 +34,19 @@ class FileTypeAnalysis(Analysis):
             logging.warning(f'failed to get file_type of {self.target.value}: {process.stderr}')
         self.details.file_type = process.stdout.strip()
 
+        # convert non linux file types to linux file type so we get the same result regardless platform
+        if self.details.file_type in file_type_conversion_map:
+            self.details.file_type = file_type_conversion_map[self.details.file_type]
+
         # get the mime type
         process = subprocess.run(['file', '-b', '--mime-type', '-L', self.target.path], capture_output=True, text=True)
         if process.stderr:
             logging.warning(f'failed to get mime_type of {self.target.value}: {process.stderr}')
         self.details.mime_type = process.stdout.strip()
+
+        # convert non linux mime types to linux mime type so we get the same result regardless of platform
+        if self.details.mime_type in mime_type_conversion_map:
+            self.details.mime_type = mime_type_conversion_map[self.details.mime_type]
 
         # determine if file is ole
         with open(self.target.path, 'rb') as f:
@@ -76,7 +96,7 @@ class FileTypeAnalysis(Analysis):
                     is_x509 = False
             if is_x509:
                 self.target.add(Tag, 'x509')
-                if self.details.file_type == 'data':
+                if self.details.file_type in ['data', 'Certificate, Version=3']:
                     self.details.file_type = 'DER certificate'
 
         # determine if file is jar
