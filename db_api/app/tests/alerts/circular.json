@@ -1,0 +1,20 @@
+{
+  "name": "Circular Alert",
+  "observables": [
+    {
+      "type": "fqdn",
+      "value": "evil.com",
+      "analyses": [
+        {
+          "type": "Test Analysis",
+          "observables": [
+            {
+              "type": "fqdn",
+              "value": "evil.com"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
