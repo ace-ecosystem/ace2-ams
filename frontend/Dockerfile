@@ -3,35 +3,19 @@ FROM node:16-alpine as builder
 
 ARG http_proxy
 ARG https_proxy
-ARG no_proxy
 ARG npm_strict_ssl=true
-
-ENV http_proxy=$http_proxy
-ENV HTTP_PROXY=$http_proxy
-ENV https_proxy=$https_proxy
-ENV HTTPS_PROXY=$https_proxy
-ENV no_proxy=$no_proxy
-ENV NO_PROXY=$no_proxy
 
 WORKDIR /app
 
 COPY package*.json .
 
-RUN apk --no-cache add --virtual native-deps \
+RUN HTTP_PROXY="$http_proxy" HTTPS_PROXY="$https_proxy" apk --no-cache add --virtual native-deps \
   g++ gcc libgcc libstdc++ linux-headers make python 
 
 RUN npm config set strict-ssl ${npm_strict_ssl} && \
-  npm install node-gyp -g && \
-  npm install && \
+  http_proxy="$http_proxy" https_proxy="$https_proxy" npm install node-gyp -g && \
+  http_proxy="$http_proxy" https_proxy="$https_proxy" npm install && \
   apk del native-deps
-
-# clear proxy settings after we're done using them
-ENV http_proxy=
-ENV HTTP_PROXY=
-ENV https_proxy=
-ENV HTTPS_PROXY=
-ENV no_proxy=
-ENV NO_PROXY=
 
 COPY . .
 
