@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from uuid import uuid4
 
 from api_models.analysis import AnalysisCreate
+from api_models.analysis_summary_detail import AnalysisSummaryDetailCreateInAnalysis
 from db import crud
 from exceptions.db import UuidNotFoundInDatabase
 from tests import factory
@@ -74,6 +75,7 @@ def test_create(db):
         type="test", value="test", parent_analysis=submission.root_analysis, db=db
     )
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test", cache_seconds=90, db=db)
+    factory.format.create_or_read(value="PRE", db=db)
     factory.observable_type.create_or_read(value="ipv4", db=db)
 
     # Create the analysis
@@ -88,6 +90,7 @@ def test_create(db):
             stack_trace="test stack trace",
             submission_uuid=submission.uuid,
             summary="test summary",
+            summary_details=[AnalysisSummaryDetailCreateInAnalysis(content="test", header="test", format="PRE")],
             target_uuid=observable.uuid,
         ),
         db=db,
@@ -101,6 +104,7 @@ def test_create(db):
     assert analysis.run_time == now
     assert analysis.stack_trace == "test stack trace"
     assert analysis.summary == "test summary"
+    assert len(analysis.summary_details) == 1
     assert analysis.target == observable
 
 

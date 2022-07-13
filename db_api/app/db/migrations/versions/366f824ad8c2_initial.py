@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: bca5409c9fb6
+Revision ID: 366f824ad8c2
 Revises: 
-Create Date: 2022-07-06 15:17:53.118942
+Create Date: 2022-07-12 11:51:34.502426
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = 'bca5409c9fb6'
+revision = '366f824ad8c2'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -90,6 +90,13 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_event_vector_value'), 'event_vector', ['value'], unique=True)
+    op.create_table('format',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_format_value'), 'format', ['value'], unique=True)
     op.create_table('metadata',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('metadata_type', sa.String(), nullable=True),
@@ -275,6 +282,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('uuid')
     )
     op.create_index(op.f('ix_metadata_display_value_value'), 'metadata_display_value', ['value'], unique=True)
+    op.create_table('metadata_sort',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['uuid'], ['metadata.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_metadata_sort_value'), 'metadata_sort', ['value'], unique=True)
     op.create_table('metadata_tag',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -509,6 +524,18 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('analysis_uuid', 'observable_uuid', 'metadata_uuid')
     )
     op.create_index(op.f('ix_analysis_metadata_analysis_uuid'), 'analysis_metadata', ['analysis_uuid'], unique=False)
+    op.create_table('analysis_summary_detail',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('analysis_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('content', sa.String(), nullable=False),
+    sa.Column('format_uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('header', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['analysis_uuid'], ['analysis.uuid'], ),
+    sa.ForeignKeyConstraint(['format_uuid'], ['format.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid'),
+    sa.UniqueConstraint('analysis_uuid', 'header', 'content', name='analysis_header_content_uc')
+    )
+    op.create_index(op.f('ix_analysis_summary_detail_analysis_uuid'), 'analysis_summary_detail', ['analysis_uuid'], unique=False)
     op.create_table('event_comment',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('insert_time', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=True),
@@ -739,6 +766,8 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_event_comment_event_uuid'), table_name='event_comment')
     op.drop_index('event_comment_value_trgm', table_name='event_comment', postgresql_ops={'value': 'gin_trgm_ops'}, postgresql_using='gin')
     op.drop_table('event_comment')
+    op.drop_index(op.f('ix_analysis_summary_detail_analysis_uuid'), table_name='analysis_summary_detail')
+    op.drop_table('analysis_summary_detail')
     op.drop_index(op.f('ix_analysis_metadata_analysis_uuid'), table_name='analysis_metadata')
     op.drop_table('analysis_metadata')
     op.drop_index(op.f('ix_analysis_child_observable_mapping_observable_uuid'), table_name='analysis_child_observable_mapping')
@@ -798,6 +827,8 @@ def downgrade() -> None:
     op.drop_table('metadata_time')
     op.drop_index(op.f('ix_metadata_tag_value'), table_name='metadata_tag')
     op.drop_table('metadata_tag')
+    op.drop_index(op.f('ix_metadata_sort_value'), table_name='metadata_sort')
+    op.drop_table('metadata_sort')
     op.drop_index(op.f('ix_metadata_display_value_value'), table_name='metadata_display_value')
     op.drop_table('metadata_display_value')
     op.drop_index(op.f('ix_metadata_display_type_value'), table_name='metadata_display_type')
@@ -853,6 +884,8 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_observable_relationship_type_value'), table_name='observable_relationship_type')
     op.drop_table('observable_relationship_type')
     op.drop_table('metadata')
+    op.drop_index(op.f('ix_format_value'), table_name='format')
+    op.drop_table('format')
     op.drop_index(op.f('ix_event_vector_value'), table_name='event_vector')
     op.drop_table('event_vector')
     op.drop_index(op.f('ix_event_type_value'), table_name='event_type')

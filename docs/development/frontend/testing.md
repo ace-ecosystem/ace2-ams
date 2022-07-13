@@ -185,7 +185,7 @@ _When to use CreatePinia()_
 _When to use CreateCustomCypressPinia()_
 
 - A component using pinia needs to have an initial state.
-    - Example: TheAlertDetails pulls details from the open alert in the alertStore
+    - Example: TheAlertSummary pulls details from the open alert in the alertStore
 - A component using pinia needs to have pinia actions/getters stubbed out
     - Because of limitations between how `TestingPinia` and Cypress stubs and spies work, pinia actions/getters cannot be stubbed directly by name
     - If `stubActions` is set to `true` (default) in `createCustomCypressPinia`, Cypress **stubs** will be used, which do NOT call functions being stubbed

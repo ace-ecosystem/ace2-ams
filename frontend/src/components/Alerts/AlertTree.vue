@@ -103,7 +103,7 @@
   }
 
   function treeItemName(item: analysisTreeRead | observableTreeRead) {
-    if (isAnalysis(item)) {
+    if (isAnalysis(item) && item.analysisModuleType) {
       return item.analysisModuleType.value;
     }
   }

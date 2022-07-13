@@ -6,6 +6,7 @@ from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.analysis_module_type_directive_mapping import analysis_module_type_directive_mapping
 from db.schemas.analysis_module_type_observable_type_mapping import analysis_module_type_observable_type_mapping
 from db.schemas.analysis_module_type_tag_mapping import analysis_module_type_tag_mapping
+from db.schemas.analysis_summary_detail import AnalysisSummaryDetail
 from db.schemas.event import Event
 from db.schemas.event_comment import EventComment
 from db.schemas.event_prevention_tool import EventPreventionTool
@@ -28,11 +29,13 @@ from db.schemas.event_type_queue_mapping import event_type_queue_mapping
 from db.schemas.event_vector import EventVector
 from db.schemas.event_vector_queue_mapping import event_vector_queue_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
+from db.schemas.format import Format
 from db.schemas.metadata import Metadata
 from db.schemas.metadata_detection_point import MetadataDetectionPoint
 from db.schemas.metadata_directive import MetadataDirective
 from db.schemas.metadata_display_type import MetadataDisplayType
 from db.schemas.metadata_display_value import MetadataDisplayValue
+from db.schemas.metadata_sort import MetadataSort
 from db.schemas.metadata_tag import MetadataTag
 from db.schemas.metadata_time import MetadataTime
 from db.schemas.threat import Threat
