@@ -7,20 +7,14 @@ import snakecaseKeys from "snakecase-keys";
 import { User } from "@/services/api/user";
 import myNock from "@unit/services/api/nock";
 import { userCreate, userRead } from "@/models/user";
+import { userReadFactory, userCreateFactory } from "@mocks/user";
 
 describe("user API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: userCreate = {
-    description: "This is a user",
-    value: "Test",
-  };
-  const mockObjectRead: userRead = {
-    uuid: "1",
-    description: "This is a user",
-    value: "Test",
-  };
+  const mockObjectCreate: userCreate = userCreateFactory();
+  const mockObjectRead: userRead = userReadFactory();
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock
@@ -64,10 +58,17 @@ describe("user API calls", () => {
     expect(res).toEqual(secondSuccessMessage);
   });
 
-  it("will make a get request to /user/{uuid} when getSingle is called", async () => {
+  it("will make a get request to /user/{uuid} when read is called", async () => {
     myNock.get("/user/1").reply(200, successMessage);
 
     const res = await User.read("1");
+    expect(res).toEqual(successMessage);
+  });
+
+  it("will make a get request to /user/{uuid}/history when readHistory is called", async () => {
+    myNock.get("/user/1/history").reply(200, successMessage);
+
+    const res = await User.readHistory("1");
     expect(res).toEqual(successMessage);
   });
 
@@ -80,7 +81,7 @@ describe("user API calls", () => {
     expect(res).toEqual([mockObjectRead, mockObjectRead]);
   });
 
-  it("will make a patch request to /user/{uuid} when updateSingle is called", async () => {
+  it("will make a patch request to /user/{uuid} when update is called", async () => {
     myNock
       .patch("/user/1", JSON.stringify({ value: "New Name" }))
       .reply(200, successMessage);

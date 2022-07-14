@@ -8,20 +8,14 @@ import { ObservableInstance } from "@/services/api/observable";
 import myNock from "@unit/services/api/nock";
 import { observableCreate } from "@/models/observable";
 import { createCustomPinia } from "@tests/unitHelpers";
+import { observableCreateFactory } from "@mocks/observable";
 
 createCustomPinia();
 
 describe("OBservable API calls", () => {
   const successMessage = "Request successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: observableCreate[] = [
-    {
-      submissionUuid: "uuid1",
-      description: "This is an observable",
-      username: "Alice",
-      value: "Test",
-    },
-  ];
+  const mockObjectCreate: observableCreate[] = [observableCreateFactory()];
 
   it("will make only a post request when create is called", async () => {
     myNock
@@ -36,6 +30,13 @@ describe("OBservable API calls", () => {
     myNock.get("/observable/1").reply(200, successMessage);
 
     const res = await ObservableInstance.read("1");
+    expect(res).toEqual(successMessage);
+  });
+
+  it("will make a get request to /observable/{uuid} when readHistory is called", async () => {
+    myNock.get("/observable/1/history").reply(200, successMessage);
+
+    const res = await ObservableInstance.readHistory("1");
     expect(res).toEqual(successMessage);
   });
 

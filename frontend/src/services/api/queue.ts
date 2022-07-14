@@ -1,10 +1,5 @@
-import {
-  queueCreate,
-  queueRead,
-  queueReadPage,
-  queueUpdate,
-} from "@/models/queue";
-import { pageOptionParams, UUID } from "@/models/base";
+import { queueCreate, queueRead, queueUpdate } from "@/models/queue";
+import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
 
 const api = new BaseApi();
@@ -21,10 +16,6 @@ export const queue = {
 
   readAll: (): Promise<queueRead[]> => {
     return api.readAll(endpoint);
-  },
-
-  readPage: (params?: pageOptionParams): Promise<queueReadPage> => {
-    return api.read(`${endpoint}`, params);
   },
 
   update: (uuid: UUID, data: queueUpdate): Promise<void> => {

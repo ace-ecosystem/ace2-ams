@@ -7,20 +7,17 @@ import snakecaseKeys from "snakecase-keys";
 import { ThreatType } from "@/services/api/threatType";
 import myNock from "@unit/services/api/nock";
 import { threatTypeCreate, threatTypeRead } from "@/models/threatType";
+import {
+  queueableObjectReadFactory,
+  genericObjectCreateFactory,
+} from "@mocks/genericObject";
 
 describe("threatType API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: threatTypeCreate = {
-    description: "This is a threatType",
-    value: "Test",
-  };
-  const mockObjectRead: threatTypeRead = {
-    uuid: "1",
-    description: "This is a threatType",
-    value: "Test",
-  };
+  const mockObjectCreate: threatTypeCreate = genericObjectCreateFactory();
+  const mockObjectRead: threatTypeRead = queueableObjectReadFactory();
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock
@@ -64,7 +61,7 @@ describe("threatType API calls", () => {
     expect(res).toEqual(secondSuccessMessage);
   });
 
-  it("will make a get request to /threat/type/{uuid} when getSingle is called", async () => {
+  it("will make a get request to /threat/type/{uuid} when read is called", async () => {
     myNock.get("/threat/type/1").reply(200, successMessage);
 
     const res = await ThreatType.read("1");
@@ -80,7 +77,7 @@ describe("threatType API calls", () => {
     expect(res).toEqual([mockObjectRead, mockObjectRead]);
   });
 
-  it("will make a patch request to /threat/type/{uuid} when updateSingle is called", async () => {
+  it("will make a patch request to /threat/type/{uuid} when update is called", async () => {
     myNock
       .patch("/threat/type/1", JSON.stringify({ value: "New Name" }))
       .reply(200, successMessage);

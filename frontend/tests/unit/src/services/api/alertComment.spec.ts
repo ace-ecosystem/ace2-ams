@@ -66,14 +66,14 @@ describe("Comment API calls", () => {
     expect(res).toEqual(secondSuccessMessage);
   });
 
-  it("will make a get request to /alert/comment/{uuid} when getSingle is called", async () => {
+  it("will make a get request to /alert/comment/{uuid} when read is called", async () => {
     myNock.get("/alert/comment/1").reply(200, successMessage);
 
     const res = await AlertComment.read("1");
     expect(res).toEqual(successMessage);
   });
 
-  it("will make a patch request to /alert/comment/{uuid} when updateSingle is called", async () => {
+  it("will make a patch request to /alert/comment/{uuid} when update is called", async () => {
     myNock
       .patch(
         "/alert/comment/1",

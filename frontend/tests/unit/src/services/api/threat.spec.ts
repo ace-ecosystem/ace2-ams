@@ -64,7 +64,7 @@ describe("threat API calls", () => {
     expect(res).toEqual(secondSuccessMessage);
   });
 
-  it("will make a get request to /threat/{uuid} when getSingle is called", async () => {
+  it("will make a get request to /threat/{uuid} when read is called", async () => {
     myNock.get("/threat/1").reply(200, successMessage);
 
     const res = await Threat.read("1");
@@ -80,7 +80,7 @@ describe("threat API calls", () => {
     expect(res).toEqual([mockObjectRead, mockObjectRead]);
   });
 
-  it("will make a patch request to /threat/{uuid} when updateSingle is called", async () => {
+  it("will make a patch request to /threat/{uuid} when update is called", async () => {
     myNock
       .patch("/threat/1", JSON.stringify({ value: "New Name" }))
       .reply(200, successMessage);
