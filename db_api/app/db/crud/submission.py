@@ -1,4 +1,5 @@
 import json
+import time
 
 from datetime import datetime
 from api_models.analysis_metadata import AnalysisMetadataRead
@@ -7,7 +8,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func, not_, or_, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
-from typing import Optional
+from typing import Optional, Union
 from uuid import UUID, uuid4
 
 from api_models.analysis import AnalysisSubmissionTreeRead
@@ -24,6 +25,7 @@ from api_models.submission import (
 )
 from db import crud
 from db.schemas.alert_disposition import AlertDisposition
+from db.schemas.analysis import Analysis
 from db.schemas.analysis_child_observable_mapping import analysis_child_observable_mapping
 from db.schemas.event import Event
 from db.schemas.event_status import EventStatus
@@ -942,6 +944,10 @@ def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
 
 
 def read_tree(uuid: UUID, db: Session) -> dict:
+    print()
+    print()
+    print()
+
     # Read the submission from the database
     db_submission = read_by_uuid(uuid=uuid, db=db)
 
@@ -951,55 +957,175 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     # Set the number of observables
     db_submission.number_of_observables = len(db_submission.child_observables)
 
-    # The Submission db object has an "analyses" list that contains every analysis object reglardless
-    # of where it appears in the tree structure.
-    #
-    # The analyses and observables need to be organized in a few dictionaries so that the tree
-    # structure can be easily built:
-    #
-    # Dictionary of analysis objects where their UUID is the key
-    # Dictionary of analysis objects where their target observable UUID is the key
-    # Dictionary of observables where their UUID is the key
-    analyses_by_target: dict[UUID, list[AnalysisSubmissionTreeRead]] = {}
-    analyses_by_uuid: dict[UUID, AnalysisSubmissionTreeRead] = {}
-    child_observables: dict[UUID, ObservableSubmissionTreeRead] = {}
+    # Associate metadata and other alert-specific information with the observables
+    start = time.time()
+    for db_observable in db_submission.child_observables:
+        _associate_metadata_with_observable(analysis_uuids=db_submission.analysis_uuids, o=db_observable)
+        _build_disposition_history(o=db_observable)
+        _build_matching_observable_events(o=db_observable)
+    print(f"associated observable data in {time.time() - start} seconds")
+
+    """
+    START NEW CODE
+    """
+
+    # Build various lookup dictionaries of analyses and observables... might not need all of these.
+    analyses_by_uuid: dict[UUID, AnalysisSubmissionTreeRead] = {
+        a.uuid: a.convert_to_pydantic() for a in db_submission.analyses
+    }
+    db_analyses_by_uuid: dict[UUID, Analysis] = {a.uuid: a for a in db_submission.analyses}
+    db_analyses_by_target_uuid: dict[UUID, list[Analysis]] = {}
     for db_analysis in db_submission.analyses:
-        # Create an empty list if this target observable UUID has not been seen yet.
-        if db_analysis.target_uuid not in analyses_by_target:
-            analyses_by_target[db_analysis.target_uuid] = []
+        if db_analysis.target_uuid not in db_analyses_by_target_uuid:
+            db_analyses_by_target_uuid[db_analysis.target_uuid] = []
+        db_analyses_by_target_uuid[db_analysis.target_uuid].append(db_analysis)
 
-        # Add the analysis model to the two analysis dictionaries
-        analysis = db_analysis.convert_to_pydantic()
-        analyses_by_target[db_analysis.target_uuid].append(analysis)
-        analyses_by_uuid[db_analysis.uuid] = analysis
+    observables_by_uuid: dict[UUID, ObservableSubmissionTreeRead] = {
+        o.uuid: o.convert_to_pydantic() for o in db_submission.child_observables
+    }
+    db_observables_by_uuid: dict[UUID, Observable] = {o.uuid: o for o in db_submission.child_observables}
 
-        for db_child_observable in db_analysis.child_observables:
-            # Add the analysis metadata to the observable
-            _associate_metadata_with_observable(analysis_uuids=db_submission.analysis_uuids, o=db_child_observable)
-            _build_disposition_history(o=db_child_observable)
-            _build_matching_observable_events(o=db_child_observable)
+    """
+    TREE STRUCTURE OF CIRCULAR.JSON:
 
-            # Add the observable model to the dictionary if it has not been seen yet.
-            if db_child_observable.uuid not in child_observables:
-                child_observables[db_child_observable.uuid] = db_child_observable.convert_to_pydantic()
+    RootAnalysis
+        O1
+            A1
+                O2
+                    A2
+                        O1 <-- cut off the loop here
+    """
+    # Build the dictionary of observable descendants. This can probably help when building the final nested
+    # tree structure to know whether or not a given observable is in a loop with itself. If that is the case,
+    # then we want to add the observable to the tree but NOT add its child analysis, which should cut off the loop.
+    #
+    # The dictionary looks like this, which indicates that the first observable is in a loop with itself (O1).
+    # {
+    #     UUID("cf36efc0-c1fa-4244-8f68-e59cbde3f8d2"): {
+    #         UUID("cf36efc0-c1fa-4244-8f68-e59cbde3f8d2"),
+    #         UUID("df450ec9-b259-46d2-9680-1f5ee309bb89"),
+    #     },
+    #     UUID("df450ec9-b259-46d2-9680-1f5ee309bb89"): {UUID("cf36efc0-c1fa-4244-8f68-e59cbde3f8d2")},
+    # }
+    start = time.time()
+    processed_observables = set()
+    # breakpoint()
+    observable_descendants: dict[UUID, set[UUID]] = {}
+    for observable in db_submission.child_observables:
+        observable_descendants[observable.uuid] = set()
+        unvisited: list[Union[Analysis, Observable]] = list(db_analyses_by_target_uuid.get(observable.uuid, []))
+        while unvisited:
+            current = unvisited.pop()
 
-            # Add the observable as a child to the analysis model.
-            analyses_by_uuid[db_analysis.uuid].children.append(child_observables[db_child_observable.uuid])
+            if isinstance(current, Analysis):
+                unvisited += db_analyses_by_uuid[current.uuid].child_observables
+            elif isinstance(current, Observable):
+                if current.uuid not in processed_observables:
+                    processed_observables.add(current.uuid)
 
-        # Sort the child observables for each analysis based on metadata sort objects. If the observable has sort
-        # metadata applied to it, that value will be used. Otherwise, "infinity" will be used.
-        analyses_by_uuid[db_analysis.uuid].children.sort(
-            key=lambda x: x.analysis_metadata.sort.value if x.analysis_metadata.sort else float("inf")
-        )
+                    observable_descendants[observable.uuid].add(current.uuid)
+                    unvisited += db_analyses_by_target_uuid.get(current.uuid, [])
+    print(f"built observable descendants in {time.time() - start} seconds")
 
-    # Loop over each overvable in the submission and add its analysis as children to the observable model
-    for observable_uuid, observable in child_observables.items():
-        if observable_uuid in analyses_by_target:
-            observable.children = analyses_by_target[observable_uuid]
+    start = time.time()
+    processed_analyses = set()
+    processed_observables = set()
+    # breakpoint()
+    unvisited = [db_submission.root_analysis]
+    while unvisited:
+        current = unvisited.pop()
+
+        if isinstance(current, Analysis):
+            # breakpoint()
+            if current.uuid not in processed_analyses:
+                processed_analyses.add(current.uuid)
+
+                # This should create unique instances of each observable model object instead of using pass by reference
+                analyses_by_uuid[current.uuid].children = [o.convert_to_pydantic() for o in current.child_observables]
+                # for child_observable in current.child_observables:
+                #     analyses_by_uuid[current.uuid].children.append(observables_by_uuid[child_observable.uuid])
+
+                unvisited += current.child_observables
+            else:
+                print(f"duplicate analysis! {current.analysis_module_type.value}")
+
+        elif isinstance(current, Observable):
+            # breakpoint()
+            print(f"visiting observable {current.type.value}: {current.value}")
+            if current.uuid not in processed_observables:
+                processed_observables.add(current.uuid)
+
+                if current.uuid in db_analyses_by_target_uuid:
+                    for db_analysis in db_analyses_by_target_uuid[current.uuid]:
+                        observables_by_uuid[current.uuid].children.append(analyses_by_uuid[db_analysis.uuid])
+
+                unvisited += db_analyses_by_target_uuid.get(current.uuid, [])
+            else:
+                print(f"duplicate observable! {current.type.value}: {current.value}")
+
+    """
+    END NEW CODE
+    """
+
+    """
+    START ORIGINAL CODE
+    """
+
+    # # The Submission db object has an "analyses" list that contains every analysis object reglardless
+    # # of where it appears in the tree structure.
+
+    # # The analyses and observables need to be organized in a few dictionaries so that the tree
+    # # structure can be easily built:
+
+    # # Dictionary of analysis objects where their UUID is the key
+    # # Dictionary of analysis objects where their target observable UUID is the key
+    # # Dictionary of observables where their UUID is the key
+    # analyses_by_target: dict[UUID, list[AnalysisSubmissionTreeRead]] = {}
+    # analyses_by_uuid: dict[UUID, AnalysisSubmissionTreeRead] = {}
+    # child_observables: dict[UUID, ObservableSubmissionTreeRead] = {}
+    # for db_analysis in db_submission.analyses:
+    #     # Create an empty list if this target observable UUID has not been seen yet.
+    #     if db_analysis.target_uuid not in analyses_by_target:
+    #         analyses_by_target[db_analysis.target_uuid] = []
+
+    #     # Add the analysis model to the two analysis dictionaries
+    #     analysis = db_analysis.convert_to_pydantic()
+    #     analyses_by_target[db_analysis.target_uuid].append(analysis)
+    #     analyses_by_uuid[db_analysis.uuid] = analysis
+
+    #     for db_child_observable in db_analysis.child_observables:
+    #         # Add the analysis metadata to the observable
+    #         # _associate_metadata_with_observable(analysis_uuids=db_submission.analysis_uuids, o=db_child_observable)
+    #         # _build_disposition_history(o=db_child_observable)
+    #         # _build_matching_observable_events(o=db_child_observable)
+
+    #         # Add the observable model to the dictionary if it has not been seen yet.
+    #         if db_child_observable.uuid not in child_observables:
+    #             child_observables[db_child_observable.uuid] = db_child_observable.convert_to_pydantic()
+
+    #         # Add the observable as a child to the analysis model.
+    #         analyses_by_uuid[db_analysis.uuid].children.append(child_observables[db_child_observable.uuid])
+
+    #     # Sort the child observables for each analysis based on metadata sort objects. If the observable has sort
+    #     # metadata applied to it, that value will be used. Otherwise, "infinity" will be used.
+    #     analyses_by_uuid[db_analysis.uuid].children.sort(
+    #         key=lambda x: x.analysis_metadata.sort.value if x.analysis_metadata.sort else float("inf")
+    #     )
+
+    # # Loop over each overvable in the submission and add its analysis as children to the observable model.
+    # # But only add the analysis as its children if the observable is not a descendant of itself (meta, I know).
+    # for observable_uuid, observable in child_observables.items():
+    #     if observable_uuid in analyses_by_target and observable_uuid not in observable_descendants[observable_uuid]:
+    #         observable.children = analyses_by_target[observable_uuid]
+
+    """
+    END ORIGINAL CODE
+    """
 
     # Create the SubmissionTree object and set its root analysis.
     tree = db_submission.convert_to_pydantic()
     tree.root_analysis = analyses_by_uuid[db_submission.root_analysis_uuid]
+    print(f"built tree structure in {time.time() - start} seconds")
 
     # Now that the tree structure is built, we need to walk it to mark which of the leaves have
     # already appeared in the tree. This is useful for when you might not want to display or
@@ -1010,7 +1136,10 @@ def read_tree(uuid: UUID, db: Session) -> dict:
     # property would change the value for every instance of the object (which we do not want).
     #
     # Adapted from: https://www.geeksforgeeks.org/preorder-traversal-of-n-ary-tree-without-recursion/
+    start = time.time()
     tree_json: dict = json.loads(tree.json(encoder=jsonable_encoder))
+    print(f"converted tree to json in {time.time() - start} seconds")
+    start = time.time()
     unique_uuids: set[UUID] = set()
     unvisited = [tree_json["root_analysis"]]
     while unvisited:
@@ -1024,7 +1153,11 @@ def read_tree(uuid: UUID, db: Session) -> dict:
 
         for idx in range(len(current["children"]) - 1, -1, -1):
             unvisited.insert(0, current["children"][idx])
+    print(f"marked first appearances in {time.time() - start} seconds")
 
+    print()
+    print()
+    print()
     return tree_json
 
 
