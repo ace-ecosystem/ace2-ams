@@ -20,6 +20,15 @@
     <br />
     <AlertMatchingOpenEventsPanel />
     <br />
+    <Panel
+    header="Summary Details"
+    :toggleable="true"
+    :collapsed="true">
+    <div v-for="details in alertStore.open.rootAnalysis.Details">
+      <AnalysisSummaryDetail />
+    </div>
+  </Panel>
+    <br />
     <TheAlertDetails />
     <br />
     <AlertUrlDomainSummary :alert-uuid="alertID" />
