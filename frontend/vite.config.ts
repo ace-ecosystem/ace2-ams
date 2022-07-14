@@ -33,6 +33,7 @@ export default defineConfig({
     outputFile: "./coverage/unit/coverage.json",
     coverage: {
       100: true, // Require 100% coverage
+      exclude: ["**/etc/configuration/**", "**/tests/**"], // Exclude configuration files
       reportsDirectory: "./coverage/unit",
     },
   },
