@@ -3,12 +3,19 @@ import { useEventSeverityStore } from "@/stores/eventSeverity";
 import { createCustomPinia } from "@tests/unitHelpers";
 import { EventSeverity } from "@/services/api/eventSeverity";
 
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import {
+  genericObjectReadFactory,
+  queueableObjectReadFactory,
+} from "@mocks/genericObject";
 
 createCustomPinia();
 const store = useEventSeverityStore();
 const spy = vi.spyOn(EventSeverity, "readAll");
-const mock = genericObjectReadFactory({ value: "eventSeverity" });
+const mockDefaultQueue = genericObjectReadFactory({ value: "defaultQueue" });
+const mock = queueableObjectReadFactory({
+  value: "eventSeverity",
+  queues: [mockDefaultQueue],
+});
 
 describe("eventSeverity store", () => {
   beforeEach(() => {
@@ -21,10 +28,23 @@ describe("eventSeverity store", () => {
     expect(store.allItems).toEqual([mock]);
   });
 
+  it("will return items for the given queue on the getItemsByQueue getter, if queue available", () => {
+    store.items = [mock];
+    store.itemsByQueue = { defaultQueue: [mock] };
+    expect(store.getItemsByQueue("defaultQueue")).toEqual([mock]);
+  });
+
+  it("will return an empty array for the given queue on the getItemsByQueue getter, if queue not available", () => {
+    store.items = [mock];
+    store.itemsByQueue = { defaultQueue: [mock] };
+    expect(store.getItemsByQueue("otherQueue")).toEqual([]);
+  });
+
   it("will call EventSeverity.readAll on readAll action and set items with the result", async () => {
     spy.mockImplementationOnce(() => [mock]);
     await store.readAll();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);
+    expect(store.itemsByQueue).toEqual({ defaultQueue: [mock] });
   });
 });

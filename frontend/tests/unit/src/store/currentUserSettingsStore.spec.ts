@@ -7,23 +7,30 @@ import { createCustomPinia } from "@tests/unitHelpers";
 
 createCustomPinia();
 
+const mockAlertQueue = genericObjectReadFactory({ value: "defaultAlertQueue" });
+const mockEventQueue = genericObjectReadFactory({ value: "defaultEventQueue" });
+
 const mockUser = userReadFactory({
-  defaultAlertQueue: genericObjectReadFactory({ value: "defaultAlertQueue" }),
-  defaultEventQueue: genericObjectReadFactory({ value: "defaultEventQueue" }),
+  defaultAlertQueue: mockAlertQueue,
+  defaultEventQueue: mockEventQueue,
 });
 
 describe("currentUserSettings Store", () => {
+  const store = useCurrentUserSettingsStore();
+  beforeEach(() => {
+    store.$reset();
+  });
+
   it("will set default queue values to null when there is no user set in the authStore", () => {
-    const store = useCurrentUserSettingsStore();
     expect(store.queues.alerts).toBeNull();
     expect(store.queues.events).toBeNull();
   });
   it("will set default queue values to null when there is no user set in the authStore", () => {
     const authStore = useAuthStore();
     authStore.user = mockUser;
+    store.$reset();
 
-    const store = useCurrentUserSettingsStore();
-    expect(store.queues.alerts).toBeNull();
-    expect(store.queues.events).toBeNull();
+    expect(store.queues.alerts).toEqual(mockAlertQueue);
+    expect(store.queues.events).toEqual(mockEventQueue);
   });
 });

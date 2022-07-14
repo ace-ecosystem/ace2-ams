@@ -3,12 +3,19 @@ import { useEventStatusStore } from "@/stores/eventStatus";
 import { createCustomPinia } from "@tests/unitHelpers";
 import { EventStatus } from "@/services/api/eventStatus";
 
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import {
+  genericObjectReadFactory,
+  queueableObjectReadFactory,
+} from "@mocks/genericObject";
 
 createCustomPinia();
 const store = useEventStatusStore();
 const spy = vi.spyOn(EventStatus, "readAll");
-const mock = genericObjectReadFactory({ value: "eventStatus" });
+const mockDefaultQueue = genericObjectReadFactory({ value: "defaultQueue" });
+const mock = queueableObjectReadFactory({
+  value: "eventStatus",
+  queues: [mockDefaultQueue],
+});
 
 describe("eventStatus store", () => {
   beforeEach(() => {
@@ -21,10 +28,23 @@ describe("eventStatus store", () => {
     expect(store.allItems).toEqual([mock]);
   });
 
+  it("will return items for the given queue on the getItemsByQueue getter, if queue available", () => {
+    store.items = [mock];
+    store.itemsByQueue = { defaultQueue: [mock] };
+    expect(store.getItemsByQueue("defaultQueue")).toEqual([mock]);
+  });
+
+  it("will return an empty array for the given queue on the getItemsByQueue getter, if queue not available", () => {
+    store.items = [mock];
+    store.itemsByQueue = { defaultQueue: [mock] };
+    expect(store.getItemsByQueue("otherQueue")).toEqual([]);
+  });
+
   it("will call EventStatus.readAll on readAll action and set items with the result", async () => {
     spy.mockImplementationOnce(() => [mock]);
     await store.readAll();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);
+    expect(store.itemsByQueue).toEqual({ defaultQueue: [mock] });
   });
 });

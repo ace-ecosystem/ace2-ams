@@ -1,8 +1,8 @@
-// TODO: Move to eventTable store tests
 import { describe, it, beforeEach, expect } from "vitest";
 import myNock from "@unit/services/api/nock";
 import { eventFilterParams } from "@/models/event";
 import { parseEventSummary, useEventTableStore } from "@/stores/eventTable";
+import { useSelectedEventStore } from "@/stores/selectedEvent";
 import { eventReadFactory, eventSummaryFactory } from "@mocks/events";
 import { queueableObjectReadFactory } from "@mocks/genericObject";
 import { threatReadFactory } from "@mocks/threat";
@@ -17,10 +17,10 @@ const mockEventReadASummary = eventSummaryFactory({
   uuid: "uuid1",
   queue: "testObject",
 });
-const mockEventReadB = eventReadFactory({ uuid: "uuid2" });
+const mockEventReadB = eventReadFactory({ uuid: "uuid2", queue: null });
 const mockEventReadBSummary = eventSummaryFactory({
   uuid: "uuid2",
-  queue: "testObject",
+  queue: "None",
 });
 
 const mockOwner = userReadFactory();
@@ -102,6 +102,17 @@ describe("eventTable getters", () => {
       mockEventReadC,
     ];
     expect(store.visibleQueriedItemById("uuid1")).toEqual(mockEventReadA);
+  });
+
+  it("will correctly return  visibleQueriedSelectedItems", () => {
+    const selectedStore = useSelectedEventStore();
+    selectedStore.selected = ["uuid2"];
+    store.visibleQueriedItems = [
+      mockEventReadA,
+      mockEventReadB,
+      mockEventReadC,
+    ];
+    expect(store.visibleQueriedSelectedItems).toEqual([mockEventReadB]);
   });
 
   it("will correctly return sortFilter", () => {
