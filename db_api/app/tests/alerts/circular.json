@@ -6,11 +6,17 @@
       "value": "evil.com",
       "analyses": [
         {
-          "type": "Test Analysis",
+          "type": "Domain Analysis",
           "observables": [
             {
-              "type": "fqdn",
-              "value": "evil.com"
+              "type": "ipv4",
+              "value": "127.0.0.1",
+              "analyses": [
+                {
+                  "type": "IP Analysis",
+                  "observables": [{ "type": "fqdn", "value": "evil.com" }]
+                }
+              ]
             }
           ]
         }
