@@ -1373,3 +1373,13 @@ def test_observable_sort_order(db):
         tree["root_analysis"]["children"][2]["children"][0]["children"][2]["type"]["value"] == "type4"
         and tree["root_analysis"]["children"][2]["children"][0]["children"][2]["value"] == "value4"
     )
+
+
+def test_circular_tree(db):
+    submission = factory.submission.create_from_json_file(
+        db=db, json_path="/app/tests/alerts/circular.json", submission_name="Circular Alert"
+    )
+
+    result = crud.submission.read_tree(uuid=submission.uuid, db=db)
+
+    assert False
