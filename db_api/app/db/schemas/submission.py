@@ -143,6 +143,7 @@ class Submission(Base, HasHistory):
     name = Column(String, nullable=False)
 
     # This gets populated by certain submission-related queries.
+    # TODO: Can this be changed to len(self.child_observables)?
     number_of_observables = 0
 
     owner_uuid = Column(UUID(as_uuid=True), ForeignKey("user.uuid"), index=True)
