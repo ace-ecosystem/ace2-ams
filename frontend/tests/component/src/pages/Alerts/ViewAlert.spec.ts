@@ -15,7 +15,7 @@ import TheAlertActionToolbarVue from "@/components/Alerts/TheAlertActionToolbar.
 import TheAlertSummaryVue from "@/components/Alerts/TheAlertSummary.vue";
 import AlertTreeVue from "@/components/Alerts/AlertTree.vue";
 import { userReadFactory } from "@mocks/user";
-import AnalysisSummaryDetailVue from "@/components/Alerts/AnalysisSummaryDetail.vue"
+import AnalysisSummaryDetailVue from "@/components/Analysis/AnalysisSummaryDetail.vue";
 
 function factory(stubActions = true) {
   return mount(ViewAlert, {

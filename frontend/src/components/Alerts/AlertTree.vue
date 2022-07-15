@@ -27,17 +27,14 @@
             :observable="i"
           ></ObservableLeafVue>
 
-          <router-link v-else-if="isAnalysis(i)" :to="viewAnalysisRoute(i)"
-            ><span class="treenode-text">{{
-              treeItemName(i)
-            }}</span>
-            <div v-if="i.summarydetail" >
+          <router-link v-else-if="isAnalysis(i)" :to="viewAnalysisRoute(i)">
+            <span class="treenode-text">{{ treeItemName(i) }}</span>
+            <!--<div v-if="i.summarydetail" >
               <span class="treenode-text">{{
                 i.summarydetail
               }}</span>
-              </div>
-            </router-link
-          >
+              </div> -->
+          </router-link>
         </span>
 
         <div
