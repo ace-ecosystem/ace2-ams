@@ -8,6 +8,7 @@ import { AlertTool } from "@/services/api/alertTool";
 import myNock from "@unit/services/api/nock";
 import { alertToolCreate } from "@/models/alertTool";
 import { createCustomPinia } from "@tests/unitHelpers";
+import { genericObjectCreateFactory } from "@mocks/genericObject";
 
 createCustomPinia();
 
@@ -16,14 +17,7 @@ describe("Tool API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: alertToolCreate[] = [
-    {
-      submissionUuid: "uuid1",
-      description: "This is a tool",
-      username: "Alice",
-      value: "Test",
-    },
-  ];
+  const mockObjectCreate: alertToolCreate = genericObjectCreateFactory();
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock

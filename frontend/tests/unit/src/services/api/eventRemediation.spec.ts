@@ -8,6 +8,7 @@ import { EventRemediation } from "@/services/api/eventRemediation";
 import myNock from "@unit/services/api/nock";
 import { eventRemediationCreate } from "@/models/eventRemediation";
 import { createCustomPinia } from "@tests/unitHelpers";
+import { genericObjectCreateFactory } from "@mocks/genericObject";
 
 createCustomPinia();
 
@@ -16,14 +17,10 @@ describe("EventRemediation API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: eventRemediationCreate[] = [
-    {
-      submissionUuid: "uuid1",
-      description: "This is an event remediation",
-      username: "Alice",
-      value: "Test",
-    },
-  ];
+  const mockObjectCreate: eventRemediationCreate = {
+    ...genericObjectCreateFactory(),
+    queues: [],
+  };
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock

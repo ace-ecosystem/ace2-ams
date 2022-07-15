@@ -8,6 +8,7 @@ import { EventVector } from "@/services/api/eventVector";
 import myNock from "@unit/services/api/nock";
 import { eventVectorCreate } from "@/models/eventVector";
 import { createCustomPinia } from "@tests/unitHelpers";
+import { genericObjectCreateFactory } from "@mocks/genericObject";
 
 createCustomPinia();
 
@@ -16,14 +17,10 @@ describe("EventVector API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: eventVectorCreate[] = [
-    {
-      submissionUuid: "uuid1",
-      description: "This is a vector",
-      username: "Alice",
-      value: "Test",
-    },
-  ];
+  const mockObjectCreate: eventVectorCreate = {
+    ...genericObjectCreateFactory(),
+    queues: [],
+  };
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock

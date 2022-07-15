@@ -22,7 +22,7 @@ describe("observableType store", () => {
   });
 
   it("will call ObservableType.readAll on readAll action and set items with the result", async () => {
-    spy.mockImplementationOnce(() => [mock]);
+    spy.mockImplementationOnce(async () => [mock]);
     await store.readAll();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);

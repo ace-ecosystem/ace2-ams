@@ -8,7 +8,10 @@ import { genericObjectReadFactory } from "@mocks/genericObject";
 createCustomPinia();
 const store = useAlertDispositionStore();
 const spy = vi.spyOn(AlertDisposition, "readAll");
-const mock = genericObjectReadFactory({ value: "alertDisposition" });
+const mock = {
+  ...genericObjectReadFactory({ value: "alertDisposition" }),
+  rank: 1,
+};
 
 describe("alertDisposition store", () => {
   beforeEach(() => {
@@ -22,7 +25,7 @@ describe("alertDisposition store", () => {
   });
 
   it("will call AlertDisposition.readAll on readAll action and set items with the result", async () => {
-    spy.mockImplementationOnce(() => [mock]);
+    spy.mockImplementationOnce(async () => [mock]);
     await store.readAll();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);

@@ -8,6 +8,7 @@ import { AlertDisposition } from "@/services/api/alertDisposition";
 import myNock from "@unit/services/api/nock";
 import { alertDispositionCreate } from "@/models/alertDisposition";
 import { createCustomPinia } from "@tests/unitHelpers";
+import { genericObjectCreateFactory } from "@mocks/genericObject";
 
 createCustomPinia();
 
@@ -16,15 +17,10 @@ describe("Disposition API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: alertDispositionCreate[] = [
-    {
-      submissionUuid: "uuid1",
-      description: "This is a disposition",
-      username: "Alice",
-      value: "Test",
-    },
-  ];
-
+  const mockObjectCreate: alertDispositionCreate = {
+    ...genericObjectCreateFactory(),
+    rank: 0,
+  };
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock
       .post(

@@ -41,7 +41,7 @@ describe("eventPreventionTool store", () => {
   });
 
   it("will call EventPreventionTool.readAll on readAll action and set items and itemsByQueue with the result", async () => {
-    spy.mockImplementationOnce(() => [mock]);
+    spy.mockImplementationOnce(async () => [mock]);
     await store.readAll();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);

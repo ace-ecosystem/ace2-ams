@@ -8,7 +8,10 @@ import { genericObjectReadFactory } from "@mocks/genericObject";
 createCustomPinia();
 const store = useThreatTypeStore();
 const spy = vi.spyOn(ThreatType, "readAll");
-const mock = genericObjectReadFactory({ value: "threattype" });
+const mock = {
+  ...genericObjectReadFactory({ value: "threattype" }),
+  queues: [],
+};
 
 describe("threattype store", () => {
   beforeEach(() => {
@@ -22,7 +25,7 @@ describe("threattype store", () => {
   });
 
   it("will call ThreatType.readAll on readAll action and set items with the result", async () => {
-    spy.mockImplementationOnce(() => [mock]);
+    spy.mockImplementationOnce(async () => [mock]);
     await store.readAll();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);

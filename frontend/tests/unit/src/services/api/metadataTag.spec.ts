@@ -8,6 +8,7 @@ import { MetadataTag } from "@/services/api/metadataTag";
 import myNock from "@unit/services/api/nock";
 import { metadataTagCreate } from "@/models/metadataTag";
 import { createCustomPinia } from "@tests/unitHelpers";
+import { genericObjectCreateFactory } from "@mocks/genericObject";
 
 createCustomPinia();
 
@@ -16,14 +17,7 @@ describe("MetadataTag API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: metadataTagCreate[] = [
-    {
-      submissionUuid: "uuid1",
-      description: "This is a metadataTag",
-      username: "Alice",
-      value: "Test",
-    },
-  ];
+  const mockObjectCreate: metadataTagCreate = genericObjectCreateFactory();
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock

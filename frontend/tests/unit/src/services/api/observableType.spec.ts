@@ -8,6 +8,7 @@ import { ObservableType } from "@/services/api/observableType";
 import myNock from "@unit/services/api/nock";
 import { observableTypeCreate } from "@/models/observableType";
 import { createCustomPinia } from "@tests/unitHelpers";
+import { genericObjectCreateFactory } from "@mocks/genericObject";
 
 createCustomPinia();
 
@@ -16,14 +17,7 @@ describe("Observable type API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: observableTypeCreate[] = [
-    {
-      submissionUuid: "uuid1",
-      description: "This is an observable type",
-      username: "Alice",
-      value: "Test",
-    },
-  ];
+  const mockObjectCreate: observableTypeCreate = genericObjectCreateFactory();
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock

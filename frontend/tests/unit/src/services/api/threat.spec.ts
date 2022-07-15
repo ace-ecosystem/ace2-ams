@@ -7,19 +7,23 @@ import snakecaseKeys from "snakecase-keys";
 import { Threat } from "@/services/api/threat";
 import myNock from "@unit/services/api/nock";
 import { threatCreate, threatRead } from "@/models/threat";
+import { genericObjectCreateFactory } from "@mocks/genericObject";
 
 describe("threat API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
   const mockObjectCreate: threatCreate = {
-    description: "This is an alert threat",
-    value: "Test",
+    ...genericObjectCreateFactory(),
+    queues: [],
+    types: [],
   };
   const mockObjectRead: threatRead = {
     uuid: "1",
     description: "This is an alert threat",
     value: "Test",
+    queues: [],
+    types: [],
   };
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {

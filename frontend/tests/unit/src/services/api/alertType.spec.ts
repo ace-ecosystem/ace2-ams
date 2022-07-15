@@ -8,6 +8,7 @@ import { AlertType } from "@/services/api/alertType";
 import myNock from "@unit/services/api/nock";
 import { alertTypeCreate } from "@/models/alertType";
 import { createCustomPinia } from "@tests/unitHelpers";
+import { genericObjectCreateFactory } from "@mocks/genericObject";
 
 createCustomPinia();
 
@@ -16,14 +17,7 @@ describe("AlertType API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: alertTypeCreate[] = [
-    {
-      submissionUuid: "uuid1",
-      description: "This is an alert type",
-      username: "Alice",
-      value: "Test",
-    },
-  ];
+  const mockObjectCreate: alertTypeCreate = genericObjectCreateFactory();
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock

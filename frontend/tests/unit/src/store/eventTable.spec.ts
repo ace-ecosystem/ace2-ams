@@ -17,10 +17,9 @@ const mockEventReadASummary = eventSummaryFactory({
   uuid: "uuid1",
   queue: "testObject",
 });
-const mockEventReadB = eventReadFactory({ uuid: "uuid2", queue: null });
+const mockEventReadB = eventReadFactory({ uuid: "uuid2" });
 const mockEventReadBSummary = eventSummaryFactory({
   uuid: "uuid2",
-  queue: "None",
 });
 
 const mockOwner = userReadFactory();

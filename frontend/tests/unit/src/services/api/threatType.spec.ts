@@ -16,7 +16,10 @@ describe("threatType API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: threatTypeCreate = genericObjectCreateFactory();
+  const mockObjectCreate: threatTypeCreate = {
+    ...genericObjectCreateFactory(),
+    queues: [],
+  };
   const mockObjectRead: threatTypeRead = queueableObjectReadFactory();
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {

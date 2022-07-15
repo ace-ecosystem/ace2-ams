@@ -3,12 +3,12 @@ import { useUserStore } from "@/stores/user";
 import { createCustomPinia } from "@tests/unitHelpers";
 import { User } from "@/services/api/user";
 
-import { genericObjectReadFactory } from "@mocks/genericObject";
+import { userReadFactory } from "@mocks/user";
 
 createCustomPinia();
 const store = useUserStore();
 const spy = vi.spyOn(User, "readAll");
-const mock = genericObjectReadFactory({ value: "user" });
+const mock = userReadFactory();
 
 describe("user store", () => {
   beforeEach(() => {
@@ -22,7 +22,7 @@ describe("user store", () => {
   });
 
   it("will call User.readAll on readAll action and set items with the result", async () => {
-    spy.mockImplementationOnce(() => [mock]);
+    spy.mockImplementationOnce(async () => [mock]);
     await store.readAll();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);

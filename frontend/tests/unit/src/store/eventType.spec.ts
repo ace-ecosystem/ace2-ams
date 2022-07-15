@@ -40,7 +40,7 @@ describe("eventType store", () => {
   });
 
   it("will call EventType.readAll on readAll action and set items with the result", async () => {
-    spy.mockImplementationOnce(() => [mock]);
+    spy.mockImplementationOnce(async () => [mock]);
     await store.readAll();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);

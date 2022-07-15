@@ -8,8 +8,10 @@ import { genericObjectReadFactory } from "@mocks/genericObject";
 createCustomPinia();
 const store = useMetadataTagStore();
 const spy = vi.spyOn(MetadataTag, "readAll");
-const mock = genericObjectReadFactory({ value: "metadataTag" });
-
+const mock = {
+  ...genericObjectReadFactory({ value: "metadataDirective" }),
+  metadataType: "tag",
+};
 describe("metadataTag store", () => {
   beforeEach(() => {
     store.$reset();
@@ -22,7 +24,7 @@ describe("metadataTag store", () => {
   });
 
   it("will call MetadataTag.readAll on readAll action and set items with the result", async () => {
-    spy.mockImplementationOnce(() => [mock]);
+    spy.mockImplementationOnce(async () => [mock]);
     await store.readAll();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);

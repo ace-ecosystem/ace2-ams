@@ -8,6 +8,7 @@ import { EventSeverity } from "@/services/api/eventSeverity";
 import myNock from "@unit/services/api/nock";
 import { eventSeverityCreate } from "@/models/eventSeverity";
 import { createCustomPinia } from "@tests/unitHelpers";
+import { genericObjectCreateFactory } from "@mocks/genericObject";
 
 createCustomPinia();
 
@@ -16,14 +17,10 @@ describe("EventSeverity API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: eventSeverityCreate[] = [
-    {
-      submissionUuid: "uuid1",
-      description: "This is an eventSeverity",
-      username: "Alice",
-      value: "Test",
-    },
-  ];
+  const mockObjectCreate: eventSeverityCreate = {
+    ...genericObjectCreateFactory(),
+    queues: [],
+  };
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock

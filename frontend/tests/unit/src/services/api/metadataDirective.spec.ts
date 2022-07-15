@@ -8,6 +8,7 @@ import { MetadataDirective } from "@/services/api/metadataDirective";
 import myNock from "@unit/services/api/nock";
 import { metadataDirectiveCreate } from "@/models/metadataDirective";
 import { createCustomPinia } from "@tests/unitHelpers";
+import { genericObjectCreateFactory } from "@mocks/genericObject";
 
 createCustomPinia();
 
@@ -16,14 +17,8 @@ describe("MetadataDirective API calls", () => {
   const readAllSuccesssObject = { items: [], response: "Request successful" };
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: metadataDirectiveCreate[] = [
-    {
-      submissionUuid: "uuid1",
-      description: "This is a metadatadirective",
-      username: "Alice",
-      value: "Test",
-    },
-  ];
+  const mockObjectCreate: metadataDirectiveCreate =
+    genericObjectCreateFactory();
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock

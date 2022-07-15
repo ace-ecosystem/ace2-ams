@@ -8,6 +8,7 @@ import { EventStatus } from "@/services/api/eventStatus";
 import myNock from "@unit/services/api/nock";
 import { eventStatusCreate } from "@/models/eventStatus";
 import { createCustomPinia } from "@tests/unitHelpers";
+import { genericObjectCreateFactory } from "@mocks/genericObject";
 
 createCustomPinia();
 
@@ -16,14 +17,10 @@ describe("EventStatus API calls", () => {
   const successMessage = "Request successful";
   const secondSuccessMessage = "Request 2 successful";
   const failureMessage = "Request failed";
-  const mockObjectCreate: eventStatusCreate[] = [
-    {
-      submissionUuid: "uuid1",
-      description: "This is an event status",
-      username: "Alice",
-      value: "Test",
-    },
-  ];
+  const mockObjectCreate: eventStatusCreate = {
+    ...genericObjectCreateFactory(),
+    queues: [],
+  };
 
   it("will make only a post request when create is called and return create results if getAfterCreate is false and there is NOT a content-location header", async () => {
     myNock

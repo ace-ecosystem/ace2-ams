@@ -8,7 +8,10 @@ import { genericObjectReadFactory } from "@mocks/genericObject";
 createCustomPinia();
 const store = useMetadataDirectiveStore();
 const spy = vi.spyOn(MetadataDirective, "readAll");
-const mock = genericObjectReadFactory({ value: "metadataDirective" });
+const mock = {
+  ...genericObjectReadFactory({ value: "metadataDirective" }),
+  metadataType: "directive",
+};
 
 describe("metadataDirective store", () => {
   beforeEach(() => {
@@ -22,7 +25,7 @@ describe("metadataDirective store", () => {
   });
 
   it("will call MetadataDirective.readAll on readAll action and set items with the result", async () => {
-    spy.mockImplementationOnce(() => [mock]);
+    spy.mockImplementationOnce(async () => [mock]);
     await store.readAll();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);

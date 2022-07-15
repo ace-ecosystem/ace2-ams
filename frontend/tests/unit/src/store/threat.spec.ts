@@ -6,6 +6,7 @@ import { Threat } from "@/services/api/threat";
 import {
   genericObjectReadFactory,
   queueableObjectReadFactory,
+  genericObjectCreateFactory,
 } from "@mocks/genericObject";
 
 createCustomPinia();
@@ -14,10 +15,13 @@ const spy = vi.spyOn(Threat, "readAll");
 const createSpy = vi.spyOn(Threat, "create");
 const updateSpy = vi.spyOn(Threat, "update");
 const mockDefaultQueue = genericObjectReadFactory({ value: "defaultQueue" });
-const mock = queueableObjectReadFactory({
-  value: "threat",
-  queues: [mockDefaultQueue],
-});
+const mock = {
+  ...queueableObjectReadFactory({
+    value: "threat",
+    queues: [mockDefaultQueue],
+  }),
+  types: [],
+};
 
 describe("threat store", () => {
   beforeEach(() => {
@@ -46,9 +50,13 @@ describe("threat store", () => {
   });
 
   it("will call Threat.create and Threat.readAll on create action and set items with the updated results", async () => {
-    createSpy.mockImplementationOnce(async () => "Success");
-    spy.mockImplementationOnce(() => [mock]);
-    await store.create({ value: "threat", types: [] });
+    createSpy.mockImplementationOnce(async () => undefined);
+    spy.mockImplementationOnce(async () => [mock]);
+    await store.create({
+      ...genericObjectCreateFactory({ value: "threat" }),
+      types: [],
+      queues: [],
+    });
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);
@@ -60,7 +68,11 @@ describe("threat store", () => {
       throw new Error("Error");
     });
     try {
-      await store.create({ value: "threat", types: [] });
+      await store.create({
+        ...genericObjectCreateFactory({ value: "threat" }),
+        types: [],
+        queues: [],
+      });
     } catch (e) {
       const error = e as Error;
       expect(error.message).toEqual("Error");
@@ -68,9 +80,9 @@ describe("threat store", () => {
   });
 
   it("will call Threat.update and Threat.readAll on create action and set items with the updated results", async () => {
-    updateSpy.mockImplementationOnce(async () => "Success");
-    spy.mockImplementationOnce(() => [mock]);
-    await store.update({ value: "threat", types: [] });
+    updateSpy.mockImplementationOnce(async () => undefined);
+    spy.mockImplementationOnce(async () => [mock]);
+    await store.update("uuid", { value: "threat", types: [] });
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);
@@ -82,7 +94,7 @@ describe("threat store", () => {
       throw new Error("Error");
     });
     try {
-      await store.update({ value: "threat", types: [] });
+      await store.update("uuid", { value: "threat", types: [] });
     } catch (e) {
       const error = e as Error;
       expect(error.message).toEqual("Error");
@@ -90,7 +102,7 @@ describe("threat store", () => {
   });
 
   it("will call Threat.readAll on readAll action and set items with the result", async () => {
-    spy.mockImplementationOnce(() => [mock]);
+    spy.mockImplementationOnce(async () => [mock]);
     await store.readAll();
     expect(spy).toHaveBeenCalledTimes(1);
     expect(store.items).toEqual([mock]);
