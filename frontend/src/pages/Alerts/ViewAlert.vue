@@ -20,14 +20,14 @@
     <br />
     <AlertMatchingOpenEventsPanel />
     <br />
-    <Panel
+    <!--<Panel
     header="Summary Details"
     :toggleable="true"
     :collapsed="true">
-    <div v-for="details in alertStore.open.rootAnalysis.Details">
+    <div v-for="details in alertStore.open.rootAnalysis.Details"> 
       <AnalysisSummaryDetail />
     </div>
-  </Panel>
+  </Panel> -->
     <br />
     <TheAlertDetails />
     <br />
@@ -65,6 +65,7 @@
   import { useAlertStore } from "@/stores/alert";
   import { useAuthStore } from "@/stores/auth";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
+  import AnalysisSummaryDetail from "@/components/Alerts/AnalysisSummaryDetail.vue"
 
   const authStore = useAuthStore();
   const route = useRoute();

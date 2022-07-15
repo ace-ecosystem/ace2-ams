@@ -15,6 +15,7 @@ import TheAlertActionToolbarVue from "@/components/Alerts/TheAlertActionToolbar.
 import TheAlertSummaryVue from "@/components/Alerts/TheAlertSummary.vue";
 import AlertTreeVue from "@/components/Alerts/AlertTree.vue";
 import { userReadFactory } from "@mocks/user";
+import AnalysisSummaryDetailVue from "@/components/Alerts/AnalysisSummaryDetail.vue"
 
 function factory(stubActions = true) {
   return mount(ViewAlert, {
@@ -47,6 +48,7 @@ describe("ViewAlert", () => {
       expect(wrapper.findComponent(TheAlertActionToolbarVue)).to.exist;
       expect(wrapper.findComponent(TheAlertSummaryVue)).to.exist;
       expect(wrapper.findComponent(AlertTreeVue)).to.exist;
+      expect(wrapper.findComponent(AnalysisSummaryDetailVue)).to.exist;
     });
   });
   it("attempts to disposition alert as 'false positive' on ignoreClicked event", () => {

@@ -31,10 +31,11 @@
             ><span class="treenode-text">{{
               treeItemName(i)
             }}</span>
-            <div v-if="isSummaryDetail(i)" >
+            <div v-if="i.summarydetail" >
               <span class="treenode-text">{{
-                summarydetail(i)
+                i.summarydetail
               }}</span>
+              </div>
             </router-link
           >
         </span>
