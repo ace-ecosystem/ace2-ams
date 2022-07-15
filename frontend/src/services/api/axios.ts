@@ -29,9 +29,9 @@ instance.interceptors.response.use(
   },
 
   async function (error) {
-    if (typeof error.response === "undefined") {
-      throw error;
-    }
+    // if (typeof error.response === "undefined") {
+    //   throw error;
+    // }
 
     // Reject the promise if it was not a 401 error
     if (error.response.status !== 401) {
