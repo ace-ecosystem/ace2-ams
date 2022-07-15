@@ -4,7 +4,7 @@ import myNock from "@unit/services/api/nock";
 import { analysisReadFactory } from "@mocks/analysis";
 
 describe("Analysis API calls", () => {
-  it("will make a get request to /alert/queue/{uuid} when getSingle is called", async () => {
+  it("will make a get request to /alert/queue/{uuid} when read is called", async () => {
     const mockAnalysis = analysisReadFactory();
     myNock.get("/analysis/uuid2").reply(200, mockAnalysis);
 
