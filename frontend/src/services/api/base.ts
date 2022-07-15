@@ -89,7 +89,6 @@ export class BaseApi {
       }
       return this.formatIncomingData(response.data);
     }
-    // throw new Error(`${this.methodDict[method]} failed!`);
   }
 
   async create(
