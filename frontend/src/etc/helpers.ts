@@ -39,6 +39,33 @@ export function copyToClipboard(text: string): void | boolean | string | null {
 }
 /* c8 ignore stop */
 
+/* c8 ignore start */
+// TODO: Can this be easily tested?
+export const scrollTo = (id: string | null, animate = false) => {
+  if (id) {
+    const obj = document.getElementById(id);
+
+    if (obj) {
+      obj.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      if (animate) {
+        obj.animate(
+          [
+            {
+              backgroundColor: "yellow",
+            },
+          ],
+          {
+            duration: 300,
+            iterations: 3,
+          },
+        );
+      }
+    }
+  }
+};
+/* c8 ignore stop */
+
 // https://weblog.west-wind.com/posts/2014/jan/06/javascript-json-date-parsing-and-real-dates
 export function dateParser(_: string, value: unknown): Date | unknown {
   const reISO =

@@ -3,8 +3,8 @@
     <ul class="p-tree-container">
       <li
         v-for="(i, index) of items"
-        :id="`ID-${i.uuid}-${i}`"
-        :key="`${i.uuid}-${i}`"
+        :id="`${i.treeUuid}`"
+        :key="`${i.treeUuid}`"
         :class="containerClass(i)"
         :data-cy="treeItemName(i)"
       >
@@ -72,13 +72,12 @@
     items: (analysisTreeRead | observableTreeRead)[],
   ) {
     const expandedStatus: Record<number, boolean> = {};
-    items.forEach((item, index) => {
-      expandedStatus[index] = item.firstAppearance
-        ? item.firstAppearance
-        : false;
+    items.forEach((_, index) => {
+      expandedStatus[index] = true;
     });
     return expandedStatus;
   }
+
   function leafExpanded(index: number) {
     return itemsExpandedStatus.value[index];
   }

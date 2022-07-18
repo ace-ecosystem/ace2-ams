@@ -49,7 +49,7 @@
                         style="vertical-align: baseline"
                         icon="pi pi-directions"
                         class="p-button-rounded p-button-secondary p-button-text"
-                        @click="scrollToDetection(detection.uuid)"
+                        @click="scrollTo(detection.uuid)"
                       />
                     </span>
                   </td>
@@ -77,7 +77,7 @@
 
   import MetadataTag from "@/components/Metadata/MetadataTag.vue";
 
-  import { copyToClipboard } from "@/etc/helpers";
+  import { copyToClipboard, scrollTo } from "@/etc/helpers";
   import { useAlertStore } from "@/stores/alert";
   import { getAllAlertTags } from "@/etc/helpers";
   import AlertTableCell from "./AlertTableCell.vue";
@@ -97,14 +97,6 @@
     { value: "ownerWithTime", label: "Owner" },
     { value: "comments", label: "Comments" },
   ];
-
-  const scrollToDetection = (detectionUuid: string) => {
-    const detection = document.getElementById(detectionUuid);
-
-    if (detection) {
-      detection.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  };
 
   function copyLink() {
     copyToClipboard(window.location.href);

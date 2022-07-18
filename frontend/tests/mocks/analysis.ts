@@ -69,20 +69,20 @@ export const analysisTreeReadFactory = ({
   analysisModuleType = analysisModuleTypeAlertTreeReadFactory(),
   children = [],
   errorMessage = null,
-  firstAppearance = undefined,
   stackTrace = null,
   summary = null,
   summaryDetails = [],
+  treeUuid = "testTreeUuid",
   uuid = "testUuid",
 }: Partial<analysisTreeRead> = {}): analysisTreeRead => ({
   analysisModuleType: analysisModuleType,
   children: children,
   errorMessage: errorMessage,
-  firstAppearance: firstAppearance,
   objectType: "analysis",
   stackTrace: stackTrace,
   summary: summary,
   summaryDetails: summaryDetails,
+  treeUuid: treeUuid,
   uuid: uuid,
 });
 
@@ -90,6 +90,7 @@ export const rootAnalysisTreeReadFactory = ({
   children = [],
   details = null,
   summaryDetails = [],
+  treeUuid = "testTreeUuid",
   uuid = "testUuid",
 }: Partial<rootAnalysisTreeRead> = {}): rootAnalysisTreeRead => ({
   analysisModuleType: null,
@@ -100,5 +101,6 @@ export const rootAnalysisTreeReadFactory = ({
   stackTrace: null,
   summary: null,
   summaryDetails: summaryDetails,
+  treeUuid: treeUuid,
   uuid: uuid,
 });
