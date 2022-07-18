@@ -102,7 +102,7 @@ class Submission(Base, HasHistory):
         lazy="selectin",
     )
 
-    comments = relationship("SubmissionComment", lazy="selectin")
+    comments = relationship("SubmissionComment", lazy="selectin", viewonly=True)
 
     description = Column(String)
 
