@@ -1,8 +1,8 @@
-// TODO: Move to alertTable store tests
 import { describe, it, beforeEach, expect } from "vitest";
 import myNock from "@unit/services/api/nock";
 import { alertFilterParams } from "@/models/alert";
 import { useAlertTableStore } from "@/stores/alertTable";
+import { useSelectedAlertStore } from "@/stores/selectedAlert";
 import { createCustomPinia } from "@tests/unitHelpers";
 import { parseAlertSummary } from "@/etc/helpers";
 import {
@@ -74,8 +74,22 @@ describe("alertTable getters", () => {
     expect(store.visibleQueriedItemById("uuid1")).toEqual(mockAlertTreeReadA);
   });
 
+  it("will correctly return  visibleQueriedSelectedItems", () => {
+    const selectedStore = useSelectedAlertStore();
+    selectedStore.selected = ["uuid2"];
+    store.visibleQueriedItems = [
+      mockAlertTreeReadA,
+      mockAlertTreeReadB,
+      mockAlertTreeReadC,
+    ];
+    expect(store.visibleQueriedSelectedItems).toEqual([mockAlertTreeReadB]);
+  });
+
   it("will correctly return sortFilter", () => {
     expect(store.sortFilter).toEqual("event_time|desc");
+    store.sortField = null;
+    store.sortOrder = null;
+    expect(store.sortFilter).toEqual(null);
   });
 
   it("will correctly return allFiltersLoaded", () => {

@@ -1,10 +1,5 @@
-import {
-  threatCreate,
-  threatRead,
-  threatReadPage,
-  threatUpdate,
-} from "@/models/threat";
-import { pageOptionParams, UUID } from "@/models/base";
+import { threatCreate, threatRead, threatUpdate } from "@/models/threat";
+import { UUID } from "@/models/base";
 import { BaseApi } from "./base";
 
 const api = new BaseApi();
@@ -17,9 +12,6 @@ export const Threat = {
   read: (uuid: UUID): Promise<threatRead> => api.read(`${endpoint}${uuid}`),
 
   readAll: (): Promise<threatRead[]> => api.readAll(endpoint),
-
-  readPage: (params?: pageOptionParams): Promise<threatReadPage> =>
-    api.read(`${endpoint}`, params),
 
   update: (uuid: UUID, data: threatUpdate): Promise<void> =>
     api.update(`${endpoint}${uuid}`, data),

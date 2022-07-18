@@ -1,10 +1,33 @@
 import {
   observableInAlertRead,
+  observableCreate,
   observableRead,
   observableTreeRead,
 } from "@/models/observable";
 import { analysisMetadataReadFactory } from "./analysisMetadata";
 import { genericObjectReadFactory } from "./genericObject";
+
+export const observableCreateFactory = ({
+  forDetection = false,
+  observableRelationships = [],
+  tags = [],
+  type = "testType",
+  uuid = "observableUuid1",
+  value = "TestObservable",
+  version = "observableVersion1",
+  whitelisted = false,
+  parentAnalysisUuid = "parentAnalysisUuid1",
+}: Partial<observableCreate> = {}): observableCreate => ({
+  objectType: "observable",
+  observableRelationships: observableRelationships,
+  tags: tags,
+  type: type,
+  uuid: uuid,
+  value: value,
+  version: version,
+  whitelisted: whitelisted,
+  parentAnalysisUuid: parentAnalysisUuid,
+});
 
 export const observableReadFactory = ({
   context = null,
