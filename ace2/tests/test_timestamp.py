@@ -24,13 +24,19 @@ def test_timestamp(mock_now):
     # test fromisoformat with no timezone
     timestamp = Timestamp.fromisoformat('2022-07-12T10:00:00')
     assert timestamp.isoformat() == '2022-07-12T10:00:00.000000+00:00'
+    timestamp = fromisoformat('2022-07-12T10:00:00')
+    assert timestamp.isoformat() == '2022-07-12T10:00:00.000000+00:00'
 
     # test fromisoformat with eastern timezone
     timestamp = Timestamp.fromisoformat('2022-07-12T10:00:00', eastern)
     assert timestamp.isoformat() == '2022-07-12T14:00:00.000000+00:00'
+    timestamp = fromisoformat('2022-07-12T10:00:00', eastern)
+    assert timestamp.isoformat() == '2022-07-12T14:00:00.000000+00:00'
 
     # test fromisoformat with timezone in string
     timestamp = Timestamp.fromisoformat('2022-07-12T10:00:00-04:00')
+    assert timestamp.isoformat() == '2022-07-12T14:00:00.000000+00:00'
+    timestamp = fromisoformat('2022-07-12T10:00:00-04:00')
     assert timestamp.isoformat() == '2022-07-12T14:00:00.000000+00:00'
 
 
