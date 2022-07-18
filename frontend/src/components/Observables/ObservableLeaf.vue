@@ -21,13 +21,13 @@
       &#128293;
     </span>
     <Button
-      v-if="observable.jumpToUuid"
+      v-if="observable.jumpToLeaf"
       v-tooltip="'Jump to Analysis'"
       data-cy="jump-to-button"
       role="button"
       icon="pi pi-reply"
       class="p-button-rounded p-button-secondary p-button-outlined p-button-sm leaf-element"
-      @click="scrollTo(observable.jumpToUuid, true)"
+      @click="scrollTo(observable.jumpToLeaf, true)"
     />
     <Button
       v-if="showCopyToClipboard"

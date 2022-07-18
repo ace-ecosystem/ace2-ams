@@ -1378,11 +1378,13 @@ def test_circular_tree(db):
 
     # Verify the first evil.com
     assert tree.root_analysis.children[0].type.value == "fqdn" and tree.root_analysis.children[0].value == "evil.com"
-    assert tree.root_analysis.children[0].jump_to_uuid is None
+    assert tree.root_analysis.children[0].jump_to_leaf is None
+    assert tree.root_analysis.children[0].leaf_id == f"{tree.root_analysis.children[0].uuid}-0"
     assert len(tree.root_analysis.children[0].children) == 1
 
     # Verify the Domain Analysis
     assert tree.root_analysis.children[0].children[0].analysis_module_type.value == "Domain Analysis"
+    assert tree.root_analysis.children[0].children[0].leaf_id == f"{tree.root_analysis.children[0].children[0].uuid}"
     assert len(tree.root_analysis.children[0].children[0].children) == 1
 
     # Verify the ipv4 observable
@@ -1390,12 +1392,20 @@ def test_circular_tree(db):
         tree.root_analysis.children[0].children[0].children[0].type.value == "ipv4"
         and tree.root_analysis.children[0].children[0].children[0].value == "127.0.0.1"
     )
-    assert tree.root_analysis.children[0].children[0].children[0].jump_to_uuid is None
+    assert tree.root_analysis.children[0].children[0].children[0].jump_to_leaf is None
+    assert (
+        tree.root_analysis.children[0].children[0].children[0].leaf_id
+        == f"{tree.root_analysis.children[0].children[0].children[0].uuid}-0"
+    )
     assert len(tree.root_analysis.children[0].children[0].children[0].children) == 1
 
     # Verify the IP Analysis
     assert (
         tree.root_analysis.children[0].children[0].children[0].children[0].analysis_module_type.value == "IP Analysis"
+    )
+    assert (
+        tree.root_analysis.children[0].children[0].children[0].children[0].leaf_id
+        == f"{tree.root_analysis.children[0].children[0].children[0].children[0].uuid}"
     )
     assert len(tree.root_analysis.children[0].children[0].children[0].children[0].children) == 1
 
@@ -1405,7 +1415,11 @@ def test_circular_tree(db):
         and tree.root_analysis.children[0].children[0].children[0].children[0].children[0].value == "evil.com"
     )
     assert (
-        tree.root_analysis.children[0].children[0].children[0].children[0].children[0].jump_to_uuid
-        == tree.root_analysis.children[0].tree_uuid
+        tree.root_analysis.children[0].children[0].children[0].children[0].children[0].jump_to_leaf
+        == tree.root_analysis.children[0].leaf_id
+    )
+    assert (
+        tree.root_analysis.children[0].children[0].children[0].children[0].children[0].leaf_id
+        == f"{tree.root_analysis.children[0].uuid}-1"
     )
     assert tree.root_analysis.children[0].children[0].children[0].children[0].children[0].children == []
