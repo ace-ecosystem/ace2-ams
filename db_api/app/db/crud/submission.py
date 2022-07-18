@@ -1035,6 +1035,8 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
         # can show a link that will take you to the place in the tree where the analysis exists. This is what cuts
         # off circular tree references.
         elif isinstance(current, Observable):
+            instance = current.convert_to_pydantic()
+
             if current.uuid not in observable_instances:
                 observable_instances[current.uuid] = []
 
@@ -1044,8 +1046,9 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
             else:
                 # TODO: Figure out what to add to denote the duplicate observable's "jump to analysis" link
                 print(f"duplicate observable! {current.type.value}: {current.value}")
+                instance.jump_to_uuid = observable_instances[current.uuid][0].tree_uuid
 
-            observable_instances[current.uuid].append(current.convert_to_pydantic())
+            observable_instances[current.uuid].append(instance)
 
     # Associate the analyses with their child observable instances. Because an observable may appear multiple times
     # in the tree, a dictionary is used to keep track of which instance of the observable needs to be added as a child

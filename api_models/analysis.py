@@ -91,15 +91,15 @@ class AnalysisSubmissionTreeRead(BaseModel):
         default_factory=list, description="A list of this analysis' child observables"
     )
 
-    first_appearance: bool = Field(
-        default=True, description="Whether or not this is the first time the object appears in the tree"
-    )
-
     # Set a static string value so code displaying the tree structure knows which type of object this is.
     object_type: str = "analysis"
 
     summary_details: list[AnalysisSummaryDetailRead] = Field(
         default_factory=list, description="A list of summary details added to the analysis"
+    )
+
+    tree_uuid: UUID4 = Field(
+        default_factory=uuid4, description="The unique identifier of the analysis in the nested tree structure"
     )
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
