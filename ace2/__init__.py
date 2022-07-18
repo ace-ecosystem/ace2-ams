@@ -3,6 +3,7 @@ logging.getLogger().setLevel(logging.INFO)
 from pydantic import Field
 from typing import Any, Dict, List, Optional, Union
 
+from . import persistent_data
 from .collector import Collector
 from .metadata import *
 from .module import Module
