@@ -11,6 +11,6 @@ set +a
 new_path=${1#db_api/app/}
 
 docker compose up -d
-docker exec -e SQL_ECHO=no ace2-ams-db-api pytest "$new_path" -vv
+docker exec -it -e SQL_ECHO=no ace2-ams-db-api pytest "$new_path" -vv
 
 bin/disable-test-mode.sh

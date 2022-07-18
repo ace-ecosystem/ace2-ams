@@ -898,10 +898,12 @@ def test_get_submission_tree(client, db):
         db=db, json_path="/app/tests/alerts/small.json", submission_name="Test Alert"
     )
 
-    # The small.json submission has 14 observables and 16 analyses (the Root Analysis is not included in the tree).
+    # The small.json submission has 13 observables (12 unique) and 15 analyses. The small.json template actually shows
+    # 14 observables and 15 analyses, but one of each of them are repeated, so they will actually only appear once
+    # in the SubmissionTreeRead object.
     get = client.get(f"/api/submission/{submission.uuid}")
-    assert str(get.json()["root_analysis"]["children"]).count("'observable'") == 14
-    assert str(get.json()["root_analysis"]["children"]).count("'analysis'") == 16
+    assert str(get.json()).count("'object_type': 'observable'") == 13
+    assert str(get.json()).count("'object_type': 'analysis'") == 15
     assert len(get.json()["root_analysis"]["children"]) == 2
 
 

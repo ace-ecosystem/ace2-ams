@@ -36,12 +36,12 @@ class Event(Base, HasHistory):
     alert_time = Column(DateTime(timezone=True), index=True)
 
     alerts: list[Submission] = relationship(
-        "Submission", primaryjoin="Submission.event_uuid == Event.uuid", lazy="selectin"
+        "Submission", primaryjoin="Submission.event_uuid == Event.uuid", lazy="selectin", viewonly=True
     )
 
     alert_uuids = association_proxy("alerts", "uuid")
 
-    comments = relationship("EventComment", lazy="selectin")
+    comments = relationship("EventComment", lazy="selectin", viewonly=True)
 
     # There isn't currently a way to automatically calculate this time
     contain_time = Column(DateTime(timezone=True), index=True)
