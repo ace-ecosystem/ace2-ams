@@ -136,13 +136,11 @@ class ObservableSubmissionTreeRead(ObservableSubmissionRead):
         default_factory=list, description="A list of this observable's child analysis"
     )
 
-    jump_to_uuid: Optional[UUID4] = Field(
-        description="The UUID of the first occurrence of this observable in the tree where the analysis can be viewed"
+    jump_to_leaf: Optional[type_str] = Field(
+        description="The identifier of the first occurrence of this observable in the tree where the analysis can be viewed"
     )
 
-    tree_uuid: UUID4 = Field(
-        default_factory=uuid4, description="The unique identifier of the observable in the nested tree structure"
-    )
+    leaf_id: type_str = Field(description="The unique identifier of the observable in the nested tree structure")
 
     class Config:
         orm_mode = True

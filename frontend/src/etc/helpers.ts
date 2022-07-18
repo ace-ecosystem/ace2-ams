@@ -46,7 +46,7 @@ export const scrollTo = (id: string | null, animate = false) => {
     const obj = document.getElementById(id);
 
     if (obj) {
-      obj.scrollIntoView({ behavior: "smooth", block: "center" });
+      obj.scrollIntoView({ behavior: "auto", block: "center" });
 
       if (animate) {
         obj.animate(

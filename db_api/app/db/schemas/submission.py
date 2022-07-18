@@ -185,8 +185,8 @@ class Submission(Base, HasHistory):
         ),
     )
 
-    def convert_to_pydantic(self) -> SubmissionTreeRead:
-        return SubmissionTreeRead(**self.to_dict())
+    def convert_to_pydantic(self, root_analysis) -> SubmissionTreeRead:
+        return SubmissionTreeRead(root_analysis=root_analysis, **self.to_dict())
 
     def to_dict(self, extra_ignore_keys: Optional[list[str]] = None):
         ignore_keys = [
@@ -196,6 +196,7 @@ class Submission(Base, HasHistory):
             "event",
             "history",
             "history_snapshot",
+            "root_analysis",
             "to_dict",
         ]
 
@@ -233,3 +234,8 @@ class Submission(Base, HasHistory):
         if history:
             return history.action_time
         return None
+
+
+from api_models.analysis import RootAnalysisSubmissionTreeRead
+
+RootAnalysisSubmissionTreeRead.update_forward_refs()

@@ -1,10 +1,6 @@
-import json
-import time
-
 from datetime import datetime
 from api_models.analysis_metadata import AnalysisMetadataRead
 from api_models.summaries import URLDomainSummary
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy import and_, func, not_, or_, select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.selectable import Select
@@ -1019,16 +1015,16 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
     # Iterate through all of the analysis and observable objects in the submission to build the individual
     # observable instances used to construct the tree. The analysis and observable objects are iterated in reverse
     # order so that the end result of the tree structure is correct.
-    analysis_instances: dict[UUID, AnalysisSubmissionTreeRead] = {
-        a.uuid: a.convert_to_pydantic() for a in db_submission.analyses
-    }
+    analysis_instances: dict[UUID, AnalysisSubmissionTreeRead] = {}
     observable_instances: dict[UUID, list[ObservableSubmissionTreeRead]] = {}
     unvisited: list[Union[Analysis, Observable]] = [db_submission.root_analysis]
     while unvisited:
         current = unvisited.pop(0)
+        instance = current.convert_to_pydantic()
 
         # If the current object is Analysis, just add each of its child observables to the unvisited list.
         if isinstance(current, Analysis):
+            analysis_instances[current.uuid] = instance
             for idx in range(len(current.child_observables) - 1, -1, -1):
                 unvisited.insert(0, current.child_observables[idx])
 
@@ -1037,8 +1033,6 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
         # can show a link that will take you to the place in the tree where the analysis exists. This is what cuts
         # off circular tree references.
         elif isinstance(current, Observable):
-            instance = current.convert_to_pydantic()
-
             if current.uuid not in observable_instances:
                 observable_instances[current.uuid] = []
 
@@ -1047,8 +1041,10 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
                     unvisited.insert(0, children[idx])
             else:
                 # Since this is a duplicate observable, add its "jump to" link so that the GUI can transport you
-                # to the observable instance in the tree that actually contains the analysis.
-                instance.jump_to_uuid = observable_instances[current.uuid][0].tree_uuid
+                # to the observable instance in the tree that actually contains the analysis. Also override its default
+                # leaf_id value.
+                instance.jump_to_leaf = observable_instances[current.uuid][0].leaf_id
+                instance.leaf_id = f"{current.uuid}-{len(observable_instances[current.uuid])}"
 
             observable_instances[current.uuid].append(instance)
 
@@ -1073,16 +1069,14 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
         )
 
     # Add each observable's child analyses, but only to the first instance of each observable. This is to cut off
-    # any circular references. The GUI will use a "jump to analysis" link under each repeated observable in the tree.
+    # any circular references. The GUI will use a "jump to analysis" link by each repeated observable in the tree.
     for observable_uuid in observable_instances:
         if observable_uuid in db_analyses_by_target_uuid:
             for db_analysis in db_analyses_by_target_uuid[observable_uuid]:
                 observable_instances[observable_uuid][0].children.append(analysis_instances[db_analysis.uuid])
 
     # Create the SubmissionTree object and set its root analysis.
-    tree = db_submission.convert_to_pydantic()
-    tree.root_analysis = analysis_instances[db_submission.root_analysis_uuid]
-    return tree
+    return db_submission.convert_to_pydantic(root_analysis=analysis_instances[db_submission.root_analysis_uuid])
 
 
 def read_summary_url_domain(uuid: UUID, db: Session) -> URLDomainSummary:
