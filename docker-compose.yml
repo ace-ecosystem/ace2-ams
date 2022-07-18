@@ -24,9 +24,9 @@ services:
       dockerfile: ./db_api/Dockerfile
       args:
         # needed if behind a proxy for pip installation
-        http_proxy: ${http_proxy}
-        https_proxy: ${https_proxy}
-        pip_install_options: ${pip_install_options}
+        http_proxy: ${http_proxy:-}
+        https_proxy: ${https_proxy:-}
+        pip_install_options: ${pip_install_options:-}
     environment:
       # The DATABASE_URL environment variable needs to be in the form of:
       # postgresql://<user>:<password>@db:5432/<database>
@@ -52,9 +52,9 @@ services:
       dockerfile: ./gui_api/Dockerfile
       args:
         # needed if behind a proxy for pip installation
-        http_proxy: ${http_proxy}
-        https_proxy: ${https_proxy}
-        pip_install_options: ${pip_install_options}
+        http_proxy: ${http_proxy:-}
+        https_proxy: ${https_proxy:-}
+        pip_install_options: ${pip_install_options:-}
     environment:
       # The DATABASE_URL environment variable needs to be in the form of:
       # postgresql://<user>:<password>@db:5432/<database>
@@ -83,9 +83,9 @@ services:
       dockerfile: ./Dockerfile.dev
       args:
         # needed if behind a proxy for pip installation
-        http_proxy: ${http_proxy}
-        https_proxy: ${https_proxy}
-        pip_install_options: ${pip_install_options}
+        http_proxy: ${http_proxy:-}
+        https_proxy: ${https_proxy:-}
+        pip_install_options: ${pip_install_options:-}
         npm_strict_ssl: ${npm_strict_ssl:-true}
     environment:
       - DATABASE_TEST_URL=${DATABASE_TEST_URL}
