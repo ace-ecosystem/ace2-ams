@@ -1044,8 +1044,8 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
                 for idx in range(len(children) - 1, -1, -1):
                     unvisited.insert(0, children[idx])
             else:
-                # TODO: Figure out what to add to denote the duplicate observable's "jump to analysis" link
-                print(f"duplicate observable! {current.type.value}: {current.value}")
+                # Since this is a duplicate observable, add its "jump to" link so that the GUI can transport you
+                # to the observable instance in the tree that actually contains the analysis.
                 instance.jump_to_uuid = observable_instances[current.uuid][0].tree_uuid
 
             observable_instances[current.uuid].append(instance)
