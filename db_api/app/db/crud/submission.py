@@ -948,7 +948,7 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
     """
     This function reads a submission from the database and constructs its nested tree structure.
 
-    When the submission dattabase object is obtained, it contains flat lists of analyses and observables that
+    When the submission database object is obtained, it contains flat lists of analyses and observables that
     make up the submission.
 
     Using the following circular alert as an example:
