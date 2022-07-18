@@ -945,30 +945,68 @@ def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
 
 
 def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
-    print()
-    print()
-    print()
+    """
+    This function reads a submission from the database and constructs its nested tree structure.
+
+    When the submission dattabase object is obtained, it contains flat lists of analyses and observables that
+    make up the submission.
+
+    Using the following circular alert as an example:
+
+        RootAnalysis
+            O1
+                A1
+                    O2
+                        A2
+                            O1 <-- cut off the loop here
+
+    These lists would look like:
+
+    submission.analyses = [RootAnalysis, A1, A2]
+    submission.child_observables = [O1, O2]
+
+    Each analysis object knows its target (parent) observable as well as any child observables it produced. Using
+    this information, we can construct the nested structure shown above from these two flat lists.
+
+    The general idea is to first produce individual instances of the observables contained in the submission. As shown
+    above, the flat list of child_observables only has two objects, but the nested tree structure contains O1 twice.
+
+    Once the observable instances are created, we can begin associating the analysis/observable objects with their
+    children. Beginning with the analysis objects, their child observable instances are added as children. That would
+    produce a result such as:
+
+        RootAnalysis
+            O1
+
+        A1
+            O2
+
+        A2
+            O1
+
+    Next, the analysis objects must be added as children to their target (parent) observable instances. However, to
+    avoid an infinite loop, analyses are only added as children to an observable if the observable is the first of its
+    kind in the tree. Using the example above, this means that only the first instance of O1 will have child analyses.
+    This is the step that produces the final nested tree structure.
+    """
 
     # Read the submission from the database
     db_submission = read_by_uuid(uuid=uuid, db=db)
 
-    # Build the matching events information
-    start = time.time()
+    # Build the matching events information and add it to the Submission object
     _build_matching_submission_events(s=db_submission)
-    print(f"built alert matching events in {time.time() - start} seconds")
 
-    # Set the number of observables
+    # Set the number_of_observables property on the Submission database object. This is not done automatically
+    # by the Submission SQLAlchemy class because the child_observables relationship is lazy-loaded.
     db_submission.number_of_observables = len(db_submission.child_observables)
 
-    # Associate metadata and other alert-specific information with the observables
-    start = time.time()
+    # Associate metadata and other alert-specific information with the observable database objects
     for db_observable in db_submission.child_observables:
         _associate_metadata_with_observable(analysis_uuids=db_submission.analysis_uuids, o=db_observable)
         _build_disposition_history(o=db_observable)
         _build_matching_observable_events(o=db_observable)
-    print(f"associated observable data in {time.time() - start} seconds")
 
-    # Build various lookup dictionaries of analyses that are used to build the nested tree structure.
+    # Build lookup dictionaries of the analyses that are used to more efficiently build the nested tree structure.
     analysis_instances: dict[UUID, AnalysisSubmissionTreeRead] = {
         a.uuid: a.convert_to_pydantic() for a in db_submission.analyses
     }
@@ -979,36 +1017,26 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
             db_analyses_by_target_uuid[db_analysis.target_uuid] = []
         db_analyses_by_target_uuid[db_analysis.target_uuid].append(db_analysis)
 
-    """
-    TREE STRUCTURE OF CIRCULAR.JSON:
-
-    RootAnalysis
-        O1
-            A1
-                O2
-                    A2
-                        O1 <-- cut off the loop here
-    """
-
-    start = time.time()
-    unique_observables = set()
+    # Iterate through all of the analysis and observable objects in the submission to build the individual
+    # observable instances used to construct the tree. The analysis and observable objects are iterated in reverse
+    # order so that the end result of the tree structure is correct.
     observable_instances: dict[UUID, list[ObservableSubmissionTreeRead]] = {}
-    unvisited = [db_submission.root_analysis]
+    unvisited: list[Union[Analysis, Observable]] = [db_submission.root_analysis]
     while unvisited:
         current = unvisited.pop(0)
 
+        # If the current object is Analysis, just add each of its child observables to the unvisited list.
         if isinstance(current, Analysis):
             for idx in range(len(current.child_observables) - 1, -1, -1):
                 unvisited.insert(0, current.child_observables[idx])
 
+        # If the current object is Observable, only add its child analyses to the unvisited list if we have not
+        # already seen this observable. Otherwise, add a "jump to" reference to the observable so that the GUI
+        # can show a link that will take you to the place in the tree where the analysis exists. This is what cuts
+        # off circular tree references.
         elif isinstance(current, Observable):
             if current.uuid not in observable_instances:
                 observable_instances[current.uuid] = []
-
-            observable_instances[current.uuid].append(current.convert_to_pydantic())
-
-            if current.uuid not in unique_observables:
-                unique_observables.add(current.uuid)
 
                 children = db_analyses_by_target_uuid.get(current.uuid, [])
                 for idx in range(len(children) - 1, -1, -1):
@@ -1017,20 +1045,21 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
                 # TODO: Figure out what to add to denote the duplicate observable's "jump to analysis" link
                 print(f"duplicate observable! {current.type.value}: {current.value}")
 
-    # Add each analysis' child observable instances
-    start = time.time()
-    analysis_observable_instance_index: dict[UUID, int] = {}
+            observable_instances[current.uuid].append(current.convert_to_pydantic())
+
+    # Associate the analyses with their child observable instances. Because an observable may appear multiple times
+    # in the tree, a dictionary is used to keep track of which instance of the observable needs to be added as a child
+    # to the analysis.
+    observable_indices: dict[UUID, int] = {}
     for analysis_uuid in analysis_instances:
         for db_child_observable in db_analyses_by_uuid[analysis_uuid].child_observables:
-            if db_child_observable.uuid not in analysis_observable_instance_index:
-                analysis_observable_instance_index[db_child_observable.uuid] = 0
+            if db_child_observable.uuid not in observable_indices:
+                observable_indices[db_child_observable.uuid] = 0
 
             analysis_instances[analysis_uuid].children.append(
-                observable_instances[db_child_observable.uuid][
-                    analysis_observable_instance_index[db_child_observable.uuid]
-                ],
+                observable_instances[db_child_observable.uuid][observable_indices[db_child_observable.uuid]],
             )
-            analysis_observable_instance_index[db_child_observable.uuid] += 1
+            observable_indices[db_child_observable.uuid] += 1
 
         # Sort each analysis instance's child observables according to their sort metadata (if they have any). If
         # they do not have any sort metadata, then "infinity" will be used.
@@ -1038,22 +1067,16 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
             key=lambda x: x.analysis_metadata.sort.value if x.analysis_metadata.sort else float("inf")
         )
 
-    print(f"added child observables to analyses in {time.time() - start} seconds")
-
     # Add each observable's child analyses, but only to the first instance of each observable. This is to cut off
     # any circular references. The GUI will use a "jump to analysis" link under each repeated observable in the tree.
-    start = time.time()
     for observable_uuid in observable_instances:
         if observable_uuid in db_analyses_by_target_uuid:
             for db_analysis in db_analyses_by_target_uuid[observable_uuid]:
                 observable_instances[observable_uuid][0].children.append(analysis_instances[db_analysis.uuid])
 
-    print(f"added child analysis to observables in {time.time() - start} seconds")
-
     # Create the SubmissionTree object and set its root analysis.
     tree = db_submission.convert_to_pydantic()
     tree.root_analysis = analysis_instances[db_submission.root_analysis_uuid]
-    print(f"built tree structure in {time.time() - start} seconds")
     return tree
 
 
