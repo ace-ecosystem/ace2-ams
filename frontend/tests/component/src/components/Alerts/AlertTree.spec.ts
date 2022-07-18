@@ -17,7 +17,6 @@ import { metadataTagReadFactory } from "@mocks/metadata";
 
 const childObservable = observableTreeReadFactory({
   value: "Child Observable",
-  firstAppearance: true,
 });
 const childAnalysis = analysisTreeReadFactory({
   analysisModuleType: analysisModuleTypeAlertTreeReadFactory({
@@ -34,7 +33,6 @@ const parentAnalysis = analysisTreeReadFactory({
     value: "Parent Analysis",
   }),
   children: [childObservable],
-  firstAppearance: true,
 });
 interface AlertTreeProps {
   items: (analysisTreeRead | observableTreeRead)[];

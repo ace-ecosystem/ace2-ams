@@ -70,7 +70,8 @@ export interface observableReadPage {
 
 export interface observableTreeRead extends observableInAlertRead {
   children: analysisTreeRead[];
-  firstAppearance?: boolean;
+  jumpToUuid: UUID | null;
+  treeUuid: UUID;
 }
 
 export interface observableUpdate extends historyUsername {
