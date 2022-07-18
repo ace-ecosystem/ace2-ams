@@ -909,7 +909,22 @@ def read_all_history(uuid: UUID, db: Session) -> list[SubmissionHistory]:
 
 
 def read_by_uuid(uuid: UUID, db: Session) -> Submission:
-    return crud.helpers.read_by_uuid(db_table=Submission, uuid=uuid, db=db)
+    submission: Submission = crud.helpers.read_by_uuid(db_table=Submission, uuid=uuid, db=db)
+
+    # Build the matching events information and add it to the Submission object
+    _build_matching_submission_events(s=submission)
+
+    # Set the number_of_observables property on the Submission database object. This is not done automatically
+    # by the Submission SQLAlchemy class because the child_observables relationship is lazy-loaded.
+    submission.number_of_observables = len(submission.child_observables)
+
+    # Associate metadata and other alert-specific information with the observable database objects
+    for db_observable in submission.child_observables:
+        _associate_metadata_with_observable(analysis_uuids=submission.analysis_uuids, o=db_observable)
+        _build_disposition_history(o=db_observable)
+        _build_matching_observable_events(o=db_observable)
+
+    return submission
 
 
 def read_observables(uuids: list[UUID], db: Session) -> list[Observable]:
@@ -993,23 +1008,7 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
     # Read the submission from the database
     db_submission = read_by_uuid(uuid=uuid, db=db)
 
-    # Build the matching events information and add it to the Submission object
-    _build_matching_submission_events(s=db_submission)
-
-    # Set the number_of_observables property on the Submission database object. This is not done automatically
-    # by the Submission SQLAlchemy class because the child_observables relationship is lazy-loaded.
-    db_submission.number_of_observables = len(db_submission.child_observables)
-
-    # Associate metadata and other alert-specific information with the observable database objects
-    for db_observable in db_submission.child_observables:
-        _associate_metadata_with_observable(analysis_uuids=db_submission.analysis_uuids, o=db_observable)
-        _build_disposition_history(o=db_observable)
-        _build_matching_observable_events(o=db_observable)
-
     # Build lookup dictionaries of the analyses that are used to more efficiently build the nested tree structure.
-    analysis_instances: dict[UUID, AnalysisSubmissionTreeRead] = {
-        a.uuid: a.convert_to_pydantic() for a in db_submission.analyses
-    }
     db_analyses_by_uuid: dict[UUID, Analysis] = {a.uuid: a for a in db_submission.analyses}
     db_analyses_by_target_uuid: dict[UUID, list[Analysis]] = {}
     for db_analysis in db_submission.analyses:
@@ -1020,6 +1019,9 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
     # Iterate through all of the analysis and observable objects in the submission to build the individual
     # observable instances used to construct the tree. The analysis and observable objects are iterated in reverse
     # order so that the end result of the tree structure is correct.
+    analysis_instances: dict[UUID, AnalysisSubmissionTreeRead] = {
+        a.uuid: a.convert_to_pydantic() for a in db_submission.analyses
+    }
     observable_instances: dict[UUID, list[ObservableSubmissionTreeRead]] = {}
     unvisited: list[Union[Analysis, Observable]] = [db_submission.root_analysis]
     while unvisited:
