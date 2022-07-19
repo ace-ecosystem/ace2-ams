@@ -41,7 +41,6 @@ function factory(stubActions = true) {
 }
 
 describe("ViewAlert", () => {
-  
   it("renders correctly when alert can be fetched", () => {
     const summary = {
       content: "test",
@@ -50,7 +49,8 @@ describe("ViewAlert", () => {
       uuid: "1111",
     };
     const rootAnalysis = rootAnalysisTreeReadFactory({
-      summaryDetails: [summary],})
+      summaryDetails: [summary],
+    });
     cy.stub(Alert, "read").resolves(
       alertTreeReadFactory({ rootAnalysis: rootAnalysis }),
     );
@@ -63,11 +63,11 @@ describe("ViewAlert", () => {
       expect(wrapper.findComponent(TheAlertSummaryVue)).to.exist;
       expect(wrapper.findComponent(AlertTreeVue)).to.exist;
       expect(wrapper.findComponent(AnalysisSummaryDetailVue)).to.exist;
-      cy.contains("Summary Details").should('be.visible');
+      cy.contains("Summary Details").should("be.visible");
     });
   });
 
-  it.only("displays all summary details", () => {
+  it("displays all summary details", () => {
     const summary = {
       content: "test1",
       format: genericObjectReadFactory(),
@@ -81,25 +81,24 @@ describe("ViewAlert", () => {
       uuid: "2222",
     };
     const rootAnalysis = rootAnalysisTreeReadFactory({
-      summaryDetails: [summary,summary2],})
+      summaryDetails: [summary, summary2],
+    });
     cy.stub(Alert, "read").resolves(
       alertTreeReadFactory({ rootAnalysis: rootAnalysis }),
     );
     factory(false).then((wrapper) => {
       expect(wrapper.findComponent(AnalysisSummaryDetailVue)).to.exist;
-      cy.contains("Summary Details").should('be.visible');
+      cy.contains("Summary Details").should("be.visible");
       // cy.get('#pv_id_2_header > .pi').click();
-      cy.contains("testHeader1").should('be.visible');
-      cy.contains("testHeader2").should('be.visible');
+      cy.contains("testHeader1").should("be.visible");
+      cy.contains("testHeader2").should("be.visible");
     });
   });
 
   it("does not display Summary Details when there is none", () => {
-    cy.stub(Alert, "read").resolves(
-      alertTreeReadFactory({}),
-    );
-    factory(false)
-    cy.contains("Summary Details").should('not.exist');
+    cy.stub(Alert, "read").resolves(alertTreeReadFactory({}));
+    factory(false);
+    cy.contains("Summary Details").should("not.exist");
   });
 
   it("attempts to disposition alert as 'false positive' on ignoreClicked event", () => {

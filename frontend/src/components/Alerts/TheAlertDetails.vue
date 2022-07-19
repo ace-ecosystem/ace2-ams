@@ -13,7 +13,6 @@
       {{ prettyAlertDetails }}
     </div>
   </Panel>
-
 </template>
 <script setup lang="ts">
   import Panel from "primevue/panel";

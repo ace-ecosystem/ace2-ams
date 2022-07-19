@@ -20,7 +20,10 @@
     <br />
     <AlertMatchingOpenEventsPanel />
     <br />
-        <AnalysisSummaryDetail v-if="alertStore.open.rootAnalysis.summaryDetails.length" :summary-details="alertStore.open.rootAnalysis.summaryDetails"/>
+    <AnalysisSummaryDetail
+      v-if="alertStore.open.rootAnalysis.summaryDetails.length"
+      :summary-details="alertStore.open.rootAnalysis.summaryDetails"
+    />
     <br />
     <TheAlertDetails />
     <br />

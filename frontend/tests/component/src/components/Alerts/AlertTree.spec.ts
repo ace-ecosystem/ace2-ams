@@ -119,7 +119,7 @@ describe("AlertTree", () => {
       .invoke("attr", "href")
       .should("contain", "/alert/test/testUuid");
   });
-  it.only("displays all Analysis Summary Details", () => {
+  it("displays all Analysis Summary Details", () => {
     const summary = {
       content: "test1",
       format: genericObjectReadFactory(),
@@ -140,10 +140,15 @@ describe("AlertTree", () => {
       firstAppearance: true,
       summaryDetails: [summary, summary2],
     });
-    factory({props: { items: [parentObservable, parentAnalysisWithSummary], alertId: "test" }})
-      cy.contains("Summary Details").should('be.visible');
-      // cy.get('#pv_id_2_header > .pi').click();
-      cy.contains("testHeader1").should('be.visible');
-      cy.contains("testHeader2").should('be.visible');
+    factory({
+      props: {
+        items: [parentObservable, parentAnalysisWithSummary],
+        alertId: "test",
+      },
+    });
+    cy.contains("Summary Details").should("be.visible");
+    // cy.get('#pv_id_2_header > .pi').click();
+    cy.contains("testHeader1").should("be.visible");
+    cy.contains("testHeader2").should("be.visible");
   });
 });

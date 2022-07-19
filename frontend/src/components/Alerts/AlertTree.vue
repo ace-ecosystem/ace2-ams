@@ -29,7 +29,10 @@
 
           <router-link v-else-if="isAnalysis(i)" :to="viewAnalysisRoute(i)">
             <span class="treenode-text">{{ treeItemName(i) }}</span>
-              <AnalysisSummaryDetail v-if="i.summaryDetails.length" :summary-details="i.summaryDetails"/>
+            <AnalysisSummaryDetail
+              v-if="i.summaryDetails.length"
+              :summary-details="i.summaryDetails"
+            />
           </router-link>
         </span>
 

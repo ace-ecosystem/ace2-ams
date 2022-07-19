@@ -1,25 +1,26 @@
 <!-- AnalysisSummaryDetail.vue -->
 
 <template>
-<Panel header="Summary Details" :toggleable="true" :collapsed="false">
-              <div v-for="details of summaryDetails" :key="details.uuid">
-<div>
-    <Card>
-      <template #content>
-      <div data-cy="summary-details-content">
-        <div v-if="details">
-          <Panel :header="details.header">
-        <pre v-if="details.format.value == 'pre'">{{ details.content }}</pre>
-          <span v-else>{{ details.content }}</span>
-        </Panel>
-        </div>
-        </div>
-      </template>
-    </Card>
-  </div>
+  <Panel header="Summary Details" :toggleable="true" :collapsed="false">
+    <div v-for="details of summaryDetails" :key="details.uuid">
+      <div>
+        <Card>
+          <template #content>
+            <div data-cy="summary-details-content">
+              <div v-if="details">
+                <Panel :header="details.header">
+                  <pre v-if="details.format.value == 'pre'">{{
+                    details.content
+                  }}</pre>
+                  <span v-else>{{ details.content }}</span>
+                </Panel>
               </div>
-            </Panel>
-  
+            </div>
+          </template>
+        </Card>
+      </div>
+    </div>
+  </Panel>
 </template>
 
 <script setup lang="ts">
