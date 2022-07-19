@@ -29,11 +29,7 @@
 
           <router-link v-else-if="isAnalysis(i)" :to="viewAnalysisRoute(i)">
             <span class="treenode-text">{{ treeItemName(i) }}</span>
-            <!--<div v-if="i.summarydetail" >
-              <span class="treenode-text">{{
-                i.summarydetail
-              }}</span>
-              </div> -->
+              <AnalysisSummaryDetail v-if="i.summaryDetails.length" :summary-details="i.summaryDetails"/>
           </router-link>
         </span>
 
@@ -53,6 +49,9 @@
   import { onBeforeMount, defineProps, ref, PropType } from "vue";
   import { analysisTreeRead } from "@/models/analysis";
   import { observableTreeRead } from "@/models/observable";
+  import AnalysisSummaryDetail from "@/components/analysis/AnalysisSummaryDetail.vue";
+  import Panel from "primevue/panel";
+  import Card from "primevue/card";
 
   const props = defineProps({
     items: {
@@ -127,7 +126,7 @@
   }
 </script>
 
-<style>
+<style scoped>
   .p-treenode-children {
     margin: 0;
     padding: 0;

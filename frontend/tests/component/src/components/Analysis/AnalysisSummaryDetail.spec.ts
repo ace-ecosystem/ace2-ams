@@ -42,8 +42,9 @@ function factory(props: analysisSummaryDetailProps = {}) {
             header: "testHeader",
             uuid: "1111",
         };
-        factory({summary:summary})
-        cy.get('span').should('have.text','test')
+        factory({summaryDetails:[summary]})
+        cy.contains('testHeader').should('be.visible')
+        cy.get('[data-cy=summary-details-content]').find('span').eq(1).should('have.text',"test")
     })
     it("displays summary detail in pre if summary format is not plaintext", () => {
         const summary={
@@ -52,7 +53,12 @@ function factory(props: analysisSummaryDetailProps = {}) {
             header: "testHeader",
             uuid: "1111",
         };
-        factory({summary:summary})
+        factory({summaryDetails:[summary]})
+        cy.contains('testHeader').should('be.visible')
         cy.get('pre').should('have.text','test')
+    })
+
+    it("does not exist when there is no summary detail", () => {
+        cy.contains('Summary Details').should('not.exist')
     })
   });

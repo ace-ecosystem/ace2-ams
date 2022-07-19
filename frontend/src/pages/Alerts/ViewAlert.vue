@@ -20,11 +20,7 @@
     <br />
     <AlertMatchingOpenEventsPanel />
     <br />
-    <!-- <Panel header="Summary Details" :toggleable="true" :collapsed="true">
-      <div v-for="details in alertStore.open.rootAnalysis.Details">
-        <AnalysisSummaryDetail />
-      </div>
-    </Panel> -->
+        <AnalysisSummaryDetail v-if="alertStore.open.rootAnalysis.summaryDetails.length" :summary-details="alertStore.open.rootAnalysis.summaryDetails"/>
     <br />
     <TheAlertDetails />
     <br />
@@ -48,8 +44,8 @@
 <script setup lang="ts">
   import { onBeforeMount, onUnmounted, provide, inject, ref } from "vue";
   import { useRoute } from "vue-router";
-
   import Card from "primevue/card";
+  import Panel from "primevue/panel";
   import Message from "primevue/message";
   import ScrollTop from "primevue/scrolltop";
 
