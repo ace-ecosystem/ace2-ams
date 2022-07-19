@@ -8,6 +8,7 @@
         :class="containerClass(i)"
         :data-cy="treeItemName(i)"
       >
+        <!-- <span v-if="leafVisible(index)" class="p-treenode-content"> -->
         <span class="p-treenode-content">
           <span v-if="!i.children.length">
             <i class="pi pi-fw pi-minus"></i>
@@ -38,7 +39,12 @@
           v-if="leafExpanded(index) && i.children.length"
           class="p-treenode-children"
         >
-          <AlertTree :items="i.children" :alert-id="alertId" />
+          <AlertTree
+            :ref="childTree"
+            :items="i.children"
+            :alert-id="alertId"
+            :all-analysis="allAnalysis"
+          />
         </div>
       </li>
     </ul>
@@ -47,7 +53,15 @@
 
 <script setup lang="ts">
   import ObservableLeafVue from "@/components/Observables/ObservableLeaf.vue";
-  import { onBeforeMount, defineProps, ref, PropType } from "vue";
+  import {
+    onBeforeMount,
+    computed,
+    defineProps,
+    defineExpose,
+    ref,
+    PropType,
+    watch,
+  } from "vue";
   import { analysisTreeRead } from "@/models/analysis";
   import { observableTreeRead } from "@/models/observable";
 
@@ -60,13 +74,37 @@
       type: String,
       required: true,
     },
+    allAnalysis: {
+      type: Boolean,
+      required: true,
+    },
   });
 
   const itemsExpandedStatus = ref<Record<number, boolean>>({});
+  const childTree = ref<any>();
 
   onBeforeMount(() => {
-    itemsExpandedStatus.value = generateExpandedStatus(props.items);
+    resetExpansion();
   });
+
+  // function generateExpandedStatus(
+  //   items: (analysisTreeRead | observableTreeRead)[],
+  // ) {
+  //   const expandedStatus: Record<number, boolean> = {};
+  //   items.forEach((item, index) => {
+  //     expandedStatus[index] = item.firstAppearance
+  //       ? item.firstAppearance
+  //       : false;
+  //   });
+  //   return expandedStatus;
+  // }
+
+  watch(
+    () => props.allAnalysis,
+    () => {
+      resetExpansion();
+    },
+  );
 
   function generateExpandedStatus(
     items: (analysisTreeRead | observableTreeRead)[],
@@ -75,11 +113,52 @@
     items.forEach((_, index) => {
       expandedStatus[index] = true;
     });
+
+    if (props.allAnalysis) {
+      items.forEach((item, index) => {
+        const criticalPath = item.criticalPath ? item.criticalPath : false;
+        expandedStatus[index] = criticalPath;
+      });
+    }
+
     return expandedStatus;
   }
 
+  const itemsVisibleStatus = computed(() => {
+    const visibleStatus: Record<number, boolean> = {};
+    if (props.allAnalysis) {
+      props.items.forEach((item, index) => {
+        visibleStatus[index] = true;
+      });
+    } else {
+      props.items.forEach((item, index) => {
+        visibleStatus[index] = item.criticalPath ? item.criticalPath : false;
+      });
+    }
+    return visibleStatus;
+  });
+
+  function expandAll() {
+    Object.keys(itemsExpandedStatus.value).forEach((key: any) => {
+      itemsExpandedStatus.value[key] = true;
+    });
+    childTree.value?.expandAll();
+  }
+  function collapseAll() {
+    Object.keys(itemsExpandedStatus.value).forEach((key: any) => {
+      itemsExpandedStatus.value[key] = false;
+    });
+    childTree.value?.collapseAll();
+  }
+  function resetExpansion() {
+    itemsExpandedStatus.value = generateExpandedStatus(props.items);
+    childTree.value?.resetExpansion();
+  }
   function leafExpanded(index: number) {
     return itemsExpandedStatus.value[index];
+  }
+  function leafVisible(index: number) {
+    return itemsVisibleStatus.value[index];
   }
   function toggleLeafExpanded(index: number) {
     itemsExpandedStatus.value[index] = !itemsExpandedStatus.value[index];
@@ -121,6 +200,12 @@
   function containerClass(item: analysisTreeRead | observableTreeRead) {
     return ["p-treenode", { "p-treenode-leaf": !item.children.length }];
   }
+
+  defineExpose({
+    collapseAll,
+    expandAll,
+    resetExpansion,
+  });
 </script>
 
 <style>
