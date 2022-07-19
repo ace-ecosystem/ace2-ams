@@ -39,7 +39,7 @@ def test_module(mock_queue):
             'value': '127.0.0.1',
         },
     }
-    analysis = Module(**analysis)
+    analysis = Service(**analysis)
     analysis.start()
 
     # verify database message

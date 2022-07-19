@@ -1,7 +1,7 @@
 from .analysis import Analysis
 from .service import Service
 
-class Module(Analysis, Service):
+class Module(Service, Analysis):
     ''' Base class for building analysis modules '''
 
     def start(self):
