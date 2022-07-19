@@ -94,6 +94,12 @@ describe("Alert calls", () => {
     expect(res).toEqual("Read successful");
   });
 
+  it("will make a get request to the /alert/{uuid}/history endpoint when 'readHistory' is called with a given UUID", async () => {
+    myNock.get("/alert/uuid/history").reply(200, "Read successful");
+    const res = await api.readHistory("uuid");
+    expect(res).toEqual("Read successful");
+  });
+
   it("will make a get request to the /alert/ endpoint when 'readPage' is called with no params, if none given", async () => {
     myNock.get("/alert/").reply(200, "Read successful");
     const res = await api.readPage();
@@ -110,10 +116,29 @@ describe("Alert calls", () => {
     expect(res).toEqual("Read successful");
   });
 
+  it("will make a get request to the /alert/ endpoint when 'readAllPages' is called with properly formatted params", async () => {
+    myNock
+      .get(
+        "/alert/?limit=10&offset=0&name=Test+Name&disposition=FALSE_POSITIVE&observable_types=testA%2CtestB&tags=tagA%2CtagB&threats=threatA%2CthreatB&observable=test%7Cexample",
+      )
+      .reply(200, { items: [], total: 0 });
+    const res = await api.readAllPages(MOCK_PARAMS);
+    expect(res).toEqual([]);
+  });
+
   it("will make a patch request to the /alert/ endpoint when 'update' is called with an array of update data", async () => {
     myNock.patch("/alert/").reply(200, "Update successful");
     const res = await api.update([MOCK_ALERT_UPDATE]);
     expect(res).toEqual("Update successful");
+  });
+
+  it("will make a post request to the /alert/observables endpoint when 'readHistory' is called with a given UUID", async () => {
+    const uuids = ["uuid1", "uuid2"];
+    myNock
+      .post("/alert/observables", JSON.stringify(uuids))
+      .reply(200, "Read successful");
+    const res = await api.readObservables(uuids);
+    expect(res).toEqual("Read successful");
   });
 
   it("will make a get request to the /alert/{uuid}/summary/url_domain endpoint when 'readUrlDomainSummary' is called with a given UUID", async () => {

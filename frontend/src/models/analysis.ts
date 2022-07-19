@@ -3,6 +3,7 @@ import {
   analysisModuleTypeAlertTreeRead,
   analysisModuleTypeRead,
 } from "./analysisModuleType";
+import { analysisSummaryDetailRead } from "./analysisSummaryDetail";
 import { observableRead, observableTreeRead } from "./observable";
 
 export interface analysisRead {
@@ -15,6 +16,7 @@ export interface analysisRead {
   runTime: string;
   stackTrace: string | null;
   summary: string | null;
+  summaryDetails: analysisSummaryDetailRead[];
   uuid: UUID;
 }
 
@@ -23,11 +25,12 @@ export interface analysisTreeRead {
   analysisModuleType: analysisModuleTypeAlertTreeRead | null;
   children: observableTreeRead[];
   errorMessage: string | null;
-  firstAppearance?: boolean;
   criticalPath?: boolean;
+  leafId: string;
   objectType: string;
   stackTrace: string | null;
   summary: string | null;
+  summaryDetails: analysisSummaryDetailRead[];
   uuid: UUID;
 }
 

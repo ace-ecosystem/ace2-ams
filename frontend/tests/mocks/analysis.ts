@@ -40,6 +40,7 @@ export const analysisReadFactory = ({
   runTime = "2020-01-01T00:00:00.000000+00:00",
   stackTrace = null,
   summary = null,
+  summaryDetails = [],
   objectType = "analysis",
   uuid = "uuid2",
 }: Partial<analysisRead> = {}): analysisRead => ({
@@ -51,6 +52,7 @@ export const analysisReadFactory = ({
   runTime: runTime,
   stackTrace: stackTrace,
   summary: summary,
+  summaryDetails: summaryDetails,
   objectType: objectType,
   uuid: uuid,
 });
@@ -67,34 +69,40 @@ export const analysisTreeReadFactory = ({
   analysisModuleType = analysisModuleTypeAlertTreeReadFactory(),
   children = [],
   errorMessage = null,
-  firstAppearance = undefined,
   criticalPath = undefined,
+  leafId = "testTreeUuid",
   stackTrace = null,
   summary = null,
+  summaryDetails = [],
   uuid = "testUuid",
 }: Partial<analysisTreeRead> = {}): analysisTreeRead => ({
   analysisModuleType: analysisModuleType,
   children: children,
   errorMessage: errorMessage,
-  firstAppearance: firstAppearance,
   criticalPath: criticalPath,
+  leafId: leafId,
   objectType: "analysis",
   stackTrace: stackTrace,
   summary: summary,
+  summaryDetails: summaryDetails,
   uuid: uuid,
 });
 
 export const rootAnalysisTreeReadFactory = ({
   children = [],
   details = null,
+  leafId = "testTreeUuid",
+  summaryDetails = [],
   uuid = "testUuid",
 }: Partial<rootAnalysisTreeRead> = {}): rootAnalysisTreeRead => ({
   analysisModuleType: null,
   children: children,
   details: details,
   errorMessage: null,
+  leafId: leafId,
   objectType: "analysis",
   stackTrace: null,
   summary: null,
+  summaryDetails: summaryDetails,
   uuid: uuid,
 });

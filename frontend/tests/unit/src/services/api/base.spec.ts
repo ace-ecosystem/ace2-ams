@@ -47,6 +47,17 @@ describe("BaseAPI calls", () => {
     expect(res).toEqual("Read successful");
   });
 
+  it("make as many read requests as necessary and compile results on readAll", async () => {
+    myNock
+      .get("/read?offset=0")
+      .reply(200, { items: ["1"], total: 2, limit: 1 });
+    myNock
+      .get("/read?offset=1")
+      .reply(200, { items: ["2"], total: 2, limit: 1 });
+    const res = await api.readAll("/read");
+    expect(res).toEqual(["1", "2"]);
+  });
+
   it("make a patch request when updateRequest called", async () => {
     myNock.patch("/update").reply(200, "Update successful");
     const res = await api.update("/update");

@@ -273,6 +273,33 @@ def test_create_valid_optional_fields(client, db, key, value):
         assert get.json()[key] == value
 
 
+def test_create_summary_details(client, db):
+    submission = factory.submission.create(db=db)
+    analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
+    observable = factory.observable.create_or_read(
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
+    )
+    factory.format.create_or_read(value="PRE", db=db)
+
+    # Create the object
+    create = client.post(
+        "/api/analysis/",
+        json={
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "run_time": str(crud.helpers.utcnow()),
+            "submission_uuid": str(submission.uuid),
+            "summary_details": [{"content": "test", "header": "test", "format": "PRE"}],
+            "target_uuid": str(observable.uuid),
+        },
+    )
+    assert create.status_code == status.HTTP_201_CREATED
+
+    # Read it back
+    get = client.get(create.headers["Content-Location"])
+    assert get.status_code == 200
+    assert len(get.json()["summary_details"]) == 1
+
+
 def test_create_valid_required_fields(client, db):
     submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
