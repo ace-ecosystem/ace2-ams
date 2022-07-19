@@ -15,7 +15,7 @@ interface analysisSummaryDetailProps {
   summaryDetails: analysisSummaryDetailRead[];
 }
 
-function factory(props: analysisSummaryDetailProps = {summaryDetails: []}) {
+function factory(props: analysisSummaryDetailProps = { summaryDetails: [] }) {
   return mount(AnalysisSummaryDetail, {
     global: {
       plugins: [PrimeVue, createPinia()],
