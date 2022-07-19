@@ -28,6 +28,12 @@ class FileTypeAnalysis(Module):
         return isinstance(self.target, File)
 
     def execute(self):
+        persistent_data.set('file_type_analysis.foo', 'bar')
+        foo = persistent_data.get('file_type_analysis.foo')
+        logging.info(f'loaded foo = {foo}')
+        hello = persistent_data.get('file_type_analysis.hello')
+        logging.info(f'loaded hello = {hello}')
+
         # get the human readable type
         process = subprocess.run(['file', '-b', '-L', self.target.path], capture_output=True, text=True)
         if process.stderr:
