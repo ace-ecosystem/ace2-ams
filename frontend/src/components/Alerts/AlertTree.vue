@@ -52,7 +52,7 @@
   import { onBeforeMount, defineProps, ref, PropType } from "vue";
   import { analysisTreeRead } from "@/models/analysis";
   import { observableTreeRead } from "@/models/observable";
-  import AnalysisSummaryDetail from "@/components/analysis/AnalysisSummaryDetail.vue";
+  import AnalysisSummaryDetail from "@/components/Analysis/AnalysisSummaryDetail.vue";
   import Panel from "primevue/panel";
   import Card from "primevue/card";
 
