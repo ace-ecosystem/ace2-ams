@@ -1086,8 +1086,9 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
     #
     # Adapted from: https://www.geeksforgeeks.org/iterative-postorder-traversal-of-n-ary-tree/
     def _is_critical_path(o):
-        contains_critical_points = bool(isinstance(current, Observable)
-                                        and o[0].analysis_metadata.critical_points)
+        contains_critical_points = bool(
+            current[0].object_type == "observable" and o[0].analysis_metadata.critical_points
+        )
         if contains_critical_points:
             return True
 
@@ -1098,7 +1099,7 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
     critical_point_path_uuids: set[UUID] = set()
     current_root_index = 0
     stack = []
-    root = db_submission.root_analysis.convert_to_pydantic()
+    root = analysis_instances[db_submission.root_analysis_uuid]
 
     while root != None or len(stack) > 0:
         if root != None:
@@ -1112,7 +1113,6 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
             continue
 
         current = stack.pop()
-        instance = current.convert_to_pydantic()
         if _is_critical_path(current):
             critical_point_path_uuids.add(current[0].uuid)
             current[0].critical_path = True
