@@ -153,3 +153,17 @@ def strptime(timestamp:str, pattern:str, tz:tzinfo=utc):
 
     # create a Timestamp object that represents the given formatted timestamp string
     return Timestamp.strptime(timestamp, pattern, tz)
+
+def fromisoformat(timestamp:str, tz:tzinfo=utc):
+    ''' creates a Timestamp object from an iso formatted string
+
+    Args:
+        timestamp: the iso formatted string to convert to a Timestamp Object
+        tz: the timezone to use for the string if it does not have one
+
+    Returns:
+        the utc Timestamp object represented by the given iso formatted timestamp string
+    '''
+
+    # create a Timestamp object that represents the given iso formatted timestamp string
+    return Timestamp.fromisoformat(timestamp, tz)

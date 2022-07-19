@@ -7,6 +7,35 @@ import pytest
 from shutil import copyfile
 
 
+@pytest.fixture(autouse=True)
+def mock_persistent_data(monkeypatch):
+    class MockTable():
+        def __init__(self):
+            self.items = {}
+
+        def get_item(self, Key=None, AttributesToGet=None, ConsistentRead=False):
+            assert ConsistentRead
+            assert AttributesToGet == [ 'value' ]
+            if Key['key'] in self.items:
+                return { 'Item': { 'value': self.items[Key['key']] } }
+            return {}
+
+        def put_item(self, Item=None):
+            self.items[Item['key']] = Item['value']
+
+    mock_table = MockTable()
+
+    class MockResource():
+        def __init__(self, resource):
+            assert resource == 'dynamodb'
+
+        def Table(self, table):
+            assert table == 'persistent_data'
+            return mock_table
+
+    monkeypatch.setattr('ace2.persistent_data.resource', MockResource)
+
+
 # make sure we return a constant value from datetime.now functions
 _mock_now = datetime(2020, 1, 2, 3, 4, 5, 6)
 @pytest.fixture(autouse=True)
