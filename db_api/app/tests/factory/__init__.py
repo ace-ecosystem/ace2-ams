@@ -12,6 +12,7 @@ from tests.factory import event_source
 from tests.factory import event_status
 from tests.factory import event_type
 from tests.factory import event_vector
+from tests.factory import metadata_critical_point
 from tests.factory import format
 from tests.factory import metadata_detection_point
 from tests.factory import metadata_directive

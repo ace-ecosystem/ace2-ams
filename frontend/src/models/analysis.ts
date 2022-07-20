@@ -27,6 +27,7 @@ export interface analysisTreeRead {
   analysisModuleType: analysisModuleTypeAlertTreeRead | null;
   children: observableTreeRead[];
   errorMessage: string | null;
+  criticalPath?: boolean;
   leafId: string;
   objectType: string;
   stackTrace: string | null;

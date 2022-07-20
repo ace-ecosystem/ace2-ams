@@ -24,18 +24,7 @@
     <br />
     <AlertUrlDomainSummary :alert-uuid="alertID" />
     <br />
-    <Card style="overflow-x: scroll">
-      <template #content>
-        <div class="p-tree p-component p-tree-wrapper" style="border: none">
-          <AlertTree
-            id="alert-tree"
-            :items="alertStore.open.rootAnalysis.children"
-            :alert-id="alertID"
-          />
-          <ScrollTop />
-        </div>
-      </template>
-    </Card>
+    <AlertTreeContainer />
   </div>
 </template>
 
@@ -50,7 +39,7 @@
   import TheAlertActionToolbar from "@/components/Alerts/TheAlertActionToolbar.vue";
   import AlertUrlDomainSummary from "@/components/Alerts/AlertUrlDomainSummary.vue";
   import AlertMatchingOpenEventsPanel from "@/components/Alerts/AlertMatchingOpenEventsPanel.vue";
-  import AlertTree from "@/components/Alerts/AlertTree.vue";
+  import AlertTreeContainer from "@/components/Alerts/AlertTreeContainer.vue";
   import TheAlertSummary from "@/components/Alerts/TheAlertSummary.vue";
   import TheAlertDetails from "@/components/Alerts/TheAlertDetails.vue";
   import { useAlertStore } from "@/stores/alert";

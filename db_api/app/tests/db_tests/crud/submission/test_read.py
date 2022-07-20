@@ -628,6 +628,7 @@ def test_read_observables(db):
         value="bad.com",
         parent_analysis=submission.root_analysis,
         analysis_tags=["analysis_tag1"],
+        critical_points=["critical_point1"],
         directives=["directive1"],
         display_type="display_type1",
         time=time1,
@@ -699,6 +700,7 @@ def test_read_observables(db):
     assert result[0].tags == []
 
     assert result[1].type.value == "fqdn" and result[1].value == "bad.com"
+    assert [c.value for c in result[1].analysis_metadata.critical_points] == ["critical_point1"]
     assert [d.value for d in result[1].analysis_metadata.directives] == ["directive1"]
     assert [t.value for t in result[1].analysis_metadata.tags] == ["analysis_tag1", "analysis_tag2"]
     assert result[1].analysis_metadata.display_type.value == "display_type1"
@@ -1425,7 +1427,7 @@ def test_circular_tree(db):
     assert tree.root_analysis.children[0].children[0].children[0].children[0].children[0].children == []
 
 
-def test_status(db, client):
+def test_status(db):
     submission = factory.submission.create(db=db)
     obs = factory.observable.create_or_read(type="type", value="value", parent_analysis=submission.root_analysis, db=db)
 
@@ -1497,3 +1499,77 @@ def test_status(db, client):
     db.refresh(submission)
 
     assert submission.status.value == "running"
+
+
+def test_critical_path(db):
+    """
+    * - critical path
+    (*) - critical point
+
+    RootAnalysis
+        obs_type1: value1
+            Analysis 1
+                obs_type3: value3
+        obs_type2: value2 *
+            Analysis 2 *
+                obs_type4: value4 (*)
+                    Analysis 3
+                        obs_type5: value5
+
+    """
+
+    submission = factory.submission.create_from_json_file(
+        db=db, json_path="/app/tests/alerts/critical_path.json", submission_name="Critical Path Alert"
+    )
+
+    tree = crud.submission.read_tree(uuid=submission.uuid, db=db)
+    assert len(tree.root_analysis.children) == 2
+
+    # Verify obs_type1: value1
+    assert tree.root_analysis.children[0].type.value == "obs_type1" and tree.root_analysis.children[0].value == "value1"
+    assert tree.root_analysis.children[0].critical_path is False
+    assert len(tree.root_analysis.children[0].children) == 1
+
+    # Verify analysis1
+    assert tree.root_analysis.children[0].children[0].analysis_module_type.value == "Analysis 1"
+    assert tree.root_analysis.children[0].children[0].critical_path is False
+    assert len(tree.root_analysis.children[0].children[0].children) == 1
+
+    # Verify obs_type3: value3
+    assert (
+        tree.root_analysis.children[0].children[0].children[0].type.value == "obs_type3"
+        and tree.root_analysis.children[0].children[0].children[0].value == "value3"
+    )
+    assert tree.root_analysis.children[0].children[0].children[0].critical_path is False
+    assert len(tree.root_analysis.children[0].children[0].children[0].children) == 0
+
+    # Verify obs_type2: value2
+    assert tree.root_analysis.children[1].type.value == "obs_type2" and tree.root_analysis.children[1].value == "value2"
+    assert tree.root_analysis.children[1].critical_path is True
+    assert len(tree.root_analysis.children[1].children) == 1
+
+    # Verify analysis2
+    assert tree.root_analysis.children[1].children[0].analysis_module_type.value == "Analysis 2"
+    assert tree.root_analysis.children[1].children[0].critical_path is True
+    assert len(tree.root_analysis.children[1].children[0].children) == 1
+
+    # Verify obs_type4: value4
+    assert (
+        tree.root_analysis.children[1].children[0].children[0].type.value == "obs_type4"
+        and tree.root_analysis.children[1].children[0].children[0].value == "value4"
+    )
+    assert tree.root_analysis.children[1].children[0].children[0].critical_path is True
+    assert len(tree.root_analysis.children[1].children[0].children[0].children) == 1
+
+    # Verify analysis3
+    assert tree.root_analysis.children[1].children[0].children[0].children[0].analysis_module_type.value == "Analysis 3"
+    assert tree.root_analysis.children[1].children[0].children[0].children[0].critical_path is False
+    assert len(tree.root_analysis.children[1].children[0].children[0].children[0].children) == 1
+
+    # Verify obs_type5: value5
+    assert (
+        tree.root_analysis.children[1].children[0].children[0].children[0].children[0].type.value == "obs_type5"
+        and tree.root_analysis.children[1].children[0].children[0].children[0].children[0].value == "value5"
+    )
+    assert tree.root_analysis.children[1].children[0].children[0].children[0].children[0].critical_path is False
+    assert len(tree.root_analysis.children[1].children[0].children[0].children[0].children[0].children) == 0

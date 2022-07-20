@@ -25,13 +25,15 @@ class AnalysisCreateBase(AnalysisBase):
     )
 
     child_observables: "list[ObservableCreate]" = Field(
-        default_factory=list, description="A list of child observables discovered during the analysis"
+        default_factory=list,
+        description="A list of child observables discovered during the analysis",
     )
 
     details: Optional[Json] = Field(description="A JSON representation of the details produced by the analysis")
 
     run_time: datetime = Field(
-        default_factory=datetime.utcnow, description="The time at which the analysis was performed"
+        default_factory=datetime.utcnow,
+        description="The time at which the analysis was performed",
     )
 
     status: type_str = Field(default="running", description="The current status of the analysis")
@@ -39,7 +41,8 @@ class AnalysisCreateBase(AnalysisBase):
     submission_uuid: UUID4 = Field(description="The UUID of the submission that will contain this analysis")
 
     summary_details: list[AnalysisSummaryDetailCreateInAnalysis] = Field(
-        default_factory=list, description="A list of summary details to add to the analysis"
+        default_factory=list,
+        description="A list of summary details to add to the analysis",
     )
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the analysis")
@@ -76,7 +79,8 @@ class AnalysisRead(AnalysisBase):
     status: AnalysisStatusRead = Field(description="The current status of the analysis")
 
     summary_details: list[AnalysisSummaryDetailRead] = Field(
-        default_factory=list, description="A list of summary details added to the analysis"
+        default_factory=list,
+        description="A list of summary details added to the analysis",
     )
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
@@ -96,6 +100,10 @@ class AnalysisSubmissionTreeRead(BaseModel):
         default_factory=list, description="A list of this analysis' child observables"
     )
 
+    critical_path: bool = Field(
+        default=False,
+        description="Whether or not this object is part of a 'critical' path in the tree",
+    )
     leaf_id: type_str = Field(description="The unique identifier of the analysis in the nested tree structure")
 
     # Set a static string value so code displaying the tree structure knows which type of object this is.
@@ -104,7 +112,8 @@ class AnalysisSubmissionTreeRead(BaseModel):
     status: AnalysisStatusRead = Field(description="The current status of the analysis")
 
     summary_details: list[AnalysisSummaryDetailRead] = Field(
-        default_factory=list, description="A list of summary details added to the analysis"
+        default_factory=list,
+        description="A list of summary details added to the analysis",
     )
 
     uuid: UUID4 = Field(description="The UUID of the analysis")
@@ -132,7 +141,11 @@ class AnalysisUpdate(AnalysisBase):
 
 
 # Needed for the circular relationship between analysis <-> observable
-from api_models.observable import ObservableCreate, ObservableSubmissionTreeRead, ObservableRead
+from api_models.observable import (
+    ObservableCreate,
+    ObservableSubmissionTreeRead,
+    ObservableRead,
+)
 
 AnalysisCreate.update_forward_refs()
 AnalysisCreateInObservable.update_forward_refs()
