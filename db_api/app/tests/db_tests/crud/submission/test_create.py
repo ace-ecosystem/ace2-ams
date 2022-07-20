@@ -45,6 +45,7 @@ def test_create(db):
                         )
                     ],
                     analysis_metadata=[
+                        AnalysisMetadataCreate(type="critical_point", value="o_critical_point"),
                         AnalysisMetadataCreate(type="detection_point", value="o_detection_point"),
                         AnalysisMetadataCreate(type="directive", value="o_analysis_directive"),
                         AnalysisMetadataCreate(type="tag", value="o_analysis_tag"),

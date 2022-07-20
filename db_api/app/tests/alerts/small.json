@@ -13,7 +13,9 @@
           "details": {
             "from_address": "badguy@evil.com",
             "to_address": "goodguy@company.com",
-            "cc_addresses": ["otherguy@company.com"],
+            "cc_addresses": [
+              "otherguy@company.com"
+            ],
             "subject": "Hello",
             "message_id": "<123abc@evil.com>",
             "time": "2022-03-18T12:00:00.000Z",
@@ -21,9 +23,15 @@
             "headers": "blah",
             "body_text": "Here, download this malware."
           },
-          "observable_types": ["file"],
-          "required_directives": ["email"],
-          "required_tags": ["scan_me"],
+          "observable_types": [
+            "file"
+          ],
+          "required_directives": [
+            "email"
+          ],
+          "required_tags": [
+            "scan_me"
+          ],
           "observables": [
             {
               "type": "email_address",
@@ -33,8 +41,14 @@
                   "type": "detection_point",
                   "value": "Malicious email address"
                 },
-                { "type": "display_type", "value": "sender" },
-                { "type": "tag", "value": "from_address" }
+                {
+                  "type": "display_type",
+                  "value": "sender"
+                },
+                {
+                  "type": "tag",
+                  "value": "from_address"
+                }
               ],
               "analyses": [
                 {
@@ -62,7 +76,16 @@
                         {
                           "type": "Test Analysis",
                           "observables": [
-                            { "type": "test_type", "value": "test_value" }
+                            {
+                              "type": "test_type",
+                              "value": "test_value",
+                              "metadata": [
+                                {
+                                  "type": "critical_point",
+                                  "value": "contacted_host"
+                                }
+                              ]
+                            }
                           ]
                         }
                       ]
@@ -74,11 +97,21 @@
             {
               "type": "email_address",
               "value": "goodguy@company.com",
-              "metadata": [{ "type": "tag", "value": "recipient" }],
+              "metadata": [
+                {
+                  "type": "tag",
+                  "value": "recipient"
+                }
+              ],
               "analyses": [
                 {
                   "type": "Email Address Analysis",
-                  "observables": [{ "type": "fqdn", "value": "company.com" }]
+                  "observables": [
+                    {
+                      "type": "fqdn",
+                      "value": "company.com"
+                    }
+                  ]
                 }
               ]
             },
@@ -99,7 +132,10 @@
               "type": "file",
               "value": "email.rfc822.unknown_plain_text_000",
               "metadata": [
-                { "type": "display_value", "value": "email plaintext body" }
+                {
+                  "type": "display_value",
+                  "value": "email plaintext body"
+                }
               ],
               "analyses": [
                 {
@@ -188,11 +224,26 @@
       "type": "ipv4",
       "value": "127.0.0.1",
       "metadata": [
-        { "type": "display_type", "value": "private ip address" },
-        { "type": "display_value", "value": "localhost" },
-        { "type": "tag", "value": "contacted_host" }
+        {
+          "type": "critical_point",
+          "value": "tag"
+        },
+        {
+          "type": "display_type",
+          "value": "private ip address"
+        },
+        {
+          "type": "display_value",
+          "value": "localhost"
+        },
+        {
+          "type": "tag",
+          "value": "contacted_host"
+        }
       ],
-      "tags": ["c2"],
+      "tags": [
+        "c2"
+      ],
       "analyses": [
         {
           "type": "FA Queue Analysis",

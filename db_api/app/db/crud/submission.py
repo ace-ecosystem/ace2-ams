@@ -52,6 +52,10 @@ def _associate_metadata_with_observable(analysis_uuids: list[UUID], o: Observabl
         if m.analysis_uuid not in analysis_uuids:
             continue
 
+        # Add each critical point
+        if m.metadata_object.metadata_type == "critical_point":
+            o.analysis_metadata.critical_points.append(m.metadata_object)
+
         # Add each detection point
         if m.metadata_object.metadata_type == "detection_point":
             o.analysis_metadata.detection_points.append(m.metadata_object)
@@ -81,6 +85,7 @@ def _associate_metadata_with_observable(analysis_uuids: list[UUID], o: Observabl
             o.analysis_metadata.time = m.metadata_object
 
     # Dedup and sort the analysis metadata on the observable that is a list
+    o.analysis_metadata.critical_points = sorted(set(o.analysis_metadata.critical_points), key=lambda x: x.value)
     o.analysis_metadata.detection_points = sorted(set(o.analysis_metadata.detection_points), key=lambda x: x.value)
     o.analysis_metadata.directives = sorted(set(o.analysis_metadata.directives), key=lambda x: x.value)
     o.analysis_metadata.tags = sorted(set(o.analysis_metadata.tags), key=lambda m: m.value)
@@ -1074,6 +1079,59 @@ def read_tree(uuid: UUID, db: Session) -> SubmissionTreeRead:
         if observable_uuid in db_analyses_by_target_uuid:
             for db_analysis in db_analyses_by_target_uuid[observable_uuid]:
                 observable_instances[observable_uuid][0].children.append(analysis_instances[db_analysis.uuid])
+
+    # Now we need to walk it again to mark which of the leaves are a part of a 'critical' path,
+    # the criteria for that right now being that the leaf either has non-empty analysis_metadata.critical_points,
+    # or one of its children is part of a critical path.
+    #
+    # Adapted from: https://www.geeksforgeeks.org/iterative-postorder-traversal-of-n-ary-tree/
+    def _is_critical_path(o):
+        contains_critical_points = bool(
+            current[0].object_type == "observable" and o[0].analysis_metadata.critical_points
+        )
+        if contains_critical_points:
+            return True
+
+        child_uuids = [child.uuid for child in o[0].children]
+        children_on_critical_path = any(uuid in critical_point_path_uuids for uuid in child_uuids)
+        return children_on_critical_path
+
+    critical_point_path_uuids: set[UUID] = set()
+    current_root_index = 0
+    stack = []
+    root = analysis_instances[db_submission.root_analysis_uuid]
+
+    while root != None or len(stack) > 0:
+        if root != None:
+            stack.append((root, current_root_index))
+            current_root_index = 0
+
+            if len(root.children) >= 1:
+                root = root.children[0]
+            else:
+                root = None
+            continue
+
+        current = stack.pop()
+        if _is_critical_path(current):
+            critical_point_path_uuids.add(current[0].uuid)
+            current[0].critical_path = True
+        else:
+            current[0].critical_path = False
+
+        while len(stack) > 0 and current[1] == len(stack[-1][0].children) - 1:
+            current = stack[-1]
+            stack.pop()
+
+            if _is_critical_path(current):
+                critical_point_path_uuids.add(current[0].uuid)
+                current[0].critical_path = True
+            else:
+                current[0].critical_path = False
+
+        if len(stack) > 0:
+            root = stack[-1][0].children[current[1] + 1]
+            current_root_index = current[1] + 1
 
     # Create the SubmissionTree object and set its root analysis.
     return db_submission.convert_to_pydantic(root_analysis=analysis_instances[db_submission.root_analysis_uuid])

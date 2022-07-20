@@ -31,6 +31,7 @@ from db.schemas.event_vector_queue_mapping import event_vector_queue_mapping
 from db.schemas.event_vector_mapping import event_vector_mapping
 from db.schemas.format import Format
 from db.schemas.metadata import Metadata
+from db.schemas.metadata_critical_point import MetadataCriticalPoint
 from db.schemas.metadata_detection_point import MetadataDetectionPoint
 from db.schemas.metadata_directive import MetadataDirective
 from db.schemas.metadata_display_type import MetadataDisplayType

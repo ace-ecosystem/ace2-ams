@@ -13,16 +13,18 @@ import { Alert } from "@/services/api/alert";
 import { alertTreeReadFactory } from "@mocks/alert";
 import TheAlertActionToolbarVue from "@/components/Alerts/TheAlertActionToolbar.vue";
 import TheAlertSummaryVue from "@/components/Alerts/TheAlertSummary.vue";
-import AlertTreeVue from "@/components/Alerts/AlertTree.vue";
+import AlertTreeContainerVue from "@/components/Alerts/AlertTreeContainer.vue";
 import { userReadFactory } from "@mocks/user";
 import AnalysisSummaryDetailVue from "@/components/Analysis/AnalysisSummaryDetail.vue";
 import { rootAnalysisTreeReadFactory } from "@mocks/analysis";
 import { genericObjectReadFactory } from "@mocks/genericObject";
 import { StringDecoder } from "string_decoder";
+import Tooltip from "primevue/tooltip";
 
 function factory(stubActions = true) {
   return mount(ViewAlert, {
     global: {
+      directives: { tooltip: Tooltip },
       plugins: [
         PrimeVue,
         createCustomCypressPinia({
@@ -64,6 +66,7 @@ describe("ViewAlert", () => {
       expect(wrapper.findComponent(AlertTreeVue)).to.exist;
       expect(wrapper.findComponent(AnalysisSummaryDetailVue)).to.exist;
       cy.contains("Summary Details").should("be.visible");
+      expect(wrapper.findComponent(AlertTreeContainerVue)).to.exist;
     });
   });
 

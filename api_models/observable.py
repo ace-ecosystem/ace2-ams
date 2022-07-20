@@ -24,7 +24,9 @@ class ObservableMatchingEventIndividual(BaseModel):
 
     status: type_str = Field(description="The status of the matching event")
 
-    count: int = Field(description="The number of events with this status that contain the observable")
+    count: int = Field(
+        description="The number of events with this status that contain the observable"
+    )
 
 
 class ObservableBase(BaseModel):
@@ -62,11 +64,13 @@ class ObservableBase(BaseModel):
 
 class ObservableCreateBase(ObservableBase):
     analyses: "list[AnalysisCreateInObservable]" = Field(
-        default_factory=list, description="A list of analysis results to add as children to the observable"
+        default_factory=list,
+        description="A list of analysis results to add as children to the observable",
     )
 
     analysis_metadata: list[AnalysisMetadataCreate] = Field(
-        default_factory=list, description="A list of metadata objects to add to the observable by its parent analysis"
+        default_factory=list,
+        description="A list of metadata objects to add to the observable by its parent analysis",
     )
 
     history_username: Optional[type_str] = Field(
@@ -74,10 +78,13 @@ class ObservableCreateBase(ObservableBase):
     )
 
     observable_relationships: "list[ObservableRelationshipCreate]" = Field(
-        default_factory=list, description="A list of observable relationships to add to this observable"
+        default_factory=list,
+        description="A list of observable relationships to add to this observable",
     )
 
-    tags: list[type_str] = Field(default_factory=list, description="A list of tags to add to the observable")
+    tags: list[type_str] = Field(
+        default_factory=list, description="A list of tags to add to the observable"
+    )
 
     uuid: UUID4 = Field(default_factory=uuid4, description="The UUID of the observable")
 
@@ -100,7 +107,9 @@ class ObservableRead(ObservableBase):
         description="A list of observable relationships for this observable"
     )
 
-    tags: list[MetadataTagRead] = Field(description="A list of tags added to the observable")
+    tags: list[MetadataTagRead] = Field(
+        description="A list of tags added to the observable"
+    )
 
     type: ObservableTypeRead = Field(description="The type of the observable")
 
@@ -113,7 +122,9 @@ class ObservableRead(ObservableBase):
 class ObservableSubmissionRead(ObservableRead):
     """Model used to control which information for an Observable is displayed when getting Observables contained in a list of Submissions."""
 
-    analysis_metadata: AnalysisMetadataRead = Field(description="The analysis metadata for the observable")
+    analysis_metadata: AnalysisMetadataRead = Field(
+        description="The analysis metadata for the observable"
+    )
 
     disposition_history: list[ObservableDispositionHistoryIndividual] = Field(
         default_factory=list,
@@ -136,11 +147,18 @@ class ObservableSubmissionTreeRead(ObservableSubmissionRead):
         default_factory=list, description="A list of this observable's child analysis"
     )
 
+    critical_path: bool = Field(
+        default=False,
+        description="Whether or not this object is part of a 'critical' path in the tree",
+    )
+
     jump_to_leaf: Optional[type_str] = Field(
         description="The identifier of the first occurrence of this observable in the tree where the analysis can be viewed"
     )
 
-    leaf_id: type_str = Field(description="The unique identifier of the observable in the nested tree structure")
+    leaf_id: type_str = Field(
+        description="The unique identifier of the observable in the nested tree structure"
+    )
 
     class Config:
         orm_mode = True
@@ -155,7 +173,9 @@ class ObservableUpdate(ObservableBase):
         description="If given, an observable history record will be created and associated with the user"
     )
 
-    tags: Optional[list[type_str]] = Field(description="A list of tags to add to the observable")
+    tags: Optional[list[type_str]] = Field(
+        description="A list of tags to add to the observable"
+    )
 
     type: Optional[type_str] = Field(description="The type of the observable")
 
@@ -168,11 +188,15 @@ class ObservableUpdate(ObservableBase):
         the version must match when updating.""",
     )
 
-    _prevent_none: classmethod = validators.prevent_none("for_detection", "tags", "time", "type", "value")
+    _prevent_none: classmethod = validators.prevent_none(
+        "for_detection", "tags", "time", "type", "value"
+    )
 
 
 class ObservableRelationshipCreate(BaseModel):
-    relationship_type: type_str = Field(description="The type of the observable relationship")
+    relationship_type: type_str = Field(
+        description="The type of the observable relationship"
+    )
 
     type: type_str = Field(description="The related observable's type")
 

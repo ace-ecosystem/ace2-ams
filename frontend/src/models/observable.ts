@@ -70,6 +70,7 @@ export interface observableReadPage {
 
 export interface observableTreeRead extends observableInAlertRead {
   children: analysisTreeRead[];
+  criticalPath?: boolean;
   jumpToLeaf: string | null;
   leafId: string;
 }
