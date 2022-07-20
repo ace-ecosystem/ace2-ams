@@ -142,7 +142,6 @@ describe("AlertTree", () => {
         value: "Parent Analysis",
       }),
       children: [childObservable],
-      firstAppearance: true,
       summaryDetails: [summary, summary2],
     });
     factory({
