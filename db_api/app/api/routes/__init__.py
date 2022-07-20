@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from api.routes.alert_disposition import router as alert_disposition_router
 from api.routes.analysis import router as analysis_router
 from api.routes.analysis_module_type import router as analysis_module_type_router
+from api.routes.analysis_status import router as analysis_status_router
 from api.routes.analysis_summary_detail import router as analysis_summary_detail_router
 from api.routes.auth import router as auth_router
 from api.routes.event import router as event_router
@@ -46,6 +47,7 @@ router = APIRouter()
 router.include_router(alert_disposition_router)
 router.include_router(analysis_module_type_router)
 router.include_router(analysis_router)
+router.include_router(analysis_status_router)
 router.include_router(analysis_summary_detail_router)
 router.include_router(auth_router)
 router.include_router(event_comment_router)

@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 366f824ad8c2
+Revision ID: 9be46423f69a
 Revises: 
-Create Date: 2022-07-12 11:51:34.502426
+Create Date: 2022-07-19 16:21:44.037881
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '366f824ad8c2'
+revision = '9be46423f69a'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -41,6 +41,13 @@ def upgrade() -> None:
     op.create_index(op.f('ix_analysis_module_type_value'), 'analysis_module_type', ['value'], unique=False)
     op.create_index(op.f('ix_analysis_module_type_version'), 'analysis_module_type', ['version'], unique=False)
     op.create_index('value_version', 'analysis_module_type', ['value', 'version'], unique=False)
+    op.create_table('analysis_status',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_analysis_status_value'), 'analysis_status', ['value'], unique=True)
     op.create_table('event_prevention_tool',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -385,10 +392,12 @@ def upgrade() -> None:
     sa.Column('error_message', sa.String(), nullable=True),
     sa.Column('run_time', sa.DateTime(timezone=True), server_default=sa.text("TIMEZONE('utc', CURRENT_TIMESTAMP)"), nullable=False),
     sa.Column('stack_trace', sa.String(), nullable=True),
+    sa.Column('status_uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('summary', sa.String(), nullable=True),
     sa.Column('target_uuid', postgresql.UUID(as_uuid=True), nullable=True),
     postgresql.ExcludeConstraint((sa.column('analysis_module_type_uuid'), '='), (sa.column('target_uuid'), '='), (sa.column('cached_during'), '&&'), using='gist', name='cached_analysis_uc'),
     sa.ForeignKeyConstraint(['analysis_module_type_uuid'], ['analysis_module_type.uuid'], ),
+    sa.ForeignKeyConstraint(['status_uuid'], ['analysis_status.uuid'], ),
     sa.ForeignKeyConstraint(['target_uuid'], ['observable.uuid'], ),
     sa.PrimaryKeyConstraint('uuid')
     )
@@ -900,6 +909,8 @@ def downgrade() -> None:
     op.drop_table('event_remediation')
     op.drop_index(op.f('ix_event_prevention_tool_value'), table_name='event_prevention_tool')
     op.drop_table('event_prevention_tool')
+    op.drop_index(op.f('ix_analysis_status_value'), table_name='analysis_status')
+    op.drop_table('analysis_status')
     op.drop_index('value_version', table_name='analysis_module_type')
     op.drop_index(op.f('ix_analysis_module_type_version'), table_name='analysis_module_type')
     op.drop_index(op.f('ix_analysis_module_type_value'), table_name='analysis_module_type')

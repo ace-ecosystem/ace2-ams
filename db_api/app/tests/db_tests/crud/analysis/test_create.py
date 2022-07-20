@@ -7,7 +7,7 @@ from uuid import uuid4
 from api_models.analysis import AnalysisCreate
 from api_models.analysis_summary_detail import AnalysisSummaryDetailCreateInAnalysis
 from db import crud
-from exceptions.db import UuidNotFoundInDatabase
+from exceptions.db import UuidNotFoundInDatabase, ValueNotFoundInDatabase
 from tests import factory
 
 
@@ -26,6 +26,25 @@ def test_create_nonexistent_analysis_module_type(db):
         crud.analysis.create_or_read(
             model=AnalysisCreate(
                 analysis_module_type_uuid=uuid4(), submission_uuid=submission.uuid, target_uuid=observable.uuid
+            ),
+            db=db,
+        )
+
+
+def test_create_nonexistent_status(db):
+    submission = factory.submission.create(db=db)
+    observable = factory.observable.create_or_read(
+        type="test", value="test", parent_analysis=submission.root_analysis, db=db
+    )
+    analysis_module_type = factory.analysis_module_type.create_or_read(value="test", db=db)
+
+    with pytest.raises(ValueNotFoundInDatabase):
+        crud.analysis.create_or_read(
+            model=AnalysisCreate(
+                analysis_module_type_uuid=analysis_module_type.uuid,
+                status="asdf",
+                submission_uuid=submission.uuid,
+                target_uuid=observable.uuid,
             ),
             db=db,
         )
@@ -75,6 +94,7 @@ def test_create(db):
         type="test", value="test", parent_analysis=submission.root_analysis, db=db
     )
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test", cache_seconds=90, db=db)
+    factory.analysis_status.create_or_read(value="test_status", db=db)
     factory.format.create_or_read(value="PRE", db=db)
     factory.observable_type.create_or_read(value="ipv4", db=db)
 
@@ -88,6 +108,7 @@ def test_create(db):
             error_message="test error",
             run_time=now,
             stack_trace="test stack trace",
+            status="test_status",
             submission_uuid=submission.uuid,
             summary="test summary",
             summary_details=[AnalysisSummaryDetailCreateInAnalysis(content="test", header="test", format="PRE")],
@@ -103,6 +124,7 @@ def test_create(db):
     assert analysis.error_message == "test error"
     assert analysis.run_time == now
     assert analysis.stack_trace == "test stack trace"
+    assert analysis.status.value == "test_status"
     assert analysis.summary == "test summary"
     assert len(analysis.summary_details) == 1
     assert analysis.target == observable

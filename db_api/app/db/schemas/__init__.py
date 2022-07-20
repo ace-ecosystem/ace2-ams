@@ -6,6 +6,7 @@ from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.analysis_module_type_directive_mapping import analysis_module_type_directive_mapping
 from db.schemas.analysis_module_type_observable_type_mapping import analysis_module_type_observable_type_mapping
 from db.schemas.analysis_module_type_tag_mapping import analysis_module_type_tag_mapping
+from db.schemas.analysis_status import AnalysisStatus
 from db.schemas.analysis_summary_detail import AnalysisSummaryDetail
 from db.schemas.event import Event
 from db.schemas.event_comment import EventComment

@@ -3,8 +3,9 @@ from pydantic import BaseModel, Field, Json, UUID4
 from typing import Optional
 from uuid import uuid4
 
-from api_models import type_str
+from api_models import type_str, validators
 from api_models.analysis_module_type import AnalysisModuleTypeRead, AnalysisModuleTypeSubmissionTreeRead
+from api_models.analysis_status import AnalysisStatusRead
 from api_models.analysis_summary_detail import AnalysisSummaryDetailCreateInAnalysis, AnalysisSummaryDetailRead
 
 
@@ -32,6 +33,8 @@ class AnalysisCreateBase(AnalysisBase):
     run_time: datetime = Field(
         default_factory=datetime.utcnow, description="The time at which the analysis was performed"
     )
+
+    status: type_str = Field(default="running", description="The current status of the analysis")
 
     submission_uuid: UUID4 = Field(description="The UUID of the submission that will contain this analysis")
 
@@ -70,6 +73,8 @@ class AnalysisRead(AnalysisBase):
 
     run_time: datetime = Field(description="The time at which the analysis was performed")
 
+    status: AnalysisStatusRead = Field(description="The current status of the analysis")
+
     summary_details: list[AnalysisSummaryDetailRead] = Field(
         default_factory=list, description="A list of summary details added to the analysis"
     )
@@ -96,6 +101,8 @@ class AnalysisSubmissionTreeRead(BaseModel):
     # Set a static string value so code displaying the tree structure knows which type of object this is.
     object_type: str = "analysis"
 
+    status: AnalysisStatusRead = Field(description="The current status of the analysis")
+
     summary_details: list[AnalysisSummaryDetailRead] = Field(
         default_factory=list, description="A list of summary details added to the analysis"
     )
@@ -118,6 +125,10 @@ class AnalysisUpdate(AnalysisBase):
     error_message: Optional[type_str] = Field(description="An optional error message that occurred during analysis")
 
     stack_trace: Optional[type_str] = Field(description="An optional stack trace that occurred during analysis")
+
+    status: Optional[type_str] = Field(description="The current status of the analysis")
+
+    _prevent_none: classmethod = validators.prevent_none("status")
 
 
 # Needed for the circular relationship between analysis <-> observable

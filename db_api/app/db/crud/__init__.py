@@ -2,6 +2,7 @@ from db.crud import alert_disposition
 from db.crud import analysis
 from db.crud import analysis_metadata
 from db.crud import analysis_module_type
+from db.crud import analysis_status
 from db.crud import analysis_summary_detail
 from db.crud import event
 from db.crud import event_comment

@@ -4,6 +4,7 @@ import uuid
 
 from fastapi import status
 
+from db import crud
 from tests import factory
 
 
@@ -23,6 +24,9 @@ from tests import factory
         ("error_message", ""),
         ("stack_trace", 123),
         ("stack_trace", ""),
+        ("status", 123),
+        ("status", None),
+        ("status", ""),
         ("summary", 123),
         ("summary", ""),
     ],
@@ -61,12 +65,18 @@ def test_update_nonexistent_uuid(client):
         ("stack_trace", None, "test"),
         ("stack_trace", "test", None),
         ("stack_trace", "test", "test"),
+        ("status", "running", "complete"),
+        ("status", "running", "running"),
         ("summary", None, "test"),
         ("summary", "test", None),
         ("summary", "test", "test"),
     ],
 )
 def test_update(client, db, key, initial_value, updated_value):
+    if key == "status":
+        initial_status = factory.analysis_status.create_or_read(value=initial_value, db=db)
+        factory.analysis_status.create_or_read(value=updated_value, db=db)
+
     submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
     observable = factory.observable.create_or_read(
@@ -77,7 +87,10 @@ def test_update(client, db, key, initial_value, updated_value):
     )
 
     # Set the initial value
-    setattr(analysis, key, initial_value)
+    if key == "status":
+        analysis.status = initial_status
+    else:
+        setattr(analysis, key, initial_value)
 
     # Update it
     update = client.patch(f"/api/analysis/{analysis.uuid}", json={key: updated_value})
@@ -85,5 +98,7 @@ def test_update(client, db, key, initial_value, updated_value):
 
     if key == "details" and updated_value:
         assert analysis.details == json.loads(updated_value)
+    elif key == "status":
+        assert analysis.status.value == updated_value
     else:
         assert getattr(analysis, key) == updated_value
