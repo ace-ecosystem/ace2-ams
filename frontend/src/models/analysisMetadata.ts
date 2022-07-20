@@ -1,3 +1,4 @@
+import { metadataCriticalPointRead } from "./metadataCriticalPoint";
 import { metadataDetectionPointRead } from "./metadataDetectionPoint";
 import { metadataDirectiveRead } from "./metadataDirective";
 import { metadataDisplayTypeRead } from "./metadataDisplayType";
@@ -8,6 +9,7 @@ import { metadataTimeRead } from "./metadataTime";
 
 export interface analysisMetadataCreate {
   type:
+    | "critical_point"
     | "detection_point"
     | "directive"
     | "display_type"
@@ -19,6 +21,7 @@ export interface analysisMetadataCreate {
 }
 
 export interface analysisMetadataRead {
+  criticalPoints: metadataCriticalPointRead[];
   detectionPoints: metadataDetectionPointRead[];
   directives: metadataDirectiveRead[];
   displayType: metadataDisplayTypeRead | null;

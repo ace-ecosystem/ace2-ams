@@ -175,6 +175,7 @@ def create_from_json_file(db: Session, json_path: str, submission_name: str) -> 
         # Build the ObservableCreate model
         observable_model = ObservableCreate(
             analysis_metadata=o.get("metadata", []),
+            critical_points=o.get("critical_points", []),
             detection_points=o.get("detection_points", []),
             for_detection=o.get("for_detection", False),
             observable_relationships=o.get("observable_relationships", []),
@@ -257,12 +258,13 @@ def stringify_submission_tree(submission_tree: dict):
     def _stringify_children(children: list[dict], depth=0, string=""):
         for child in children:
             duplicate = "" if child["first_appearance"] else " (Duplicate)"
+            critical_path = "" if not child["critical_path"] else " (Critical Path)"
             if child["object_type"] == "observable":
-                string += f"{'  '*depth}{child['type']['value']}: {child['value']}{duplicate}\n"
+                string += f"{'  '*depth}{child['type']['value']}: {child['value']}{duplicate}{critical_path}\n"
                 if child["children"]:
                     string = _stringify_children(children=child["children"], depth=depth + 2, string=string)
             if child["object_type"] == "analysis":
-                string += f"{'  '*depth}{child['analysis_module_type']['value']}{duplicate}\n"
+                string += f"{'  '*depth}{child['analysis_module_type']['value']}{duplicate}{critical_path}\n"
                 if child["children"]:
                     string = _stringify_children(children=child["children"], depth=depth + 2, string=string)
 

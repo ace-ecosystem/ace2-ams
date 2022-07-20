@@ -4,6 +4,7 @@ from typing import Optional
 from uuid import UUID
 
 from api_models.analysis_metadata import AnalysisMetadataCreate
+from api_models.metadata_critical_point import MetadataCriticalPointCreate
 from api_models.metadata_detection_point import MetadataDetectionPointCreate
 from api_models.metadata_directive import MetadataDirectiveCreate
 from api_models.metadata_display_type import MetadataDisplayTypeCreate
@@ -31,6 +32,11 @@ def create_or_read(
 
     # Create or read the metadata object based on its type
     metadata_object = None
+
+    if model.type == "critical_point":
+        metadata_object = crud.metadata_critical_point.create_or_read(
+            model=MetadataCriticalPointCreate(value=model.value), db=db
+        )
 
     if model.type == "detection_point":
         metadata_object = crud.metadata_detection_point.create_or_read(

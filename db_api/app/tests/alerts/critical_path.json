@@ -1,0 +1,54 @@
+{
+  "name": "Critical Path",
+  "observables": [
+    {
+      "type": "obs_type1",
+      "value": "value1",
+      "analyses": [
+        {
+          "type": "Analysis 1",
+          "observables": [
+            {
+              "type": "obs_type3",
+              "value": "value3",
+              "analyses": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "obs_type2",
+      "value": "value2",
+      "analyses": [
+        {
+          "type": "Analysis 2",
+          "observables": [
+            {
+              "type": "obs_type4",
+              "value": "value4",
+              "metadata": [
+                {
+                  "type": "critical_point",
+                  "value": "test"
+                }
+              ],
+              "analyses": [
+                {
+                  "type": "Analysis 3",
+                  "observables": [
+                    {
+                      "type": "obs_type5",
+                      "value": "value5",
+                      "analyses": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

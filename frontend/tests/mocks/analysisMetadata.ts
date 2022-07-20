@@ -1,6 +1,7 @@
 import { analysisMetadataRead } from "@/models/analysisMetadata";
 
 export const analysisMetadataReadFactory = ({
+  criticalPoints = [],
   detectionPoints = [],
   directives = [],
   displayType = null,
@@ -9,6 +10,7 @@ export const analysisMetadataReadFactory = ({
   tags = [],
   time = null,
 }: Partial<analysisMetadataRead> = {}): analysisMetadataRead => ({
+  criticalPoints: criticalPoints,
   detectionPoints: detectionPoints,
   directives: directives,
   displayType: displayType,

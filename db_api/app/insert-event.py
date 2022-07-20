@@ -71,9 +71,7 @@ if args.tags:
     event.tags = [factory.metadata_tag.create_or_read(value=t, db=db) for t in args.tags.split(",")]
 
 if args.threat_actors:
-    event.threat_actors = [
-        factory.threat_actor.create_or_read(value=t, db=db) for t in args.threat_actors.split(",")
-    ]
+    event.threat_actors = [factory.threat_actor.create_or_read(value=t, db=db) for t in args.threat_actors.split(",")]
 
 if args.threats:
     event.threats = [factory.threat.create_or_read(value=t, db=db) for t in args.threats.split(",")]

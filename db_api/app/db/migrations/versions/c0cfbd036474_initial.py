@@ -1,8 +1,8 @@
 """Initial
 
-Revision ID: 366f824ad8c2
+Revision ID: c0cfbd036474
 Revises: 
-Create Date: 2022-07-12 11:51:34.502426
+Create Date: 2022-07-20 12:41:26.888895
 """
 
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic
-revision = '366f824ad8c2'
+revision = 'c0cfbd036474'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -250,6 +250,14 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_event_vector_queue_mapping_event_vector_uuid'), 'event_vector_queue_mapping', ['event_vector_uuid'], unique=False)
     op.create_index(op.f('ix_event_vector_queue_mapping_queue_uuid'), 'event_vector_queue_mapping', ['queue_uuid'], unique=False)
+    op.create_table('metadata_critical_point',
+    sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
+    sa.Column('value', sa.String(), nullable=False),
+    sa.ForeignKeyConstraint(['uuid'], ['metadata.uuid'], ),
+    sa.PrimaryKeyConstraint('uuid')
+    )
+    op.create_index(op.f('ix_metadata_critical_point_value'), 'metadata_critical_point', ['value'], unique=True)
     op.create_table('metadata_detection_point',
     sa.Column('uuid', postgresql.UUID(as_uuid=True), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
@@ -837,6 +845,8 @@ def downgrade() -> None:
     op.drop_table('metadata_directive')
     op.drop_index(op.f('ix_metadata_detection_point_value'), table_name='metadata_detection_point')
     op.drop_table('metadata_detection_point')
+    op.drop_index(op.f('ix_metadata_critical_point_value'), table_name='metadata_critical_point')
+    op.drop_table('metadata_critical_point')
     op.drop_index(op.f('ix_event_vector_queue_mapping_queue_uuid'), table_name='event_vector_queue_mapping')
     op.drop_index(op.f('ix_event_vector_queue_mapping_event_vector_uuid'), table_name='event_vector_queue_mapping')
     op.drop_table('event_vector_queue_mapping')
