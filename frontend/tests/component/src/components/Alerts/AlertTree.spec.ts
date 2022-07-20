@@ -226,6 +226,7 @@ describe("AlertTree", () => {
     factory({
       props: {
         items: [parentObservable, parentAnalysisWithSummary],
+        criticalOnly: false,
         alertId: "test",
       },
     });
