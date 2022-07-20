@@ -174,11 +174,17 @@ jobs:
       - name: Run environment
         run: docker compose -f docker-compose.yml up -d
 
-      - name: Wait for the environment to be accessible
-        run: docker exec ace2-ams-gui bin/wait-for-gui.sh
+      - name: whoami
+        run: whoami
+
+      - name: Container whoami
+        run: docker exec ace2-ams-gui whoami
 
       - name: Permissions?
         run: docker exec ace2-ams-gui ls -lah /app
+
+      - name: Wait for the environment to be accessible
+        run: docker exec ace2-ams-gui bin/wait-for-gui.sh
 
       - name: Component Tests
         run: docker exec -e TZ=America/New_York -e CYPRESS_COVERAGE=true ace2-ams-gui xvfb-run cypress run --component --headless --browser chrome --config-file "cypress.config.ts" --config video=false,screenshotOnRunFailure=false
