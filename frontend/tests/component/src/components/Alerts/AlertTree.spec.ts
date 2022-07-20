@@ -226,8 +226,8 @@ describe("AlertTree", () => {
     factory({
       props: {
         items: [parentObservable, parentAnalysisWithSummary],
-        criticalOnly: false,
         alertId: "test",
+        criticalOnly: true,
       },
     });
     cy.contains("Summary Details").should("be.visible");
