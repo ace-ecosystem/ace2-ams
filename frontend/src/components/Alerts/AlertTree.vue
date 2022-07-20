@@ -207,6 +207,7 @@
   defineExpose({
     collapseAll,
     expandAll,
+    resetExpansion,
   });
 </script>
 

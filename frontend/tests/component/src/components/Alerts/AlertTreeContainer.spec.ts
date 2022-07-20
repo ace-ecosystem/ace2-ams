@@ -36,9 +36,6 @@ const parentObservable = observableTreeReadFactory({
 
 const criticalChildObservable = observableTreeReadFactory({
   value: "Child Observable",
-  analysisMetadata: analysisMetadataReadFactory({
-    criticalPoints: [{ value: "critical" }],
-  }),
   criticalPath: true,
 });
 const criticalChildAnalysis = analysisTreeReadFactory({
