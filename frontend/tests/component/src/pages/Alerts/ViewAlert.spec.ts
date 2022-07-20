@@ -6,7 +6,7 @@ import PrimeVue from "primevue/config";
 
 import router from "@/router/index";
 import { testConfiguration } from "@/etc/configuration/test/index";
-import AlertTreeVue from "@components/Alerts/AlertTree.vue";
+import AlertTreeVue from "@/components/Alerts/AlertTree.vue";
 import ViewAlert from "@/pages/Alerts/ViewAlert.vue";
 import { createCustomCypressPinia } from "@tests/cypressHelpers";
 import { Alert } from "@/services/api/alert";
