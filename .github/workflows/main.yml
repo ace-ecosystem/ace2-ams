@@ -174,15 +174,6 @@ jobs:
       - name: Run environment
         run: docker compose -f docker-compose-ci.yml up -d
 
-      - name: whoami
-        run: whoami
-
-      - name: Container whoami
-        run: docker exec ace2-ams-gui whoami
-
-      - name: Permissions?
-        run: docker exec ace2-ams-gui ls -lah /app
-
       - name: Wait for the environment to be accessible
         run: docker exec ace2-ams-gui bin/wait-for-gui.sh
 
