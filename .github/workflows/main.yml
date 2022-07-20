@@ -122,7 +122,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run environment
-        run: docker compose -f docker-compose.yml up -d
+        run: docker compose -f docker-compose-ci.yml up -d
 
       - name: Wait for the environment to be accessible
         run: docker exec ace2-ams-gui bin/wait-for-gui.sh
@@ -172,7 +172,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run environment
-        run: docker compose -f docker-compose.yml up -d
+        run: docker compose -f docker-compose-ci.yml up -d
 
       - name: whoami
         run: whoami
