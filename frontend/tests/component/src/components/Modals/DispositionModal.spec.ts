@@ -58,6 +58,10 @@ describe("DispositionModal", () => {
     ...genericObjectReadFactory({ value: "False Positive" }),
     rank: 0,
   };
+  const deliveryDisposition = {
+    ...genericObjectReadFactory({ value: "DELIVERY" }),
+    rank: 1,
+  };
   const badDisposition = {
     ...genericObjectReadFactory({ value: "Bad" }),
     rank: 2,
@@ -95,7 +99,7 @@ describe("DispositionModal", () => {
   });
   it("shows 'Save to Event' button when high-ranking disposition is selected", () => {
     factory({
-      dipsositions: [falsePositive, badDisposition],
+      dipsositions: [falsePositive, deliveryDisposition, badDisposition],
       selected: ["uuid"],
     });
     cy.contains("Bad").click();
@@ -104,7 +108,7 @@ describe("DispositionModal", () => {
   });
   it("attempts to open 'Save to Event' modal when 'Save to Event' button clicked", () => {
     factory({
-      dipsositions: [falsePositive, badDisposition],
+      dipsositions: [falsePositive, deliveryDisposition, badDisposition],
       selected: ["uuid"],
     });
     cy.contains("Bad").click();
