@@ -1,5 +1,5 @@
 from ace2 import *
-from datetime import datetime
+from datetime import datetime, timedelta
 from pydantic import BaseModel
 import pytest
 
@@ -76,3 +76,9 @@ def test_timestamp(mock_now):
     # test validator with iso formatted string
     m = Model(dt='2022-07-12T10:00:00')
     assert m.dt.isoformat() == '2022-07-12T10:00:00.000000+00:00'
+
+    # test timespan
+    assert timespan('01') == timedelta(seconds=1)
+    assert timespan('02:01') == timedelta(seconds=1, minutes=2)
+    assert timespan('03:02:01') == timedelta(seconds=1, minutes=2, hours=3)
+    assert timespan('04:03:02:01') == timedelta(seconds=1, minutes=2, hours=3, days=4)
