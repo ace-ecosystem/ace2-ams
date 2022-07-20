@@ -64,6 +64,9 @@ export const alertDispositionMetadata: Record<string, string> = {
   test: BLUE,
 };
 
+// Used to set the cutoff for which dispositions allow you to save an alert to an event
+export const minimumSaveToEventDisposition = "DELIVERY";
+
 export const alertDetailsComponents: Record<string, unknown> = {
   "test type - a": TestComponentVue,
 };

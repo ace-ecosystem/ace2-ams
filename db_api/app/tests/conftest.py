@@ -22,9 +22,15 @@ def apply_migrations():
     alembic.command.downgrade(config, "base")
     alembic.command.upgrade(config, "head")
 
-    # Add the analyst user so API calls that create history entries have a valid user to link to.
     session_db = next(get_db())
+
+    # Add the default analysis statuses since they are required to create an analysis.
+    factory.analysis_status.create_or_read(value="complete", db=session_db)
+    factory.analysis_status.create_or_read(value="running", db=session_db)
+
+    # Add the analyst user so API calls that create history entries have a valid user to link to.
     factory.user.create_or_read(username="analyst", db=session_db)
+
     session_db.commit()
 
     yield

@@ -458,7 +458,7 @@ describe("Manage Alerts - Save to Event", () => {
 
       // Open disposition modal, select disposition, and open save to event modal
       cy.get("[data-cy=disposition-button]").click();
-      cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+      cy.get('[aria-label="DELIVERY"]').click();
       cy.get(".p-dialog-footer > .p-button-raised").click();
 
       cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
@@ -486,7 +486,7 @@ describe("Manage Alerts - Save to Event", () => {
 
       // Open disposition modal, select disposition, and open save to event modal
       cy.get("[data-cy=disposition-button]").click();
-      cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+      cy.get('[aria-label="DELIVERY"]').click();
       cy.get(".p-dialog-footer > .p-button-raised").click();
 
       cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
@@ -509,7 +509,7 @@ describe("Manage Alerts - Save to Event", () => {
 
       // Open disposition modal, select disposition, and open save to event modal
       cy.get("[data-cy=disposition-button]").click();
-      cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+      cy.get('[aria-label="DELIVERY"]').click();
       cy.get(".p-dialog-footer > .p-button-raised").click();
 
       cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
@@ -532,7 +532,7 @@ describe("Manage Alerts - Save to Event", () => {
 
       // Open disposition modal, select disposition, and open save to event modal
       cy.get("[data-cy=disposition-button]").click();
-      cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+      cy.get('[aria-label="DELIVERY"]').click();
       cy.get(".p-dialog-footer > .p-button-raised").click();
 
       cy.wait("@getOpenEvents").its("state").should("eq", "Complete");
@@ -630,7 +630,7 @@ describe("Manage Alerts - Save to Event", () => {
 
       // Open disposition modal, select disposition, add disposition comment, and open save to event modal
       cy.get("[data-cy=disposition-button]").click();
-      cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+      cy.get('[aria-label="DELIVERY"]').click();
       cy.get(".p-inputtextarea").click().type("disposition comment");
       cy.get(".p-dialog-footer > .p-button-raised").click();
 
@@ -651,7 +651,7 @@ describe("Manage Alerts - Save to Event", () => {
       // Check first alert disposition
       cy.get(".p-datatable-tbody > tr > :nth-child(6) > div").should(
         "contain.text",
-        "APPROVED_BUSINESS",
+        "DELIVERY",
       );
       // Check alert comment
       cy.get(".p-datatable-tbody > tr > :nth-child(4) .p-mr-2").should(
@@ -680,7 +680,7 @@ describe("Manage Alerts - Save to Event", () => {
 
       // Open disposition modal, select disposition, add disposition comment, and open save to event modal
       cy.get("[data-cy=disposition-button]").click();
-      cy.get('[aria-label="APPROVED_BUSINESS"]').click();
+      cy.get('[aria-label="DELIVERY"]').click();
       cy.get(".p-inputtextarea").click().type("disposition comment");
       cy.get(".p-dialog-footer > .p-button-raised").click();
 
@@ -708,7 +708,7 @@ describe("Manage Alerts - Save to Event", () => {
       // Check first alert disposition
       cy.get(".p-datatable-tbody > tr > :nth-child(6) > div").should(
         "contain.text",
-        "APPROVED_BUSINESS",
+        "DELIVERY",
       );
 
       // Check alert comments

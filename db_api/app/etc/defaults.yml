@@ -49,6 +49,11 @@ alert_disposition:
   - EXFIL
   - DAMAGE
 
+analysis_status:
+  - running
+  - ignore
+  - complete
+
 directive:
   - value: sandbox
     description: submit observable to sandbox

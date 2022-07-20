@@ -40,6 +40,7 @@ def create_or_read(model: AnalysisCreate, db: Session) -> Analysis:
         error_message=model.error_message,
         run_time=model.run_time,
         stack_trace=model.stack_trace,
+        status=crud.analysis_status.read_by_value(value=model.status, db=db),
         summary=model.summary,
         target_uuid=target.uuid,
         uuid=model.uuid,
@@ -71,7 +72,7 @@ def create_or_read(model: AnalysisCreate, db: Session) -> Analysis:
 
 
 def create_root(db: Session, details: Optional[Json] = None) -> Analysis:
-    obj = Analysis(details=details)
+    obj = Analysis(details=details, status=crud.analysis_status.read_by_value(value="complete", db=db))
 
     db.add(obj)
     db.flush()
@@ -102,12 +103,26 @@ def read_cached(
 
 
 def update(uuid: UUID, model: AnalysisUpdate, db: Session):
+    # Read the current analysis
     obj = read_by_uuid(uuid=uuid, db=db)
 
     # Get the data that was given in the request and use it to update the database object
     update_data = model.dict(exclude_unset=True)
-    for key in update_data:
-        setattr(obj, key, update_data[key])
+
+    if "details" in update_data:
+        obj.details = update_data["details"]
+
+    if "error_message" in update_data:
+        obj.error_message = update_data["error_message"]
+
+    if "stack_trace" in update_data:
+        obj.stack_trace = update_data["stack_trace"]
+
+    if "status" in update_data:
+        obj.status = crud.analysis_status.read_by_value(value=update_data["status"], db=db)
+
+    if "summary" in update_data:
+        obj.summary = update_data["summary"]
 
     db.flush()
 
