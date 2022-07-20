@@ -47,6 +47,7 @@
 
   import BaseModal from "@/components/Modals/BaseModal.vue";
 
+  import { ObservableInstance } from "@/services/api/observable";
   import {
     objectStores,
     objectSelectedStores,
@@ -57,7 +58,6 @@
   import { useMetadataTagStore } from "@/stores/metadataTag";
   import { metadataTagRead } from "@/models/metadataTag";
   import { observableTreeRead } from "@/models/observable";
-  import { useObservableStore } from "@/stores/observable";
 
   const props = defineProps({
     name: { type: String, required: true },
@@ -160,10 +160,8 @@
   };
 
   const removeObservableTags = async () => {
-    const observableStore = useObservableStore();
-
     if (props.observable) {
-      await observableStore.update(props.observable.uuid, {
+      await ObservableInstance.update(props.observable.uuid, {
         tags: deduped([
           ...props.observable.tags.map((tag) => tag.value),
           ...formTagValues.value,

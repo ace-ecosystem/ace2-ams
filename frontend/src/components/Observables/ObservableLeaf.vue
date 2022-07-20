@@ -21,6 +21,15 @@
       &#128293;
     </span>
     <Button
+      v-if="observable.jumpToLeaf"
+      v-tooltip="'Jump to Analysis'"
+      data-cy="jump-to-button"
+      role="button"
+      icon="pi pi-reply"
+      class="p-button-rounded p-button-secondary p-button-outlined p-button-sm leaf-element"
+      @click="scrollTo(observable.jumpToLeaf, true)"
+    />
+    <Button
       v-if="showCopyToClipboard"
       data-cy="copy-to-clipboard-button"
       role="button"
@@ -137,6 +146,7 @@
   import { useAlertStore } from "@/stores/alert";
   import { useFilterStore } from "@/stores/filter";
   import { useModalStore } from "@/stores/modal";
+  import { scrollTo } from "@/etc/helpers";
 
   const config = inject("config") as Record<string, any>;
 

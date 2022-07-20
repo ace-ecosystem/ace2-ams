@@ -20,7 +20,6 @@ import AnalysisSummaryDetailVue from "@/components/Analysis/AnalysisSummaryDetai
 
 const childObservable = observableTreeReadFactory({
   value: "Child Observable",
-  firstAppearance: true,
 });
 const childAnalysis = analysisTreeReadFactory({
   analysisModuleType: analysisModuleTypeAlertTreeReadFactory({
@@ -37,7 +36,6 @@ const parentAnalysis = analysisTreeReadFactory({
     value: "Parent Analysis",
   }),
   children: [childObservable],
-  firstAppearance: true,
 });
 interface AlertTreeProps {
   items: (analysisTreeRead | observableTreeRead)[];
@@ -71,45 +69,52 @@ describe("AlertTree", () => {
     factory({
       props: { items: [parentObservable, parentAnalysis], alertId: "test" },
     });
-    // 3 Visible to start
-    cy.get("li").should("have.length", 3);
+    // 4 Visible to start
+    cy.get("li").should("have.length", 4);
 
     // Check icons and values
-    cy.get("li").eq(0).get(".pi-chevron-right");
+    cy.get("li").eq(0).get(".pi-chevron-down");
     cy.get("li")
       .eq(0)
       .should("contain.text", "Parent Observable")
-      .get(".pi-chevron-right");
+      .get(".pi-chevron-down");
 
-    cy.get("li").eq(1).get(".pi-chevron-down");
+    cy.get("li").eq(1).get(".pi-minus");
     cy.get("li")
       .eq(1)
-      .should("contain.text", "Parent Analysis")
-      .get(".pi-chevron-right");
+      .should("contain.text", "Child Analysis")
+      .get(".pi-minus");
 
-    cy.get("li").eq(2).get(".pi-minus");
+    cy.get("li").eq(2).get(".pi-chevron-down");
     cy.get("li")
       .eq(2)
+      .should("contain.text", "Parent Analysis")
+      .get(".pi-chevron-down");
+
+    cy.get("li").eq(3).get(".pi-minus");
+    cy.get("li")
+      .eq(3)
       .should("contain.text", "testObservableType")
-      .get(".pi-chevron-right");
+      .get(".pi-minus");
   });
   it("toggles showing child objects (analysis or observables) when toggle clicked", () => {
     factory({
       props: { items: [parentObservable, parentAnalysis], alertId: "test" },
     });
     // Click first toggle
-    cy.get(".pi-chevron-right").click();
+    cy.get(".pi-chevron-down").eq(0).click();
+    cy.contains("Child Analysis").should("not.exist");
     // Check newest
     cy.get("li")
       .eq(1)
-      .should("contain.text", "Child Analysis")
+      .should("contain.text", "Parent Analysis")
       .get(".pi-minus");
 
     // Click toggle again
-    cy.get(".pi-chevron-down").eq(0).click();
+    cy.get(".pi-chevron-right").eq(0).click();
     // Should be 3 again
-    cy.get("li").should("have.length", 3);
-    cy.contains("Child Analysis").should("not.exist");
+    cy.get("li").should("have.length", 4);
+    cy.contains("Child Analysis").should("exist");
   });
   it("renders analysis list items with a link to that analysis's specifc page", () => {
     factory({

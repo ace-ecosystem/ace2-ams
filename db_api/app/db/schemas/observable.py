@@ -130,7 +130,7 @@ class Observable(Base, HasHistory):
     )
 
     def convert_to_pydantic(self) -> ObservableSubmissionTreeRead:
-        return ObservableSubmissionTreeRead(**self.to_dict())
+        return ObservableSubmissionTreeRead(leaf_id=f"{self.uuid}-0", **self.to_dict())
 
     def to_dict(self, extra_ignore_keys: Optional[list[str]] = None):
         ignore_keys = [

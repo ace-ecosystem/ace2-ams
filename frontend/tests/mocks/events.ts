@@ -175,7 +175,7 @@ export const eventSummaryFactory = ({
   type = "None",
   uuid = mockEventUUID,
   vectors = [],
-  queue = "None",
+  queue = "testObject",
   remediations = [],
 }: Partial<eventSummary> = {}): eventSummary => ({
   comments: comments,

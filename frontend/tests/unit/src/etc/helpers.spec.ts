@@ -7,6 +7,10 @@ import {
   getAllAlertTags,
   groupItemsByQueue,
   findClosestMatchingString,
+  parseAlertSummary,
+  prettyPrintDateTime,
+  dateParser,
+  camelToSnakeCase,
 } from "@/etc/helpers";
 import { alertTreeReadFactory } from "@mocks/alert";
 import { alertFilterParams } from "@/models/alert";
@@ -18,6 +22,8 @@ import { genericObjectReadFactory } from "@mocks/genericObject";
 import { metadataTagReadFactory } from "@mocks/metadata";
 import { genericQueueableObjectRead } from "@/models/base";
 import { useAlertDispositionStore } from "@/stores/alertDisposition";
+import { alertReadFactory, alertSummaryFactory } from "@mocks/alert";
+import { userReadFactory } from "@mocks/user";
 
 createTestingPinia({ createSpy: vi.fn, stubActions: false });
 
@@ -43,6 +49,38 @@ const mockAlertTreeRead = alertTreeReadFactory({
 });
 
 describe("parseFilters", () => {
+  it("will skip any unknown filter types", async () => {
+    const unknownFilter = {
+      name: "unknown",
+      label: "Unknown",
+      type: "unknown",
+    };
+
+    const results = parseFilters({ unknown: "test" }, [
+      ...alertFilters.external,
+      unknownFilter,
+    ]);
+
+    expect(results).toEqual({});
+  });
+
+  it("will skip any empty multiselect filters", async () => {
+    const observableTypeStore = useObservableTypeStore();
+    observableTypeStore.items = [
+      { value: "ipv4", description: null, uuid: "1" },
+      { value: "file", description: null, uuid: "2" },
+      { value: "url", description: null, uuid: "3" },
+      { value: "fqdn", description: null, uuid: "4" },
+    ];
+
+    const results = parseFilters(
+      { observableTypes: " , " },
+      alertFilters.external,
+    );
+
+    expect(results).toEqual({});
+  });
+
   it("will correctly parse and add any multiselect filters", async () => {
     const observableTypeStore = useObservableTypeStore();
     observableTypeStore.items = [
@@ -764,6 +802,58 @@ describe("groupItemsByQueue", () => {
   });
 });
 
+describe("parseAlertSummary", () => {
+  it("correctly generates an alert summary given an alertRead object", () => {
+    const alertA = alertReadFactory({
+      tool: null,
+      toolInstance: null,
+    });
+    const alertB = alertReadFactory({
+      description: "Test Description",
+      disposition: {
+        rank: 0,
+        ...genericObjectReadFactory({ value: "FALSE_POSITIVE" }),
+      },
+      dispositionTime: "2020-01-01T00:00:00.000Z",
+      dispositionUser: userReadFactory(),
+      eventTime: "2020-01-01T00:00:00.000Z",
+      eventUuid: "testEventUuid",
+      insertTime: "2020-01-01T00:00:00.000Z",
+      owner: userReadFactory(),
+      ownershipTime: "2020-01-01T00:00:00.000Z",
+      tool: genericObjectReadFactory({ value: "Test Tool" }),
+      toolInstance: genericObjectReadFactory({ value: "Test Tool Instance" }),
+    });
+
+    const expectedA = alertSummaryFactory({
+      tool: "None",
+      toolInstance: "None",
+    });
+    const expectedB = alertSummaryFactory({
+      description: "Test Description",
+      disposition: "FALSE_POSITIVE",
+      dispositionTime: "1/1/2020, 12:00:00 AM UTC",
+      dispositionWithUserAndTime:
+        "FALSE_POSITIVE by Test Analyst @ 1/1/2020, 12:00:00 AM UTC",
+      dispositionUser: "Test Analyst",
+      eventTime: "1/1/2020, 12:00:00 AM UTC",
+      eventUuid: "testEventUuid",
+      insertTime: "1/1/2020, 12:00:00 AM UTC",
+      owner: "Test Analyst",
+      ownerWithTime: "Test Analyst @ 1/1/2020, 12:00:00 AM UTC",
+      ownershipTime: "1/1/2020, 12:00:00 AM UTC",
+      tool: "Test Tool",
+      toolInstance: "Test Tool Instance",
+    });
+
+    const resultA = parseAlertSummary(alertA);
+    const resultB = parseAlertSummary(alertB);
+
+    expect(resultA).toEqual(expectedA);
+    expect(resultB).toEqual(expectedB);
+  });
+});
+
 describe("findClosestMatchingString", () => {
   const stringArr = ["a - b", "a - b - c", "a", "b - c", "b", "c"];
 
@@ -779,4 +869,43 @@ describe("findClosestMatchingString", () => {
       expect(res).toEqual(result);
     },
   );
+});
+
+describe("prettyPrintDateTime", () => {
+  it.each([
+    [null, undefined, "None"],
+    [
+      new Date("2020-01-02T00:00:00.000Z"),
+      undefined,
+      "1/2/2020, 12:00:00 AM UTC",
+    ],
+    ["2020-01-02T00:00:00.000Z", undefined, "1/2/2020, 12:00:00 AM UTC"],
+    ["invalid", undefined, "invalid"],
+  ])(
+    "correctly returns closest matching string",
+    (datetime, timezone, result) => {
+      const res = prettyPrintDateTime(datetime, timezone);
+      expect(res).toEqual(result);
+    },
+  );
+});
+
+describe("dateParser", () => {
+  it.each([
+    ["key", "2020-01-02T00:00:00.000Z", new Date("1/2/2020, 12:00:00 AM UTC")],
+    ["key", "invalid", "invalid"],
+  ])("correctly returns closest matching string", (key, value, result) => {
+    const res = dateParser(key, value);
+    expect(res).toEqual(result);
+  });
+});
+
+describe("camelToSnakeCase", () => {
+  it.each([
+    ["single", "single"],
+    ["doubleWord", "double_word"],
+  ])("correctly returns closest matching string", (string, result) => {
+    const res = camelToSnakeCase(string);
+    expect(res).toEqual(result);
+  });
 });

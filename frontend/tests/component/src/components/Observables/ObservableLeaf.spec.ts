@@ -107,7 +107,6 @@ const observableWithDispositionHistory = observableTreeReadFactory({
 
 const observableWithDetectionPoints = observableTreeReadFactory({
   value: "Observable w/ Detection Points",
-  firstAppearance: true,
   analysisMetadata: analysisMetadataReadFactory({
     detectionPoints: [
       metadataDetectionPointReadFactory({
@@ -122,13 +121,11 @@ const observableWithDetectionPoints = observableTreeReadFactory({
 
 const observableWithForDetectionEnabled = observableTreeReadFactory({
   value: "Observable w/ For Detection Enabled",
-  firstAppearance: true,
   forDetection: true,
 });
 
 const ipv4Observable = observableTreeReadFactory({
   value: "1.2.3.4",
-  firstAppearance: true,
   type: genericObjectReadFactory({ value: "ipv4" }),
 });
 describe("ObservableLeaf", () => {

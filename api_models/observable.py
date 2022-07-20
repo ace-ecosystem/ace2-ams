@@ -136,9 +136,11 @@ class ObservableSubmissionTreeRead(ObservableSubmissionRead):
         default_factory=list, description="A list of this observable's child analysis"
     )
 
-    first_appearance: bool = Field(
-        default=True, description="Whether or not this is the first time the object appears in the tree"
+    jump_to_leaf: Optional[type_str] = Field(
+        description="The identifier of the first occurrence of this observable in the tree where the analysis can be viewed"
     )
+
+    leaf_id: type_str = Field(description="The unique identifier of the observable in the nested tree structure")
 
     class Config:
         orm_mode = True
