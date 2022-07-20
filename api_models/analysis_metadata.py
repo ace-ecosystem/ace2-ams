@@ -27,18 +27,21 @@ class AnalysisMetadataCreate(BaseModel):
     type: type_str = Field(description="The type of the metadata")
 
     value: Union[type_int, type_str, datetime] = Field(
-        description="The value of the metadata")
+        description="The value of the metadata"
+    )
 
 
 class AnalysisMetadataRead(BaseModel):
     """Represents the collection of analysis metadata that was added to an observable."""
 
     critical_points: list[MetadataCriticalPointRead] = Field(
-        default_factory=list, description="A list of critical points added to the observable"
+        default_factory=list,
+        description="A list of critical points added to the observable",
     )
 
     detection_points: list[MetadataDetectionPointRead] = Field(
-        default_factory=list, description="A list of detection points added to the observable"
+        default_factory=list,
+        description="A list of detection points added to the observable",
     )
 
     directives: list[MetadataDirectiveRead] = Field(
@@ -46,16 +49,21 @@ class AnalysisMetadataRead(BaseModel):
     )
 
     display_type: Optional[MetadataDisplayTypeRead] = Field(
-        description="The display type of the observable")
+        description="The display type of the observable"
+    )
 
     display_value: Optional[MetadataDisplayValueRead] = Field(
-        description="The display value of the observable")
+        description="The display value of the observable"
+    )
 
     sort: Optional[MetadataSortRead] = Field(
-        description="The sort order for the observable")
+        description="The sort order for the observable"
+    )
 
     tags: list[MetadataTagRead] = Field(
-        default_factory=list, description="A list of tags added to the observable")
+        default_factory=list, description="A list of tags added to the observable"
+    )
 
     time: Optional[MetadataTimeRead] = Field(
-        description="The time added to the observable")
+        description="The time added to the observable"
+    )
