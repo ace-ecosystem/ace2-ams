@@ -7,6 +7,7 @@ import {
   analysisModuleTypeAlertTreeRead,
   analysisModuleTypeRead,
 } from "@/models/analysisModuleType";
+import { genericObjectReadFactory } from "./genericObject";
 
 export const analysisModuleTypeReadFactory = ({
   cacheSeconds = 90,
@@ -39,6 +40,7 @@ export const analysisReadFactory = ({
   errorMessage = null,
   runTime = "2020-01-01T00:00:00.000000+00:00",
   stackTrace = null,
+  status = genericObjectReadFactory(),
   summary = null,
   summaryDetails = [],
   objectType = "analysis",
@@ -51,6 +53,7 @@ export const analysisReadFactory = ({
   errorMessage: errorMessage,
   runTime: runTime,
   stackTrace: stackTrace,
+  status: status,
   summary: summary,
   summaryDetails: summaryDetails,
   objectType: objectType,
@@ -71,6 +74,7 @@ export const analysisTreeReadFactory = ({
   errorMessage = null,
   leafId = "testTreeUuid",
   stackTrace = null,
+  status = genericObjectReadFactory(),
   summary = null,
   summaryDetails = [],
   uuid = "testUuid",
@@ -81,6 +85,7 @@ export const analysisTreeReadFactory = ({
   leafId: leafId,
   objectType: "analysis",
   stackTrace: stackTrace,
+  status: status,
   summary: summary,
   summaryDetails: summaryDetails,
   uuid: uuid,
@@ -90,6 +95,7 @@ export const rootAnalysisTreeReadFactory = ({
   children = [],
   details = null,
   leafId = "testTreeUuid",
+  status = genericObjectReadFactory(),
   summaryDetails = [],
   uuid = "testUuid",
 }: Partial<rootAnalysisTreeRead> = {}): rootAnalysisTreeRead => ({
@@ -100,6 +106,7 @@ export const rootAnalysisTreeReadFactory = ({
   leafId: leafId,
   objectType: "analysis",
   stackTrace: null,
+  status: status,
   summary: null,
   summaryDetails: summaryDetails,
   uuid: uuid,
