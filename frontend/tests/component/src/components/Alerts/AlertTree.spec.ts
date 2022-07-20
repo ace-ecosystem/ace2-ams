@@ -89,7 +89,7 @@ describe("AlertTree", () => {
     cy.contains("Child Analysis 2").should("be.visible");
     cy.contains("Child Observable").should("not.exist");
   });
-  it.only("collapses as expected on collapseAll", () => {
+  it("collapses as expected on collapseAll", () => {
     factory({
       props: {
         items: [parentObservable2],
@@ -111,7 +111,7 @@ describe("AlertTree", () => {
       cy.contains("Child Observable").should("be.visible");
     });
   });
-  it.only("expands as expected on expandAll", () => {
+  it("expands as expected on expandAll", () => {
     factory({
       props: {
         items: [parentObservable2],
