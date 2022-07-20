@@ -23,10 +23,24 @@ const childAnalysis = analysisTreeReadFactory({
     value: "Child Analysis",
   }),
 });
+const childAnalysis2 = analysisTreeReadFactory({
+  analysisModuleType: analysisModuleTypeAlertTreeReadFactory({
+    value: "Child Analysis 2",
+  }),
+  criticalPath: false,
+  children: [childObservable],
+});
+const parentObservable2 = observableTreeReadFactory({
+  value: "Parent Observable 2",
+  children: [childAnalysis2],
+  tags: [metadataTagReadFactory({ value: "testTag" })],
+  criticalPath: true,
+});
 const parentObservable = observableTreeReadFactory({
   value: "Parent Observable",
   children: [childAnalysis],
   tags: [metadataTagReadFactory({ value: "testTag" })],
+  criticalPath: false,
 });
 const parentAnalysis = analysisTreeReadFactory({
   analysisModuleType: analysisModuleTypeAlertTreeReadFactory({
@@ -37,11 +51,13 @@ const parentAnalysis = analysisTreeReadFactory({
 interface AlertTreeProps {
   items: (analysisTreeRead | observableTreeRead)[];
   alertId: string;
+  criticalOnly: boolean;
 }
 
 const defaultProps: AlertTreeProps = {
   items: [],
   alertId: "test",
+  criticalOnly: false,
 };
 
 function factory(
@@ -62,9 +78,64 @@ describe("AlertTree", () => {
   it("renders when there are no given items", () => {
     factory();
   });
+  it("only renders criticalPath items when criticalOnly is true", () => {
+    const props: AlertTreeProps = {
+      items: [parentObservable2],
+      alertId: "test",
+      criticalOnly: true,
+    };
+    factory({ props: props });
+    cy.contains("Parent Observable 2").should("be.visible");
+    cy.contains("Child Analysis 2").should("be.visible");
+    cy.contains("Child Observable").should("not.exist");
+  });
+  it.only("collapses as expected on collapseAll", () => {
+    factory({
+      props: {
+        items: [parentObservable2],
+        alertId: "test",
+        criticalOnly: false,
+      },
+    }).then((wrapper) => {
+      wrapper.vm.collapseAll();
+      cy.contains("Parent Observable 2").should("be.visible");
+      cy.contains("Child Analysis 2").should("not.be.visible");
+      cy.contains("Child Observable").should("not.be.visible");
+      cy.get(".p-tree-toggler-icon").eq(0).click();
+      cy.contains("Parent Observable 2").should("be.visible");
+      cy.contains("Child Analysis 2").should("be.visible");
+      cy.contains("Child Observable").should("not.be.visible");
+      cy.get(".p-tree-toggler-icon").eq(1).click();
+      cy.contains("Parent Observable 2").should("be.visible");
+      cy.contains("Child Analysis 2").should("be.visible");
+      cy.contains("Child Observable").should("be.visible");
+    });
+  });
+  it.only("expands as expected on expandAll", () => {
+    factory({
+      props: {
+        items: [parentObservable2],
+        alertId: "test",
+        criticalOnly: false,
+      },
+    });
+    cy.get(".p-tree-toggler-icon").eq(1).click();
+    cy.get(".p-tree-toggler-icon").eq(0).click();
+    cy.get("body").then(() => {
+      const wrapperVm = Cypress.vueWrapper.vm as any;
+      wrapperVm.expandAll();
+    });
+    cy.contains("Parent Observable 2").should("be.visible");
+    cy.contains("Child Analysis 2").should("be.visible");
+    cy.contains("Child Observable").should("be.visible");
+  });
   it("correctly renders list items that include children", () => {
     factory({
-      props: { items: [parentObservable, parentAnalysis], alertId: "test" },
+      props: {
+        items: [parentObservable, parentAnalysis],
+        alertId: "test",
+        criticalOnly: false,
+      },
     });
     // 4 Visible to start
     cy.get("li").should("have.length", 4);
@@ -96,14 +167,18 @@ describe("AlertTree", () => {
   });
   it("toggles showing child objects (analysis or observables) when toggle clicked", () => {
     factory({
-      props: { items: [parentObservable, parentAnalysis], alertId: "test" },
+      props: {
+        items: [parentObservable, parentAnalysis],
+        alertId: "test",
+        criticalOnly: false,
+      },
     });
     // Click first toggle
     cy.get(".pi-chevron-down").eq(0).click();
-    cy.contains("Child Analysis").should("not.exist");
+    cy.contains("Child Analysis").should("not.be.visible");
     // Check newest
     cy.get("li")
-      .eq(1)
+      .eq(2)
       .should("contain.text", "Parent Analysis")
       .get(".pi-minus");
 
@@ -115,7 +190,11 @@ describe("AlertTree", () => {
   });
   it("renders analysis list items with a link to that analysis's specifc page", () => {
     factory({
-      props: { items: [parentObservable, parentAnalysis], alertId: "test" },
+      props: {
+        items: [parentObservable, parentAnalysis],
+        alertId: "test",
+        criticalOnly: false,
+      },
     });
     cy.contains("Parent Analysis")
       .invoke("attr", "href")

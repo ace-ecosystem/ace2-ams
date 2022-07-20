@@ -37,7 +37,7 @@
 
         <div
           v-if="leafVisible(index) && i.children.length"
-          v-show="leafExpanded(index)"
+          v-show="leafVisible(index) && leafExpanded(index)"
           class="p-treenode-children"
         >
           <AlertTree
@@ -116,6 +116,7 @@
         visibleStatus[index] = true;
       });
     }
+    console.log(visibleStatus);
     return visibleStatus;
   });
 
@@ -206,7 +207,6 @@
   defineExpose({
     collapseAll,
     expandAll,
-    resetExpansion,
   });
 </script>
 

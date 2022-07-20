@@ -31,7 +31,11 @@
   </Toolbar>
   <Card style="overflow-x: scroll">
     <template #content>
-      <div class="p-tree p-component p-tree-wrapper" style="border: none">
+      <div
+        v-if="alertStore.open.rootAnalysis.children.length"
+        class="p-tree p-component p-tree-wrapper"
+        style="border: none"
+      >
         <AlertTreeVue
           id="alert-tree"
           ref="tree"
@@ -41,6 +45,7 @@
         />
         <ScrollTop />
       </div>
+      <div v-else>No alert data to display.</div>
     </template>
   </Card>
 </template>

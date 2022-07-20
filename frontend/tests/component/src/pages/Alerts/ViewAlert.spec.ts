@@ -13,12 +13,14 @@ import { Alert } from "@/services/api/alert";
 import { alertTreeReadFactory } from "@mocks/alert";
 import TheAlertActionToolbarVue from "@/components/Alerts/TheAlertActionToolbar.vue";
 import TheAlertSummaryVue from "@/components/Alerts/TheAlertSummary.vue";
-import AlertTreeVue from "@/components/Alerts/AlertTree.vue";
+import AlertTreeContainerVue from "@/components/Alerts/AlertTreeContainer.vue";
 import { userReadFactory } from "@mocks/user";
+import Tooltip from "primevue/tooltip";
 
 function factory(stubActions = true) {
   return mount(ViewAlert, {
     global: {
+      directives: { tooltip: Tooltip },
       plugins: [
         PrimeVue,
         createCustomCypressPinia({
@@ -46,7 +48,7 @@ describe("ViewAlert", () => {
       cy.get("@spy-3").should("have.been.calledOnce"); // read alert
       expect(wrapper.findComponent(TheAlertActionToolbarVue)).to.exist;
       expect(wrapper.findComponent(TheAlertSummaryVue)).to.exist;
-      expect(wrapper.findComponent(AlertTreeVue)).to.exist;
+      expect(wrapper.findComponent(AlertTreeContainerVue)).to.exist;
     });
   });
   it("attempts to disposition alert as 'false positive' on ignoreClicked event", () => {
