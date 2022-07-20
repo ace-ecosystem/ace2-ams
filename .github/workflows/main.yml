@@ -16,8 +16,6 @@ jobs:
 
     env:
       ACE_DEV: true
-      DOCKER_BUILDKIT: 0
-      COMPOSE_DOCKER_CLI_BUILD: 0
       POSTGRES_DB: ace
       POSTGRES_USER: ace
       POSTGRES_PASSWORD: supersecret
@@ -41,8 +39,6 @@ jobs:
 
     env:
       ACE_DEV: true
-      DOCKER_BUILDKIT: 0
-      COMPOSE_DOCKER_CLI_BUILD: 0
       COOKIES_SAMESITE: lax
       COOKIES_SECURE: False
       JWT_ACCESS_EXPIRE_SECONDS: 900
@@ -107,8 +103,6 @@ jobs:
 
     env:
       ACE_DEV: true
-      DOCKER_BUILDKIT: 0
-      COMPOSE_DOCKER_CLI_BUILD: 0
       COOKIES_SAMESITE: lax
       COOKIES_SECURE: False
       JWT_ACCESS_EXPIRE_SECONDS: 900
@@ -157,8 +151,6 @@ jobs:
 
     env:
       ACE_DEV: true
-      DOCKER_BUILDKIT: 0
-      COMPOSE_DOCKER_CLI_BUILD: 0
       COOKIES_SAMESITE: lax
       COOKIES_SECURE: False
       JWT_ACCESS_EXPIRE_SECONDS: 900
@@ -194,10 +186,6 @@ jobs:
   production-build:
     name: Production Build
     runs-on: ubuntu-latest
-
-    env:
-      DOCKER_BUILDKIT: 0
-      COMPOSE_DOCKER_CLI_BUILD: 0
 
     steps:
       - name: Checkout code
