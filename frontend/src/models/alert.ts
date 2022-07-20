@@ -1,18 +1,19 @@
 import { historyUsername, pageOptionParams, UUID } from "./base";
+import { alertCommentRead } from "./alertComment";
 import { alertDispositionRead } from "./alertDisposition";
-import { alertToolRead } from "./alertTool";
 import { alertToolInstanceRead } from "./alertToolInstance";
+import { alertToolRead } from "./alertTool";
 import { alertTypeRead } from "./alertType";
+import { analysisStatusRead } from "./analysisStatus";
+import { eventRead } from "./event";
 import { metadataDetectionPointRead } from "./metadataDetectionPoint";
 import { metadataTagRead } from "./metadataTag";
-import { alertCommentRead } from "./alertComment";
-import { eventRead } from "./event";
 import { observableCreateInAlert } from "./observable";
 import { observableTypeRead } from "./observableType";
 import { queueRead } from "./queue";
-import { userRead } from "./user";
 import { readPage } from "./page";
 import { rootAnalysisTreeRead } from "./analysis";
+import { userRead } from "./user";
 
 export interface submissionMatchingEventIndividual {
   event: eventRead;
@@ -61,6 +62,7 @@ export interface alertRead {
   owner: userRead | null;
   ownershipTime: string | null;
   queue: queueRead;
+  status: analysisStatusRead;
   tags: metadataTagRead[];
   tool: alertToolRead | null;
   toolInstance: alertToolInstanceRead | null;

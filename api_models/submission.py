@@ -6,6 +6,7 @@ from uuid import uuid4
 from api_models import type_str, validators
 from api_models.alert_disposition import AlertDispositionRead
 from api_models.analysis import RootAnalysisSubmissionTreeRead
+from api_models.analysis_status import AnalysisStatusRead
 from api_models.event import EventRead
 from api_models.metadata_detection_point import MetadataDetectionPointRead
 from api_models.observable import ObservableCreateInSubmission
@@ -126,6 +127,8 @@ class SubmissionRead(SubmissionBase):
     )
 
     queue: QueueRead = Field(description="The queue containing this submission")
+
+    status: AnalysisStatusRead = Field(description="The overall status of the submission based on its analyses")
 
     tags: list[MetadataTagRead] = Field(description="A list of tags added to the submission", default_factory=list)
 

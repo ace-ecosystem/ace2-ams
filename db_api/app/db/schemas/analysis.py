@@ -38,6 +38,9 @@ class Analysis(Base):
 
     stack_trace = Column(String)
 
+    # NOTE: It is assumed that the analysis status values are "hard coded" to be: running, complete, and ignore.
+    # If these are changed or more added, then you will also need to update the Submission.status @property so
+    # that it can correctly determine the submission's overall status.
     status = relationship("AnalysisStatus", lazy="selectin")
 
     status_uuid = Column(UUID(as_uuid=True), ForeignKey("analysis_status.uuid"), nullable=False)

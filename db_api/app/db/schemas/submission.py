@@ -10,6 +10,7 @@ from typing import Optional
 from api_models.submission import SubmissionRead, SubmissionTreeRead
 from db.database import Base
 from db.schemas.analysis import Analysis
+from db.schemas.analysis_status import AnalysisStatus
 from db.schemas.helpers import utcnow
 from db.schemas.history import HasHistory, HistoryMixin
 from db.schemas.metadata_detection_point import MetadataDetectionPoint
@@ -35,6 +36,20 @@ class Submission(Base, HasHistory):
     # Analyses are lazy loaded and are not included by default when fetching a submission from the API.
     analyses: list[Analysis] = relationship("Analysis", secondary=submission_analysis_mapping)
 
+    # This relationship is used to get a list of the unique analysis statuses within the submission. It is then
+    # used to determine the "overall" status for the submission. For example, if any of the statuses in this list
+    # is "running", then the submission's status will be "running". If there is only a single status in this list,
+    # then that will be the submission's status.
+    analysis_statuses: list[AnalysisStatus] = relationship(
+        "AnalysisStatus",
+        secondary="join(AnalysisStatus, Analysis, AnalysisStatus.uuid == Analysis.status_uuid)."
+        "join(submission_analysis_mapping, submission_analysis_mapping.c.analysis_uuid == Analysis.uuid)",
+        primaryjoin="Submission.uuid == submission_analysis_mapping.c.submission_uuid",
+        uselist=True,
+        viewonly=True,
+    )
+
+    # This association proxy is used for associating analysis metadata with observables
     analysis_uuids: list[UUID] = association_proxy("analyses", "uuid")
 
     # The child_* fields use a composite join relationship to get a list of the objects that
@@ -191,6 +206,7 @@ class Submission(Base, HasHistory):
     def to_dict(self, extra_ignore_keys: Optional[list[str]] = None):
         ignore_keys = [
             "analyses",
+            "analysis_statuses",
             "analysis_uuids",
             "child_observables",
             "event",
@@ -234,6 +250,32 @@ class Submission(Base, HasHistory):
         if history:
             return history.action_time
         return None
+
+    @property
+    def status(self) -> AnalysisStatus:
+        """Determines the submission's overall analysis status"""
+
+        # Possible status combinations are:
+        #
+        # running -> running
+        # ignore -> ignore
+        # complete -> complete
+        # complete, running -> running
+        # complete, ignore -> complete
+        # ignore, running -> running
+        # complete, running, ignore -> running
+
+        # If there is only a single status, then use that one
+        if len(self.analysis_statuses) == 1:
+            return self.analysis_statuses[0]
+
+        # If any of the statuses is "running" then use that
+        running = next((s for s in self.analysis_statuses if s.value == "running"), None)
+        if running is not None:
+            return running
+
+        # Otherwise at this point the statuses must be "complete" and "ignore", so use "complete"
+        return next(s for s in self.analysis_statuses if s.value == "complete")
 
 
 from api_models.analysis import RootAnalysisSubmissionTreeRead
