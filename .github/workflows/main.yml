@@ -16,8 +16,6 @@ jobs:
 
     env:
       ACE_DEV: true
-      DOCKER_BUILDKIT: 0
-      COMPOSE_DOCKER_CLI_BUILD: 0
       POSTGRES_DB: ace
       POSTGRES_USER: ace
       POSTGRES_PASSWORD: supersecret
@@ -41,8 +39,6 @@ jobs:
 
     env:
       ACE_DEV: true
-      DOCKER_BUILDKIT: 0
-      COMPOSE_DOCKER_CLI_BUILD: 0
       COOKIES_SAMESITE: lax
       COOKIES_SECURE: False
       JWT_ACCESS_EXPIRE_SECONDS: 900
@@ -107,8 +103,6 @@ jobs:
 
     env:
       ACE_DEV: true
-      DOCKER_BUILDKIT: 0
-      COMPOSE_DOCKER_CLI_BUILD: 0
       COOKIES_SAMESITE: lax
       COOKIES_SECURE: False
       JWT_ACCESS_EXPIRE_SECONDS: 900
@@ -128,7 +122,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run environment
-        run: docker compose -f docker-compose.yml up -d
+        run: docker compose -f docker-compose-ci.yml up -d
 
       - name: Wait for the environment to be accessible
         run: docker exec ace2-ams-gui bin/wait-for-gui.sh
@@ -157,8 +151,6 @@ jobs:
 
     env:
       ACE_DEV: true
-      DOCKER_BUILDKIT: 0
-      COMPOSE_DOCKER_CLI_BUILD: 0
       COOKIES_SAMESITE: lax
       COOKIES_SECURE: False
       JWT_ACCESS_EXPIRE_SECONDS: 900
@@ -180,7 +172,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run environment
-        run: docker compose -f docker-compose.yml up -d
+        run: docker compose -f docker-compose-ci.yml up -d
 
       - name: Wait for the environment to be accessible
         run: docker exec ace2-ams-gui bin/wait-for-gui.sh
@@ -194,10 +186,6 @@ jobs:
   production-build:
     name: Production Build
     runs-on: ubuntu-latest
-
-    env:
-      DOCKER_BUILDKIT: 0
-      COMPOSE_DOCKER_CLI_BUILD: 0
 
     steps:
       - name: Checkout code
