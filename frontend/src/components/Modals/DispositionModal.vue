@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, defineEmits, defineProps, ref } from "vue";
+  import { computed, defineEmits, defineProps, inject, ref } from "vue";
 
   import Button from "primevue/button";
   import Message from "primevue/message";
@@ -82,6 +82,8 @@
 
   import { alertDispositionRead } from "@/models/alertDisposition";
   import { alertCommentCreate } from "@/models/alertComment";
+
+  const config = inject("config") as Record<string, any>;
 
   const alertDispositionStore = useAlertDispositionStore();
   const alertStore = useAlertStore();
@@ -151,9 +153,19 @@
   };
 
   const showAddToEventButton = computed(() => {
-    // Only show add to event button if selected disposition is an 'elevated' disposition
+    // Only show add to event button if selected disposition is at or above the configured minimum
+    let minimumRequiredRank = Number.POSITIVE_INFINITY;
+    for (let i = 0; i < alertDispositionStore.allItems.length; i++) {
+      if (
+        alertDispositionStore.allItems[i].value.toLowerCase() ===
+        config.alerts.minimumSaveToEventDisposition.toLowerCase()
+      ) {
+        minimumRequiredRank = alertDispositionStore.allItems[i].rank;
+      }
+    }
+
     if (newDisposition.value) {
-      return newDisposition.value.rank > 1;
+      return newDisposition.value.rank >= minimumRequiredRank;
     }
     return false;
   });
