@@ -1,6 +1,8 @@
 from boto3 import resource
 from typing import Optional
 
+from .timestamp import Timestamp, fromisoformat
+
 def persistent_data():
     ''' returns the boto3 resource for the persistent data table '''
     return resource('dynamodb').Table('persistent_data')
@@ -44,3 +46,31 @@ def set(key:str, value:str):
             'value': value,
         }
     )
+
+def get_timestamp(key:str, default:Optional[Timestamp]=None) -> Optional[Timestamp]:
+    ''' gets a timestamp from persistent data string
+
+    Args:
+        key: the key of the timestamp to get
+        default: a default timestamp to return if the key is not in persistent data
+
+    Returns:
+        the timestamp for given key in persistent data or a default timestamp if key is not found
+    '''
+
+    # get the timestamp from persistent data as a string
+    timestamp = get(key)
+
+    # convert string to timestamp or return default if not found
+    return fromisoformat(timestamp) if timestamp else default
+
+def set_timestamp(key:str, timestamp:Timestamp):
+    ''' sets the value of key in persistent data to the isoformatted string value of given timestamp
+
+    Args:
+        key: the key to set the value of
+        timestamp: the Timestamp object to store
+    '''
+
+    # set the key's value in persistent data to the iso formatted string representation of given timestamp
+    set(key, timestamp.isoformat())

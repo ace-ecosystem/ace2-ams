@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime, tzinfo
+from datetime import datetime, tzinfo, timedelta
 from pydantic import BaseModel
 from pytz import utc, timezone
 from typing import Union
@@ -167,3 +167,21 @@ def fromisoformat(timestamp:str, tz:tzinfo=utc):
 
     # create a Timestamp object that represents the given iso formatted timestamp string
     return Timestamp.fromisoformat(timestamp, tz)
+
+def timespan(timespan:str) -> timedelta:
+    ''' turns a colon delimited timespan into a timedelta object
+
+    Args:
+        timespan: the colon delimited timespan string
+
+    Returns:
+        timedelta object represented by the given colon delimited timespan string
+    '''
+
+    duration = timespan.split(':')
+    return timedelta(
+        days = int(duration[-4]) if len(duration) > 3 else 0,
+        hours = int(duration[-3]) if len(duration) > 2 else 0,
+        minutes = int(duration[-2]) if len(duration) > 1 else 0,
+        seconds = int(duration[-1]) if len(duration) > 0 else 0,
+    )
