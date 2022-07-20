@@ -38,6 +38,13 @@ class Analysis(Base):
 
     stack_trace = Column(String)
 
+    # NOTE: It is assumed that the analysis status values are "hard coded" to be: running, complete, and ignore.
+    # If these are changed or more added, then you will also need to update the Submission.status @property so
+    # that it can correctly determine the submission's overall status.
+    status = relationship("AnalysisStatus", lazy="selectin")
+
+    status_uuid = Column(UUID(as_uuid=True), ForeignKey("analysis_status.uuid"), nullable=False)
+
     summary = Column(String)
 
     summary_details: "list[AnalysisSummaryDetail]" = relationship("AnalysisSummaryDetail", lazy="selectin")
@@ -72,7 +79,11 @@ class Analysis(Base):
         return self.cached_during.upper if self.cached_during else None
 
     def convert_to_pydantic(self) -> AnalysisSubmissionTreeRead:
-        return AnalysisSubmissionTreeRead(leaf_id=f"{self.uuid}", **self.__dict__)
+        return AnalysisSubmissionTreeRead(leaf_id=f"{self.uuid}", **self.to_dict())
+
+    def to_dict(self):
+        ignore_keys = ["convert_to_pydantic", "to_dict"]
+        return {key: getattr(self, key) for key in self.__class__.__dict__ if key not in ignore_keys}
 
 
 from db.schemas.analysis_summary_detail import AnalysisSummaryDetail

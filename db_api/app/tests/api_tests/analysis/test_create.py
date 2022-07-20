@@ -42,6 +42,9 @@ from tests import factory
         ("run_time", "2022-01-01"),
         ("stack_trace", 123),
         ("stack_trace", ""),
+        ("status", 123),
+        ("status", None),
+        ("status", ""),
         ("submission_uuid", 123),
         ("submission_uuid", None),
         ("submission_uuid", ""),
@@ -90,6 +93,27 @@ def test_create_nonexistent_analysis_module_type(client, db):
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_create_nonexistent_status(client, db):
+    submission = factory.submission.create(db=db)
+    analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
+    observable = factory.observable.create_or_read(
+        type="fqdn", value="localhost", parent_analysis=submission.root_analysis, db=db
+    )
+
+    create = client.post(
+        "/api/analysis/",
+        json={
+            "analysis_module_type_uuid": str(analysis_module_type.uuid),
+            "run_time": str(crud.helpers.utcnow()),
+            "status": "asdf",
+            "submission_uuid": str(submission.uuid),
+            "target_uuid": str(observable.uuid),
+        },
+    )
+
+    assert create.status_code == status.HTTP_404_NOT_FOUND
+
+
 def test_create_nonexistent_submission(client, db):
     submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
@@ -107,8 +131,6 @@ def test_create_nonexistent_submission(client, db):
         },
     )
 
-    # The create_analysis API endpoint does not try to read the parent observable, so it returns an
-    # IntegrityError and 409 status code if you try to add an analysis with a nonexistent parent observable.
     assert create.status_code == status.HTTP_404_NOT_FOUND
 
 
@@ -234,12 +256,16 @@ def test_create_invalid_user_analysis(client, db):
         ("error_message", "test"),
         ("stack_trace", None),
         ("stack_trace", "test"),
+        ("status", "test_status"),
         ("summary", None),
         ("summary", "test"),
         ("uuid", str(uuid.uuid4())),
     ],
 )
 def test_create_valid_optional_fields(client, db, key, value):
+    if key == "status":
+        factory.analysis_status.create_or_read(value=value, db=db)
+
     submission = factory.submission.create(db=db)
     analysis_module_type = factory.analysis_module_type.create_or_read(value="test_type", version="1.0.0", db=db)
     observable = factory.observable.create_or_read(
@@ -269,6 +295,9 @@ def test_create_valid_optional_fields(client, db, key, value):
     # If the test is for child_observables, make sure the length is the same as the supplied list
     elif key == "child_observables":
         assert len(get.json()[key]) == len(value)
+    # If the test is for status, make sure it is associated with the correct object
+    elif key == "status":
+        assert get.json()[key]["value"] == value
     else:
         assert get.json()[key] == value
 

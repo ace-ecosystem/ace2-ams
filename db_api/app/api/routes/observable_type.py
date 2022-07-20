@@ -17,7 +17,7 @@ from exceptions.db import UuidNotFoundInDatabase
 
 router = APIRouter(
     prefix="/observable/type",
-    tags=["Observable Observable Type"],
+    tags=["Observable Type"],
 )
 
 

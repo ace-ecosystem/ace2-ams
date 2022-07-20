@@ -96,4 +96,7 @@ export const alertDispositionMetadata: Record<string, string> = {
   damage: RED,
 };
 
+// Used to set the cutoff for which dispositions allow you to save an alert to an event
+export const minimumSaveToEventDisposition = "APPROVED_BUSINESS";
+
 export const alertDetailsComponents: Record<string, unknown> = {};

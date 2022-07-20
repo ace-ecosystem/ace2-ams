@@ -3,31 +3,20 @@ from pydantic import BaseModel, Field, Json, UUID4
 from typing import Optional
 from uuid import uuid4
 
-from api_models import type_str
-from api_models.analysis_module_type import (
-    AnalysisModuleTypeRead,
-    AnalysisModuleTypeSubmissionTreeRead,
-)
-from api_models.analysis_summary_detail import (
-    AnalysisSummaryDetailCreateInAnalysis,
-    AnalysisSummaryDetailRead,
-)
+from api_models import type_str, validators
+from api_models.analysis_module_type import AnalysisModuleTypeRead, AnalysisModuleTypeSubmissionTreeRead
+from api_models.analysis_status import AnalysisStatusRead
+from api_models.analysis_summary_detail import AnalysisSummaryDetailCreateInAnalysis, AnalysisSummaryDetailRead
 
 
 class AnalysisBase(BaseModel):
     """Represents an individual analysis that was performed."""
 
-    error_message: Optional[type_str] = Field(
-        description="An optional error message that occurred during analysis"
-    )
+    error_message: Optional[type_str] = Field(description="An optional error message that occurred during analysis")
 
-    stack_trace: Optional[type_str] = Field(
-        description="An optional stack trace that occurred during analysis"
-    )
+    stack_trace: Optional[type_str] = Field(description="An optional stack trace that occurred during analysis")
 
-    summary: Optional[type_str] = Field(
-        description="A short summary/description of what this analysis did or found"
-    )
+    summary: Optional[type_str] = Field(description="A short summary/description of what this analysis did or found")
 
 
 class AnalysisCreateBase(AnalysisBase):
@@ -40,18 +29,16 @@ class AnalysisCreateBase(AnalysisBase):
         description="A list of child observables discovered during the analysis",
     )
 
-    details: Optional[Json] = Field(
-        description="A JSON representation of the details produced by the analysis"
-    )
+    details: Optional[Json] = Field(description="A JSON representation of the details produced by the analysis")
 
     run_time: datetime = Field(
         default_factory=datetime.utcnow,
         description="The time at which the analysis was performed",
     )
 
-    submission_uuid: UUID4 = Field(
-        description="The UUID of the submission that will contain this analysis"
-    )
+    status: type_str = Field(default="running", description="The current status of the analysis")
+
+    submission_uuid: UUID4 = Field(description="The UUID of the submission that will contain this analysis")
 
     summary_details: list[AnalysisSummaryDetailCreateInAnalysis] = Field(
         default_factory=list,
@@ -62,9 +49,7 @@ class AnalysisCreateBase(AnalysisBase):
 
 
 class AnalysisCreate(AnalysisCreateBase):
-    target_uuid: UUID4 = Field(
-        description="The UUID of the target observable for this analysis"
-    )
+    target_uuid: UUID4 = Field(description="The UUID of the target observable for this analysis")
 
 
 class AnalysisCreateInObservable(AnalysisCreateBase):
@@ -84,16 +69,14 @@ class AnalysisRead(AnalysisBase):
         description="The list of child observables produced by this analysis"
     )
 
-    details: Optional[dict] = Field(
-        description="A JSON representation of the details produced by the analysis"
-    )
+    details: Optional[dict] = Field(description="A JSON representation of the details produced by the analysis")
 
     # Set a static string value so code displaying the tree structure knows which type of object this is.
     object_type: str = "analysis"
 
-    run_time: datetime = Field(
-        description="The time at which the analysis was performed"
-    )
+    run_time: datetime = Field(description="The time at which the analysis was performed")
+
+    status: AnalysisStatusRead = Field(description="The current status of the analysis")
 
     summary_details: list[AnalysisSummaryDetailRead] = Field(
         default_factory=list,
@@ -121,12 +104,12 @@ class AnalysisSubmissionTreeRead(BaseModel):
         default=False,
         description="Whether or not this object is part of a 'critical' path in the tree",
     )
-    leaf_id: type_str = Field(
-        description="The unique identifier of the analysis in the nested tree structure"
-    )
+    leaf_id: type_str = Field(description="The unique identifier of the analysis in the nested tree structure")
 
     # Set a static string value so code displaying the tree structure knows which type of object this is.
     object_type: str = "analysis"
+
+    status: AnalysisStatusRead = Field(description="The current status of the analysis")
 
     summary_details: list[AnalysisSummaryDetailRead] = Field(
         default_factory=list,
@@ -142,23 +125,19 @@ class AnalysisSubmissionTreeRead(BaseModel):
 class RootAnalysisSubmissionTreeRead(AnalysisSubmissionTreeRead):
     """Model used to represent a submission's root analysis."""
 
-    details: Optional[dict] = Field(
-        description="A JSON representation of the root analysis details"
-    )
+    details: Optional[dict] = Field(description="A JSON representation of the root analysis details")
 
 
 class AnalysisUpdate(AnalysisBase):
-    details: Optional[Json] = Field(
-        description="A JSON representation of the details produced by the analysis"
-    )
+    details: Optional[Json] = Field(description="A JSON representation of the details produced by the analysis")
 
-    error_message: Optional[type_str] = Field(
-        description="An optional error message that occurred during analysis"
-    )
+    error_message: Optional[type_str] = Field(description="An optional error message that occurred during analysis")
 
-    stack_trace: Optional[type_str] = Field(
-        description="An optional stack trace that occurred during analysis"
-    )
+    stack_trace: Optional[type_str] = Field(description="An optional stack trace that occurred during analysis")
+
+    status: Optional[type_str] = Field(description="The current status of the analysis")
+
+    _prevent_none: classmethod = validators.prevent_none("status")
 
 
 # Needed for the circular relationship between analysis <-> observable

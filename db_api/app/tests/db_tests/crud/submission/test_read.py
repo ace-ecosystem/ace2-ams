@@ -1427,6 +1427,80 @@ def test_circular_tree(db):
     assert tree.root_analysis.children[0].children[0].children[0].children[0].children[0].children == []
 
 
+def test_status(db):
+    submission = factory.submission.create(db=db)
+    obs = factory.observable.create_or_read(type="type", value="value", parent_analysis=submission.root_analysis, db=db)
+
+    # Possible status combinations are:
+    #
+    # running -> running
+    # ignore -> ignore
+    # complete -> complete
+    # complete, running -> running
+    # complete, ignore -> complete
+    # ignore, running -> running
+    # complete, running, ignore -> running
+
+    # Test with all the same status
+    a1 = factory.analysis.create_or_read(
+        analysis_module_type=factory.analysis_module_type.create_or_read(value="test_module1", db=db),
+        status="complete",
+        submission=submission,
+        target=obs,
+        db=db,
+    )
+
+    a2 = factory.analysis.create_or_read(
+        analysis_module_type=factory.analysis_module_type.create_or_read(value="test_module2", db=db),
+        status="complete",
+        submission=submission,
+        target=obs,
+        db=db,
+    )
+
+    a3 = factory.analysis.create_or_read(
+        analysis_module_type=factory.analysis_module_type.create_or_read(value="test_module3", db=db),
+        status="complete",
+        submission=submission,
+        target=obs,
+        db=db,
+    )
+
+    assert submission.status.value == "complete"
+
+    # Test with complete and running
+    a1.status = factory.analysis_status.create_or_read(value="running", db=db)
+    a2.status = factory.analysis_status.create_or_read(value="complete", db=db)
+    a3.status = factory.analysis_status.create_or_read(value="complete", db=db)
+    db.refresh(submission)
+
+    assert submission.status.value == "running"
+
+    # Test with complete and ignore
+    a1.status = factory.analysis_status.create_or_read(value="ignore", db=db)
+    a2.status = factory.analysis_status.create_or_read(value="complete", db=db)
+    a3.status = factory.analysis_status.create_or_read(value="complete", db=db)
+    db.refresh(submission)
+
+    assert submission.status.value == "complete"
+
+    # Test with running and ignore
+    a1.status = factory.analysis_status.create_or_read(value="ignore", db=db)
+    a2.status = factory.analysis_status.create_or_read(value="running", db=db)
+    a3.status = factory.analysis_status.create_or_read(value="running", db=db)
+    db.refresh(submission)
+
+    assert submission.status.value == "running"
+
+    # Test with all three statuses
+    a1.status = factory.analysis_status.create_or_read(value="complete", db=db)
+    a2.status = factory.analysis_status.create_or_read(value="ignore", db=db)
+    a3.status = factory.analysis_status.create_or_read(value="running", db=db)
+    db.refresh(submission)
+
+    assert submission.status.value == "running"
+
+
 def test_critical_path(db):
     """
     * - critical path
@@ -1445,7 +1519,7 @@ def test_critical_path(db):
     """
 
     submission = factory.submission.create_from_json_file(
-        db=db, json_path="/app/tests/alerts/critical_path.json", submission_name="Circular Alert"
+        db=db, json_path="/app/tests/alerts/critical_path.json", submission_name="Critical Path Alert"
     )
 
     tree = crud.submission.read_tree(uuid=submission.uuid, db=db)

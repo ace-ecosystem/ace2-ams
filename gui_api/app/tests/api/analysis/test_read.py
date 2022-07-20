@@ -13,6 +13,11 @@ def test_get_analysis(client_valid_access_token, requests_mock):
             "child_observables": [],
             "cached_until": str(datetime.utcnow()),
             "run_time": str(datetime.utcnow()),
+            "status": {
+                "description": None,
+                "uuid": str(uuid4()),
+                "value": "complete",
+            },
         },
     )
 

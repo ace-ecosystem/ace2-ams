@@ -10,6 +10,7 @@ from db import crud
 from db.schemas.analysis_module_type import AnalysisModuleType
 from db.schemas.observable import Observable
 from db.schemas.submission import Submission
+from tests import factory
 
 
 def create_or_read(
@@ -22,8 +23,11 @@ def create_or_read(
     error_message: str = None,
     run_time: Optional[datetime] = None,
     stack_trace: str = None,
+    status: str = "running",
     summary: str = None,
 ):
+    factory.analysis_status.create_or_read(value=status, db=db)
+
     if child_observables is None:
         child_observables = []
 
@@ -38,6 +42,7 @@ def create_or_read(
             error_message=error_message,
             run_time=run_time,
             stack_trace=stack_trace,
+            status=status,
             submission_uuid=submission.uuid,
             summary=summary,
             target_uuid=target.uuid,

@@ -10,6 +10,7 @@ from core.auth import hash_password
 from core.config import is_in_testing_mode
 from db.database import get_db
 from db.schemas.alert_disposition import AlertDisposition
+from db.schemas.analysis_status import AnalysisStatus
 from db.schemas.event_prevention_tool import EventPreventionTool
 from db.schemas.event_remediation import EventRemediation
 from db.schemas.event_severity import EventSeverity
@@ -83,9 +84,16 @@ def seed(db: Session):
 
     # Add the rest of the objects from the config into the database
     if "alert_disposition" in data:
-        for rank, value in enumerate(data["alert_disposition"]):
+        for index, value in enumerate(data["alert_disposition"]):
+            # Calculate the rank so that there is space between them for any potential future dispositions
+            rank = (index + 1) * 10
             db.add(AlertDisposition(rank=rank, value=value))
             print(f"Adding alert disposition: {rank}:{value}")
+
+    if "analysis_status" in data:
+        for value in data["analysis_status"]:
+            db.add(AnalysisStatus(value=value))
+            print(f"Adding analysis status: {value}")
 
     if "directive" in data:
         for directive in data["directive"]:
