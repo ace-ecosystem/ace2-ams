@@ -36,14 +36,15 @@
         </span>
 
         <div
-          v-if="leafExpanded(index) && i.children.length"
+          v-if="leafVisible(index) && i.children.length"
+          v-show="leafExpanded(index)"
           class="p-treenode-children"
         >
           <AlertTree
-            :ref="childTree"
+            ref="childTree"
             :items="i.children"
             :alert-id="alertId"
-            :all-analysis="allAnalysis"
+            :critical-only="criticalOnly"
           />
         </div>
       </li>
@@ -74,33 +75,21 @@
       type: String,
       required: true,
     },
-    allAnalysis: {
+    criticalOnly: {
       type: Boolean,
       required: true,
     },
   });
 
-  const itemsExpandedStatus = ref<Record<number, boolean>>({});
+  const childExpandedStatus = ref<Record<number, boolean>>({});
   const childTree = ref<any>();
 
   onBeforeMount(() => {
     resetExpansion();
   });
 
-  // function generateExpandedStatus(
-  //   items: (analysisTreeRead | observableTreeRead)[],
-  // ) {
-  //   const expandedStatus: Record<number, boolean> = {};
-  //   items.forEach((item, index) => {
-  //     expandedStatus[index] = item.firstAppearance
-  //       ? item.firstAppearance
-  //       : false;
-  //   });
-  //   return expandedStatus;
-  // }
-
   watch(
-    () => props.allAnalysis,
+    () => props.criticalOnly,
     () => {
       resetExpansion();
     },
@@ -113,57 +102,70 @@
     items.forEach((_, index) => {
       expandedStatus[index] = true;
     });
-
-    if (props.allAnalysis) {
-      items.forEach((item, index) => {
-        const criticalPath = item.criticalPath ? item.criticalPath : false;
-        expandedStatus[index] = criticalPath;
-      });
-    }
-
     return expandedStatus;
   }
 
-  const itemsVisibleStatus = computed(() => {
+  const childVisibleStatus = computed(() => {
     const visibleStatus: Record<number, boolean> = {};
-    if (props.allAnalysis) {
+    if (props.criticalOnly) {
       props.items.forEach((item, index) => {
-        visibleStatus[index] = true;
+        visibleStatus[index] = item.criticalPath ? item.criticalPath : false;
       });
     } else {
       props.items.forEach((item, index) => {
-        visibleStatus[index] = item.criticalPath ? item.criticalPath : false;
+        visibleStatus[index] = true;
       });
     }
     return visibleStatus;
   });
 
   function expandAll() {
-    Object.keys(itemsExpandedStatus.value).forEach((key: any) => {
-      itemsExpandedStatus.value[key] = true;
+    Object.keys(childExpandedStatus.value).forEach((key: any) => {
+      childExpandedStatus.value[key] = true;
     });
-    childTree.value?.expandAll();
+    if (Array.isArray(childTree.value)) {
+      childTree.value?.forEach((tree: any) => {
+        tree.expandAll();
+      });
+    } else {
+      childTree.value?.expandAll();
+    }
   }
   function collapseAll() {
-    Object.keys(itemsExpandedStatus.value).forEach((key: any) => {
-      itemsExpandedStatus.value[key] = false;
+    Object.keys(childExpandedStatus.value).forEach((key: any) => {
+      childExpandedStatus.value[key] = false;
     });
-    childTree.value?.collapseAll();
+    if (Array.isArray(childTree.value)) {
+      childTree.value?.forEach((tree: any) => {
+        tree.collapseAll();
+      });
+    } else {
+      childTree.value?.collapseAll();
+    }
   }
   function resetExpansion() {
-    itemsExpandedStatus.value = generateExpandedStatus(props.items);
-    childTree.value?.resetExpansion();
+    childExpandedStatus.value = generateExpandedStatus(props.items);
+    if (Array.isArray(childTree.value)) {
+      childTree.value?.forEach((tree: any) => {
+        tree.resetExpansion();
+      });
+    } else {
+      childTree.value?.resetExpansion();
+    }
   }
   function leafExpanded(index: number) {
-    return itemsExpandedStatus.value[index];
+    return childExpandedStatus.value[index];
   }
   function leafVisible(index: number) {
-    return itemsVisibleStatus.value[index];
+    return childVisibleStatus.value[index];
   }
   function toggleLeafExpanded(index: number) {
-    itemsExpandedStatus.value[index] = !itemsExpandedStatus.value[index];
+    childExpandedStatus.value[index] = !childExpandedStatus.value[index];
   }
   function toggleIcon(index: number) {
+    if (!leafVisible(index)) {
+      return ["p-tree-toggler-icon pi pi-fw", "pi pi-fw pi-minus"];
+    }
     return [
       "p-tree-toggler-icon pi pi-fw",
       {

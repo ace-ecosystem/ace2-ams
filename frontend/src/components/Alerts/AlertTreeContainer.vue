@@ -1,78 +1,43 @@
 <template>
-  <!-- <Toolbar>
+  <Toolbar>
     <template #start>
       <div style="display: flex; align-items: center">
-        <span style="padding-right: 5px">Critical</span>
         <span>
-          <InputSwitch v-model="allAnalysis" />
+          <Checkbox v-model="criticalOnly" :binary="true" />
         </span>
-        <span style="padding-left: 3px">All Analysis</span>
+        <span style="padding-left: 3px"
+          ><b>Critical Analysis </b
+          ><i
+            v-tooltip="'Hide irrelevant data points'"
+            class="pi pi-question-circle"
+          ></i
+        ></span>
       </div>
     </template>
     <template #end>
       <Button
         label="Expand All"
-        icon="pi pi-plus"
+        icon="pi pi-angle-double-down"
         class="mr-2"
         @click="expandAll"
       />
       <Button
         label="Collapse All"
-        icon="pi pi-minus"
+        icon="pi pi-angle-double-up"
         class="mr-2"
         @click="collapseAll"
-      />
-      <Button
-        label="Default"
-        icon="pi pi-undo"
-        class="mr-2"
-        @click="resetExpansion"
-      />
-    </template>
-  </Toolbar> -->
-  <!-- <Toolbar>
-    <template #start>
-      <div style="display: flex; align-items: center">
-        <span style="padding-right: 5px">Critical</span>
-        <span>
-          <InputSwitch v-model="allAnalysis" />
-        </span>
-        <span style="padding-left: 3px">All Analysis</span>
-      </div>
-    </template>
-  </Toolbar> -->
-  <Toolbar>
-    <template #start>
-      <ToggleButton
-        v-model="allAnalysis"
-        on-label="Critical Analysis"
-        off-label="All Analysis"
       />
     </template>
   </Toolbar>
   <Card style="overflow-x: scroll">
     <template #content>
-      <!-- <TabView>
-        <TabPanel v-for="tab in tabs" :key="tab.title" :header="tab.title">
-          <div class="p-tree p-component p-tree-wrapper" style="border: none">
-            <AlertTree
-              ref="alertTree"
-              id="alert-tree"
-              :items="alertStore.open.rootAnalysis.children"
-              :alert-id="alertStore.open.uuid"
-              :all-analysis="tab.allAnalysis"
-            />
-            <ScrollTop />
-          </div>
-        </TabPanel>
-      </TabView> -->
       <div class="p-tree p-component p-tree-wrapper" style="border: none">
-        <AlertTree
-          ref="alertTree"
+        <AlertTreeVue
           id="alert-tree"
+          ref="tree"
           :items="alertStore.open.rootAnalysis.children"
           :alert-id="alertStore.open.uuid"
-          :all-analysis="allAnalysis"
+          :critical-only="criticalOnly"
         />
         <ScrollTop />
       </div>
@@ -82,41 +47,27 @@
 <script setup lang="ts">
   import { ref } from "vue";
 
-  import InputSwitch from "primevue/inputswitch";
+  import Checkbox from "primevue/checkbox";
 
   import Button from "primevue/button";
   import Card from "primevue/card";
   import ScrollTop from "primevue/scrolltop";
   import Toolbar from "primevue/toolbar";
 
-  import TabView from "primevue/tabview";
-  import TabPanel from "primevue/tabpanel";
-  import ToggleButton from "primevue/togglebutton";
-
-  import AlertTree from "@/components/Alerts/AlertTree.vue";
+  import AlertTreeVue from "@/components/Alerts/AlertTree.vue";
   import { useAlertStore } from "@/stores/alert";
 
   const alertStore = useAlertStore();
 
-  const tabs = ref([
-    { title: "Critical Analysis", allAnalysis: false },
-    { title: "All Analysis", allAnalysis: true },
-  ]);
+  const criticalOnly = ref(true);
 
-  // allAnalysis: true;
-  // criticalAnalysis: false;
-  const allAnalysis = ref(false);
-
-  const alertTree = ref<InstanceType<typeof AlertTree>>();
-  function collapseAll() {
-    alertTree.value?.collapseAll();
-  }
-  function expandAll() {
-    alertTree.value?.expandAll();
-  }
-  function resetExpansion() {
-    alertTree.value?.resetExpansion();
-  }
+  const tree = ref<InstanceType<typeof AlertTreeVue>>();
+  const collapseAll = () => {
+    tree.value?.collapseAll();
+  };
+  const expandAll = () => {
+    tree.value?.expandAll();
+  };
 </script>
 
 <style>
