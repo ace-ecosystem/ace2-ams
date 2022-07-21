@@ -10,10 +10,13 @@ import { observableTreeReadFactory } from "@mocks/observable";
 import {
   analysisModuleTypeAlertTreeReadFactory,
   analysisTreeReadFactory,
+  rootAnalysisTreeReadFactory,
 } from "@mocks/analysis";
 import { testConfiguration } from "@/etc/configuration/test";
 import ToastService from "primevue/toastservice";
 import { metadataTagReadFactory } from "@mocks/metadata";
+import { genericObjectReadFactory } from "@mocks/genericObject";
+import AnalysisSummaryDetailVue from "@/components/Analysis/AnalysisSummaryDetail.vue";
 
 const childObservable = observableTreeReadFactory({
   value: "Child Observable",
@@ -199,5 +202,37 @@ describe("AlertTree", () => {
     cy.contains("Parent Analysis")
       .invoke("attr", "href")
       .should("contain", "/alert/test/testUuid");
+  });
+  it("displays all Analysis Summary Details", () => {
+    const summary = {
+      content: "test1",
+      format: genericObjectReadFactory(),
+      header: "testHeader1",
+      uuid: "1111",
+    };
+    const summary2 = {
+      content: "test2",
+      format: genericObjectReadFactory(),
+      header: "testHeader2",
+      uuid: "2222",
+    };
+    const parentAnalysisWithSummary = analysisTreeReadFactory({
+      analysisModuleType: analysisModuleTypeAlertTreeReadFactory({
+        value: "Parent Analysis",
+      }),
+      children: [childObservable],
+      summaryDetails: [summary, summary2],
+    });
+    factory({
+      props: {
+        items: [parentObservable, parentAnalysisWithSummary],
+        alertId: "test",
+        criticalOnly: true,
+      },
+    });
+    cy.contains("Summary Details").should("be.visible");
+    // cy.get('#pv_id_2_header > .pi').click();
+    cy.contains("testHeader1").should("be.visible");
+    cy.contains("testHeader2").should("be.visible");
   });
 });

@@ -20,6 +20,11 @@
     <br />
     <AlertMatchingOpenEventsPanel />
     <br />
+    <AnalysisSummaryDetail
+      v-if="alertStore.open.rootAnalysis.summaryDetails.length"
+      :summary-details="alertStore.open.rootAnalysis.summaryDetails"
+    />
+    <br />
     <TheAlertDetails />
     <br />
     <AlertUrlDomainSummary :alert-uuid="alertID" />
@@ -31,8 +36,8 @@
 <script setup lang="ts">
   import { onBeforeMount, onUnmounted, provide, inject, ref } from "vue";
   import { useRoute } from "vue-router";
-
   import Card from "primevue/card";
+  import Panel from "primevue/panel";
   import Message from "primevue/message";
   import ScrollTop from "primevue/scrolltop";
 
@@ -45,6 +50,7 @@
   import { useAlertStore } from "@/stores/alert";
   import { useAuthStore } from "@/stores/auth";
   import { useSelectedAlertStore } from "@/stores/selectedAlert";
+  import AnalysisSummaryDetail from "@/components/Analysis/AnalysisSummaryDetail.vue";
 
   const authStore = useAuthStore();
   const route = useRoute();
