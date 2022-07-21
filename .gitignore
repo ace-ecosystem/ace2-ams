@@ -1,3 +1,6 @@
+.DS_Store
+node_modules/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -42,6 +45,7 @@ htmlcov/
 .nox/
 .coverage
 .coverage.*
+coverage/
 .cache
 nosetests.xml
 coverage.xml
@@ -102,6 +106,8 @@ celerybeat.pid
 
 # Environments
 .env
+.env.local
+.env.*.local
 .venv
 env/
 venv/
@@ -129,3 +135,30 @@ dmypy.json
 
 # vim
 *.swp
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# E2E test screenshots and videos
+frontend/tests/*/screenshots
+frontend/tests/*/videos
+frontend/tests/*/downloads
+frontend/cypress/screenshots
+frontend/cypress/videos
+frontend/cypress/downloads
+
+# Frontend test coverage files
+instrumented/
+.nyc_output

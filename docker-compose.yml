@@ -1,0 +1,110 @@
+version: "3.9"
+
+services:
+  db:
+    container_name: ace2-ams-db
+    build:
+      context: ./db_container
+      dockerfile: ./Dockerfile
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - 6666:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  db-api:
+    depends_on:
+      - db
+    container_name: ace2-ams-db-api
+    build:
+      context: ./
+      dockerfile: ./db_api/Dockerfile
+      args:
+        # needed if behind a proxy for pip installation
+        http_proxy: ${http_proxy:-}
+        https_proxy: ${https_proxy:-}
+        pip_install_options: ${pip_install_options:-}
+    environment:
+      # The DATABASE_URL environment variable needs to be in the form of:
+      # postgresql://<user>:<password>@db:5432/<database>
+      - ACE_DEV=${ACE_DEV}
+      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_TEST_URL=${DATABASE_TEST_URL}
+      - LOG_LEVEL=debug
+      - SQL_ECHO=${SQL_ECHO}
+      - TESTING=${TESTING:-no}
+    ports:
+      - 8888:80
+    volumes:
+      - ./db_api/app:/app
+      - ./api_models:/app/api_models
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; /start-reload.sh'
+
+  gui-api:
+    depends_on:
+      - db-api
+    container_name: ace2-ams-gui-api
+    build:
+      context: ./
+      dockerfile: ./gui_api/Dockerfile
+      args:
+        # needed if behind a proxy for pip installation
+        http_proxy: ${http_proxy:-}
+        https_proxy: ${https_proxy:-}
+        pip_install_options: ${pip_install_options:-}
+    environment:
+      # The DATABASE_URL environment variable needs to be in the form of:
+      # postgresql://<user>:<password>@db:5432/<database>
+      - COOKIES_SAMESITE=${COOKIES_SAMESITE}
+      - COOKIES_SECURE=${COOKIES_SECURE}
+      - DATABASE_API_URL=${DATABASE_API_URL}
+      - JWT_ACCESS_EXPIRE_SECONDS=${JWT_ACCESS_EXPIRE_SECONDS}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_REFRESH_EXPIRE_SECONDS=${JWT_REFRESH_EXPIRE_SECONDS}
+      - JWT_SECRET=${JWT_SECRET}
+      - LOG_LEVEL=debug
+      - SQL_ECHO=${SQL_ECHO}
+    ports:
+      - 7777:80
+    volumes:
+      - ./gui_api/app:/app
+      - ./api_models:/app/api_models
+    command: bash -c 'while !</dev/tcp/db-api/80; do sleep 1; done; /start-reload.sh'
+
+  gui:
+    depends_on:
+      - gui-api
+    container_name: ace2-ams-gui
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile.dev
+      args:
+        # needed if behind a proxy for pip installation
+        http_proxy: ${http_proxy:-}
+        https_proxy: ${https_proxy:-}
+        pip_install_options: ${pip_install_options:-}
+        npm_strict_ssl: ${npm_strict_ssl:-true}
+    environment:
+      - DATABASE_TEST_URL=${DATABASE_TEST_URL}
+      - VITE_BACKEND_URL=http://ace2-ams:8080/api/
+      - VITE_TESTING_MODE=${TESTING:-no}
+      - CYPRESS_COVERAGE=${CYPRESS_COVERAGE:-false}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+  ace2-ams:
+    depends_on:
+      - gui
+    container_name: ace2-ams
+    build:
+      context: ./nginx
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8080
+
+volumes:
+  postgres_data:

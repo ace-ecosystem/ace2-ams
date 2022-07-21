@@ -1,0 +1,21 @@
+FROM cypress/included:10.3.0
+
+ARG http_proxy
+ARG https_proxy
+ARG npm_strict_ssl=true
+
+RUN http_proxy="$http_proxy" https_proxy="$https_proxy" apt-get install -y curl
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm config set strict-ssl ${npm_strict_ssl} && http_proxy="$http_proxy" https_proxy="$https_proxy" npm install 
+
+COPY . .
+
+# Fixes the strange permission issues GitHub Actions was having.
+RUN chmod -R 777 /app
+
+# Override the entrypoint of the cypress/included image
+ENTRYPOINT ["bash", "-c", "while !</dev/tcp/gui-api/80; do sleep 1; done; npm run dev"]

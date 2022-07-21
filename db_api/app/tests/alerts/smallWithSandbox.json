@@ -1,0 +1,294 @@
+{
+  "name": "Small Alert with Sandbox Analysis",
+  "observables": [
+    {
+      "type": "file",
+      "value": "email.rfc822",
+      "analyses": [
+        {
+          "type": "Email Analysis",
+          "details": {
+            "from_address": "badguy@evil.com",
+            "to_address": "goodguy@company.com",
+            "cc_addresses": ["otherguy@company.com"],
+            "subject": "Hello",
+            "message_id": "<123abc@evil.com>",
+            "time": "2022-03-18T12:00:00.000Z",
+            "attachments": ["malware.exe"],
+            "headers": "blah",
+            "body_text": "Here, download this malware."
+          },
+          "observable_types": ["file"],
+          "required_directives": ["email"],
+          "required_tags": ["scan_me"],
+          "observables": [
+            {
+              "type": "file",
+              "value": "malware.exe",
+              "analyses": [
+                {
+                  "type": "Sandbox Analysis - Cuckoo",
+                  "details": {
+                    "contacted_hosts": [
+                      {
+                        "ip": "127.0.0.1",
+                        "port": 80,
+                        "protocol": "TCP",
+                        "location": "some place",
+                        "associated_domains": ["domain1", "domain2"]
+                      },
+                      {
+                        "ip": "192.168.1.1",
+                        "port": 443,
+                        "protocol": "TCP",
+                        "location": "some other place",
+                        "associated_domains": []
+                      }
+                    ],
+                    "created_services": [
+                      "created_service1",
+                      "created_service2"
+                    ],
+                    "dns_requests": [
+                      {
+                        "request": "malware.com",
+                        "type": "A",
+                        "answer": "127.0.0.1",
+                        "answer_type": "A"
+                      },
+                      {
+                        "request": "othermalware.com",
+                        "type": "A",
+                        "answer": "192.168.1.1",
+                        "answer_type": "A"
+                      }
+                    ],
+                    "dropped_files": [
+                      {
+                        "filename": "dropped1.exe",
+                        "path": "c:\\users\\analyst\\desktop\\dropped1.exe",
+                        "size": 100,
+                        "type": "application/octet-stream",
+                        "md5": "10239eb7264449296277d10538e27f3e",
+                        "sha1": "344329cc1356f227a722ad81e36a6e5baf6a0642",
+                        "sha256": "17d771db597ca8eb06c874200a067d7ac4374aa14d7b775a3b57181e69cfb100",
+                        "sha512": "54f61aba3cfb0249b84b9b2464b946e1039615dbebe6ce2ca6403c91945ef30a6156eb5c3ec330fe8c67b34e8a8b71a2f6e8d394874a72dd06fb96649d020682",
+                        "ssdeep": "3:cIoN:cb"
+                      },
+                      {
+                        "filename": "dropped2.exe",
+                        "path": "c:\\users\\analyst\\desktop\\dropped2.exe",
+                        "size": 100,
+                        "type": "application/octet-stream",
+                        "md5": "8ad98e2965070ebbb86a95e35c18010f",
+                        "sha1": "6e1833d62213441c60edce1a4cfb6674af102d69",
+                        "sha256": "fc0fefa8d1f318419f927bc3b793bf66a035d59f24874ce7cf773f9162d0a158",
+                        "sha512": "6774d837fb2851c1c1d89170068caa1b81143b81ec7fbf4322b3ffdbc24efcebcc12d763d1c6f4b0c843e43427671453167b1c50ed5f71c7ede8759f75f39732",
+                        "ssdeep": "3:cIeAn:ckn"
+                      }
+                    ],
+                    "filename": "malware.exe",
+                    "http_requests": [
+                      {
+                        "host": "malware.com",
+                        "port": 80,
+                        "path": "/malware.exe",
+                        "method": "GET",
+                        "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+                      },
+                      {
+                        "host": "othermalware.com",
+                        "port": 443,
+                        "path": "/othermalware.exe",
+                        "method": "GET",
+                        "user_agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0"
+                      }
+                    ],
+                    "malware_family": "ransomware",
+                    "md5": "9051c29972c935649d8fa4b823e54dea",
+                    "memory_strings": ["memory_string1", "memory_string2"],
+                    "mutexes": ["mutex1", "mutex2"],
+                    "processes": [
+                      {
+                        "command": "malware.exe",
+                        "pid": 1000,
+                        "parent_pid": 0
+                      },
+                      {
+                        "command": "sub_command1",
+                        "pid": 1001,
+                        "parent_pid": 1000
+                      },
+                      {
+                        "command": "sub_sub_command1",
+                        "pid": 1002,
+                        "parent_pid": 1001
+                      },
+                      {
+                        "command": "sub_command2",
+                        "pid": 1003,
+                        "parent_pid": 1000
+                      }
+                    ],
+                    "registry_keys": ["registry_key1", "registry_key2"],
+                    "resolved_apis": ["resolved_api1", "resolved_api2"],
+                    "sandbox_url": "https://url.to.sandbox.report",
+                    "sha1": "2da7b04fa4f6e94c7c82c1c8ee09ead16121bc60",
+                    "sha256": "66ecfc29b6d458538b23310988289158f319e2e1cf7587413011d43a639c6ec0",
+                    "sha512": "951c56c1bad4cdb721da736d9f1c04ebbbf32d2737c8ec8c64086a4c5448cb37f95784186c8c67c42b7bc622ba6358dc8befee750c14bcf5136a6706a19e007b",
+                    "ssdeep": "3:5c+a:q",
+                    "started_services": [
+                      "started_service1",
+                      "started_service2"
+                    ],
+                    "strings_urls": [
+                      "https://string.url1",
+                      "https://string.url2"
+                    ],
+                    "suricata_alerts": ["suricata_alert1", "suricata_alert2"]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "email_address",
+              "value": "badguy@evil.com",
+              "metadata": [{ "type": "tag", "value": "from_address" }],
+              "analyses": [
+                {
+                  "type": "Email Address Analysis",
+                  "observables": [
+                    {
+                      "type": "fqdn",
+                      "value": "evil.com",
+                      "analyses": [
+                        {
+                          "type": "Test Analysis",
+                          "observables": [
+                            { "type": "test_type", "value": "test_value" }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "email_address",
+              "value": "goodguy@company.com",
+              "metadata": [{ "type": "tag", "value": "recipient" }],
+              "analyses": [
+                {
+                  "type": "Email Address Analysis",
+                  "observables": [{ "type": "fqdn", "value": "company.com" }]
+                },
+                {
+                  "type": "User Analysis",
+                  "details": {
+                    "user_id": "12345",
+                    "email": "goodguy@company.com",
+                    "company": "Company Inc.",
+                    "division": "R&D",
+                    "department": "Widgets",
+                    "title": "Director",
+                    "manager_email": "ceo@company.com"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "email_address",
+              "value": "otherguy@company.com",
+              "metadata": [{ "type": "tag", "value": "recipient" }],
+              "analyses": [
+                {
+                  "type": "Email Address Analysis",
+                  "observables": [{ "type": "fqdn", "value": "company.com" }]
+                },
+                {
+                  "type": "User Analysis",
+                  "details": {
+                    "user_id": "98765",
+                    "email": "otherguy@company.com",
+                    "company": "Company Inc.",
+                    "division": "R&D",
+                    "department": "Widgets",
+                    "title": "Engineer",
+                    "manager_email": "goodguy@company.com"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "email_subject",
+              "value": "Hello",
+              "analyses": []
+            },
+            {
+              "type": "file",
+              "value": "email.rfc822.unknown_plain_text_000",
+              "analyses": [
+                {
+                  "type": "URL Extraction Analysis",
+                  "observables": [
+                    {
+                      "type": "url",
+                      "value": "http://evil.com/malware.exe",
+                      "analyses": [
+                        {
+                          "type": "URL Parse Analysis",
+                          "observables": [
+                            {
+                              "type": "fqdn",
+                              "value": "evil.com",
+                              "analyses": [
+                                {
+                                  "type": "Test Analysis",
+                                  "observables": [
+                                    {
+                                      "type": "test_type",
+                                      "value": "test_value"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "uri_path",
+                              "value": "/malware.exe",
+                              "analyses": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "File Analysis",
+          "observables": [
+            {
+              "type": "md5",
+              "value": "912ec803b2ce49e4a541068d495ab570",
+              "analyses": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ipv4",
+      "value": "127.0.0.1",
+      "metadata": [
+        { "type": "tag", "value": "c2" },
+        { "type": "tag", "value": "contacted_host" }
+      ],
+      "analyses": []
+    }
+  ]
+}

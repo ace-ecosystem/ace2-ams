@@ -1,0 +1,80 @@
+// create instance
+import axios, { AxiosRequestConfig } from "axios";
+import camelcaseKeys from "camelcase-keys";
+
+import { useAuthStore } from "@/stores/auth";
+
+/* c8 ignore start */
+const backendURL =
+  `${import.meta.env.VITE_TESTING}` === "yes"
+    ? "http://localhost:3000/api/"
+    : `${import.meta.env.VITE_BACKEND_URL}`;
+/* c8 ignore stop */
+
+const instance = axios.create({
+  // baseURL: `${import.meta.env.VITE_BACKEND_URL}`,
+  baseURL: backendURL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  // By default, axios has no timeout!
+  timeout: 10000, // 10 seconds
+});
+
+// Set an interceptor that will refresh the tokens if a request gets a 401 response
+instance.interceptors.response.use(
+  // Don't do anything if the response was successful
+  function (response) {
+    return response;
+  },
+
+  async function (error) {
+    // Reject the promise if it was not a 401 error
+    if (error.response.status !== 401) {
+      return Promise.reject(error);
+    }
+
+    const originalRequest = error.config;
+    console.debug("got 401 accessing: " + originalRequest.url);
+
+    // Reject the promise if the 401 came from one of the auth URLs
+    if (originalRequest.url.includes("/auth")) {
+      return Promise.reject(error);
+    }
+
+    // Try to refresh the tokens
+    console.debug("trying to refresh tokens");
+    await axiosRefresh().catch((err) => {
+      console.debug("refresh token not present or expired");
+      return Promise.reject(err);
+    });
+
+    // Replay the original request
+    console.debug("replaying original request to: " + originalRequest.url);
+    return await instance(originalRequest).catch((err) => {
+      console.debug("replayed request to " + originalRequest.url + " failed");
+      return Promise.reject(err);
+    });
+  },
+);
+
+export async function axiosRefresh(): Promise<void> {
+  const authStore = useAuthStore();
+
+  const config: AxiosRequestConfig = {
+    url: "/auth/refresh",
+    method: "GET",
+    withCredentials: true,
+  };
+
+  const response = await instance.request(config).catch((error) => {
+    console.debug("need to authenticate");
+    authStore.$reset();
+    throw error;
+  });
+
+  authStore.user = camelcaseKeys(response.data, { deep: true });
+  console.debug("successfully refreshed tokens");
+}
+
+export default instance;

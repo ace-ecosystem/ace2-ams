@@ -1,0 +1,156 @@
+{
+  "name": "<ALERT_NAME>",
+  "observables": [
+    {
+      "type": "<O_TYPE>",
+      "value": "<O_VALUE>",
+      "tags": ["<TAG>", "<TAG>", "<TAG>"],
+      "analyses": [
+        {
+          "type": "Email Analysis",
+          "details": {
+            "from_address": "<O_VALUE>@evil.com",
+            "to_address": "<O_VALUE>@company.com",
+            "cc_addresses": ["<O_VALUE>@company.com"],
+            "subject": "<O_VALUE>",
+            "message_id": "<O_VALUE>@evil.com",
+            "time": "2022-03-18T12:00:00.000Z",
+            "attachments": [],
+            "headers": "blah",
+            "body_text": "Here, download this malware."
+          },
+          "observables": [
+            {
+              "type": "<O_TYPE>",
+              "value": "<O_VALUE>",
+              "metadata": [{ "type": "tag", "value": "<TAG>" }],
+              "analyses": [
+                {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "link": "https://url.to.search/query=asdf",
+                    "hits": 5
+                  }
+                },
+                {
+                  "type": "<A_TYPE> Analysis",
+                  "observables": [{ "type": "<O_TYPE>", "value": "<O_VALUE>" }]
+                }
+              ]
+            },
+            {
+              "type": "<O_TYPE>",
+              "value": "<O_VALUE>",
+              "metadata": [{ "type": "tag", "value": "<TAG>" }],
+              "analyses": [
+                {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "link": "https://url.to.search/query=asdf",
+                    "hits": 10
+                  }
+                },
+                {
+                  "type": "<A_TYPE> Analysis",
+                  "observables": [{ "type": "<O_TYPE>", "value": "<O_VALUE>" }]
+                }
+              ]
+            },
+            {
+              "type": "<O_TYPE>",
+              "value": "<O_VALUE>",
+              "analyses": [
+                {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "link": "https://url.to.search/query=asdf",
+                    "hits": 15
+                  }
+                }
+              ]
+            },
+            {
+              "type": "<O_TYPE>",
+              "value": "<O_VALUE>",
+              "analyses": [
+                {
+                  "type": "FA Queue Analysis",
+                  "details": {
+                    "link": "https://url.to.search/query=asdf",
+                    "hits": 100
+                  }
+                },
+                {
+                  "type": "<A_TYPE> Analysis",
+                  "observables": [
+                    {
+                      "type": "<O_TYPE>",
+                      "value": "<O_VALUE>",
+                      "analyses": [
+                        {
+                          "type": "FA Queue Analysis",
+                          "details": {
+                            "link": "https://url.to.search/query=asdf",
+                            "hits": 10
+                          }
+                        },
+                        {
+                          "type": "<A_TYPE> Analysis",
+                          "observables": [
+                            {
+                              "type": "<O_TYPE>",
+                              "value": "<O_VALUE>",
+                              "analyses": [
+                                {
+                                  "type": "FA Queue Analysis",
+                                  "details": {
+                                    "link": "https://url.to.search/query=asdf",
+                                    "hits": 0
+                                  }
+                                }
+                              ]
+                            },
+                            {
+                              "type": "<O_TYPE>",
+                              "value": "<O_VALUE>",
+                              "analyses": [
+                                {
+                                  "type": "FA Queue Analysis",
+                                  "details": {
+                                    "link": "https://url.to.search/query=asdf",
+                                    "hits": 1000
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "<A_TYPE> Analysis",
+          "observables": [
+            {
+              "type": "<O_TYPE>",
+              "value": "<O_VALUE>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "<O_TYPE>",
+      "value": "<O_VALUE>",
+      "metadata": [
+        { "type": "tag", "value": "<TAG>" },
+        { "type": "tag", "value": "<TAG>" }
+      ]
+    }
+  ]
+}

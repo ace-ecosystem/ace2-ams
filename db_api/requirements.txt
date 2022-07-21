@@ -1,0 +1,17 @@
+alembic==1.8.1
+bcrypt==3.2.2
+deepdiff==5.8.1
+email-validator==1.2.1
+fastapi==0.79.0
+fastapi-pagination==0.9.3
+passlib[bcrypt]==1.7.4
+psycopg2-binary==2.9.3
+pytest==7.1.2
+pytest-cov==3.0.0
+python-dateutil==2.8.2
+pytz==2022.1
+pyyaml==6.0
+requests==2.28.1
+semver==2.13.0
+SQLAlchemy==1.4.39
+types-python-dateutil==2.8.18

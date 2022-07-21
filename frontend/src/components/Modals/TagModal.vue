@@ -1,0 +1,202 @@
+<!-- TagModal.vue -->
+<!-- 'Tag' action modal, agnostic to what is being tagged -->
+
+<template>
+  <BaseModal :name="name" header="Add Tags" @show="loadAllExistingTags">
+    <div>
+      <div v-if="error" class="p-col">
+        <Message severity="error" @close="handleError">{{ error }}</Message>
+      </div>
+    </div>
+    <span class="p-fluid">
+      <Chips v-model="formTagValues" data-cy="chips-container" />
+      <Dropdown
+        :options="metadataTagStore.allItems"
+        option-label="value"
+        :filter="true"
+        placeholder="Select from existing tags"
+        filter-placeholder="Search tags"
+        @change="addExistingTag($event as unknown as tagEvent)"
+      />
+    </span>
+    <template #footer>
+      <Button
+        label="Nevermind"
+        icon="pi pi-times"
+        class="p-button-text"
+        @click="close"
+      />
+      <Button
+        label="Add"
+        icon="pi pi-check"
+        :disabled="!allowSubmit"
+        @click="createAndAddTags"
+      />
+    </template>
+  </BaseModal>
+</template>
+
+<script setup lang="ts">
+  import { computed, defineEmits, defineProps, ref, PropType } from "vue";
+
+  import Button from "primevue/button";
+  import Message from "primevue/message";
+  import Chips from "primevue/chips";
+  import Dropdown from "primevue/dropdown";
+
+  import BaseModal from "@/components/Modals/BaseModal.vue";
+
+  import { MetadataTag } from "@/services/api/metadataTag";
+  import { ObservableInstance } from "@/services/api/observable";
+  import {
+    objectStores,
+    objectSelectedStores,
+    objectTableStores,
+  } from "@/stores/index";
+  import { useAuthStore } from "@/stores/auth";
+  import { useModalStore } from "@/stores/modal";
+  import { useMetadataTagStore } from "@/stores/metadataTag";
+  import { metadataTagRead } from "@/models/metadataTag";
+  import { observableTreeRead } from "@/models/observable";
+
+  const props = defineProps({
+    name: { type: String, required: true },
+    reloadObject: { type: String, required: true },
+    objectType: {
+      type: String as PropType<"alerts" | "events" | "observable">,
+      required: true,
+    },
+    observable: {
+      type: Object as PropType<observableTreeRead>,
+      required: false,
+      default: undefined,
+    },
+  });
+
+  let objectStore: any;
+  let tableStore: any;
+  let selectedStore: any;
+  if (!(props.objectType === "observable")) {
+    objectStore = objectStores[props.objectType]();
+    selectedStore = objectSelectedStores[props.objectType]();
+    tableStore = objectTableStores[props.objectType]();
+  }
+
+  const authStore = useAuthStore();
+  const modalStore = useModalStore();
+  const metadataTagStore = useMetadataTagStore();
+
+  const emit = defineEmits(["requestReload"]);
+
+  const formTagValues = ref<string[]>([]);
+  const error = ref<string>();
+  const isLoading = ref(false);
+
+  async function loadAllExistingTags() {
+    await metadataTagStore.readAll();
+  }
+
+  async function createAndAddTags() {
+    isLoading.value = true;
+    try {
+      if (uniqueNewTags.value.length) {
+        await createNewTags();
+      }
+      if (props.objectType == "observable") {
+        await addObservableTags();
+      } else {
+        await addObjectTags();
+      }
+    } catch (e: unknown) {
+      if (typeof e === "string") {
+        error.value = e;
+      } else if (e instanceof Error) {
+        error.value = e.message;
+      }
+    }
+
+    isLoading.value = false;
+    if (!error.value) {
+      close();
+      emit("requestReload");
+    }
+  }
+
+  const addObjectTags = async () => {
+    const updateData = selectedStore.selected.map((uuid: any) => ({
+      uuid: uuid,
+      tags: deduped([...getExistingTagValues(uuid), ...formTagValues.value]),
+    }));
+
+    await objectStore.update(updateData);
+  };
+
+  const getExistingTagValues = (uuid: string) => {
+    let tags: metadataTagRead[] = [];
+    if (props.reloadObject == "table") {
+      const object = tableStore.visibleQueriedItemById(uuid);
+      tags = object ? object.tags : [];
+    } else if (props.reloadObject == "object") {
+      tags = objectStore.open.tags;
+    }
+    return tags.map((tag) => tag.value);
+  };
+
+  const addObservableTags = async () => {
+    if (props.observable) {
+      await ObservableInstance.update(props.observable.uuid, {
+        tags: deduped([
+          ...props.observable.tags.map((tag) => tag.value),
+          ...formTagValues.value,
+        ]),
+        historyUsername: authStore.user.username,
+      });
+    }
+  };
+
+  const createNewTags = async () => {
+    for (const tag of uniqueNewTags.value) {
+      await MetadataTag.create({ value: tag });
+    }
+    await loadAllExistingTags();
+  };
+
+  const uniqueNewTags = computed(() => {
+    return deduped(formTagValues.value).filter(
+      (tag) => !existingTagValues.value.includes(tag),
+    );
+  });
+
+  const existingTagValues = computed(() => {
+    return metadataTagStore.allItems.map((tag) => tag.value);
+  });
+
+  interface tagEvent {
+    value: metadataTagRead;
+  }
+  function addExistingTag(tagEvent: tagEvent) {
+    // Add an existing tag to the list of tags to be added
+    formTagValues.value.push(tagEvent.value.value);
+  }
+
+  const allowSubmit = computed(() => {
+    if (props.objectType == "observable") {
+      return formTagValues.value.length;
+    }
+    return selectedStore.selected.length && formTagValues.value.length;
+  });
+
+  const deduped = (arr: string[]) => {
+    return [...new Set(arr)];
+  };
+
+  const handleError = () => {
+    error.value = undefined;
+    close();
+  };
+
+  function close() {
+    formTagValues.value = [];
+    modalStore.close(props.name);
+  }
+</script>

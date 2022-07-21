@@ -1,0 +1,166 @@
+{
+  "name": "Small Alert with User Analysis",
+  "observables": [
+    {
+      "type": "file",
+      "value": "email.rfc822",
+      "analyses": [
+        {
+          "type": "Email Analysis",
+          "details": {
+            "from_address": "badguy@evil.com",
+            "to_address": "goodguy@company.com",
+            "cc_addresses": ["otherguy@company.com"],
+            "subject": "Hello",
+            "message_id": "<123abc@evil.com>",
+            "time": "2022-03-18T12:00:00.000Z",
+            "attachments": [],
+            "headers": "blah",
+            "body_text": "Here, download this malware."
+          },
+          "observable_types": ["file"],
+          "required_directives": ["email"],
+          "required_tags": ["scan_me"],
+          "observables": [
+            {
+              "type": "email_address",
+              "value": "badguy@evil.com",
+              "metadata": [{ "type": "tag", "value": "from_address" }],
+              "analyses": [
+                {
+                  "type": "Email Address Analysis",
+                  "observables": [
+                    {
+                      "type": "fqdn",
+                      "value": "evil.com",
+                      "analyses": [
+                        {
+                          "type": "Test Analysis",
+                          "observables": [
+                            { "type": "test_type", "value": "test_value" }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "email_address",
+              "value": "goodguy@company.com",
+              "metadata": [{ "type": "tag", "value": "recipient" }],
+              "analyses": [
+                {
+                  "type": "Email Address Analysis",
+                  "observables": [{ "type": "fqdn", "value": "company.com" }]
+                },
+                {
+                  "type": "User Analysis",
+                  "details": {
+                    "user_id": "12345",
+                    "email": "goodguy@company.com",
+                    "company": "Company Inc.",
+                    "division": "R&D",
+                    "department": "Widgets",
+                    "title": "Director",
+                    "manager_email": "ceo@company.com"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "email_address",
+              "value": "otherguy@company.com",
+              "metadata": [{ "type": "tag", "value": "recipient" }],
+              "analyses": [
+                {
+                  "type": "Email Address Analysis",
+                  "observables": [{ "type": "fqdn", "value": "company.com" }]
+                },
+                {
+                  "type": "User Analysis",
+                  "details": {
+                    "user_id": "98765",
+                    "email": "otherguy@company.com",
+                    "company": "Company Inc.",
+                    "division": "R&D",
+                    "department": "Widgets",
+                    "title": "Engineer",
+                    "manager_email": "goodguy@company.com"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "email_subject",
+              "value": "Hello",
+              "analyses": []
+            },
+            {
+              "type": "file",
+              "value": "email.rfc822.unknown_plain_text_000",
+              "analyses": [
+                {
+                  "type": "URL Extraction Analysis",
+                  "observables": [
+                    {
+                      "type": "url",
+                      "value": "http://evil.com/malware.exe",
+                      "analyses": [
+                        {
+                          "type": "URL Parse Analysis",
+                          "observables": [
+                            {
+                              "type": "fqdn",
+                              "value": "evil.com",
+                              "analyses": [
+                                {
+                                  "type": "Test Analysis",
+                                  "observables": [
+                                    {
+                                      "type": "test_type",
+                                      "value": "test_value"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "uri_path",
+                              "value": "/malware.exe",
+                              "analyses": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "File Analysis",
+          "observables": [
+            {
+              "type": "md5",
+              "value": "912ec803b2ce49e4a541068d495ab570",
+              "analyses": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "ipv4",
+      "value": "127.0.0.1",
+      "metadata": [
+        { "type": "tag", "value": "c2" },
+        { "type": "tag", "value": "contacted_host" }
+      ],
+      "analyses": []
+    }
+  ]
+}
